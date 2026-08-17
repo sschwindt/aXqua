@@ -8,10 +8,10 @@ from datetime import datetime
 sys.path.insert(0, os.path.abspath("../src"))
 
 # -- Project information ------------------------------------------------------
-project = "axqua"
+project = "aXqua"
 author = "Sebastian Schwindt"
 copyright = f"{datetime.now():%Y}, {author}"
-release = "0.3.0"
+release = "0.3.1"
 version = "0.1"
 
 # -- General configuration ----------------------------------------------------
@@ -54,4 +54,4 @@ intersphinx_mapping = {
 # -- HTML output --------------------------------------------------------------
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
-html_title = "axqua"
+html_title = "aXqua"
