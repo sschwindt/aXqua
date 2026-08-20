@@ -68,7 +68,7 @@ initialization:
   # run starts from a wet channel instead of marching the wetting front from the
   # inflow (the dry-start march took ~17 h of wall time on this 680k-element mesh;
   # comment this out to return to the dry start).
-  prewet_depth: 1.0         # ALTERNATIVE hotstart: wet the whole channel zone (needs geodata.mesh_zones)
+  prewet_depth: 0.2         # ALTERNATIVE hotstart: wet the whole channel zone (needs geodata.mesh_zones)
 
 mesh:
   # Anisotropic, flow-aligned strategy (used when geodata.mesh_zones +
@@ -101,7 +101,7 @@ hydrodynamics:
   # 1500 s suffices for the PRE-WETTED hotstart: the monitored run balanced its
   # boundary fluxes to <1% after ~430 s of simulated time (3x margin here); the
   # dry-start wetting march needed 5000 s.
-  duration: 1500.0             # simulated time [s] for the steady march to convergence
+  duration: 5000.0             # simulated time [s] for the steady march to convergence
   n_time_steps: 15000          # only bounds a FIXED-step run (variable_timestep: false)
   graphic_printout_period: 500
   listing_printout_period: 500
@@ -113,7 +113,7 @@ hydrodynamics:
   # Courant 0.6 for the pre-wetted calibration fleet (no advancing dry front, the
   # locally-implicit distributive scheme takes it; ~2x larger dt than the 0.30
   # default that guards the dry start).
-  desired_courant: 0.60        # target Courant for the CFL-adaptive march (default 0.30)
+  desired_courant: 0.40        # target Courant for the CFL-adaptive march (default 0.30)
   # Ambient (background) eddy viscosity added to the Spalart-Allmaras closure;
   # emitted as VELOCITY DIFFUSIVITY so HydroBayesCal can perturb it (July-2026
   # 3-parameter calibration; midpoint of the [0.001, 0.05] m2/s prior).
@@ -164,27 +164,40 @@ calibration:
   # (a factorial grid would degenerate to the cube corners at 8-16 samples),
   # then Bayesian Active Learning adds up to (max_runs - init_runs) more.
   parameter_sampling_method: sobol
-  # BAL-extension bookkeeping (July 2026): the 16 Sobol design runs + 9 BAL
-  # runs were promoted to the restart files, so a --resume treats all 25 as
-  # the completed initial design and continues BAL from there (convergence
-  # criterion: RE change < 5% over 5 consecutive iterations).
-  init_runs: 25                # completed evaluations promoted to the restart design
-  max_runs: 45                 # total runs (initial + active-learning iterations)
+  # August 2026 re-start on the 6-zone roughness map (5 calibrated parameters:
+  # zones 1/3/4/5 + VELOCITY DIFFUSIVITY). HydroBayesCal >= 1.5 sizes the initial
+  # design at ~10 runs per parameter (5 -> 50, rounded to 64 for a balanced Sobol
+  # block) and grows it adaptively from 2**ceil(log2(4*n)) = 32, stopping as soon
+  # as the GP is measurably sufficient. init_runs is the CEILING, so the ladder can
+  # only save simulations - the ones it saves become BAL iterations.
+  init_runs: 64                # ceiling for the initial design (adaptive ladder starts at 32)
+  max_runs: 88                 # total runs (initial + active-learning iterations)
   gp_library: gpy
-  # Calibrate the CHANNEL roughness only (zone1 = roughness zone 1 in friction.tbl).
-  # Bounds from the bed GSD (d50 ~ 0.05 m, d90 ~ 0.15 m): ks in [d50, 3*d90]
-  # = [0.05, 0.45] m (van Rijn: ks = 1..3 x d90). The floodplain (zone2) stays at
-  # its roughness-table value (0.5 m).
-  # July-2026 3-parameter extension: the ks-only calibration parked an inflated
-  # effective roughness (0.41 m vs measured pool-profile ks ~0.09 m) because the
-  # margin-velocity misfit has no roughness remedy. VELOCITY DIFFUSIVITY governs
-  # the lateral momentum exchange toward the slow near-bank measurement points;
-  # the wall roughness (Strickler, law 3) acts on the same margins.
+  # ROUGHNESS ZONES ARE NOT LISTED HERE. They come from geodata.roughness_table
+  # (columns zone_id, ks_min, ks_max, calibration): every zone flagged
+  # calibration=True becomes a `zone<N>` parameter over [ks_min, ks_max], so the
+  # zonation is defined in exactly one place. Only NON-zone parameters belong below.
+  #
+  # Flagged False, so pinned at their nominal (midpoint) ks:
+  #  * zone 2 - floodplain, 3% wet at Q=47 m3/s. Pinned at 0.5 m.
+  #  * zone 6 - 84% dry, median wet depth 0.042 m, i.e. the flow depth is BELOW the
+  #    roughness height over the whole [0.01, 0.3] prior, where the Nikuradse law
+  #    has no physical meaning. Two measurement points, both in partially-wet
+  #    cells. Pinned at 0.155 m (dropped from calibration 2026-08-11).
+  # Zones 3 and 4 carry no measurement points but stay calibrated: they are wet and
+  # conveying (zone 4 is 99.5% wet and the fastest zone in the reach, a strongly
+  # dissipating patch directly upstream of the measurements), so they act on the
+  # measured points even though nothing was measured inside them.
+  #
+  # VELOCITY DIFFUSIVITY governs the lateral momentum exchange toward the slow
+  # near-bank measurement points - the misfit the July-2026 ks-only calibration
+  # could not close with roughness alone.
+  #
+  # ROUGHNESS COEFFICIENT OF BOUNDARIES was dropped after the July-2026
+  # 3-parameter run returned a completely flat marginal for it (posterior = prior):
+  # the wall friction is not identifiable from these targets, and each extra
+  # non-identifiable dimension costs ~10 initial-design runs.
   parameters:
-    - { name: zone1, min: 0.05, max: 0.45, comment: "channel ks [m] (Nikuradse), d50..3*d90" }
     - { name: "VELOCITY DIFFUSIVITY", min: 0.001, max: 0.05,
         comment: "ambient eddy viscosity [m2/s]; Elder ~3e-3, transverse mixing ~0.02" }
-    - { name: "ROUGHNESS COEFFICIENT OF BOUNDARIES", min: 15, max: 45,
-        comment: "bank Strickler Kst; riprap/blocks 15-25 .. smooth gravel 45" }
-    # - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }

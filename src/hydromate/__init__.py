@@ -31,7 +31,7 @@ from hydromate.flowtracker import (
 )
 from hydromate.mesh import (
     build_mesh, channel_node_mask, interpolate_elevations, interpolate_roughness,
-    write_mesh,
+    read_roughness_table, read_roughness_zones, write_mesh,
 )
 from hydromate.mesh_quality import assess_quality
 from hydromate.steering import select_turbulence_model, eddy_viscosity_estimate
@@ -85,7 +85,8 @@ __all__ = ["Config", "load_config", "clip_to_roi", "clip_dem_to_roi",
            "write_target_template", "read_targets", "read_target_parameters",
            "read_flowtracker", "read_flowtrackers", "fill_template_hydraulics",
            "build_mesh", "channel_node_mask", "interpolate_elevations",
-           "interpolate_roughness", "write_mesh", "assess_quality",
+           "interpolate_roughness", "read_roughness_table", "read_roughness_zones",
+           "write_mesh", "assess_quality",
            "select_turbulence_model", "eddy_viscosity_estimate",
            "build_3d_cas", "build_3d_cases", "infer_vertical_layers",
            "select_3d_turbulence",
