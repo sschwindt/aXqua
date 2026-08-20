@@ -334,6 +334,12 @@ class FlowSpec:
     sheet: str = "KB15"
     duration: float | None = None   # steady sim seconds (default: cfg duration)
     vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR
+    # Continue from an already-converged result instead of re-filling the reach
+    # from the pre-wet seed on every calibration run. The flow field then only has
+    # to re-equilibrate to the perturbed roughness, which is a small fraction of
+    # the time a fill takes - the difference between a feasible and an infeasible
+    # calibration on a large mesh. See write_flow_cas for the caveat on DURATION.
+    hotstart_from: str | None = None    # e.g. "r2d.slf"
 
     def compile(self, crs_epsg: int) -> pd.DataFrame:
         if self.kind == "csv":
@@ -365,6 +371,17 @@ def _patch_cas(text: str, key: str, value: str) -> str:
     return new
 
 
+def _set_cas(text: str, key: str, value: str) -> str:
+    """Like :func:`_patch_cas` but appends the keyword when the base case has no
+    such line (a hotstart adds keywords a pre-wet start never carried)."""
+    import re
+    new, n = re.subn(rf"^{re.escape(key)}\s*:.*$", f"{key} : {value}", text,
+                     count=1, flags=re.M)
+    if n == 1:
+        return new
+    return text.rstrip("\n") + f"\n{key} : {value}\n"
+
+
 def outflow_stage(cfg: Config, discharge: float, out_dir: Path) -> float:
     """Outflow water-surface elevation at ``discharge`` from the synthetic
     normal-flow rating (extrapolation warning: unreliable far above the geometry
@@ -377,12 +394,24 @@ def outflow_stage(cfg: Config, discharge: float, out_dir: Path) -> float:
 def write_flow_cas(cfg: Config, base_cas: Path, flow: FlowSpec, rating_dir: Path,
                    *, duration: float | None = None, dest_dir: Path | None = None,
                    listing: int | None = None, graphic: int | None = None) -> Path:
-    """Derive one flow's steering file from the built base ``.cas``."""
+    """Derive one flow's steering file from the built base ``.cas``.
+
+    With ``flow.hotstart_from`` the run continues from that result file instead of
+    the base case's pre-wet/dry seed. ``DURATION`` then measures *re-equilibration*
+    after the roughness change, not the fill - but it must still be long enough for
+    the field to forget the seed, or every run is pulled toward the roughness the
+    seed was converged at and the calibration under-reports sensitivity. Verify it
+    at the prior extremes before trusting a short hotstart duration.
+    """
     text = base_cas.read_text()
     wse = outflow_stage(cfg, flow.discharge, rating_dir)
     dur = duration if duration is not None else (flow.duration
                                                  or cfg.hydrodynamics.duration)
     text = _patch_cas(text, "TITLE", f"'{cfg.name} steady {flow.name}'")
+    if flow.hotstart_from:
+        text = _set_cas(text, "PREVIOUS COMPUTATION FILE", flow.hotstart_from)
+        text = _set_cas(text, "PREVIOUS COMPUTATION FILE FORMAT", "'SERAFIN'")
+        text = _set_cas(text, "INITIAL TIME SET TO ZERO", "YES")
     text = _patch_cas(text, "PRESCRIBED FLOWRATES", f"0.;{flow.discharge:.4f}")
     text = _patch_cas(text, "PRESCRIBED ELEVATIONS", f"{wse:.4f};0.")
     text = _patch_cas(text, "DURATION", f"{dur}")
@@ -403,14 +432,22 @@ def emit_multiflow_config(cfg: Config, out_dir: Path, model_dir: Path,
                           n_cpus: int, init_runs: int, max_runs: int,
                           complete_bal_mode: bool = True,
                           only_bal_mode: bool = False,
-                          prior_samples: int | None = None) -> Path:
+                          prior_samples: int | None = None,
+                          adaptive_init_runs: bool | None = None) -> Path:
     """Write ``config_Telemac_multiflow.py`` (standard blocks + a ``multiflow``
     block of per-flow steering/CSV entries)."""
+    from axqua.calibration import merged_parameters
+
     c = cfg.calibration
-    params = [p.name for p in c.parameters]
-    ranges = [[p.min, p.max] for p in c.parameters]
+    # merged_parameters, not c.parameters: the roughness table's calibrated zones
+    # and the target template's rows must reach the multiflow config too
+    parameters = merged_parameters(cfg)
+    params = [p.name for p in parameters]
+    ranges = [[p.min, p.max] for p in parameters]
     prior = prior_samples if prior_samples is not None else getattr(
         c, "prior_samples", 5000)
+    adaptive = bool(getattr(c, "adaptive_init_runs", True)
+                    if adaptive_init_runs is None else adaptive_init_runs)
     flow_entries = ",\n".join(
         "        {{'name': {n!r}, 'control_file': {cf!r},\n"
         "         'results_filename_base': {rb!r},\n"
@@ -467,6 +504,13 @@ sampling = {{
     'max_runs': {max_runs},
     'parameter_distribution': 'uniform',
     'parameter_sampling_method': {c.parameter_sampling_method!r},
+    # HydroBayesCal >= 1.5: grow the initial design in Sobol blocks and stop when
+    # it is measurably sufficient. init_runs is the ceiling, so this can only save
+    # runs - and here one run means one TELEMAC simulation PER FLOW.
+    'adaptive_init_runs': {adaptive},
+    'init_runs_min': {getattr(c, "init_runs_min", None)!r},
+    # exploit the posterior until >1 well-separated mode is found, then explore
+    'bal_exploration_tradeoff': {getattr(c, "bal_exploration_tradeoff", "auto")!r},
     'tp_selection_criteria': 'dkl',
     'eval_steps': 1,
     # prior_samples drives a (prior_samples x prior_samples) dense covariance PER
@@ -483,6 +527,17 @@ execution = {{
     'delete_complex_outputs': True,
     'validation': False,
     'user_param_values': False,
+}}
+
+extraction = {{
+    # Read the CONVERGED final frame, not a mean over the last n frames: these runs
+    # march to steady state from a pre-wetted start, so a mean_last window folds the
+    # residual transient into the values the surrogate is trained on. The multiflow
+    # driver silently defaulted to 'mean_last' until HydroBayesCal 1.5 made it read
+    # this block (single-flow runs on the same config already honoured it), so the
+    # two modes were fitted to different data - emit it explicitly.
+    'output_extraction_time': 'last',
+    'n_last': 80,
 }}
 '''
     path = Path(out_dir) / "config_Telemac_multiflow.py"
@@ -530,8 +585,15 @@ def run_multiflow_smoke(cfg: Config, flows: list[FlowSpec], multiflow_dir: Path,
         shutil.rmtree(smoke)
     model.mkdir(parents=True)
     src = cfg.model_dir
-    for name in ("geometry.slf", "boundaries.cli", "initial-conditions.slf"):
-        (model / name).symlink_to(src / name)
+    inputs = ["geometry.slf", "boundaries.cli", "initial-conditions.slf"]
+    # a hotstarted flow reads its seed instead of (or besides) the pre-wet initial
+    # conditions, so it has to exist in the smoke model dir too
+    inputs += sorted({f.hotstart_from for f in flows if f.hotstart_from})
+    for name in inputs:
+        if (src / name).exists():
+            (model / name).symlink_to(src / name)
+        elif name not in ("initial-conditions.slf",):
+            raise SystemExit(f"smoke: {name} missing from {src}")
     shutil.copy2(src / cfg.friction_tbl, model / cfg.friction_tbl)
 
     base_cas = src / cfg.cas_file
@@ -541,7 +603,10 @@ def run_multiflow_smoke(cfg: Config, flows: list[FlowSpec], multiflow_dir: Path,
                        listing=50, graphic=50)
     config_path = emit_multiflow_config(
         cfg, smoke, model, flows, csv_paths, n_cpus=2, init_runs=init_runs,
-        max_runs=init_runs, complete_bal_mode=False)
+        max_runs=init_runs, complete_bal_mode=False,
+        # the plumbing checks below assert exactly init_runs rows; the adaptive
+        # ladder may stop at a different size, so pin the design for the smoke test
+        adaptive_init_runs=False)
     driver = stage_driver(smoke, "bal_telemac_multiflow.py", checkout=checkout,
                           also=("bal_telemac.py",))
     rc = launch(cfg, driver, config_path, env=env,
