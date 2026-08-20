@@ -759,9 +759,16 @@ def _burn_structures(cfg: Config, mesh: Mesh, z: np.ndarray) -> np.ndarray:
 
 
 def read_roughness_table(path: Path) -> dict[int, float]:
-    """Read the zone-roughness CSV -> ``{zone_id: roughness}``.
+    """Read the zone-roughness CSV -> ``{zone_id: nominal roughness}``.
     See :func:`axqua.core.geodata.read_roughness_table`."""
     return geodata.read_roughness_table(path)
+
+
+def read_roughness_zones(path: Path) -> dict[int, "geodata.ZoneRoughness"]:
+    """Read the zone-roughness CSV -> ``{zone_id: ZoneRoughness}`` (nominal ks plus
+    the calibration prior bounds and flag).
+    See :func:`axqua.core.geodata.read_roughness_zones`."""
+    return geodata.read_roughness_zones(path)
 
 
 def interpolate_roughness(cfg: Config, mesh: Mesh) -> Mesh:

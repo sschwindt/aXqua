@@ -113,17 +113,56 @@ def compile_ground_truth(cfg: Config) -> Path | None:
     return ground_truth.compile_ground_truth(cfg)
 
 
+def roughness_zone_parameters(cfg: Config) -> list:
+    """``zone<N>`` calibration parameters declared by the roughness table.
+
+    A zone is a calibration parameter when it has a non-degenerate
+    ``[ks_min, ks_max]`` prior and is not flagged ``calibration = False``. Writing
+    a genuine range is itself the declaration, so a table with bounds but no
+    ``calibration`` column calibrates all of them rather than silently none; the
+    column is how you *opt a zone out*. Excluded zones are held at their nominal ks
+    - they still get a ``.tbl`` row and still influence the flow, they are just not
+    inferred.
+
+    Returns an empty list for the legacy single-``ks`` schema, which carries no
+    bounds; there the config's ``calibration.parameters`` remains the only source.
+    """
+    from axqua.config import CalibrationParameter
+    from axqua.core.geodata import read_roughness_zones
+
+    if cfg.geodata.roughness_table is None:
+        return []
+    out = []
+    for zid, z in sorted(read_roughness_zones(cfg.geodata.roughness_table).items()):
+        if z.calibrate is False or z.ks_min is None or z.ks_max is None:
+            continue
+        if z.ks_max <= z.ks_min:
+            log.warning("  roughness zone %d flagged for calibration but its prior "
+                        "is degenerate (ks_min=%g >= ks_max=%g) - held fixed at %g m",
+                        zid, z.ks_min, z.ks_max, z.ks)
+            continue
+        out.append(CalibrationParameter(
+            name=f"zone{zid}", min=z.ks_min, max=z.ks_max,
+            comment=f"roughness zone {zid} ks [m] (Nikuradse)"))
+    return out
+
+
 def merged_parameters(cfg: Config) -> list:
-    """Calibration parameters: config ``calibration.parameters`` merged with the
-    ``parameters`` tab of the filled calibration-target template (template rows
-    win on a name collision, so the spreadsheet is the live source of truth)."""
+    """Calibration parameters, merged from the three places they can be declared.
+
+    Precedence, later wins on a name collision: config ``calibration.parameters``
+    < the roughness table's ``zone<N>`` rows (``geodata.roughness_table`` with the
+    bounds schema) < the ``parameters`` tab of the filled calibration-target
+    template. The roughness table outranks the config because it is where the
+    zonation itself is defined - adding a zone there must not require editing the
+    parameter list in two files - while the spreadsheet stays the live override.
+    """
     from axqua import targets as targets_mod
 
-    template = targets_mod.read_target_parameters(cfg)
-    if not template:
-        return list(cfg.calibration.parameters)
     by_name = {p.name: p for p in cfg.calibration.parameters}
-    for p in template:
+    for p in roughness_zone_parameters(cfg):
+        by_name[p.name] = p
+    for p in targets_mod.read_target_parameters(cfg):
         by_name[p.name] = p
     return list(by_name.values())
 
@@ -228,6 +267,13 @@ sampling = {{
     'max_runs': {c.max_runs},
     'parameter_distribution': 'uniform',
     'parameter_sampling_method': {c.parameter_sampling_method!r},
+    # HydroBayesCal >= 1.5: grow the initial design in Sobol blocks and stop when
+    # it is measurably sufficient. init_runs is the ceiling, so this can only save
+    # runs; the saved ones become BAL iterations.
+    'adaptive_init_runs': {bool(c.adaptive_init_runs)},
+    'init_runs_min': {c.init_runs_min!r},
+    # exploit the posterior until >1 well-separated mode is found, then explore
+    'bal_exploration_tradeoff': {c.bal_exploration_tradeoff!r},
     'tp_selection_criteria': 'dkl',
     'eval_steps': 1,
     # prior_samples drives a (prior_samples x prior_samples) dense covariance PER
