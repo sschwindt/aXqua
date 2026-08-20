@@ -392,12 +392,13 @@ def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=No
     # roughness per sample from the roughness zones, else the lateral-boundary value
     ks = None
     if cfg.geodata.roughness_zones is not None and cfg.geodata.roughness_table is not None:
-        import pandas as pd
+        from hydromate.mesh import read_roughness_table
         zones = gpd.read_file(cfg.geodata.roughness_zones)
         if zones.crs and zones.crs.to_epsg() != cfg.crs_epsg:
             zones = zones.to_crs(epsg=cfg.crs_epsg)
-        table = pd.read_csv(cfg.geodata.roughness_table)
-        lookup = dict(zip(table.iloc[:, 0].astype(int), table.iloc[:, 1].astype(float)))
+        # via the shared parser: the CSV's second column is not necessarily the
+        # roughness (the bounds schema puts ks_min there)
+        lookup = read_roughness_table(cfg.geodata.roughness_table)
         zid_col = next((c for c in zones.columns if c.lower().replace(" ", "_")
                         in ("zone_id", "zoneid", "id")), None)
         if zid_col is not None:

@@ -247,3 +247,35 @@ def write_initial_state(
     ]
     return _write_selafin(Path(path), x, y, ikle, ipobo, variables,
                           title=title, date=date, double_precision=double_precision)
+
+
+def extract_hotstart(results: str | Path, out: str | Path, *, frame: int = -1,
+                     title: str = "hydromate hotstart") -> Path:
+    """Write a one-frame ``PREVIOUS COMPUTATION FILE`` from a multi-frame result.
+
+    A steady run's result carries every printout - hundreds of frames of eight
+    variables - but a continuation only reads the *last* frame's VELOCITY U,
+    VELOCITY V and WATER DEPTH. Handing the full file to a fleet of calibration
+    runs makes every one of them copy hundreds of megabytes into its temporary work
+    directory for the sake of a few, so extract the frame once instead: on the KB15
+    case this turns a 2.3 GB seed into ~11 MB with no change in what TELEMAC reads.
+
+    The mesh is carried over from *results*, so the output matches the same
+    GEOMETRY FILE. Depth is taken directly when the result carries WATER DEPTH,
+    else derived as FREE SURFACE - BOTTOM.
+    """
+    r = read_slf(Path(results), frame=frame)
+    values = r["values"]
+    if "WATER DEPTH" in values:
+        depth = np.asarray(values["WATER DEPTH"], dtype=float)
+    elif "FREE SURFACE" in values and "BOTTOM" in values:
+        depth = (np.asarray(values["FREE SURFACE"], dtype=float)
+                 - np.asarray(values["BOTTOM"], dtype=float))
+    else:
+        raise ValueError(
+            f"{Path(results).name} has neither WATER DEPTH nor FREE SURFACE+BOTTOM "
+            f"(has {sorted(values)}) - cannot build a hotstart from it")
+    return write_initial_state(
+        Path(out), r["x"], r["y"], r["ikle"], r["ipobo"], np.maximum(depth, 0.0),
+        velocity_u=values.get("VELOCITY U"), velocity_v=values.get("VELOCITY V"),
+        title=title)

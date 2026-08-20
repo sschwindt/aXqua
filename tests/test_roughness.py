@@ -127,6 +127,79 @@ def test_friction_tbl_from_roughness(tmp_path):
     assert steering._global_friction(cfg) == (5, 0.2)
 
 
+BOUNDS_CSV = """zone_id,ks_min, ks_max, calibration
+1,0.01,0.3, True
+2,0.5,0.5, False
+3,0.05,0.5, True
+"""
+
+
+def test_read_roughness_zones_bounds_schema(tmp_path):
+    """The ks_min/ks_max/calibration schema: nominal ks is the prior midpoint, and
+    the header's stray whitespace (', ks_max') must not hide a column."""
+    from hydromate.mesh import read_roughness_table, read_roughness_zones
+
+    path = tmp_path / "roughness-table.csv"
+    path.write_text(BOUNDS_CSV)
+
+    zones = read_roughness_zones(path)
+    assert set(zones) == {1, 2, 3}
+    assert (zones[1].ks_min, zones[1].ks_max) == (0.01, 0.3)
+    assert zones[1].calibrate is True
+    assert zones[2].calibrate is False
+    # nominal = midpoint of the prior, NOT the first numeric column (ks_min)
+    assert read_roughness_table(path) == {1: 0.155, 2: 0.5, 3: 0.275}
+
+
+def test_read_roughness_zones_legacy_schema(tmp_path):
+    """The legacy `zone_id,ks` table still parses, with no bounds and no flag."""
+    from hydromate.mesh import read_roughness_table, read_roughness_zones
+
+    path = tmp_path / "legacy.csv"
+    path.write_text("zone_id,ks\n1,0.2\n2,0.5\n")
+    assert read_roughness_table(path) == {1: 0.2, 2: 0.5}
+    assert read_roughness_zones(path)[1].calibrate is None
+    # headerless positional form
+    bare = tmp_path / "bare.csv"
+    bare.write_text("1,0.2\n2,0.5\n")
+    assert read_roughness_table(bare) == {1: 0.2, 2: 0.5}
+
+
+def test_calibration_parameters_from_roughness_table(tmp_path):
+    """Zones flagged for calibration become `zone<N>` parameters over their own
+    bounds; unflagged and degenerate ones do not, and non-zone config parameters
+    survive the merge."""
+    from hydromate.calibration import merged_parameters
+    from hydromate.config import CalibrationParameter, load_config
+
+    cfg = load_config(_write_fixtures(tmp_path))
+    Path(cfg.geodata.roughness_table).write_text(BOUNDS_CSV)
+    cfg.calibration.parameters = [
+        CalibrationParameter(name="VELOCITY DIFFUSIVITY", min=0.001, max=0.05),
+        # a stale hand-written zone1 must lose to the table's bounds
+        CalibrationParameter(name="zone1", min=0.05, max=0.45),
+    ]
+    params = {p.name: (p.min, p.max) for p in merged_parameters(cfg)}
+    assert params["zone1"] == (0.01, 0.3), "table bounds must win over the config"
+    assert params["zone3"] == (0.05, 0.5)
+    assert "zone2" not in params, "calibration=False zone must not be inferred"
+    assert params["VELOCITY DIFFUSIVITY"] == (0.001, 0.05)
+
+
+def test_bounds_without_calibration_column_calibrates_all(tmp_path):
+    """Writing a genuine [ks_min, ks_max] range IS the declaration: with no
+    `calibration` column every non-degenerate zone is calibrated, rather than
+    silently none. The column exists to opt a zone OUT."""
+    from hydromate.calibration import roughness_zone_parameters
+    from hydromate.config import load_config
+
+    cfg = load_config(_write_fixtures(tmp_path))
+    Path(cfg.geodata.roughness_table).write_text(
+        "zone_id,ks_min,ks_max\n1,0.01,0.3\n2,0.5,0.5\n")
+    names = {p.name for p in roughness_zone_parameters(cfg)}
+    assert names == {"zone1"}, "zone2's degenerate prior is a fixed value, not a range"
+
+
 def test_roughness(tmp_path):
     run_roughness_test(tmp_path)
 
