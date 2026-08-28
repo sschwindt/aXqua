@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import logging
 import math
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -326,18 +327,104 @@ class Dataset:
         return self.layer("centerline", self.cfg.geodata.channel_centerline)
 
 
-def read_roughness_table(path) -> dict[int, float]:
-    """Standalone reader for the zone-roughness CSV (no Dataset required)."""
+@dataclass(frozen=True)
+class ZoneRoughness:
+    """One row of the zone-roughness CSV.
+
+    ``ks`` is the *nominal* roughness that seeds the friction ``.tbl`` and the
+    geometry's ``BOTTOM FRICTION``; for a calibrated zone the calibrator
+    overwrites it on every run, so it only has to be a sane starting point.
+    ``ks_min`` / ``ks_max`` are the calibration prior bounds and ``calibrate``
+    says whether the zone is a calibration parameter at all (``None`` = the table
+    does not say, so the decision falls back to the config's parameter list).
+    """
+    zone_id: int
+    ks: float
+    ks_min: float | None = None
+    ks_max: float | None = None
+    calibrate: bool | None = None
+
+
+_TRUEY = {"true", "t", "yes", "y", "1"}
+_FALSEY = {"false", "f", "no", "n", "0"}
+
+
+def _as_bool(value) -> bool | None:
+    """Parse a spreadsheet-ish boolean; ``None`` when blank or unrecognised."""
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    if text in _TRUEY:
+        return True
+    if text in _FALSEY:
+        return False
+    return None
+
+
+def read_roughness_zones(path) -> dict[int, ZoneRoughness]:
+    """Standalone reader for the zone-roughness CSV (no Dataset required).
+
+    Two schemas are accepted, distinguished by the header:
+
+    * **bounds** - ``zone_id, ks_min, ks_max[, calibration]``: the nominal ks is
+      the midpoint of the prior, matching how a uniform prior's central value is
+      chosen elsewhere. A zone whose bounds are equal is a fixed roughness.
+    * **legacy** - ``zone_id, ks``: one value per zone, no bounds, no flag.
+
+    Header names are matched case-insensitively after stripping whitespace (the
+    hand-edited CSVs carry ``, ks_max`` with a leading space), and a headerless
+    file falls back to positional columns.
+    """
     import pandas as pd
 
-    df = pd.read_csv(Path(path), header=None)
-    first = df.iloc[0]
-    if pd.to_numeric(first.iloc[:2], errors="coerce").isna().any():
-        df = df.iloc[1:]                         # the first row was a header
-    ids = pd.to_numeric(df.iloc[:, 0], errors="coerce")
-    values = pd.to_numeric(df.iloc[:, 1], errors="coerce")
-    return {int(i): float(v) for i, v in zip(ids, values)
-            if not (np.isnan(i) or np.isnan(v))}
+    df = pd.read_csv(Path(path), skipinitialspace=True)
+    df.columns = [str(c).strip().lower() for c in df.columns]
+
+    def col(*names):
+        return next((c for c in df.columns if c in names), None)
+
+    id_col = col("zone_id", "zoneid", "id") or df.columns[0]
+    min_col, max_col = col("ks_min", "ksmin"), col("ks_max", "ksmax")
+    ks_col = col("ks", "roughness", "value")
+    cal_col = col("calibration", "calibrate", "calibrated")
+
+    if min_col is None and max_col is None and ks_col is None:
+        # headerless: re-read positionally (zone_id, ks[, ...])
+        df = pd.read_csv(Path(path), header=None, skipinitialspace=True)
+        id_col, ks_col = df.columns[0], df.columns[1]
+
+    out: dict[int, ZoneRoughness] = {}
+    for _, row in df.iterrows():
+        zid = pd.to_numeric(row[id_col], errors="coerce")
+        if pd.isna(zid):
+            continue
+        lo = pd.to_numeric(row[min_col], errors="coerce") if min_col else np.nan
+        hi = pd.to_numeric(row[max_col], errors="coerce") if max_col else np.nan
+        ks = pd.to_numeric(row[ks_col], errors="coerce") if ks_col else np.nan
+        if np.isnan(ks):
+            if np.isnan(lo) or np.isnan(hi):
+                continue                          # no usable roughness on this row
+            ks = 0.5 * (float(lo) + float(hi))    # nominal = midpoint of the prior
+        out[int(zid)] = ZoneRoughness(
+            zone_id=int(zid),
+            ks=float(ks),
+            ks_min=None if np.isnan(lo) else float(lo),
+            ks_max=None if np.isnan(hi) else float(hi),
+            calibrate=_as_bool(row[cal_col]) if cal_col else None,
+        )
+    return out
+
+
+def read_roughness_table(path) -> dict[int, float]:
+    """Standalone reader for the zone-roughness CSV -> ``{zone_id: nominal ks}``.
+
+    The nominal value seeds the friction ``.tbl`` and the geometry's
+    ``BOTTOM FRICTION``; see :func:`read_roughness_zones` for the full record
+    (prior bounds + calibration flag).
+    """
+    return {zid: z.ks for zid, z in read_roughness_zones(Path(path)).items()}
 
 
 def nominal_channel_size(cfg) -> float:
