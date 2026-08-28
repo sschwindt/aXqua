@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 # module name resolves differently on case-insensitive filesystems. PyPI normalises the
 # two to the same project, so `pip install aXqua` and `pip install axqua` both work.
 name = "aXqua"
-version = "0.3.4"
+version = "0.4.0"
 description = "Automated setup, persistent execution and calibration of river models - TELEMAC-2D/3D with GAIA, and OpenFOAM interFoam - with a QGIS frontend."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -53,7 +53,7 @@ gui = ["streamlit>=1.30"]
 # single-flow one on the same config did not - the two were fitted to different data.
 # axqua emits `extraction` in config_Telemac.py (see calibration.emit_hbc_config),
 # which only reaches the multi-flow path from this release on.
-calibration = ["hydrobayescal>=1.4.4"]
+calibration = ["hydrobayescal>=1.8.0"]
 
 [project.scripts]
 axqua = "axqua.cli:main"
