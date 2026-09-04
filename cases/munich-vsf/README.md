@@ -125,6 +125,36 @@ Two things to settle before drawing conclusions from that comparison:
    `axqua-case/postprocessing/pool-sections.png` labels every pool, so comparing it
    with the report settles the question at a glance.
 
+## The steady run, and judging it
+
+`hydrodynamics.turbulence_model` is set to **3 (k-epsilon) rather than `auto`**. The
+auto-selection picks Smagorinski here, and Smagorinski carries no turbulent kinetic
+energy: there is no `K` to print, so TKE could be neither converged against nor
+calibrated - and the flume data has TKE columns. The steering therefore prints
+`'U,V,S,B,H,M,Q,F,K,E'`.
+
+```bash
+python check_convergence.py                    # depth, velocity, TKE, discharge
+python check_convergence.py --tolerance 0.005  # stricter than the 1% default
+nohup ./watch_run.sh > /dev/null 2>&1 &        # a record while nobody is looking
+tail -f axqua-case/simulation/convergence-watch.log
+```
+
+The test is the **RMS change between frames over the wet nodes, divided by the field's
+own RMS**, not the worst node: at a wetting front a node going from 1 to 2 mm is a
+permanent 100% change, and a per-node maximum would never converge however still the
+reach became. The worst node is reported alongside so a genuinely misbehaving one stays
+visible. Anything that cannot be measured fails rather than passes.
+
+In a parallel run TELEMAC merges the result only at the end, so the *fields* can only be
+judged once it finishes; the boundary discharges stream to the listing and can be
+watched live.
+
+Rough cost at 5 cm resolution, 273k elements, 8 cores: about **6 s of simulated time per
+minute of wall clock**, so 1800 s takes roughly five hours. The reach holds ~50 m3 and
+fills at 0.135 m3/s, so nothing can be steady before ~400 s of it. If 1% proves out of
+reach, `initialization.prewet_depth` skips most of the filling transient.
+
 ## What this case will and will not answer
 
 The 2D stage exists to give a converged, mass-balanced result, a first roughness
