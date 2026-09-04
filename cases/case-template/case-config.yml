@@ -378,6 +378,51 @@ dem_of_difference:
   mask_below_lod: true          # |dz| < LoD -> nodata (true) or 0.0 (false)
 
 # =============================================================================
+# OPTIONAL: surfaces - CAD geometry (STL) as the terrain of the case
+# =============================================================================
+# For a structure that was DESIGNED rather than surveyed - a fish pass, a culvert, a
+# flume - there is no DEM and there never will be. Name the STL parts of the CAD
+# assembly and what each one IS, and stage 0 of the build turns them into the ordinary
+# artifacts everything else consumes: the DEM, the ROI polygon, the liquid-boundary
+# lines, structure footprints with crests, and roughness zones. Nothing downstream
+# knows a CAD file was involved, and geodata.dem_initial / geodata.boundary /
+# boundaries.liquid_boundaries then need no entries of their own.
+#
+# Roles:
+#   bed      rasterised into the DEM (at least one part must be bed)
+#   wall     near-vertical faces -> solid structure footprints carrying a crest
+#   inflow   a boundary patch -> an 'inflow' line of the liquid-boundary layer
+#   outflow  the same, downstream
+#   roi      an explicit domain outline, instead of the bed's own coverage
+#   ignore   parts that are not geometry - the air patches of a VOF export
+#
+# Inspect the result before building the case:
+#   axqua surface cases/<your-case>/case-config.yml
+#
+# surfaces:
+#   resolution: 0.05             # DEM cell size [m]; the mesh cannot resolve below it
+#   # Place CAD-local coordinates on the map. Leave at the identity to work in local
+#   # coordinates - the model is the same, only its position on a map is missing, and
+#   # the artifacts are then written WITHOUT a CRS rather than with a false one.
+#   # `axqua georef --dxf <drawing.dxf> --stl <part.stl>` derives these from a drawing.
+#   scale: 1.0                   # 0.001 if the CAD is in millimetres
+#   rotation_deg: 0.0
+#   dx: 0.0
+#   dy: 0.0
+#   dz: 0.0
+#   bed_max_slope_deg: 45        # flatter than this and facing up -> bed
+#   wall_min_slope_deg: 70       # steeper than this -> wall. Facets in between are
+#                                # neither, and are reported so you can widen these
+#   simplify: 0.02               # polygon simplification tolerance [m]
+#   parts:
+#     - {file: user-sources/cad/bed.stl,     role: bed,  zone_id: 1, ks: 0.08}
+#     - {file: user-sources/cad/concrete.stl, role: bed, zone_id: 2, ks: 0.003}
+#     - {file: user-sources/cad/walls.stl,   role: wall}
+#     - {file: user-sources/cad/inlet.stl,   role: inflow}
+#     - {file: user-sources/cad/outlet.stl,  role: outflow}
+#     - {file: user-sources/cad/air-top.stl, role: ignore}
+
+# =============================================================================
 # OPTIONAL: structures - dams, weirs, walls, buildings
 # =============================================================================
 # A structure is an ORDINARY QGIS VECTOR LAYER, not a triangulated surface. STL is a

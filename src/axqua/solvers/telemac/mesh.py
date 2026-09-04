@@ -347,6 +347,18 @@ def _size_fields(cfg: Config, breakline_curves: list[int]):
         field.setNumbers(bg, "FieldsList", thresholds)
         field.setAsBackgroundMesh(bg)
 
+    # The baseline size, applied whether or not any refinement field exists. Without
+    # this a case with no breaklines and no MATID seed points builds no field at all,
+    # and since the three size sources below are switched off, gmsh is left with no
+    # size information whatsoever: it falls back to its own bounding-box default and
+    # mesh.default_size is silently ignored. A CAD-derived case is exactly that case -
+    # it has neither breaklines nor region points - and the result is a domain meshed
+    # metres coarse with a boundary discretised at the polygon's own vertex spacing,
+    # which is where the sliver and zero-area cells come from.
+    gmsh.option.setNumber("Mesh.MeshSizeMax", default_size)
+    if m.min_size:
+        gmsh.option.setNumber("Mesh.MeshSizeMin", m.min_size * scale)
+
     gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
     gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 1)
     gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 0)

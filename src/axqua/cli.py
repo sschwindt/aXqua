@@ -171,6 +171,107 @@ def _run_targets(argv: list[str]) -> int:
     return 0
 
 
+def _surface_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="axqua surface",
+        description="Turn the CAD surfaces of a case into the geodata the rest of the "
+                    "workflow expects: a DEM from the bed parts, an ROI polygon from "
+                    "their coverage, liquid-boundary lines from the inlet/outlet "
+                    "patches, structure footprints with crests from the walls, and "
+                    "roughness zones from the materials. Runs automatically as stage 0 "
+                    "of a build; this verb is for inspecting the result first.",
+    )
+    p.add_argument("config", type=Path, help="path to the YAML configuration file")
+    p.add_argument("--force", action="store_true",
+                   help="rebuild even when the artifacts are newer than the CAD parts")
+    p.add_argument("-v", "--verbose", action="store_true")
+    return p
+
+
+def _run_surface(argv: list[str]) -> int:
+    args = _surface_parser().parse_args(argv)
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    log = logging.getLogger("axqua")
+    from axqua import surface_stage
+
+    try:
+        cfg = load_config(args.config)
+        if not cfg.surfaces.active:
+            log.error("%s declares no surfaces block with parts - nothing to derive. "
+                      "See the surfaces section of docs/preprocessing.rst.",
+                      args.config)
+            return 2
+        cfg.ensure_dirs()
+        produced = surface_stage.run(cfg, force=args.force)
+    except Exception as exc:
+        log.error("%s: %s", type(exc).__name__, exc)
+        if args.verbose:
+            raise
+        return 3
+    for path in produced.paths():
+        log.info("wrote %s", path)
+    log.info("inspect these in QGIS, then build the case with `axqua %s`", args.config)
+    return 0
+
+
+def _georef_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="axqua georef",
+        description="Propose the transform that places CAD-local STL geometry on the "
+                    "map, by matching its footprint against a georeferenced DXF of the "
+                    "same structure. Reports the scale, the rotation candidates and "
+                    "the translation for you to check, and prints the config block to "
+                    "paste - it changes nothing on its own.",
+    )
+    p.add_argument("--stl", type=Path, required=True,
+                   help="an STL part, ideally the one covering the whole structure")
+    p.add_argument("--dxf", type=Path, default=None,
+                   help="the georeferenced drawing of the same structure (not needed "
+                        "when --control-point pairs are given)")
+    p.add_argument("--layer", action="append", default=None,
+                   help="restrict the drawing to this layer (repeatable); without it "
+                        "the extent is the whole sheet, title block included")
+    p.add_argument("--list-layers", action="store_true",
+                   help="list the drawing's layers with their feature counts and exit")
+    p.add_argument("--rotation", type=float, default=None,
+                   help="pick one of the reported rotation candidates [degrees]")
+    p.add_argument("--control-point", action="append", default=None,
+                   metavar="CADX,CADY:MAPX,MAPY",
+                   help="a point identified in both the CAD and the map, repeatable. "
+                        "Two of them fix the transform exactly and bypass the "
+                        "bounding-box match entirely - which is what a drawing sheet "
+                        "holding several views needs. --dxf is then optional.")
+    p.add_argument("--dz", type=float, default=0.0,
+                   help="vertical shift [m], if the drawing's datum differs")
+    p.add_argument("-v", "--verbose", action="store_true")
+    return p
+
+
+def _run_georef(argv: list[str]) -> int:
+    args = _georef_parser().parse_args(argv)
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    log = logging.getLogger("axqua")
+    from axqua import georef
+
+    try:
+        if args.list_layers:
+            for name, count in georef.dxf_layers(args.dxf):
+                log.info("%8d  %s", count, name)
+            return 0
+        if args.control_point:
+            return georef.report_control_points(args.stl, args.control_point,
+                                                dz=args.dz)
+        result = georef.log_match(georef.match(
+            args.stl, args.dxf, layers=args.layer, rotation_deg=args.rotation,
+            dz=args.dz))
+    except Exception as exc:
+        log.error("%s: %s", type(exc).__name__, exc)
+        if args.verbose:
+            raise
+        return 3
+    return 0 if result.verdict == "match" else 1
+
+
 def _status_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="axqua status",
@@ -421,6 +522,8 @@ _DISPATCH = {
     "rating": lambda argv: _run_rating(argv),
     "migrate": lambda argv: _run_migrate(argv),
     "targets": lambda argv: _run_targets(argv),
+    "surface": lambda argv: _run_surface(argv),
+    "georef": lambda argv: _run_georef(argv),
     "openfoam": lambda argv: _run_openfoam(argv),
     "case-status": lambda argv: _run_status(argv),
     "submit": _job("run_submit"),
