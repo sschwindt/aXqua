@@ -144,11 +144,21 @@ ground_truth:
   sources:                                      # (b) raw sources -> compiled tidy table
     # FlowTracker2 Sept-2025 campaign (KB15 sheet = sheet 0 of the revised
     # FT_TKE_Summary.xlsx: one row per vertical at ~0.6 x depth, numeric IDs
-    # 1501..1530), joined by ID to the DGPS positions GeoPackage (EPSG:25832,
-    # z = bed elevation from the DGPS survey).
+    # 1501..1530), joined by ID to the DGPS positions GeoPackage (EPSG:25832).
+    #
+    # USE THE -zcorrected LAYER. The raw dgps-flowtracker-kb15-sept25.gpkg stores
+    # the GNSS **ANTENNA** elevation in z, not the bed: the rover pole was 2.26 m
+    # for IDs 1501-1511, 2.51 m for 1512 and 2.70 m for 1513-1530. The corrected
+    # layer subtracts those (x/y identical) and carries z_raw_antenna,
+    # pole_height and wse_implied as the audit trail. The pole heights were
+    # recovered from the flat-water-surface condition and hold to +/-2 cm within
+    # each pool. NEVER join targets to the raw layer's z - doing so put the 2026
+    # OpenFOAM calibration targets ~2.3 m above the water, where HydroBayesCal's
+    # cutoff-free nearest-point search silently returned ~0.003 m/s.
+    # `axqua check-gt` now refuses this class of error.
     - { category: hydraulics, kind: flowtracker, join_key: ID,
         values: user-sources/ground-truth/hydraulics/FT_TKE_Summary.xlsx,
-        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-kb15-sept25.gpkg }
+        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-kb15-sept25-zcorrected.gpkg }
 
 calibration:
   # calibration target set by run_Bayes_cal.py: SCALAR VELOCITY (FlowTracker at
@@ -200,4 +210,88 @@ calibration:
   parameters:
     - { name: "VELOCITY DIFFUSIVITY", min: 0.001, max: 0.05,
         comment: "ambient eddy viscosity [m2/s]; Elder ~3e-3, transverse mixing ~0.02" }
+    # --- OpenFOAM only (run_Bayes_cal_openfoam.py) ------------------------------
+    # The two calibrations share this list and each takes only its own: the TELEMAC
+    # emitter drops ks/Cmu (calibration.telemac_parameters) and the OpenFOAM one
+    # drops zone<N> and the .cas keywords (openfoam.calibration.openfoam_parameters).
+    # NOTE ks here is ONE GLOBAL VALUE for the whole bed - HydroBayesCal's OpenFOAM
+    # binding has no per-zone roughness - so it is NOT comparable with the zone1/3/4/5
+    # posterior of the 2D calibration and must not be reported beside it.
+    # The prior spans the wetted range of roughness-table.csv (0.05-0.30 m).
+    - { name: "ks", min: 0.02, max: 0.30,
+        comment: "OpenFOAM bed Nikuradse Ks [m], nutkRoughWallFunction; one global value" }
+    - { name: "Cmu", min: 0.06, max: 0.12,
+        comment: "k-epsilon eddy-viscosity constant [-]; standard 0.09" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+
+
+# ---------------------------------------------------------------------------- #
+# OpenFOAM (interFoam) - the 3D free-surface extension
+# ---------------------------------------------------------------------------- #
+# Built and calibrated by openfoam_preprocessing.py / run_Bayes_cal_openfoam.py /
+# openfoam_verify_posterior.py. Everything here is additive: the TELEMAC path does
+# not read this block.
+openfoam:
+  # OpenFOAM Foundation 9, built from source on this machine with g++-10 and the
+  # system OpenMPI. It must be the FOUNDATION line, not ESI/openfoam.com: aXqua
+  # writes constant/momentumTransport, system/fvConstraints and a
+  # "Gauss interfaceCompression vanLeer" alpha scheme, all of which are Foundation
+  # spellings.
+  bashrc: /home/IWS/public/openfoam/OpenFOAM-9/etc/bashrc
+  n_processors: 8
+
+  pre_run:
+    # This case already has a converged 2.3 GB r2d.slf from initial_run.py, which
+    # is worth far more as a seed than any fresh coarse run, so reuse it and never
+    # start TELEMAC from here.
+    enabled: true
+    reuse: true
+    dimension: 2d
+    require: warn
+
+  # --- what is solved --------------------------------------------------------
+  # The CALIBRATION campaign overrides these to rigid-lid at cell_size_factor 4
+  # (see run_Bayes_cal_openfoam.py); the values below are the PRODUCTION case that
+  # openfoam_preprocessing.py and openfoam_verify_posterior.py build - two-phase,
+  # with a free surface, because that is what the campaign's rigid lid gives up
+  # and what the verification run exists to check.
+  mode: vof
+  cell_size: 1.5          # [m] plan lattice. The KB15 ROI is 320,290 m2: at 0.5 m
+                          # this is ~6 M cells, which is a production run but not
+                          # something to build casually.
+  n_layers: 12
+
+  domain: wetted          # trim to the 2D wetted extent + wet_margin
+  wet_margin: 5.0
+  align_to_flow: true     # rotate the lattice onto the reach's principal axis
+
+  lid: follow             # the lid tracks the 2D free surface + freeboard
+  freeboard: 0.5
+  headroom_mode: auto     # size freeboard/wet_margin from the seed's own flow
+
+  auto_bed_layer: true    # pin the bed layer to ~2x the wetted median ks
+  # k-epsilon, NOT the kOmegaSST default: the calibration perturbs kEpsilonCoeffs,
+  # which only exist under this closure. Keeping the production case on the same
+  # closure is what makes the calibrated coefficients mean anything here.
+  turbulence: kEpsilon
+
+  spinup_time: 30.0
+  end_time: 300.0
+  max_courant: 0.9
+  spinup_courant: 0.3
+  write_interval: 10.0
+
+
+# ---------------------------------------------------------------------------- #
+# Post-processing (VisIt)
+# ---------------------------------------------------------------------------- #
+# Driven by postprocessing.py / `axqua postproc`. VisIt ships its own Python, so
+# axqua generates a script and runs it with `visit -cli -nowin -s` rather than
+# importing anything - `visit` below is the LAUNCHER executable, which is why it
+# is not spelled like telemac.pysource / openfoam.bashrc.
+postproc:
+  visit: /home/IWS/public/visit/bin/visit
+  backend: visit
+  scenes: ["free-surface", "velocity-plan", "profiles"]
+  image_width: 1600
+  image_height: 1000

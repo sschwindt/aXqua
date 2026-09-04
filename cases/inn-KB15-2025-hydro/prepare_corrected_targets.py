@@ -44,10 +44,19 @@ from axqua.selafin import read_slf
 HERE = Path(__file__).resolve().parent
 GEO = HERE / "user-sources/geodata"
 GT = HERE / "user-sources/ground-truth/hydraulics"
-OUT = HERE / "axqua-case/preprocessing"
+
+# Resolve the produced-artifact tree through the config rather than hard-coding a
+# folder name. This script named "axqua-case/" while the tree on disk is the
+# legacy "hydromate-case/", so it could not be re-run at all; load_config already
+# resolves both (config._resolve_sim_dir), and using it means a future rename does
+# not break the script again.
+from axqua.config import load_config                     # noqa: E402
+
+_CFG = load_config(HERE / "case-config.yml")
+OUT = Path(_CFG.preprocessing_dir)
 
 DGPS_CORRECTED = GEO / "flowtracker2/dgps-flowtracker-kb15-sept25-zcorrected.gpkg"
-GEOMETRY = HERE / "axqua-case/simulation/geometry.slf"
+GEOMETRY = Path(_CFG.model_path(_CFG.geometry_slf))
 
 WSE_ERROR_SEPT = 0.05   # m: RTK z (3 cm) + depth reading (2 cm) + pool flatness
 WSE_ERROR_NOV = 0.10    # m: unresolved z/depth inconsistency across the transect
