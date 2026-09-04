@@ -138,10 +138,31 @@ sigma           {of.surface_tension:g};
 
 
 def momentum_transport(cfg) -> str:
+    """``constant/momentumTransport`` - the Foundation 8+ name for the RAS settings.
+
+    Under ``kEpsilon`` the closure coefficients are written **explicitly**, at the
+    model's own defaults. Two reasons, both about calibration: OpenFOAM falls back
+    to built-in values for any coefficient it does not find in the file, so a
+    calibration that perturbs one which is absent would leave every run using the
+    same value and never say so; and HydroBayesCal's ``update_dictionary_entry``
+    requires the key to exist, raising ``Key 'Cmu' not found`` otherwise. Other
+    models (kOmegaSST, the default) are written exactly as before.
+    """
     of = cfg.openfoam
     if of.turbulence == "laminar":
         body = "simulationType  laminar;\n"
     else:
+        coeffs = ""
+        if of.turbulence == "kEpsilon":
+            coeffs = (
+                "\n    kEpsilonCoeffs\n    {\n"
+                f"        Cmu             {of.kepsilon_cmu:g};\n"
+                f"        C1              {of.kepsilon_c1:g};\n"
+                f"        C2              {of.kepsilon_c2:g};\n"
+                f"        sigmak          {of.kepsilon_sigmak:g};\n"
+                f"        sigmaEps        {of.kepsilon_sigma_eps:g};\n"
+                "    }\n"
+            )
         body = f"""simulationType  RAS;
 
 RAS
@@ -151,7 +172,7 @@ RAS
     turbulence      on;
 
     printCoeffs     on;
-}}
+{coeffs}}}
 """
     return _dict_file("momentumTransport", body, location="constant")
 
@@ -187,7 +208,7 @@ writeControl    adjustableRunTime;
 
 writeInterval   {of.write_interval:g};
 
-purgeWrite      0;
+purgeWrite      {of.purge_write:d};
 
 // binary keeps a multi-million-cell case's output and the decomposed meshes
 // compact; only the hand-written polyMesh is ASCII

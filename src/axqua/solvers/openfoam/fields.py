@@ -168,10 +168,20 @@ def turbulence_scales(state, cfg) -> tuple[float, float, float]:
 # --------------------------------------------------------------------------- #
 
 
-def _wall_entries(of_mesh, cfg, patch: str) -> dict[str, str]:
-    """``nut`` entry for a wall patch, with per-face ``Ks`` on the bed."""
+def _wall_entries(of_mesh, cfg, patch: str, *, uniform: bool = False) -> dict[str, str]:
+    r"""``nut`` entry for a wall patch, with per-face ``Ks`` on the bed.
+
+    *uniform* forces a single ``Ks uniform <value>`` even where the mesh carries a
+    per-face roughness. That is what a **calibration template** needs: HydroBayesCal
+    perturbs ``ks`` by rewriting the one line matching ``^\s*Ks\s+`` with
+    ``Ks uniform <v>;``, and it has no skip logic for a multi-line list - so against
+    a ``nonuniform List<scalar>`` the header is replaced and the list body survives
+    as orphaned tokens, giving an unparseable ``0/nut``. A calibrated ``ks`` is one
+    global number anyway, so there is nothing to lose here and a corrupt dictionary
+    (reported far away, as an OpenFOAM parse error) to avoid.
+    """
     of = cfg.openfoam
-    if patch == "bed" and of_mesh.bed_ks is not None:
+    if patch == "bed" and of_mesh.bed_ks is not None and not uniform:
         ks = np.nan_to_num(np.asarray(of_mesh.bed_ks, dtype=float),
                            nan=of.friction_ks)
         return {"type": "nutkRoughWallFunction",
@@ -201,12 +211,15 @@ def _outlet_profiles(of_mesh, patch: str, stage: float,
 
 def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
                  outflow_stage: float | None = None,
-                 discharges: dict[str, float] | None = None) -> list[Path]:
+                 discharges: dict[str, float] | None = None,
+                 uniform_bed_ks: bool = False) -> list[Path]:
     """Write ``0/{alpha.water, U, p_rgh, nut, k, omega|epsilon}``.
 
     *outflow_stage* is the water level [m a.s.l.] the outlet patches hold; ``None``
     selects the free-outfall boundary instead (``outflow_condition: free``).
     *discharges* maps each inlet patch to its own Q [m3/s].
+    *uniform_bed_ks* writes one global bed roughness instead of the per-face list
+    (see :func:`_wall_entries`); set it for a calibration template.
     """
     of = cfg.openfoam
     rigid = getattr(of_mesh, "rigid_lid", False)
@@ -316,7 +329,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     bc = {p: {"type": "calculated", "value": "uniform 0"}
           for p in of_mesh.inlet_patches + of_mesh.outlet_patches + [top]}
     for patch in walls:
-        bc[patch] = _wall_entries(of_mesh, cfg, patch)
+        bc[patch] = _wall_entries(of_mesh, cfg, patch, uniform=uniform_bed_ks)
     written.append(_write(zero / "nut", render_field(
         "volScalarField", "nut", "[0 2 -1 0 0 0 0]", "uniform 0", bc)))
 

@@ -752,6 +752,16 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         lid = np.full_like(bed, base + of.freeboard)
         notes.append("no 2D hotstart: flat lid, so the domain carries the full air column")
     if rigid:
+        if state is None:
+            # A rigid lid IS a prescribed free surface, so there is nothing to
+            # place it on without a 2D result. Previously this read the unbound
+            # `wse_v` and raised UnboundLocalError from deep inside the mesher.
+            raise ValueError(
+                "openfoam.mode is 'rigid-lid' but no 2D hotstart was supplied, so "
+                "there is no free surface to place the lid on - a rigid lid is a "
+                "PRESCRIBED surface by definition. Build with a 2D seed "
+                "(openfoam.pre_run enabled, or a converged r2d.slf), or use "
+                "mode: vof, which solves the surface instead.")
         # The lid IS the free surface. No freeboard, because a freeboard would be air.
         lid = np.where(np.isfinite(wse_v), wse_v, bed)
         notes.append("lid placed on the 2D free surface (freeboard ignored)")
