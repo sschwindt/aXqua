@@ -1310,11 +1310,29 @@ class OpenFoam:
     surface_tension: float = 0.07
     roughness_constant: float = 0.5   # nutkRoughWallFunction Cs
     friction_ks: float = 0.05         # fallback ks [m] with no roughness zones
+    # k-epsilon closure coefficients, at OpenFOAM's own defaults. Written into
+    # constant/momentumTransport only when turbulence == "kEpsilon", so a kOmegaSST
+    # case is unaffected. They exist as config fields because they are calibration
+    # PARAMETERS (see axqua.solvers.openfoam.calibration): OpenFOAM silently falls
+    # back to built-in values for a coefficient that is absent from the file, so a
+    # perturbed coefficient has to be written explicitly or the perturbation is a
+    # no-op that nothing reports.
+    kepsilon_cmu: float = 0.09
+    kepsilon_c1: float = 1.44
+    kepsilon_c2: float = 1.92
+    kepsilon_sigmak: float = 1.0
+    kepsilon_sigma_eps: float = 1.3
 
     # ---- run ----------------------------------------------------------------
     spinup_time: float = 30.0       # [s] stage 1 (settle the interface)
     end_time: float = 300.0         # [s] end of stage 2
     write_interval: float = 10.0    # [s] of simulated time
+    # How many time directories to keep (OpenFOAM's purgeWrite; 0 = keep all).
+    # 0 is right for a single production run whose whole time series is wanted.
+    # A calibration campaign sets it to n_avg_timesteps + 1: only the trailing
+    # window is ever read, and dozens of binary time directories per run x tens of
+    # runs is a lot of disk written to be deleted.
+    purge_write: int = 0
     initial_time_step: float = 0.001
     max_time_step: float = 0.5
     max_courant: float = 0.9        # stage 2 (stage 1 uses spinup_courant)
@@ -1368,6 +1386,48 @@ class OpenFoam:
 
 
 @dataclass
+class PostProcessing:
+    """Visualisation: which tool draws the figures, and what to draw.
+
+    ``visit`` is the VisIt **launcher** (an executable), not a script to source -
+    which is why it is not spelled like ``telemac.pysource`` / ``openfoam.bashrc``
+    even though it occupies the same slot in its block. VisIt ships its own Python,
+    so axqua generates a script and runs it with ``visit -cli -nowin -s`` rather
+    than importing anything (see :mod:`axqua.postproc`). ``environment`` covers the
+    rare install that still needs a setup script, and is what makes this work
+    through WSL on Windows.
+
+    Additive: a config with no ``postproc:`` block gets these defaults and nothing
+    in either solver path consults them.
+    """
+
+    visit: Path | None = None
+    environment: Environment = field(default_factory=Environment)
+    backend: str = "visit"
+    scenes: list[str] = field(default_factory=lambda: [
+        "free-surface", "velocity-plan", "profiles"])
+    # separate ints rather than a tuple, so the YAML round-trip is exact
+    image_width: int = 1600
+    image_height: int = 1000
+    animation_fps: int = 10
+
+    def validate(self) -> None:
+        if self.backend not in ("visit",):
+            raise ValueError(
+                f"postproc.backend must be 'visit', got {self.backend!r}")
+        if self.visit is not None and not Path(self.visit).exists():
+            raise FileNotFoundError(
+                f"VisIt launcher not found: {self.visit}. Point postproc.visit at "
+                "the `visit` executable of your install, e.g. "
+                "/home/IWS/public/visit/bin/visit")
+        for name, value in (("image_width", self.image_width),
+                            ("image_height", self.image_height),
+                            ("animation_fps", self.animation_fps)):
+            if int(value) <= 0:
+                raise ValueError(f"postproc.{name} must be positive, got {value}")
+
+
+@dataclass
 class Config:
     name: str
     crs_epsg: int
@@ -1397,6 +1457,7 @@ class Config:
     structures: Structures = field(default_factory=Structures)
     # OpenFOAM free-surface extension (optional; see axqua.solvers.openfoam)
     openfoam: OpenFoam = field(default_factory=OpenFoam)
+    postproc: PostProcessing = field(default_factory=PostProcessing)
     # where the OpenFOAM case tree is written; defaults to <sim_dir>/openfoam
     openfoam_dir: Path | None = None
     # Top-level blocks the YAML actually contained. Every solver section has a
@@ -1514,6 +1575,8 @@ class Config:
         self.openfoam.environment.validate()
         self.structures.validate()
         self.openfoam.validate()
+        self.postproc.environment.validate()
+        self.postproc.validate()
         self.initialization.validate()
         self.drying.validate(self.percolation)
         self.dem_of_difference.validate()
@@ -1691,6 +1754,13 @@ def load_config(path: str | os.PathLike) -> Config:
     openfoam_dir = _resolve(cfg_dir, project.get("openfoam_dir")) if \
         project.get("openfoam_dir") else None
 
+    # Post-processing: absent block -> defaults, and nothing consults them
+    ppdict = dict(raw.get("postproc") or {})
+    if ppdict.get("visit") is not None:
+        ppdict["visit"] = _resolve(cfg_dir, ppdict["visit"])
+    ppdict["environment"] = _load_environment(ppdict.get("environment"), cfg_dir)
+    postproc = PostProcessing(**_only_known(PostProcessing, ppdict))
+
     cfg = Config(
         name=project.get("name", path.stem),
         crs_epsg=int(project.get("crs_epsg", 25832)),
@@ -1714,6 +1784,7 @@ def load_config(path: str | os.PathLike) -> Config:
         drying=drying,
         structures=structures,
         openfoam=openfoam,
+        postproc=postproc,
         openfoam_dir=openfoam_dir,
         declared_blocks=frozenset(raw),
     )
