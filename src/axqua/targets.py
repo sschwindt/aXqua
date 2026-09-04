@@ -239,6 +239,37 @@ PARAMETER_CATALOG: tuple[ParameterSpec, ...] = (
         "CATEGORICAL (1=MPM, 4=Einstein, 5=Bijker, 6=Soulsby-van Rijn, 7=van "
         "Rijn, 30=MPM multi-class...) - compare discrete runs, do not sample "
         "continuously in the Bayesian calibration"),
+    # --- OpenFOAM (interFoam) ------------------------------------------------ #
+    # These are NOT TELEMAC keywords: ParameterSpec.hbc_name falls through to the
+    # bare keyword for an unrecognised module, which is exactly the name
+    # HydroBayesCal's OpenFOAM binding dispatches on (see
+    # hydroBayesCal.openfoam.control_openfoam.KEPSILON_COEFFS and "ks").
+    # See axqua.solvers.openfoam.calibration.
+    ParameterSpec(
+        "OPENFOAM ks (bed roughness)", "openfoam", "ks", "", 0.01, 0.50,
+        "Nikuradse roughness height [m] on the OpenFOAM bed patch "
+        "(nutkRoughWallFunction Ks in 0/nut). ONE GLOBAL VALUE - the OpenFOAM "
+        "binding has no per-zone roughness, so this is NOT comparable with the "
+        "TELEMAC zone<N> parameters. Gravel bed ~2-3 x d90. Keep the prior below "
+        "about half the bed-layer thickness, or the wall function is inadmissible "
+        "(see axqua.solvers.openfoam.quality)"),
+    ParameterSpec(
+        "OPENFOAM k-epsilon Cmu", "openfoam", "Cmu", "", 0.06, 0.12,
+        "eddy-viscosity constant [-] of the k-epsilon closure; standard 0.09. "
+        "Needs openfoam.turbulence: kEpsilon - with kOmegaSST the case carries no "
+        "kEpsilonCoeffs subdictionary and every run would fail"),
+    ParameterSpec(
+        "OPENFOAM k-epsilon C1", "openfoam", "C1", "", 1.30, 1.60,
+        "epsilon production constant [-]; standard 1.44. Needs kEpsilon"),
+    ParameterSpec(
+        "OPENFOAM k-epsilon C2", "openfoam", "C2", "", 1.70, 2.00,
+        "epsilon destruction constant [-]; standard 1.92. Needs kEpsilon"),
+    ParameterSpec(
+        "OPENFOAM k-epsilon sigmak", "openfoam", "sigmak", "", 0.80, 1.30,
+        "turbulent Prandtl number for k [-]; standard 1.0. Needs kEpsilon"),
+    ParameterSpec(
+        "OPENFOAM k-epsilon sigmaEps", "openfoam", "sigmaEps", "", 1.00, 1.50,
+        "turbulent Prandtl number for epsilon [-]; standard 1.3. Needs kEpsilon"),
 )
 
 
