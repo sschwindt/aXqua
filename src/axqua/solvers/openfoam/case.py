@@ -110,12 +110,15 @@ def _inlet_discharges(of_mesh, cfg: Config, total: float) -> dict[str, float]:
 def build_case(cfg: Config, *, state: State2D | None = None,
                hotstart: str | Path | None = None,
                case_dir: str | Path | None = None,
-               discharge: float | None = None) -> OpenFoamArtifacts:
+               discharge: float | None = None,
+               uniform_bed_ks: bool = False) -> OpenFoamArtifacts:
     """Build the OpenFOAM case for *cfg*.
 
     *state* short-circuits reading the 2D result (used by tests); *hotstart* points
     at a different ``r2d.slf`` than the config's own; *discharge* overrides
-    ``boundaries.prescribed_flowrate``.
+    ``boundaries.prescribed_flowrate``. *uniform_bed_ks* writes one global bed
+    roughness rather than the per-face list, which is what a calibration template
+    needs (see :func:`axqua.solvers.openfoam.fields._wall_entries`).
     """
     of = cfg.openfoam
     of.validate()
@@ -172,7 +175,8 @@ def build_case(cfg: Config, *, state: State2D | None = None,
 
     polymesh_dir = write_polymesh(of_mesh.polymesh, case_dir)
     field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
-                                      outflow_stage=stage, discharges=inlets)
+                                      outflow_stage=stage, discharges=inlets,
+                                      uniform_bed_ks=uniform_bed_ks)
     dict_files = dicts.write_dicts(of_mesh, cfg, case_dir, velocity_cap=cap)
     (case_dir / "case.foam").write_text("")     # so ParaView can open the folder
 
