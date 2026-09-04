@@ -125,6 +125,12 @@ Solver-agnostic core
 .. automodule:: axqua.core.structures
    :members:
 
+.. automodule:: axqua.core.surfaces
+   :members:
+
+.. automodule:: axqua.surface_stage
+   :members:
+
 .. automodule:: axqua.core.capabilities
    :members:
 

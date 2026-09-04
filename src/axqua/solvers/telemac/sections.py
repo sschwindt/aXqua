@@ -101,7 +101,10 @@ def line_discharges(results: Path, lines, *, geometry: Path | None = None,
     ``lines`` is a path to a line layer (any CRS - reprojected to *crs_epsg*) or an
     already-loaded GeoDataFrame. Returns a DataFrame with one row per line:
     ``name``, ``discharge`` (m3/s, positive along the section's net flow),
-    ``wetted_width``, ``mean_depth``, ``mean_velocity``, ``orientation``.
+    ``wetted_width``, ``mean_depth``, ``max_depth``, ``mean_velocity``,
+    ``max_velocity``, ``orientation``. The maxima are over the wet part of the section
+    and exist for comparing against laboratory data reported per cross-section rather
+    than per point (:mod:`axqua.labdata`).
     """
     import geopandas as gpd
     import numpy as np
@@ -116,6 +119,10 @@ def line_discharges(results: Path, lines, *, geometry: Path | None = None,
     interp_qx = LinearTriInterpolator(triang, h * u)
     interp_qy = LinearTriInterpolator(triang, h * v)
     interp_h = LinearTriInterpolator(triang, h)
+    # the velocity itself, for the section maxima below: |q|/h is indeterminate
+    # at a drying sample, where both go to zero
+    interp_u = LinearTriInterpolator(triang, u)
+    interp_v = LinearTriInterpolator(triang, v)
 
     if isinstance(lines, (str, Path)):
         gdf = gpd.read_file(lines)
@@ -156,6 +163,16 @@ def line_discharges(results: Path, lines, *, geometry: Path | None = None,
         mean_h = float(hh[wet].mean()) if wet.any() else 0.0
         area = float(np.trapezoid(hh, s))
         mean_u = abs(q_signed) / area if area > 1e-9 else 0.0
+        # Maxima along the section, for comparing against a laboratory campaign that
+        # reports a section maximum rather than a value at a coordinate (see
+        # axqua.labdata). Taken over the wet samples only: the speed at a dry sample is
+        # the ratio of two vanishing numbers, and including it turns the drying front
+        # into the section's maximum velocity.
+        speed = np.hypot(
+            np.asarray(interp_u(pts[:, 0], pts[:, 1]).filled(0.0), dtype=float),
+            np.asarray(interp_v(pts[:, 0], pts[:, 1]).filled(0.0), dtype=float))
+        max_h = float(hh[wet].max()) if wet.any() else 0.0
+        max_u = float(speed[wet].max()) if wet.any() else 0.0
         # normalise the sign: report the section's own net flow as positive
         flip = q_signed < 0
         rows.append({
@@ -163,11 +180,14 @@ def line_discharges(results: Path, lines, *, geometry: Path | None = None,
             "discharge": abs(q_signed),
             "wetted_width": width,
             "mean_depth": mean_h,
+            "max_depth": max_h,
             "mean_velocity": mean_u,
+            "max_velocity": max_u,
             "orientation": "left-hand" if flip else "right-hand",
         })
         log.info("  section %-16s Q = %8.4f m3/s  (wet %5.1f m, mean h %.3f m, "
-                 "mean |U| %.3f m/s)", name, abs(q_signed), width, mean_h, mean_u)
+                 "max h %.3f m, mean |U| %.3f m/s, max |U| %.3f m/s)",
+                 name, abs(q_signed), width, mean_h, max_h, mean_u, max_u)
     return pd.DataFrame(rows)
 
 

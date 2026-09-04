@@ -34,6 +34,8 @@ class Artifacts:
     calibration_csv: Path | None = None
     hbc_config: Path | None = None
     rasters: dict[str, Path] = field(default_factory=dict)
+    # what stage 0 derived from CAD, when the case is built from surfaces
+    surfaces: list[Path] = field(default_factory=list)
 
 
 def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
@@ -49,6 +51,20 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         mesh-convergence study logging the per-level builds to postprocessing/).
     """
     cfg.ensure_dirs()
+    # compound logfile for the build, in the simulation (model) output folder. Opened
+    # before anything else so that stage 0 and a validation failure are recorded too.
+    if log_to_file:
+        setup_logging(cfg.model_path(cfg.log_file))
+    art = Artifacts()
+    # 0) CAD surfaces -> the geodata a surveyed case would have been given. Ahead of
+    # everything else, including the rating synthesis below, which reads the DEM and
+    # the outflow line that this stage writes.
+    if cfg.surfaces.active:
+        from axqua import surface_stage
+
+        with log_step("stage 0: derive geodata from the CAD surfaces"):
+            produced = surface_stage.run(cfg)
+            art.surfaces = produced.paths()
     # synthesise a missing outflow rating before validating: with
     # boundaries.rating_method set, leaving stage_discharge unset is a legitimate
     # "derive it from the geodata at the simulated Q" (see workflow.
@@ -59,10 +75,6 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         from axqua.workflow import synthesize_rating_if_missing
         synthesize_rating_if_missing(cfg, float(cfg.boundaries.prescribed_flowrate))
     cfg.validate()
-    # compound logfile for the build, in the simulation (model) output folder
-    if log_to_file:
-        setup_logging(cfg.model_path(cfg.log_file))
-    art = Artifacts()
     t_start = time.perf_counter()
     log.info("build start: case '%s' -> %s", cfg.name, cfg.model_dir)
 

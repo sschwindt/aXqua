@@ -121,10 +121,20 @@ def clip_to_roi(dem_path, boundary_path, out_path, *, target_epsg: int | None = 
     # CRS the DEM is effectively in (assume the boundary's if undeclared)
     effective_epsg = dem_epsg or boundary_epsg
     if effective_epsg is None:
-        raise ValueError(
-            f"Neither {dem_path} nor {boundary_path} declares a CRS; "
-            "set target_epsg explicitly."
-        )
+        # Neither declares one, which is not an error when both came out of the same
+        # source: a case built from CAD in the drawing's own coordinates has no CRS to
+        # declare, and stamping the project's onto it would be a falsehood. They are in
+        # the same system by construction, so clipping needs no reprojection - and a
+        # reprojection is refused below rather than done on invented coordinates.
+        if target_epsg is not None:
+            raise ValueError(
+                f"cannot reproject {dem_path.name} to EPSG:{target_epsg}: neither it "
+                f"nor {Path(boundary_path).name} declares a CRS, so there is nothing "
+                f"to reproject *from*. Georeference the case first (`axqua georef`), "
+                f"or leave target_epsg unset to clip in local coordinates.")
+        log.info("no CRS on either input - clipping in local coordinates")
+        return _clip_without_crs(dem_path, boundary_path, out_path,
+                                 all_touched=all_touched, compress=compress)
 
     src_path = dem_path
     out_epsg = effective_epsg
@@ -157,6 +167,29 @@ def clip_to_roi(dem_path, boundary_path, out_path, *, target_epsg: int | None = 
     return out_path
 
 
+def _clip_without_crs(dem_path, boundary_path, out_path, *, all_touched, compress):
+    """Clip when neither input carries a CRS: same system by construction, no reprojection."""
+    import geopandas as gpd
+    import rasterio
+    from rasterio.mask import mask
+
+    geoms = list(gpd.read_file(Path(boundary_path)).geometry)
+    with rasterio.open(dem_path) as src:
+        nodata = src.nodata if src.nodata is not None else -9999.0
+        out_image, out_transform = mask(
+            src, geoms, crop=True, nodata=nodata, filled=True, all_touched=all_touched)
+        meta = src.meta.copy()
+    meta.update(height=out_image.shape[1], width=out_image.shape[2],
+                transform=out_transform, nodata=nodata, crs=None)
+    if compress:
+        meta["compress"] = compress
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with rasterio.open(out_path, "w", **meta) as dst:
+        dst.write(out_image)
+    return out_path
+
+
 def clip_dem_to_roi(cfg: Config, dem_path, out_path=None) -> Path:
     """Clip *dem_path* to the configuration's ROI boundary, in the project CRS.
 
@@ -168,7 +201,16 @@ def clip_dem_to_roi(cfg: Config, dem_path, out_path=None) -> Path:
     dem_path = Path(dem_path)
     if out_path is None:
         out_path = dem_path.with_name(f"{dem_path.stem}-roi-clip.tif")
-    return clip_to_roi(dem_path, cfg.geodata.boundary, out_path, target_epsg=cfg.crs_epsg)
+    # A case built from CAD without a georeference has no CRS to reproject to; asking
+    # for one would fail on coordinates that are deliberately local.
+    target = None if _is_local(cfg) else cfg.crs_epsg
+    return clip_to_roi(dem_path, cfg.geodata.boundary, out_path, target_epsg=target)
+
+
+def _is_local(cfg: Config) -> bool:
+    """Whether this case runs in local (un-georeferenced) CAD coordinates."""
+    return bool(getattr(cfg, "surfaces", None)
+                and cfg.surfaces.active and cfg.surfaces.transform().is_identity)
 
 
 def clip_dem(cfg: Config, dem_path: Path, out_name: str) -> ClippedDEM:
@@ -178,7 +220,7 @@ def clip_dem(cfg: Config, dem_path: Path, out_name: str) -> ClippedDEM:
     cfg.ensure_dirs()
     out_path = clip_to_roi(
         dem_path, cfg.geodata.boundary, Path(cfg.preprocessing_dir) / out_name,
-        target_epsg=cfg.crs_epsg,
+        target_epsg=None if _is_local(cfg) else cfg.crs_epsg,
     )
     with rasterio.open(out_path) as src:
         nodata = src.nodata if src.nodata is not None else -9999.0

@@ -1,0 +1,167 @@
+# =============================================================================
+# Munich vertical slot fishway - Hachinger Bach at Kreillerstrasse
+# =============================================================================
+# A fish pass built from its CAD assembly rather than from a survey: there is no DEM
+# of it and there never will be. The `surfaces` block below names the STL parts and
+# what each one is, and stage 0 of the build turns them into the DEM, the ROI, the
+# liquid-boundary lines, the wall footprints and the roughness zones (see
+# docs/preprocessing.rst, "CAD geometry instead of a DEM").
+#
+# Three steady design discharges, run from one build with axqua.bayescal.write_flow_cas:
+#   Q30   0.060 m3/s     MQ    0.135 m3/s     HQ100  1.000 m3/s
+#
+# Reference data: the physical 1:3 flume campaign published at
+# https://zenodo.org/records/14440623 (physical-flume/). Four cross-sections per
+# discharge, each with a mean water depth and an ADV velocity maximum - cross-section
+# AGGREGATES, compared against the model with axqua.labdata + section statistics, not
+# as point targets. Fetch them with `python lab_reference.py`.
+#
+# STATUS: the CAD is staged and stage 0 runs. It reads 6.2 M facets in ~20 s and
+# writes the DEM, ROI, 9 wall footprints and the two boundary lines in ~80 s. The
+# derived model is 24 x 88 m with a 258 m2 wetted channel, the bed falling 1.86 m from
+# the inlet end (bed 2.5 m) through the pool-and-slot reach to the outlet (bed 0.33 m).
+# Still to do: the cross-section lines XS1-XS4 for the lab comparison, and a decision
+# on the velocity scale of the flume data (see README.md).
+
+project:
+  name: munich-vsf
+  # The drawing is set out in DHDN / Gauss-Krueger zone 4 (easting 4 473 041,
+  # northing 5 332 067), so that - not UTM 32N - is this case's grid once it is
+  # georeferenced. Unused while the case runs in local CAD coordinates.
+  crs_epsg: 31468                # DHDN / GK zone 4
+  sim_dir: axqua-case
+
+telemac:
+  pysource: /home/modelling/telemac-v911/telemac-mascaret/configs/pysource.debian12.sh
+  solver: telemac2d
+  n_processors: 8
+
+# -----------------------------------------------------------------------------
+# CAD geometry -> DEM, ROI, boundaries, walls, roughness zones
+# -----------------------------------------------------------------------------
+surfaces:
+  resolution: 0.02               # 2 cm: the slots are decimetres, so this has to be
+                                 # fine enough to carry a slot and its walls
+  # No transform: the STLs are in CAD-local metres (x 2.5..26.7, y 16.3..106.8,
+  # z 0.13..6.0) and the drawing cannot be matched to them by bounding box - the sheet
+  # carries plans, sections and a title block, so its extent (126 x 29 m) is not the
+  # structure's (24 x 88 m). `axqua georef` reports that mismatch rather than guessing.
+  # The case therefore runs in LOCAL coordinates, which is a supported way to run: only
+  # the position on a map is missing. To georeference it, identify two features in both
+  # the CAD and the drawing - a slot corner, an axis intersection - and run
+  #   axqua georef --stl user-sources/geodata/cad/substratum.stl \
+  #     --control-point 2.81,19.22:4473050.0,5332080.0 \
+  #     --control-point 26.69,106.77:4473150.0,5332100.0
+  # then paste the reported block here. Add a third point to check the fit.
+  scale: 1.0
+  rotation_deg: 0.0
+  dx: 0.0
+  dy: 0.0
+  dz: 0.0
+  bed_max_slope_deg: 45
+  wall_min_slope_deg: 70
+  simplify: 0.01
+  parts:
+    # --- the bed: substrate over lean concrete, each its own roughness zone --------
+    - {file: user-sources/geodata/cad/substratum.stl, role: bed, zone_id: 1, ks: 0.08}
+    - {file: user-sources/geodata/cad/substratum_amphibienweg.stl, role: bed, zone_id: 2, ks: 0.10}
+    - {file: user-sources/geodata/cad/magerbeton.stl, role: bed, zone_id: 3, ks: 0.003}
+    # --- the structure: walls and baffles become solid footprints -----------------
+    - {file: user-sources/geodata/cad/stahlbeton.stl, role: wall}
+    - {file: user-sources/geodata/cad/stahlblech.stl, role: wall}
+    - {file: user-sources/geodata/cad/edelstahlverkleidung.stl, role: wall}
+    # --- flow boundaries ----------------------------------------------------------
+    - {file: user-sources/geodata/cad/inlet.stl, role: inflow}
+    - {file: user-sources/geodata/cad/outlet.stl, role: outflow}
+    # --- not geometry: the air-phase bounding patches of the intended VOF case -----
+    - {file: user-sources/geodata/cad/inlet-box.stl, role: ignore}
+    - {file: user-sources/geodata/cad/air-sides.stl, role: ignore}
+    - {file: user-sources/geodata/cad/air-top.stl, role: ignore}
+
+boundaries:
+  # the middle design discharge; the other two are derived from the built case by
+  # lab_reference.py / write_flow_cas rather than by re-meshing
+  prescribed_flowrate: 0.135
+  outflow_condition: elevation
+  # Local datum, from the derived DEM: the bed at the outlet end (y > 104 m) sits at
+  # 0.33..1.01 m, and the flume measured 0.36 m of water at the downstream section
+  # (XS4/US7) at MQ. 0.33 + 0.36 = 0.69. This is an estimate to start the run from,
+  # not a surveyed tailwater - check it against the drawing's elevation labels, and
+  # re-derive it per discharge (0.60 at Q30, 1.17 at HQ100 by the same arithmetic).
+  prescribed_elevation: 0.69
+
+initialization:
+  # A fish pass fills from its inflow; the plug lets the prescribed-Q boundary
+  # establish on an otherwise dry bed. The inlet patch is small (0.47 x 0.38 m at
+  # z = 2.30 m), so the plug has to cover it rather than a wide cross-section.
+  dry_start_depth: 0.20
+  dry_start_extent: 5
+
+mesh:
+  # Pools are metres, slots are decimetres. These are the fallbacks; the anisotropic
+  # path needs mesh zones and a centerline, which a fish pass does not really have -
+  # the isotropic fallback at this size is the right tool here.
+  default_size: 0.05
+  min_size: 0.02
+  # The default of 3 m is coarser than the mesh itself here, and it used to set the
+  # liquid-boundary matching tolerance. It no longer does (that comes from the built
+  # mesh), but leaving a size 60x the cell size in the config invites the next
+  # surprise.
+  breakline_size: 0.05
+
+structures:
+  # A fish-pass baffle stands about a metre above its pool; the 2 m default freeboard
+  # (meant for a river floodwall) turns a 3.3 m wall into a 5.3 m one and gives the
+  # solver a 3 m terrain step to march water into at the inflow. A quarter of that is
+  # still far above any water level this case produces.
+  solid_freeboard_2d: 0.5
+
+friction:
+  roughness_law: 5               # Nikuradse
+  boundary_law: 5
+  boundary_coefficient: 0.02
+
+hydrodynamics:
+  regime: steady
+  finite_volumes: false
+  # k-epsilon, not the auto-selection. 'auto' picks Smagorinski here (the mesh resolves
+  # the depth well), and Smagorinski carries no turbulent kinetic energy: there is no K
+  # to print, so TKE can be neither converged against nor calibrated. The flume data
+  # has TKE columns, so the closure has to be the one that produces it.
+  turbulence_model: 3            # k-epsilon -> graphic printout gains K,E
+  desired_courant: 0.30
+  time_step: 0.05
+  # The reach holds ~50 m3 at 0.2 m depth and fills at 0.135 m3/s, so it needs ~400 s
+  # of water before anything can be steady. 1800 s leaves room for the pools to
+  # equilibrate after that; the run is stopped early once the frames stop changing.
+  duration: 1800.0
+  # a frame and a flux printout every ~10 s of simulated time (dt is ~2.2 ms here),
+  # which is what the between-frames convergence check reads
+  graphic_printout_period: 4500
+  listing_printout_period: 4500
+  wet_depth: 0.005               # a fish pass is shallow; 1 cm would hide the margins
+  flux_tolerance: 1.0e-3
+
+openfoam:
+  bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
+  mode: vof                      # start with rigid-lid + cell_size_factor 3 to shake
+                                 # out the mesh, then switch here
+  cell_size: 0.03
+  n_layers: 12
+  freeboard: 0.30
+  turbulence: kOmegaSST
+  pre_run:
+    enabled: true                # seed from the 2D result
+    reuse: true
+
+calibration:
+  # Bed roughness is the knob; the three zones above are what there is to calibrate.
+  # 12 depth values over 3 discharges is thin, so keep the parameter set small.
+  calibration_quantities: ["WATER DEPTH"]
+  extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]
+  measurement_error: 0.10
+  init_runs: 16
+  max_runs: 30
+  parameters:
+    - {name: zone1, min: 0.03, max: 0.20, comment: "substrate ks [m]"}
+    - {name: zone3, min: 0.001, max: 0.01, comment: "lean concrete ks [m]"}

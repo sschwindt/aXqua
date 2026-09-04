@@ -140,6 +140,14 @@ class TelemacEnv:
     solver_python: str | None = None
 
     def validate(self) -> None:
+        if self.pysource is None:
+            # Unset is its own mistake and deserves its own sentence: Path(None) raises
+            # a TypeError from pathlib that says nothing about the configuration.
+            raise FileNotFoundError(
+                "telemac.pysource is not set. Point it at the environment script of "
+                "your TELEMAC installation, e.g. "
+                "/home/schwindt/opt/telemac/configs/pysource.mint22.sh"
+            )
         if not Path(self.pysource).is_file():
             raise FileNotFoundError(
                 f"TELEMAC pysource script not found: {self.pysource}. "
@@ -214,16 +222,26 @@ class Geodata:
     control_sections: Path | None = None
     control_section_name_field: str | None = None  # attribute holding each line's name
 
-    def validate(self) -> None:
+    def validate(self, *, produced: frozenset[str] = frozenset()) -> None:
+        """Check the inputs exist.
+
+        *produced* names the entries an earlier stage writes rather than the user
+        supplying - the CAD surface stage, in practice. Those are allowed to be
+        missing here, because validating a case before its first build is exactly when
+        they do not exist yet, and refusing to validate would make ``--check`` useless
+        for the one kind of case that most needs checking first. What produces them
+        validates its own inputs instead (:meth:`Surfaces.validate`).
+        """
         required = {"dem_initial": self.dem_initial, "boundary": self.boundary}
-        missing = [name for name, p in required.items() if p is None or not Path(p).exists()]
+        missing = [name for name, p in required.items()
+                   if name not in produced and (p is None or not Path(p).exists())]
         if missing:
             raise FileNotFoundError(f"Missing required geodata: {missing}")
         for name in ("dem_target", "breaklines", "mesh_zones", "channel_centerline",
                      "roughness_zones", "roughness_table", "region_points",
                      "region_table", "dem_of_difference", "control_sections"):
             p = getattr(self, name)
-            if p is not None and not Path(p).exists():
+            if name not in produced and p is not None and not Path(p).exists():
                 raise FileNotFoundError(f"geodata.{name} set but not found: {p}")
 
 
@@ -254,6 +272,130 @@ class Structures:
     def validate(self) -> None:
         if self.default_width <= 0:
             raise ValueError("structures.default_width must be > 0")
+
+
+#: what a CAD part is, and therefore what it becomes downstream
+SURFACE_ROLES = ("bed", "wall", "inflow", "outflow", "roi", "ignore")
+
+
+@dataclass
+class SurfacePart:
+    """One STL part of a CAD assembly, and the role it plays in the model.
+
+    ``bed`` parts are rasterised into the DEM; ``wall`` parts become
+    :class:`Structures` footprints with a crest; ``inflow`` / ``outflow`` parts become
+    the lines of the liquid-boundary layer; ``roi`` overrides the domain outline that
+    is otherwise the bed's own coverage; ``ignore`` is for the parts a CFD export
+    carries that are not geometry at all - the air-phase bounding patches of a VOF
+    case being the usual ones.
+    """
+
+    file: Path
+    role: str = "bed"
+    zone_id: int | None = None    # roughness zone this material becomes
+    ks: float | None = None       # its Nikuradse roughness [m], paired with zone_id
+    name: str | None = None       # label in reports and layers; defaults to the stem
+
+    def label(self) -> str:
+        return self.name or Path(self.file).stem
+
+    def validate(self) -> None:
+        if self.role not in SURFACE_ROLES:
+            raise ValueError(f"surfaces.parts[{self.label()}].role must be one of "
+                             f"{list(SURFACE_ROLES)}, got {self.role!r}")
+        if not Path(self.file).exists():
+            raise FileNotFoundError(f"surfaces part not found: {self.file}")
+        if (self.ks is not None) != (self.zone_id is not None):
+            raise ValueError(
+                f"surfaces.parts[{self.label()}]: zone_id and ks go together - a "
+                f"roughness zone needs a value, and a value needs a zone to sit in")
+
+
+@dataclass
+class Surfaces:
+    """CAD geometry as the terrain and domain of a case (optional; off by default).
+
+    For a structure that was **designed rather than surveyed** - a fish pass, a
+    culvert, a flume - there is no DEM and there never will be. This block names the
+    STL parts of the CAD assembly and what each one is, and the surface stage turns
+    them into the ordinary artifacts the rest of axqua consumes: a DEM, an ROI
+    polygon, liquid-boundary lines, structure footprints and roughness zones. Nothing
+    downstream knows that a CAD file was involved. See :mod:`axqua.core.surfaces`.
+
+    The transform places CAD-local coordinates on the map. Leave it at the identity to
+    work in local coordinates: the model is physically the same either way, and only
+    its position on a map is arbitrary. ``axqua georef`` derives one from a DXF.
+    """
+
+    parts: list[SurfacePart] = field(default_factory=list)
+    resolution: float = 0.05           # DEM cell size [m]
+    # the similarity transform onto project coordinates (see core.surfaces.Transform)
+    scale: float = 1.0                 # 0.001 for a drawing in millimetres
+    rotation_deg: float = 0.0
+    dx: float = 0.0
+    dy: float = 0.0
+    dz: float = 0.0
+    # facet classification; a facet between the two is neither rasterised nor turned
+    # into a footprint, and is reported so the thresholds can be widened knowingly
+    bed_max_slope_deg: float = 45.0
+    wall_min_slope_deg: float = 70.0
+    simplify: float | None = None      # polygon simplification tolerance [m]
+    min_wall_area: float = 0.0         # drop wall footprints smaller than this [m2]
+    max_triangles: int | None = None   # guard against an unexpectedly huge part
+    # produced artifact names, written into preprocessing_dir
+    dem_name: str = "dem-from-surfaces.tif"
+    roi_name: str = "roi-from-surfaces.gpkg"
+    boundaries_name: str = "liquid-boundaries-from-surfaces.gpkg"
+    structures_name: str = "structures-from-surfaces.gpkg"
+    roughness_zones_name: str = "roughness-zones-from-surfaces.gpkg"
+    roughness_table_name: str = "roughness-table-from-surfaces.csv"
+
+    @property
+    def active(self) -> bool:
+        return bool(self.parts)
+
+    def by_role(self, role: str) -> list[SurfacePart]:
+        return [p for p in self.parts if p.role == role]
+
+    @property
+    def has_roughness_zones(self) -> bool:
+        return any(p.zone_id is not None for p in self.parts)
+
+    def transform(self):
+        """The :class:`axqua.core.surfaces.Transform` this block describes."""
+        from axqua.core.surfaces import Transform
+
+        return Transform(scale=self.scale, rotation_deg=self.rotation_deg,
+                         dx=self.dx, dy=self.dy, dz=self.dz)
+
+    def validate(self) -> None:
+        if not self.active:
+            return
+        if self.resolution <= 0:
+            raise ValueError("surfaces.resolution must be > 0")
+        if self.scale <= 0:
+            raise ValueError("surfaces.scale must be > 0")
+        if not (0.0 < self.bed_max_slope_deg < 90.0):
+            raise ValueError("surfaces.bed_max_slope_deg must be between 0 and 90")
+        if not (0.0 < self.wall_min_slope_deg <= 90.0):
+            raise ValueError("surfaces.wall_min_slope_deg must be between 0 and 90")
+        if self.wall_min_slope_deg < self.bed_max_slope_deg:
+            raise ValueError(
+                "surfaces.wall_min_slope_deg must not be below bed_max_slope_deg, "
+                "otherwise a facet would be both bed and wall")
+        for part in self.parts:
+            part.validate()
+        if not self.by_role("bed"):
+            raise ValueError(
+                "surfaces needs at least one part with role: bed - the DEM has to "
+                "come from somewhere")
+        zones = [(p.zone_id, p.ks) for p in self.parts if p.zone_id is not None]
+        by_zone: dict[int, float] = {}
+        for zone_id, ks in zones:
+            if by_zone.setdefault(zone_id, ks) != ks:
+                raise ValueError(
+                    f"surfaces: zone_id {zone_id} is given two different ks values "
+                    f"({by_zone[zone_id]} and {ks}); one zone is one roughness")
 
 
 @dataclass
@@ -296,8 +438,10 @@ class Boundaries:
     # guard on negative sources).
     internal_source_region_width: float = 3.0
 
-    def validate(self) -> None:
-        if self.liquid_boundaries is None or not Path(self.liquid_boundaries).exists():
+    def validate(self, *, produced: frozenset[str] = frozenset()) -> None:
+        if "liquid_boundaries" not in produced and (
+                self.liquid_boundaries is None
+                or not Path(self.liquid_boundaries).exists()):
             raise FileNotFoundError(
                 f"boundaries.liquid_boundaries not found: {self.liquid_boundaries}"
             )
@@ -1383,6 +1527,8 @@ class Config:
     drying: Drying = field(default_factory=Drying)
     # dams / weirs / walls / buildings (optional; see axqua.core.structures)
     structures: Structures = field(default_factory=Structures)
+    # CAD geometry as terrain (optional; see axqua.core.surfaces)
+    surfaces: Surfaces = field(default_factory=Surfaces)
     # OpenFOAM free-surface extension (optional; see axqua.solvers.openfoam)
     openfoam: OpenFoam = field(default_factory=OpenFoam)
     # where the OpenFOAM case tree is written; defaults to <sim_dir>/openfoam
@@ -1439,6 +1585,31 @@ class Config:
     def calibration_path(self, filename: str) -> Path:
         return Path(self.calibration_dir) / filename
 
+    def surfaces_produce(self) -> frozenset[str]:
+        """Which geodata/boundaries entries the CAD surface stage writes.
+
+        Only the ones still pointing at the stage's own output: a case is free to take
+        its bed from CAD and its roughness zones from a layer drawn in QGIS, and an
+        entry the user redirected is theirs to provide.
+        """
+        if not self.surfaces.active:
+            return frozenset()
+        candidates = {
+            "dem_initial": self.surfaces.dem_name,
+            "boundary": self.surfaces.roi_name,
+            "structures": self.surfaces.structures_name,
+            "roughness_zones": self.surfaces.roughness_zones_name,
+            "roughness_table": self.surfaces.roughness_table_name,
+            "liquid_boundaries": self.surfaces.boundaries_name,
+        }
+        owner = {"liquid_boundaries": self.boundaries}
+        produced = set()
+        for key, filename in candidates.items():
+            current = getattr(owner.get(key, self.geodata), key, None)
+            if current is not None and Path(current) == self.preprocessing_path(filename):
+                produced.add(key)
+        return frozenset(produced)
+
     @property
     def rigid_lid(self) -> bool:
         """Convenience: is the OpenFOAM case single-phase under a fixed lid?"""
@@ -1468,8 +1639,12 @@ class Config:
 
     def validate(self) -> None:
         self.telemac.validate()
-        self.geodata.validate()
-        self.boundaries.validate()
+        self.surfaces.validate()
+        # What the surface stage will write does not have to exist yet; its own inputs
+        # (the STL parts) were just validated instead.
+        produced = self.surfaces_produce() if self.surfaces.active else frozenset()
+        self.geodata.validate(produced=produced)
+        self.boundaries.validate(produced=produced)
         # ground truth is non-fatal: it feeds only the calibration/HydroBayesCal
         # setup, so a missing/mismatched source warns and skips that setup rather
         # than aborting the model build (see GroundTruth.problems / pipeline stage 5).
@@ -1616,12 +1791,38 @@ def load_config(path: str | os.PathLike) -> Config:
     tdict["environment"] = _load_environment(tdict.get("environment"), cfg_dir)
     telemac = TelemacEnv(**_only_known(TelemacEnv, tdict))
 
+    # CAD surfaces: parsed before geodata because, when present, they *supply* the
+    # geodata a surveyed case would have provided as files
+    sdict = dict(raw.get("surfaces") or {})
+    parts = []
+    for entry in sdict.pop("parts", None) or []:
+        pdict = dict(entry)
+        pdict["file"] = _resolve(cfg_dir, pdict.get("file"))
+        parts.append(SurfacePart(**_only_known(SurfacePart, pdict)))
+    surfaces = Surfaces(parts=parts, **_only_known(Surfaces, sdict))
+
     # geodata (resolve every path against the config dir)
     gdict = dict(raw.get("geodata") or {})
     _geodata_scalars = {"control_section_name_field"}   # plain strings, not paths
     for key in list(gdict):
         if key not in _geodata_scalars:
             gdict[key] = _resolve(cfg_dir, gdict[key])
+    if surfaces.active:
+        # The surface stage writes these; an explicit geodata entry still wins, so a
+        # case can take its bed from CAD and its roughness zones from a drawn layer.
+        produced = {
+            "dem_initial": preprocessing_dir / surfaces.dem_name,
+            "boundary": preprocessing_dir / surfaces.roi_name,
+        }
+        if surfaces.by_role("wall"):
+            produced["structures"] = preprocessing_dir / surfaces.structures_name
+        if surfaces.has_roughness_zones:
+            produced["roughness_zones"] = (preprocessing_dir
+                                           / surfaces.roughness_zones_name)
+            produced["roughness_table"] = (preprocessing_dir
+                                           / surfaces.roughness_table_name)
+        for key, value in produced.items():
+            gdict.setdefault(key, value)
     geodata = Geodata(**_only_known(Geodata, gdict))
 
     # boundaries: liquid-boundary lines / inflow / rating are paths; the rest scalars
@@ -1629,6 +1830,9 @@ def load_config(path: str | os.PathLike) -> Config:
     for key in ("liquid_boundaries", "inflow", "stage_discharge"):
         if key in bdict:
             bdict[key] = _resolve(cfg_dir, bdict[key])
+    if surfaces.active and (surfaces.by_role("inflow") or surfaces.by_role("outflow")):
+        bdict.setdefault("liquid_boundaries",
+                         preprocessing_dir / surfaces.boundaries_name)
     boundaries = Boundaries(**_only_known(Boundaries, bdict))
 
     initialization = Initialization(
@@ -1701,6 +1905,7 @@ def load_config(path: str | os.PathLike) -> Config:
         gain_lose=gain_lose,
         drying=drying,
         structures=structures,
+        surfaces=surfaces,
         openfoam=openfoam,
         openfoam_dir=openfoam_dir,
         declared_blocks=frozenset(raw),

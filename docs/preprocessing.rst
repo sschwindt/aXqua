@@ -340,6 +340,45 @@ It auto-detects the three real export layouts - the SonTek ``.ft.sum`` summary, 
 
    The hydraulics tab needs **globally-unique IDs** to join a single position layer. Multi-day surveys whose files each restart IDs at 0 (e.g. ``FlowTracker2-day1`` / ``day2``) must be extracted into separate templates and position layers, or their IDs made unique first - otherwise the ID join reports a duplicate-ID error.
 
+.. _surfaces:
+
+CAD geometry instead of a DEM
+-----------------------------
+
+Some things are **designed rather than surveyed**: a fish pass, a culvert, a flume, a spillway. There is no DEM of them and there never will be, because they exist as a construction drawing. For those, the ``surfaces`` block names the STL parts of the CAD assembly and says what each one is, and a stage ahead of the build turns them into the ordinary artifacts described above - a DEM, an ROI polygon, liquid-boundary lines, structure footprints, roughness zones. Everything after that point is unchanged and unaware that CAD was involved, which is the reason it is done this way rather than by teaching the meshers about triangles.
+
+.. code-block:: yaml
+
+   surfaces:
+     resolution: 0.05             # DEM cell size [m]
+     scale: 0.001                 # the drawing is in millimetres
+     dx: 692000.0                 # place it on the map; omit to work locally
+     dy: 5334000.0
+     parts:
+       - {file: user-sources/cad/substratum.stl, role: bed,  zone_id: 2, ks: 0.08}
+       - {file: user-sources/cad/concrete.stl,   role: bed,  zone_id: 1, ks: 0.003}
+       - {file: user-sources/cad/walls.stl,      role: wall}
+       - {file: user-sources/cad/inlet.stl,      role: inflow}
+       - {file: user-sources/cad/outlet.stl,     role: outflow}
+       - {file: user-sources/cad/air-top.stl,    role: ignore}
+
+Six roles. ``bed`` parts are rasterised into the DEM and at least one is required; ``wall`` parts become ``solid`` :ref:`structures <usage-structures>` carrying the crest elevation of their own facets; ``inflow`` and ``outflow`` parts are the boundary patches of a CFD geometry and become the typed lines of the liquid-boundary layer; ``roi`` gives the domain outline explicitly instead of taking the bed's coverage; and ``ignore`` is for the parts that are not geometry at all - the air-phase bounding patches a VOF export carries are the usual ones. A part that names a ``zone_id`` and a ``ks`` also becomes a roughness zone, so the materials of the drawing turn into the friction zonation directly.
+
+Inspect the result before spending a build on it:
+
+.. code-block:: bash
+
+   axqua surface cases/<your-case>/case-config.yml
+
+The artifacts land in ``preprocessing/`` and the case config points at them automatically, so ``geodata.dem_initial``, ``geodata.boundary`` and ``boundaries.liquid_boundaries`` need no entries of their own. An explicit entry still wins, which is how a case takes its bed from CAD and its roughness zones from a layer drawn in QGIS. ``axqua <config> --check`` validates such a case *before* the artifacts exist, by checking the STL parts instead - checking is most useful precisely then.
+
+A height field is not a solid
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A CAD assembly is a set of closed volumes; a DEM is a single-valued function of x and y. The conversion is lossy exactly where the geometry is not single-valued, which for a fish pass is at its walls. Hence the slope split: a facet flatter than ``bed_max_slope_deg`` and facing upwards is bed, a facet steeper than ``wall_min_slope_deg`` is a wall, and anything in between is **neither** - it is counted and reported so the thresholds can be widened knowingly rather than guessed at. Downward-facing facets are overhangs, which a height field cannot represent at all; the fraction of them is reported per part, and a part that is more than 5 % overhang draws a warning, because that is usually a sign the part is not terrain.
+
+Two consequences worth planning for. A wall is only as thin as the DEM cell it is burned into, so ``resolution`` has to resolve the thinnest baffle you care about, and the mesh needs a ``refinement`` zone to match - a baffle thinner than the local mesh cell touches no node and is silently ineffective. And the georeference is optional: with the transform left at the identity the artifacts are written **without a CRS**, in the drawing's own coordinates. That is a supported way to run, because the model is physically the same and only its position on a map is missing; stamping a projected CRS onto drawing coordinates would be a falsehood that QGIS would then act on.
+
 .. _meshing:
 
 Meshing
