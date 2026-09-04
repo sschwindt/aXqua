@@ -595,3 +595,34 @@ calibration:
     - { name: zone1, min: 0.05, max: 0.50, comment: "channel ks [m] (Nikuradse)" }
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+
+
+# ---------------------------------------------------------------------------- #
+# postproc - figures from the solver results (VisIt)
+# ---------------------------------------------------------------------------- #
+# Optional and additive: with no `postproc:` block the defaults below apply and
+# nothing in either solver path consults them. Driven by postprocessing.py and by
+# `axqua postproc <config>`.
+#
+# VisIt ships its OWN Python interpreter, so axqua cannot import it: it generates
+# a script and runs it with `visit -cli -nowin -s`. `visit` below is therefore the
+# LAUNCHER EXECUTABLE, not a script to source - which is why it is not spelled
+# like telemac.pysource / openfoam.bashrc even though it fills the same slot.
+# `axqua postproc <config> --script-only` writes the scripts without running
+# anything, so the output can be inspected on a machine with no VisIt at all.
+#
+# postproc:
+#   visit: /home/IWS/public/visit/bin/visit   # [REQUIRED to render] your `visit` launcher
+#   backend: visit
+#   # free-surface  - the water surface coloured by speed. Under mode: rigid-lid
+#   #                 there is no interface to contour, so it falls back to the lid
+#   #                 patch and SAYS ON THE FIGURE that the surface was prescribed
+#   #                 by the 2D seed rather than solved.
+#   # velocity-plan - plan-view velocity, sampled at the same relative depth a
+#   #                 FlowTracker measures at, so figure and calibration agree.
+#   # profiles      - modelled vertical profiles vs the measured verticals, with
+#   #                 error bars, plus a residual CSV. Needs ground_truth.
+#   scenes: ["free-surface", "velocity-plan", "profiles"]
+#   image_width: 1600
+#   image_height: 1000
+#   animation_fps: 10
