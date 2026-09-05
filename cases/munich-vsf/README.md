@@ -140,20 +140,94 @@ nohup ./watch_run.sh > /dev/null 2>&1 &        # a record while nobody is lookin
 tail -f axqua-case/simulation/convergence-watch.log
 ```
 
-The test is the **RMS change between frames over the wet nodes, divided by the field's
-own RMS**, not the worst node: at a wetting front a node going from 1 to 2 mm is a
-permanent 100% change, and a per-node maximum would never converge however still the
-reach became. The worst node is reported alongside so a genuinely misbehaving one stays
-visible. Anything that cannot be measured fails rather than passes.
+The test is the **RMS change over the wet nodes, divided by the field's own RMS**, not
+the worst node: at a wetting front a node going from 1 to 2 mm is a permanent 100%
+change, and a per-node maximum would never converge however still the reach became. The
+worst node is reported alongside so a genuinely misbehaving one stays visible. Anything
+that cannot be measured fails rather than passes. "Wet" means **5 cm**, aXqua's own
+`min_depth`, not a numerical dry threshold - on this bed 5 mm of water stands inside the
+grain roughness, and thousands of fringe nodes flickering wet and dry dominated the
+statistic (velocity reads 6.9% at 5 mm and 3.4% at 10 cm, for the same flow).
 
-In a parallel run TELEMAC merges the result only at the end, so the *fields* can only be
-judged once it finishes; the boundary discharges stream to the listing and can be
-watched live.
+**Two criteria, because there are two kinds of quantity here.** A vertical slot fishway
+has no steady state to find: at constant discharge the slot jets flap and the pool gyres
+shed, so the flow settles to a *statistically stationary* state - a fixed mean with
+sustained fluctuation about it. Depth and discharge are therefore judged instantaneously,
+as before, while velocity and TKE are judged as **window means**: the record's last third
+is split in two, each half averaged in time node by node, and the two averages compared.
+A stationary flow passes that easily; one still developing does not. The instantaneous
+fluctuation is reported alongside as the *band*, so unsteadiness reads as a number rather
+than as failure.
+
+### What the first 1800 s actually showed
+
+| quantity | at t = 1800 s | reading |
+| --- | --- | --- |
+| depth | 0.33% per frame | settled |
+| boundary discharges | 0.000% / 0.072% | settled |
+| velocity | window mean **7.5%**, band 3.6% | mean still drifting |
+| TKE | window mean **7.5%**, band 3.4% | mean still drifting |
+| mass balance | Qin - Qout = **+2.4%** of inflow | still filling |
+
+The run was a **dry start** - the log says so: 6183 inflow-plug nodes at 0.20 m, dry
+everywhere else - so all 89.5 m3 the reach eventually holds had to arrive through the
+inflow at 0.135 m3/s. That is 663 s of pure volume at best, and because the pools fill in
+a cascade the approach is exponential with a time constant of **553 s**, measured off the
+storage curve. At t = 1800 s the domain was at 97.8% of its final storage and still
+taking on 5.5 L/s. The velocity mean drifts because the pools are still deepening under
+it; the 3.6% band is the jets and is irreducible.
+
+So the answer was not a longer *first* run but a **continuation**:
+
+```bash
+python continue_run.py                       # another 1800 s from r2d.slf
+python check_convergence.py --result r2d-hotstart.slf
+```
+
+1800 s more is about three time constants, taking the residual filling from 4% of the
+inflow to roughly 0.1%. `continue_run.py` writes `hotstart2d.cas` through
+`axqua.solvers.telemac.steering.write_hotstart_cas` - the same case with its initial
+conditions switched to `PREVIOUS COMPUTATION FILE : r2d.slf` and the prescribed Q and
+downstream stage carried over - so nothing is re-derived and nothing is re-filled. Chain
+it again with `--from-result r2d-hotstart.slf` if the window means have not settled.
+
+**The other two discharges should be continued, not restarted.** They share this mesh, so
+the converged 135 L/s field is a far better starting point than a dry bed: the reach is
+already full and the run only has to redistribute flow. That is most of a working day
+saved per scenario.
+
+```bash
+python continue_run.py --discharge 0.060 --stage <tailwater>
+python continue_run.py --discharge 1.000 --stage <tailwater>
+```
+
+The downstream stage is the scenario's own tailwater, not something to interpolate, so it
+has to be given; without it the 135 L/s value is kept and the script says so.
 
 Rough cost at 5 cm resolution, 273k elements, 8 cores: about **6 s of simulated time per
-minute of wall clock**, so 1800 s takes roughly five hours. The reach holds ~50 m3 and
-fills at 0.135 m3/s, so nothing can be steady before ~400 s of it. If 1% proves out of
-reach, `initialization.prewet_depth` skips most of the filling transient.
+minute of wall clock**, so 1800 s takes roughly five hours.
+
+### Resolution, and what it limits
+
+The mesh is uniform at a median **4.7 cm** (273k elements, 138k nodes; 2.6-7.6 cm range).
+The slots are 0.32-0.35 m, so a slot is spanned by about **7 elements**. The usual
+requirement for a resolved jet is 10-15 across the opening, so the slot jets here are
+under-resolved and their spreading rate - and with it the pool velocities the flume data
+is compared against - is mesh-dependent to an extent this case has not yet measured.
+
+Refining only the pool reach (y 45-67, 96k of the 273k elements) would cost:
+
+| target | element size | pool-reach elements | total | run time |
+| --- | --- | --- | --- | --- |
+| 10 per slot | 3.2 cm | x2.1 | ~375k | ~3x |
+| 15 per slot | 2.1 cm | x4.7 | ~630k | ~8x |
+
+Run time scales worse than element count because the variable step holds the Courant
+number: halving the cell size roughly doubles the step count as well, so cost goes as
+size^-3. `mesh_convergence_study.py` is the instrument for this question and computes a
+GCI over a four-mesh ladder - but it is a multi-day study at these sizes, and every level
+must be run long enough to *finish filling* or the GCI will compare four mid-fill states
+and attribute the transient to discretization.
 
 ## What this case will and will not answer
 
