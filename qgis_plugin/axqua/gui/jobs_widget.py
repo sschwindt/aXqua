@@ -1,4 +1,4 @@
-"""The job dashboard: a table, a timer, and the six actions.
+"""The job dashboard: a table, a timer, and the five actions.
 
 The table is the plan's (§18), with one column added and one removed. ``Best objective``
 stays because a calibration is what it was designed around, but ``Iteration`` is replaced
@@ -14,7 +14,6 @@ fires it usually does no more than ``stat`` a file.
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from qgis.PyQt.QtCore import QTimer
 from qgis.PyQt.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLabel,
@@ -23,6 +22,7 @@ from qgis.PyQt.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QL
 
 from ..compat import USER_ROLE, color, open_in_file_manager
 from ..core.job_model import JobTable
+from ..core.runner_client import user_text
 from ..core.tasks import run_async
 
 COLUMNS = ["Job ID", "Case", "Solver", "Kind", "State", "Progress", "Best objective"]
@@ -43,6 +43,8 @@ class JobsWidget(QWidget):
         super().__init__(parent)
         self.ctx = context                 # PluginContext: client, project, messages
         self.table_model = JobTable()
+        #: Which table row each job is on, so a changed job can be repainted alone.
+        self._rows: dict[str, int] = {}
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._tick)
         self._build()
@@ -97,7 +99,7 @@ class JobsWidget(QWidget):
         run_async("aXqua: listing jobs",
                   lambda: client.list_jobs(job_root=job_root, case=case),
                   on_success=self._rows_arrived,
-                  on_error=lambda exc: self.ctx.warn(str(exc)))
+                  on_error=lambda exc: self.ctx.warn(user_text(exc)), owner=self)
 
     def _rows_arrived(self, rows) -> None:
         self.table_model.replace(rows or [])
@@ -108,30 +110,53 @@ class JobsWidget(QWidget):
         self._reschedule()
 
     def _repaint(self) -> None:
+        """Rebuild every row. For a new job list, not for a tick."""
         selected = self.selected_job_id()
         self.table.setRowCount(len(self.table_model))
+        self._rows = {}
         for row, job in enumerate(self.table_model):
-            values = [job.job_id, job.case_name, job.solver, job.kind, job.state,
-                      job.progress_text, job.objective_text]
-            for col, value in enumerate(values):
-                item = QTableWidgetItem(str(value))
-                item.setData(USER_ROLE, job.job_id)
-                if col == 4:
-                    tint = STATE_COLOURS.get(job.state)
-                    if tint:
-                        item.setBackground(color(tint))
-                if job.error_text:
-                    item.setToolTip(job.error_text)
-                self.table.setItem(row, col, item)
+            self._rows[job.job_id] = row
+            self._fill_row(row, job)
         if selected:
             self.select(selected)
         self._selection_changed()
 
+    def _fill_row(self, row: int, job) -> None:
+        """Write one job's cells, reusing the items already there.
+
+        Reuse rather than replace: a ``QTableWidgetItem`` per cell per tick is seven
+        allocations per job every two seconds, and replacing the item under the cursor
+        is also what makes a tooltip flicker away while it is being read.
+        """
+        values = [job.job_id, job.case_name, job.solver, job.kind, job.state,
+                  job.progress_text, job.objective_text]
+        for col, value in enumerate(values):
+            item = self.table.item(row, col)
+            if item is None:
+                item = QTableWidgetItem()
+                self.table.setItem(row, col, item)
+            text = str(value)
+            if item.text() != text:
+                item.setText(text)
+            item.setData(USER_ROLE, job.job_id)
+            if col == 4:
+                tint = STATE_COLOURS.get(job.state)
+                if tint:
+                    item.setBackground(color(tint))
+            item.setToolTip(job.error_text or "")
+
     # -- polling ------------------------------------------------------------------
     def _tick(self) -> None:
-        changed = self.table_model.poll(self._visible_job_ids())
+        changed = self.table_model.poll(self._poll_ids())
+        for job in changed:
+            row = self._rows.get(job.job_id)
+            if row is None:                 # the list moved underneath us
+                self._repaint()
+                break
+            self._fill_row(row, job)
         if changed:
-            self._repaint()
+            # The buttons depend on state, which is what just changed.
+            self._selection_changed()
         self._reschedule()
 
     def _reschedule(self) -> None:
@@ -148,18 +173,28 @@ class JobsWidget(QWidget):
         if self._timer.interval() != interval or not self._timer.isActive():
             self._timer.start(interval)
 
-    def _visible_job_ids(self) -> list[str]:
-        """Only the rows actually on screen - the rest cannot be looked at anyway."""
+    def _poll_ids(self) -> list[str]:
+        """Which rows this tick should stat.
+
+        Visible: the rows actually on screen. Hidden: none of them are, and the old
+        fallback - "no row looks visible, so look at all of them" - made the *cheapest*
+        state do the most work, which is backwards from the polling policy this widget
+        is built around. While hidden only the jobs that can still move are worth a
+        stat, which is all the 30-second tick is there to keep current.
+        """
+        if not self.isVisible():
+            return [j.job_id for j in self.table_model if j.is_active]
         ids = []
         viewport = self.table.viewport().rect()
         for row in range(self.table.rowCount()):
             item = self.table.item(row, 0)
             if item is None:
                 continue
-            rect = self.table.visualItemRect(item)
-            if rect.intersects(viewport):
+            if self.table.visualItemRect(item).intersects(viewport):
                 ids.append(item.text())
-        return ids or [j.job_id for j in self.table_model]
+        # A table with rows but no laid-out geometry yet would otherwise poll nothing
+        # and look frozen on the first tick after a refresh.
+        return ids or [j.job_id for j in self.table_model if j.is_active]
 
     def showEvent(self, event):          # noqa: N802 - Qt naming
         super().showEvent(event)
@@ -223,7 +258,7 @@ class JobsWidget(QWidget):
         run_async(f"aXqua: cancelling {job.job_id}",
                   lambda: client.cancel(job.job_id, job_root=job_root),
                   on_success=lambda data: self._cancelled(data),
-                  on_error=lambda exc: self.ctx.warn(str(exc)))
+                  on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
 
     def _cancelled(self, data) -> None:
         self.ctx.info(f"Job is now {(data or {}).get('state', 'cancelled')}.")
@@ -244,11 +279,28 @@ class JobsWidget(QWidget):
             self.ctx.warn(f"Could not open {job.root}")
 
     def _load_results(self) -> None:
+        """Find out what the job produced - off the GUI thread - then add it.
+
+        Discovery reads a manifest, or in its absence walks the job directory, and an
+        OpenFOAM job directory is not a thing to walk on the thread that paints the
+        interface. The *loading* has to happen back on this thread, because layers and
+        the layer tree may only be touched here.
+        """
         job = self._selected_or_warn()
         if job is None:
             return
-        from ..core.result_loader import ResultLoader, discover
-        results = discover(job.root)
+        from ..core.result_loader import discover
+        self.actions["load"].setEnabled(False)
+        self.status_line.setText(f"looking for {job.job_id}'s results...")
+        run_async(f"aXqua: finding {job.job_id}'s results",
+                  lambda: discover(job.root),
+                  on_success=lambda results: self._results_found(job, results),
+                  on_error=lambda exc: self._results_failed(exc), owner=self)
+
+    def _results_found(self, job, results) -> None:
+        from ..core.result_loader import ResultLoader
+        self.actions["load"].setEnabled(True)
+        self.status_line.setText("")
         if not results.layers:
             self.ctx.warn(
                 f"{job.job_id} has produced nothing QGIS can open yet."
@@ -260,8 +312,13 @@ class JobsWidget(QWidget):
         added = loader.load(results)
         for warning in loader.warnings:
             self.ctx.warn(warning)
-        self.ctx.info(f"Loaded {len(added)} layer(s) into axqua/{job.job_id}.")
+        reused = len(loader.reused)
+        message = f"Loaded {len(added)} layer(s) into axqua/{job.job_id}."
+        if reused:
+            message += f" {reused} were already loaded and were restyled in place."
+        self.ctx.info(message)
 
-
-def job_directory(job) -> Path:
-    return Path(job.root)
+    def _results_failed(self, exc: Exception) -> None:
+        self.actions["load"].setEnabled(True)
+        self.status_line.setText("")
+        self.ctx.warn(f"Could not read the job's results: {user_text(exc)}")

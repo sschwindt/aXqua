@@ -98,6 +98,31 @@ def fail(command: str, exc: BaseException, *, as_json: bool, verbose: bool = Fal
     return _CODE_TO_EXIT.get(record.code, EXIT_ERROR)
 
 
+def parse_args(parser: argparse.ArgumentParser, argv: list[str], command: str):
+    """``parser.parse_args``, but a usage error still leaves an envelope behind.
+
+    argparse prints its usage to stderr and exits 2 with **empty stdout**. For a shell
+    that is exactly right, but the plugin's whole boundary is "run it and read the JSON
+    on stdout", so a mistyped flag arrives there as "axqua returned something that is
+    not JSON" - a message about the protocol, for what is really a typo. Writing the
+    envelope first costs nothing, and argparse's own message still goes to stderr where
+    it always did. The exit code is unchanged, because shell callers branch on it.
+    """
+    try:
+        return parser.parse_args(argv)
+    except SystemExit as exc:
+        code = exc.code if exc.code is not None else 0
+        if code and "--json" in argv:
+            from axqua.core.errors import ConfigError
+            fail(command, ConfigError(
+                f"{parser.prog}: the arguments could not be understood",
+                subject="arguments",
+                remedy=f"Run '{parser.prog} --help' to see the accepted flags; "
+                       "argparse's own message is on stderr."),
+                as_json=True)
+        raise
+
+
 def _common(p: argparse.ArgumentParser) -> argparse.ArgumentParser:
     p.add_argument("-v", "--verbose", action="store_true")
     p.add_argument("--json", dest="as_json", action="store_true",
@@ -147,7 +172,7 @@ def _submit_parser() -> argparse.ArgumentParser:
 
 
 def run_submit(argv: list[str]) -> int:
-    args = _submit_parser().parse_args(argv)
+    args = parse_args(_submit_parser(), argv, "submit")
     _setup_logging(args)
     from axqua.jobs.model import KIND_META
 
@@ -184,12 +209,16 @@ def run_submit(argv: list[str]) -> int:
         if args.dry_run:
             return emit("submit.dry-run", result.as_dict(), as_json=args.as_json,
                         lines=[json.dumps(result.as_dict(), indent=2, default=str)])
-        # The job id on its own line: the plan's contract is that `submit` returns at
-        # minimum a JOB_ID, and a caller that does not want JSON should be able to use
-        # `$(axqua submit ...)` directly.
+        if args.as_json:
+            # Nothing before the opening brace. stdout under --json is one JSON
+            # document and nothing else; printing the job id first made it parseable
+            # only by the grace of a reader that goes hunting for the first '{'.
+            return emit("submit", {"job_id": result.job_id,
+                                   "job_dir": str(result.root)}, as_json=True)
+        # Without --json, the job id on its own line: the plan's contract is that
+        # `submit` returns at minimum a JOB_ID, so `$(axqua submit ...)` works.
         print(result.job_id)
-        return emit("submit", {"job_id": result.job_id, "job_dir": str(result.root)},
-                    as_json=args.as_json) if args.as_json else EXIT_OK
+        return EXIT_OK
     except BaseException as exc:  # noqa: BLE001
         return fail("submit", exc, as_json=args.as_json, verbose=args.verbose)
 
@@ -243,7 +272,7 @@ def _execute_parser() -> argparse.ArgumentParser:
 
 
 def run_execute(argv: list[str]) -> int:
-    args = _execute_parser().parse_args(argv)
+    args = parse_args(_execute_parser(), argv, "execute")
     _setup_logging(args)
     try:
         from axqua.jobs import executor
@@ -277,7 +306,7 @@ def _job_status_parser() -> argparse.ArgumentParser:
 
 
 def run_job_status(argv: list[str]) -> int:
-    args = _job_status_parser().parse_args(argv)
+    args = parse_args(_job_status_parser(), argv, "status")
     _setup_logging(args)
     try:
         from axqua.jobs.reaper import reconcile
@@ -345,7 +374,7 @@ def _cancel_parser() -> argparse.ArgumentParser:
 
 
 def run_cancel(argv: list[str]) -> int:
-    args = _cancel_parser().parse_args(argv)
+    args = parse_args(_cancel_parser(), argv, "cancel")
     _setup_logging(args)
     try:
         from axqua.jobs.launcher import LaunchHandle, launcher_for
@@ -418,7 +447,7 @@ def _logs_parser() -> argparse.ArgumentParser:
 
 
 def run_logs(argv: list[str]) -> int:
-    args = _logs_parser().parse_args(argv)
+    args = parse_args(_logs_parser(), argv, "logs")
     _setup_logging(args)
     try:
         jd = _resolve_job(args.job, job_root=args.job_root)
@@ -490,7 +519,7 @@ def _list_parser() -> argparse.ArgumentParser:
 
 
 def run_list(argv: list[str]) -> int:
-    args = _list_parser().parse_args(argv)
+    args = parse_args(_list_parser(), argv, "list")
     _setup_logging(args)
     try:
         from axqua.jobs.index import list_jobs
@@ -530,7 +559,7 @@ def _profiles_parser() -> argparse.ArgumentParser:
 
 
 def run_profiles(argv: list[str]) -> int:
-    args = _profiles_parser().parse_args(argv)
+    args = parse_args(_profiles_parser(), argv, "profiles")
     _setup_logging(args)
     try:
         from axqua.jobs.paths import profiles_path
@@ -568,8 +597,23 @@ def run_profiles(argv: list[str]) -> int:
                              + ", ".join(status.ambient))
         if not targets:
             lines = [f"no profiles in {profiles_path()}"]
+        if not ok:
+            # The envelope's `ok` is the command's verdict, not "the process ran". It
+            # used to say true beside exit code 4, which leaves a JSON consumer - the
+            # plugin - to resolve the contradiction by reading the exit code the
+            # envelope exists to make unnecessary.
+            from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+            unusable = [name for name, r in report.items() if not r["ok"]]
+            for line in lines:
+                log.error("%s", line)
+            return fail("profiles.validate", AxquaEnvironmentError(
+                "unusable solver profile: " + ", ".join(unusable),
+                subject=", ".join(unusable),
+                remedy="Run 'axqua profiles show <name>' and check that its setup "
+                       "script exists and exports the variables listed as missing."),
+                as_json=args.as_json, verbose=args.verbose)
         emit("profiles.validate", report, as_json=args.as_json, lines=lines)
-        return EXIT_OK if ok else EXIT_ENVIRONMENT
+        return EXIT_OK
     except BaseException as exc:  # noqa: BLE001
         return fail("profiles", exc, as_json=args.as_json, verbose=args.verbose)
 

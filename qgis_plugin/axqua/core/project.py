@@ -63,8 +63,17 @@ class AxquaProject:
 
         A case that lives beside the project travels with it; a scratch volume named by
         absolute path is described honestly rather than turned into a lie.
+
+        **An unsaved project has no base**, only QGIS's working directory - which is
+        wherever QGIS happened to be started from, and is not where the project will
+        eventually be saved. Storing a path relative to *that* produced an entry which
+        resolved, later, against the project's own folder: a path that had never
+        existed. Until the project has a file, everything is stored absolute; ``save``
+        rewrites the entries once there is something to be relative to.
         """
         target = Path(value).expanduser().resolve()
+        if self.path is None:
+            return str(target)
         try:
             return str(target.relative_to(self.base.resolve()))
         except ValueError:
@@ -156,9 +165,18 @@ def save(project: AxquaProject, path: str | os.PathLike | None = None) -> Path:
         # The old file is left in place rather than deleted: it is the user's, and a
         # silent removal is not something a save should do.
         target = target.with_suffix(SUFFIX)
+    was_unsaved = project.path is None
     project.path = target
     if not project.name:
         project.name = target.stem
+    if was_unsaved:
+        # The project now has a folder to be relative to. Everything added before this
+        # moment was stored absolute, which is correct but not portable; rewriting the
+        # entries here is what makes a project that was assembled first and saved
+        # afterwards travel with its cases.
+        project.cases = [project.store(project.resolve(c)) for c in project.cases]
+        if project.active_case:
+            project.active_case = project.store(project.resolve(project.active_case))
     target.parent.mkdir(parents=True, exist_ok=True)
     tmp = target.with_name(f".{target.name}.tmp")
     tmp.write_text(json.dumps(project.as_dict(), indent=2) + "\n", encoding="utf-8")

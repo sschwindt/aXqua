@@ -69,6 +69,14 @@ NOT_IMPLEMENTED_REASON = (
 NOT_CONFIGURED_REASON = (
     "This case does not ask for {title} yet. Add the relevant block to case-config.yml "
     "(see the annotated template) and refresh.")
+#: Some capabilities are implemented in axqua's library but have no job kind, so there
+#: is no ``--kind`` the runner could be given. Morphodynamics, the gain-lose reach and
+#: unsteady 3D are the three today. Saying so is the honest answer; the alternative -
+#: which this used to do - is an enabled tab with two buttons that cannot do anything.
+NO_JOB_KIND_REASON = (
+    "axqua implements {title} for {solver}, but not yet as a job the runner can "
+    "submit - there is no job kind for it. Run it from a Python driver in the case "
+    "folder for now.")
 
 
 @dataclass
@@ -92,8 +100,17 @@ class CapabilityView:
         return self.implemented != "n/a"
 
     @property
+    def submittable(self) -> bool:
+        """Is there a job kind behind this capability at all?
+
+        Not every capability axqua implements is exposed as a job. Without a kind the
+        runner has nothing to be asked for, so the tab can only explain itself.
+        """
+        return bool(self.submit_kind or self.build_kind)
+
+    @property
     def enabled(self) -> bool:
-        return self.implemented == "yes"
+        return self.implemented == "yes" and self.submittable
 
     @property
     def can_submit(self) -> bool:
@@ -114,6 +131,9 @@ class CapabilityView:
         """Why an action is unavailable - shown, never left to be guessed."""
         if self.implemented == "no":
             return NOT_IMPLEMENTED_REASON.format(solver=self.solver)
+        if not self.submittable:
+            # Before "not configured": configuring it would not help.
+            return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
         if not self.configured:
             return NOT_CONFIGURED_REASON.format(title=self.title)
         return ""
@@ -122,6 +142,8 @@ class CapabilityView:
     def state_text(self) -> str:
         if self.implemented != "yes":
             return "not available"
+        if not self.submittable:
+            return "no job kind"
         marks = [name for name, flag in (("configured", self.configured),
                                          ("built", self.built), ("run", self.run))
                  if flag]

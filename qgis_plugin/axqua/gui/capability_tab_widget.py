@@ -1,7 +1,7 @@
 """One tab per capability, built from what axqua said the case can do.
 
 Each tab is the same shape - a status line, the reason an action is unavailable, the
-per-kind options, and the four buttons - because the differences between capabilities are
+per-kind options, and the three buttons - because the differences between capabilities are
 *data* (see :mod:`.capability_tabs`), not layout. A hand-written tab per capability would
 be six near-identical files that drift.
 """
@@ -11,6 +11,8 @@ from __future__ import annotations
 from qgis.PyQt.QtWidgets import (QCheckBox, QFormLayout, QGroupBox, QHBoxLayout, QLabel,
                                  QPushButton, QSpinBox, QVBoxLayout, QWidget)
 
+from ..compat import PARTIALLY_CHECKED, UNCHECKED
+from ..core.runner_client import user_text
 from ..core.tasks import run_async
 
 #: Per-kind knobs worth exposing. Everything else stays in ``case-config.yml``, where it
@@ -111,19 +113,38 @@ class CapabilityTab(QWidget):
                 widget.setSpecialValueText("from the case config")
                 widget.setValue(int(default))
             else:
+                # Tri-state, and starting *partial*, so that a form the user never
+                # touched sends nothing. A plain two-state box has no way to say "leave
+                # it to the case config": every submit would carry
+                # `--option reconstruct=true --option to_vtk=false` and silently
+                # override case-config.yml with the widget's defaults, which is the
+                # opposite of what the config file is for. The third state is that
+                # sentence, and the tooltip says which way the case will go.
                 widget = QCheckBox()
-                widget.setChecked(bool(default))
+                widget.setTristate(True)
+                widget.setCheckState(PARTIALLY_CHECKED)
+                widget.setToolTip(
+                    "Partly checked: leave this to case-config.yml"
+                    f" (its default here is {'on' if default else 'off'}).")
             self.options_form.addRow(label, widget)
             self._fields[key] = widget
 
     def options(self) -> dict:
+        """Only what the user actually asked for.
+
+        Both widget types have an explicit "not set" state - 0 for the spin box, the
+        partial state for the check box - and neither is sent. An option the plugin does
+        not send is one ``case-config.yml`` still decides.
+        """
         out = {}
         for key, widget in self._fields.items():
             if isinstance(widget, QSpinBox):
                 if widget.value() > 0:      # 0 means "leave it to the config"
                     out[key] = widget.value()
             elif isinstance(widget, QCheckBox):
-                out[key] = widget.isChecked()
+                state = widget.checkState()
+                if state != PARTIALLY_CHECKED:
+                    out[key] = state != UNCHECKED
         return out
 
     # -- actions ------------------------------------------------------------------
@@ -142,7 +163,7 @@ class CapabilityTab(QWidget):
                                   job_root=project.job_root or None,
                                   launcher=project.launcher, options=options),
             on_success=self._submitted,
-            on_error=lambda exc: self.ctx.warn(str(exc)))
+            on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
 
     def _submitted(self, data) -> None:
         job_id = (data or {}).get("job_id", "")

@@ -170,7 +170,9 @@ The capability tabs are generated from the case, so there is no case selected ye
 
 .. code-block:: bash
 
-   axqua case-status <config.yml> --json
+   axqua case-status <config.yml> --no-write --json
+
+``--no-write`` is what the plugin passes: without it the command also writes the ``MODEL=<SOLVER>_<ENABLED|DISABLED>`` marker files, which is not what a diagnostic should do to a case you are trying to understand.
 
 A layer loaded but is not styled
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -26,6 +26,8 @@ On the **Setup** tab:
 2. Optionally choose a **solver profile** (see :doc:`advanced`) and a **job root** - point the latter at a large volume.
 3. *Save as…* to write a ``<name>.axqua-prj`` beside your case.
 
+A project written before the rename, ``<name>.hydromate-prj``, still opens - the file dialog offers both suffixes - and is saved back as ``.axqua-prj``, leaving the original where it is.
+
 The project file is a thin pointer: which cases belong together, which profile to use, where jobs go. It deliberately carries **no simulation status** - the runner writes status while QGIS is closed, so a copy here would be stale, and two open QGIS windows would fight over it.
 
 The tabs
@@ -46,10 +48,10 @@ The job dashboard
 
 .. code-block:: text
 
-    Job ID                              Case   Solver   Kind    State      Progress
-    2026-08-14-isar-2025-steady-a3f19c  isar   TELEMAC  steady  RUNNING    62%  (it 4100)
-    2026-08-13-isar-2025-bal-9ab19d     isar   TELEMAC  bal     COMPLETED  iter 50/50  best 0.0198
-    2026-08-12-isar-2025-meshconv-5b31  isar   TELEMAC  meshc.  FAILED     level 3/4
+    Job ID                              Case   Solver   Kind    State      Progress          Best objective
+    2026-08-14-isar-2025-steady-a3f19c  isar   TELEMAC  steady  RUNNING    62%  (it 4100)    -
+    2026-08-13-isar-2025-bal-9ab19d     isar   TELEMAC  bal     COMPLETED  iter 50/50        0.0198
+    2026-08-12-isar-2025-meshconv-5b31  isar   TELEMAC  meshc.  FAILED     level 3/4         -
 
 Actions: **Refresh**, **Cancel**, **View logs**, **Open job directory**, **Load results**.
 
@@ -83,12 +85,12 @@ Two defaults are applied:
 
 Both thresholds are in *Settings*. Everything else points you at Layer Symbology, on purpose: a plausible-looking wrong scale is harder to notice than an obviously default one.
 
-For an unsteady result, **Export movie** renders the visible variable frame by frame and encodes WebM/VP9 with ``ffmpeg``. Without ffmpeg the PNG frames are kept and the exact command to encode them is shown. To export rasters, use QGIS's own mesh export.
+For an unsteady result, *aXqua ▸ Export movie…* renders a mesh variable frame by frame - through the canvas's own layers, extent and styling - and encodes WebM/VP9 with ``ffmpeg``. Pick the layer and the variable in the dialog; only variables with more than one timestep are offered, because a static bed level has nothing to animate. Rendering does not block QGIS, and *Cancel* stops it after the current frame and keeps what has been written. Without ffmpeg the PNG frames are kept and the exact command to encode them is shown. To export rasters, use QGIS's own mesh export.
 
 The print layout
 ----------------
 
-*aXqua ▸ Add the default A3 print layout* creates a layout fitted to your current extent: the ROI, a north arrow, a bold **Q** arrow along the reach, a two-tone scale bar, an empty legend with a hint to populate it, and 16 pt Arial throughout.
+*aXqua ▸ Add the default A3 print layout* creates a layout fitted to your current extent: the ROI, a north arrow, a bold **Q** arrow along the reach - taken from a loaded centerline layer where there is one, and from the extent's own aspect otherwise - a two-tone scale bar, an empty legend with a hint to populate it, and 16 pt Arial throughout.
 
 Processing
 ----------

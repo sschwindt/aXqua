@@ -65,14 +65,41 @@ class RunnerError(RuntimeError):
         self.stderr = stderr
 
     def user_text(self) -> str:
+        """Everything known about the failure, in the order a reader needs it.
+
+        A structured error carries its own remedy and that is the whole answer. An
+        *unstructured* one - a traceback, a missing shared library, a solver environment
+        that will not source - carries no remedy, and then the tail of what axqua
+        actually printed is the only diagnosis there is. Discarding it, as this used to,
+        left the user with "axqua returned something that is not JSON" for every one of
+        those failures.
+        """
         parts = [self.message]
         if self.remedy:
             parts.append(self.remedy)
+        else:
+            detail = _tail(self.stderr)
+            if self.returncode:
+                parts.append(f"axqua exited with code {self.returncode}."
+                             + (f"\n{detail}" if detail else ""))
+            elif detail:
+                parts.append(detail)
         return "\n".join(parts)
 
 
 class RunnerNotFound(RunnerError):
     """axqua could not be located. The message names every place looked."""
+
+
+def user_text(exc: Exception) -> str:
+    """The most informative rendering of *exc* there is.
+
+    Every error callback in the plugin goes through this. ``str(exc)`` on a
+    :class:`RunnerError` is only its first line, and silently drops the remedy that
+    axqua computed and sent precisely so the user would not have to guess - which is
+    what every asynchronous failure path used to do, exactly where jobs fail.
+    """
+    return exc.user_text() if isinstance(exc, RunnerError) else str(exc)
 
 
 @dataclass
@@ -124,7 +151,10 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
     # Never a silent fallback to some other interpreter: say what was tried.
     lines = ["axqua could not be found.", "", "Looked in:",
              f"  1. the plugin setting ({configured or 'not set'})",
-             f"  2. ${ENV_VAR} ({from_env or 'not set'})",
+             # Both spellings, because both are honoured: a shell profile written before
+             # the rename still works, and a message that named only the new one would
+             # send that user looking for a variable they have already set.
+             f"  2. ${ENV_VAR}, or ${LEGACY_ENV_VAR} ({from_env or 'not set'})",
              f"  3. PATH ({on_path or 'not found'})"]
     if problems:
         lines += ["", "What was tried:"] + problems
@@ -169,7 +199,36 @@ def _probe(path: str) -> str:
         # Something else answered. Reporting it as a wrong executable is far kinder than
         # letting it fail obscurely at submit time.
         raise RunnerError(f"this does not look like axqua (said {text[:60]!r})")
-    return text.split()[-1]
+    version = text.split()[-1]
+    _require_minimum(version)
+    return version
+
+
+#: The oldest axqua that speaks the JSON envelope this plugin reads. Documented as a
+#: requirement since the first release, and until now never actually checked - so an
+#: older one presented as a series of unexplained parse failures instead.
+MINIMUM_VERSION = (0, 3)
+
+
+def _require_minimum(version: str) -> None:
+    parts = []
+    for piece in version.split(".")[:2]:
+        digits = "".join(c for c in piece if c.isdigit())
+        if not digits:
+            break
+        parts.append(int(digits))
+    if len(parts) < 2:
+        # An unparseable version (a git describe string, a local build) is accepted:
+        # refusing to run something merely because its version is unusual would be worse
+        # than the problem this check exists for.
+        return
+    if tuple(parts) < MINIMUM_VERSION:
+        raise RunnerError(
+            f"this plugin needs axqua {MINIMUM_VERSION[0]}.{MINIMUM_VERSION[1]} or "
+            f"newer, and this one is {version}",
+            remedy="Upgrade it with 'pip install --upgrade "
+                   "git+https://github.com/sschwindt/aXqua.git' in the environment that "
+                   "has your solver tooling.")
 
 
 def _no_window() -> dict:
@@ -340,6 +399,17 @@ class RunnerClient:
 
     def kinds(self) -> list[dict]:
         return list(self.call(["submit", "x", "--help-kinds"]).data or [])
+
+
+def _tail(text: str, lines: int = 6) -> str:
+    """The last few non-empty lines of a subprocess's output.
+
+    Bounded on both axes - the count and each line's length - because this ends up in a
+    message bar, and a 2 KB traceback pasted into one would push the useful part of the
+    interface off the screen.
+    """
+    kept = [line.rstrip()[:200] for line in (text or "").splitlines() if line.strip()]
+    return "\n".join(kept[-lines:])
 
 
 def _parse(text: str) -> dict | None:

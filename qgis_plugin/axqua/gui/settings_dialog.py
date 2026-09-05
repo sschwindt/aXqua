@@ -104,12 +104,26 @@ class SettingsDialog(QDialog):
             self.executable.setText(path)
 
     def _test(self) -> None:
-        """Validate now, so a wrong executable is never discovered at submit time."""
+        """Validate now, so a wrong executable is never discovered at submit time.
+
+        This one probe stays synchronous: the dialog is modal, the user pressed a button
+        called *Test* and is waiting for its answer, and a background result arriving
+        after they have closed the dialog would be worse. But it can take 30 s per
+        candidate path, so the cursor says the application is busy rather than hung.
+        """
+        from qgis.PyQt.QtWidgets import QApplication
+
+        from ..compat import WAIT_CURSOR
+        self.result.setText("checking...")
+        QApplication.setOverrideCursor(WAIT_CURSOR)
+        QApplication.processEvents()          # paint "checking..." before we block
         try:
             info = RunnerClient(self.executable.text().strip() or None).validate()
         except RunnerError as exc:
             self.result.setText(exc.user_text())
             return
+        finally:
+            QApplication.restoreOverrideCursor()
         self.result.setText(info.describe())
 
     def values(self) -> dict:

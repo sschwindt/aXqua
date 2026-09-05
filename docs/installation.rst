@@ -41,7 +41,7 @@ Install ``axqua`` into that environment in editable mode from a clone:
 .. code-block:: bash
 
    git clone https://github.com/sschwindt/aXqua.git
-   cd axqua
+   cd aXqua
    pip install -e .
 
 This exposes the ``axqua`` command-line entry point and the importable ``axqua`` package. Four extras are available, and they compose (``pip install -e ".[gui,calibration]"``):

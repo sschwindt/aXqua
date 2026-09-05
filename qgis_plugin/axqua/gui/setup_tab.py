@@ -20,7 +20,7 @@ from qgis.PyQt.QtWidgets import (QComboBox, QFileDialog, QFormLayout, QGroupBox,
 
 from ..compat import MATCH_EXACTLY
 from ..core import project as project_io
-from ..core.runner_client import RunnerError
+from ..core.runner_client import RunnerError, user_text
 from ..core.tasks import run_async
 
 
@@ -106,22 +106,58 @@ class SetupTab(QWidget):
 
     # -- axqua ----------------------------------------------------------------
     def check_runner(self) -> None:
-        try:
-            info = self.ctx.client.validate()
-        except RunnerError as exc:
-            self.runner_label.setText(exc.user_text())
-            self.ctx.warn(exc.user_text())
-            self.ctx.set_runner_ok(False)
-            return
+        """Probe axqua, off the GUI thread.
+
+        The dock's constructor calls this, and QGIS runs plugin constructors during
+        startup with the splash screen up. ``axqua --version`` imports gmsh and rasterio
+        and takes seconds; three candidate paths, one of them on an unreachable network
+        mount, take a minute and a half of frozen QGIS before the user has done anything
+        at all. So the probe is queued like every other CLI call, and the label says what
+        is happening meanwhile.
+        """
+        self.runner_label.setText("checking...")
+        client = self.ctx.client
+        run_async("aXqua: checking the axqua executable", client.validate,
+                  on_success=self._runner_checked,
+                  on_error=self._runner_failed, owner=self)
+
+    def _runner_checked(self, info) -> None:
         self.runner_label.setText(info.describe())
         self.ctx.set_runner_ok(True)
         self.load_profiles()
+        self.load_kinds()
+
+    def load_kinds(self) -> None:
+        """Ask axqua what it can run, for the Processing algorithm's list.
+
+        The Processing algorithm cannot ask for itself - it is constructed while the
+        provider is registered, during QGIS startup - so the answer is fetched here,
+        once, and left where it can pick it up. This is what "adding a capability needs
+        no plugin update" means for the Processing side of the plugin.
+        """
+        client = self.ctx.client
+
+        def store(kinds):
+            from ..processing.algorithms.submit import set_kinds
+            set_kinds(kinds)
+
+        run_async("aXqua: reading the job kinds", client.kinds,
+                  on_success=store,
+                  # An older axqua without --help-kinds is not worth a message: the
+                  # shipped list still works.
+                  on_error=lambda _exc: None, owner=self)
+
+    def _runner_failed(self, exc: Exception) -> None:
+        text = exc.user_text() if isinstance(exc, RunnerError) else str(exc)
+        self.runner_label.setText(text)
+        self.ctx.warn(text)
+        self.ctx.set_runner_ok(False, text)
 
     def load_profiles(self) -> None:
         run_async("aXqua: reading solver profiles",
                   self.ctx.client.profiles,
                   on_success=self._profiles_arrived,
-                  on_error=lambda exc: self.ctx.warn(str(exc)))
+                  on_error=lambda exc: self.ctx.warn(user_text(exc)), owner=self)
 
     def _profiles_arrived(self, profiles) -> None:
         current = self.ctx.project.profile
@@ -219,11 +255,19 @@ class SetupTab(QWidget):
                 continue
             env = ("environment ok" if solver.env_ok
                    else "environment UNAVAILABLE" if solver.env_ok is False
-                   else "environment not checked")
+                   else "checking the environment...")
+            if solver.env_ok is False and solver.env_detail:
+                env += f" ({solver.env_detail})"
             available = [c.title for c in solver.visible_capabilities if c.can_submit]
             lines.append(f"<b>{solver.name}</b> - {env}. "
                          + (", ".join(available) if available
                             else "nothing configured yet"))
+        if not lines:
+            # Every solver disabled means the config declares none of them, which is a
+            # real and fixable state - and used to produce an empty panel with no
+            # explanation anywhere.
+            lines.append("This case enables no solver. Add a <tt>telemac:</tt> or "
+                         "<tt>openfoam:</tt> block to its case-config.yml.")
         self.capability_label.setText("<br>".join(lines))
 
 

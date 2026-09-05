@@ -51,6 +51,28 @@ def test_metadata_declares_both_qgis_generations():
     assert "GPL" in fields["license"]
 
 
+def test_the_package_version_is_the_manifests():
+    """``__init__.py`` used to repeat the number, and drifted from it across two
+    releases without anything noticing. The manifest is what QGIS shows, so it is the
+    source and the module reads it."""
+    import axqua_plugin
+
+    text = (PLUGIN_ROOT / "axqua" / "metadata.txt").read_text(encoding="utf-8")
+    declared = next(line.split("=", 1)[1].strip() for line in text.splitlines()
+                    if line.startswith("version="))
+    assert axqua_plugin.__version__ == declared
+    assert declared != "0.0.0", "the manifest could not be read at import time"
+
+
+def test_the_changelog_is_headed_by_the_shipped_version():
+    """A manifest whose changelog opens with an older version is the first thing a
+    plugin-repository reviewer notices."""
+    text = (PLUGIN_ROOT / "axqua" / "metadata.txt").read_text(encoding="utf-8")
+    fields = dict(line.split("=", 1) for line in text.splitlines()
+                  if "=" in line and not line.startswith(" "))
+    assert fields["changelog"].strip() == fields["version"].strip()
+
+
 def test_no_compiled_resources_are_shipped():
     """A ``.qrc``-compiled module is built against one Qt major version and fails to
     import on the other - the most common reason a plugin loads on 3.x and not on 4."""
@@ -86,7 +108,7 @@ def test_the_plugin_never_imports_axqua():
 # ----------------------------------------------------------- executable discovery
 
 
-def _fake_axqua(tmp_path: Path, *, version: str = "axqua 0.2.0",
+def _fake_axqua(tmp_path: Path, *, version: str = "axqua 0.3.5",
                     exit_code: int = 0) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "axqua"
@@ -132,6 +154,29 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
     # The instruction has to be one that actually works: aXqua is not on PyPI yet,
     # and guidance that 404s is worse than none.
     assert "github.com/sschwindt/aXqua" in message
+
+
+@pytest.mark.skipif(os.name == "nt", reason="shell script stub")
+def test_an_axqua_too_old_for_this_plugin_is_refused_by_name(tmp_path, monkeypatch):
+    """The documentation has required aXqua 0.3 since the first release, and nothing
+    checked - so an older one presented as a series of unexplained parse failures at
+    every verb rather than as one sentence here."""
+    old = _fake_axqua(tmp_path, version="axqua 0.2.0")
+    monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    with pytest.raises(runner_client.RunnerNotFound) as excinfo:
+        runner_client.find_executable(str(old))
+    assert "0.3 or newer" in str(excinfo.value)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="shell script stub")
+def test_an_unusual_version_string_is_accepted(tmp_path, monkeypatch):
+    """Refusing to run something because its version is a git describe string would be
+    worse than the problem the check exists for."""
+    dev = _fake_axqua(tmp_path, version="axqua 0.4.0.dev3+g1a2b3c4")
+    monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    assert runner_client.find_executable(str(dev)).version.startswith("0.4.0")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
@@ -189,7 +234,7 @@ def test_a_structured_failure_reaches_the_user_with_its_remedy():
 def test_output_that_is_not_json_is_reported_as_such(tmp_path, monkeypatch):
     script = tmp_path / "axqua"
     script.write_text("#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo "
-                      "'axqua 0.2.0'; else echo 'Segmentation fault'; fi\n",
+                      "'axqua 0.3.5'; else echo 'Segmentation fault'; fi\n",
                       encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     client = runner_client.RunnerClient(str(script))
@@ -365,6 +410,8 @@ MATRIX = {
             {"capability": "steady2d", "implemented": "yes", "configured": True,
              "built": True, "run": False},
             {"capability": "free_surface_3d", "implemented": "n/a"},
+            {"capability": "unsteady2d", "implemented": "yes", "configured": False,
+             "built": None, "run": None},
             {"capability": "morphodynamics", "implemented": "yes", "configured": False,
              "built": None, "run": None},
         ]},
@@ -397,9 +444,24 @@ def test_an_unimplemented_capability_is_shown_disabled_with_a_reason():
 
 def test_a_capability_the_case_does_not_ask_for_says_so():
     view = CaseView.from_payload(MATRIX)
-    capability = view.solver("telemac").capability("morphodynamics")
+    capability = view.solver("telemac").capability("unsteady2d")
     assert capability.enabled is True and capability.can_submit is False
     assert "case-config.yml" in capability.reason
+
+
+def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
+    """Morphodynamics, the gain-lose reach and unsteady 3D are implemented in axqua but
+    are not submittable jobs. Their tabs used to render *enabled*, with a Build and a
+    Submit button that could not do anything, because there is no ``--kind`` to send.
+    """
+    view = CaseView.from_payload(MATRIX)
+    capability = view.solver("telemac").capability("morphodynamics")
+    assert capability.visible is True                  # the gap is worth seeing
+    assert capability.submittable is False
+    assert capability.enabled is False
+    assert capability.can_submit is False
+    assert capability.state_text == "no job kind"
+    assert "Python driver" in capability.reason
 
 
 def test_actions_follow_configured_built_and_run():
@@ -425,6 +487,151 @@ def test_a_capability_this_plugin_has_never_heard_of_still_gets_a_tab():
     assert capability.visible and capability.title == "Ice jam"
 
 
+# --------------------------------------------------------------- audit regressions
+#
+# One test per defect the end-to-end audit found. They are grouped here rather than
+# scattered because what they have in common is the reason they existed: each was a
+# plausible-looking line that nothing exercised.
+
+
+def test_a_queued_job_keeps_the_dashboard_polling():
+    """QUEUED was in neither the terminal nor the active set, so ``interval_ms`` said
+    "stop the timer" for a dashboard whose only job had just been submitted - and the
+    row then never moved until the user pressed Refresh."""
+    table = job_model.JobTable()
+    table.replace([{"job_id": "JOB-1", "root": "/tmp/JOB-1", "state": "QUEUED"}])
+    assert table.has_active is True
+    assert table.interval_ms(visible=True) == job_model.INTERVAL_ACTIVE_MS
+    assert table.interval_ms(visible=False) == job_model.INTERVAL_HIDDEN_MS
+
+
+def test_a_completed_job_stops_the_timer():
+    table = job_model.JobTable()
+    table.replace([{"job_id": "JOB-1", "root": "/tmp/JOB-1", "state": "COMPLETED"}])
+    assert table.interval_ms(visible=True) == 0
+
+
+@pytest.mark.parametrize("payload", [
+    {"kind": "solver_run", "duration": "n/a", "simulated_time": 12.0},
+    {"kind": "solver_run", "duration": 100.0, "simulated_time": None, "iteration": "?"},
+    {"kind": "calibration", "best_objective": "pending"},
+    {"kind": "openfoam_build", "cells": "many"},
+])
+def test_a_broken_progress_payload_does_not_raise_in_a_timer_slot(payload):
+    """``status.json`` is written by the solver side, and a crashed run can leave a
+    string where a number belongs. Formatting it with ``:.4g`` raises inside a QTimer
+    slot, with the table half painted and the traceback nowhere the user can see."""
+    job = job_model.Job(job_id="JOB-1", root=Path("/tmp/JOB-1"), progress=payload)
+    assert isinstance(job.progress_text, str)
+    assert isinstance(job.objective_text, str)
+
+
+def test_a_usable_number_is_still_formatted():
+    job = job_model.Job(job_id="JOB-1", root=Path("/tmp/JOB-1"),
+                        progress={"kind": "calibration", "best_objective": 0.0123456})
+    assert job.objective_text == "0.01235"
+    assert job_model._number(True) is None       # a flag is not a count
+
+
+def test_an_unstructured_failure_shows_what_axqua_printed():
+    """axqua dying with a traceback used to reach the user as "axqua returned something
+    that is not JSON" - a statement about the protocol, for what is usually one readable
+    line about a missing library."""
+    exc = runner_client.RunnerError(
+        "axqua returned something that is not JSON",
+        returncode=1,
+        stderr="Traceback (most recent call last):\n  ...\n"
+               "ImportError: libgdal.so.32: cannot open shared object file")
+    text = exc.user_text()
+    assert "libgdal" in text
+    assert "exited with code 1" in text
+
+
+def test_a_structured_failure_shows_the_remedy_and_not_the_noise():
+    """When axqua explains itself, its remedy is the answer - and stderr is then full of
+    the narration it deliberately sent there."""
+    exc = runner_client.RunnerError(
+        "the mesh has 14 zero-area elements", remedy="Lower breakline_size and rebuild.",
+        stderr="INFO reading DEM\nINFO meshing\n" * 50)
+    text = exc.user_text()
+    assert text == ("the mesh has 14 zero-area elements\n"
+                    "Lower breakline_size and rebuild.")
+
+
+def test_user_text_handles_anything_thrown_at_it():
+    assert runner_client.user_text(ValueError("plain")) == "plain"
+    assert "remedy" in runner_client.user_text(
+        runner_client.RunnerError("failed", remedy="remedy"))
+
+
+def test_a_case_added_before_the_project_is_saved_survives_the_save(tmp_path):
+    """Stored relative to QGIS's working directory, an entry resolved later against the
+    project's own folder - a path that had never existed anywhere."""
+    case = tmp_path / "cases" / "inn" / "case-config.yml"
+    case.parent.mkdir(parents=True)
+    case.write_text("telemac: {}\n", encoding="utf-8")
+
+    project = project_io.AxquaProject()
+    project.add_case(case)
+    assert Path(project.cases[0]).is_absolute()
+    assert project.active_case_path() == case
+
+    project_io.save(project, tmp_path / "reach.axqua-prj")
+    # Now that there is a folder to be relative to, the entry becomes portable.
+    assert project.cases[0] == str(Path("cases") / "inn" / "case-config.yml")
+    assert project.active_case_path() == case
+    assert project_io.load(tmp_path / "reach.axqua-prj").active_case_path() == case
+
+
+def test_the_glob_fallback_is_bounded(tmp_path):
+    """An OpenFOAM job directory holds a time directory per write per rank. Walking one
+    unbounded is minutes of stat calls with nothing on screen to explain the freeze."""
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    for rank in range(3):
+        deep = results / f"processor{rank}" / "0.1" / "uniform"
+        deep.mkdir(parents=True)
+        (deep / "time").write_text("noise", encoding="utf-8")
+    (results / "reach.slf").write_text("mesh", encoding="utf-8")
+
+    found = result_loader.discover(tmp_path)
+    assert [i.name for i in found.layers] == ["reach"]
+    assert found.from_manifest is False
+    assert len(result_loader._walk(results, 4)) == 4
+
+
+def test_the_manifest_wins_over_the_glob(tmp_path):
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "r2d.slf").write_text("mesh", encoding="utf-8")
+    (results / "results.json").write_text(json.dumps({
+        "job_id": "JOB-7",
+        "results": [{"name": "depth", "path": "results/r2d.slf", "kind": "mesh",
+                     "style": "water-depth", "variable": "WATER DEPTH"}]}),
+        encoding="utf-8")
+
+    found = result_loader.discover(tmp_path)
+    assert found.from_manifest is True and found.job_id == "JOB-7"
+    assert found.layers[0].variable == "WATER DEPTH"
+
+
+def test_a_corrupt_manifest_falls_back_to_the_glob(tmp_path):
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "r2d.slf").write_text("mesh", encoding="utf-8")
+    (results / "results.json").write_text("{ this is not json", encoding="utf-8")
+
+    found = result_loader.discover(tmp_path)
+    assert found.from_manifest is False
+    assert [i.name for i in found.layers] == ["r2d"]
+
+
 # ------------------------------------------------- Qt6 and security regressions
 #
 # Both classes of problem below were reported by plugins.qgis.org's own analysis on
@@ -442,6 +649,31 @@ UNSCOPED_ENUMS = [
     (r"QgsLegendStyle\.(Title|Group|Subgroup|SymbolLabel)", "QgsLegendStyle.Style.*"),
     (r"Qt\.(UserRole|AlignRight|AlignCenter|MatchExactly)\b", "Qt.<Scope>.*"),
 ]
+
+#: Every scope ``Qt`` member the plugin uses lives under. Anything else spelled
+#: ``Qt.Something`` is an unscoped literal, which is the Qt6 hazard - listing the scopes
+#: rather than the members means a *newly written* unscoped enum is caught too, which
+#: the six patterns above could not do.
+QT_SCOPES = {"ItemDataRole", "AlignmentFlag", "DockWidgetArea", "ItemFlag", "MatchFlag",
+             "CheckState", "CursorShape", "Orientation", "TextFormat", "KeyboardModifier",
+             "WindowType", "FocusPolicy", "ScrollBarPolicy", "PenStyle", "GlobalColor"}
+
+
+def test_no_new_unscoped_qt_enum_creeps_in():
+    """The rule compat.py states, enforced generally rather than case by case."""
+    import re
+
+    used = re.compile(r"\bQt\.([A-Z][A-Za-z_]*)")
+    offenders = []
+    for path in (PLUGIN_ROOT / "axqua").rglob("*.py"):
+        if path.name == "compat.py":
+            continue
+        for n, line in enumerate(path.read_text("utf-8").splitlines(), 1):
+            for name in used.findall(line):
+                if name not in QT_SCOPES:
+                    offenders.append(f"{path.relative_to(PLUGIN_ROOT)}:{n}  Qt.{name}")
+    assert offenders == [], (
+        "unscoped Qt enum - resolve it in compat.py with enum_value: " + str(offenders))
 
 
 @pytest.mark.parametrize("pattern,scoped", UNSCOPED_ENUMS)
