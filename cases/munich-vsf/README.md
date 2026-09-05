@@ -184,6 +184,25 @@ python continue_run.py                       # another 1800 s from r2d.slf
 python check_convergence.py --result r2d-hotstart.slf
 ```
 
+### What the continuation showed - converged
+
+1800 s more, 6.5 h of wall clock, and every criterion is met:
+
+| quantity | first run | after the continuation | |
+| --- | --- | --- | --- |
+| depth | 0.33% | **0.347%** | converged |
+| velocity | window mean 7.5% | **window mean 0.376%** | converged |
+| TKE | window mean 7.5% | **window mean 0.325%** | converged |
+| boundary 1 | 0.000% | **0.000%** | converged |
+| boundary 2 | 0.072% | **0.060%** | converged |
+| mass balance | +2.394% of inflow | **+0.037%** | balanced |
+
+The velocity band is **3.7% per frame, unchanged** from the first run - which is the
+point of separating the two measures. The filling drift fell by a factor of twenty
+because it was a transient; the fluctuation did not move at all because it is the jets,
+and it never will. `|Qin| - |Qout|` closing from 3.2 L/s to 0.05 L/s is the same fact
+seen from the mass side.
+
 1800 s more is about three time constants, taking the residual filling from 4% of the
 inflow to roughly 0.1%. `continue_run.py` writes `hotstart2d.cas` through
 `axqua.solvers.telemac.steering.write_hotstart_cas` - the same case with its initial
@@ -206,6 +225,35 @@ has to be given; without it the 135 L/s value is kept and the script says so.
 
 Rough cost at 5 cm resolution, 273k elements, 8 cores: about **6 s of simulated time per
 minute of wall clock**, so 1800 s takes roughly five hours.
+
+### The tailwater is too high, and it shows
+
+The converged run's own outlet report says so:
+
+```
+outlet profile: backwater (near-boundary surface slope 1.4 permille vs 28.8 permille
+                           in the reach above)
+      0-3   m: WSE 0.6923  H 0.262 m  |U| 0.348 m/s  Fr 0.22
+     20-40  m: WSE 0.7132  H 0.307 m  |U| 0.301 m/s  Fr 0.18
+     40-70  m: WSE 2.0657  H 0.924 m  |U| 0.349 m/s  Fr 0.12
+  -> the prescribed outflow stage sits ABOVE the reach's own level
+```
+
+`hydrodynamics.prescribed_elevation: 0.69` holds the lowest 40 m of the domain as a flat
+pool at a **1.4 permille** surface slope where the reach above it falls at **28.8
+permille**. That is a boundary condition backing water up over ground that would
+otherwise drain, and it is also where the 34% of wetted area the wetting report calls
+*stagnant film* (69 m2, 26 m3, |U| < 0.05 m/s) comes from - the report notes that the
+film has **plateaued**, so it is not a transient a longer run removes.
+
+None of that touches the fish pass itself, which sits at y 45-67 with WSE 2.07 and is
+hydraulically upstream of the backwater. But it does mean two things:
+
+* the downstream 40 m of this model is not a prediction of anything, and nothing should
+  be read off it;
+* **before the flume comparison**, either lower the stage to the reach's own outlet level
+  or set `outflow_condition: free` and let the model find it. The 0.69 m came from the
+  CAD, not from a measurement, and the model is now good enough to say it is wrong.
 
 ### Resolution, and what it limits
 

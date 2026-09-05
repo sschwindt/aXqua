@@ -75,6 +75,14 @@ def _retarget(cas: Path, discharge: float, stage: float | None) -> Path:
     return out
 
 
+def _result_of(cas: Path) -> str:
+    """The RESULTS FILE a steering file writes, so the analyses read the right one."""
+    for line in cas.read_text().splitlines():
+        if line.strip().startswith("RESULTS FILE"):
+            return line.split(":", 1)[1].strip()
+    return "r2d-hotstart.slf"
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--duration", type=float, default=DEFAULT_DURATION,
@@ -122,11 +130,20 @@ def main(argv=None) -> int:
         print(f"FAILED - solver returned {proc.returncode}")
         return proc.returncode
 
+    # Both analyses find their inputs through the config, so the config has to name the
+    # run that just finished. Without this the flux analysis globs
+    # ``steady2d.cas_*.sortie`` and reports the *previous* run's imbalance beside this
+    # run's result - which it did once, saying 2.4% where the result was 0.04%.
+    cfg.cas_file = cas.name
+    cfg.results_slf = _result_of(cas)
+
     print("\nOK. Now judge it with the window criterion:")
-    print("  python check_convergence.py --result r2d-hotstart.slf --window")
+    print(f"  python check_convergence.py --result {cfg.results_slf}")
     try:
         for line in format_flux_convergence(
-                analyze_flux_convergence(cfg, tolerance=HOTSTART_TOLERANCE)):
+                analyze_flux_convergence(cfg, tolerance=HOTSTART_TOLERANCE,
+                                         # this script writes its own continuation
+                                         write_hotstart=False)):
             print(line)
         for line in report_wetting(cfg):
             print(line)
