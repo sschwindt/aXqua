@@ -1255,6 +1255,18 @@ class Calibration:
     # gpytorch; 25000 OOM-kills a 16 GB box. A low-dimensional roughness posterior
     # needs only a few thousand - 5000 is ample and memory-safe. Raise with RAM.
     prior_samples: int = 5000
+    # HydroBayesCal >= 1.5 grows the initial design in Sobol blocks and stops as
+    # soon as it is measurably sufficient (GP leave-one-out predictivity, error-bar
+    # calibration, posterior resolution, stability), instead of always running
+    # init_runs. init_runs stays the ceiling, so this only ever saves simulations -
+    # which matters here, where the design size scales with the parameter count and
+    # every evaluation is a TELEMAC run per flow. False = the old fixed-size design.
+    adaptive_init_runs: bool = True
+    init_runs_min: int | None = None       # first block; None -> 2**ceil(log2(4*n_par))
+    # BAL point selection: 'auto' exploits the posterior until more than one
+    # well-separated mode is detected, then adds exploration. Pure exploitation is
+    # how a local maximum survives to the end of a calibration.
+    bal_exploration_tradeoff: str | bool = "auto"
     # Which solver HydroBayesCal drives, and which case files it perturbs. The
     # defaults calibrate the steady 2D case built by pipeline.run; a 3D profile
     # calibration points them at the 3D steering file instead (HydroBayesCal maps

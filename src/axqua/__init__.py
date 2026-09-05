@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING
 # Single source of truth: whatever was installed. The literal is the fallback for a
 # source checkout that was never `pip install`ed, and is kept in step with
 # pyproject.toml by a test.
-_FALLBACK_VERSION = "0.3.5"
+_FALLBACK_VERSION = "0.4.2"
 
 try:
     from importlib.metadata import version as _pkg_version
@@ -56,6 +56,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "core.errors": ("ConfigError", "ErrorRecord", "GeodataError",
                     "AxquaError", "MeshError", "SolverError"),
     "core.schema": ("Layer", "classify_setting"),
+    "core.geodata": ("read_roughness_table", "read_roughness_zones", "ZoneRoughness"),
     "dem": ("clip_dem_to_roi", "clip_to_roi", "dem_of_difference", "propagated_lod",
             "resolve_lod"),
     "ground_truth": ("compile_ground_truth", "read_tidy"),
@@ -64,6 +65,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "solvers.telemac.mesh": ("build_mesh", "channel_node_mask", "interpolate_elevations",
              "interpolate_roughness", "write_mesh"),
     "solvers.telemac.mesh_quality": ("assess_quality",),
+    "core.selafin": ("extract_hotstart",),
     "mesh_validity": ("MeshValidity", "channel_ks", "check_level"),
     "solvers.telemac.steering": ("select_turbulence_model", "eddy_viscosity_estimate"),
     "solvers.telemac.threed": ("build_3d_cas", "build_3d_cases", "infer_vertical_layers",
@@ -114,7 +116,7 @@ __all__ = [
     "BackendSpec", "Capability", "CapabilitySpec", "CapabilityState", "CaseStatus",
     "Config", "ConfigError", "ErrorRecord", "FlowSpec", "FluxConvergence",
     "GeodataError", "AxquaError", "Layer", "MeshError", "MeshValidity",
-    "OutletProfile", "SolverError",
+    "OutletProfile", "SolverError", "ZoneRoughness",
     "PhreaticPlane", "ProgressBar", "SolverBackend", "SolverProgress",
     "SeedResult", "SolverStatus", "Sortie", "Support", "WettingReport",
     "analyze_flux_convergence", "assess_quality", "backends", "build_3d_cas",
@@ -123,14 +125,16 @@ __all__ = [
     "clip_dem_to_roi", "clip_to_roi", "compile_ground_truth", "convergence_index",
     "classify_setting", "convergence_rate", "dem_of_difference",
     "dump_config", "eddy_viscosity_estimate",
-    "ensure_seed", "expected_duration", "fill_template_hydraulics", "find_lines",
+    "ensure_seed", "expected_duration", "extract_hotstart",
+    "fill_template_hydraulics", "find_lines",
     "fit_phreatic_plane", "format_3d_cases", "format_flux_convergence",
     "generate_stage_discharge", "infer_vertical_layers", "interpolate_elevations",
     "interpolate_roughness", "latest_sortie", "layer_levels", "line_discharges",
     "load_config", "load_hydrograph", "log_step", "logging_to",
     "mesh_from_geometry", "normal_depth", "outlet_profile", "patch_node_mask",
     "percent_levels", "prepare_steady_inputs", "propagated_lod", "ratio_levels",
-    "read_flowtracker", "read_flowtrackers", "read_marker", "read_sortie",
+    "read_flowtracker", "read_flowtrackers", "read_marker",
+    "read_roughness_table", "read_roughness_zones", "read_sortie",
     "read_target_parameters", "read_targets", "read_tidy", "relative_imbalance",
     "report_sections", "report_wetting", "require_hbc", "resolve_discharge",
     "resolve_lod", "run_mesh_convergence", "run_multiflow_calibration",

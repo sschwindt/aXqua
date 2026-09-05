@@ -1,12 +1,19 @@
 """Multi-discharge Bayesian calibration of the KB15 case (workflow step 3, multi).
 
 Thin wrapper around :func:`axqua.run_multiflow_calibration` - all the logic
-lives in ``axqua.bayescal`` / ``axqua.campaigns``. Calibrates one shared
-channel roughness against velocity ground truth from several steady-discharge
-FlowTracker campaigns at once (each campaign = one TELEMAC run per collocation
-point, joined into one Bayesian inference by the additive
-``bal_telemac_multiflow.py`` + ``MultiflowTelemacModel`` in the hydrobayescal
-checkout).
+lives in ``axqua.bayescal`` / ``axqua.campaigns``. Calibrates the reach's
+roughness against velocity ground truth from several steady-discharge FlowTracker
+campaigns at once (each campaign = one TELEMAC run per collocation point, joined
+into one Bayesian inference by the additive ``bal_telemac_multiflow.py`` +
+``MultiflowTelemacModel``).
+
+**Calibration parameters are NOT declared here.** The roughness zones come from
+``user-sources/geodata/roughness-table.csv`` (``zone_id, ks_min, ks_max,
+calibration``): every zone flagged ``calibration=True`` becomes a ``zone<N>``
+parameter over its own bounds. As of the August-2026 restart that is zones 1, 3, 4
+and 5, plus VELOCITY DIFFUSIVITY from ``case-config.yml`` - 5 parameters. Zone 2
+(floodplain, 3% wet) and zone 6 (84% dry, flow shallower than its own roughness
+height) are pinned. Add or retire a zone by editing the CSV, nothing else.
 
 Campaigns (see user-sources/ground-truth/hydraulics/discharge-info.md):
 
@@ -37,7 +44,7 @@ import argparse
 from pathlib import Path
 
 from axqua import FlowSpec, run_multiflow_calibration
-from axqua.config import load_config
+from axqua.config import DEFAULT_SIM_DIR, LEGACY_SIM_DIR, load_config
 
 HERE = Path(__file__).resolve().parent
 CONFIG = HERE / "case-config.yml"
@@ -51,11 +58,44 @@ GEO = HERE / "user-sources/geodata"
 # see README.md "Data particularities". Run that script first after any
 # ground-truth change. (The raw adapter/transect specs are kept below for
 # reference, commented out.)
-PREP = HERE / "axqua-case/preprocessing"
+# The artifact folder was renamed axqua-case, but this case was built before the
+# rename and its results are on disk under the old name. Mirror the rule
+# config.py uses (_resolve_sim_dir) instead of hard-coding either spelling.
+CASE = HERE / DEFAULT_SIM_DIR
+if not CASE.is_dir() and (HERE / LEGACY_SIM_DIR).is_dir():
+    CASE = HERE / LEGACY_SIM_DIR
+PREP = CASE / "preprocessing"
+
+# Every calibration run CONTINUES from the converged steady field instead of
+# re-filling the reach from the 0.2 m pre-wet seed. That fill is what makes a cold
+# run expensive: at prewet_depth 0.2 the boundary fluxes do not balance until
+# ~4000-4900 s (at 1500 s the reach is still filling, relative imbalance 1.00), and
+# 5000 s costs 4.8 h per run on 16 cores - times two flows, times a 32-64 point
+# design, that is 13-25 days. Hotstarted, a run only has to re-equilibrate to the
+# perturbed roughness.
+#
+# HOTSTART_DURATION must be long enough that the field has FORGOTTEN the seed,
+# otherwise every run is pulled toward the roughness the seed was converged at and
+# the calibration under-reports its sensitivity to ks. It is measured, not guessed:
+# hotstart_probe.py runs the two prior extremes and reports when the
+# calibration-point depth/velocity stop drifting. See the probe's --analyse output.
+HOTSTART_SEED = "hotstart-seed.slf"   # slim one-frame extract of r2d.slf
+# MEASURED 2026-08-12 (hotstart_probe.py, both prior extremes + a 2000 s extension
+# of the slower one). Continuing the roughest corner from t=2500 to t=4500 moved the
+# 52 calibration points by a median 0.8 mm / 0.0012 m/s and at most 3.2 mm /
+# 0.0029 m/s - one to two orders inside the assumed measurement error. NOTE the
+# boundary FLUX balance is still ~3.6% at t=2500 there and is NOT the right gate:
+# that residual 1.7 m3/s of storage spread over ~300000 m2 of wetted area is
+# millimetres of depth. The QoI is what the surrogate is trained on, so the QoI is
+# what has to be converged. Interior design samples settle faster than this corner.
+HOTSTART_DURATION = 2500.0            # s (~1.8-2.4 h per run on 16 cores)
+
 FLOWS = [
-    FlowSpec(name="q47-3", discharge=47.3, kind="csv", duration=1500.0,
+    FlowSpec(name="q47-3", discharge=47.3, kind="csv",
+             duration=HOTSTART_DURATION, hotstart_from=HOTSTART_SEED,
              values=PREP / "measurements-corrected-q47-3.csv"),
-    FlowSpec(name="q48-45", discharge=48.45, kind="csv", duration=1500.0,
+    FlowSpec(name="q48-45", discharge=48.45, kind="csv",
+             duration=HOTSTART_DURATION, hotstart_from=HOTSTART_SEED,
              values=PREP / "measurements-corrected-q48-45.csv"),
     # FlowSpec(name="q47-3", discharge=47.3, kind="adapter", duration=1500.0,
     #          values=GT / "FT_TKE_Summary.xlsx",
