@@ -9,7 +9,26 @@ of consecutive frames, how much the fields still change:
 * the **discharge** at each liquid boundary, from the solver listing, both as its own
   frame-to-frame change and as the imbalance between inflow and outflow.
 
-The verdict is against a threshold, 1 % by default, and every quantity has to pass.
+Two criteria, because there are two kinds of quantity here
+----------------------------------------------------------
+A vertical slot fishway does not reach a steady state, and no amount of simulated time
+will make it. At constant discharge the slot jets flap and the pool gyres shed vorticity,
+so the flow settles into a **statistically stationary** state: a fixed *mean* with
+sustained fluctuation about it. On this case the depth settles to 0.45% per frame and
+stays there while the velocity field keeps changing by 5-7% per frame indefinitely -
+not a transient that needs longer, a limit cycle that has no fixed point to find.
+
+Testing such a flow frame against frame therefore asks a question with no answer. So:
+
+**Depth and discharge** are tested instantaneously, as before. They do settle, and a
+depth that is still drifting means the reach is still filling.
+
+**Velocity and TKE** are tested as *window means*: the record's last third is split in
+two, each half is averaged over time, and the two averages are compared. A stationary
+flow passes this easily - its mean has stopped moving - while a flow still developing
+fails it, which is exactly the distinction being asked about. The instantaneous
+fluctuation is reported alongside as the **band**, so the unsteadiness is visible as a
+number rather than mistaken for a failure to converge.
 
 Why RMS rather than the worst node
 ----------------------------------
@@ -20,12 +39,22 @@ about - whether the solution as a whole is still moving - and the per-node maxim
 reported alongside it rather than used as the test, so a single misbehaving node is
 visible without vetoing the result.
 
+Why 5 cm of water counts as wet
+-------------------------------
+``--wet`` defaults to aXqua's own ``min_depth``, not to a numerical dry threshold. On a
+bed with a Nikuradse roughness of 0.05-0.5 m, water 5 mm deep stands *inside* the grain
+roughness rather than flowing over it, and thousands of such nodes flickering wet and dry
+at the fringe dominated the statistic: on this case the velocity change reads 6.9% at
+5 mm and 3.4% at 10 cm, for the same flow. Judging what the model resolves, rather than
+what it merely wets, is the point.
+
 TKE needs the k-epsilon closure (``hydrodynamics.turbulence_model: 3``); Smagorinski
 carries no K and the check says so instead of quietly passing.
 
     python check_convergence.py                     # the built case's r2d.slf
+    python check_convergence.py --window            # with the stationary-mean test
     python check_convergence.py --tolerance 0.005   # a stricter threshold
-    python check_convergence.py --result r2d-smoke.slf --watch
+    python check_convergence.py --result r2d-hotstart.slf --window
 """
 
 from __future__ import annotations
@@ -51,8 +80,11 @@ FIELDS = (
     (("VELOCITY U", "VELOCITY V"), "velocity"),
     (("TURBULENT ENERG.", "TURBULENT ENERGY"), "tke"),
 )
-#: a node is wet, and so counts, above this depth [m]
-WET = 0.005
+#: Judged instantaneously; the rest are judged as window means. Depth is here because a
+#: drifting depth means the reach is still filling, which no averaging should hide.
+INSTANTANEOUS = {"depth"}
+#: a node is wet, and so counts, above this depth [m] - aXqua's own min_depth
+WET = 0.05
 #: "FLUX BOUNDARY 1: 0.135 M3/S"
 _FLUX = re.compile(r"FLUX\s+BOUNDARY\s+(\d+)\s*:\s*(-?[\d.Ee+-]+)")
 
@@ -92,6 +124,44 @@ def read_frames(path: Path):
     return out
 
 
+def window_means(frames, label: str, wet_threshold: float):
+    """Compare the time-averaged field over two consecutive windows.
+
+    The record's last third is split in half and each half averaged **in time, node by
+    node**; the two averages are then compared with the same RMS measure used between
+    frames. For a statistically stationary flow the fluctuation cancels and what is left
+    is the drift of the mean, which is the quantity that actually has to reach zero.
+
+    Returns ``(relative change, band, n per window, t0, t1)`` where *band* is the mean
+    instantaneous frame-to-frame change over the same span - the size of the
+    fluctuation the averaging removed.
+    """
+    usable = [(t, f) for t, f in frames if label in f and "depth" in f]
+    if len(usable) < 6:
+        return None
+    take = max(2, len(usable) // 3)
+    tail = usable[-2 * take:]
+    first, second = tail[:take], tail[take:]
+
+    def average(block):
+        stack = np.stack([f[label] for _, f in block])
+        wet = np.all(np.stack([f["depth"] for _, f in block]) > wet_threshold, axis=0)
+        return stack.mean(axis=0), wet
+
+    mean_a, wet_a = average(first)
+    mean_b, wet_b = average(second)
+    change, _ = field_change(mean_a, mean_b, wet_a & wet_b)
+
+    bands = []
+    for (t0, a), (t1, b) in zip(tail, tail[1:]):
+        wet = (a["depth"] > wet_threshold) & (b["depth"] > wet_threshold)
+        rms, _ = field_change(a[label], b[label], wet)
+        if rms is not None:
+            bands.append(rms)
+    band = float(np.mean(bands)) if bands else float("nan")
+    return change, band, take, tail[0][0], tail[-1][0]
+
+
 def boundary_discharges(sortie: Path):
     """Per-printout discharge at each liquid boundary, from the solver listing."""
     series: dict[int, list[float]] = {}
@@ -115,19 +185,23 @@ def latest_sortie(folder: Path, stem: str):
                 if "_p0" not in p.name]
     if listings:
         return listings[-1]
-    live = folder / "run-full.log"
-    return live if live.exists() else None
+    for name in ("run-continue.log", "run-full.log"):
+        live = folder / name
+        if live.exists():
+            return live
+    return None
 
 
-def report(result: Path, sortie: Path | None, tolerance: float, log) -> bool:
+def report(result: Path, sortie: Path | None, tolerance: float, log, *,
+           use_window: bool = True, wet_threshold: float = WET) -> bool:
     frames = read_frames(result)
     if len(frames) < 2:
         log.warning("only %d frame in %s - nothing to compare yet", len(frames),
                     result.name)
         return False
 
-    log.info("%s: %d frames, t = %.1f .. %.1f s", result.name, len(frames),
-             frames[0][0], frames[-1][0])
+    log.info("%s: %d frames, t = %.1f .. %.1f s (wet = h > %.0f mm)", result.name,
+             len(frames), frames[0][0], frames[-1][0], wet_threshold * 1000)
     missing = [label for _, label in FIELDS if label not in frames[-1][1]]
     if missing:
         log.warning("not in the result: %s. TKE needs the k-epsilon closure "
@@ -135,11 +209,12 @@ def report(result: Path, sortie: Path | None, tolerance: float, log) -> bool:
                     ", ".join(missing))
 
     log.info("")
-    log.info("  %-9s %-9s %-9s %-9s %-9s", "t [s]", "depth", "velocity", "tke", "worst")
+    log.info("  %-9s %-8s %-9s %-9s %-9s %-9s", "t [s]", "dt [s]", "depth", "velocity",
+             "tke", "worst")
     passing = {}
     for (t0, previous), (t1, current) in zip(frames, frames[1:]):
-        wet = (previous.get("depth", np.zeros(1)) > WET) & \
-              (current.get("depth", np.zeros(1)) > WET)
+        wet = (previous.get("depth", np.zeros(1)) > wet_threshold) & \
+              (current.get("depth", np.zeros(1)) > wet_threshold)
         row, worst = [], 0.0
         for _, label in FIELDS:
             if label not in current or label not in previous:
@@ -149,7 +224,10 @@ def report(result: Path, sortie: Path | None, tolerance: float, log) -> bool:
             passing[label] = rms
             row.append(f"{rms * 100:7.3f}% " if rms is not None else "     -   ")
             worst = max(worst, node or 0.0)
-        log.info("  %-9.1f %s %7.1fx", t1, " ".join(row), worst)
+        # The interval is printed because it is not constant: GRAPHIC PRINTOUT PERIOD
+        # counts time steps and the step is variable, so a short final interval makes
+        # the last change look smaller than the ones before it for no physical reason.
+        log.info("  %-9.1f %-8.1f %s %7.1fx", t1, t1 - t0, " ".join(row), worst)
 
     log.info("")
     ok = True
@@ -159,10 +237,33 @@ def report(result: Path, sortie: Path | None, tolerance: float, log) -> bool:
             log.warning("  %-9s not available - NOT converged (cannot be judged)", label)
             ok = False
             continue
-        verdict = "converged" if value <= tolerance else "NOT converged"
-        log.info("  %-9s last change %6.3f%%  ->  %s (threshold %.1f%%)",
-                 label, value * 100, verdict, tolerance * 100)
-        ok &= value <= tolerance
+        instantaneous = value <= tolerance
+        if label in INSTANTANEOUS or not use_window:
+            log.info("  %-9s last change %6.3f%%  ->  %s (threshold %.1f%%)",
+                     label, value * 100,
+                     "converged" if instantaneous else "NOT converged", tolerance * 100)
+            ok &= instantaneous
+            continue
+
+        window = window_means(frames, label, wet_threshold)
+        if window is None:
+            log.warning("  %-9s too few frames for the window test", label)
+            ok = False
+            continue
+        change, band, take, t0, t1 = window
+        if change is None:
+            log.warning("  %-9s window mean could not be formed (no lasting wet nodes)",
+                        label)
+            ok = False
+            continue
+        settled = change <= tolerance
+        log.info("  %-9s window mean %6.3f%%  ->  %s (threshold %.1f%%)",
+                 label, change * 100,
+                 "converged" if settled else "NOT converged", tolerance * 100)
+        log.info("  %-9s   fluctuates %6.3f%% per frame about that mean, over "
+                 "%d+%d frames spanning t = %.0f..%.0f s",
+                 "", band * 100, take, take, t0, t1)
+        ok &= settled
 
     if sortie is not None and sortie.exists():
         series = boundary_discharges(sortie)
@@ -182,6 +283,10 @@ def report(result: Path, sortie: Path | None, tolerance: float, log) -> bool:
             log.info("  |Qin| - |Qout| = %+.5f m3/s  (%.3f%% of the inflow)  ->  %s",
                      inflow - outflow, imbalance * 100,
                      "balanced" if imbalance <= tolerance else "NOT balanced")
+            if imbalance > tolerance:
+                log.info("      a persistent surplus means the reach is still filling; "
+                         "continue the run rather than restarting it "
+                         "(python continue_run.py)")
             ok &= imbalance <= tolerance
     else:
         log.warning("  no solver listing found - the discharge cannot be judged")
@@ -200,6 +305,12 @@ def main(argv=None) -> int:
                              "case's own r2d.slf)")
     parser.add_argument("--tolerance", type=float, default=0.01,
                         help="largest accepted change between frames (default 0.01 = 1%%)")
+    parser.add_argument("--wet", type=float, default=WET,
+                        help="a node counts as wet above this depth [m] "
+                             "(default %(default)s, aXqua's min_depth)")
+    parser.add_argument("--no-window", dest="window", action="store_false",
+                        help="judge velocity and TKE frame against frame, as if the "
+                             "flow had a steady state to find")
     parser.add_argument("--watch", action="store_true",
                         help="re-check every few minutes until it converges")
     parser.add_argument("--interval", type=float, default=300.0)
@@ -216,7 +327,8 @@ def main(argv=None) -> int:
         if not result.exists():
             log.info("%s does not exist yet", result)
         else:
-            if report(result, latest_sortie(folder, stem), args.tolerance, log):
+            if report(result, latest_sortie(folder, stem), args.tolerance, log,
+                      use_window=args.window, wet_threshold=args.wet):
                 return 0
         if not args.watch:
             return 1
