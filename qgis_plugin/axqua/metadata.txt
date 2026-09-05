@@ -3,8 +3,8 @@ name=aXqua
 qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM river models from QGIS, with jobs that keep running after QGIS is closed.
-about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as styled mesh, raster and vector layers. The plugin does not run solvers itself: it talks to the separately installed `axqua` command-line tool, so QGIS's Python never has to become the solver's Python. Requires the aXqua command-line tool, installed separately with 'pip install git+https://github.com/sschwindt/aXqua.git' (it is not on PyPI yet), plus a working TELEMAC and/or OpenFOAM installation.
-version=0.3.4
+about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin does not run solvers itself: it talks to the separately installed `axqua` command-line tool, so QGIS's Python never has to become the solver's Python. Requires the aXqua command-line tool, installed separately with 'pip install git+https://github.com/sschwindt/aXqua.git' (it is not on PyPI yet), plus a working TELEMAC and/or OpenFOAM installation.
+version=0.3.5
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -27,7 +27,20 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=0.2.0
+changelog=0.3.5
+    - Export movie is reachable at last, from the aXqua menu, and renders without
+      freezing QGIS.
+    - Nothing runs axqua on the GUI thread any more: the startup probe, the job
+      list, result discovery and the log path are all backgrounded.
+    - Errors show what axqua actually said - its remedy, or the tail of its output -
+      instead of "returned something that is not JSON".
+    - Option check boxes are tri-state, so an untouched form no longer overrides
+      case-config.yml.
+    - A freshly submitted job keeps the dashboard polling; loading results twice no
+      longer duplicates the layers.
+    - Capabilities axqua cannot submit as a job are disabled with the reason, and a
+      case that enables no solver says so instead of showing an empty panel.
+0.2.0
     - First release.
     - Persistent job runner: submit, monitor and cancel TELEMAC/OpenFOAM runs that
       outlive the QGIS session.

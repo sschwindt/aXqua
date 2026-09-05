@@ -16,7 +16,7 @@ from typing import Any, Callable
 
 from qgis.core import QgsApplication, QgsTask
 
-from ..compat import TASK_CAN_CANCEL
+from ..compat import TASK_CAN_CANCEL, is_deleted
 from .runner_client import RunnerError
 
 
@@ -26,15 +26,21 @@ class RunnerTask(QgsTask):
     Both callbacks run on the main thread (Qt delivers ``finished`` there), so they may
     touch widgets and the layer tree freely - which is precisely why the subprocess call
     has to happen in ``run`` and nothing else does.
+
+    *owner* is the widget the callbacks will touch. A task started from a dock that the
+    user then closes, or from a plugin that is reloaded, would otherwise call into a
+    deleted C++ object; naming the owner lets the callback be dropped instead.
     """
 
     def __init__(self, description: str, work: Callable[[], Any], *,
                  on_success: Callable[[Any], None] | None = None,
-                 on_error: Callable[[Exception], None] | None = None) -> None:
+                 on_error: Callable[[Exception], None] | None = None,
+                 owner: Any = None) -> None:
         super().__init__(description, TASK_CAN_CANCEL)
         self._work = work
         self._on_success = on_success
         self._on_error = on_error
+        self._owner = owner
         self._result: Any = None
         self._error: Exception | None = None
 
@@ -53,6 +59,8 @@ class RunnerTask(QgsTask):
 
     def finished(self, ok: bool) -> None:
         try:
+            if self.isCanceled() or is_deleted(self._owner):
+                return
             if ok and self._on_success is not None:
                 self._on_success(self._result)
             elif not ok and self._on_error is not None:
@@ -81,9 +89,28 @@ _IN_FLIGHT: "set[RunnerTask]" = set()
 
 def run_async(description: str, work: Callable[[], Any], *,
               on_success: Callable[[Any], None] | None = None,
-              on_error: Callable[[Exception], None] | None = None) -> RunnerTask:
+              on_error: Callable[[Exception], None] | None = None,
+              owner: Any = None) -> RunnerTask:
     """Queue *work* on QGIS's task manager and return the task."""
-    task = RunnerTask(description, work, on_success=on_success, on_error=on_error)
+    task = RunnerTask(description, work, on_success=on_success, on_error=on_error,
+                      owner=owner)
     _IN_FLIGHT.add(task)
     QgsApplication.taskManager().addTask(task)
     return task
+
+
+def cancel_all() -> None:
+    """Cancel everything still in flight. Called from the plugin's ``unload``.
+
+    Unloading tears down the widgets the callbacks were going to touch, so anything
+    still running has to be told to stop before they go. Cancelling is advisory - a
+    subprocess already started will finish - but the callback is suppressed either way,
+    both by the cancelled flag and by the owner check in :meth:`RunnerTask.finished`.
+    """
+    for task in list(_IN_FLIGHT):
+        try:
+            task.cancel()
+        except RuntimeError:
+            # Already destroyed by the task manager; nothing left to cancel.
+            pass
+    _IN_FLIGHT.clear()

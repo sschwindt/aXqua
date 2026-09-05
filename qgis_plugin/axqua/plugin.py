@@ -56,12 +56,28 @@ class AxquaPlugin:
         layout.triggered.connect(self._add_layout)
         self._register(layout)
 
+        movie = QAction("Export movie...", self.iface.mainWindow())
+        movie.triggered.connect(self._export_movie)
+        self._register(movie)
+
         self._add_provider()
 
     def unload(self) -> None:
+        # Before anything is destroyed: a background call that finishes afterwards would
+        # deliver its result into a deleted dock. Cancelling is what makes a plugin
+        # reload safe rather than merely usually safe.
+        try:
+            from .core.tasks import cancel_all
+            cancel_all()
+        except Exception as exc:                # noqa: BLE001 - unload must complete
+            log.debug("could not cancel in-flight tasks: %s", exc)
         for action in self._actions:
             self.iface.removePluginMenu(MENU, action)
             self.iface.removeToolBarIcon(action)
+            # Removing an action from the menus does not destroy it, and a reloaded
+            # plugin that left its predecessor's actions alive is how a menu ends up
+            # with three copies of every entry.
+            action.deleteLater()
         self._actions.clear()
         if self.dock is not None:
             self.iface.removeDockWidget(self.dock)
@@ -125,3 +141,20 @@ class AxquaPlugin:
         self.iface.messageBar().pushMessage(
             "aXqua", f"Added the print layout {name!r}. Open it from "
             "Project > Layouts.", duration=8)
+
+    # -- the movie ----------------------------------------------------------------
+    def _export_movie(self) -> None:
+        """Animate the active mesh layer over its own time steps.
+
+        Documented in three places and, until now, reachable from none: the dialog
+        existed but nothing ever constructed it.
+        """
+        from .compat import exec_dialog
+        from .gui.movie_dialog import MovieDialog, animatable_layers
+        layers = animatable_layers()
+        if not layers:
+            self.iface.messageBar().pushMessage(
+                "aXqua", "No mesh layer with more than one time step is loaded. Load a "
+                "result from the Jobs tab first.", duration=8)
+            return
+        exec_dialog(MovieDialog(self.iface, layers, self.iface.mainWindow()))

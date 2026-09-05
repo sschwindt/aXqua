@@ -43,6 +43,7 @@ from pathlib import Path
 
 from axqua import __version__, pipeline
 from axqua.config import load_config
+from axqua.jobcli import parse_args
 from axqua.logsetup import setup_logging
 
 
@@ -111,7 +112,7 @@ def _rating_parser() -> argparse.ArgumentParser:
 
 
 def _run_rating(argv: list[str]) -> int:
-    args = _rating_parser().parse_args(argv)
+    args = parse_args(_rating_parser(), argv, "rating")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.rating import generate_stage_discharge
@@ -152,7 +153,7 @@ def _targets_parser() -> argparse.ArgumentParser:
 
 
 def _run_targets(argv: list[str]) -> int:
-    args = _targets_parser().parse_args(argv)
+    args = parse_args(_targets_parser(), argv, "targets")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.targets import write_target_template
@@ -184,30 +185,51 @@ def _surface_parser() -> argparse.ArgumentParser:
     p.add_argument("config", type=Path, help="path to the YAML configuration file")
     p.add_argument("--force", action="store_true",
                    help="rebuild even when the artifacts are newer than the CAD parts")
+    p.add_argument("--json", dest="as_json", action="store_true",
+                   help="emit the artifacts as JSON - what a QGIS plugin reads to "
+                        "offer the CAD-derived geodata before a build is spent")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
 
 def _run_surface(argv: list[str]) -> int:
-    args = _surface_parser().parse_args(argv)
+    args = parse_args(_surface_parser(), argv, "surface")
+    from axqua import jobcli, surface_stage
+    from axqua.core.errors import ConfigError
+
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
-    from axqua import surface_stage
+    if args.as_json:
+        # Narration to stderr so stdout carries the document alone.
+        jobcli._setup_logging(args)
 
     try:
         cfg = load_config(args.config)
         if not cfg.surfaces.active:
-            log.error("%s declares no surfaces block with parts - nothing to derive. "
-                      "See the surfaces section of docs/preprocessing.rst.",
-                      args.config)
-            return 2
+            # Raised rather than returned, so it goes out through the same envelope and
+            # the same exit code as every other configuration error. It used to return
+            # a bare 2, which collides with EXIT_CONFIG only by coincidence.
+            raise ConfigError(
+                f"{args.config} declares no surfaces block with parts - nothing to "
+                "derive", subject="surfaces",
+                remedy="See the surfaces section of docs/preprocessing.rst.")
         cfg.ensure_dirs()
         produced = surface_stage.run(cfg, force=args.force)
     except Exception as exc:
-        log.error("%s: %s", type(exc).__name__, exc)
-        if args.verbose:
-            raise
-        return 3
+        return jobcli.fail("surface", exc, as_json=args.as_json, verbose=args.verbose)
+
+    if args.as_json:
+        return jobcli.emit("surface", {
+            "skipped": bool(produced.skipped),
+            "artifacts": {name: (str(path) if path else None) for name, path in (
+                ("dem", produced.dem), ("roi", produced.roi),
+                ("liquid_boundaries", produced.liquid_boundaries),
+                ("structures", produced.structures),
+                ("roughness_zones", produced.roughness_zones),
+                ("roughness_table", produced.roughness_table))},
+            "paths": [str(p) for p in produced.paths()],
+            "reports": produced.reports,
+        }, as_json=True)
     for path in produced.paths():
         log.info("wrote %s", path)
     log.info("inspect these in QGIS, then build the case with `axqua %s`", args.config)
@@ -243,32 +265,54 @@ def _georef_parser() -> argparse.ArgumentParser:
                         "holding several views needs. --dxf is then optional.")
     p.add_argument("--dz", type=float, default=0.0,
                    help="vertical shift [m], if the drawing's datum differs")
+    p.add_argument("--json", dest="as_json", action="store_true",
+                   help="emit the proposed transform as JSON")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
 
 def _run_georef(argv: list[str]) -> int:
-    args = _georef_parser().parse_args(argv)
+    args = parse_args(_georef_parser(), argv, "georef")
+    from axqua import georef, jobcli
+
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
-    from axqua import georef
+    if args.as_json:
+        jobcli._setup_logging(args)
 
     try:
         if args.list_layers:
-            for name, count in georef.dxf_layers(args.dxf):
+            layers = list(georef.dxf_layers(args.dxf))
+            if args.as_json:
+                return jobcli.emit("georef.layers",
+                                   [{"layer": n, "features": c} for n, c in layers],
+                                   as_json=True)
+            for name, count in layers:
                 log.info("%8d  %s", count, name)
             return 0
         if args.control_point:
-            return georef.report_control_points(args.stl, args.control_point,
-                                                dz=args.dz)
-        result = georef.log_match(georef.match(
-            args.stl, args.dxf, layers=args.layer, rotation_deg=args.rotation,
-            dz=args.dz))
+            result = georef.match_control_points(args.stl, args.control_point,
+                                                 dz=args.dz)
+            georef.log_control_points(args.stl, result)
+        else:
+            result = georef.log_match(georef.match(
+                args.stl, args.dxf, layers=args.layer, rotation_deg=args.rotation,
+                dz=args.dz))
     except Exception as exc:
-        log.error("%s: %s", type(exc).__name__, exc)
-        if args.verbose:
-            raise
-        return 3
+        return jobcli.fail("georef", exc, as_json=args.as_json, verbose=args.verbose)
+
+    if args.as_json:
+        transform = result.transform
+        return jobcli.emit("georef", {
+            "verdict": result.verdict,
+            "message": result.message,
+            "recommendation": result.recommendation,
+            "transform": {"scale": transform.scale,
+                          "rotation_deg": transform.rotation_deg,
+                          "dx": transform.dx, "dy": transform.dy, "dz": transform.dz},
+            "rotation_candidates": list(result.rotation_candidates),
+            "config_block": result.as_yaml(),
+        }, as_json=True)
     return 0 if result.verdict == "match" else 1
 
 
@@ -297,7 +341,7 @@ def _status_parser() -> argparse.ArgumentParser:
 
 
 def _run_status(argv: list[str]) -> int:
-    args = _status_parser().parse_args(argv)
+    args = parse_args(_status_parser(), argv, "case-status")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     from axqua import jobcli
     from axqua.core.capabilities import CaseStatus
@@ -353,7 +397,7 @@ def _openfoam_parser() -> argparse.ArgumentParser:
 
 
 def _run_openfoam(argv: list[str]) -> int:
-    args = _openfoam_parser().parse_args(argv)
+    args = parse_args(_openfoam_parser(), argv, "openfoam")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.solvers.openfoam import build_case, estimate_cells, load_hotstart, summarise
@@ -393,7 +437,7 @@ def _run_openfoam(argv: list[str]) -> int:
 
 
 def _run_build(argv: list[str] | None) -> int:
-    args = _build_parser().parse_args(argv)
+    args = parse_args(_build_parser(), argv, "build")
     level = logging.DEBUG if args.verbose else logging.INFO
     setup_logging(level=level)            # console now; compound logfile once config loads
     log = logging.getLogger("axqua")
@@ -427,7 +471,7 @@ def _run_build(argv: list[str] | None) -> int:
 
 
 def _run_clip(argv: list[str]) -> int:
-    args = _clip_parser().parse_args(argv)
+    args = parse_args(_clip_parser(), argv, "clip")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.dem import clip_to_roi
@@ -469,7 +513,7 @@ def _migrate_parser() -> argparse.ArgumentParser:
 
 
 def _run_migrate(argv: list[str]) -> int:
-    args = _migrate_parser().parse_args(argv)
+    args = parse_args(_migrate_parser(), argv, "migrate")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.config import dump_config
@@ -535,6 +579,28 @@ _DISPATCH = {
 }
 
 
+#: Flags of either ``status`` form that take a separate value. The token after one of
+#: them is that value, not the subject of the command - without this,
+#: ``axqua status --job-root /scratch JOB-123`` dispatched on ``/scratch``, which exists,
+#: and so reported the *case* status of a directory. The dispatch was correct only for
+#: as long as nobody put a flag first.
+_STATUS_VALUE_FLAGS = {"--job-root", "--timeout"}
+
+
+def _first_positional(argv: list[str]) -> str:
+    """The first token that is a subject rather than a flag or a flag's value."""
+    skip = False
+    for token in argv:
+        if skip:
+            skip = False
+            continue
+        if token.startswith("-"):
+            skip = token in _STATUS_VALUE_FLAGS      # --flag=value needs no skip
+            continue
+        return token
+    return ""
+
+
 def _dispatch_status(argv: list[str]) -> int:
     """``status`` means the case or the job, decided by the argument.
 
@@ -543,8 +609,7 @@ def _dispatch_status(argv: list[str]) -> int:
     spelling. Anything matching the job-id grammar is a job. Neither can be mistaken for
     the other, so there is no guess here, only a rule.
     """
-    positional = [a for a in argv if not a.startswith("-")]
-    first = positional[0] if positional else ""
+    first = _first_positional(argv)
     if first and Path(first).exists():
         logging.getLogger("axqua").warning(
             "'axqua status <config>' now also accepts a job id; the case form is "

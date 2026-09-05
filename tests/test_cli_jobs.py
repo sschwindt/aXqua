@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 
 from axqua.cli import main
 from axqua.jobs.model import JobKind, JobState
@@ -198,6 +200,58 @@ def test_submit_dry_run_creates_nothing(fake_case, capsys, tmp_path):
     assert not list(paths.job_root().glob("*")) if paths.job_root().exists() else True
 
 
+def test_submit_json_stdout_carries_the_document_alone(fake_case, capsys, monkeypatch,
+                                                       tmp_path):
+    """The plugin reads stdout as one JSON document, unconditionally.
+
+    ``submit`` printed the bare job id first, so stdout was ``<id>\\n{...}``. That
+    parsed only because the plugin's reader goes hunting for the first ``{`` - a
+    tolerance meant for a stray library warning, not for our own output. The dry-run
+    path, which every other JSON test here used, returns before the offending line and
+    so could never have caught it.
+    """
+    from axqua.jobs import submit as submit_mod
+
+    class _Result:
+        job_id = "2026-09-05-inn-steady-abcdef"
+        root = tmp_path / "job"
+
+    monkeypatch.setattr(submit_mod, "submit_job", lambda *a, **k: _Result())
+    config = str(fake_case.config_dir / "case-config.yml")
+    assert main(["submit", config, "--kind", "steady", "--json"]) == 0
+    out = capsys.readouterr().out
+    assert out.lstrip().startswith("{"), out[:120]
+    assert json.loads(out)["data"]["job_id"] == _Result.job_id
+
+
+def test_submit_without_json_still_prints_the_bare_job_id(fake_case, capsys, monkeypatch,
+                                                          tmp_path):
+    """The other half of the contract: ``$(axqua submit ...)`` is a job id."""
+    from axqua.jobs import submit as submit_mod
+
+    class _Result:
+        job_id = "2026-09-05-inn-steady-abcdef"
+        root = tmp_path / "job"
+
+    monkeypatch.setattr(submit_mod, "submit_job", lambda *a, **k: _Result())
+    config = str(fake_case.config_dir / "case-config.yml")
+    assert main(["submit", config, "--kind", "steady"]) == 0
+    assert capsys.readouterr().out.strip() == _Result.job_id
+
+
+def test_a_mistyped_flag_still_produces_an_envelope(fake_case, capsys):
+    """argparse exits 2 with empty stdout, which a JSON caller can only report as "not
+    JSON" - a message about the protocol, for what is really a typo."""
+    config = str(fake_case.config_dir / "case-config.yml")
+    with pytest.raises(SystemExit) as exit_info:
+        main(["submit", config, "--kind", "steady", "--nonsense", "--json"])
+    assert exit_info.value.code == 2
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["ok"] is False
+    assert payload["command"] == "submit"
+    assert "--help" in payload["error"]["remedy"]
+
+
 def test_submit_options_are_parsed_as_json_where_possible(fake_case, capsys):
     config = str(fake_case.config_dir / "case-config.yml")
     main(["submit", config, "--kind", "steady", "--dry-run", "--json",
@@ -307,6 +361,43 @@ def test_profiles_on_a_fresh_install_reports_emptiness(capsys):
 def test_profiles_path_points_into_the_config_dir(capsys):
     assert main(["profiles", "path"]) == 0
     assert "profiles.yml" in capsys.readouterr().out
+
+
+def test_an_unusable_profile_says_so_in_the_envelope(tmp_path, monkeypatch, capsys):
+    """``ok`` is the command's verdict, not "the process ran".
+
+    ``profiles validate`` used to emit ``ok: true`` beside exit code 4, leaving a JSON
+    consumer to resolve the contradiction by reading the exit code the envelope exists
+    to make unnecessary.
+    """
+    from axqua import jobcli
+
+    monkeypatch.setenv("AXQUA_CONFIG_DIR", str(tmp_path))
+    (tmp_path / "profiles.yml").write_text(
+        "profiles:\n"
+        "  broken:\n"
+        "    solver: telemac\n"
+        "    environment: posix\n"
+        f"    setup_script: {tmp_path / 'nowhere.sh'}\n", encoding="utf-8")
+
+    code = main(["profiles", "validate", "--json"])
+    payload = json.loads(capsys.readouterr().out)
+    assert code == jobcli.EXIT_ENVIRONMENT
+    assert payload["ok"] is False
+    assert "broken" in payload["error"]["message"]
+
+
+def test_status_dispatch_is_not_fooled_by_a_flag_value(tmp_path, capsys):
+    """``axqua status --job-root <dir> <id>`` dispatched on the *directory*, which
+    exists, and so reported the case status of a folder. It was correct only for as long
+    as nobody put a flag first."""
+    from axqua.cli import _first_positional
+
+    job_id = "2026-01-01-x-steady-aaaaaa"
+    assert _first_positional(["--job-root", str(tmp_path), job_id]) == job_id
+    assert _first_positional([f"--job-root={tmp_path}", job_id]) == job_id
+    assert _first_positional([job_id]) == job_id
+    assert _first_positional(["--json"]) == ""
 
 
 def test_the_plan_example_profiles_parse_verbatim(tmp_path, monkeypatch, capsys):

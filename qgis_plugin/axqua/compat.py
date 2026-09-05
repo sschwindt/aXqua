@@ -76,20 +76,29 @@ def enum_value(owner, *names, default=_MISSING):
     raise AttributeError(f"none of {names} exist on {owner!r}")
 
 
-# The enums the plugin actually uses, resolved once.
+# The enums the plugin actually uses, resolved once. Nothing is resolved here "in case
+# it is needed": an unused entry is one more member that has to exist on every QGIS the
+# plugin claims to support, for no benefit - and this module is imported before anything
+# else, so a member that has moved stops the plugin loading at all.
 USER_ROLE = enum_value(Qt, "ItemDataRole.UserRole", "UserRole")
-ALIGN_RIGHT = enum_value(Qt, "AlignmentFlag.AlignRight", "AlignRight")
-ALIGN_CENTER = enum_value(Qt, "AlignmentFlag.AlignCenter", "AlignCenter")
 DOCK_RIGHT = enum_value(Qt, "DockWidgetArea.RightDockWidgetArea", "RightDockWidgetArea")
-ITEM_SELECTABLE = enum_value(Qt, "ItemFlag.ItemIsSelectable", "ItemIsSelectable")
-ITEM_ENABLED = enum_value(Qt, "ItemFlag.ItemIsEnabled", "ItemIsEnabled")
 #: Qt 6 requires a real MatchFlag here; Qt 5 silently accepted a bare int, which is
 #: exactly the kind of difference that only shows up when the widget is constructed.
 MATCH_EXACTLY = enum_value(Qt, "MatchFlag.MatchExactly", "MatchExactly")
+#: Tri-state check boxes: the third state is the plugin's "leave it to case-config.yml".
+UNCHECKED = enum_value(Qt, "CheckState.Unchecked", "Unchecked")
+PARTIALLY_CHECKED = enum_value(Qt, "CheckState.PartiallyChecked", "PartiallyChecked")
+CHECKED = enum_value(Qt, "CheckState.Checked", "Checked")
+#: For the one probe that is allowed to block: the modal Settings dialog's Test button.
+WAIT_CURSOR = enum_value(Qt, "CursorShape.WaitCursor", "WaitCursor")
 
 # QGIS's own enums, which moved under scopes for Qt6 in exactly the same way. Resolved
-# here so no widget module contains an unscoped literal - which is both a Qt6 hazard and
-# something the plugin repository's checker reports on upload.
+# here so that no module outside this one names an **unscoped** literal - which is both a
+# Qt6 hazard and something the plugin repository's checker reports on upload. Fully
+# scoped literals (``QDialogButtonBox.StandardButton.Ok``) are fine anywhere: they are
+# the Qt6 spelling and Qt5 has accepted them since 5.11, so routing those through here
+# too would be ceremony rather than compatibility. The test suite enforces exactly this
+# rule, and no more.
 LAYOUT_MM = enum_value(QgsUnitTypes, "LayoutUnit.LayoutMillimeters", "LayoutMillimeters")
 PICTURE_SVG = enum_value(QgsLayoutItemPicture, "Format.FormatSVG", "FormatSVG")
 TASK_CAN_CANCEL = enum_value(QgsTask, "Flag.CanCancel", "CanCancel")
@@ -145,7 +154,6 @@ def message_level(name: str):
 INFO = message_level("Info")
 WARNING = message_level("Warning")
 CRITICAL = message_level("Critical")
-SUCCESS = message_level("Success")
 
 
 def open_in_file_manager(path: str | os.PathLike) -> bool:
@@ -161,3 +169,76 @@ def open_in_file_manager(path: str | os.PathLike) -> bool:
 def describe_host() -> str:
     """A one-line environment banner for the log panel and bug reports."""
     return f"QGIS {Qgis.QGIS_VERSION} (int {QGIS_VERSION}), Qt{'6' if IS_QGIS4 else '5'}"
+
+
+def is_deleted(obj) -> bool:
+    """True when Qt has destroyed the C++ half of *obj* underneath Python.
+
+    Background work outlives widgets: the dock is closed, or the plugin is reloaded,
+    while a task is still in flight. Its callback then reaches a Python wrapper whose
+    C++ object is gone, and touching it raises ``RuntimeError: wrapped C/C++ object has
+    been deleted`` from inside a Qt slot, where nothing is left to catch it and QGIS
+    reports it as a plugin crash. Asking first costs nothing and turns that into a
+    callback that simply does not fire, which is the correct behaviour anyway.
+    """
+    if obj is None:
+        return False
+    try:
+        from qgis.PyQt import sip
+    except ImportError:                        # pragma: no cover - unusual QGIS build
+        try:
+            import sip                          # type: ignore[no-redef]
+        except ImportError:
+            return False
+    try:
+        return bool(sip.isdeleted(obj))
+    except (TypeError, RuntimeError, AttributeError):
+        # Not a wrapped object at all (a plain Python callable, a test double).
+        return False
+
+
+def push_message(bar, title: str, text: str, level, duration: int = 8) -> None:
+    """One line in the message bar, the rest behind *More*.
+
+    axqua's errors come with a remedy, and a remedy is usually a sentence or two too
+    long for a banner across the map. QGIS's own overload exists for exactly this: a
+    short line plus a body the user can expand. Falling back to the plain call keeps
+    this working against an iface double in the tests.
+    """
+    head, _, rest = (text or "").partition("\n")
+    rest = rest.strip()
+    if rest:
+        try:
+            bar.pushMessage(title, head, rest, level, duration)
+            return
+        except TypeError:                      # pragma: no cover - older signature
+            pass
+    bar.pushMessage(title, text, level=level, duration=duration)
+
+
+#: The environment banner is written once, before the first message.
+_LOG_BANNER_WRITTEN = False
+
+
+def log_message(text: str, level=None) -> None:
+    """Write to QGIS's *aXqua* message-log tab.
+
+    The bug-reporting instructions in the documentation tell users to copy this tab, so
+    something has to write to it. The message bar is for the one line the user needs
+    now; this is the durable record of what the plugin asked axqua and what came back.
+    """
+    global _LOG_BANNER_WRITTEN
+    try:
+        from qgis.core import QgsMessageLog
+        if not _LOG_BANNER_WRITTEN:
+            # Once per session, at the top of the tab: a bug report that starts with
+            # which QGIS and which Qt is one nobody has to ask a first question about.
+            _LOG_BANNER_WRITTEN = True
+            QgsMessageLog.logMessage(describe_host(), "aXqua", INFO)
+        QgsMessageLog.logMessage(str(text), "aXqua",
+                                 level if level is not None else INFO)
+    except Exception:                          # noqa: BLE001 - logging must never raise
+        # Not reported anywhere, because this *is* the reporting channel. A QGIS whose
+        # message log has gone - a headless run, an application being torn down - must
+        # not turn a diagnostic into a second failure on top of the first.
+        return

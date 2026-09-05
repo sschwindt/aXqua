@@ -12,7 +12,27 @@ it writes, so either side can be reinstalled without touching the other.
 
 from __future__ import annotations
 
-__version__ = "0.3.2"
+from pathlib import Path
+
+
+def _version() -> str:
+    """The version in ``metadata.txt``, which is the one QGIS shows.
+
+    Read rather than repeated. A second literal here drifted from the manifest across
+    two releases without anything noticing, and the number a user reads in the plugin
+    manager is always the manifest's - so that file is the source and this follows it.
+    """
+    try:
+        for line in (Path(__file__).with_name("metadata.txt")
+                     .read_text(encoding="utf-8").splitlines()):
+            if line.startswith("version="):
+                return line.split("=", 1)[1].strip()
+    except OSError:
+        pass
+    return "0.0.0"
+
+
+__version__ = _version()
 
 
 def classFactory(iface):        # noqa: N802 - the name QGIS requires

@@ -75,7 +75,7 @@ Exporting
 
 **A figure.** *aXqua ▸ Add the default A3 print layout* creates a layout fitted to the current extent, with the ROI, a north arrow, a bold **Q** arrow along the reach, a two-tone scale bar and a legend placeholder. Export it from QGIS's layout manager as PDF, SVG or PNG.
 
-**An animation.** For an unsteady result, *Export movie* renders the visible variable frame by frame and encodes WebM/VP9 with ``ffmpeg``. Without ffmpeg the PNG frames are kept and the exact encoding command is printed, so the frames are never lost to a missing tool.
+**An animation.** For an unsteady result, *aXqua ▸ Export movie…* renders a mesh variable frame by frame - through the canvas's own layers, extent and styling - and encodes WebM/VP9 with ``ffmpeg``. Without ffmpeg the PNG frames are kept and the exact encoding command is printed, so the frames are never lost to a missing tool.
 
 **The whole case.** ``axqua-case/`` is self-contained and ordinary files: copying that folder moves the built case, the results and the reports together. The tracked ``case-config.yml`` plus ``user-sources/`` is the smaller thing to archive when the results can be rebuilt.
 

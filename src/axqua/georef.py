@@ -199,8 +199,8 @@ def parse_control_point(text: str) -> tuple[tuple[float, float], tuple[float, fl
     return cad, world
 
 
-def report_control_points(stl: Path, points: list[str], *, dz: float = 0.0) -> int:
-    """Fit and report a transform from control points, and say how well it fits.
+def match_control_points(stl: Path, points: list[str], *, dz: float = 0.0) -> Match:
+    """Fit a transform from control points, with the residuals that judge it.
 
     The residuals are the whole point of reporting rather than applying: two points
     always fit exactly, so a third is what tells you whether the pairs were identified
@@ -212,25 +212,44 @@ def report_control_points(stl: Path, points: list[str], *, dz: float = 0.0) -> i
     transform = Transform.from_control_points(cad, world, dz=dz)
     residuals = transform.residuals(cad, world)
 
-    result = Match(transform=transform, cad_bounds=(), map_bounds=(),
-                   scale_ratio=transform.scale, aspect_cad=0.0, aspect_map=0.0,
-                   verdict="match")
-    log.info("GEOREFERENCE from %d control point(s): scale %.6g, rotation %.4f deg",
-             len(pairs), transform.scale, transform.rotation_deg)
-    for index, (pair, residual) in enumerate(zip(pairs, residuals), start=1):
-        log.info("  point %d: CAD %s -> map %s, residual %.4f m",
-                 index, pair[0], pair[1], residual)
     if len(pairs) == 2:
-        log.warning("two points fit exactly by construction, so these residuals prove "
-                    "nothing. Add a third, independent point to check the fit.")
+        message = ("two points fit exactly by construction, so these residuals prove "
+                   "nothing. Add a third, independent point to check the fit.")
     elif residuals.max() > 0.05:
-        log.warning("largest residual %.3f m - larger than a slot width. Check that "
-                    "each pair really names the same feature.", residuals.max())
-    surface = read_stl(stl)
-    moved = surface.transformed(transform)
+        message = (f"largest residual {residuals.max():.3f} m - larger than a slot "
+                   "width. Check that each pair really names the same feature.")
+    else:
+        message = f"largest residual {residuals.max():.3f} m"
+    return Match(transform=transform, cad_bounds=(), map_bounds=(),
+                 scale_ratio=transform.scale, aspect_cad=0.0, aspect_map=0.0,
+                 verdict="match", message=message,
+                 recommendation="\n".join(
+                     f"point {i}: CAD {p[0]} -> map {p[1]}, residual {r:.4f} m"
+                     for i, (p, r) in enumerate(zip(pairs, residuals), start=1)))
+
+
+def log_control_points(stl: Path, result: Match) -> Match:
+    """Narrate a control-point fit, and say where the geometry lands under it."""
+    transform = result.transform
+    log.info("GEOREFERENCE from control points: scale %.6g, rotation %.4f deg",
+             transform.scale, transform.rotation_deg)
+    for line in result.recommendation.splitlines():
+        log.info("  %s", line)
+    # A plain "largest residual x m" is the good case; the other two messages are both
+    # reasons not to trust the fit yet.
+    settled = (result.message.startswith("largest residual")
+               and "larger than" not in result.message)
+    (log.info if settled else log.warning)("%s", result.message)
+    moved = read_stl(stl).transformed(transform)
     log.info("  %s lands at x %.2f..%.2f, y %.2f..%.2f", Path(stl).name,
              moved.bounds[0], moved.bounds[3], moved.bounds[1], moved.bounds[4])
     log.info("paste into the case config:\n\n%s", result.as_yaml())
+    return result
+
+
+def report_control_points(stl: Path, points: list[str], *, dz: float = 0.0) -> int:
+    """The control-point path as a CLI return code. Kept for direct callers."""
+    log_control_points(stl, match_control_points(stl, points, dz=dz))
     return 0
 
 

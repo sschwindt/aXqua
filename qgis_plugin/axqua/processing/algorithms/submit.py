@@ -17,11 +17,37 @@ from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterEnum,
 from ...core.runner_client import RunnerClient, RunnerError
 from ...gui.settings_dialog import read_settings
 
-#: Offered in the enum. Kept short - the full list is in ``axqua submit --help-kinds``
-#: and in the dock, which generates its tabs from the case itself.
+#: The fallback list, used until axqua has been asked. It is a copy of what axqua
+#: shipped when this was written, and keeping it in step by hand is exactly the failure
+#: this module now avoids - it was already missing ``calibration-multiflow``.
 KINDS = ["preprocessing", "steady", "mesh-convergence", "build-3d", "steady-3d",
          "vertical-convergence", "unsteady", "openfoam-build", "openfoam-run",
          "calibration"]
+
+#: What ``axqua submit --help-kinds`` reported, once anything has asked it.
+#:
+#: Filled by the Setup tab's background probe rather than by a call from here: this
+#: module's ``initAlgorithm`` runs when the Processing provider is *registered*, which
+#: is during QGIS startup, and a subprocess there is the very thing the audit removed.
+#: So the list improves as soon as the dock has talked to axqua once, and until then
+#: the shipped list is used.
+_DISCOVERED: list[str] = []
+
+
+def set_kinds(kinds) -> None:
+    """Record what axqua says it can run. Accepts the ``--help-kinds`` payload."""
+    names = []
+    for entry in kinds or []:
+        name = entry.get("kind") if isinstance(entry, dict) else entry
+        if name:
+            names.append(str(name))
+    if names:
+        _DISCOVERED[:] = names
+
+
+def available_kinds() -> list[str]:
+    """The kinds to offer: axqua's own answer when there is one."""
+    return list(_DISCOVERED) if _DISCOVERED else list(KINDS)
 
 
 class SubmitJobAlgorithm(QgsProcessingAlgorithm):
@@ -56,11 +82,14 @@ class SubmitJobAlgorithm(QgsProcessingAlgorithm):
             "aXqua panel, or with the 'Check job status' algorithm.")
 
     def initAlgorithm(self, config=None):    # noqa: N802 - QGIS naming
+        # Frozen here so the index the user picks means the same thing when the
+        # algorithm runs, even if axqua is asked again in between.
+        self._kinds = available_kinds()
         self.addParameter(QgsProcessingParameterFile(
             self.CONFIG, "Case configuration (case-config.yml)",
             extension="yml"))
         self.addParameter(QgsProcessingParameterEnum(
-            self.KIND, "What to run", options=KINDS, defaultValue=1))
+            self.KIND, "What to run", options=self._kinds, defaultValue=1))
         self.addParameter(QgsProcessingParameterString(
             self.PROFILE, "Solver profile (blank: use the case config)",
             defaultValue="", optional=True))
@@ -74,7 +103,8 @@ class SubmitJobAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):   # noqa: N802
         config = self.parameterAsFile(parameters, self.CONFIG, context)
-        kind = KINDS[self.parameterAsEnum(parameters, self.KIND, context)]
+        kinds = getattr(self, "_kinds", None) or available_kinds()
+        kind = kinds[self.parameterAsEnum(parameters, self.KIND, context)]
         profile = self.parameterAsString(parameters, self.PROFILE, context).strip()
         job_root = self.parameterAsFile(parameters, self.JOB_ROOT, context)
         processes = self.parameterAsInt(parameters, self.PROCESSES, context)

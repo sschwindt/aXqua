@@ -22,18 +22,41 @@ every mutation.
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 TERMINAL_STATES = {"COMPLETED", "FAILED", "CANCELLED"}
-ACTIVE_STATES = {"STARTING", "RUNNING", "POSTPROCESSING", "CANCEL_REQUESTED"}
+#: QUEUED belongs here. It is neither terminal nor uninteresting: a job sits in it from
+#: the moment it is submitted until the launcher picks it up, which is exactly when the
+#: user is watching hardest. Leaving it out made ``interval_ms`` return "stop the timer"
+#: for a dashboard whose only job had just been submitted, and the row then never moved
+#: until somebody pressed Refresh.
+ACTIVE_STATES = {"QUEUED", "STARTING", "RUNNING", "POSTPROCESSING", "CANCEL_REQUESTED"}
 
 #: Poll intervals in milliseconds.
 INTERVAL_ACTIVE_MS = 2000
 INTERVAL_HIDDEN_MS = 30000
 INTERVAL_IDLE_MS = 0            # 0 = stop the timer entirely
+
+
+def _number(value: Any) -> float | None:
+    """*value* as a float, or None if it is not a number.
+
+    ``status.json`` is written by a solver-side process, and a crashed or half-written
+    run can put ``null``, ``"n/a"`` or a string in a field the dashboard formats with
+    ``:.4g``. That raises a TypeError inside a QTimer slot, with the table half painted
+    and no traceback anywhere the user can see - so every numeric field is asked rather
+    than assumed. Booleans are excluded on purpose: ``True`` is an int in Python, and
+    "1.000 cells" would be a lie about a flag.
+    """
+    if isinstance(value, bool) or value is None:
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if number == number else None      # NaN formats, but means nothing
 
 
 @dataclass
@@ -79,11 +102,12 @@ class Job:
         p = self.progress or {}
         kind = str(p.get("kind", ""))
         if kind == "solver_run":
-            duration, time = p.get("duration"), p.get("simulated_time")
+            duration, time = _number(p.get("duration")), _number(p.get("simulated_time"))
+            iteration = _number(p.get("iteration")) or 0
             if duration and time is not None:
-                return f"{min(time / duration, 1.0) * 100:.0f}%  (it {p.get('iteration', 0)})"
+                return f"{min(time / duration, 1.0) * 100:.0f}%  (it {iteration:.0f})"
             if time is not None:
-                return f"t={time:.0f}s  it={p.get('iteration', 0)}"
+                return f"t={time:.0f}s  it={iteration:.0f}"
         if kind == "ladder":
             done, total = p.get("levels_done", 0), p.get("levels_total")
             text = f"level {done}" + (f"/{total}" if total else "")
@@ -92,19 +116,21 @@ class Job:
             return text
         if kind == "calibration":
             it, mx = p.get("iteration"), p.get("max_iterations")
-            best = p.get("best_objective")
+            best = _number(p.get("best_objective"))
             text = f"iter {it or 0}" + (f"/{mx}" if mx else "")
             return text + (f"  best {best:.4g}" if best is not None else "")
         if kind == "preprocessing":
             return f"{p.get('step_name') or ''} {p.get('step', 0)}/{p.get('n_steps', 5)}"
-        if kind == "openfoam_build" and p.get("cells"):
-            return f"{int(p['cells']):,} cells"
+        if kind == "openfoam_build":
+            cells = _number(p.get("cells"))
+            if cells:
+                return f"{int(cells):,} cells"
         return self.phase or ""
 
     @property
     def objective_text(self) -> str:
-        best = (self.progress or {}).get("best_objective")
-        return f"{best:.4g}" if isinstance(best, (int, float)) else "-"
+        best = _number((self.progress or {}).get("best_objective"))
+        return f"{best:.4g}" if best is not None else "-"
 
     @property
     def error_text(self) -> str:
@@ -226,7 +252,3 @@ class JobTable:
         if not self.has_active:
             return INTERVAL_IDLE_MS
         return INTERVAL_ACTIVE_MS if visible else INTERVAL_HIDDEN_MS
-
-
-def job_root_for(project_root: str | os.PathLike | None) -> str | None:
-    return str(project_root) if project_root else None
