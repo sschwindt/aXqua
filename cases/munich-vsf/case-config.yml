@@ -146,17 +146,39 @@ openfoam:
   bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
   mode: vof                      # start with rigid-lid + cell_size_factor 3 to shake
                                  # out the mesh, then switch here
-  # 3.1 M cells of interFoam on one core is months. 16 of the machine's 32 ranks put
-  # ~196 k cells on each, which is where interFoam still scales, and leaves half the
-  # box for the TELEMAC work this case also runs.
-  n_processors: 16
+  # Measured on the first attempt: 3.14 M cells, dt 5.2e-4 s, 27.6 s/step on 16 ranks
+  # = 0.765 s of river in 7.8 h. The 30 s spin-up would have been 13 days and the 300 s
+  # production stage 128. The four settings below are what make it finishable.
+  n_processors: 32
+  # THE SUB-MODEL. The 88 m reach is three parts and only the middle is a 3D question:
+  # y 19-45 is an approach pool flat at WSE 2.99, y 45-70 is the pool-and-slot reach
+  # falling 1.86 m, y 70-107 is an exit channel flat at 0.72. Two thirds of the plan
+  # area is uniform channel the depth-averaged model already resolves. Written by
+  # make_openfoam_roi.py, which also reads the two boundary values below off r2d.slf.
+  roi: roi-fishpass.gpkg
+  outlet_stage: 0.715            # the parent's WSE at the y=74 crop face, not its
+                                 # own 0.69 tailwater 32 m further down
   cell_size: 0.03
   n_layers: 12
   freeboard: 0.30
   turbulence: kOmegaSST
+  # The spin-up exists to settle the interface AND to develop the vertical velocity
+  # profile, which a 2D seed cannot provide (fields.initial_velocity says so: "left to
+  # develop during the spin-up"). With a 3D seed the profile arrives at t=0, so only
+  # the interface is left to settle and 8 s is enough.
+  spinup_time: 8
+  # NOT a flush of the cropped domain, which is 309 s by volume/Q and 511 s advective.
+  # The jets are a basin-scale process - a basin exchanges in ~7 s - and the run is
+  # seeded from a converged field, so 120 s is ~17 basin exchanges plus room to average
+  # the shedding. Judge it on discharge-convergence.csv and extend if it has not
+  # settled; end_time is re-read by dicts.activate without remeshing.
+  end_time: 120
   pre_run:
     enabled: true                # seed from the 2D result
     reuse: true
+    dimension: 3d                # + a hydrostatic TELEMAC-3D pass for the U profile
+    n_levels: 10                 # inference says 19; 10 halves the pre-run and still
+                                 # gives dz 0.046 m (aspect ~1) on a 0.41 m depth
 
 calibration:
   # Bed roughness is the knob; the three zones above are what there is to calibrate.

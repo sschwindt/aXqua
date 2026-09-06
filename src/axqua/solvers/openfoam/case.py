@@ -151,7 +151,12 @@ def build_case(cfg: Config, *, state: State2D | None = None,
             "boundaries.liquid_boundaries reached the domain edge. Without one the "
             "water has nowhere to leave and the run will simply fill up.")
 
-    if cfg.boundaries.outflow_condition == "free":
+    if of.outlet_stage is not None:
+        stage = float(of.outlet_stage)
+        notes.append(f"outlet stage {stage:.3f} m a.s.l. from openfoam.outlet_stage - "
+                     "this domain is a sub-model, so its tailwater is the parent's "
+                     "level at the crop face, not the case's own far-end prescription")
+    elif cfg.boundaries.outflow_condition == "free":
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
     else:
