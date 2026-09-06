@@ -809,3 +809,65 @@ def test_initial_velocity_varies_over_the_depth_with_a_3d_seed(tmp_path):
     state.u3d = state.v3d = state.z3d = None        # same seed, depth-averaged
     flat = initial_velocity(_M(), np.ones(n), state)
     assert flat[:, 0] == pytest.approx([2.0, 2.0, 2.0])
+
+
+# --------------------------------------------------------------------------- #
+# openfoam.roi: the 3D domain as a sub-model of the 2D reach
+# --------------------------------------------------------------------------- #
+
+
+def _roi_file(tmp_path, poly, name="roi-fishpass.gpkg"):
+    gpd = pytest.importorskip("geopandas")
+    path = tmp_path / name
+    gpd.GeoDataFrame({"name": ["fishpass"]}, geometry=[poly]).to_file(path,
+                                                                     driver="GPKG")
+    return path
+
+
+def test_openfoam_roi_overrides_the_case_boundary(tmp_path):
+    """A 3D run is often worth having over a short stretch of a reach the 2D model
+    covers in full - a structure, a fish pass. Cropping through geodata.boundary would
+    re-cut the 2D mesh the seed comes from, so the override is separate."""
+    shapely = pytest.importorskip("shapely.geometry")
+
+    crop = shapely.box(0.0, 40.0, 30.0, 70.0)
+    path = _roi_file(tmp_path, crop)
+
+    class _OF:
+        roi = path
+
+    class _Cfg:
+        openfoam = _OF()
+
+    polygon, label = ofmesh._openfoam_roi(_Cfg())
+    assert polygon.bounds == pytest.approx((0.0, 40.0, 30.0, 70.0))
+    assert "roi-fishpass.gpkg" in label
+
+
+def test_without_the_override_the_case_boundary_is_used(monkeypatch):
+    sentinel = object()
+    monkeypatch.setattr(ofmesh, "dataset",
+                        lambda cfg: type("D", (), {"roi_polygon": lambda s: sentinel})())
+
+    class _OF:
+        roi = None
+
+    class _Cfg:
+        openfoam = _OF()
+
+    polygon, label = ofmesh._openfoam_roi(_Cfg())
+    assert polygon is sentinel
+    assert label == "the full ROI boundary"
+
+
+def test_a_missing_sub_model_roi_says_so_rather_than_meshing_the_whole_reach(tmp_path):
+    """Silently falling back would mesh the full reach - millions of cells and days of
+    interFoam - for a typo in a path."""
+    class _OF:
+        roi = tmp_path / "not-written-yet.gpkg"
+
+    class _Cfg:
+        openfoam = _OF()
+
+    with pytest.raises(FileNotFoundError, match="does not exist"):
+        ofmesh._openfoam_roi(_Cfg())

@@ -630,9 +630,9 @@ def _domain_polygon(cfg: Config, state, *, domain: str, wet_margin: float,
     """The plan footprint the lattice covers: the ROI, or the wetted corridor."""
     from shapely.ops import unary_union
 
-    roi = dataset(cfg).roi_polygon()
+    roi, roi_label = _openfoam_roi(cfg)
     if domain == "roi" or state is None:
-        return roi, "the full ROI boundary"
+        return roi, roi_label
     wet = state.wet_footprint(wet_depth=wet_depth, buffer=wet_margin)
     if wet is None or wet.is_empty:
         log.warning("no wetted footprint in the 2D result; meshing the full ROI")
@@ -643,7 +643,39 @@ def _domain_polygon(cfg: Config, state, *, domain: str, wet_margin: float,
     if clipped.geom_type == "MultiPolygon":
         clipped = max(clipped.geoms, key=lambda g: g.area)
     return clipped, (f"the 2D wetted extent (H > {wet_depth:g} m) buffered by "
-                     f"{wet_margin:g} m, clipped to the ROI")
+                     f"{wet_margin:g} m, clipped to {roi_label}")
+
+
+def _openfoam_roi(cfg: Config):
+    """(polygon, label) for the ROI the OpenFOAM domain is cut from.
+
+    ``openfoam.roi`` overrides the case boundary so a sub-model - a structure, a fish
+    pass - can be meshed in 3D without the uniform channel above and below it, while
+    the 2D case keeps the full reach it was built and converged on.
+    """
+    override = getattr(cfg.openfoam, "roi", None)
+    if not override:
+        return dataset(cfg).roi_polygon(), "the full ROI boundary"
+
+    import geopandas as gpd
+    from shapely.ops import polygonize, unary_union
+
+    path = Path(override)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"openfoam.roi points at {path}, which does not exist. It is written by "
+            "the case's own ROI helper; run that first, or unset openfoam.roi to mesh "
+            "the whole reach.")
+    gdf = gpd.read_file(path)
+    geoms = [g for g in gdf.geometry.values if g is not None and not g.is_empty]
+    if not geoms:
+        raise ValueError(f"openfoam.roi {path.name} holds no geometry")
+    if set(gdf.geom_type) & {"LineString", "MultiLineString"}:
+        polys = list(polygonize(unary_union(geoms)))
+        if not polys:
+            raise ValueError(f"{path.name}: boundary lines do not close into a polygon")
+        return max(polys, key=lambda p: p.area), f"the OpenFOAM ROI {path.name}"
+    return unary_union(geoms), f"the OpenFOAM ROI {path.name}"
 
 
 # --------------------------------------------------------------------------- #

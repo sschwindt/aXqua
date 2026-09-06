@@ -1408,6 +1408,27 @@ class OpenFoam:
     cell_size_factor: float | None = None
     n_layers: int = 14              # sigma layers per column
     domain: str = "wetted"          # wetted | roi
+    # An ROI for the OpenFOAM domain alone, overriding geodata.boundary. The point is
+    # a **sub-model**: the 2D run covers the whole reach cheaply, while most reaches
+    # have only a short stretch worth solving in 3D - a structure, a confluence, a
+    # fish pass - and the uniform channel above and below it costs VOF cells at no
+    # gain. Kept separate from geodata.boundary so one case config can describe both
+    # models; pointing geodata.boundary at the smaller polygon would silently re-cut
+    # the 2D mesh the seed comes from.
+    #
+    # A crop that removes the case's liquid boundaries makes this a sub-model in the
+    # full sense: it then needs its own inflow and outflow lines and its own
+    # prescribed Q and stage, read from the parent result at those stations rather
+    # than guessed. See cases/munich-vsf/make_openfoam_roi.py.
+    roi: Path | None = None
+    # The tailwater for that sub-model [m a.s.l.]. A crop moves the outflow to a new
+    # station, where the reach does not carry the stage the case prescribes at its own
+    # far end - so prescribing the case value there would impose a level the parent
+    # model never had. Read it from the parent result at the crop face instead.
+    # ``boundaries.prescribed_elevation`` is deliberately not reused: the 2D case is
+    # converged against it, and editing it to suit the 3D crop would silently change
+    # the model the seed comes from.
+    outlet_stage: float | None = None
     wet_margin: float = 5.0         # [m] buffer around the 2D wetted extent
     lid: str = "follow"             # follow (the 2D free surface) | flat
     lid_elevation: float | None = None      # pin the lid to this level [m a.s.l.]
@@ -1478,6 +1499,13 @@ class OpenFoam:
         if self.domain not in ("wetted", "roi"):
             raise ValueError(
                 f"openfoam.domain must be 'wetted' or 'roi', got {self.domain!r}")
+        if self.roi is not None and not Path(self.roi).exists():
+            # Checked here rather than at mesh time: a missing sub-model ROI should
+            # stop the build in the first second, not after the pre-run has spent an
+            # hour producing a seed for a domain that cannot be cut.
+            raise ValueError(
+                f"openfoam.roi {self.roi} does not exist. Write it first (see the "
+                "case's ROI helper), or remove the key to mesh the whole reach.")
         if self.headroom_mode not in ("auto", "fixed"):
             raise ValueError("openfoam.headroom_mode must be 'auto' or 'fixed', "
                              f"got {self.headroom_mode!r}")
@@ -1889,6 +1917,15 @@ def load_config(path: str | os.PathLike) -> Config:
     ofdict = dict(raw.get("openfoam") or {})
     if "bashrc" in ofdict and ofdict["bashrc"] is not None:
         ofdict["bashrc"] = _resolve(cfg_dir, ofdict["bashrc"])
+    if ofdict.get("roi") is not None:
+        # Resolved against the preprocessing folder first - that is where the surfaces
+        # stage and its helpers write geodata - then against the config's own folder,
+        # so both `roi: roi-fishpass.gpkg` and a path spelled out in full work.
+        candidate = Path(str(ofdict["roi"])).expanduser()
+        if not candidate.is_absolute():
+            beside = Path(preprocessing_dir) / candidate
+            candidate = beside if beside.exists() else _resolve(cfg_dir, candidate)
+        ofdict["roi"] = candidate
     ofdict["environment"] = _load_environment(ofdict.get("environment"), cfg_dir)
     ofdict["pre_run"] = PreRun(**_only_known(PreRun, dict(ofdict.get("pre_run") or {})))
     openfoam = OpenFoam(**_only_known(OpenFoam, ofdict))
