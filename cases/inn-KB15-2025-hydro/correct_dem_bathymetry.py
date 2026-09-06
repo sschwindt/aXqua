@@ -93,8 +93,8 @@ def fit_correction(cfg):
     }
 
 
-def model_depth_on(cfg, xs, ys):
-    """The 2D modelled water depth at raster cell centres."""
+def model_column_on(cfg, xs, ys):
+    """The 2D modelled ``(depth, wse)`` at raster cell centres."""
     from axqua.model_column import telemac_column
 
     column = telemac_column(
@@ -103,7 +103,8 @@ def model_depth_on(cfg, xs, ys):
         fields=cfg.model_path("hotstart-seed.slf"),
         method="nearest")            # nearest: a whole raster through a
                                      # triangulation would be needlessly slow
-    return np.where(column.inside, column.depth, 0.0)
+    depth = np.where(column.inside, column.depth, 0.0)
+    return depth, np.where(column.inside, column.wse, np.nan)
 
 
 def main() -> int:
@@ -158,15 +159,31 @@ def main() -> int:
         rows, cols = np.indices(data.shape)
         xs, ys = rasterio.transform.xy(src.transform, rows.ravel(), cols.ravel())
 
-    depth = model_depth_on(cfg, np.asarray(xs), np.asarray(ys)).reshape(data.shape)
-    # Do NOT extrapolate the fit past the depths that support it. The survey spans
-    # 0.30-0.99 m; the model has pools several metres deep, and applying the linear
-    # fit there lowered the bed by up to 1.26 m on the strength of no data at all.
+    depth, wse = model_column_on(cfg, np.asarray(xs), np.asarray(ys))
+    depth = depth.reshape(data.shape)
+    wse = wse.reshape(data.shape)
+
+    # SOLVE for the bed, do not just subtract a correction evaluated at the model's
+    # own depth. The bias depends on the TRUE depth, and the model's depth is
+    # itself too shallow precisely because the bed is too high - using it
+    # under-corrects by ~0.12 m at the survey points, about half the correction.
+    #
+    #   bed_true = DEM - (a + b*(WSE - bed_true))  =>  bed_true = (DEM - a - b*WSE)/(1 - b)
+    #
+    # The modelled WSE is the right anchor: it is set by the downstream control and
+    # the discharge rather than by local bed detail, and matches the corrected DGPS
+    # water surface to ~1 cm on this reach even with the bed wrong.
+    with np.errstate(invalid="ignore"):
+        bed_true = (data - intercept - slope * wse) / (1.0 - slope)
+        correction = np.where(np.isfinite(wse) & (depth > 0), data - bed_true, 0.0)
+
+    # Do NOT extrapolate past the depths that support the fit. The survey spans
+    # 0.30-0.99 m; the model has pools several metres deep, and the linear fit
+    # there lowered the bed by up to 1.26 m on the strength of no data at all.
     # Held flat beyond the deepest surveyed vertical: attenuation must saturate
     # once the return is lost, so a constant is the conservative continuation.
     supported = float(s["depth"].max())
-    correction = np.where(depth > 0,
-                          intercept + slope * np.minimum(depth, supported), 0.0)
+    correction = np.minimum(correction, intercept + slope * supported)
     # taper to zero at the waterline: the LiDAR sees dry ground correctly, and a
     # step at the bank edge would be a meshing artefact rather than terrain
     correction *= np.clip(depth / TAPER_DEPTH, 0.0, 1.0)

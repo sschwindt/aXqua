@@ -431,3 +431,78 @@ decision with a multi-hour rebuild behind it. Steps are printed by the script.
 It remains a hypothesis about the bed, not a survey of it (r = 0.54, two pools,
 105 x 47 m of a 1.6 km reach). It makes the 3D calibration possible; echo-sounding
 or a denser wading survey is what would make the bathymetry known.
+
+### Adopting the corrected bed: what it invalidates, and what it rests on
+
+`geodata.dem_initial` now points at `DEM-2025-20cm-bathy-corrected.tif`. Two
+consequences that must travel with any result computed on it.
+
+**1. It invalidates the 2D roughness posterior.** `ks = 0.411` (90% CI
+0.348-0.446) was fitted against *water levels* on the OLD bed. Lowering the wetted
+channel by ~0.4 m lowers the modelled stage at a given discharge, so the roughness
+that reproduced the measured water surface before will not reproduce it now. The
+2D calibration has to be re-run before its posterior means anything again; until
+then, treat `ks = 0.411` as belonging to the previous bathymetry.
+
+**2. The correction solves for the bed, it does not subtract a number.** The bias
+depends on the TRUE depth, and the model's own depth was too shallow *because* the
+bed was too high, so evaluating `a + b*depth_model` under-corrects by ~0.12 m at
+the survey points - about half the correction. It is solved self-consistently:
+
+    bed_true = (DEM - a - b*WSE) / (1 - b)
+
+anchored on the modelled water surface, which is the right anchor because stage is
+set by the downstream control and the discharge rather than by local bed detail,
+and matched the corrected DGPS water surface to ~1 cm even with the bed wrong.
+
+**What it rests on, stated plainly.** All 30 DGPS verticals are in wadeable water,
+0.30-0.99 m deep - that is *why* they could be waded. The median correction over
+the wetted channel is 0.405 m, which is the **cap**: more than half the wetted
+cells are deeper than any surveyed vertical and take the capped value rather than
+a fitted one. So the main channel is corrected by extrapolation from its margins,
+on a fit explaining about a third of the variance. That is better than a bed known
+to be 0.34 m wrong, and it is not a survey. Echo-sounding the pools is what would
+settle it.
+
+### Verdict: the FlowTracker verticals cannot calibrate a 3D model on this reach
+
+The corrected bed, a converged 2D seed and dropping the unusable `U_z` together
+moved the campaign from 3/90 bracketed to **3/60 (5%)**, median 6.5 -> **6.0
+sigma**. That is not a near miss; it is the same failure.
+
+The direction of the miss is the point:
+
+| | model | measured |
+|---|---|---|
+| horizontal speed at the verticals | mean **0.095** m/s | mean **0.266** m/s |
+| range | 0.002 - 0.356 | 0.008 - 0.879 |
+
+**The model is slower than the measurement at 26 of 30 verticals, by ~2.8x** -
+and the bathymetry correction made this *worse*, not better: deepening the channel
+slows it further at fixed discharge. So the depth evidence and the velocity
+evidence pull in opposite directions. Reconciling them by roughness is impossible,
+because ks cannot add flow that is not there.
+
+What that means: at these coordinates the model routes materially less water than
+the survey measured. Every FlowTracker vertical is in wadeable margin/pool water -
+that is *why* it could be waded - and a margin is exactly where a depth-averaged
+2D solution, and a 3D case seeded from it, distributes flow least reliably. The
+same bias is already recorded for the March-2026 campaign ("margin points carry
+the DEM too-shallow/too-fast bias").
+
+**Recommendation.** Stop trying to calibrate 3D velocity against this dataset.
+Options, in order of what the data can actually support:
+
+1. **Calibrate against water LEVELS**, which the model reproduces to ~1 cm, using
+   the corrected-target route that already works (`prepare_corrected_targets.py`).
+2. **Measure in the conveying channel**, not the margins - an ADCP transect at
+   depth, or a wadeable campaign at genuinely low flow where the thalweg is
+   accessible. Velocity calibration needs points where the model carries the flow.
+3. **Echo-sound the pools** before trusting any bathymetry-dependent conclusion:
+   the present correction extrapolates from 0.30-0.99 m margins into a channel
+   whose depth it never sampled.
+
+The machinery is sound and is now guarded end to end - the elevation check, the
+placement audit and the bracketing test each caught a real defect during this
+work. What it is telling us here is about the reach and the campaign design, not
+about the code.

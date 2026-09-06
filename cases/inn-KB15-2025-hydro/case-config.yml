@@ -30,6 +30,12 @@ geodata:
   # Pure geodata files (boundary CONDITIONS are in `boundaries`, ground truth in
   # `ground_truth`). Paths resolve relative to THIS file; data under user-sources/.
   # ---- required -----------------------------------------------------------
+  # The raw LiDAR survey. correct_dem_bathymetry.py produces a bathymetry-
+  # corrected variant (the wetted bed is ~0.34 m too high, growing with depth);
+  # it is NOT adopted here, because it invalidates the ks=0.411 2D posterior,
+  # which was fitted against water levels on this bed, and because a 3D velocity
+  # campaign on the corrected bed did NOT improve (see the README). Switch the
+  # path below to DEM-2025-20cm-bathy-corrected.tif to adopt it deliberately.
   dem_initial: user-sources/geodata/DEM-2025-20cm.tif  # [REQUIRED] baseline terrain (GeoTIFF)
   boundary: user-sources/geodata/roi-kb15.gpkg         # [REQUIRED] ROI / max wetted extent polygon
   # ---- optional -----------------------------------------------------------
