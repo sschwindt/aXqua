@@ -156,6 +156,10 @@ openfoam:
   # area is uniform channel the depth-averaged model already resolves. Written by
   # make_openfoam_roi.py, which also reads the two boundary values below off r2d.slf.
   roi: roi-fishpass.gpkg
+  # The crop moves the domain away from the case's own inflow (y 19.2) and outflow
+  # (y 106.8), so it needs its own lines and its own tailwater. Both read off r2d.slf
+  # at the crop faces; the 2D case keeps its own, being converged against them.
+  liquid_boundaries: liquid-boundaries-fishpass.gpkg
   outlet_stage: 0.715            # the parent's WSE at the y=74 crop face, not its
                                  # own 0.69 tailwater 32 m further down
   cell_size: 0.03

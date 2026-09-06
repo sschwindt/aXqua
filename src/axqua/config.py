@@ -1429,6 +1429,11 @@ class OpenFoam:
     # converged against it, and editing it to suit the 3D crop would silently change
     # the model the seed comes from.
     outlet_stage: float | None = None
+    # The sub-model's own inflow/outflow lines. A crop that moves the domain away from
+    # the case's liquid boundaries leaves it with none - the water has nowhere to enter
+    # or leave - and the build stops with exactly that message. Same reasoning as
+    # ``roi``: the 2D case keeps its own lines, because it is converged against them.
+    liquid_boundaries: Path | None = None
     wet_margin: float = 5.0         # [m] buffer around the 2D wetted extent
     lid: str = "follow"             # follow (the 2D free surface) | flat
     lid_elevation: float | None = None      # pin the lid to this level [m a.s.l.]
@@ -1499,6 +1504,12 @@ class OpenFoam:
         if self.domain not in ("wetted", "roi"):
             raise ValueError(
                 f"openfoam.domain must be 'wetted' or 'roi', got {self.domain!r}")
+        if (self.liquid_boundaries is not None
+                and not Path(self.liquid_boundaries).exists()):
+            raise ValueError(
+                f"openfoam.liquid_boundaries {self.liquid_boundaries} does not exist. "
+                "A cropped domain needs its own inflow and outflow lines; write them "
+                "first, or remove the key to use the case's own.")
         if self.roi is not None and not Path(self.roi).exists():
             # Checked here rather than at mesh time: a missing sub-model ROI should
             # stop the build in the first second, not after the pre-run has spent an
@@ -1917,15 +1928,17 @@ def load_config(path: str | os.PathLike) -> Config:
     ofdict = dict(raw.get("openfoam") or {})
     if "bashrc" in ofdict and ofdict["bashrc"] is not None:
         ofdict["bashrc"] = _resolve(cfg_dir, ofdict["bashrc"])
-    if ofdict.get("roi") is not None:
-        # Resolved against the preprocessing folder first - that is where the surfaces
-        # stage and its helpers write geodata - then against the config's own folder,
-        # so both `roi: roi-fishpass.gpkg` and a path spelled out in full work.
-        candidate = Path(str(ofdict["roi"])).expanduser()
+    # The sub-model's geodata. Resolved against the preprocessing folder first - that
+    # is where the surfaces stage and its helpers write geodata - then against the
+    # config's own folder, so both `roi: roi-fishpass.gpkg` and a full path work.
+    for key in ("roi", "liquid_boundaries"):
+        if ofdict.get(key) is None:
+            continue
+        candidate = Path(str(ofdict[key])).expanduser()
         if not candidate.is_absolute():
             beside = Path(preprocessing_dir) / candidate
             candidate = beside if beside.exists() else _resolve(cfg_dir, candidate)
-        ofdict["roi"] = candidate
+        ofdict[key] = candidate
     ofdict["environment"] = _load_environment(ofdict.get("environment"), cfg_dir)
     ofdict["pre_run"] = PreRun(**_only_known(PreRun, dict(ofdict.get("pre_run") or {})))
     openfoam = OpenFoam(**_only_known(OpenFoam, ofdict))
