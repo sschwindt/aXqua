@@ -489,6 +489,7 @@ def classify_sides(cfg: Config, midpoints: np.ndarray,
     labels = np.full(midpoints.shape[0], BANKS_PATCH, dtype=object)
     names: list[str] = []
     discharges: dict[str, float] = {}
+    cfg = _with_submodel_boundaries(cfg)
     if cfg.boundaries.liquid_boundaries is None or midpoints.shape[0] == 0:
         return labels, names, discharges
 
@@ -644,6 +645,23 @@ def _domain_polygon(cfg: Config, state, *, domain: str, wet_margin: float,
         clipped = max(clipped.geoms, key=lambda g: g.area)
     return clipped, (f"the 2D wetted extent (H > {wet_depth:g} m) buffered by "
                      f"{wet_margin:g} m, clipped to {roi_label}")
+
+
+def _with_submodel_boundaries(cfg: Config) -> Config:
+    """*cfg*, with the sub-model's own liquid lines in place of the case's.
+
+    A cropped OpenFOAM domain no longer touches the boundaries the reach enters and
+    leaves by, so it carries its own - swapped in here rather than in the case config,
+    which the 2D run is converged against.
+    """
+    override = getattr(cfg.openfoam, "liquid_boundaries", None)
+    if not override:
+        return cfg
+    import copy
+    local = copy.copy(cfg)
+    local.boundaries = copy.copy(cfg.boundaries)
+    local.boundaries.liquid_boundaries = Path(override)
+    return local
 
 
 def _openfoam_roi(cfg: Config):
