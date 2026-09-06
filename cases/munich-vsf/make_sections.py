@@ -1,5 +1,21 @@
 """Derive the pool cross-sections XS1-XS4 from the geometry.
 
+.. warning::
+
+   **Superseded, and it was wrong.** This script reports 12 baffles and 11 pools. The
+   structure has **14 baffles and 13 basins** at a 1.640 m pitch, which the contractor
+   STL, the Blender heightmap and the dimensioned drawing all agree on (see the case
+   README). The pool-reach detection below drops the two end basins, where the channel
+   transitions into the entry chamber and the outlet, so every section it places is
+   numbered one or two basins off.
+
+   ``user-sources/geodata/fishpass-dimensions-ssc.fodp`` gives the four sections
+   directly, as stations along the reach: **XS 1 at 3.4 m** (approach channel),
+   **XS 2 at 11.2 m** (basin 3), **XS 3 at 17.8 m** (basin 7), **XS 4 at 32.3 m** (exit
+   channel). Two of the four are channel sections rather than basins, which is also why
+   the campaign's ``US2/US4/US5/US7`` labels never mapped onto pool numbers. Use those
+   stations; keep this script for the pool geometry it reports along the way.
+
 The flume campaign reports its measurements per **pool** - XS1 at US2, XS2 at US4, XS3
 at US5, XS4 at US7 - and nothing else: no coordinates, no station chainage. The pools
 themselves are in the CAD, though, so the sections can be recovered from it rather than
