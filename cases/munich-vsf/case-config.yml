@@ -146,6 +146,10 @@ openfoam:
   bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
   mode: vof                      # start with rigid-lid + cell_size_factor 3 to shake
                                  # out the mesh, then switch here
+  # 3.1 M cells of interFoam on one core is months. 16 of the machine's 32 ranks put
+  # ~196 k cells on each, which is where interFoam still scales, and leaves half the
+  # box for the TELEMAC work this case also runs.
+  n_processors: 16
   cell_size: 0.03
   n_layers: 12
   freeboard: 0.30

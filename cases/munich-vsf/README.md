@@ -125,6 +125,47 @@ Two things to settle before drawing conclusions from that comparison:
    `axqua-case/postprocessing/pool-sections.png` labels every pool, so comparing it
    with the report settles the question at a glance.
 
+### 13 basins, not 11 - settled
+
+`make_sections.py` reported 12 baffles and 11 pools. It was wrong, and the newer sources
+in `user-sources/geodata/` say so three times over:
+
+| source | baffles | basins | pitch | span |
+| --- | --- | --- | --- | --- |
+| contractor STL (`stahlbeton` + `stahlblech`) | 14, plus an end wall | **13** | 1.640 m, std 0.010 | 21.44 m |
+| `blender-heightmap-high-res.jpg` | 14 | **13** | 1.64-1.65 m | 21.45 m |
+| `fishpass-dimensions-ssc.fodp` | - | - | 1.50 m clear | 22.70 m reach |
+
+Measured by rotating the CAD onto the reach's own axis (bearing 76.8 deg) and counting
+periodic wall features across it, and independently by counting the baffle glyphs in the
+heightmap against the drawing's own dimension lines - the drawing is 1 cm to the metre,
+so its 22.70 m dimension is drawn 22.58 cm long and the scale checks itself.
+
+**The two figures are not two designs.** The pitch agrees to a centimetre between the
+contractor CAD and the Blender remodelling, which is what says they are the same
+structure measured twice rather than a plan revision. What differed was the *detection*:
+`make_sections.py` finds the pool reach by a cross-cut heuristic and dropped the two end
+basins, where the channel transitions into the entry chamber and the outlet.
+
+The drawing also reconciles its own numbers. Its **1.50 m** is the *clear* basin length,
+between baffle faces; the pitch is 1.65 m and the baffle wall is about 0.15 m thick.
+22.70 m of reach = 1.08 m entry chamber + 13 x 1.65 m of basins + the outlet.
+
+And it settles what `make_sections.py` could only guess at - **where XS 1-4 actually
+are**, as stations along the drawing:
+
+| section | station | where |
+| --- | --- | --- |
+| XS 1 | 3.4 m | approach channel, upstream of the structure |
+| XS 2 | 11.2 m | basin 3 |
+| XS 3 | 17.8 m | basin 7 |
+| XS 4 | 32.3 m | exit channel, 3.87 m below the reach |
+
+Note that XS 1 and XS 4 are in the approach and exit channels, **not in basins at all**,
+which is why the report's `US2 / US4 / US5 / US7` labels never mapped onto pool numbers.
+Two of the four flume sections are channel sections, and the comparison has to treat
+them as such.
+
 ## The steady run, and judging it
 
 `hydrodynamics.turbulence_model` is set to **3 (k-epsilon) rather than `auto`**. The
