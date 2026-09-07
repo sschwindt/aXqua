@@ -149,7 +149,11 @@ openfoam:
   # Measured on the first attempt: 3.14 M cells, dt 5.2e-4 s, 27.6 s/step on 16 ranks
   # = 0.765 s of river in 7.8 h. The 30 s spin-up would have been 13 days and the 300 s
   # production stage 128. The four settings below are what make it finishable.
-  n_processors: 32
+  # 16, not 32: this box is a Ryzen 9 5950X - 16 physical cores, 2 threads each, so
+  # nproc says 32 and Open MPI allocates 16 slots and refuses more. Oversubscribing
+  # hyperthreads would not help either; interFoam is memory-bandwidth bound. There is
+  # no core-count lever here, only the domain and the run length.
+  n_processors: 16
   # THE SUB-MODEL. The 88 m reach is three parts and only the middle is a 3D question:
   # y 19-45 is an approach pool flat at WSE 2.99, y 45-70 is the pool-and-slot reach
   # falling 1.86 m, y 70-107 is an exit channel flat at 0.72. Two thirds of the plan
