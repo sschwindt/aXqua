@@ -543,6 +543,20 @@ def write_dicts(of_mesh, cfg, case_dir: str | Path, *,
     written.append(_write(system / "fvConstraints", fv_constraints(cfg, velocity_cap)))
 
     patches = of_mesh.inlet_patches + of_mesh.outlet_patches
+    wanted = {STAGE_DIRS[s.name] for s in stages(cfg)}
+    for name in set(STAGE_DIRS.values()) - wanted:
+        # A rebuild that changes the mode changes which stages exist, and a stage
+        # directory left behind by the previous one is not merely clutter: activate()
+        # would happily copy a two-phase stage1-spinup (MULESCorr yes, maxCo 0.3) into
+        # a rigid-lid case, and the case would run - just not as the config describes.
+        stale = system / name
+        if stale.is_dir():
+            for f in stale.iterdir():
+                f.unlink()
+            stale.rmdir()
+            log.info("removed the stale %s stage directory (this mode does not use it)",
+                     name)
+
     for stage in stages(cfg):
         stage_dir = system / STAGE_DIRS[stage.name]
         stage_dir.mkdir(parents=True, exist_ok=True)

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from axqua import prerun
@@ -274,7 +275,6 @@ def test_a_diverged_3d_result_is_not_adopted_as_a_seed(tmp_path):
     """A diverged TELEMAC run does not always fail loudly - it can march to the end
     and write a file full of NaN. Seeding U from that gives an OpenFOAM run that dies
     with no visible cause."""
-    import numpy as np
 
     from axqua.core.selafin import write_geometry
 
@@ -332,3 +332,73 @@ def test_a_3d_seed_does_not_claim_the_2d_run_was_recomputed(tmp_path, spy,
     text = " ".join(prerun.ensure_seed(cfg).summary())
     assert "TELEMAC-3D pre-run" in text
     assert "dedicated coarse" not in text
+
+
+# --------------------------------------------------------------------------- #
+# reusing the 3D pre-run
+# --------------------------------------------------------------------------- #
+
+
+def _cfg_with_reuse(reuse: bool):
+    class _PreRun:
+        pass
+
+    pre = _PreRun()
+    pre.reuse = reuse
+
+    class _OF:
+        pass
+
+    of = _OF()
+    of.pre_run = pre
+
+    class _Cfg:
+        pass
+
+    cfg = _Cfg()
+    cfg.openfoam = of
+    return cfg
+
+
+def _slf_pair(tmp_path, monkeypatch, *, newer=True):
+    """A 2D seed and a 3D result beside it, with controllable mtimes.
+
+    The files are placeholders: whether the *contents* are usable is ``_is_finite``'s
+    question and is tested against it, while ``_reusable_3d`` decides on the reuse
+    flag, existence and which of the two is newer.
+    """
+    import os
+
+    monkeypatch.setattr(prerun, "_is_finite", lambda path: True)
+    two_d = tmp_path / "r2d.slf"
+    three_d = tmp_path / "r3d-hydrostatic.slf"
+    for path in (two_d, three_d):
+        path.write_bytes(b"placeholder")
+    stamp = os.path.getmtime(two_d)
+    os.utime(three_d, (stamp + 10, stamp + 10) if newer else (stamp - 10, stamp - 10))
+    return two_d, three_d
+
+
+def test_an_existing_3d_pre_run_is_reused(tmp_path, monkeypatch):
+    """pre_run.reuse used to cover only the 2D result, so any later failure - a missing
+    sub-model boundary line, a bad ROI - re-ran a solver step that had been correct.
+    On the Munich fish pass that was 3 h 15 min an attempt."""
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch)
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(True)) is True
+
+
+def test_a_3d_pre_run_older_than_its_2d_seed_is_not_reused(tmp_path, monkeypatch):
+    """A re-converged 2D run invalidates the profile derived from the old one."""
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch, newer=False)
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(True)) is False
+
+
+def test_reuse_off_always_re_runs(tmp_path, monkeypatch):
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch)
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(False)) is False
+
+
+def test_a_missing_3d_result_is_not_reused(tmp_path, monkeypatch):
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch)
+    three_d.unlink()
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(True)) is False
