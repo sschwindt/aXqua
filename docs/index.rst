@@ -44,6 +44,7 @@ One case description feeds **two simulation backends**. The geodata, the boundar
    openfoam
    hbc
    results
+   postprocessing
    advanced
    help
    development

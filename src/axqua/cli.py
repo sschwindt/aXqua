@@ -561,8 +561,82 @@ def _job(name: str):
 #: the alternative - ``argparse`` subparsers - cannot express the default form
 #: (``axqua <config.yml>``, with no verb at all) without a pre-pass on ``argv[0]``,
 #: so the chain would survive the conversion anyway and only the help output would churn.
+def _postproc_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="axqua postproc",
+        description="Render figures from a case's solver results (VisIt).")
+    parser.add_argument("config", type=Path, help="case-config.yml")
+    parser.add_argument("--scene", action="append", dest="scenes", default=None,
+                        help="scene to render (repeatable); default: postproc.scenes")
+    parser.add_argument("--solver", default=None, choices=("openfoam", "telemac"),
+                        help="only draw results from this solver")
+    parser.add_argument("--backend", default=None, help="override postproc.backend")
+    parser.add_argument("--time", default="last",
+                        help="'last' (default), 'first', or a time-slider state")
+    parser.add_argument("-o", "--out", type=Path, default=None,
+                        help="output directory (default: <postprocessing_dir>/figures)")
+    parser.add_argument("--list", action="store_true",
+                        help="report which scenes are available, and why not")
+    parser.add_argument("--script-only", action="store_true",
+                        help="write the generated scripts and stop (needs no VisIt)")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    return parser
+
+
+def _run_postproc(argv: list[str]) -> int:
+    args = _postproc_parser().parse_args(argv)
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    from axqua.postproc import render as render_mod
+
+    try:
+        cfg = load_config(args.config)
+        if args.backend:
+            cfg.postproc.backend = args.backend
+        names = args.scenes if args.scenes else (cfg.postproc.scenes or None)
+
+        if args.list:
+            for line in render_mod.plan_lines(cfg, names=names, solver=args.solver):
+                print(line)
+            return 0
+        return render_mod.render(cfg, names=names, solver=args.solver,
+                                 out_dir=args.out, script_only=args.script_only)
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger("axqua").error("%s: %s", type(exc).__name__, exc)
+        if args.verbose:
+            raise
+        return 1
+
+
+def _run_check_gt(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="axqua check-gt",
+        description="Check the compiled ground-truth elevations against the model.")
+    parser.add_argument("config", type=Path)
+    parser.add_argument("--strict", action="store_true",
+                        help="exit non-zero on an error finding")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    args = parser.parse_args(argv)
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    from axqua.ground_truth_qa import check_ground_truth_elevations, report
+
+    try:
+        cfg = load_config(args.config)
+        findings = check_ground_truth_elevations(cfg)
+        report(findings, strict=args.strict)
+        return 1 if (args.strict and any(f.severity == "error" for f in findings)) else 0
+    except SystemExit:
+        return 1
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger("axqua").error("%s: %s", type(exc).__name__, exc)
+        if args.verbose:
+            raise
+        return 1
+
+
 _DISPATCH = {
     "clip": lambda argv: _run_clip(argv),
+    "check-gt": lambda argv: _run_check_gt(argv),
+    "postproc": lambda argv: _run_postproc(argv),
     "rating": lambda argv: _run_rating(argv),
     "migrate": lambda argv: _run_migrate(argv),
     "targets": lambda argv: _run_targets(argv),

@@ -42,9 +42,11 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "report": ("DischargeHistory", "SurfaceFreedom", "analyse", "surface_freedom",
                "write_report"),
     "runtime": ("OpenFoamProgress", "OpenFoamRuntime"),
+    "calibration": ("campaign_config", "emit_openfoam_config", "openfoam_parameters",
+                    "run_openfoam_calibration", "stage_case_template"),
 }
-_SUBMODULES = ("case", "dicts", "fields", "hotstart", "mesh", "polymesh", "quality",
-               "report", "runtime", "spec")
+_SUBMODULES = ("calibration", "case", "dicts", "fields", "hotstart", "mesh", "polymesh",
+               "quality", "report", "runtime", "spec")
 
 _NAME_TO_MODULE = {name: module
                    for module, names in _EXPORTS.items()
@@ -54,8 +56,10 @@ __all__ = [
     "DischargeHistory", "MeshReport", "OpenFoamArtifacts", "OpenFoamMesh",
     "OpenFoamProgress", "OpenFoamRuntime", "Patch", "PlanGrid", "PolyMesh",
     "State2D", "SurfaceFreedom", "analyse", "assess", "build_case", "build_mesh",
-    "build_plan_grid", "estimate_cells", "load_hotstart", "sigma_levels",
-    "summarise", "surface_freedom", "write_polymesh", "write_report", *_SUBMODULES,
+    "build_plan_grid", "campaign_config", "emit_openfoam_config", "estimate_cells",
+    "load_hotstart", "openfoam_parameters", "run_openfoam_calibration",
+    "sigma_levels", "stage_case_template", "summarise", "surface_freedom",
+    "write_polymesh", "write_report", *_SUBMODULES,
 ]
 
 

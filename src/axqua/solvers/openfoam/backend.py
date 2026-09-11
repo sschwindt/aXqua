@@ -191,6 +191,24 @@ class OpenFoamBackend(BaseBackend):
                 log.warning("foamToVTK failed: %s: %s", type(exc).__name__, exc)
         return out
 
+    def study(self, cfg, capability=None, *, ctx: Any = None,
+              launch_mode: str = "prepare", checkout=None, rebuild: bool = False,
+              seed=None, **kwargs):
+        """Multi-run investigations. Currently only the calibration campaign.
+
+        The 2D seed is passed in rather than obtained here: ``axqua.prerun`` imports
+        the TELEMAC backend transitively, and this module must not reach into it
+        (``tests/test_capabilities.py`` enforces that by reading the source).
+        """
+        from axqua.core.capabilities import Capability
+
+        if capability is not Capability.CALIBRATION:
+            return super().study(cfg, capability, **kwargs)
+        from axqua.solvers.openfoam.calibration import run_openfoam_calibration
+        return run_openfoam_calibration(
+            cfg, launch_mode=launch_mode, checkout=checkout, rebuild=rebuild,
+            state=seed, ctx=ctx, **kwargs)
+
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
         """The relative inlet/outlet discharge imbalance - what the run is judged on."""
         from axqua.solvers.openfoam import report
@@ -199,8 +217,79 @@ class OpenFoamBackend(BaseBackend):
         except Exception as exc:  # noqa: BLE001
             log.debug("no discharge history: %s: %s", type(exc).__name__, exc)
             return None
-        value = getattr(history, "final_imbalance", None)
+        # Direct attribute access, not getattr(..., None): this read used to name a
+        # field DischargeHistory did not define, so it silently returned None for
+        # every run. A real attribute means a future rename fails loudly instead.
+        value = history.final_imbalance
         return float(value) if value is not None else None
+
+    def describe_results(self, cfg) -> list:
+        """What a visualiser can open for this case.
+
+        Cheap by contract: directory listings and the ``0/`` field names, no
+        pyvista and no solver launch, because a caller may ask this just to decide
+        which figures are available. ``case.foam`` is handed over as-is - VisIt and
+        ParaView both read an OpenFOAM case directory natively, so nothing is
+        converted here.
+        """
+        from axqua.postproc.dataset import Dataset
+
+        case_dir = Path(cfg.openfoam_case_dir)
+        foam = case_dir / "case.foam"
+        if not (case_dir / "constant" / "polyMesh" / "faces").is_file():
+            return []
+        if not foam.is_file():
+            try:
+                foam.write_text("")
+            except OSError:
+                return []
+
+        times: list[float] = []
+        for root in (case_dir, case_dir / "processor0"):
+            if not root.is_dir():
+                continue
+            for entry in root.iterdir():
+                if not entry.is_dir():
+                    continue
+                try:
+                    times.append(float(entry.name))
+                except ValueError:
+                    continue
+            if times:
+                break
+
+        fields: set[str] = set()
+        zero = case_dir / "0"
+        if zero.is_dir():
+            fields = {f.name for f in zero.iterdir() if f.is_file()}
+
+        try:
+            from axqua.solvers.openfoam.polymesh import read_patch_names
+            patches = set(read_patch_names(case_dir))
+        except Exception as exc:  # noqa: BLE001 - a listing must never raise
+            log.debug("could not read patch names: %s: %s", type(exc).__name__, exc)
+            patches = set()
+
+        notes = ()
+        if cfg.openfoam.mode == "rigid-lid":
+            # 0/alpha.water EXISTS in a rigid-lid case, but it is uniformly 1: the
+            # domain is water only. Advertising it as a field would let a scene
+            # contour alpha = 0.5 and render an empty isosurface - a blank figure
+            # that looks like a successful render. What the case actually has is a
+            # lid patch carrying the prescribed surface, which is reported below.
+            fields.discard("alpha.water")
+            # Worth carrying into every figure: under a rigid lid the surface is an
+            # input, so a picture of it shows the 2D seed rather than a 3D result.
+            notes = ("rigid lid: the free surface is prescribed by the 2D seed, "
+                     "not solved",)
+
+        return [Dataset(
+            solver="openfoam", kind="openfoam", path=foam,
+            times=tuple(sorted(times)), fields=frozenset(fields),
+            patches=frozenset(patches),
+            vector_fields={"U": ("U_x", "U_y", "U_z")},
+            notes=notes,
+        )]
 
     def export_qgis_results(self, cfg, ctx: Any = None):
         """List what QGIS can open. No PyQGIS, no copies of the case."""
