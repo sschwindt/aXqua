@@ -235,7 +235,13 @@ def test_a_solid_structure_removes_columns_from_the_openfoam_lattice():
     blocked = build_plan_grid(domain, 1.0, blocked=Polygon([(10, 10), (20, 10),
                                                             (20, 20), (10, 20)]))
     assert blocked.n_columns < plain.n_columns
-    assert plain.n_columns - blocked.n_columns == pytest.approx(100, abs=25)
+    # A 10x10 solid on a 1 m lattice covers 100 columns as drawn, but it is blanked
+    # against itself grown by half a cell diagonal so that a structure thinner than
+    # the lattice cannot slip between two cell centres and leave the mesh joined
+    # through it. That costs up to one extra cell on every side: 100 as drawn, 144 at
+    # the limit of 12x12.
+    removed = plain.n_columns - blocked.n_columns
+    assert 100 <= removed <= 144, removed
     # the void is genuinely absent, not filled back in
     inside = ((blocked.cell_xy[:, 0] > 11) & (blocked.cell_xy[:, 0] < 19)
               & (blocked.cell_xy[:, 1] > 11) & (blocked.cell_xy[:, 1] < 19))

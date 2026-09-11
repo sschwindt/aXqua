@@ -151,7 +151,12 @@ def build_case(cfg: Config, *, state: State2D | None = None,
             "boundaries.liquid_boundaries reached the domain edge. Without one the "
             "water has nowhere to leave and the run will simply fill up.")
 
-    if cfg.boundaries.outflow_condition == "free":
+    if of.outlet_stage is not None:
+        stage = float(of.outlet_stage)
+        notes.append(f"outlet stage {stage:.3f} m a.s.l. from openfoam.outlet_stage - "
+                     "this domain is a sub-model, so its tailwater is the parent's "
+                     "level at the crop face, not the case's own far-end prescription")
+    elif cfg.boundaries.outflow_condition == "free":
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
     else:
@@ -344,7 +349,12 @@ def summarise(art: OpenFoamArtifacts) -> list[str]:
         out += art.report.lines()
     total = art.report.n_cells if art.report is not None else 0
     if art.mesh is not None and total:
-        water = float(np.mean(fields.initial_alpha(art.mesh) > 0.5))
+        # Under a rigid lid alpha is set to 1 outright (fields.write_fields), so
+        # re-deriving it from the seed here would report a water fraction the case
+        # does not have - and reporting 96.8% for a domain that is water by
+        # construction is exactly the kind of contradiction this line exists to catch.
+        water = (1.0 if getattr(art.mesh, "rigid_lid", False)
+                 else float(np.mean(fields.initial_alpha(art.mesh) > 0.5)))
         out.append(f"  water at t=0 : {100 * water:.1f}% of cells "
                    f"({total:,} total)")
     if art.mesh is not None and art.cfg is not None:

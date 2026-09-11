@@ -230,6 +230,36 @@ def _coarse_pre_run(cfg, *, validate_env: bool) -> SeedResult:
     return result
 
 
+def _listing_for(model_dir: Path, cfg, result: SeedResult):
+    """The solver listing that belongs to *result*, not merely to the case's steering.
+
+    ``cfg.cas_file`` names the case's nominal ``.cas``, but the result being judged is
+    often the output of something else - a continuation, a re-run under another
+    steering file - and the listing beside it then describes a different run. Reporting
+    that run's flux imbalance against this result is how a converged seed gets
+    announced as unconverged, which is exactly what happened on the Munich fish pass:
+    the continuation closed to 3.7e-4 and the message quoted the first attempt's
+    2.4e-2. So the listing is chosen by proximity in time to the result it judges.
+    """
+    from axqua.solvers.telemac import sortie
+
+    named = sortie.latest_sortie(model_dir, cfg.cas_file)
+    if result.path is None or not Path(result.path).exists():
+        return named
+    try:
+        target = Path(result.path).stat().st_mtime
+    except OSError:
+        return named
+    candidates = [p for p in model_dir.glob("*.sortie") if "_p0" not in p.name]
+    if not candidates:
+        return named
+    best = min(candidates, key=lambda p: abs(p.stat().st_mtime - target))
+    if named is not None and best != named:
+        log.debug("judging %s against %s rather than the case's %s listing",
+                  Path(result.path).name, best.name, cfg.cas_file)
+    return best
+
+
 def _judge(result: SeedResult, model_dir, cfg) -> SeedResult:
     """Read the run's listing, if there is one, to say whether the seed is steady.
 
@@ -240,7 +270,7 @@ def _judge(result: SeedResult, model_dir, cfg) -> SeedResult:
     try:
         from axqua.solvers.telemac import flux_convergence, sortie
 
-        listing = sortie.latest_sortie(Path(model_dir), cfg.cas_file)
+        listing = _listing_for(Path(model_dir), cfg, result)
         if listing is None:
             return result
         data = sortie.read_sortie(listing)
@@ -305,6 +335,14 @@ def _extend_to_3d(cfg, seed: SeedResult) -> SeedResult:
         lc = copy.copy(cfg)
         lc.model_dir = seed.path.parent
 
+        existing = Path(lc.model_dir) / threed.HYDROSTATIC_RESULT_3D
+        if _reusable_3d(existing, seed.path, cfg):
+            log.info("3D pre-run: reusing %s (newer than the 2D seed and finite)",
+                     existing.name)
+            seed.path, seed.source = existing, PRE_RUN_3D
+            seed.notes.append(f"reused the existing 3D pre-run {existing.name}")
+            return seed
+
         data = selafin.read_slf(seed.path)
         vertical = threed.infer_vertical_layers(lc, data=data)
         pinned = cfg.openfoam.pre_run.n_levels
@@ -362,6 +400,27 @@ def _extend_to_3d(cfg, seed: SeedResult) -> SeedResult:
                     type(exc).__name__, exc)
         seed.notes.append(f"3D pre-run failed ({type(exc).__name__}); seeding from 2D")
     return seed
+
+
+def _reusable_3d(existing: Path, seed_2d: Path, cfg) -> bool:
+    """Whether a previous 3D pre-run can stand in for running one again.
+
+    ``pre_run.reuse`` used to cover only the 2D result, so any failure *after* the 3D
+    extension - a missing sub-model boundary line, a bad ROI, a typo in a stage name -
+    cost a full re-run of a solver step that had been correct the first time. On the
+    Munich fish pass that was 3 h 15 min per attempt.
+
+    Reused only when it is finite and **newer than the 2D result it was derived from**,
+    so a re-converged 2D run still invalidates it.
+    """
+    if not cfg.openfoam.pre_run.reuse or not existing.exists():
+        return False
+    try:
+        if existing.stat().st_mtime < Path(seed_2d).stat().st_mtime:
+            return False
+    except OSError:
+        return False
+    return _is_finite(existing)
 
 
 def _is_finite(result: Path) -> bool:

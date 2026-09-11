@@ -125,6 +125,47 @@ Two things to settle before drawing conclusions from that comparison:
    `axqua-case/postprocessing/pool-sections.png` labels every pool, so comparing it
    with the report settles the question at a glance.
 
+### 13 basins, not 11 - settled
+
+`make_sections.py` reported 12 baffles and 11 pools. It was wrong, and the newer sources
+in `user-sources/geodata/` say so three times over:
+
+| source | baffles | basins | pitch | span |
+| --- | --- | --- | --- | --- |
+| contractor STL (`stahlbeton` + `stahlblech`) | 14, plus an end wall | **13** | 1.640 m, std 0.010 | 21.44 m |
+| `blender-heightmap-high-res.jpg` | 14 | **13** | 1.64-1.65 m | 21.45 m |
+| `fishpass-dimensions-ssc.fodp` | - | - | 1.50 m clear | 22.70 m reach |
+
+Measured by rotating the CAD onto the reach's own axis (bearing 76.8 deg) and counting
+periodic wall features across it, and independently by counting the baffle glyphs in the
+heightmap against the drawing's own dimension lines - the drawing is 1 cm to the metre,
+so its 22.70 m dimension is drawn 22.58 cm long and the scale checks itself.
+
+**The two figures are not two designs.** The pitch agrees to a centimetre between the
+contractor CAD and the Blender remodelling, which is what says they are the same
+structure measured twice rather than a plan revision. What differed was the *detection*:
+`make_sections.py` finds the pool reach by a cross-cut heuristic and dropped the two end
+basins, where the channel transitions into the entry chamber and the outlet.
+
+The drawing also reconciles its own numbers. Its **1.50 m** is the *clear* basin length,
+between baffle faces; the pitch is 1.65 m and the baffle wall is about 0.15 m thick.
+22.70 m of reach = 1.08 m entry chamber + 13 x 1.65 m of basins + the outlet.
+
+And it settles what `make_sections.py` could only guess at - **where XS 1-4 actually
+are**, as stations along the drawing:
+
+| section | station | where |
+| --- | --- | --- |
+| XS 1 | 3.4 m | approach channel, upstream of the structure |
+| XS 2 | 11.2 m | basin 3 |
+| XS 3 | 17.8 m | basin 7 |
+| XS 4 | 32.3 m | exit channel, 3.87 m below the reach |
+
+Note that XS 1 and XS 4 are in the approach and exit channels, **not in basins at all**,
+which is why the report's `US2 / US4 / US5 / US7` labels never mapped onto pool numbers.
+Two of the four flume sections are channel sections, and the comparison has to treat
+them as such.
+
 ## The steady run, and judging it
 
 `hydrodynamics.turbulence_model` is set to **3 (k-epsilon) rather than `auto`**. The
@@ -276,6 +317,97 @@ size^-3. `mesh_convergence_study.py` is the instrument for this question and com
 GCI over a four-mesh ladder - but it is a multi-day study at these sizes, and every level
 must be run long enough to *finish filling* or the GCI will compare four mid-fill states
 and attribute the transient to discretization.
+
+### The air phase was the whole cost, and it is now gone
+
+The first sub-model VOF run is recorded in `axqua-case/openfoam/vof-record/`. It was
+correct, stable and mass-balanced, and it was never going to finish. Measured on the
+running job over 6 h 50 min on 16 ranks:
+
+| quantity | measured |
+| --- | --- |
+| cells | 1,340,928 (111,744 columns x 12 layers) |
+| wall per step | 8.70 s (24,584 s over 2,824 steps) |
+| time step | 5.7e-4 s, having fallen from 9.5e-4 at t = 0.016 s |
+| throughput | 6.5e-5 s of river per second of wall clock |
+| stage 1 (8 s) | ~1.3 days remaining at t = 1.605 s |
+| stage 2 (120 s) | **~22 days** |
+
+Two lines from that log say where the money went. The `0/` fields report **39.5 % of
+cells start as water**, so 60.5 % of the mesh was air; and `Interface Courant Number max`
+equals `Courant Number max` on *every step in the log* - the cell setting the time step
+was always an interface cell, never a water cell. `MULESCorr yes` did not buy the
+decoupling its own comment claims: `maxAlphaCo` was the binding limit throughout.
+
+So the run spent ~60 % of its cells and essentially all of its time-step budget on an
+air-water interface that this case has no interest in. What the case actually needs from
+the free surface is only that it be **non-horizontal**, and that is already known: the
+converged 2D result has it, to a few millimetres, everywhere.
+
+`openfoam.mode: rigid-lid` takes it. The lid is built from `State2D.sample_surface` at
+every plan vertex, so it *is* the 2D free surface - sloping, stepped over the baffles, no
+freeboard - as a slip wall. `alpha` is identically 1, so `interFoam` degenerates to a
+single-phase solver while keeping its `p_rgh` + gravity treatment intact, and there is no
+interface left to set the Courant number. What it costs is that the surface becomes an
+**input**: it cannot rise, overtop or wet a dry bar, the waterline is a fixed vertical
+wall, and `outlet_stage` is not applied (the lid geometry already fixes the level there).
+
+That last trade is recoverable without ever meshing air. `p_rgh` on the lid is exactly
+the elevation the surface wanted and the geometry refused, `dz = p_rgh / (rho g)`; feeding
+`surface + dz` back in as a corrected seed and rebuilding converges the surface in two or
+three passes. `correct_lid.py` does that, and the `max|dz|` it reports each pass is also
+the honest error bar on the prescribed-surface result.
+
+**Measured, on the same 16 ranks, both at t = 0.93 s** - the same simulated time, which
+matters: the VOF time step fell by half over its first second, so an early window would
+have flattered either run.
+
+| | VOF | rigid lid |
+| --- | --- | --- |
+| cells | 1,340,928 | **815,016** (101,877 columns x 8 layers) |
+| air cells | 60.5 % | **none** |
+| wall per step | 8.70 s | **3.79 s** |
+| time step | 5.7e-4 s | **2.96e-3 s** |
+| throughput | 6.5e-5 s/s | **7.8e-4 s/s** |
+| 120 s costs | ~22 days | **~42 hours** |
+
+**Twelve times faster**, and `Interface Courant Number max` now reads 0 on every step
+because there is no interface for it to be measured on. Cumulative continuity error is
+3.4e-8, `limitVelocity` is not clipping anything, and the time step is flat: 2.95e-3 to
+3.03e-3 over 100 consecutive steps, against a VOF step that was still falling when it
+was stopped. The three windows (whole run, last half, last 100 steps) agree to 2 %.
+
+**Both columns above are single-tenant figures**, and the machine did not stay that way.
+At about 15:00 on 2026-09-08, 20 hours in, a second 16-rank job started on the same 16
+physical cores and the cost per step stepped from 3.80 s to 8.91 s - flat before, flat
+after, a 2.34x ratio and no ramp, which is contention rather than anything in the flow.
+The time step never moved (3.02e-3 throughout), so the model is unaffected; only the
+wall clock is. The run therefore lands at **~70 h rather than ~42**. Both numbers are
+worth keeping: 42 h is what this case costs, 70 h is what it cost on a shared box.
+
+That is short of the ~60x the arithmetic suggested, and the missing factor is in the time
+step: 3.1e-3 s against the 1.5e-2 predicted from a 1.8 m/s slot jet across 3 cm cells.
+OpenFOAM's Courant number sums the flux over all six faces of a cell rather than taking
+the worst direction, so a cell carrying both a horizontal jet and the vertical velocity
+the baffle steps force through a 2.5 cm layer runs out of Courant budget several times
+sooner than the horizontal estimate says. The prediction was optimistic; the run is not
+in trouble - `Co` is pinned at its 0.90 ceiling and `dt` bottomed at 2.95e-3 and is
+recovering.
+
+### Two things the rigid-lid build taught, both measured
+
+**The lid steps ~1 m across a single 3 cm cell** where the 2D free surface passes a
+structure edge - measured lid gradient 34.8 there against a mesh-wide p95 of 0.81. A
+first attempt set `layer_expansion: 0.6` to thicken the bed layer towards `ks`, which
+also makes the *top* layer the thinnest, exactly where that step is: 256 incorrectly
+oriented face pyramids, which checkMesh treats as fatal. Uniform layers give zero. The
+folds are a lid problem, not a bed problem, and smoothing the lid does not fix them.
+
+**The mesh is better than the one it replaces on every measure but skewness**: 85,394
+faces over 70 deg non-orthogonality against the VOF mesh's 488,897, zero folded faces
+against 0 - but max skewness 80.9 with 3,032 faces over 4, against 12.4 and 50. Those
+sit at the same lid steps. At 0.12 % of faces and with the pressure solve converging in
+2-3 GAMG iterations, they are being carried rather than fixed.
 
 ## What this case will and will not answer
 
