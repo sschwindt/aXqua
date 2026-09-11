@@ -506,3 +506,44 @@ The machinery is sound and is now guarded end to end - the elevation check, the
 placement audit and the bracketing test each caught a real defect during this
 work. What it is telling us here is about the reach and the campaign design, not
 about the code.
+
+### The rigid lid does not apply on this reach (measured, September 2026)
+
+The `mesh.lid_steps()` applicability test merged from `rigid-lid-applicability`
+**fails on KB15, decisively**:
+
+    median 2.0%   p99 331%   (the build warns past 50%)
+
+i.e. at the 99th percentile the prescribed free surface steps more than three
+times the local water depth within two cells. A lid is a slip WALL, so it cannot
+answer a drop by plunging - it converts the head into velocity, `sqrt(2 g dz)`.
+Only 78% of the run's cells and **3 of the 30 FlowTracker verticals** sit on
+columns that pass the test.
+
+Masking the offending columns was run as a check on the earlier "model is 2.8x too
+slow" conclusion:
+
+| | verticals | model | measured | ratio |
+|---|---|---|---|---|
+| all cells | 26/30 | 0.127 | 0.289 m/s | 0.44 |
+| lid-step columns excluded | 9/30 | 0.254 | 0.302 m/s | 0.84 |
+
+**Neither number should be quoted as the model's accuracy.** The masked subset is
+not a fair sample - the surviving verticals are systematically *slower* measured
+water (0.161 vs 0.277 m/s) in shallower columns, and only 3 sit squarely on clean
+columns, the other 6 entering through the 2.5 m search radius. A ratio computed on
+9 of 30 points whose membership moves with the search radius is not a measurement.
+
+What it does establish: **the velocity field at these points is contaminated by a
+modelling artefact**, so the earlier 2.8x figure cannot be attributed to the
+reach's hydraulics either. The honest statement is that a rigid lid cannot
+represent this reach at the measurement locations, and the velocity comparison is
+therefore uninformative about roughness in *both* directions.
+
+The two supported routes are unchanged, and now better motivated:
+
+* **water levels**, which the model reproduces to ~1 cm and which the lid does not
+  distort, since the surface is prescribed from the 2D result that produced them;
+* a **`mode: vof`** campaign, where the surface is free to move and the steps
+  resolve themselves - or the sub-model `openfoam.roi` added on the rigid-lid
+  branch, which is what makes a vof case affordable.
