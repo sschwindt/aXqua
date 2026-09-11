@@ -126,7 +126,11 @@ class OpenFoamBackend(BaseBackend):
             if ctx is not None:
                 ctx.check_cancelled()
                 ctx.sink.step(f"openfoam:{stage.name}")
-            start = 0.0 if stage.name == "spinup" else cfg.openfoam.spinup_time
+            # start_from, not the stage name: a rigid-lid case has ONE stage and it is
+            # called "run", but it starts from t=0 like a spin-up does. Keying off the
+            # name told the progress bar the run began at spinup_time and it reported
+            # a run that was already 8 s in before the first step.
+            start = 0.0 if stage.start_from == "startTime" else cfg.openfoam.spinup_time
             proc = runtime.run_stage(
                 case_dir, stage.name, end_time=stage.end_time, start_time=start,
                 n_processors=nprocs, cfg=cfg,

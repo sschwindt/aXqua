@@ -25,13 +25,19 @@ INTERVAL="${INTERVAL:-1800}"          # 30 minutes
 
 log() { printf '%s  %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*" >> "$LOG"; }
 
-# The two stage end times, so the ETA is against the stage actually running.
+# The stage end times, so the ETA is against the stage actually running. A rigid-lid
+# case has no interface to settle and therefore no spin-up: dicts.stages() emits one
+# stage and only stage2-run/ is written, so SPINUP_END is empty and every t is past it.
 SPINUP_END=$(grep -E "^endTime" "$OF/system/stage1-spinup/controlDict" 2>/dev/null \
              | awk '{print $2}' | tr -d ';')
 RUN_END=$(grep -E "^endTime" "$OF/system/stage2-run/controlDict" 2>/dev/null \
           | awk '{print $2}' | tr -d ';')
 
-log "watch started (interval ${INTERVAL}s, spin-up to ${SPINUP_END:-?} s, run to ${RUN_END:-?} s)"
+if [ -n "${SPINUP_END:-}" ]; then
+    log "watch started (interval ${INTERVAL}s, spin-up to ${SPINUP_END} s, run to ${RUN_END:-?} s)"
+else
+    log "watch started (interval ${INTERVAL}s, single stage to ${RUN_END:-?} s - no spin-up, so this is a rigid-lid case)"
+fi
 prev_t=""; prev_wall=""
 
 while true; do

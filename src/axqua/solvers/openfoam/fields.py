@@ -184,6 +184,18 @@ def _wall_entries(of_mesh, cfg, patch: str) -> dict[str, str]:
             "value": "uniform 0"}
 
 
+def _patch_lid_level(of_mesh, patch: str) -> float:
+    """Mean lid elevation over one patch [m a.s.l.], the rigid-lid fallback stage.
+
+    Used only when no ``outlet_stage`` was configured. Under a rigid lid the lid *is*
+    the free surface, so its own elevation on the outlet patch is the level the
+    pressure datum has to be referenced to - the geometry already knows the answer.
+    """
+    ids = of_mesh.polymesh.patch_face_ids(patch)
+    quads = of_mesh.polymesh.faces[ids]
+    return float(of_mesh.polymesh.points[quads][:, :, 2].max(axis=1).mean())
+
+
 def _outlet_profiles(of_mesh, patch: str, stage: float,
                      rho: float) -> tuple[str, str]:
     """``(alpha inletValue, p profile)`` on an outlet patch holding *stage*.
@@ -235,7 +247,10 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         bc[patch] = {"type": "variableHeightFlowRate", "lowerBound": "0",
                      "upperBound": "1", "value": "uniform 0"}
     for patch in of_mesh.outlet_patches:
-        if outflow_stage is None:
+        # Under a rigid lid the outlet is fully wet to the lid, so there is no water
+        # level to find on the patch and the face-by-face profile is not computed -
+        # it would only be discarded below.
+        if rigid or outflow_stage is None:
             bc[patch] = {"type": "zeroGradient"}
         else:
             inlet_value, _ = _outlet_profiles(of_mesh, patch, outflow_stage,
@@ -252,8 +267,6 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         # has nothing to vary
         for patch in of_mesh.inlet_patches:
             bc[patch] = {"type": "fixedValue", "value": "uniform 1"}
-        for patch in of_mesh.outlet_patches:
-            bc[patch] = {"type": "zeroGradient"}
     written.append(_write(zero / "alpha.water", render_field(
         "volScalarField", "alpha.water", "[0 0 0 0 0 0 0]",
         scalar_list(alpha), bc)))
@@ -292,10 +305,22 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         bc[patch] = {"type": "fixedFluxPressure", "value": "uniform 0"}
     for patch in of_mesh.outlet_patches:
         if rigid:
-            # The lid IS the free surface, so the surface at the outlet is already
-            # fixed by the geometry; p_rgh = 0 there is exactly "atmospheric at the
-            # surface". Prescribing a stage as well would over-determine it.
-            bc[patch] = {"type": "fixedValue", "value": "uniform 0"}
+            # The lid IS the free surface, so the outlet needs a LEVEL rather than a
+            # profile - but it is not zero, and this used to say it was.
+            #
+            # OpenFOAM carries p_rgh = p - rho*(g & C), so for a hydrostatic column
+            # whose surface stands at z_s the whole patch has p_rgh = rho*g*z_s: a
+            # constant, but a constant equal to the free-surface elevation head, not
+            # to nothing. Writing 0 puts the zero-pressure level at the mesh DATUM
+            # instead of at the water surface, which on this case (z_s = 0.715 m in
+            # local CAD metres) offset every reported pressure by -7.0 kPa. Velocities
+            # are unaffected - a uniform shift of p has no gradient - but anything
+            # read FROM the pressure is wrong, and correct_lid.py is exactly that: it
+            # reported a 0.87 m lid error that was purely this datum.
+            level = outflow_stage if outflow_stage is not None else _patch_lid_level(
+                of_mesh, patch)
+            bc[patch] = {"type": "fixedValue",
+                         "value": f"uniform {of.water_density * GRAVITY * level:.6g}"}
         elif outflow_stage is None:
             bc[patch] = {"type": "zeroGradient"}
         else:

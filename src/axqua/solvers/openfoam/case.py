@@ -349,7 +349,12 @@ def summarise(art: OpenFoamArtifacts) -> list[str]:
         out += art.report.lines()
     total = art.report.n_cells if art.report is not None else 0
     if art.mesh is not None and total:
-        water = float(np.mean(fields.initial_alpha(art.mesh) > 0.5))
+        # Under a rigid lid alpha is set to 1 outright (fields.write_fields), so
+        # re-deriving it from the seed here would report a water fraction the case
+        # does not have - and reporting 96.8% for a domain that is water by
+        # construction is exactly the kind of contradiction this line exists to catch.
+        water = (1.0 if getattr(art.mesh, "rigid_lid", False)
+                 else float(np.mean(fields.initial_alpha(art.mesh) > 0.5)))
         out.append(f"  water at t=0 : {100 * water:.1f}% of cells "
                    f"({total:,} total)")
     if art.mesh is not None and art.cfg is not None:

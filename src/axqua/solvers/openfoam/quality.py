@@ -351,8 +351,9 @@ def assess(of_mesh, *, state=None, roughness_constant: float = 0.5) -> MeshRepor
             f"{report.n_bad_pyramid} face(s) are incorrectly oriented (a pyramid to "
             "the cell centre has non-positive volume). checkMesh treats this as fatal. "
             "On a rigid-lid mesh it comes from the waterline, where the water column "
-            "thins to nothing - raise openfoam.min_column_height so those columns are "
-            "left out.")
+            "thins to nothing - raise openfoam.min_water_depth (that, not "
+            "min_column_height, is the floor under a rigid lid) so those columns are "
+            "left out, or drop openfoam.n_layers so the ones that remain are thicker.")
     if report.min_volume <= 0:
         report.warnings.append(
             f"{int((vol <= 0).sum())} cells have zero or negative volume - the mesh "

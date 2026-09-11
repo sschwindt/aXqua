@@ -1463,6 +1463,18 @@ class OpenFoam:
     # Measured on isar at 5x coarsening: pinning gave 48 incorrectly oriented face
     # pyramids and 84 deg non-orthogonality; without it, 20 and 46 deg.
     auto_bed_layer: bool | None = None
+    # Let a rigid-lid build cut n_layers to what the bed roughness and the shallowest
+    # meshed column allow. None means "decide from the mode": on under a rigid lid,
+    # irrelevant otherwise. False keeps the configured n_layers.
+    #
+    # The reduction is right by default - carrying a two-phase layer count into a
+    # water-only column makes cells three to four times thinner, and past a point
+    # thinner than the grains on the bed. But it is driven by min_water_depth, which is
+    # ALSO the trim threshold, so a case cannot buy layers back without discarding real
+    # wet area. munich-vsf is that case: ks 0.08 m against a 0.20 m floor gives two
+    # layers, in a reach whose median meshed column is 0.77 m deep and whose whole
+    # reason for being solved in 3D is the vertical structure of a slot jet.
+    auto_layers: bool | None = None
     # rigid-lid only: the shallowest water column that is meshed at all, and the floor
     # on column height. A column thinner than this cannot be divided into n_layers
     # cells without collapsing into slivers that checkMesh rejects. 0.20 m took the
