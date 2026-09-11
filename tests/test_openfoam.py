@@ -503,6 +503,222 @@ def test_rigid_lid_cost_names_the_water_not_the_air():
     assert "bed slope" in text
 
 
+# --- the lid itself: where the mesh stops, and therefore what the model can say ---
+#
+# These exercise the geometry decision rather than the dictionaries. Nothing else in
+# the suite calls into the lid, and it is the whole difference between a surface that
+# is solved and one that is prescribed.
+
+
+def _sloping(nx=4, ny=3, dx=1.0, *, fall=0.10, depth=0.60):
+    """``(grid, bed, wse)`` for a bed falling along x under a uniform depth."""
+    grid = _plan_grid(nx, ny, dx)
+    bed = grid.vert_xy[:, 0] * -fall
+    return grid, bed, bed + depth
+
+
+def test_the_rigid_lid_is_the_free_surface_itself():
+    """Not a plane over the reach and not a freeboard above the water: the lid IS the
+    2D surface, per vertex, which is what makes a non-horizontal surface available
+    without meshing a single air cell."""
+    grid, bed, wse = _sloping()
+    notes: list[str] = []
+    lid = ofmesh.resolve_lid(_Cfg(mode="rigid-lid", freeboard=0.5), grid, bed, wse,
+                             0.5, notes=notes)
+    np.testing.assert_allclose(lid, wse)
+    assert lid.max() - lid.min() > 0.2          # it slopes, as the bed does
+    assert any("free surface" in n for n in notes)
+
+
+def test_a_two_phase_lid_keeps_its_freeboard_above_that_same_surface():
+    """The two-phase lid still has to leave the surface room to move, so it cannot be
+    the surface. `follow` is the compromise: above the water everywhere, but hugging
+    it rather than spanning the whole fall of the reach as `flat` does."""
+    grid, bed, wse = _sloping()
+    flat = ofmesh.resolve_lid(_Cfg(lid="flat", freeboard=0.5), grid, bed, wse, 0.5)
+    assert flat.min() == pytest.approx(flat.max())          # a plane, so all air
+    following = ofmesh.resolve_lid(_Cfg(lid="follow", freeboard=0.5), grid, bed, wse,
+                                   0.5)
+    assert np.all(following > wse)                          # never touches the water
+    assert np.ptp(following) > 0.1                          # and it slopes
+    assert following.mean() < flat.mean()                   # for far less air
+
+
+def test_the_rigid_lid_never_closes_onto_the_bed():
+    """A dry column has no water column to mesh; the floor is what stops the cells
+    collapsing into the slivers checkMesh rejects as folded."""
+    grid, bed, wse = _sloping(depth=0.0)                    # surface on the bed
+    lid = ofmesh.resolve_lid(_Cfg(mode="rigid-lid", min_water_depth=0.20), grid, bed,
+                             wse, 0.0)
+    np.testing.assert_allclose(lid, bed + 0.20)
+
+
+def test_a_rigid_lid_without_a_2d_result_says_so(tmp_path):
+    """It used to be a bare NameError from inside the lid block. There is no sensible
+    fallback: a flat lid would be a horizontal surface, which is the thing the mode
+    exists to avoid."""
+    with pytest.raises(ValueError, match="rigid-lid needs a 2D result"):
+        ofmesh.build_mesh(_Cfg(mode="rigid-lid"), state=None, dem=tmp_path / "no.tif")
+
+
+# --- how many layers, and who decides -------------------------------------------
+
+
+def test_rigid_lid_layers_are_cut_to_the_bed_roughness():
+    """Layers carried over from a two-phase case span water plus freeboard; under a
+    rigid lid they span the water alone, and 12 of them in a 0.20 m column would be
+    thinner than the gravel."""
+    ks = np.full(50, 0.08)
+    notes: list[str] = []
+    n = ofmesh.resolve_layers(_Cfg(mode="rigid-lid", n_layers=12,
+                                   min_water_depth=0.20), ks, notes=notes)
+    assert n == 2
+    assert any("reduced to 2" in note for note in notes)
+
+
+def test_auto_layers_false_keeps_the_count_and_records_what_it_costs():
+    """munich-vsf: the cut is sized on the 0.20 m floor, but the median meshed column
+    there is 0.77 m and the run exists to resolve a slot jet over it. Saying so is the
+    case's call - but the shallow columns still pay, and the note has to say that."""
+    ks = np.full(50, 0.08)
+    notes: list[str] = []
+    n = ofmesh.resolve_layers(
+        _Cfg(mode="rigid-lid", n_layers=8, min_water_depth=0.20, auto_layers=False),
+        ks, np.full(50, 0.77), notes=notes)
+    assert n == 8
+    text = " ".join(notes)
+    assert "auto_layers: false" in text
+    assert "0.096 m cells" in text              # 0.77 / 8, the typical column
+    assert "0.025 m" in text                    # 0.20 / 8, the shallowest one
+
+
+def test_the_two_phase_case_never_cuts_its_layers():
+    """The reduction is about a water-only column. A VOF column is water plus air, so
+    the same roughness must leave the count alone."""
+    assert ofmesh.resolve_layers(_Cfg(n_layers=12, min_water_depth=0.20),
+                                 np.full(50, 0.5)) == 12
+
+
+def test_the_top_patch_is_a_lid_not_an_atmosphere():
+    """A rigid lid is a boundary the flow cannot cross, so it is a wall patch that the
+    slip condition keeps shear-free - not the inlet-outlet `atmosphere` of a VOF run,
+    which would let water leave through the top."""
+    assert ofmesh.OpenFoamMesh.top_patch.fget(_rigid_mesh()) == "lid"
+
+    m = _rigid_mesh()
+    m.rigid_lid = False
+    assert ofmesh.OpenFoamMesh.top_patch.fget(m) == "atmosphere"
+
+
+def test_the_rigid_lid_gets_slip_and_no_prescribed_stage(tmp_path):
+    """Under a rigid lid the surface is already fixed by the geometry, so prescribing
+    a stage at the outlet as well would over-determine it - and the lid must not put a
+    boundary layer on the top of the water column."""
+    from axqua.solvers.openfoam.fields import write_fields
+
+    class _M:
+        rigid_lid = True
+        n_cells = 4
+        top_patch = "lid"
+        inlet_patches = ["inlet-1"]
+        outlet_patches = ["outlet-1"]
+        cell_centres = np.zeros((4, 3))
+        cell_column = np.zeros(4, dtype=int)
+        column_uv = np.zeros((1, 2))
+        bed_ks = None
+
+        class grid:
+            cell_xy = np.zeros((1, 2))
+
+    write_fields(_M(), _Cfg(mode="rigid-lid"), tmp_path, outflow_stage=0.715,
+                 discharges={"inlet-1": 0.135})
+    u = (tmp_path / "0" / "U").read_text()
+    assert "lid" in u and "slip" in u
+    assert "flowRateInletVelocity" in u          # fully wet inlet, no variableHeight
+    p = (tmp_path / "0" / "p_rgh").read_text()
+    assert "prghPressure" not in p               # the 0.715 m stage is NOT applied
+    assert "uniform 1" in (tmp_path / "0" / "alpha.water").read_text()
+
+
+# --- when a rigid lid does NOT apply, and a wall that does not block --------------
+#
+# Both of these cost munich-vsf a 61-hour run that finished, balanced its discharge to
+# -0.000 % and reported a healthy Courant number throughout, while 3,719 of its cells
+# sat pinned at the velocity cap. Neither is detectable from the solver's own output.
+
+
+def test_a_stepped_surface_is_reported_as_unfit_for_a_rigid_lid():
+    """A lid is a wall, so where the prescribed surface drops it becomes a sluice the
+    flow must squeeze under. A 1 m step drives sqrt(2 g dz) = 4.4 m/s through a reach
+    whose own water moves at 0.4 - and nothing downstream of the build says so."""
+    grid = _plan_grid(20, 6, 0.03)
+    bed = np.zeros(grid.vert_xy.shape[0])
+    smooth = bed + 0.6
+    med, p99 = ofmesh.lid_steps(grid, smooth, bed)
+    assert p99 < 0.05                                   # a flat surface: no steps
+
+    stepped = np.where(grid.vert_xy[:, 0] < 0.3, 1.6, 0.6)
+    med, p99 = ofmesh.lid_steps(grid, stepped, bed)
+    assert p99 > 0.5                                    # a 1 m step in a 0.6 m column
+
+
+def test_a_wall_thinner_than_a_cell_still_blocks():
+    """A column is blanked on its CENTRE, so a baffle thinner than the lattice - or
+    one that passes between two centres - used to block nothing and the mesh joined
+    both sides of it. The structure is there precisely because the two sides are at
+    different levels, so the hole carries the whole head difference."""
+    import shapely
+
+    polygon = shapely.geometry.box(0, 0, 1.0, 0.3)
+    # A vertical-slot baffle: a 5 mm wall on a 5 cm lattice, lying between two rows of
+    # cell centres, leaving a slot along the far side. Partial, because a wall across
+    # the whole channel is a different case the builder already warns about.
+    wall = shapely.geometry.box(0.4975, -0.1, 0.5025, 0.15)
+
+    open_grid = ofmesh.build_plan_grid(polygon, 0.05)
+    sealed = ofmesh.build_plan_grid(polygon, 0.05, blocked=wall)
+    assert sealed.n_columns < open_grid.n_columns, "the wall blocked nothing"
+
+    # Nothing spans the wall: before the seal, every row passed straight through it
+    # because no cell centre fell inside 5 mm of solid.
+    through = ((sealed.cell_xy[:, 0] > 0.4975) & (sealed.cell_xy[:, 0] < 0.5025)
+               & (sealed.cell_xy[:, 1] < 0.15))
+    assert not through.any(), "the wall still leaks"
+    # and the slot is open, so the two pools are still one connected domain
+    assert (sealed.cell_xy[:, 1] > 0.15).any()
+    assert sealed.n_columns == open_grid.n_columns - int(
+        ((open_grid.cell_xy[:, 0] > 0.46) & (open_grid.cell_xy[:, 0] < 0.54)
+         & (open_grid.cell_xy[:, 1] < 0.19)).sum())
+
+
+def test_the_rigid_lid_outlet_is_referenced_to_the_water_surface(tmp_path):
+    """p_rgh = p - rho*(g & C), so a hydrostatic column standing at z_s carries
+    p_rgh = rho*g*z_s over the whole patch - a constant, but not zero. Writing zero
+    puts the zero-pressure level at the mesh datum instead of at the water surface,
+    which leaves every reported pressure offset by rho*g*z_s."""
+    from axqua.solvers.openfoam.fields import write_fields
+
+    class _M:
+        rigid_lid = True
+        n_cells = 4
+        top_patch = "lid"
+        inlet_patches = ["inlet-1"]
+        outlet_patches = ["outlet-1"]
+        cell_centres = np.zeros((4, 3))
+        cell_column = np.zeros(4, dtype=int)
+        column_uv = np.zeros((1, 2))
+        bed_ks = None
+
+        class grid:
+            cell_xy = np.zeros((1, 2))
+
+    write_fields(_M(), _Cfg(mode="rigid-lid"), tmp_path, outflow_stage=0.715,
+                 discharges={"inlet-1": 0.135})
+    p = (tmp_path / "0" / "p_rgh").read_text()
+    expected = 998.2 * 9.81 * 0.715              # 7002 Pa, not 0
+    assert f"{expected:.6g}" in p, p[p.index("outlet-1"):][:200]
+
+
 def test_cell_size_factor_coarsens_relative_to_the_telemac_mesh(monkeypatch):
     """The point of the factor is that one number coarsens a test run without
     editing the resolution the TELEMAC case is meshed at."""

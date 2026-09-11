@@ -144,8 +144,26 @@ hydrodynamics:
 
 openfoam:
   bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
-  mode: vof                      # start with rigid-lid + cell_size_factor 3 to shake
-                                 # out the mesh, then switch here
+  # RIGID LID, not vof. Measured on the VOF run this replaces (logs in
+  # axqua-case/openfoam/vof-record/): 60.5% of the cells were air, and `Interface
+  # Courant Number max` equalled `Courant Number max` on every step in the log - the
+  # cell setting the time step was always an interface cell, never a water cell. So
+  # the run spent ~60% of its cells and effectively all of its time-step budget on a
+  # phase this case is not modelling, at 6.5e-5 s/s = ~22 days for the 120 s stage.
+  #
+  # What the case actually needs from the free surface is that it be NON-HORIZONTAL,
+  # and the converged 2D result already has that. Under a rigid lid the mesh stops at
+  # `State2D.sample_surface` sampled per plan vertex - the 2D surface itself, sloping
+  # and stepped over the baffles - as a slip wall; alpha is identically 1 and interFoam
+  # degenerates to a single-phase solver keeping its p_rgh + gravity treatment.
+  #
+  # The price, and it is a real one: the surface becomes an INPUT. It cannot rise,
+  # overtop or wet a dry bar, the waterline is a fixed vertical wall, and outlet_stage
+  # below is NOT applied (the outlet gets p_rgh = 0, because the lid geometry already
+  # fixes the level there - prescribing a stage as well would over-determine it).
+  # correct_lid.py buys it back: p_rgh on the lid is dz = p_rgh/(rho g), the elevation
+  # the surface wanted, and feeding surface+dz back as the seed converges in 2-3 passes.
+  mode: rigid-lid
   # Measured on the first attempt: 3.14 M cells, dt 5.2e-4 s, 27.6 s/step on 16 ranks
   # = 0.765 s of river in 7.8 h. The 30 s spin-up would have been 13 days and the 300 s
   # production stage 128. The four settings below are what make it finishable.
@@ -164,16 +182,46 @@ openfoam:
   # (y 106.8), so it needs its own lines and its own tailwater. Both read off r2d.slf
   # at the crop faces; the 2D case keeps its own, being converged against them.
   liquid_boundaries: liquid-boundaries-fishpass.gpkg
-  outlet_stage: 0.715            # the parent's WSE at the y=74 crop face, not its
-                                 # own 0.69 tailwater 32 m further down
+  # The parent's WSE at the y=74 crop face, not the case's own 0.69 tailwater 32 m
+  # further down. NOT APPLIED under mode: rigid-lid - the lid already fixes the surface
+  # at the outlet, so the patch gets p_rgh = 0 instead. It still sets the lid there,
+  # through the seed the lid is sampled from, and it is what a switch back to vof uses.
+  outlet_stage: 0.715
   cell_size: 0.03
-  n_layers: 12
-  freeboard: 0.30
+  # 8 layers, ALL of them in the water. The VOF mesh had 12 spanning water plus air, of
+  # which ~5 were water: this is finer where it matters and half the cells.
+  n_layers: 8
+  # ...but the rigid-lid default would cut that to 2. The cut is sized on the
+  # SHALLOWEST meshed column (min_water_depth 0.20 m) against the wetted median ks
+  # (0.08 m, the substrate), and this reach is nothing like that shallow: measured over
+  # the cropped band in r2d.slf, 80.4% of columns are deeper than 0.20 m and among
+  # those the median is 0.770 m. Eight layers over 0.77 m is 0.096 m cells. The
+  # shallow margins do pay - see the build note and the quality report.
+  auto_layers: false
+  min_water_depth: 0.20          # rigid-lid: the thinnest column that is meshed at all
+  # UNIFORM layers, and this one was measured rather than reasoned. Thickening the bed
+  # layer (expansion 0.6) to get the first cell centre nearer ks 0.08 m also makes the
+  # TOP layer the thinnest - and the top layer is against the lid, which is where this
+  # mesh has its trouble: the 2D free surface steps ~1 m across a single 0.03 m cell at
+  # the structure edges (measured lid gradient 34.8 there against a mesh-wide p95 of
+  # 0.81), and the thinnest layer folds over that step. Expansion 0.6 produced 256
+  # incorrectly oriented face pyramids, which checkMesh treats as fatal; 1.0 produces
+  # none. Smoothing the lid does not help and is skipped under a rigid lid anyway.
+  #
+  # The cost is that the bed wall function stays inadmissible over about half the
+  # wetted bed faces (y1 ~ 0.036 m against ks up to 0.08 m). That is not a meshing
+  # choice but this reach's roughness-to-depth ratio: 0.08 m substrate in a 0.4 m
+  # column is macro-roughness, and the result is bulk flow, not a bed boundary layer.
+  layer_expansion: 1.0
+  # There is no air to cap. The default (5x the 2D p95 = 2.1 m/s) is BELOW a slot jet -
+  # sqrt(2 g x 0.14) is 1.66 m/s depth-averaged and the near-surface value is higher -
+  # and limitVelocity is written with `selectionMode all`, so it applies to the water.
+  # Clipping the slot jets would destroy the one quantity this model exists to produce.
+  air_velocity_cap: 6.0
+  freeboard: 0.30                # ignored under a rigid lid; kept so vof is one edit away
   turbulence: kOmegaSST
-  # The spin-up exists to settle the interface AND to develop the vertical velocity
-  # profile, which a 2D seed cannot provide (fields.initial_velocity says so: "left to
-  # develop during the spin-up"). With a 3D seed the profile arrives at t=0, so only
-  # the interface is left to settle and 8 s is enough.
+  # Ignored under a rigid lid: there is no interface to settle, so dicts.stages() emits
+  # a single `run` stage. Kept for the same reason as freeboard.
   spinup_time: 8
   # NOT a flush of the cropped domain, which is 309 s by volume/Q and 511 s advective.
   # The jets are a basin-scale process - a basin exchanges in ~7 s - and the run is
