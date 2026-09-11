@@ -315,3 +315,51 @@ def test_shell_runtime_still_wraps_the_way_it_always_did():
     assert argv[0] == "bash" and argv[1] == "-lc"
     assert "source /opt/telemac/pysource.sh" in argv[2]
     assert runtime.env_script == Path("/opt/telemac/pysource.sh")
+
+
+def test_a_noisy_setup_script_still_reaches_the_command(tmp_path):
+    """A setup script that returns non-zero from a warning must not abort the run.
+
+    OpenFOAM Foundation's etc/bashrc does exactly this when sourced in a
+    non-interactive login shell ("pop_var_context: head of shell_variables not a
+    function context"). Under the old `set -e; source <script>` payload the shell
+    exited before the command ran, so every OpenFOAM call reported the environment
+    as broken while the environment was in fact fine.
+    """
+    import subprocess
+
+    from axqua.core.environment import EnvironmentKind, SolverEnvironment
+
+    script = tmp_path / "noisy.sh"
+    script.write_text("export MARKER=set\n"
+                      "echo 'a benign warning' >&2\n"
+                      "false\n")          # the trailing non-zero, as OF9's bashrc has
+    env = SolverEnvironment(kind=EnvironmentKind.POSIX, setup_script=script)
+    proc = subprocess.run(env.command("echo \"$MARKER\""), capture_output=True, text=True)
+    assert proc.returncode == 0
+    assert proc.stdout.strip() == "set", "the sourced environment must still apply"
+
+
+def test_an_unreadable_setup_script_still_fails_loudly(tmp_path):
+    """The guard the payload exists for: never run the command in a bare shell."""
+    import subprocess
+
+    from axqua.core.environment import EnvironmentKind, SolverEnvironment
+
+    env = SolverEnvironment(kind=EnvironmentKind.POSIX,
+                            setup_script=tmp_path / "not-here.sh")
+    proc = subprocess.run(env.command("echo SHOULD_NOT_PRINT"),
+                          capture_output=True, text=True)
+    assert proc.returncode != 0
+    assert "SHOULD_NOT_PRINT" not in proc.stdout
+
+
+def test_the_commands_own_exit_code_still_propagates(tmp_path):
+    import subprocess
+
+    from axqua.core.environment import EnvironmentKind, SolverEnvironment
+
+    script = tmp_path / "ok.sh"
+    script.write_text("export MARKER=set\n")
+    env = SolverEnvironment(kind=EnvironmentKind.POSIX, setup_script=script)
+    assert subprocess.run(env.command("exit 42")).returncode == 42

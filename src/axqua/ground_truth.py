@@ -27,6 +27,8 @@ import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+import logging
+
 import numpy as np
 import pandas as pd
 
@@ -111,7 +113,10 @@ def read_xlsx_sheet(path: Path, sheet: int | str = 0) -> pd.DataFrame:
 _FT_VALUE_COLUMNS = {
     "VelX": "u", "VelY": "v", "VelZ": "w",
     "VxErr": "u_err", "VyErr": "v_err", "VzErr": "w_err",
-    "FinalD": "h",
+    # FinalD is the TOTAL depth of the vertical; MeasD is how far below the
+    # SURFACE the probe sat. Both are needed to know where in the water column
+    # the measurement is - see ground_truth.relative_height.
+    "FinalD": "h", "MeasD": "h_meas", "% Depth": "pct_depth",
 }
 
 
@@ -204,6 +209,8 @@ def scalar_velocity(df: pd.DataFrame) -> pd.Series:
 # quantities. Column headers are normalised to canonical names where known;
 # unrecognised columns pass through unchanged so arbitrary quantities work.
 # --------------------------------------------------------------------------- #
+log = logging.getLogger("axqua")
+
 COORD_COLUMNS = ("x", "y", "z")
 
 _COLUMN_ALIASES = {
@@ -216,8 +223,18 @@ _COLUMN_ALIASES = {
     "u_err": "u_err", "u'": "u_err", "uerr": "u_err", "vxerr": "u_err",
     "v_err": "v_err", "v'": "v_err", "verr": "v_err", "vyerr": "v_err",
     "w_err": "w_err", "w'": "w_err", "werr": "w_err", "vzerr": "w_err",
+    # TOTAL water depth of the vertical.
     "h": "h", "depth": "h", "water_depth": "h", "waterdepth": "h",
-    "measd": "h", "finald": "h",
+    "finald": "h", "total depth": "h", "totald": "h",
+    # DEPTH OF THE MEASUREMENT ITSELF, measured DOWN FROM THE SURFACE - which is
+    # what a FlowTracker records. It is NOT the column depth: mapping both
+    # `measd` and `finald` to "h" produced two columns of that name, so df["h"]
+    # silently became a DataFrame. The two are what let the measurement's height
+    # above the bed be recovered: height = h - h_meas = (1 - h_meas/h) * h.
+    "measd": "h_meas", "meas. depth": "h_meas", "meas depth": "h_meas",
+    "measured_depth": "h_meas",
+    # the same quantity as a FRACTION of the column, again from the surface
+    "% depth": "pct_depth", "pct depth": "pct_depth", "pct_depth": "pct_depth",
 }
 
 
@@ -289,6 +306,17 @@ def compile_ground_truth(cfg) -> Path | None:
     merged = {cat: pd.concat(parts, ignore_index=True) for cat, parts in tables.items()}
     out = cfg.ground_truth_path
     write_tidy(merged, out)
+
+    # Sanity-check the elevations, LOG ONLY. This must never raise: pipeline stage 5
+    # wraps the whole HydroBayesCal setup in a blanket `except Exception`, so a raise
+    # here would turn a warning into a silent skip of the entire calibration setup -
+    # a louder defect than the one being guarded. The calibration entry points call
+    # the same check with strict=True, where refusing is the right response.
+    try:
+        from axqua.ground_truth_qa import check_ground_truth_elevations, report
+        report(check_ground_truth_elevations(cfg, tables=merged))
+    except Exception as exc:                              # noqa: BLE001
+        log.debug("elevation check skipped: %s: %s", type(exc).__name__, exc)
     return out
 
 
@@ -315,3 +343,61 @@ def write_tidy(tables: dict[str, pd.DataFrame], path: Path) -> Path:
         for category, df in tables.items():
             _canonical_columns(df).to_excel(writer, sheet_name=category[:31], index=False)
     return path
+
+
+# --------------------------------------------------------------------------- #
+# Where in the water column a measurement sits
+# --------------------------------------------------------------------------- #
+#: Height above the bed, as a fraction of the column, of the conventional
+#: "0.6 depth" point. **0.6 is measured DOWN FROM THE SURFACE** (that is the
+#: FlowTracker/USGS convention), so the probe sits at 0.4 of the depth ABOVE the
+#: bed. Getting this backwards misplaces every target by 0.2*h.
+DEFAULT_RELATIVE_HEIGHT = 0.4
+
+
+def relative_height(df: pd.DataFrame, *,
+                    default: float = DEFAULT_RELATIVE_HEIGHT
+                    ) -> tuple[pd.Series, str]:
+    """Height above the bed as a fraction of the column, per measurement row.
+
+    Returns ``(f, source)``; *source* names which rule fired, so a placement
+    audit can say where every target's position came from rather than leaving it
+    implicit. First hit wins:
+
+    1. an explicit ``f`` column;
+    2. ``h_meas`` and ``h`` -> ``1 - h_meas/h`` (FlowTracker ``MeasD``/``FinalD``);
+    3. ``pct_depth`` -> ``1 - pct_depth`` (``% Depth``, also from the surface);
+    4. a ``label`` ending ``-<p>h`` (the ``q47-3-1501-0.93h`` convention);
+    5. *default*, with one warning naming how many rows took it.
+    """
+    n = len(df)
+    if "f" in df.columns:
+        return pd.to_numeric(df["f"], errors="coerce").fillna(default), "f column"
+
+    if "h_meas" in df.columns and "h" in df.columns:
+        h = pd.to_numeric(df["h"], errors="coerce")
+        hm = pd.to_numeric(df["h_meas"], errors="coerce")
+        f = 1.0 - (hm / h.where(h > 0))
+        if f.notna().any():
+            return f.fillna(default), "1 - MeasD/FinalD"
+
+    if "pct_depth" in df.columns:
+        pct = pd.to_numeric(df["pct_depth"], errors="coerce")
+        # tolerate a percentage written as 60 rather than 0.60
+        if pct.dropna().gt(1.5).any():
+            pct = pct / 100.0
+        if pct.notna().any():
+            return (1.0 - pct).fillna(default), "1 - % Depth"
+
+    if "label" in df.columns:
+        got = df["label"].astype(str).str.extract(r"-([0-9.]+)h$")[0]
+        f = 1.0 - pd.to_numeric(got, errors="coerce")
+        if f.notna().any():
+            return f.fillna(default), "label -<p>h suffix"
+
+    log.warning(
+        "no MeasD/%%Depth/label in the ground truth, so the measurement height "
+        "is unknown for all %d point(s); assuming %.2f of the depth above the "
+        "bed (the 0.6-depth convention, which is measured from the SURFACE). "
+        "Carry MeasD + FinalD to place targets from the data instead.", n, default)
+    return pd.Series(np.full(n, float(default)), index=df.index), f"default {default}"

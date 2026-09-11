@@ -76,3 +76,78 @@ Combine it with ``cell_size_factor``, which coarsens relative to the 2D channel 
 **What you give up is the free surface.** It can no longer move, so the mode cannot tell you about a hydraulic jump, a standing wave, or superelevation through a bend - exactly the questions a 3D free-surface model is usually bought for. It is a way to reach a trustworthy ``vof`` run quickly, not a substitute for one.
 
 Two knobs exist only in this mode. ``min_water_depth`` (0.20 m) leaves shallower columns out of the mesh; it cannot be raised freely, because a reach whose inflow section is itself shallow will lose its inlet patch to the trim. The layer count is then **fitted to that depth** - cells thinner than the bed grains are meaningless, and thin enough that the bed's variation within one plan cell folds them - so 14 layers over 0.20 m is reduced to 4, and the build says so. ``auto_bed_layer`` defaults *off* here for the same reason: pinning a thick bed layer into a shallow column is what turns the layers above it into folded slivers.
+
+Bayesian calibration
+--------------------
+
+The OpenFOAM case can be calibrated against **measured velocity components** -
+``U_x``, ``U_y``, ``U_z`` (and ``TKE``) at each survey vertical, which is what an
+ADV campaign such as a FlowTracker survey actually produces, and what a
+depth-averaged 2D model cannot be calibrated against at all. The parameters are
+the bed roughness ``ks`` and, optionally, the k-epsilon closure coefficients.
+
+.. code-block:: bash
+
+   python <case>/run_Bayes_cal_openfoam.py --smoke   # ALWAYS run this first
+   python <case>/run_Bayes_cal_openfoam.py --run
+   python <case>/openfoam_verify_posterior.py
+
+``--smoke`` is a 3-run, 30 s plumbing test that exercises parameter routing into
+the OpenFOAM dictionaries, the solver launch, the field extraction and the
+per-run accumulation. It costs minutes and catches every wiring fault that would
+otherwise surface after a night of solver time.
+
+Run the campaign coarse, verify it free
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The campaign runs under ``mode: rigid-lid`` at ``cell_size_factor`` 3-5. About
+90% of a two-phase case's cells are air and a surrogate needs tens of runs, so a
+production-resolution VOF case cannot supply them. Rigid-lid also has exactly one
+run stage, so the case HydroBayesCal copies per run is correct straight out of
+``build_case``.
+
+**The trade is real and is why the verification run is part of the workflow, not
+an extra.** Under a rigid lid the free surface is *prescribed* from the 2D
+result rather than solved, so a roughness error that would have shown up as a
+surface-slope error is absorbed into the velocity field instead.
+``openfoam_verify_posterior.py`` rebuilds the calibrated case at production
+resolution with ``mode: vof`` and refuses if a calibrated value sits within 5% of
+its own prior bound - the signature of an answer lying outside the range it was
+allowed to explore.
+
+.. warning::
+
+   ``ks`` here is **one global value**: HydroBayesCal's OpenFOAM binding has no
+   per-zone roughness. It is therefore *not* comparable with the zoned
+   ``zone<N>`` posterior of a TELEMAC calibration on the same reach, and the two
+   must not be reported side by side as though they were the same quantity.
+
+Sharing one parameter list
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A case calibrating both codes declares both sets under ``calibration.parameters``
+and each emitter takes only its own:
+:func:`axqua.calibration.telemac_parameters` drops ``ks``/``Cmu``, and
+:func:`axqua.solvers.openfoam.calibration.openfoam_parameters` drops the
+roughness zones and ``.cas`` keywords, each warning about what it skipped. Without
+that, an OpenFOAM ``ks`` emitted into ``config_Telemac.py`` would have
+HydroBayesCal rewriting a ``.cas`` keyword that does not exist for a whole
+campaign.
+
+Guards that fire before the campaign starts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``stage_case_template`` asserts the copied template rather than letting a fault
+surface hours later as an OpenFOAM parse error:
+
+* the bed ``Ks`` is **uniform**. aXqua normally writes a per-face roughness list
+  from ``geodata.roughness_zones``, but HydroBayesCal rewrites the single line
+  matching ``^\s*Ks\s+`` and cannot skip a multi-line list, so the list body
+  would survive as orphaned tokens and ``0/nut`` would stop parsing;
+* ``constant/momentumTransport`` carries a ``kEpsilonCoeffs`` line for every
+  coefficient being calibrated. OpenFOAM silently falls back to its built-in
+  value for a coefficient it cannot find, so perturbing an absent one is a no-op
+  that nothing reports;
+* the run writes at least ``n_avg_timesteps`` times, starts from ``startTime``,
+  has a ``decomposeParDict``, and carries no leftover result directories that
+  would be copied into every run and averaged into its result.
