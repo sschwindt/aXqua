@@ -623,6 +623,31 @@ ground_truth:
   #   - { category: hydraulics, kind: flowtracker, join_key: ID,
   #       values: user-sources/ground-truth/hydraulics/flowtracker-day1.xlsx,
   #       positions: user-sources/geodata/flowtracker/dgps-day1.shp }
+  #
+  #   # MULTI-DEPTH VERTICALS. A FlowTracker vertical often carries several
+  #   # readings at different depths. `sheet` names the per-reading worksheet and
+  #   # `profile` says which of them become targets:
+  #   #   single         one per vertical, nearest the 0.6 depth. THE DEFAULT, and
+  #   #                  what every config without these keys already does.
+  #   #   all            every reading, one target each.
+  #   #   drop-lowest    every reading except the one nearest the bed (a vertical
+  #   #                  with only one reading keeps it). The near-bed reading sits
+  #   #                  inside the grain roughness on a coarse bed, where a wall
+  #   #                  function returns a boundary condition, not a result.
+  #   #   depth-average  one per vertical, USGS three-point weights applied to the
+  #   #                  velocity COMPONENTS - the quantity a depth-averaged 2D
+  #   #                  model actually predicts. (Averaging the per-reading SPEEDS
+  #   #                  instead is a different, always-larger number.)
+  #   # The lowest reading is found by height above the bed, never by row order.
+  #   #
+  #   # Give a 2D and a 3D calibration DIFFERENT categories when they read the same
+  #   # survey under different rules - sources sharing a category are concatenated,
+  #   # so both would otherwise receive the union of the rows. Select one with
+  #   # build_calibration_csv(category=...).
+  #   - { category: hydraulics-3d, kind: flowtracker, join_key: ID,
+  #       sheet: profiles, profile: drop-lowest,
+  #       values: user-sources/ground-truth/hydraulics/flowtracker-day1.xlsx,
+  #       positions: user-sources/geodata/flowtracker/dgps-day1.shp }
 
 calibration:
   calibration_quantities: ["WATER DEPTH"]                    # measured columns used for calibration

@@ -98,7 +98,8 @@ def _pick_table(tables: dict[str, pd.DataFrame], quantities: list[str]) -> pd.Da
 def build_calibration_csv(cfg: Config, *,
                           floors: Mapping[str, float] | None = None,
                           path: Path | None = None,
-                          z_resolver: "Callable[[pd.DataFrame], np.ndarray] | None" = None
+                          z_resolver: "Callable[[pd.DataFrame], np.ndarray] | None" = None,
+                          category: str | None = None,
                           ) -> Path | None:
     """Write the HydroBayesCal calibration-points CSV from the tidy ground truth.
 
@@ -125,6 +126,14 @@ def build_calibration_csv(cfg: Config, *,
     because the two HydroBayesCal bindings disagree on what ``z`` means - OpenFOAM
     wants an absolute elevation, TELEMAC-3D a height above the model bed - and that
     knowledge belongs to the adapter, not here.
+
+    *category* selects one tidy tab by name instead of letting the quantities
+    decide. This is what lets a 2D and a 3D calibration read the *same* survey
+    under **different profile rules** - the 2D one depth-averaged, the 3D one
+    per-reading - by compiling them as separate categories (``hydraulics`` and
+    ``hydraulics-3d``). They must not share a category: ``compile_ground_truth``
+    concatenates sources that do, which would silently hand both calibrations the
+    union of the two row sets.
     """
     compile_ground_truth(cfg)            # no-op when the table is user-supplied
     if not cfg.ground_truth.sources and cfg.ground_truth.measurements is None \
@@ -139,7 +148,16 @@ def build_calibration_csv(cfg: Config, *,
         return None
     tables = ground_truth.read_tidy(cfg.ground_truth_path)
     quantities = cfg.calibration.calibration_quantities
-    df = _pick_table(tables, quantities).reset_index(drop=True)
+    if category is not None:
+        if category not in tables:
+            raise ValueError(
+                f"ground-truth category {category!r} is not in "
+                f"{Path(cfg.ground_truth_path).name} (has: {', '.join(tables)}). "
+                "Add a ground_truth source with that category, or drop the "
+                "category= argument to pick the tab by its quantities.")
+        df = tables[category].reset_index(drop=True)
+    else:
+        df = _pick_table(tables, quantities).reset_index(drop=True)
 
     if z_resolver is not None:
         z_column = np.asarray(z_resolver(df), dtype=float)
