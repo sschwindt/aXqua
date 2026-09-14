@@ -9,6 +9,7 @@ and BAL settings declared in the axqua config.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable, Mapping
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +19,25 @@ from axqua.config import Config
 from axqua import ground_truth
 
 log = logging.getLogger("axqua")
+
+
+def _scalar_velocity_with_error(df: pd.DataFrame) -> tuple[pd.Series, pd.Series | None]:
+    """Speed from the velocity components, with the component errors propagated.
+
+    Shared by ``SCALAR VELOCITY`` (TELEMAC) and ``U_MAG`` (OpenFOAM) so the two
+    cannot drift apart: they are the same quantity under two solvers' names, and
+    the error propagation is the part that would be easy to get subtly different.
+
+    sigma_V = (1/V) * sqrt(sum_i (c_i * sigma_i)^2)
+    """
+    vel = ground_truth.scalar_velocity(df)
+    terms = [(df[c].astype(float) * df[f"{c}_err"].astype(float)) ** 2
+             for c in ("u", "v", "w") if c in df and f"{c}_err" in df]
+    err = None
+    if terms:
+        safe_v = vel.replace(0.0, np.nan)
+        err = (np.sqrt(sum(terms)) / safe_v).fillna(0.0)
+    return vel, err
 
 
 def _resolve_quantity(df: pd.DataFrame, qty: str) -> tuple[pd.Series, pd.Series | None] | None:
@@ -39,15 +59,22 @@ def _resolve_quantity(df: pd.DataFrame, qty: str) -> tuple[pd.Series, pd.Series 
         err = df["u_mag_std"].astype(float) if "u_mag_std" in df else None
         return df["u_mag"].astype(float), err
     if q == "SCALAR VELOCITY" and any(c in df for c in ("u", "v", "w")):
-        vel = ground_truth.scalar_velocity(df)
-        # propagate component errors: sigma_V = (1/V) * sqrt(sum((c_i * sigma_i)^2))
-        terms = [(df[c].astype(float) * df[f"{c}_err"].astype(float)) ** 2
-                 for c in ("u", "v", "w") if c in df and f"{c}_err" in df]
-        err = None
-        if terms:
-            safe_v = vel.replace(0.0, np.nan)
-            err = (np.sqrt(sum(terms)) / safe_v).fillna(0.0)
-        return vel, err
+        return _scalar_velocity_with_error(df)
+    # --- OpenFOAM field names (axqua.solvers.openfoam.calibration) ------------
+    # HydroBayesCal's OpenFOAM binding extracts U_x/U_y/U_z/U_MAG/TKE, not the
+    # SELAFIN names, and compares them case-SENSITIVELY - so the spelling the
+    # caller passes is the spelling that must reach the CSV header.
+    for name, comp in (("U_X", "u"), ("U_Y", "v"), ("U_Z", "w")):
+        if q == name and comp in df:
+            err = df[f"{comp}_err"].astype(float) if f"{comp}_err" in df else None
+            return df[comp].astype(float), err
+    if q == "U_MAG" and "u_mag" in df:
+        err = df["u_mag_std"].astype(float) if "u_mag_std" in df else None
+        return df["u_mag"].astype(float), err
+    if q == "U_MAG" and any(c in df for c in ("u", "v", "w")):
+        return _scalar_velocity_with_error(df)
+    if q == "TKE" and "tke" in df:
+        return df["tke"].astype(float), None
     if q == "VELOCITY U" and "u" in df:
         return df["u"].astype(float), df["u_err"].astype(float) if "u_err" in df else None
     if q == "VELOCITY V" and "v" in df:
@@ -68,12 +95,100 @@ def _pick_table(tables: dict[str, pd.DataFrame], quantities: list[str]) -> pd.Da
     )
 
 
-def build_calibration_csv(cfg: Config) -> Path | None:
+def _positional_errors(cfg, df, quantities) -> dict:
+    """Per-quantity uncertainty induced by not knowing where the point is.
+
+    Returns ``{}`` unless the case declares a survey position quality, so every
+    existing config produces a byte-identical CSV. Never raises: a positional
+    error bar is an improvement to the error budget, and failing to compute one
+    must not cost the calibration its inputs.
+    """
+    from axqua import positional_error as pe
+
+    # resolve_sigma's ValueError (an unknown quality name) is deliberately NOT
+    # caught: that is a typo in the config, and silently calibrating without the
+    # error bar the user asked for is the wrong response to it.
+    sigma, quality = pe.resolve_sigma(cfg)
+    if not sigma:
+        return {}
+
+    geometry = Path(cfg.model_path(cfg.geometry_slf))
+    results = Path(cfg.model_path("r2d.slf"))
+    if not (geometry.is_file() and results.is_file()):
+        log.warning(
+            "%s, but there is no converged 2D result to measure it against yet "
+            "(%s). The calibration CSV carries measurement error only; rebuild it "
+            "after the steady run to include the positional term.",
+            pe.describe(sigma, quality), results.name)
+        return {}
+
+    x = df["x"].to_numpy(float)
+    y = df["y"].to_numpy(float)
+    out = {}
+    for qty in quantities:
+        variable = _SELAFIN_VARIABLE.get(qty, qty)
+        try:
+            sampler = pe.telemac_sampler(geometry, results, variable)
+        except (KeyError, OSError) as exc:
+            log.debug("no positional error for %s: %s", qty, exc)
+            continue
+        spread = pe.sample_spread(sampler, x, y, sigma)
+        if np.any(spread > 0):
+            out[qty] = spread
+            log.info("%s -> %s positional error: median %.3f, max %.3f "
+                     "(added in quadrature to the measurement error)",
+                     pe.describe(sigma, quality), qty,
+                     float(np.median(spread)), float(np.max(spread)))
+    return out
+
+
+#: Calibration quantity -> the SELAFIN variable whose spatial variation carries
+#: the positional uncertainty. A component velocity varies like the speed does.
+_SELAFIN_VARIABLE = {
+    "U_x": "VELOCITY U", "U_y": "VELOCITY V", "U_z": "SCALAR VELOCITY",
+    "U_MAG": "SCALAR VELOCITY", "TKE": "SCALAR VELOCITY",
+}
+
+
+def build_calibration_csv(cfg: Config, *,
+                          floors: Mapping[str, float] | None = None,
+                          path: Path | None = None,
+                          z_resolver: "Callable[[pd.DataFrame], np.ndarray] | None" = None,
+                          category: str | None = None,
+                          ) -> Path | None:
     """Write the HydroBayesCal calibration-points CSV from the tidy ground truth.
 
     The tidy table is compiled from ``ground_truth.sources`` when given, otherwise
     read from a user-authored ``ground_truth.measurements``. Returns ``None`` if neither
     is configured.
+
+    *floors* clamps the per-quantity ``_ERROR`` column from below. This is a
+    correctness guard, not a nicety: HydroBayesCal builds each observation's
+    variance from this column, so a measured error that is zero (or a value near
+    zero multiplied by the relative fraction) gives that point a near-zero variance
+    and lets the least trustworthy measurement dominate the whole likelihood. The
+    default ``None`` leaves the existing behaviour exactly as it was.
+
+    *path* overrides the output location, for a second CSV alongside the default
+    one (the OpenFOAM calibration targets the same points with different columns).
+
+    *z_resolver* replaces the ``z`` column. The default (``None``) writes the tidy
+    table's own ``z``, which is the **surveyed bed** - fine for a 2D calibration,
+    where ``z`` is ignored, and wrong for a 3D one, where it places the extraction
+    point on the bed and couples it to the survey's vertical accuracy. A solver
+    adapter supplies a resolver that places targets in the model's own column
+    instead (see :mod:`axqua.model_column`). It is a callback rather than a flag
+    because the two HydroBayesCal bindings disagree on what ``z`` means - OpenFOAM
+    wants an absolute elevation, TELEMAC-3D a height above the model bed - and that
+    knowledge belongs to the adapter, not here.
+
+    *category* selects one tidy tab by name instead of letting the quantities
+    decide. This is what lets a 2D and a 3D calibration read the *same* survey
+    under **different profile rules** - the 2D one depth-averaged, the 3D one
+    per-reading - by compiling them as separate categories (``hydraulics`` and
+    ``hydraulics-3d``). They must not share a category: ``compile_ground_truth``
+    concatenates sources that do, which would silently hand both calibrations the
+    union of the two row sets.
     """
     compile_ground_truth(cfg)            # no-op when the table is user-supplied
     if not cfg.ground_truth.sources and cfg.ground_truth.measurements is None \
@@ -88,22 +203,48 @@ def build_calibration_csv(cfg: Config) -> Path | None:
         return None
     tables = ground_truth.read_tidy(cfg.ground_truth_path)
     quantities = cfg.calibration.calibration_quantities
-    df = _pick_table(tables, quantities).reset_index(drop=True)
+    if category is not None:
+        if category not in tables:
+            raise ValueError(
+                f"ground-truth category {category!r} is not in "
+                f"{Path(cfg.ground_truth_path).name} (has: {', '.join(tables)}). "
+                "Add a ground_truth source with that category, or drop the "
+                "category= argument to pick the tab by its quantities.")
+        df = tables[category].reset_index(drop=True)
+    else:
+        df = _pick_table(tables, quantities).reset_index(drop=True)
 
+    if z_resolver is not None:
+        z_column = np.asarray(z_resolver(df), dtype=float)
+    elif "z" in df:
+        z_column = df["z"].astype(float)
+    else:
+        z_column = 0.0
     out = pd.DataFrame({
         "id": np.arange(1, len(df) + 1),
         "x": df["x"].astype(float),
         "y": df["y"].astype(float),
-        "z": df["z"].astype(float) if "z" in df else 0.0,
+        "z": z_column,
     })
     frac = cfg.calibration.measurement_error
+    positional = _positional_errors(cfg, df, quantities)
     for qty in quantities:
         values, measured_err = _resolve_quantity(df, qty)
         err = measured_err if measured_err is not None else values.abs() * frac
+        floor = (floors or {}).get(qty)
+        if floor is not None:
+            err = err.clip(lower=float(floor))
+        extra = positional.get(qty)
+        if extra is not None:
+            # In quadrature: the position error and the instrument error are
+            # independent. Applied AFTER the floor, because the floor is a
+            # statement about the instrument and this is not.
+            err = np.sqrt(err.astype(float) ** 2 + np.asarray(extra) ** 2)
         out[f"{qty}_DATA"] = values.round(6)
-        out[f"{qty}_ERROR"] = err.round(6)
+        out[f"{qty}_ERROR"] = np.round(err, 6)
 
-    path = cfg.calibration_path(cfg.calibration_csv)
+    path = Path(path) if path is not None else cfg.calibration_path(cfg.calibration_csv)
+    path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(path, index=False)
     return path
 
@@ -167,10 +308,36 @@ def merged_parameters(cfg: Config) -> list:
     return list(by_name.values())
 
 
+def telemac_parameters(cfg: Config) -> list:
+    """The declared parameters minus the ones that belong to another solver.
+
+    A case that calibrates both codes declares both sets in one
+    ``calibration.parameters`` list, so this filter is the mirror image of
+    :func:`axqua.solvers.openfoam.calibration.openfoam_parameters`. Without it an
+    OpenFOAM ``ks`` / ``Cmu`` would be emitted into ``config_Telemac.py`` as though
+    it were a TELEMAC keyword, and HydroBayesCal would spend the whole campaign
+    rewriting a ``.cas`` line that does not exist.
+    """
+    from axqua.solvers.openfoam.spec import OPENFOAM_PARAMETERS
+
+    keep, drop = [], []
+    for p in merged_parameters(cfg):
+        # a zone<N> roughness parameter is TELEMAC's and must survive: only the
+        # names that are exclusively OpenFOAM's are removed
+        if str(p.name).strip().lower() in OPENFOAM_PARAMETERS:
+            drop.append(p.name)
+        else:
+            keep.append(p)
+    if drop:
+        log.info("not TELEMAC calibration parameters, skipped: %s (they belong to "
+                 "the OpenFOAM calibration)", ", ".join(sorted(drop)))
+    return keep
+
+
 def emit_hbc_config(cfg: Config, calibration_csv: Path | None) -> Path:
     """Emit a HydroBayesCal ``config_Telemac.py`` for the produced case."""
     c = cfg.calibration
-    parameters = merged_parameters(cfg)
+    parameters = telemac_parameters(cfg)
     params = [p.name for p in parameters]
     ranges = [[p.min, p.max] for p in parameters]
     # which case HydroBayesCal drives: the built steady 2D case by default, or the

@@ -43,6 +43,9 @@ class DischargeHistory:
     tolerance: float = 1.0e-3
     steady_time: float | None = None
     converged: bool = False
+    #: True when the case runs under a rigid lid. The balance is then STRUCTURAL,
+    #: not evidence of anything - see :meth:`lines`.
+    rigid_lid: bool = False
 
     @property
     def imbalance(self) -> np.ndarray:
@@ -51,6 +54,23 @@ class DischargeHistory:
             return np.zeros(0)
         denom = np.where(np.abs(self.inflow) > 1e-12, np.abs(self.inflow), np.nan)
         return (np.abs(self.inflow) - np.abs(self.outflow)) / denom
+
+    @property
+    def final_imbalance(self) -> float | None:
+        """|relative imbalance| the run settled at - the number a study minimises.
+
+        The mean of the last ``STEADY_WINDOW`` finite samples, not the single last
+        one: the same window already decides convergence, and one final sample on a
+        still-oscillating run is noise rather than a settled value.
+
+        ``None`` when there is nothing to read, which is not the same as zero - a
+        caller ranking runs must be able to tell "balanced" from "never reported".
+        """
+        imbalance = np.abs(self.imbalance)
+        finite = imbalance[np.isfinite(imbalance)]
+        if finite.size == 0:
+            return None
+        return float(finite[-STEADY_WINDOW:].mean())
 
     def lines(self) -> list[str]:
         if self.time.size == 0:
@@ -67,7 +87,21 @@ class DischargeHistory:
             out.append(f"  outflow total: {np.abs(self.outflow[-1]):8.4f} m3/s")
             out.append(f"  imbalance    : {100 * imb[-1]:+8.3f}% "
                        f"(tolerance {100 * self.tolerance:g}%)")
-        if self.converged:
+        if self.rigid_lid:
+            # Under a rigid lid the free surface cannot move, so the water volume in
+            # the domain is FIXED and inflow must equal outflow at every step
+            # whatever the flow is doing. The balance is then a property of the
+            # boundary conditions, not a measurement - it closes within seconds and
+            # would read "converged" on a run that had not settled at all. Say so,
+            # rather than letting a tautology be read as evidence.
+            out.append(f"  the balance closes to {100 * abs(imb[-1]):.3f}%, but under a "
+                       "RIGID LID that is structural, not evidence: the lid fixes the "
+                       "water volume, so inflow equals outflow by construction.")
+            out.append("  Judge steadiness on the VELOCITY FIELD instead (compare "
+                       "successive write times); on this reach the mean settles long "
+                       "before the local fluctuation does, which is why the "
+                       "calibration averages the last n_avg_timesteps writes.")
+        elif self.converged:
             out.append(f"  CONVERGED at t = {self.steady_time:.2f} s: the balance held "
                        f"inside {100 * self.tolerance:g}% for {STEADY_WINDOW} "
                        "consecutive samples")
@@ -143,8 +177,10 @@ def analyse(cfg, case_dir: str | Path | None = None, *,
     tolerance = float(cfg.hydrodynamics.flux_tolerance)
     if target is None:
         target = float(cfg.boundaries.prescribed_flowrate or 0.0)
+    rigid_lid = getattr(cfg, "rigid_lid", False)
     if not monitors:
-        return DischargeHistory(time=np.zeros(0), target=target, tolerance=tolerance)
+        return DischargeHistory(time=np.zeros(0), target=target, tolerance=tolerance,
+                                rigid_lid=rigid_lid)
 
     # the monitors share a write interval, but a restart can leave them ragged;
     # interpolate every patch onto the shortest common time base
@@ -157,6 +193,7 @@ def analyse(cfg, case_dir: str | Path | None = None, *,
         time=base, per_patch=per_patch, target=target, tolerance=tolerance,
         inflow=np.sum(inlets, axis=0) if inlets else None,
         outflow=np.sum(outlets, axis=0) if outlets else None,
+        rigid_lid=rigid_lid,
     )
     if history.inflow is not None and history.outflow is not None:
         _find_steady(history)

@@ -9,9 +9,12 @@ distinction between *not applicable* and *not implemented* carries real informat
 * ``steady2d`` / ``unsteady2d`` are **not applicable**. ``interFoam`` is a two-phase
   VOF solver; there is no depth-averaged mode to run, and reporting "not implemented"
   would suggest axqua is merely missing a feature that could be added.
-* ``morphodynamics``, ``calibration`` and the convergence studies are **not
-  implemented**: each is genuinely possible for OpenFOAM and simply is not built yet.
-  A user deciding which code to set up deserves to see that difference.
+* ``morphodynamics`` and the convergence studies are **not implemented**: each is
+  genuinely possible for OpenFOAM and simply is not built yet. A user deciding
+  which code to set up deserves to see that difference.
+* ``calibration`` **is** supported - see
+  :mod:`axqua.solvers.openfoam.calibration`. It calibrates the bed roughness and
+  the k-epsilon coefficients against measured velocity components.
 """
 
 from __future__ import annotations
@@ -40,8 +43,48 @@ def _describe_environment(cfg) -> str:
     return " / ".join(parts)
 
 
+#: Parameter names HydroBayesCal's OpenFOAM binding can route, lowercased (see
+#: ``hydroBayesCal.openfoam.control_openfoam.KEPSILON_COEFFS`` and its ``ks``
+#: branch). Defined here rather than beside the calibration code so the capability
+#: predicate below stays import-light: ``calibration.py`` pulls in pandas, and
+#: ``tests/test_capabilities.py`` asserts that listing capabilities imports nothing
+#: heavy.
+OPENFOAM_PARAMETERS = frozenset({"ks", "cmu", "c1", "c2", "sigmak", "sigmaeps"})
+
+
 def _case(cfg) -> Path:
     return Path(cfg.openfoam_case_dir)
+
+
+def _calibration_root(cfg) -> Path:
+    return Path(cfg.calibration_dir) / "openfoam"
+
+
+def _calibration_configured(cfg) -> bool:
+    """An OpenFOAM block plus at least one parameter the binding can actually route.
+
+    Only ``calibration.parameters`` is consulted. The roughness table and the
+    target-template spreadsheet are the other two places a parameter can be
+    declared, but reading either needs pandas, which this module must not import.
+    That is no real loss here: OpenFOAM's ``ks`` is one global value, so a per-zone
+    roughness table has nothing to contribute to it.
+    """
+    return ("openfoam" in cfg.declared_blocks
+            and any(str(p.name).strip().lower() in OPENFOAM_PARAMETERS
+                    for p in cfg.calibration.parameters))
+
+
+def _calibration_built(cfg) -> bool:
+    """The per-run case template and the emitted HydroBayesCal config both exist."""
+    root = _calibration_root(cfg)
+    return ((root / "case-template" / "constant" / "polyMesh" / "faces").is_file()
+            and (root / "config_OpenFOAM.py").is_file())
+
+
+def _calibration_run(cfg) -> bool:
+    """The initial design has produced model outputs."""
+    return (_calibration_root(cfg) / "auto-saved-results-HydroBayesCal"
+            / "restart_data" / "initial-model-outputs.json").is_file()
 
 
 def _mesh_built(cfg) -> bool:
@@ -92,6 +135,11 @@ SPEC = BackendSpec(
         Capability.GAIN_LOSE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
         Capability.MESH_CONVERGENCE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
         Capability.VERTICAL_CONVERGENCE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
-        Capability.CALIBRATION: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
+        Capability.CALIBRATION: CapabilitySpec(
+            support=Support.SUPPORTED,
+            configured=_calibration_configured,
+            built=_calibration_built,
+            run=_calibration_run,
+        ),
     },
 )
