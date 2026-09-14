@@ -594,3 +594,43 @@ the target must be a quantity the point sample can represent. Extracting
 `U_x/U_y/U_z` at a single height - which is what HydroBayesCal's OpenFOAM binding
 does - imports the profile-shape bias directly into the likelihood, and on a reach
 with `ks/h ~ 0.6` that bias is larger than the signal being calibrated.
+
+#### Which readings to use depends on what the target is
+
+The KB15 profiles sample at %Depth ~0.29 / 0.54 / 0.93 (measured from the
+SURFACE), i.e. 71% / 46% / **7%** of the column above the bed. On vertical 1501
+the lowest reading sits **0.055 m above the bed against a measured ks of 0.089 m**
+- physically inside the grain roughness.
+
+Log-law sensitivity of a point reading to the model/reality roughness mismatch
+(`ks/h` 0.15 measured vs ~0.6 in the rigid-lid model):
+
+| relative height | ks/h=0.15 | ks/h=0.6 | spread |
+|---|---|---|---|
+| 0.71 h (upper) | 1.153 | 1.226 | 6.3% |
+| 0.46 h (middle) | 1.052 | 1.077 | 2.4% |
+| **0.07 h (near bed)** | 0.614 | 0.430 | **29.9%** |
+
+So for a **point** target the near-bed reading should be dropped - it carries a
+30% profile-shape bias where the upper two carry 2-6%, and the model cannot
+represent that part of the column anyway (`y1 < ks` on every wetted bed face).
+Measured on the 3D case, using the two upper readings against the model at the
+same relative heights moves the ratio from **0.56 to 0.68**.
+
+For a **depth-averaged** target the opposite holds: the near-bed reading *belongs*,
+because it is what makes the average a depth-average. The USGS 3-point rule
+weights it deliberately. Dropping it biases the measured value high (0.256 ->
+0.290 m/s) and moves the 2D ratio away from 1: **1.02 with all three readings,
+0.90 with only the upper two.**
+
+The two rules are complementary, not competing:
+
+* **2D / depth-averaged targets** - keep all three, via `usgs_three_point`. This
+  is what `prepare_corrected_targets.py` already does, and it gives 1.02.
+* **3D / point targets** - drop the near-bed reading.
+
+Neither rescues the 3D rigid-lid field at these points: the upper-band average
+gives 0.48 with a per-vertical IQR of 0.02-0.74. That is scatter, not bias, and it
+is consistent with `lid_steps` failing at p99 331% and only 3 of 30 verticals
+sitting on columns that pass the applicability test. The sampling scheme is not
+what is wrong there - the field is.
