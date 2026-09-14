@@ -581,6 +581,18 @@ dem_of_difference:
 #   write_interval: 10.0
 
 ground_truth:
+  # How well the survey's HORIZONTAL coordinates are known. A calibration reads the
+  # model AT the measurement's coordinates, so a position error is charged to the
+  # model - or to whichever parameter absorbs it. Naming the GNSS solution quality
+  # turns it into an error bar instead: the model is sampled on rings at that radius
+  # and the resulting spread is added to each target's _ERROR in quadrature. A
+  # target on a steep gradient then carries wide error bars and one in a uniform
+  # patch narrow ones, which is the weighting a likelihood should give them.
+  #   rtk-fixed 0.03 m | rtk-float 1.0 m | dgps 1.0 m | standalone 3.0 m
+  # Unset (the default) means no positional term at all, so existing cases are
+  # untouched. position_sigma: <metres> overrides the lookup.
+  # position_quality: rtk-fixed
+  #
   # The calibration consumes a tidy, multi-tab "measurements" table: one tab per
   # category (hydraulics, morphodynamics, ...), first three columns x,y,z (project
   # CRS), then quantity columns. Provide it one of three ways:
@@ -623,6 +635,31 @@ ground_truth:
   #   - { category: hydraulics, kind: flowtracker, join_key: ID,
   #       values: user-sources/ground-truth/hydraulics/flowtracker-day1.xlsx,
   #       positions: user-sources/geodata/flowtracker/dgps-day1.shp }
+  #
+  #   # MULTI-DEPTH VERTICALS. A FlowTracker vertical often carries several
+  #   # readings at different depths. `sheet` names the per-reading worksheet and
+  #   # `profile` says which of them become targets:
+  #   #   single         one per vertical, nearest the 0.6 depth. THE DEFAULT, and
+  #   #                  what every config without these keys already does.
+  #   #   all            every reading, one target each.
+  #   #   drop-lowest    every reading except the one nearest the bed (a vertical
+  #   #                  with only one reading keeps it). The near-bed reading sits
+  #   #                  inside the grain roughness on a coarse bed, where a wall
+  #   #                  function returns a boundary condition, not a result.
+  #   #   depth-average  one per vertical, USGS three-point weights applied to the
+  #   #                  velocity COMPONENTS - the quantity a depth-averaged 2D
+  #   #                  model actually predicts. (Averaging the per-reading SPEEDS
+  #   #                  instead is a different, always-larger number.)
+  #   # The lowest reading is found by height above the bed, never by row order.
+  #   #
+  #   # Give a 2D and a 3D calibration DIFFERENT categories when they read the same
+  #   # survey under different rules - sources sharing a category are concatenated,
+  #   # so both would otherwise receive the union of the rows. Select one with
+  #   # build_calibration_csv(category=...).
+  #   - { category: hydraulics-3d, kind: flowtracker, join_key: ID,
+  #       sheet: profiles, profile: drop-lowest,
+  #       values: user-sources/ground-truth/hydraulics/flowtracker-day1.xlsx,
+  #       positions: user-sources/geodata/flowtracker/dgps-day1.shp }
 
 calibration:
   calibration_quantities: ["WATER DEPTH"]                    # measured columns used for calibration
@@ -640,3 +677,34 @@ calibration:
     - { name: zone1, min: 0.05, max: 0.50, comment: "channel ks [m] (Nikuradse)" }
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+
+
+# ---------------------------------------------------------------------------- #
+# postproc - figures from the solver results (VisIt)
+# ---------------------------------------------------------------------------- #
+# Optional and additive: with no `postproc:` block the defaults below apply and
+# nothing in either solver path consults them. Driven by postprocessing.py and by
+# `axqua postproc <config>`.
+#
+# VisIt ships its OWN Python interpreter, so axqua cannot import it: it generates
+# a script and runs it with `visit -cli -nowin -s`. `visit` below is therefore the
+# LAUNCHER EXECUTABLE, not a script to source - which is why it is not spelled
+# like telemac.pysource / openfoam.bashrc even though it fills the same slot.
+# `axqua postproc <config> --script-only` writes the scripts without running
+# anything, so the output can be inspected on a machine with no VisIt at all.
+#
+# postproc:
+#   visit: /home/IWS/public/visit/bin/visit   # [REQUIRED to render] your `visit` launcher
+#   backend: visit
+#   # free-surface  - the water surface coloured by speed. Under mode: rigid-lid
+#   #                 there is no interface to contour, so it falls back to the lid
+#   #                 patch and SAYS ON THE FIGURE that the surface was prescribed
+#   #                 by the 2D seed rather than solved.
+#   # velocity-plan - plan-view velocity, sampled at the same relative depth a
+#   #                 FlowTracker measures at, so figure and calibration agree.
+#   # profiles      - modelled vertical profiles vs the measured verticals, with
+#   #                 error bars, plus a residual CSV. Needs ground_truth.
+#   scenes: ["free-surface", "velocity-plan", "profiles"]
+#   image_width: 1600
+#   image_height: 1000
+#   animation_fps: 10

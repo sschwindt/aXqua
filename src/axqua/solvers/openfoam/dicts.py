@@ -69,8 +69,25 @@ class Stage:
     purpose: str
 
 
-def stages(cfg) -> list[Stage]:
+def stages(cfg, *, single: bool = False) -> list[Stage]:
+    """The run's stages, in order.
+
+    *single* collapses a two-phase case to ONE full-length production stage. It
+    exists for the Bayesian campaign: HydroBayesCal copies a case template and
+    makes a single solver call, so a two-stage case would run only its spin-up -
+    30 s at half interface compression and upwinded momentum - while the config
+    claimed the full ``end_time``. The interface is settled once up front instead
+    (``calibration._prespin_template``) and promoted into the template's ``0/``.
+    """
     of = cfg.openfoam
+    if single and of.mode != "rigid-lid":
+        return [Stage(name="run", start_from="startTime", end_time=of.end_time,
+                      max_courant=of.max_courant,
+                      alpha_scheme="Gauss interfaceCompression vanLeer 1",
+                      velocity_scheme="Gauss limitedLinearV 1",
+                      n_outer_correctors=2,
+                      purpose="production run from a pre-spun interface "
+                              "(the spin-up was run once into 0/)")]
     if of.mode == "rigid-lid":
         # No interface and no air, so the two-stage split has nothing to settle: the
         # spin-up exists to let a depth-averaged hotstart grow a vertical profile
@@ -138,10 +155,31 @@ sigma           {of.surface_tension:g};
 
 
 def momentum_transport(cfg) -> str:
+    """``constant/momentumTransport`` - the Foundation 8+ name for the RAS settings.
+
+    Under ``kEpsilon`` the closure coefficients are written **explicitly**, at the
+    model's own defaults. Two reasons, both about calibration: OpenFOAM falls back
+    to built-in values for any coefficient it does not find in the file, so a
+    calibration that perturbs one which is absent would leave every run using the
+    same value and never say so; and HydroBayesCal's ``update_dictionary_entry``
+    requires the key to exist, raising ``Key 'Cmu' not found`` otherwise. Other
+    models (kOmegaSST, the default) are written exactly as before.
+    """
     of = cfg.openfoam
     if of.turbulence == "laminar":
         body = "simulationType  laminar;\n"
     else:
+        coeffs = ""
+        if of.turbulence == "kEpsilon":
+            coeffs = (
+                "\n    kEpsilonCoeffs\n    {\n"
+                f"        Cmu             {of.kepsilon_cmu:g};\n"
+                f"        C1              {of.kepsilon_c1:g};\n"
+                f"        C2              {of.kepsilon_c2:g};\n"
+                f"        sigmak          {of.kepsilon_sigmak:g};\n"
+                f"        sigmaEps        {of.kepsilon_sigma_eps:g};\n"
+                "    }\n"
+            )
         body = f"""simulationType  RAS;
 
 RAS
@@ -151,7 +189,7 @@ RAS
     turbulence      on;
 
     printCoeffs     on;
-}}
+{coeffs}}}
 """
     return _dict_file("momentumTransport", body, location="constant")
 
@@ -187,7 +225,7 @@ writeControl    adjustableRunTime;
 
 writeInterval   {of.write_interval:g};
 
-purgeWrite      0;
+purgeWrite      {of.purge_write:d};
 
 // binary keeps a multi-million-cell case's output and the decomposed meshes
 // compact; only the hand-written polyMesh is ASCII
@@ -574,7 +612,8 @@ def write_dicts(of_mesh, cfg, case_dir: str | Path, *,
     return written
 
 
-def activate(case_dir: str | Path, stage: str, cfg=None) -> None:
+def activate(case_dir: str | Path, stage: str, cfg=None, *,
+             single: bool = False) -> None:
     """Make one stage's dictionaries the active ``system/`` set.
 
     With *cfg* the three staged files are **regenerated from that config** before
@@ -597,7 +636,8 @@ def activate(case_dir: str | Path, stage: str, cfg=None) -> None:
     src = system / STAGE_DIRS[stage]
 
     if cfg is not None:
-        target = next((s for s in stages(cfg) if s.name == stage), None)
+        target = next((s for s in stages(cfg, single=single) if s.name == stage),
+                      None)
         if target is None:
             raise ValueError(f"unknown stage {stage!r}; expected one of "
                              f"{sorted(STAGE_DIRS)}")

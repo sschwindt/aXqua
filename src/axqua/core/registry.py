@@ -239,6 +239,21 @@ class SolverBackend(Protocol):
         """
         ...
 
+    def describe_results(self, cfg) -> list:
+        """What a visualiser can open for this case, in solver-neutral terms.
+
+        The counterpart to :meth:`export_qgis_results`: that one writes files for
+        QGIS, this one *describes* what already exists so a post-processing backend
+        (:mod:`axqua.postproc`) can draw it without knowing which solver produced it.
+        Returns :class:`axqua.postproc.dataset.Dataset` values.
+
+        This is the seam that keeps ``postproc`` from importing a solver: the
+        knowledge of where a result lives and what fields and patches it carries is
+        the backend's, and it is handed over as data. Returning ``[]`` means
+        "nothing to draw yet", never an error.
+        """
+        ...
+
 
 class BaseBackend:
     """Optional base supplying no-op defaults for the parts a backend does not have.
@@ -273,6 +288,9 @@ class BaseBackend:
         return None
 
     def export_qgis_results(self, cfg, ctx):
+        return []
+
+    def describe_results(self, cfg) -> list:
         return []
 
 

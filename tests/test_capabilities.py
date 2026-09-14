@@ -392,3 +392,28 @@ def test_openfoam_does_not_import_the_telemac_backend():
                 offenders.append(f"{path.name}:{number}: {line.strip()}")
     assert not offenders, ("the OpenFOAM backend reaches into TELEMAC:\n  "
                            + "\n  ".join(offenders))
+
+
+def test_openfoam_does_not_import_the_telemac_calibration_adapter():
+    """``axqua.bayescal`` is the TELEMAC calibration adapter, not shared plumbing.
+
+    It does not live under ``solvers/telemac/``, so the sibling check above cannot
+    see it - but importing it from the OpenFOAM backend would leak TELEMAC's .cas
+    rewriting and its pysource launch into OpenFOAM's calibration path just the
+    same. What the two share is ``axqua.hbc``, which is deliberately solver-neutral.
+    """
+    import pathlib
+    import re
+
+    root = (pathlib.Path(__file__).resolve().parent.parent / "src" / "axqua"
+            / "solvers" / "openfoam")
+    offenders = []
+    for path in root.rglob("*.py"):
+        for number, line in enumerate(path.read_text().splitlines(), 1):
+            # import statements only: a docstring cross-reference naming where the
+            # TELEMAC half lives is documentation worth having, not a dependency.
+            if re.match(r"\s*(from|import)\s+axqua\.bayescal\b", line):
+                offenders.append(f"{path.name}:{number}: {line.strip()}")
+    assert not offenders, (
+        "the OpenFOAM backend imports the TELEMAC calibration adapter; use "
+        "axqua.hbc for the shared parts:\n  " + "\n  ".join(offenders))

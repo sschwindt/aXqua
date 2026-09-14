@@ -158,6 +158,11 @@ class TelemacEnv:
             raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
 
 
+#: Valid ``GroundTruthSource.profile`` rules. Must stay in step with
+#: :data:`axqua.ground_truth.PROFILE_RULES` (fenced by a test).
+PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average")
+
+
 @dataclass
 class GroundTruthSource:
     """One raw ground-truth source to compile into the tidy measurements table.
@@ -174,6 +179,33 @@ class GroundTruthSource:
     values: Path | None = None           # measured-values file (e.g. .ft.sum xlsx)
     positions: Path | None = None        # position layer (shp/gpkg) to join coords from
     join_key: str = "ID"
+
+    #: Worksheet to read the values from. ``None`` keeps the historic behaviour
+    #: (the first sheet, one row per vertical). Name a per-reading profile sheet
+    #: to use any ``profile`` rule other than ``single``.
+    sheet: str | int | None = None
+
+    #: Which reading of a multi-depth vertical becomes a target - see
+    #: :func:`axqua.ground_truth.select_profile_rows`. ``single`` is the default
+    #: and reproduces the previous behaviour exactly.
+    profile: str = "single"
+
+    #: Column identifying the vertical a reading belongs to, for the profile
+    #: rules. Defaults to ``join_key``.
+    group_key: str | None = None
+
+    def __post_init__(self) -> None:
+        # Spelled out rather than imported from axqua.ground_truth: that module
+        # pulls pandas, and this runs on every config load - including the
+        # capability listing, which tests/test_capabilities.py requires to import
+        # nothing heavy. test_profile_rules_match_the_implementation fences the
+        # duplication.
+        if self.profile not in PROFILE_RULES:
+            raise ValueError(
+                f"ground_truth source {self.category!r}: unknown profile rule "
+                f"{self.profile!r}; expected one of {', '.join(PROFILE_RULES)}")
+        if self.group_key is None:
+            self.group_key = self.join_key
 
 
 @dataclass
@@ -854,6 +886,18 @@ class GroundTruth:
     sources: list[GroundTruthSource] = field(default_factory=list)  # raw sources to compile
     targets: CalibrationTargets | None = None  # filled calibration-target-data.xlsx
 
+    #: How well the survey's HORIZONTAL coordinates are known. A calibration reads
+    #: the model at the measurement's coordinates, so a position error is charged
+    #: to the model - or to whichever parameter happens to absorb it. Naming the
+    #: survey's GNSS solution quality (``rtk-fixed`` / ``rtk-float`` / ``dgps`` /
+    #: ``standalone``) turns that into an error bar instead. Leave unset and
+    #: nothing changes; the default is no positional uncertainty at all.
+    position_quality: str | None = None
+
+    #: Explicit horizontal sigma [m], winning over ``position_quality`` - for a
+    #: survey whose real accuracy is known rather than assumed.
+    position_sigma: float | None = None
+
     def problems(self) -> list[str]:
         """Return ground-truth input problems as messages (empty when all OK).
 
@@ -1428,7 +1472,13 @@ class OpenFoam:
     # ``boundaries.prescribed_elevation`` is deliberately not reused: the 2D case is
     # converged against it, and editing it to suit the 3D crop would silently change
     # the model the seed comes from.
-    outlet_stage: float | None = None
+    # A single number where the crop really has one outfall; a {patch: level}
+    # mapping where it does not. Cutting a reach mid-stream generally leaves
+    # SEVERAL open faces at different stations, and the parent's water surface
+    # across them spans whatever its own slope puts there - 1.18 m across the
+    # three faces of the KB15 40 m crop. One number on all of them would impose a
+    # tailwater the parent never had. A mapping must name every outlet patch.
+    outlet_stage: float | dict[str, float] | None = None
     # The sub-model's own inflow/outflow lines. A crop that moves the domain away from
     # the case's liquid boundaries leaves it with none - the water has nowhere to enter
     # or leave - and the build stops with exactly that message. Same reasoning as
@@ -1492,11 +1542,29 @@ class OpenFoam:
     surface_tension: float = 0.07
     roughness_constant: float = 0.5   # nutkRoughWallFunction Cs
     friction_ks: float = 0.05         # fallback ks [m] with no roughness zones
+    # k-epsilon closure coefficients, at OpenFOAM's own defaults. Written into
+    # constant/momentumTransport only when turbulence == "kEpsilon", so a kOmegaSST
+    # case is unaffected. They exist as config fields because they are calibration
+    # PARAMETERS (see axqua.solvers.openfoam.calibration): OpenFOAM silently falls
+    # back to built-in values for a coefficient that is absent from the file, so a
+    # perturbed coefficient has to be written explicitly or the perturbation is a
+    # no-op that nothing reports.
+    kepsilon_cmu: float = 0.09
+    kepsilon_c1: float = 1.44
+    kepsilon_c2: float = 1.92
+    kepsilon_sigmak: float = 1.0
+    kepsilon_sigma_eps: float = 1.3
 
     # ---- run ----------------------------------------------------------------
     spinup_time: float = 30.0       # [s] stage 1 (settle the interface)
     end_time: float = 300.0         # [s] end of stage 2
     write_interval: float = 10.0    # [s] of simulated time
+    # How many time directories to keep (OpenFOAM's purgeWrite; 0 = keep all).
+    # 0 is right for a single production run whose whole time series is wanted.
+    # A calibration campaign sets it to n_avg_timesteps + 1: only the trailing
+    # window is ever read, and dozens of binary time directories per run x tens of
+    # runs is a lot of disk written to be deleted.
+    purge_write: int = 0
     initial_time_step: float = 0.001
     max_time_step: float = 0.5
     max_courant: float = 0.9        # stage 2 (stage 1 uses spinup_courant)
@@ -1563,6 +1631,48 @@ class OpenFoam:
 
 
 @dataclass
+class PostProcessing:
+    """Visualisation: which tool draws the figures, and what to draw.
+
+    ``visit`` is the VisIt **launcher** (an executable), not a script to source -
+    which is why it is not spelled like ``telemac.pysource`` / ``openfoam.bashrc``
+    even though it occupies the same slot in its block. VisIt ships its own Python,
+    so axqua generates a script and runs it with ``visit -cli -nowin -s`` rather
+    than importing anything (see :mod:`axqua.postproc`). ``environment`` covers the
+    rare install that still needs a setup script, and is what makes this work
+    through WSL on Windows.
+
+    Additive: a config with no ``postproc:`` block gets these defaults and nothing
+    in either solver path consults them.
+    """
+
+    visit: Path | None = None
+    environment: Environment = field(default_factory=Environment)
+    backend: str = "visit"
+    scenes: list[str] = field(default_factory=lambda: [
+        "free-surface", "velocity-plan", "profiles"])
+    # separate ints rather than a tuple, so the YAML round-trip is exact
+    image_width: int = 1600
+    image_height: int = 1000
+    animation_fps: int = 10
+
+    def validate(self) -> None:
+        if self.backend not in ("visit",):
+            raise ValueError(
+                f"postproc.backend must be 'visit', got {self.backend!r}")
+        if self.visit is not None and not Path(self.visit).exists():
+            raise FileNotFoundError(
+                f"VisIt launcher not found: {self.visit}. Point postproc.visit at "
+                "the `visit` executable of your install, e.g. "
+                "/home/IWS/public/visit/bin/visit")
+        for name, value in (("image_width", self.image_width),
+                            ("image_height", self.image_height),
+                            ("animation_fps", self.animation_fps)):
+            if int(value) <= 0:
+                raise ValueError(f"postproc.{name} must be positive, got {value}")
+
+
+@dataclass
 class Config:
     name: str
     crs_epsg: int
@@ -1594,6 +1704,7 @@ class Config:
     surfaces: Surfaces = field(default_factory=Surfaces)
     # OpenFOAM free-surface extension (optional; see axqua.solvers.openfoam)
     openfoam: OpenFoam = field(default_factory=OpenFoam)
+    postproc: PostProcessing = field(default_factory=PostProcessing)
     # where the OpenFOAM case tree is written; defaults to <sim_dir>/openfoam
     openfoam_dir: Path | None = None
     # Top-level blocks the YAML actually contained. Every solver section has a
@@ -1740,6 +1851,8 @@ class Config:
         self.openfoam.environment.validate()
         self.structures.validate()
         self.openfoam.validate()
+        self.postproc.environment.validate()
+        self.postproc.validate()
         self.initialization.validate()
         self.drying.validate(self.percolation)
         self.dem_of_difference.validate()
@@ -1920,7 +2033,11 @@ def load_config(path: str | os.PathLike) -> Config:
                 tdict[key] = _resolve(cfg_dir, tdict[key])
         targets = CalibrationTargets(**tdict)
     ground_truth = GroundTruth(measurements=measurements, sources=sources,
-                               targets=targets)
+                               targets=targets,
+                               **_only_known(GroundTruth,
+                                             {k: v for k, v in gtdict.items()
+                                              if k in ("position_quality",
+                                                       "position_sigma")}))
 
     mesh = MeshConfig(**_only_known(MeshConfig, raw.get("mesh", {}) or {}))
     # YAML maps keys may come back as str; coerce region_sizes keys to int
@@ -1957,6 +2074,13 @@ def load_config(path: str | os.PathLike) -> Config:
     openfoam_dir = _resolve(cfg_dir, project.get("openfoam_dir")) if \
         project.get("openfoam_dir") else None
 
+    # Post-processing: absent block -> defaults, and nothing consults them
+    ppdict = dict(raw.get("postproc") or {})
+    if ppdict.get("visit") is not None:
+        ppdict["visit"] = _resolve(cfg_dir, ppdict["visit"])
+    ppdict["environment"] = _load_environment(ppdict.get("environment"), cfg_dir)
+    postproc = PostProcessing(**_only_known(PostProcessing, ppdict))
+
     cfg = Config(
         name=project.get("name", path.stem),
         crs_epsg=int(project.get("crs_epsg", 25832)),
@@ -1981,6 +2105,7 @@ def load_config(path: str | os.PathLike) -> Config:
         structures=structures,
         surfaces=surfaces,
         openfoam=openfoam,
+        postproc=postproc,
         openfoam_dir=openfoam_dir,
         declared_blocks=frozenset(raw),
     )

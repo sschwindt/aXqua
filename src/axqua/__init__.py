@@ -101,7 +101,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
 # Historic module names stay listed: they are shims (see axqua/mesh.py and
 # friends) that alias the moved modules, so `from axqua import pipeline`
 # keeps working for case scripts written before the backends were split out.
-_SUBMODULES = ("core", "solvers", "campaigns", "openfoam", "config", "pipeline",
+_SUBMODULES = ("core", "solvers", "campaigns", "hbc", "openfoam", "config", "pipeline",
                "cli", "mesh", "steering", "selafin")
 
 _NAME_TO_MODULE = {name: module
@@ -115,7 +115,7 @@ _NAME_TO_MODULE = {name: module
 __all__ = [
     "BackendSpec", "Capability", "CapabilitySpec", "CapabilityState", "CaseStatus",
     "Config", "ConfigError", "ErrorRecord", "FlowSpec", "FluxConvergence",
-    "GeodataError", "AxquaError", "Layer", "MeshError", "MeshValidity",
+    "GeodataError", "AxquaError", "hbc", "Layer", "MeshError", "MeshValidity",
     "OutletProfile", "SolverError", "ZoneRoughness",
     "PhreaticPlane", "ProgressBar", "SolverBackend", "SolverProgress",
     "SeedResult", "SolverStatus", "Sortie", "Support", "WettingReport",

@@ -101,7 +101,7 @@ def test_launch_uses_this_interpreter_and_no_conda_env(tmp_path, monkeypatch, ca
     the thing that made this fragile across machines."""
     from types import SimpleNamespace
 
-    from axqua import bayescal
+    from axqua import bayescal, hbc
 
     seen = {}
 
@@ -109,7 +109,10 @@ def test_launch_uses_this_interpreter_and_no_conda_env(tmp_path, monkeypatch, ca
         seen["args"] = args
         return SimpleNamespace(returncode=0)
 
-    monkeypatch.setattr(bayescal.subprocess, "run", fake_run)
+    # The subprocess seam lives in axqua.hbc now: launching a staged driver is the
+    # same job whichever solver is being calibrated, so bayescal only supplies the
+    # TELEMAC environment and delegates the run.
+    monkeypatch.setattr(hbc.subprocess, "run", fake_run)
     cfg = SimpleNamespace(telemac=SimpleNamespace(pysource=tmp_path / "pysource.sh"))
     driver = tmp_path / "bal_telemac.py"
     driver.write_text("")
@@ -127,9 +130,9 @@ def test_launch_reports_an_ignored_env_argument(tmp_path, monkeypatch, capsys):
     rather than silently ignoring it."""
     from types import SimpleNamespace
 
-    from axqua import bayescal
+    from axqua import bayescal, hbc
 
-    monkeypatch.setattr(bayescal.subprocess, "run",
+    monkeypatch.setattr(hbc.subprocess, "run",
                         lambda args, **kw: SimpleNamespace(returncode=0))
     cfg = SimpleNamespace(telemac=SimpleNamespace(pysource=tmp_path / "pysource.sh"))
     driver = tmp_path / "bal_telemac.py"
