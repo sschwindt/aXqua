@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import io
 import logging
+from collections.abc import Mapping
 from pathlib import Path
 
 import numpy as np
@@ -221,8 +222,38 @@ def _outlet_profiles(of_mesh, patch: str, stage: float,
     return scalar_list(alpha), scalar_list(pressure)
 
 
+def outlet_stages(outflow_stage, patches) -> dict[str, float] | None:
+    """Per-patch tailwater level [m a.s.l.], broadcasting a scalar.
+
+    A single number is the right answer for a whole-reach case, which has one
+    outfall. A **sub-model crop does not**: cutting a reach mid-stream leaves
+    several open faces at different stations, and the free surface across them
+    spans whatever the parent's water-surface slope puts there - 1.18 m on the
+    KB15 40 m crop. Prescribing one level on all of them would impose a
+    tailwater the parent model never had on at least one face.
+
+    A mapping must name **every** outlet patch. Silently defaulting the ones it
+    omits would reintroduce exactly the bug this exists to prevent, in the case
+    where it is hardest to notice.
+    """
+    patches = list(patches)
+    if outflow_stage is None:
+        return None
+    if isinstance(outflow_stage, Mapping):
+        missing = [p for p in patches if p not in outflow_stage]
+        if missing:
+            raise ValueError(
+                f"openfoam.outlet_stage names {sorted(outflow_stage)} but the mesh "
+                f"has outlet patch(es) {missing} with no level. Give every outlet "
+                "its own tailwater, or use a single number if they really do share "
+                "one - a crop's open faces sit at different stations and generally "
+                "do not.")
+        return {p: float(outflow_stage[p]) for p in patches}
+    return {p: float(outflow_stage) for p in patches}
+
+
 def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
-                 outflow_stage: float | None = None,
+                 outflow_stage: "float | Mapping[str, float] | None" = None,
                  discharges: dict[str, float] | None = None,
                  uniform_bed_ks: bool = False) -> list[Path]:
     """Write ``0/{alpha.water, U, p_rgh, nut, k, omega|epsilon}``.
@@ -235,6 +266,9 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     """
     of = cfg.openfoam
     rigid = getattr(of_mesh, "rigid_lid", False)
+    # Resolve to one level PER OUTLET PATCH up front, so the three boundary
+    # conditions below cannot disagree about what the tailwater is.
+    stages = outlet_stages(outflow_stage, of_mesh.outlet_patches)
     case_dir = Path(case_dir)
     zero = case_dir / "0"
     zero.mkdir(parents=True, exist_ok=True)
@@ -263,10 +297,10 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         # Under a rigid lid the outlet is fully wet to the lid, so there is no water
         # level to find on the patch and the face-by-face profile is not computed -
         # it would only be discarded below.
-        if rigid or outflow_stage is None:
+        if rigid or stages is None:
             bc[patch] = {"type": "zeroGradient"}
         else:
-            inlet_value, _ = _outlet_profiles(of_mesh, patch, outflow_stage,
+            inlet_value, _ = _outlet_profiles(of_mesh, patch, stages[patch],
                                               of.water_density)
             bc[patch] = {"type": "inletOutlet", "inletValue": inlet_value,
                          "value": inlet_value}
@@ -300,7 +334,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
                       "flowRate": f"{q:g}", "alpha": "alpha.water",
                       "value": "uniform (0 0 0)"})
     for patch in of_mesh.outlet_patches:
-        bc[patch] = ({"type": "zeroGradient"} if outflow_stage is None else
+        bc[patch] = ({"type": "zeroGradient"} if stages is None else
                      {"type": "pressureInletOutletVelocity",
                       "value": "uniform (0 0 0)"})
     for patch in walls:
@@ -330,14 +364,14 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
             # are unaffected - a uniform shift of p has no gradient - but anything
             # read FROM the pressure is wrong, and correct_lid.py is exactly that: it
             # reported a 0.87 m lid error that was purely this datum.
-            level = outflow_stage if outflow_stage is not None else _patch_lid_level(
-                of_mesh, patch)
+            level = (stages[patch] if stages is not None
+                     else _patch_lid_level(of_mesh, patch))
             bc[patch] = {"type": "fixedValue",
                          "value": f"uniform {of.water_density * GRAVITY * level:.6g}"}
-        elif outflow_stage is None:
+        elif stages is None:
             bc[patch] = {"type": "zeroGradient"}
         else:
-            _, profile = _outlet_profiles(of_mesh, patch, outflow_stage,
+            _, profile = _outlet_profiles(of_mesh, patch, stages[patch],
                                           of.water_density)
             bc[patch] = {"type": "prghPressure", "p": profile, "value": "uniform 0"}
     for patch in walls:

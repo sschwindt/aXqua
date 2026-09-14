@@ -46,6 +46,26 @@ DEFAULT_VELOCITY_CAP_FACTOR = 5.0
 COURANT_FACE_SUM_FACTOR = 2.0
 
 
+def _describe_outflow(stage) -> str:
+    """One line for the outlet prescription, scalar or per-patch.
+
+    A crop with several open faces carries a different level on each, and the
+    SPREAD is the number worth seeing: it is what says whether one scalar would
+    have been an acceptable approximation.
+    """
+    from collections.abc import Mapping
+
+    if stage is None:
+        return "free outfall"
+    if isinstance(stage, Mapping):
+        levels = sorted(stage.values())
+        if len(set(levels)) == 1:
+            return f"stage held at {levels[0]:.3f} m a.s.l. on every outlet"
+        return (", ".join(f"{p} {v:.3f}" for p, v in stage.items())
+                + f" m a.s.l. (spread {levels[-1] - levels[0]:.3f} m)")
+    return f"stage held at {float(stage):.3f} m a.s.l."
+
+
 @dataclass
 class OpenFoamArtifacts:
     """Everything the build produced, mirroring :class:`axqua.pipeline.Artifacts`."""
@@ -58,7 +78,7 @@ class OpenFoamArtifacts:
     report: object = None               # openfoam.quality.MeshReport
     discharge: float = 0.0
     inlet_discharges: dict[str, float] = field(default_factory=dict)
-    outflow_stage: float | None = None
+    outflow_stage: "float | dict[str, float] | None" = None
     velocity_cap: float = 0.0
     hotstart: Path | None = None
     notes: list[str] = field(default_factory=list)
@@ -69,8 +89,7 @@ class OpenFoamArtifacts:
         seed = self.hotstart.name if self.hotstart else "none (cold start, flat lid)"
         inflow = ", ".join(f"{k} {v:g} m3/s"
                            for k, v in self.inlet_discharges.items())
-        outflow = (f"stage held at {self.outflow_stage:.3f} m a.s.l."
-                   if self.outflow_stage is not None else "free outfall")
+        outflow = _describe_outflow(self.outflow_stage)
         out = [f"OpenFOAM case built in {self.case_dir}"]
         out.append(f"  hotstart    : {seed}")
         out.append(f"  inflow      : {inflow}")
@@ -155,10 +174,18 @@ def build_case(cfg: Config, *, state: State2D | None = None,
             "water has nowhere to leave and the run will simply fill up.")
 
     if of.outlet_stage is not None:
-        stage = float(of.outlet_stage)
-        notes.append(f"outlet stage {stage:.3f} m a.s.l. from openfoam.outlet_stage - "
-                     "this domain is a sub-model, so its tailwater is the parent's "
-                     "level at the crop face, not the case's own far-end prescription")
+        stage = fields.outlet_stages(of.outlet_stage, of_mesh.outlet_patches)
+        levels = sorted(stage.values())
+        where = ("this domain is a sub-model, so its tailwater is the parent's "
+                 "level at the crop face, not the case's own far-end prescription")
+        if len(set(levels)) > 1:
+            notes.append(
+                "outlet stages " + ", ".join(f"{p} {v:.3f}" for p, v in stage.items())
+                + f" m a.s.l. from openfoam.outlet_stage, spanning "
+                  f"{levels[-1] - levels[0]:.3f} m - " + where)
+        else:
+            notes.append(f"outlet stage {levels[0]:.3f} m a.s.l. from "
+                         f"openfoam.outlet_stage - {where}")
     elif cfg.boundaries.outflow_condition == "free":
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
