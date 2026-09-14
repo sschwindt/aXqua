@@ -39,10 +39,20 @@ else
     log "watch started (interval ${INTERVAL}s, single stage to ${RUN_END:-?} s - no spin-up, so this is a rigid-lid case)"
 fi
 prev_t=""; prev_wall=""
+seen=0                                # has the solver ever been seen running?
 
 while true; do
     if pgrep -x interFoam > /dev/null 2>&1; then
         state="running ($(pgrep -c -x interFoam) ranks)"
+        seen=1
+    elif [ "$seen" -eq 0 ]; then
+        # Not started YET is not the same as gone. openfoam_run.py spends minutes in
+        # checkMesh and decomposePar before the solver appears, and a watch armed at
+        # launch used to sample inside that window, conclude the run was over and
+        # exit - which is how a 65-hour run went unwatched from its first second.
+        log "waiting for interFoam to start (checkMesh / decomposePar)"
+        sleep "$INTERVAL"
+        continue
     else
         state="NOT RUNNING"
     fi
