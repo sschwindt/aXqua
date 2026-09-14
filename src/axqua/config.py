@@ -1460,7 +1460,13 @@ class OpenFoam:
     # ``boundaries.prescribed_elevation`` is deliberately not reused: the 2D case is
     # converged against it, and editing it to suit the 3D crop would silently change
     # the model the seed comes from.
-    outlet_stage: float | None = None
+    # A single number where the crop really has one outfall; a {patch: level}
+    # mapping where it does not. Cutting a reach mid-stream generally leaves
+    # SEVERAL open faces at different stations, and the parent's water surface
+    # across them spans whatever its own slope puts there - 1.18 m across the
+    # three faces of the KB15 40 m crop. One number on all of them would impose a
+    # tailwater the parent never had. A mapping must name every outlet patch.
+    outlet_stage: float | dict[str, float] | None = None
     # The sub-model's own inflow/outflow lines. A crop that moves the domain away from
     # the case's liquid boundaries leaves it with none - the water has nowhere to enter
     # or leave - and the build stops with exactly that message. Same reasoning as

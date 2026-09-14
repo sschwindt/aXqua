@@ -1087,3 +1087,49 @@ def test_a_missing_sub_model_roi_says_so_rather_than_meshing_the_whole_reach(tmp
 
     with pytest.raises(FileNotFoundError, match="does not exist"):
         ofmesh._openfoam_roi(_Cfg())
+
+
+# --------------------------------------------------------------------------- #
+# per-patch outlet stage (a sub-model crop has several open faces)
+# --------------------------------------------------------------------------- #
+def test_scalar_outlet_stage_broadcasts_to_every_patch():
+    from axqua.solvers.openfoam.fields import outlet_stages
+
+    assert outlet_stages(375.5, ["outlet-1", "outlet-2"]) == {
+        "outlet-1": 375.5, "outlet-2": 375.5}
+
+
+def test_no_outlet_stage_means_a_free_outfall():
+    from axqua.solvers.openfoam.fields import outlet_stages
+
+    assert outlet_stages(None, ["outlet-1"]) is None
+
+
+def test_per_patch_outlet_stage_is_kept_distinct():
+    """The KB15 crop's three open faces span 1.18 m of the parent's surface."""
+    from axqua.solvers.openfoam.fields import outlet_stages
+
+    got = outlet_stages({"outlet-1": 375.007, "outlet-2": 375.6, "outlet-3": 376.183},
+                        ["outlet-1", "outlet-2", "outlet-3"])
+    assert got["outlet-1"] == 375.007 and got["outlet-3"] == 376.183
+    assert max(got.values()) - min(got.values()) == pytest.approx(1.176)
+
+
+def test_an_incomplete_outlet_mapping_is_refused():
+    """Defaulting the omitted patch would reintroduce the exact bug this prevents."""
+    from axqua.solvers.openfoam.fields import outlet_stages
+
+    with pytest.raises(ValueError, match="no level"):
+        outlet_stages({"outlet-1": 375.0}, ["outlet-1", "outlet-2"])
+
+
+def test_outflow_description_reports_the_spread():
+    """The spread is what says whether one scalar would have been acceptable."""
+    from axqua.solvers.openfoam.case import _describe_outflow
+
+    assert _describe_outflow(None) == "free outfall"
+    assert "375.500" in _describe_outflow(375.5)
+    shared = _describe_outflow({"a": 375.5, "b": 375.5})
+    assert "every outlet" in shared
+    spread = _describe_outflow({"a": 375.007, "b": 376.183})
+    assert "spread 1.176 m" in spread
