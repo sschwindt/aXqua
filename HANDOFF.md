@@ -13,9 +13,47 @@ Written from **lww-134** on 2026-09-14 for the Claude instance on **lww-133**. T
 
 Only the scripts, `case-config.yml` and `README.md` are in the repo (20 files). So on lww-133: `git pull` gives you the *instructions* for this case and none of its *inputs*.
 
-**First thing to do: check.** Run `ls cases/munich-vsf/user-sources/ cases/munich-vsf/axqua-case/ 2>&1` on lww-133. If both are missing or empty, take the library tasks below and do not attempt to run the case. If the user has synced the data by some other route (rsync, a drive), say so and we will re-divide.
-
 Do not try to fix this by committing the data. It is 4.2 GB of CAD and binary results; that is a deliberate `.gitignore` decision, not an oversight.
+
+## The user is copying the data across
+
+**The user has said they will rsync it to lww-133 by hand.** Until it arrives, take the library tasks (§ Tasks) and do not attempt to run the case. Once it arrives, § "If the data has landed" below applies and the division of labour changes.
+
+**Check before assuming either way:**
+
+```bash
+ls -la cases/munich-vsf/axqua-case/simulation/r2d.slf \
+       cases/munich-vsf/axqua-case/simulation/r3d-hydrostatic.slf \
+       cases/munich-vsf/axqua-case/preprocessing/ 2>&1
+```
+
+### What is being copied
+
+**Tier 1, ~860 MB, enough to run the OpenFOAM work without touching the CAD:**
+
+| path | size | why |
+| --- | --- | --- |
+| `axqua-case/preprocessing/` | 6.4 M | DEM (`dem-initial-roi.tif`), `roi-fishpass.gpkg`, `liquid-boundaries-fishpass.gpkg`, roughness zones and table, structures |
+| `axqua-case/simulation/r2d.slf` | 549 M | the converged 2D run: the lid, the wetted footprint, the boundary values |
+| `axqua-case/simulation/r3d-hydrostatic.slf` | 263 M | the TELEMAC-3D pre-run, which is where the vertical velocity profile comes from |
+| `axqua-case/simulation/*.cas`, `*.sortie` | ~2 M | `prerun` reads the listing to confirm the flux balance before reusing the seed |
+
+Deliberately excluded: `r2d-initial.slf` (518 M, superseded by `r2d.slf`) and `*_old1.slf` (287 M, byte-identical duplicates).
+
+**Tier 2, ~1.1 GB, only needed to rebuild from CAD** (a change of geometry or of `surfaces.resolution`): `user-sources/`, excluding `user-of-poor/` (459 M, the old user OpenFOAM case, reference only, read by nothing). `user-sources/ground-truth/` is 32 KB and holds the flume velocities and depths, so it is needed for any lab comparison regardless of tier.
+
+**Not copied:** `axqua-case/openfoam/` (2.6 GB). Build your own from `case-config.yml`; copying it would hand over a half-finished run as well.
+
+### If the data has landed
+
+With Tier 1 present, `openfoam_preprocessing.py` reuses the existing seed rather than re-running TELEMAC (`pre_run.reuse: true`), so lww-133 can build and run an OpenFOAM case in minutes of setup.
+
+**Then lww-133 should take the VOF run**, and say so on the issue before starting so the work is not done twice. Rationale: lww-134 is finishing the rigid-lid run and is shared with another user who periodically takes 16 of its 16 physical cores, so it is the worse machine for a second long job. Set `openfoam.mode: vof` and leave every other setting alone: the crop (`roi: roi-fishpass.gpkg`), the sealed structures, `liquid_boundaries`, `outlet_stage`, and the 3D pre-run all still apply.
+
+Two things about that run:
+
+* **measure dt and s/step over the first 50 steps and post them before committing days to it.** The 22-day figure quoted above predates the seal, and that run had the same leaking baffles suppressing its time step, so it is probably pessimistic. Do not repeat it as though it were a prediction.
+* the user's plan is for VOF to be **seeded from the finished rigid-lid run** via `mapFields`. That seed lives on lww-134 and is not worth moving (2.6 GB). So either run VOF cold on lww-133 in parallel, which is still useful and independent, or wait for lww-134 to do the mapped version. Say which you are doing.
 
 ## Division of labour
 
@@ -83,7 +121,7 @@ There is no guidance in `docs/` on choosing between `mode: vof` and `mode: rigid
 
 In the PR, or by commenting on the issue that points here:
 
-1. whether lww-133 has `user-sources/` and `axqua-case/` (this re-divides the work if it does);
+1. whether the Tier 1 data has arrived yet (this re-divides the work, see above), and whether Tier 2 came with it;
 2. its core count and whether TELEMAC and OpenFOAM are installed, and at what paths (do not assume they match lww-134's `/home/modelling/...`);
 3. `pytest` and `ruff` results on a second interpreter;
 4. your verdict on the two judgement calls in task 1.
