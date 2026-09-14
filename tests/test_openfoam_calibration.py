@@ -280,7 +280,7 @@ def test_smoke_and_resume_switch_the_execution_block(tmp_path):
 # template guards - each must fire before the campaign starts
 # --------------------------------------------------------------------------- #
 def _template(tmp_path, *, ks="uniform 0.05", coeffs=True, start="startTime",
-              extra_time=None):
+              extra_time=None, end_time=600.0, write_interval=20.0):
     case = tmp_path / "tmpl"
     (case / "0").mkdir(parents=True)
     (case / "constant").mkdir()
@@ -293,8 +293,12 @@ def _template(tmp_path, *, ks="uniform 0.05", coeffs=True, start="startTime",
         body += ("    kEpsilonCoeffs\n    {\n        Cmu             0.09;\n"
                  "        C1              1.44;\n    }\n")
     (case / "constant" / "momentumTransport").write_text(body + "}\n")
+    # a real controlDict always carries writeInterval; _assert_template reads
+    # endTime/writeInterval from HERE rather than from the config, because
+    # this file is what every copied run actually obeys
     (case / "system" / "controlDict").write_text(
-        f"startFrom       {start};\nendTime         600;\n")
+        f"startFrom       {start};\nendTime         {end_time:g};\n"
+        f"writeInterval   {write_interval:g};\n")
     (case / "system" / "decomposeParDict").write_text("numberOfSubdomains 8;\n")
     if extra_time:
         (case / extra_time).mkdir()
@@ -330,10 +334,27 @@ def test_template_rejects_a_coefficient_that_is_not_in_the_file(tmp_path):
 
 
 def test_template_rejects_too_few_write_times(tmp_path):
+    """Judged on what the TEMPLATE writes, not on what the config intended."""
     cfg = _cfg(tmp_path)
     cfg.openfoam.end_time, cfg.openfoam.write_interval = 600.0, 200.0   # 3 writes
+    template = _template(tmp_path, end_time=600.0, write_interval=200.0)
     with pytest.raises(SystemExit, match="averages the last 5"):
-        ofcal._assert_template(_template(tmp_path), cfg, _params("ks"), 5)
+        ofcal._assert_template(template, cfg, _params("ks"), 5)
+
+
+def test_template_rejects_a_spinup_stage_left_activated(tmp_path):
+    """The failure mode that makes a two-phase campaign silently meaningless.
+
+    HydroBayesCal copies the template and makes ONE solver call, so a case whose
+    spin-up stage is activated runs 30 s at half interface compression while the
+    config still claims the full end_time - and every extracted value is an
+    average over a spin-up.
+    """
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.end_time, cfg.openfoam.write_interval = 600.0, 20.0
+    template = _template(tmp_path, end_time=30.0, write_interval=20.0)
+    with pytest.raises(SystemExit, match="wrong stage is activated"):
+        ofcal._assert_template(template, cfg, _params("ks"), 1)
 
 
 def test_template_rejects_a_stray_result_directory(tmp_path):
@@ -713,3 +734,119 @@ def test_the_compile_hook_is_wrapped(tmp_path):
     hook = src[src.index("check_ground_truth_elevations"):]
     assert "except Exception" in src[:src.index("check_ground_truth_elevations")] \
         or "except Exception" in hook, "the elevation check must not be able to raise here"
+
+
+# --------------------------------------------------------------------------- #
+# two-phase (VOF) campaigns
+# --------------------------------------------------------------------------- #
+def test_campaign_defaults_to_a_rigid_lid(tmp_path):
+    """The historic behaviour, unchanged: no mode= means rigid-lid."""
+    cfg = _cfg(tmp_path)
+    c = ofcal.campaign_config(cfg, cell_size_factor=4.0, end_time=600.0,
+                              write_interval=20.0, n_processors=8)
+    assert c.openfoam.mode == "rigid-lid"
+    assert c.openfoam.spinup_time == 0.0
+
+
+def test_vof_campaign_keeps_a_spinup_so_the_config_stays_valid(tmp_path):
+    """Zeroing spinup_time under VOF would make the campaign a hard failure.
+
+    OpenFoam.validate() rejects end_time <= spinup_time, and the spin-up is run
+    ONCE into 0/ rather than per run, so it must survive into the campaign config.
+    """
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.spinup_time = 30.0
+    c = ofcal.campaign_config(cfg, cell_size_factor=4.0, end_time=300.0,
+                              write_interval=20.0, n_processors=8, mode="vof")
+    assert c.openfoam.mode == "vof"
+    assert c.openfoam.spinup_time == 30.0
+    assert c.openfoam.end_time > c.openfoam.spinup_time
+
+
+def test_campaign_overrides_are_applied_only_when_given(tmp_path):
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.n_layers = 14
+    untouched = ofcal.campaign_config(cfg, cell_size_factor=4.0, end_time=300.0,
+                                      write_interval=20.0, n_processors=8)
+    assert untouched.openfoam.n_layers == 14
+    lowered = ofcal.campaign_config(cfg, cell_size_factor=4.0, end_time=300.0,
+                                    write_interval=20.0, n_processors=8,
+                                    mode="vof", n_layers=10,
+                                    air_velocity_cap=3.0, auto_bed_layer=False)
+    assert lowered.openfoam.n_layers == 10
+    assert lowered.openfoam.air_velocity_cap == 3.0
+    assert lowered.openfoam.auto_bed_layer is False
+    assert cfg.openfoam.n_layers == 14        # the caller is still untouched
+
+
+def test_single_collapses_a_two_phase_case_to_one_production_stage(tmp_path):
+    """HydroBayesCal makes ONE solver call, so the template must present one stage."""
+    from axqua.solvers.openfoam import dicts
+
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.mode = "vof"
+    cfg.openfoam.spinup_time = 30.0
+    cfg.openfoam.end_time = 300.0
+
+    assert len(dicts.stages(cfg)) == 2                     # normal run: two stages
+    single = dicts.stages(cfg, single=True)
+    assert len(single) == 1
+    assert single[0].name == "run"
+    assert single[0].start_from == "startTime"             # not latestTime
+    assert single[0].end_time == 300.0                     # not the 30 s spin-up
+    assert "interfaceCompression vanLeer 1" in single[0].alpha_scheme
+
+
+def test_single_leaves_a_rigid_lid_case_alone(tmp_path):
+    from axqua.solvers.openfoam import dicts
+
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.mode = "rigid-lid"
+    assert dicts.stages(cfg) == dicts.stages(cfg, single=True)
+
+
+def test_prespin_is_skipped_without_an_interface(tmp_path):
+    """A rigid-lid template has no interface to settle; it must not run a solver."""
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.mode = "rigid-lid"
+    case = _template(tmp_path)
+    ofcal._prespin_template(case, cfg)                     # must not raise or run
+    assert not (case / ofcal._PRESPIN_MARKER).exists()
+
+
+def test_prespin_is_not_repeated_on_a_reused_template(tmp_path):
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.mode = "vof"
+    cfg.openfoam.spinup_time = 30.0
+    case = _template(tmp_path)
+    (case / ofcal._PRESPIN_MARKER).write_text("already done\n")
+    ofcal._prespin_template(case, cfg)                     # returns without a solver
+
+
+def _emit_in_mode(tmp_path, mode):
+    from axqua.config import CalibrationParameter
+
+    cfg = _cfg(tmp_path)
+    cfg.openfoam.turbulence = "kEpsilon"
+    cfg.openfoam.mode = mode
+    params = [CalibrationParameter(name="ks", min=0.02, max=0.30)]
+    return ofcal.emit_openfoam_config(
+        cfg, template=tmp_path / "case-template", csv=tmp_path / "m.csv",
+        parameters=params, calibration_quantities=["U_x"],
+        extraction_quantities=["U_x"], out_dir=tmp_path / "out").read_text()
+
+
+def test_generated_config_names_the_mode_it_actually_ran(tmp_path):
+    """The generated file is where someone looks to find out what made a posterior.
+
+    Hard-coding 'rigid-lid' here made it state the opposite of the truth for a
+    two-phase campaign.
+    """
+    rigid = _emit_in_mode(tmp_path, "rigid-lid")
+    assert "rigid-lid" in rigid
+    assert "PRESCRIBED" in rigid            # and says why that matters
+
+    two_phase = _emit_in_mode(tmp_path, "vof")
+    assert "two-phase (VOF)" in two_phase
+    assert "rigid-lid" not in two_phase
+    assert "PRESCRIBED" not in two_phase

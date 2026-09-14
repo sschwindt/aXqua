@@ -82,22 +82,50 @@ _DRIVER_PATCHES: dict[str, str] = {}
 def campaign_config(cfg: Config, *, cell_size_factor: float, end_time: float,
                     write_interval: float, n_processors: int,
                     n_avg_timesteps: int = 5,
-                    turbulence: str = "kEpsilon") -> Config:
+                    turbulence: str = "kEpsilon",
+                    mode: str = "rigid-lid",
+                    n_layers: int | None = None,
+                    spinup_time: float | None = None,
+                    air_velocity_cap: float | None = None,
+                    min_column_height: float | None = None,
+                    auto_bed_layer: bool | None = None) -> Config:
     """A copy of *cfg* describing the **campaign** case, not the production case.
 
     A deep copy rather than a mutation: the caller's config still describes the
     full-resolution two-phase case that the verification run rebuilds, so the two
     never have to be reconciled and running a campaign cannot quietly change what
     ``openfoam_preprocessing.py`` would build afterwards.
+
+    *mode* defaults to ``rigid-lid``, which is what makes a surrogate affordable:
+    about 90% of a two-phase case's cells are air and a campaign needs tens of
+    runs. Pass ``vof`` where the rigid lid is not admissible - it is a slip WALL,
+    so wherever the prescribed surface steps it converts head into velocity, and
+    on a shallow reach that is most of the domain. The remaining overrides exist
+    because a two-phase campaign has to be cheapened along different axes than a
+    rigid-lid one (fewer layers, a tighter air cap) and those are exactly the
+    numbers a production config should not carry.
     """
     c = copy.deepcopy(cfg)
-    c.openfoam.mode = "rigid-lid"
+    c.openfoam.mode = mode
     c.openfoam.cell_size_factor = float(cell_size_factor)
     c.openfoam.turbulence = turbulence
     c.openfoam.end_time = float(end_time)
-    # No interface to settle under a rigid lid, so stages() yields a single stage
-    # and a spin-up would be dead time in every one of tens of runs.
-    c.openfoam.spinup_time = 0.0
+    if spinup_time is not None:
+        c.openfoam.spinup_time = float(spinup_time)
+    elif mode == "rigid-lid":
+        # No interface to settle under a rigid lid, so stages() yields a single
+        # stage and a spin-up would be dead time in every one of tens of runs.
+        c.openfoam.spinup_time = 0.0
+    # else: keep the case's own spin-up. It is run ONCE by _prespin_template and
+    # promoted into 0/, never per run - and OpenFoam.validate() rejects
+    # end_time <= spinup_time, so zeroing it here would make mode="vof" a hard
+    # failure rather than the cheaper campaign it is meant to be.
+    for name, value in (("n_layers", n_layers),
+                        ("air_velocity_cap", air_velocity_cap),
+                        ("min_column_height", min_column_height),
+                        ("auto_bed_layer", auto_bed_layer)):
+        if value is not None:
+            setattr(c.openfoam, name, value)
     c.openfoam.write_interval = float(write_interval)
     c.openfoam.n_processors = int(n_processors)
     # Only the trailing window is ever read. Keeping every write time would put
@@ -171,13 +199,35 @@ def _assert_template(case_dir: Path, cfg: Config, parameters: Sequence[Any],
             f"{control} does not start from startTime. Each calibration run is a "
             "fresh copy of the template and must start from its own 0/, not from a "
             "latestTime that the copy does not carry.")
-    n_writes = int(cfg.openfoam.end_time // cfg.openfoam.write_interval)
+    # Read endTime and writeInterval from the ACTIVATED controlDict, never from
+    # the config. HydroBayesCal copies this directory and makes ONE solver call,
+    # so whatever system/controlDict says is what every run actually does. A
+    # two-phase case whose spin-up stage was activated by mistake ends at 30 s
+    # while the config still claims the full end_time - which this catches by
+    # name instead of leaving as dozens of runs averaged over a spin-up.
+    def _number(key: str) -> float | None:
+        m = re.search(rf"^\s*{key}\s+([0-9.eE+-]+)\s*;", ctext, re.M)
+        return float(m.group(1)) if m else None
+
+    end_time = _number("endTime")
+    interval = _number("writeInterval")
+    if end_time is None or interval is None or interval <= 0:
+        raise SystemExit(
+            f"{control} has no readable endTime/writeInterval, so the number of "
+            "writes the extraction averages over cannot be checked.")
+    if abs(end_time - cfg.openfoam.end_time) > 1e-9:
+        raise SystemExit(
+            f"{control} ends at {end_time:g} s but the campaign config says "
+            f"{cfg.openfoam.end_time:g} s. The wrong stage is activated - a "
+            "two-phase case must have its single production stage activated "
+            "(dicts.stages(cfg, single=True)), not its spin-up.")
+    n_writes = int(end_time // interval)
     if n_writes < n_avg_timesteps:
         raise SystemExit(
             f"the template writes {n_writes} time(s) "
-            f"(end_time {cfg.openfoam.end_time:g} s / write_interval "
-            f"{cfg.openfoam.write_interval:g} s) but extraction averages the last "
-            f"{n_avg_timesteps}. Lower n_avg_timesteps or lengthen the run.")
+            f"(endTime {end_time:g} s / writeInterval {interval:g} s) but "
+            f"extraction averages the last {n_avg_timesteps}. Lower "
+            "n_avg_timesteps or lengthen the run.")
 
     if not (case_dir / "system" / "decomposeParDict").is_file():
         raise SystemExit(
@@ -241,11 +291,100 @@ def stage_case_template(cfg: Config, *, state=None, rebuild: bool = False,
     except Exception as exc:  # noqa: BLE001 - the placer rebuilds if this is absent
         log.debug("column cache not written (%s: %s); the target placer will "
                   "rebuild the lattice", type(exc).__name__, exc)
+    # A two-phase template is spun up ONCE, here, and the settled state promoted
+    # into 0/ - see _prespin_template. Must happen before _clean_template's
+    # sibling below would have removed the produced time directory, and before
+    # the production stage is activated.
+    _prespin_template(dest, cfg)
+
     # Regenerate system/ from THIS config, so a reused template cannot carry an
-    # end_time or Courant number from an earlier campaign.
-    dicts.activate(dest, dicts.stages(cfg)[0].name, cfg)
+    # end_time or Courant number from an earlier campaign. single=True: HBC makes
+    # ONE solver call per run, so a two-phase case must present a single
+    # full-length production stage rather than its spin-up.
+    dicts.activate(dest, dicts.stages(cfg, single=True)[0].name, cfg, single=True)
     _assert_template(dest, cfg, parameters, n_avg_timesteps)
     return dest
+
+
+#: Marker written into a pre-spun template so a reused one is not spun up twice.
+_PRESPIN_MARKER = ".axqua-prespun"
+
+
+def _prespin_template(case_dir: Path, cfg: Config) -> None:
+    """Settle the interface once, into the template's ``0/``.
+
+    HydroBayesCal copies the template and makes **one** solver call per run, so a
+    two-phase case cannot use the normal two-stage sequence: it would run only the
+    spin-up. Running every calibration run at spin-up settings instead would be
+    both slower and wrong.
+
+    So the spin-up is run **once**, at the nominal ``ks``, and its final time
+    directory is promoted to ``0/``. The cost is one short run for the whole
+    campaign, against roughly three times the steps per run if each spun itself up.
+
+    The approximation this buys - **every run starts from the same settled
+    interface**, rather than from one settled at its own roughness - is the same
+    class as the single reference column in :func:`model_relative_z_resolver`, and
+    is registered as a named caveat (``spun-up-from-one-state``) rather than left
+    implicit. A rigid-lid case has no interface and is skipped entirely.
+    """
+    of = cfg.openfoam
+    if of.mode == "rigid-lid" or float(getattr(of, "spinup_time", 0.0) or 0.0) <= 0:
+        return
+    marker = case_dir / _PRESPIN_MARKER
+    if marker.is_file():
+        log.info("template already pre-spun (%s); not repeating it", marker.name)
+        return
+
+    from axqua.solvers.openfoam.runtime import OpenFoamRuntime
+
+    log.info("pre-spinning the two-phase template for %g s (once for the whole "
+             "campaign)", of.spinup_time)
+    runtime = OpenFoamRuntime(of)
+    nprocs = int(getattr(of, "n_processors", 1) or 1)
+    if nprocs > 1:
+        runtime.decompose(case_dir)
+    proc = runtime.run_stage(case_dir, "spinup", end_time=of.spinup_time, cfg=cfg)
+    if getattr(proc, "returncode", 0) != 0:
+        raise SystemExit(
+            f"the pre-spin of the calibration template failed (exit "
+            f"{proc.returncode}); see log.{of.solver} in {case_dir}. Every run "
+            "would otherwise start from an unsettled interface.")
+    if nprocs > 1:
+        # A parallel run leaves its result in processor*/; without this there is
+        # no top-level time directory to promote and the spin-up is silently lost.
+        runtime.reconstruct(case_dir)
+        for path in case_dir.glob("processor*"):
+            shutil.rmtree(path, ignore_errors=True)
+
+    produced = sorted(
+        (p for p in case_dir.iterdir()
+         if p.is_dir() and re.fullmatch(r"[0-9]+(\.[0-9]+)?", p.name)
+         and float(p.name) > 0.0),
+        key=lambda p: float(p.name))
+    if not produced:
+        raise SystemExit(
+            f"the pre-spin produced no time directory in {case_dir}. Without one "
+            "there is no settled interface to promote into 0/, and every "
+            "calibration run would start from the raw depth-averaged hotstart.")
+
+    settled = produced[-1]
+    zero = case_dir / "0"
+    if zero.exists():
+        shutil.rmtree(zero)
+    settled.rename(zero)
+    log.info("promoted the pre-spun state t=%s to 0/", settled.name)
+    for leftover in produced[:-1]:
+        shutil.rmtree(leftover, ignore_errors=True)
+    # The spin-up's own logs and postProcessing would otherwise be copied into
+    # every run, and its monitor files would be appended to rather than started.
+    for pattern in ("log.*", "postProcessing", "VTK"):
+        for path in case_dir.glob(pattern):
+            shutil.rmtree(path, ignore_errors=True) if path.is_dir() \
+                else path.unlink(missing_ok=True)
+    marker.write_text(
+        f"pre-spun {of.spinup_time:g} s at ks={of.friction_ks:g} m\n"
+        "Delete this file (or pass rebuild=True) to spin up again.\n")
 
 
 # --------------------------------------------------------------------------- #
@@ -366,14 +505,28 @@ def emit_openfoam_config(cfg: Config, *, template: Path, csv: Path,
     def pylist(items):
         return "[" + ", ".join(repr(str(i)) for i in items) + "]"
 
+    # Describe the mode the campaign ACTUALLY runs in. Hard-coding "rigid-lid"
+    # here made the generated file state the opposite of the truth for a
+    # two-phase campaign - in the one document someone reads to find out what
+    # produced a posterior.
+    mode = cfg.openfoam.mode
+    if mode == "rigid-lid":
+        mode_note = ("a rigid-lid, coarsened variant of the production case: the "
+                     "free surface is PRESCRIBED from the 2D result rather than "
+                     "solved, so a roughness error that would show as a "
+                     "surface-slope error is absorbed into the velocity field")
+    else:
+        mode_note = ("a coarsened two-phase (VOF) variant of the production case, "
+                     "pre-spun once into 0/ so that every run starts from the "
+                     "same settled interface")
+
     text = f'''"""HydroBayesCal OpenFOAM config generated by axqua for case '{cfg.name}'.
 
 Run a surrogate-assisted Bayesian calibration with:
     python bal_openfoam.py --config {Path(out_dir) / "config_OpenFOAM.py"}
 
-The case at 'case_template_dir' is COPIED for every run; it is a rigid-lid,
-coarsened variant of the production case (see
-axqua.solvers.openfoam.calibration.campaign_config), not the case that
+The case at 'case_template_dir' is COPIED for every run. It is {mode_note}
+(see axqua.solvers.openfoam.calibration.campaign_config) - NOT the case that
 openfoam_preprocessing.py builds.
 """
 
