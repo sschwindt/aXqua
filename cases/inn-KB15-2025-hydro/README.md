@@ -547,3 +547,50 @@ The two supported routes are unchanged, and now better motivated:
 * a **`mode: vof`** campaign, where the surface is free to move and the steps
   resolve themselves - or the sub-model `openfoam.roi` added on the rigid-lid
   branch, which is what makes a vof case affordable.
+
+### CORRECTION: compare DEPTH-AVERAGED velocity, not point velocity
+
+The preceding sections report the model as badly wrong on velocity (2.8x slow,
+then 0.44, then 0.84 after masking). **Those numbers are artefacts of comparing
+mismatched quantities**, and the correct comparison is close to perfect:
+
+| comparison | model | measured | ratio |
+|---|---|---|---|
+| **2D, depth-averaged vs depth-averaged** | 0.262 | 0.256 m/s | **1.02** |
+| 3D rigid-lid, depth-averaged both sides | 0.197 | 0.256 | 0.77 |
+| 3D, point at 0.4h vs measured point | 0.135 | 0.272 | 0.50 |
+
+A FlowTracker reading is **depth-explicit**: it is the velocity at one height, and
+on a log profile that height's value relative to the column mean depends on `ks/h`.
+Measured, `u(0.6 depth)/u_avg = 1.07` - the standard proxy holds, because the real
+profile has `ks/h ~ 0.15`. In the rigid-lid model the same relative height gives
+`u/u_depth-avg = 0.69`, because `ks/h ~ 0.6` leaves barely any log layer. So a
+point-to-point comparison at equal *relative* depth is biased ~30% low by profile
+shape alone, before any hydraulic error.
+
+That fully explains the apparent 2D/3D contradiction (2D "1.46x fast" against 3D
+"0.44x slow" at the same points, same discharge): the 2D figure compared a
+depth-averaged model value against a measured *point*, and the 3D figure compared
+two points whose profiles differ. Put both on a depth-averaged footing and the two
+models agree with each other and with the data.
+
+**This is why the 2D multiflow calibration was sound**: `prepare_corrected_targets.py`
+already feeds it the USGS 3-point profile-averaged velocity
+(`usgs_three_point`, `(u02 + 2*u06 + u08)/4`) against TELEMAC's depth-averaged
+`SCALAR VELOCITY`. It was comparing like with like all along.
+
+**What remains is depth, not velocity.** At the same 20 verticals:
+
+    velocity ratio 1.02   depth ratio 0.58   unit discharge u*h ratio 0.55
+
+The model carries about half the unit discharge because it is about half as deep,
+while its velocity is right. Since the modelled water *surface* matches the
+corrected DGPS surface to ~1 cm, a depth deficit means the **bed** is still too
+high - the residual bathymetry problem, now isolated cleanly from any velocity
+error.
+
+**Consequence for the 3D calibration.** The extraction must be depth-averaged, or
+the target must be a quantity the point sample can represent. Extracting
+`U_x/U_y/U_z` at a single height - which is what HydroBayesCal's OpenFOAM binding
+does - imports the profile-shape bias directly into the likelihood, and on a reach
+with `ks/h ~ 0.6` that bias is larger than the signal being calibrated.
