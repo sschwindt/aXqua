@@ -120,13 +120,35 @@ _FT_VALUE_COLUMNS = {
 }
 
 
-def read_flowtracker_values(xlsx: Path) -> pd.DataFrame:
+#: Column aliases used by per-reading PROFILE sheets, whose headers are suffixed
+#: ``raw`` so that the summary-sheet readers do not pick them up by accident.
+_FT_PROFILE_COLUMNS = {
+    "v(x) raw [m/s]": "u", "v(y) raw [m/s]": "v", "v(z) raw [m/s]": "w",
+    "v_err(x) raw [m/s]": "u_err", "v_err(y) raw [m/s]": "v_err",
+    "v_err(z) raw [m/s]": "w_err",
+    "Total Depth raw [m]": "h", "Meas. Depth raw [m]": "h_meas",
+    "% Depth": "pct_depth",
+    "u' raw [m/s]": "u_std", "v' raw [m/s]": "v_std", "w' raw [m/s]": "w_std",
+    "TKE raw [m2/s2]": "tke",
+}
+
+
+def read_flowtracker_values(xlsx: Path, sheet: str | int | None = None
+                            ) -> pd.DataFrame:
     """Read a SonTek FlowTracker2 ``.ft.sum`` workbook -> per-vertical values.
 
     Returns columns ``ID, u, v, w, u_err, v_err, w_err, h`` (one row per
     measurement vertical). Coordinates are *not* here - they come from the
     paired DGPS position layer (see :func:`read_flowtracker`).
+
+    *sheet* names a worksheet to read instead of the first. A **profile** sheet
+    (several readings per vertical, headers suffixed ``raw``) is detected by its
+    own column names and returns one row per *reading*, keyed by the same ``ID``
+    - so a vertical appears several times and the caller must apply
+    :func:`select_profile_rows`.
     """
+    if sheet is not None:
+        return _read_flowtracker_profile(Path(xlsx), sheet)
     raw = read_xlsx_sheet(Path(xlsx))
     # the header row is the one whose first cell is "ID"; units row follows it.
     header_idx = next(i for i in range(len(raw))
@@ -144,8 +166,38 @@ def read_flowtracker_values(xlsx: Path) -> pd.DataFrame:
     return out.dropna(subset=["ID"]).reset_index(drop=True)
 
 
+def _read_flowtracker_profile(xlsx: Path, sheet: str | int) -> pd.DataFrame:
+    """Read a per-reading PROFILE worksheet -> one row per measurement reading.
+
+    Such a sheet carries a title row, then the header, then data - and repeats
+    the ``ID`` once per reading. A ``Site`` column, when present, may hold several
+    reaches in one workbook; all are returned and the caller filters.
+    """
+    raw = read_xlsx_sheet(Path(xlsx), sheet)
+    header_idx = next(
+        (i for i in range(min(len(raw), 10))
+         if any(str(c).strip() == "ID" for c in raw.iloc[i])), 0)
+    header = [str(h).strip() if h is not None else "" for h in raw.iloc[header_idx]]
+    data = raw.iloc[header_idx + 1:].copy()
+    data.columns = header
+    data = data[data["ID"].notna()]
+
+    out = pd.DataFrame(index=data.index)
+    out["ID"] = pd.to_numeric(data["ID"], errors="coerce").astype("Int64")
+    for src, dst in _FT_PROFILE_COLUMNS.items():
+        if src in data.columns:
+            out[dst] = pd.to_numeric(data[src], errors="coerce")
+    for passthrough in ("Site", "Point", "Station"):
+        if passthrough in data.columns:
+            out[passthrough.lower()] = data[passthrough].astype(str)
+    return out.dropna(subset=["ID"]).reset_index(drop=True)
+
+
 def read_flowtracker(xlsx: Path, positions: Path, crs_epsg: int,
-                     join_key: str = "ID") -> pd.DataFrame:
+                     join_key: str = "ID", *,
+                     sheet: str | int | None = None,
+                     profile: str = "single",
+                     group_key: str | None = None) -> pd.DataFrame:
     """Join FlowTracker values to their DGPS positions -> tidy hydraulics table.
 
     Parameters
@@ -165,7 +217,7 @@ def read_flowtracker(xlsx: Path, positions: Path, crs_epsg: int,
     """
     import geopandas as gpd
 
-    values = read_flowtracker_values(Path(xlsx))
+    values = read_flowtracker_values(Path(xlsx), sheet)
 
     pts = gpd.read_file(Path(positions))
     if pts.crs is not None and pts.crs.to_epsg() != crs_epsg:
@@ -185,7 +237,35 @@ def read_flowtracker(xlsx: Path, positions: Path, crs_epsg: int,
     zcol = pcols.get("z")
     pos["z"] = pd.to_numeric(pts[zcol], errors="coerce") if zcol else 0.0
 
-    merged = pos.merge(values, on="ID", how="inner", validate="one_to_one")
+    # A profile workbook may cover several reaches in one sheet (KB15 and KB08
+    # share FT_TKE_Summary.xlsx). Drop whole SITES that this position layer knows
+    # nothing about, but keep the unmatched-ID guard strict within the sites it
+    # does know - that distinguishes "this workbook covers another reach" from
+    # "the join key is wrong", which is what the guard is actually for.
+    if "site" in values.columns and values["site"].notna().any():
+        known = set(pos["ID"].dropna())
+        mine = {s for s, g in values.groupby("site")
+                if set(g["ID"].dropna()) & known}
+        dropped = sorted(set(values["site"].dropna()) - mine)
+        if dropped and mine:
+            log.info("profile workbook also covers site(s) %s, which %s has no "
+                     "positions for - not compiled here",
+                     ", ".join(map(str, dropped)), Path(positions).name)
+            values = values[values["site"].isin(mine)].reset_index(drop=True)
+    values = values.drop(columns=[c for c in ("site", "point", "station")
+                                 if c in values.columns])
+
+    # Select AFTER the site filter, never before: the rules group by ID, and two
+    # reaches in one workbook may reuse an ID. Selecting first would merge two
+    # different verticals into one group and silently average across reaches.
+    values = select_profile_rows(values, profile, group_key=group_key or join_key)
+
+    # one_to_many, not many_to_many: a vertical may contribute several readings,
+    # but each must still resolve to exactly ONE position. Relaxing the left side
+    # too would let a duplicated position silently multiply the targets.
+    merged = pos.merge(values, on="ID", how="inner",
+                       validate="one_to_one" if profile == "single"
+                       else "one_to_many")
     if len(merged) < len(values):
         missing = sorted(set(values["ID"].dropna()) - set(pos["ID"].dropna()))
         raise ValueError(
@@ -277,7 +357,10 @@ def read_points(path: Path, crs_epsg: int) -> pd.DataFrame:
 def _compile_source(src, crs_epsg: int) -> pd.DataFrame:
     """Run one :class:`~axqua.config.GroundTruthSource` -> tidy DataFrame."""
     if src.kind == "flowtracker":
-        return read_flowtracker(src.values, src.positions, crs_epsg, src.join_key)
+        return read_flowtracker(src.values, src.positions, crs_epsg, src.join_key,
+                                sheet=getattr(src, "sheet", None),
+                                profile=getattr(src, "profile", "single"),
+                                group_key=getattr(src, "group_key", None))
     if src.kind == "points":
         layer = src.positions or src.values
         return read_points(layer, crs_epsg)
@@ -401,3 +484,138 @@ def relative_height(df: pd.DataFrame, *,
         "bed (the 0.6-depth convention, which is measured from the SURFACE). "
         "Carry MeasD + FinalD to place targets from the data instead.", n, default)
     return pd.Series(np.full(n, float(default)), index=df.index), f"default {default}"
+
+
+# --------------------------------------------------------------------------- #
+# Which reading of a multi-depth vertical becomes a calibration target
+# --------------------------------------------------------------------------- #
+#: The USGS three-point rule samples at these depths BELOW THE SURFACE.
+_USGS_DEPTHS = (0.2, 0.6, 0.8)
+
+#: Weights of the USGS three-point rule, in the order of :data:`_USGS_DEPTHS`.
+_USGS_WEIGHTS = (1.0, 2.0, 1.0)
+
+PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average")
+
+
+def _height_above_bed(df: pd.DataFrame) -> pd.Series:
+    """Height above the bed as a fraction of the column, for ordering readings.
+
+    Shares :func:`relative_height`'s rules so that ordering and *placement* can
+    never disagree about where a reading sits - which is the whole reason the
+    lowest reading is identified by height rather than by row order.
+    """
+    f, _ = relative_height(df)
+    return pd.to_numeric(f, errors="coerce")
+
+
+def select_profile_rows(df: pd.DataFrame, rule: str = "single", *,
+                        group_key: str = "ID") -> pd.DataFrame:
+    """Reduce a multi-depth profile table to the rows that become targets.
+
+    A FlowTracker vertical may carry several readings at different depths. Which
+    of them a calibration should see is a modelling decision, not a data
+    property, so it is named explicitly:
+
+    ``single``
+        one row per vertical - the reading nearest the conventional 0.6 depth.
+        **The default, and a no-op when there is already one row per vertical**,
+        so every existing config keeps its present behaviour.
+    ``all``
+        every reading, one target each.
+    ``drop-lowest``
+        every reading **except the one nearest the bed**, and only where there is
+        more than one - a lone reading is kept. The near-bed reading sits inside
+        the grain roughness on a coarse bed (KB15: 0.055 m above a bed with
+        ks = 0.089 m), where a wall function returns a boundary condition rather
+        than a result.
+    ``depth-average``
+        one row per vertical carrying the **USGS three-point** depth-averaged
+        velocity ``(u_0.2 + 2*u_0.6 + u_0.8) / 4`` where three readings allow it,
+        else the plain mean. This is the quantity a depth-averaged 2D model
+        actually predicts.
+
+    The lowest reading is found by **height above the bed**, never by row order:
+    the readings of one vertical arrive in whatever order they were entered
+    (KB15 vertical 1501 reads 0.926, 0.540, 0.292 of the depth from the surface),
+    and the source workbook has a column literally called ``entry order fixed``.
+    """
+    if rule not in PROFILE_RULES:
+        raise ValueError(
+            f"unknown ground-truth profile rule {rule!r}; "
+            f"expected one of {', '.join(PROFILE_RULES)}")
+    if group_key not in df.columns or df.empty:
+        return df.reset_index(drop=True)
+
+    work = df.copy()
+    work["_f"] = _height_above_bed(work)
+    sizes = work.groupby(group_key)[group_key].transform("size")
+
+    if rule == "all":
+        out = work
+    elif rule == "drop-lowest":
+        # rank by height above bed; rank 0 is the reading nearest the bed
+        rank = work.groupby(group_key)["_f"].rank(method="first", ascending=True)
+        out = work[(sizes == 1) | (rank > 1)]
+    elif rule == "single":
+        # nearest the 0.6-depth convention == 0.4 of the column above the bed
+        order = (work["_f"] - DEFAULT_RELATIVE_HEIGHT).abs()
+        keep = order.groupby(work[group_key]).transform("min") == order
+        out = work[keep].groupby(group_key, as_index=False).head(1)
+    else:                                                  # depth-average
+        out = _depth_average(work, group_key)
+
+    dropped = len(df) - len(out)
+    if dropped:
+        log.info("profile rule %r: %d of %d reading(s) kept (%d dropped) "
+                 "across %d vertical(s)", rule, len(out), len(df), dropped,
+                 work[group_key].nunique())
+    return out.drop(columns="_f", errors="ignore").reset_index(drop=True)
+
+
+def _depth_average(work: pd.DataFrame, group_key: str) -> pd.DataFrame:
+    """Collapse each vertical to one row of depth-averaged velocity components.
+
+    Applies the USGS three-point weights where the vertical carries three
+    readings. ``% Depth`` is used directly - it is measured **from the surface**,
+    which is the convention the rule itself is written in.
+
+    **The weights are applied to the COMPONENTS, not to the speeds**, and the
+    distinction is not cosmetic. A depth-averaged 2D model carries depth-averaged
+    *components*: TELEMAC's ``SCALAR VELOCITY`` is ``sqrt(U^2 + V^2)`` built from
+    them, i.e. the speed of the mean vector. Averaging the per-reading *speeds*
+    instead answers a different question - the mean speed - and by the triangle
+    inequality it is **always the larger of the two** whenever the flow direction
+    changes over the column.
+
+    Measured on the KB15 September-2025 profiles (20 three-point verticals, median
+    direction shear 16 degrees over the column): averaging speeds reads high by a
+    median +0.6% but up to **+9.9%**, and the error concentrates in the slow,
+    strongly sheared verticals (1501: 73 degrees of shear, +9.9%) - which is
+    precisely where the velocity data is weakest and least able to absorb a bias.
+    So the comparison is made vector-first.
+    """
+    comps = [c for c in ("u", "v", "w") if c in work.columns]
+    if "pct_depth" in work.columns:
+        pct = pd.to_numeric(work["pct_depth"], errors="coerce")
+        if pct.dropna().gt(1.5).any():                     # written as 60, not 0.60
+            pct = pct / 100.0
+    else:
+        pct = 1.0 - work["_f"]                             # from the surface
+
+    rows = []
+    for key, grp in work.groupby(group_key, sort=False):
+        row = grp.iloc[0].copy()
+        p = pct.loc[grp.index]
+        if len(grp) >= 3 and p.notna().all():
+            idx = [(p - d).abs().idxmin() for d in _USGS_DEPTHS]
+            weight = sum(_USGS_WEIGHTS)
+            for c in comps:
+                vals = pd.to_numeric(grp[c], errors="coerce")
+                row[c] = sum(w * vals.loc[i]
+                             for w, i in zip(_USGS_WEIGHTS, idx)) / weight
+        else:
+            for c in comps:
+                row[c] = pd.to_numeric(grp[c], errors="coerce").mean()
+        rows.append(row)
+    return pd.DataFrame(rows)

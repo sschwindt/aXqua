@@ -158,6 +158,11 @@ class TelemacEnv:
             raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
 
 
+#: Valid ``GroundTruthSource.profile`` rules. Must stay in step with
+#: :data:`axqua.ground_truth.PROFILE_RULES` (fenced by a test).
+PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average")
+
+
 @dataclass
 class GroundTruthSource:
     """One raw ground-truth source to compile into the tidy measurements table.
@@ -174,6 +179,33 @@ class GroundTruthSource:
     values: Path | None = None           # measured-values file (e.g. .ft.sum xlsx)
     positions: Path | None = None        # position layer (shp/gpkg) to join coords from
     join_key: str = "ID"
+
+    #: Worksheet to read the values from. ``None`` keeps the historic behaviour
+    #: (the first sheet, one row per vertical). Name a per-reading profile sheet
+    #: to use any ``profile`` rule other than ``single``.
+    sheet: str | int | None = None
+
+    #: Which reading of a multi-depth vertical becomes a target - see
+    #: :func:`axqua.ground_truth.select_profile_rows`. ``single`` is the default
+    #: and reproduces the previous behaviour exactly.
+    profile: str = "single"
+
+    #: Column identifying the vertical a reading belongs to, for the profile
+    #: rules. Defaults to ``join_key``.
+    group_key: str | None = None
+
+    def __post_init__(self) -> None:
+        # Spelled out rather than imported from axqua.ground_truth: that module
+        # pulls pandas, and this runs on every config load - including the
+        # capability listing, which tests/test_capabilities.py requires to import
+        # nothing heavy. test_profile_rules_match_the_implementation fences the
+        # duplication.
+        if self.profile not in PROFILE_RULES:
+            raise ValueError(
+                f"ground_truth source {self.category!r}: unknown profile rule "
+                f"{self.profile!r}; expected one of {', '.join(PROFILE_RULES)}")
+        if self.group_key is None:
+            self.group_key = self.join_key
 
 
 @dataclass
