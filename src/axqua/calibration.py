@@ -95,6 +95,61 @@ def _pick_table(tables: dict[str, pd.DataFrame], quantities: list[str]) -> pd.Da
     )
 
 
+def _positional_errors(cfg, df, quantities) -> dict:
+    """Per-quantity uncertainty induced by not knowing where the point is.
+
+    Returns ``{}`` unless the case declares a survey position quality, so every
+    existing config produces a byte-identical CSV. Never raises: a positional
+    error bar is an improvement to the error budget, and failing to compute one
+    must not cost the calibration its inputs.
+    """
+    from axqua import positional_error as pe
+
+    # resolve_sigma's ValueError (an unknown quality name) is deliberately NOT
+    # caught: that is a typo in the config, and silently calibrating without the
+    # error bar the user asked for is the wrong response to it.
+    sigma, quality = pe.resolve_sigma(cfg)
+    if not sigma:
+        return {}
+
+    geometry = Path(cfg.model_path(cfg.geometry_slf))
+    results = Path(cfg.model_path("r2d.slf"))
+    if not (geometry.is_file() and results.is_file()):
+        log.warning(
+            "%s, but there is no converged 2D result to measure it against yet "
+            "(%s). The calibration CSV carries measurement error only; rebuild it "
+            "after the steady run to include the positional term.",
+            pe.describe(sigma, quality), results.name)
+        return {}
+
+    x = df["x"].to_numpy(float)
+    y = df["y"].to_numpy(float)
+    out = {}
+    for qty in quantities:
+        variable = _SELAFIN_VARIABLE.get(qty, qty)
+        try:
+            sampler = pe.telemac_sampler(geometry, results, variable)
+        except (KeyError, OSError) as exc:
+            log.debug("no positional error for %s: %s", qty, exc)
+            continue
+        spread = pe.sample_spread(sampler, x, y, sigma)
+        if np.any(spread > 0):
+            out[qty] = spread
+            log.info("%s -> %s positional error: median %.3f, max %.3f "
+                     "(added in quadrature to the measurement error)",
+                     pe.describe(sigma, quality), qty,
+                     float(np.median(spread)), float(np.max(spread)))
+    return out
+
+
+#: Calibration quantity -> the SELAFIN variable whose spatial variation carries
+#: the positional uncertainty. A component velocity varies like the speed does.
+_SELAFIN_VARIABLE = {
+    "U_x": "VELOCITY U", "U_y": "VELOCITY V", "U_z": "SCALAR VELOCITY",
+    "U_MAG": "SCALAR VELOCITY", "TKE": "SCALAR VELOCITY",
+}
+
+
 def build_calibration_csv(cfg: Config, *,
                           floors: Mapping[str, float] | None = None,
                           path: Path | None = None,
@@ -172,14 +227,21 @@ def build_calibration_csv(cfg: Config, *,
         "z": z_column,
     })
     frac = cfg.calibration.measurement_error
+    positional = _positional_errors(cfg, df, quantities)
     for qty in quantities:
         values, measured_err = _resolve_quantity(df, qty)
         err = measured_err if measured_err is not None else values.abs() * frac
         floor = (floors or {}).get(qty)
         if floor is not None:
             err = err.clip(lower=float(floor))
+        extra = positional.get(qty)
+        if extra is not None:
+            # In quadrature: the position error and the instrument error are
+            # independent. Applied AFTER the floor, because the floor is a
+            # statement about the instrument and this is not.
+            err = np.sqrt(err.astype(float) ** 2 + np.asarray(extra) ** 2)
         out[f"{qty}_DATA"] = values.round(6)
-        out[f"{qty}_ERROR"] = err.round(6)
+        out[f"{qty}_ERROR"] = np.round(err, 6)
 
     path = Path(path) if path is not None else cfg.calibration_path(cfg.calibration_csv)
     path.parent.mkdir(parents=True, exist_ok=True)

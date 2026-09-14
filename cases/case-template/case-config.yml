@@ -581,6 +581,18 @@ dem_of_difference:
 #   write_interval: 10.0
 
 ground_truth:
+  # How well the survey's HORIZONTAL coordinates are known. A calibration reads the
+  # model AT the measurement's coordinates, so a position error is charged to the
+  # model - or to whichever parameter absorbs it. Naming the GNSS solution quality
+  # turns it into an error bar instead: the model is sampled on rings at that radius
+  # and the resulting spread is added to each target's _ERROR in quadrature. A
+  # target on a steep gradient then carries wide error bars and one in a uniform
+  # patch narrow ones, which is the weighting a likelihood should give them.
+  #   rtk-fixed 0.03 m | rtk-float 1.0 m | dgps 1.0 m | standalone 3.0 m
+  # Unset (the default) means no positional term at all, so existing cases are
+  # untouched. position_sigma: <metres> overrides the lookup.
+  # position_quality: rtk-fixed
+  #
   # The calibration consumes a tidy, multi-tab "measurements" table: one tab per
   # category (hydraulics, morphodynamics, ...), first three columns x,y,z (project
   # CRS), then quantity columns. Provide it one of three ways:

@@ -886,6 +886,18 @@ class GroundTruth:
     sources: list[GroundTruthSource] = field(default_factory=list)  # raw sources to compile
     targets: CalibrationTargets | None = None  # filled calibration-target-data.xlsx
 
+    #: How well the survey's HORIZONTAL coordinates are known. A calibration reads
+    #: the model at the measurement's coordinates, so a position error is charged
+    #: to the model - or to whichever parameter happens to absorb it. Naming the
+    #: survey's GNSS solution quality (``rtk-fixed`` / ``rtk-float`` / ``dgps`` /
+    #: ``standalone``) turns that into an error bar instead. Leave unset and
+    #: nothing changes; the default is no positional uncertainty at all.
+    position_quality: str | None = None
+
+    #: Explicit horizontal sigma [m], winning over ``position_quality`` - for a
+    #: survey whose real accuracy is known rather than assumed.
+    position_sigma: float | None = None
+
     def problems(self) -> list[str]:
         """Return ground-truth input problems as messages (empty when all OK).
 
@@ -2021,7 +2033,11 @@ def load_config(path: str | os.PathLike) -> Config:
                 tdict[key] = _resolve(cfg_dir, tdict[key])
         targets = CalibrationTargets(**tdict)
     ground_truth = GroundTruth(measurements=measurements, sources=sources,
-                               targets=targets)
+                               targets=targets,
+                               **_only_known(GroundTruth,
+                                             {k: v for k, v in gtdict.items()
+                                              if k in ("position_quality",
+                                                       "position_sigma")}))
 
     mesh = MeshConfig(**_only_known(MeshConfig, raw.get("mesh", {}) or {}))
     # YAML maps keys may come back as str; coerce region_sizes keys to int
