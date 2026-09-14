@@ -143,6 +143,15 @@ dem_of_difference:
   mask_below_lod: true
 
 ground_truth:
+  # The September-2025 survey was positioned with an RTK FLOAT solution, not a
+  # fixed one: decimetre-to-metre horizontal, not centimetre. That is not a detail
+  # here - the modelled depth at these verticals is 0.374 m while the deepest node
+  # 3 m away is 0.648 m, so the position uncertainty moves the modelled value by
+  # more than the discrepancy being calibrated against. Declaring it adds that
+  # spread to each target's _ERROR in quadrature instead of charging it to the
+  # roughness. The depths and velocities themselves are sound - a wading rod and a
+  # FlowTracker do not depend on GNSS.
+  position_quality: rtk-float
   # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
   # axqua compiles into it. Compiled to preprocessing/ground-truth.xlsx unless
   # `measurements` gives an explicit output path.
