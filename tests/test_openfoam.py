@@ -686,9 +686,39 @@ def test_a_wall_thinner_than_a_cell_still_blocks():
     assert not through.any(), "the wall still leaks"
     # and the slot is open, so the two pools are still one connected domain
     assert (sealed.cell_xy[:, 1] > 0.15).any()
-    assert sealed.n_columns == open_grid.n_columns - int(
-        ((open_grid.cell_xy[:, 0] > 0.46) & (open_grid.cell_xy[:, 0] < 0.54)
-         & (open_grid.cell_xy[:, 1] < 0.19)).sum())
+
+    # BOUNDED GROWTH. A 5 mm wall crosses at most two columns per row (it straddles
+    # one cell boundary), so sealing it must not cost more than that. The rule this
+    # replaced dilated every solid by half a cell diagonal instead, which blanked a
+    # band two cells wide whether or not anything was at risk of leaking.
+    rows = len(set(np.round(open_grid.cell_xy[:, 1], 6))) * 0.15 / 0.3
+    assert open_grid.n_columns - sealed.n_columns <= 2 * rows + 2
+
+
+def test_sealing_a_structure_does_not_close_the_gap_beside_it():
+    """The assertion munich-vsf needed and did not have.
+
+    Sealing walls and keeping openings are the same question asked from two sides,
+    and a rule can get the first right while destroying the second. Growing every
+    solid by half a cell diagonal sealed the baffles of the fish pass and narrowed
+    the channel past them from 2.25 m to 0.09 m - three cells - so the reach could
+    not drain and the run pressurised its upstream half to 20 m of head.
+    """
+    import shapely
+
+    polygon = shapely.geometry.box(0, 0, 1.0, 1.0)
+    # two baffles reaching in from opposite banks, leaving a 0.30 m slot between them
+    left = shapely.geometry.box(0.49, -0.1, 0.51, 0.35)
+    right = shapely.geometry.box(0.49, 0.65, 0.51, 1.1)
+    grid = ofmesh.build_plan_grid(polygon, 0.05,
+                                  blocked=shapely.union_all([left, right]))
+
+    # the slot is 0.30 m wide as drawn; it must still be open, and by about that much
+    at_wall = np.abs(grid.cell_xy[:, 0] - 0.50) < 0.05
+    open_y = grid.cell_xy[at_wall, 1]
+    assert open_y.size, "the baffles closed the channel completely"
+    width = open_y.max() - open_y.min() + 0.05
+    assert width == pytest.approx(0.30, abs=0.06), f"slot narrowed to {width:.2f} m"
 
 
 def test_the_rigid_lid_outlet_is_referenced_to_the_water_surface(tmp_path):

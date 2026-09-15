@@ -163,22 +163,44 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
         # AFTER the hole fill, never before: a building punched out of the domain is
         # exactly the interior void that binary_fill_holes exists to close, so
         # blanking first would simply be undone.
-        # Against the solid grown by half a cell diagonal, not against the solid
-        # itself. A column is blanked on its CENTRE, so a wall thinner than dx - or
-        # one that simply passes between two centres - blocks nothing at all, and the
-        # mesh then joins the two sides of it. That is not a small error: the
-        # structure is there precisely because the two sides are at different levels,
-        # so the hole carries the whole head difference. On munich-vsf (3 cm lattice,
-        # sheet-steel baffles) it let the fish pass short-circuit its own baffles and
-        # the flow reached the velocity cap; the same failure is what fragmented the
-        # footprint into 45 disconnected blocks.
+        # A column is blanked when the solid INTERSECTS ITS CELL SQUARE, not when it
+        # contains the cell centre.
         #
-        # The cost is that every structure is one cell thicker than drawn. That is
-        # the right trade: a wall that does not separate is not a wall, and a mesh
-        # cannot represent a solid thinner than its own cells in any case.
-        seal = float(dx) * np.sqrt(2.0) / 2.0
-        solid = shapely.contains_xy(blocked.buffer(seal), world[:, 0],
-                                    world[:, 1]).reshape(ny, nx)
+        # Testing the centre lets a wall thinner than dx - or one that merely passes
+        # between two rows of centres - block nothing at all, and the mesh then joins
+        # the two sides of it. A structure is there precisely because its two sides
+        # are at different levels, so such a hole carries the whole head difference:
+        # on munich-vsf (3 cm lattice, sheet-steel baffles) 8,222 columns straddled a
+        # baffle and the fish pass short-circuited itself.
+        #
+        # The first fix here dilated the solid by half a cell diagonal and tested the
+        # centre against that. It seals, but it also fattens every structure whether
+        # or not it was at risk, and on this geometry that was not a rounding error:
+        # it cut the narrowest opening across the fish pass from 2.25 m to 0.09 m,
+        # three cells, and the run built on it pressurised its upstream half to 20 m
+        # of head because the water had nowhere to go. A 5 m weir crest on a 1 m
+        # lattice would likewise have been widened 28%, silently changing a physical
+        # parameter.
+        #
+        # Intersection gives the guarantee without the fattening: a solid cannot cross
+        # a cell without intersecting it, so nothing can leak, while a structure that
+        # already spans several cells grows by strictly less than a half-diagonal. The
+        # cheap dilation is kept only as a CANDIDATE FILTER - exact intersection is
+        # then evaluated on those few thousand cells rather than on all of them.
+        half = float(dx) / 2.0
+        near = shapely.contains_xy(blocked.buffer(float(dx) * np.sqrt(2.0) / 2.0),
+                                   world[:, 0], world[:, 1])
+        cand = np.flatnonzero(near)
+        flat = np.zeros(world.shape[0], dtype=bool)
+        if cand.size:
+            # Axis-aligned in the GRID frame, then rotated, so the test stays exact
+            # when align_to_flow has turned the lattice off the world axes.
+            corners = np.array([[-half, -half], [half, -half],
+                                [half, half], [-half, half]]) @ rot.T
+            squares = shapely.polygons(
+                world[cand][:, None, :] + corners[None, :, :])
+            flat[cand] = shapely.intersects(blocked, squares)
+        solid = flat.reshape(ny, nx)
         leaky = int((keep & solid).sum()) - int(
             (keep & shapely.contains_xy(blocked, world[:, 0],
                                         world[:, 1]).reshape(ny, nx)).sum())
@@ -186,9 +208,10 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
         keep = keep & ~solid
         if removed:
             log.info("plan grid: %d columns removed by solid structures (%.0f m2), "
-                     "of which %d come from sealing them to the lattice (structures "
-                     "are blanked %.3f m wider than drawn so none of them leak)",
-                     removed, removed * dx * dx, leaky, seal)
+                     "of which %d come from sealing them to the lattice (a column is "
+                     "blanked where the solid crosses its %.3f m cell, so none of "
+                     "them leak)",
+                     removed, removed * dx * dx, leaky, float(dx))
     labels, n = ndimage.label(keep)          # 4-connectivity (the default structure)
     if n > 1:
         sizes = ndimage.sum(keep, labels, range(1, n + 1))
