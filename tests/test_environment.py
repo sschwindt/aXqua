@@ -30,9 +30,21 @@ from axqua.core.environment import (
     windows_to_wsl, wsl_to_windows,
 )
 
-TELEMAC_PYSOURCE = Path(
-    "/home/modelling/telemac-v911/telemac-mascaret/configs/pysource.debian12.sh")
-OPENFOAM_BASHRC = Path("/home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc")
+# Resolved for THIS machine, not hard-coded to one developer's home directory.
+# The previous constants named /home/modelling/... so these tests silently skipped
+# on every other machine - including ones where both solvers are installed, which
+# is the "check that would have caught nothing" failure mode. Path(os.devnull) is
+# a readable path that is not a setup script, so `.is_file()` is False and the
+# skipif still fires cleanly when nothing is configured.
+def _resolved(key: str) -> Path:
+    from axqua.core.machine import resolve
+
+    found = resolve(key)
+    return found.path if found and found.path.is_file() else Path("/nonexistent")
+
+
+TELEMAC_PYSOURCE = _resolved("telemac")
+OPENFOAM_BASHRC = _resolved("openfoam")
 
 
 # --------------------------------------------------------------------------- #
