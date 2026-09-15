@@ -409,7 +409,7 @@ profiles:
   telemac_linux:
     solver: telemac
     environment: posix
-    setup_script: /home/user/telemac/v9.1/configs/pysource.sh
+    setup_script: /opt/telemac/v9.1/configs/pysource.sh
     config_name: ubuntu
     mpi_launcher: mpirun
     mpi_processes: 16

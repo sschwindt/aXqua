@@ -146,13 +146,13 @@ class TelemacEnv:
             raise FileNotFoundError(
                 "telemac.pysource is not set. Point it at the environment script of "
                 "your TELEMAC installation, e.g. "
-                "/home/schwindt/opt/telemac/configs/pysource.mint22.sh"
+                "/opt/telemac/configs/pysource.sh"
             )
         if not Path(self.pysource).is_file():
             raise FileNotFoundError(
                 f"TELEMAC pysource script not found: {self.pysource}. "
                 "Set telemac.pysource to e.g. "
-                "/home/schwindt/opt/telemac/configs/pysource.mint22.sh"
+                "/opt/telemac/configs/pysource.sh"
             )
         if self.solver not in ("telemac2d", "telemac3d"):
             raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
@@ -1621,7 +1621,7 @@ class OpenFoam:
             raise FileNotFoundError(
                 f"OpenFOAM bashrc not found: {self.bashrc}. Point openfoam.bashrc at "
                 "the etc/bashrc of your install (e.g. "
-                "/home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc)."
+                "/opt/openfoam9/etc/bashrc)."
             )
 
 
@@ -1963,7 +1963,15 @@ def load_config(path: str | os.PathLike) -> Config:
 
     # telemac env
     tdict = dict(raw.get("telemac", {}))
-    tdict["pysource"] = _resolve(cfg_dir, tdict.get("pysource"))
+    # Where the solver lives is a property of the MACHINE, not of the reach. The
+    # config value is now the last resort before discovery, behind the environment,
+    # the per-machine settings file and a gitignored case-local override - so a
+    # shared case config never has to name anyone's home directory. See
+    # axqua.core.machine.
+    from axqua.core import machine as _machine
+
+    _t = _machine.resolve("telemac", configured=tdict.get("pysource"), case_dir=cfg_dir)
+    tdict["pysource"] = _t.path if _t else _resolve(cfg_dir, tdict.get("pysource"))
     tdict["environment"] = _load_environment(tdict.get("environment"), cfg_dir)
     telemac = TelemacEnv(**_only_known(TelemacEnv, tdict))
 
@@ -2068,6 +2076,10 @@ def load_config(path: str | os.PathLike) -> Config:
             beside = Path(preprocessing_dir) / candidate
             candidate = beside if beside.exists() else _resolve(cfg_dir, candidate)
         ofdict[key] = candidate
+    _of = _machine.resolve("openfoam", configured=ofdict.get("bashrc"),
+                           case_dir=cfg_dir)
+    if _of:
+        ofdict["bashrc"] = _of.path
     ofdict["environment"] = _load_environment(ofdict.get("environment"), cfg_dir)
     ofdict["pre_run"] = PreRun(**_only_known(PreRun, dict(ofdict.get("pre_run") or {})))
     openfoam = OpenFoam(**_only_known(OpenFoam, ofdict))
