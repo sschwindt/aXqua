@@ -143,7 +143,16 @@ def read_patch_values(field: Path, patch: str, n_faces: int) -> np.ndarray:
     _, at = _read_list(buf, at, binary) if _LIST.search(buf, at) else (None, at)
 
     at = buf.index(b"boundaryField", at)
-    at = buf.index(patch.encode(), at)
+    # Match the patch as a DICTIONARY KEY - newline, indent, the exact name, then an
+    # opening brace - not as a substring. In binary format the patches before this one
+    # carry tens of thousands of raw doubles, and those bytes contain short names like
+    # "lid" often enough that a plain search lands inside the previous patch's payload
+    # and then reports that the field has no value entry.
+    key = re.compile(rb"\n\s*" + re.escape(patch.encode()) + rb"\s*\n\s*\{")
+    m = key.search(buf, at)
+    if m is None:
+        raise SystemExit(f"{field.name}: no boundaryField entry for patch {patch}")
+    at = m.end()
     head = buf[at:at + 400]
     if _LIST.search(head):
         vals, _ = _read_list(buf, at, binary)
