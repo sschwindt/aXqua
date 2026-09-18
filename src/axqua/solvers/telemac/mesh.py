@@ -766,7 +766,7 @@ def _burn_structures(cfg: Config, mesh: Mesh, z: np.ndarray) -> np.ndarray:
     if any(s.mode == SOLID for s in structures):
         log.info("  solid structures raised to crest + %.2f m freeboard: a 2D mesh "
                  "has no vertical wall to remove", freeboard)
-    z, _ = apply_to_bed(as_terrain, xy, z)
+    z, _ = apply_to_bed(as_terrain, xy, z, triangles=mesh.triangles)
     return z
 
 

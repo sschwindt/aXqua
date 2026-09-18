@@ -190,29 +190,95 @@ def _inside(polygon, xy: np.ndarray) -> np.ndarray:
     return shapely.contains_xy(polygon, xy[:, 0], xy[:, 1])
 
 
-def solid_mask(structures: list[Structure], xy: np.ndarray) -> np.ndarray:
-    """Points that fall inside a ``solid`` structure and must leave the domain."""
+def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray) -> np.ndarray:
+    """Nodes of every element the *polygon* crosses, not merely nodes inside it.
+
+    A node test alone cannot represent a wall thinner than an element. On the Munich
+    fish pass the walls are 0.30 m and the sheet-steel baffles a few millimetres, on a
+    mesh whose edges are 0.05 m: raising only the nodes that fall inside such a
+    footprint left **295 one-node spikes** - a raised node with every neighbour low,
+    which no water is stopped by and which the propagation step diverges on - and
+    punched two 1.5 m holes clean through a wall where a node happened to miss it.
+
+    Raising every node of every element the footprint crosses is the fix, and it is
+    the right criterion rather than a safety margin: flow in a P1 element passes
+    *through the element*, so an element is only blocked when all three of its nodes
+    stand on the wall. It also makes the raised band continuous by construction, and
+    it costs at most one element of width on each side.
+
+    This is the same rule the OpenFOAM mesher already applies in plan, where a column
+    is blanked when the solid intersects its cell square rather than its centre.
+    """
+    import shapely
+
+    inside = _inside(polygon, xy)
+    tri_xy = xy[triangles]                                   # (NELEM, 3, 2)
+    # cheap bbox filter first: a shapely intersects over every element is wasteful
+    # when a footprint covers a fraction of a percent of the mesh
+    xmin, ymin, xmax, ymax = polygon.bounds
+    near = ((tri_xy[:, :, 0].max(axis=1) >= xmin) & (tri_xy[:, :, 0].min(axis=1) <= xmax)
+            & (tri_xy[:, :, 1].max(axis=1) >= ymin)
+            & (tri_xy[:, :, 1].min(axis=1) <= ymax))
+    mask = inside.copy()
+    cand = np.flatnonzero(near)
+    if cand.size:
+        hit = shapely.intersects(polygon, shapely.polygons(tri_xy[cand]))
+        mask[triangles[cand[hit]].ravel()] = True
+    return mask
+
+
+def solid_mask(structures: list[Structure], xy: np.ndarray, *,
+               triangles: np.ndarray | None = None) -> np.ndarray:
+    """Points that fall inside a ``solid`` structure and must leave the domain.
+
+    Pass *triangles* to use the element rule of :func:`_crossed`, which is what the
+    bed raise uses. The two must agree: a node whose bed was lifted onto a crest but
+    which still counts as open water is exactly the inconsistency that perches water
+    on a wall or prescribes a discharge onto one.
+    """
     mask = np.zeros(len(xy), dtype=bool)
     for structure in structures:
         if structure.mode == SOLID:
-            mask |= _inside(structure.polygon, xy)
+            mask |= (_inside(structure.polygon, xy) if triangles is None
+                     else _crossed(structure.polygon, xy, triangles))
+    return mask
+
+
+def covered_mask(structures: list[Structure], xy: np.ndarray, *,
+                 triangles: np.ndarray | None = None) -> np.ndarray:
+    """Points any structure covers, whatever its mode.
+
+    Every structure raises the bed where it stands, so this is the set of nodes whose
+    bed is a crest rather than the terrain - the nodes a uniform-depth initial seed
+    must not wet.
+    """
+    mask = np.zeros(len(xy), dtype=bool)
+    for structure in structures:
+        mask |= (_inside(structure.polygon, xy) if triangles is None
+                 else _crossed(structure.polygon, xy, triangles))
     return mask
 
 
 def apply_to_bed(structures: list[Structure], xy: np.ndarray,
-                 bed: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+                 bed: np.ndarray, *,
+                 triangles: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
     """Raise *bed* to every ``overflow`` structure's crest.
 
     Returns ``(bed, touched)``. The bed is only ever raised, never lowered
     (``maximum``): a structure adds material to the terrain, and a crest digitised
     slightly below the surveyed ground should not carve a trench through it.
+
+    Pass *triangles* - the ``(NELEM, 3)`` connectivity - to raise by element rather
+    than by node, which is what a structure narrower than an element needs; see
+    :func:`_crossed`. Without it the node test is used, and a thin wall leaks.
     """
     bed = np.array(bed, dtype=float, copy=True)
     touched = np.zeros(len(bed), dtype=bool)
     for structure in structures:
         if structure.mode != OVERFLOW:
             continue
-        inside = _inside(structure.polygon, xy)
+        inside = (_inside(structure.polygon, xy) if triangles is None
+                  else _crossed(structure.polygon, xy, triangles))
         if not inside.any():
             log.warning("structure %s covers no mesh point - is it inside the ROI, "
                         "and is the layer in the project CRS?", structure.name)

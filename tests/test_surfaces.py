@@ -13,6 +13,9 @@ import struct
 
 import numpy as np
 import pytest
+import shapely
+from shapely.geometry import Point
+from shapely.ops import unary_union
 
 from axqua.core.surfaces import (
     Surface,
@@ -78,6 +81,21 @@ def vertical_wall(x=2.0, y0=0.0, y1=4.0, z0=100.0, z1=101.5):
         [(x, y0, z0), (x, y1, z0), (x, y1, z1)],
         [(x, y0, z0), (x, y1, z1), (x, y0, z1)],
     ])
+
+
+def thick_wall(x0=2.0, x1=2.3, y0=0.5, y1=3.5, z0=100.0, z1=101.5):
+    """The four side faces of a wall that has thickness, with no top or bottom cap.
+
+    This is how a CAD export of a concrete wall usually arrives - an extrusion of its
+    plan outline - and it is the case the footprint has to get right: burning only the
+    faces leaves the body hollow.
+    """
+    faces = []
+    corners = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    for (ax, ay), (bx, by) in zip(corners, corners[1:] + corners[:1]):
+        faces.append([(ax, ay, z0), (bx, by, z0), (bx, by, z1)])
+        faces.append([(ax, ay, z0), (bx, by, z1), (ax, ay, z1)])
+    return np.array(faces)
 
 
 def lid(size=4.0, z=102.0):
@@ -283,6 +301,60 @@ def test_a_wall_becomes_a_footprint_carrying_its_crest():
     assert polygon.bounds[1] == pytest.approx(0.0, abs=0.2)   # spans the y extent
     assert polygon.bounds[3] == pytest.approx(4.0, abs=0.2)
     assert polygon.bounds[2] - polygon.bounds[0] < 0.5        # thin in x
+
+
+def test_a_wall_with_thickness_is_solid_and_not_two_ribbons():
+    """The body between a wall's two faces is concrete, and has to be blanked.
+
+    Burning only the faces left it open. On the Munich fish pass that put 2.9 m of
+    stagnant water inside the walls and opened a conduit beside the pass carrying up
+    to 57% of the discharge past the slots.
+    """
+    surface = Surface(thick_wall(x0=2.0, x1=2.3, y0=0.5, y1=3.5))
+    footprints = wall_footprints(surface, resolution=0.02)
+
+    assert len(footprints) == 1
+    polygon, crest = footprints[0]
+    assert crest == pytest.approx(101.5, abs=1e-3)
+    assert polygon.contains(Point(2.15, 2.0))                 # the body, not a hole
+    assert polygon.area == pytest.approx(0.30 * 3.0, rel=0.15)
+    width = polygon.bounds[2] - polygon.bounds[0]
+    assert width == pytest.approx(0.30, abs=0.05)
+
+
+def test_the_gap_between_two_walls_survives_at_its_own_width():
+    """Sealing the walls must not close the slot between them.
+
+    The half-diagonal dilation tried before did exactly that: it sealed the baffles and
+    narrowed the pass from 2.25 m to 0.09 m. A one-cell closing does not, and the
+    residual bias here is rasterisation, one cell per side at most.
+    """
+    slot = 0.38
+    surface = Surface(np.vstack([
+        thick_wall(x0=1.0, x1=1.3, y0=0.0, y1=4.0),
+        thick_wall(x0=1.3 + slot, x1=1.6 + slot, y0=0.0, y1=4.0),
+    ]))
+    blocked = unary_union([p for p, _ in wall_footprints(surface, resolution=0.02)])
+
+    ray = np.arange(1.05, 1.95, 0.002)            # inside both walls, across the gap
+    open_cells = ~shapely.contains_xy(blocked, ray, np.full_like(ray, 2.0))
+    measured = open_cells.sum() * 0.002
+    assert measured == pytest.approx(slot, abs=0.05)
+
+
+def test_a_bed_arriving_in_a_wall_part_is_not_swallowed():
+    """Filling the wall body must key on the wall's own faces, not on plan coverage.
+
+    A part can carry a bed surface alongside its walls. Projecting every facet would
+    make the footprint the whole bed.
+    """
+    surface = Surface(np.vstack([ramp(slope=0.0, size=4.0),
+                                 thick_wall(x0=2.0, x1=2.3, y0=0.5, y1=3.5)]))
+    footprints = wall_footprints(surface, resolution=0.05)
+
+    assert len(footprints) == 1
+    polygon, _ = footprints[0]
+    assert polygon.area < 1.5                                 # the wall, not the 16 m2
 
 
 def test_a_surface_with_no_wall_yields_no_footprints():

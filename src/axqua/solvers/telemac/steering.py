@@ -718,6 +718,39 @@ def _inflow_plug_mask(cfg: Config, mesh):
     return np.asarray(contains_xy(inflow.buffer(extent), mesh.x, mesh.y), dtype=bool)
 
 
+def _drop_plug_on_structures(cfg: Config, mesh, plug):
+    """Take the plug off the nodes a structure stands on.
+
+    The seed is a uniform *depth*, so a node whose bed has been raised to a crest gets
+    that depth on top of the crest. Measured on munich-vsf the moment the wall
+    footprints became solid: 142 plug nodes lifted to bed 3.70-3.80 m carried a free
+    surface at 3.90-4.00 m while the plug beside them sat at 2.46 m. Releasing a 1.5 m
+    perched column at t = 0 diverged the propagation step inside the first time step,
+    with GRACJG residuals climbing from 1e-5 to NaN.
+
+    The structures are the same ones the bed raise uses, tested the same way, so the
+    two cannot disagree about which nodes are on a wall.
+    """
+    import numpy as np
+
+    try:
+        from axqua.core.structures import covered_mask, load_structures
+
+        structures = load_structures(cfg)
+    except Exception as exc:  # noqa: BLE001 - a seed must not fail on a bad layer
+        log.debug("no structures for the inflow plug (%s: %s)", type(exc).__name__, exc)
+        return plug
+    if not structures:
+        return plug
+    xy = np.column_stack([mesh.x, mesh.y])
+    covered = covered_mask(structures, xy, triangles=mesh.triangles)
+    dropped = int((plug & covered).sum())
+    if dropped:
+        log.info("  inflow plug: %d node(s) dropped, they stand on a structure and "
+                 "would carry the seed depth on top of its crest", dropped)
+    return plug & ~covered
+
+
 def write_dry_start_conditions(cfg: Config, mesh) -> Path | None:
     """Write the DRY-START initial-conditions SELAFIN: a thin water plug only on the
     nodes near the inflow line(s), dry everywhere else.
@@ -738,6 +771,7 @@ def write_dry_start_conditions(cfg: Config, mesh) -> Path | None:
     plug = _inflow_plug_mask(cfg, mesh)
     if plug is None:
         return None
+    plug = _drop_plug_on_structures(cfg, mesh, plug)
     seed = float(cfg.initialization.dry_start_depth)
     depth = np.where(plug, seed, 0.0)
     extent = _inflow_plug_extent(cfg)

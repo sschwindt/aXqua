@@ -220,6 +220,58 @@ def test_solid_mask_and_footprint_select_only_solids():
     assert solid_footprint([dam]) is None
 
 
+def _strip_mesh(nx=21, ny=3, step=1.0):
+    """A regular triangulated strip, so element widths are known exactly."""
+    gx, gy = np.meshgrid(np.arange(nx) * step, np.arange(ny) * step)
+    xy = np.column_stack([gx.ravel(), gy.ravel()])
+    tris = []
+    for j in range(ny - 1):
+        for i in range(nx - 1):
+            a, b = j * nx + i, j * nx + i + 1
+            c, d = (j + 1) * nx + i, (j + 1) * nx + i + 1
+            tris += [[a, b, d], [a, d, c]]
+    return xy, np.array(tris)
+
+
+def test_a_wall_thinner_than_an_element_still_raises_a_continuous_ridge():
+    """Raising only the nodes inside a thin footprint leaves a ridge full of holes.
+
+    On munich-vsf that produced 295 one-node spikes - a raised node with every
+    neighbour low, which stops no water - and the propagation step diverged. Raising
+    every node of every element the wall crosses is the fix.
+    """
+    xy, tris = _strip_mesh()
+    bed = np.zeros(len(xy))
+    # 0.2 m wall on a 1 m mesh, offset so it contains no node at all
+    thin = Structure("sheet", OVERFLOW, _band(10.4, 10.6), crest=5.0)
+
+    by_node, _ = apply_to_bed([thin], xy, bed)
+    assert by_node.max() == 0.0                       # nothing raised: the wall leaks
+
+    by_element, touched = apply_to_bed([thin], xy, bed, triangles=tris)
+    assert touched.any()
+    # every element the wall crosses has all three nodes raised, so no element spans
+    # the wall with a low node on each side
+    spans = [t for t in tris if (xy[t][:, 0].min() < 10.4 < xy[t][:, 0].max())
+             or (xy[t][:, 0].min() < 10.6 < xy[t][:, 0].max())]
+    assert spans
+    for tri in spans:
+        assert by_element[tri].min() == pytest.approx(5.0)
+
+
+def test_the_raise_and_the_solid_mask_agree_about_who_is_on_the_wall():
+    """They must use one rule. A node raised onto a crest but still counted as open
+    water is what perches the initial seed on a wall and puts a liquid boundary on it.
+    """
+    xy, tris = _strip_mesh()
+    thin_solid = Structure("sheet", SOLID, _band(10.4, 10.6), crest=5.0)
+    as_terrain = Structure("sheet", OVERFLOW, _band(10.4, 10.6), crest=5.0)
+
+    _, touched = apply_to_bed([as_terrain], xy, np.zeros(len(xy)), triangles=tris)
+    on_solid = solid_mask([thin_solid], xy, triangles=tris)
+    assert on_solid.tolist() == touched.tolist()
+
+
 # --------------------------------------------------------------------------- #
 # the meshers
 # --------------------------------------------------------------------------- #
