@@ -190,6 +190,12 @@ def _inside(polygon, xy: np.ndarray) -> np.ndarray:
     return shapely.contains_xy(polygon, xy[:, 0], xy[:, 1])
 
 
+#: Candidate elements per `shapely.polygons` call in :func:`_crossed`. 100k costs
+#: ~60 MiB of transient GEOS geometry - small enough to be invisible, large enough
+#: that the per-chunk overhead does not show up in the runtime.
+_CROSSED_CHUNK = 100_000
+
+
 def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray) -> np.ndarray:
     """Nodes of every element the *polygon* crosses, not merely nodes inside it.
 
@@ -221,9 +227,18 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray) -> np.ndarray:
             & (tri_xy[:, :, 1].min(axis=1) <= ymax))
     mask = inside.copy()
     cand = np.flatnonzero(near)
-    if cand.size:
-        hit = shapely.intersects(polygon, shapely.polygons(tri_xy[cand]))
-        mask[triangles[cand[hit]].ravel()] = True
+    # In chunks, because `shapely.polygons` materialises one GEOS polygon per
+    # candidate and that is where both the time and the memory of this function go.
+    # The bbox filter does not help the case that matters: a wall drawn diagonally
+    # across the reach has a bbox covering the whole domain, so every element is a
+    # candidate. Measured on inn-KB15 (680k elements): 366 ms and **411 MiB** for the
+    # unchunked construction, against 234 ms for the intersects itself. Chunking
+    # leaves the result and the runtime alone and caps the allocation at the chunk,
+    # so a mesh twice the size costs twice the time and the same memory.
+    for start in range(0, cand.size, _CROSSED_CHUNK):
+        part = cand[start:start + _CROSSED_CHUNK]
+        hit = shapely.intersects(polygon, shapely.polygons(tri_xy[part]))
+        mask[triangles[part[hit]].ravel()] = True
     return mask
 
 

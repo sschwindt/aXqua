@@ -259,6 +259,36 @@ def test_a_wall_thinner_than_an_element_still_raises_a_continuous_ridge():
         assert by_element[tri].min() == pytest.approx(5.0)
 
 
+def test_the_element_rule_is_chunked_without_changing_its_answer():
+    """`shapely.polygons` materialises one GEOS polygon per candidate element, and
+    the bbox prefilter cannot help the case that matters: a wall drawn diagonally
+    across a reach has a bbox covering the whole domain, so every element is a
+    candidate. Measured on inn-KB15's 680k-element mesh, the unchunked construction
+    cost 411 MiB of transient geometry against 24 MiB chunked, at the same runtime.
+
+    Chunking must be invisible in the result, including when a chunk boundary falls
+    between an element and the nodes it contributes.
+    """
+    from axqua.core import structures as module
+
+    xy, tris = _strip_mesh()
+    diagonal = Structure("diagonal", OVERFLOW,
+                         LineString([(xy[:, 0].min(), xy[:, 1].min()),
+                                     (xy[:, 0].max(), xy[:, 1].max())]
+                                    ).buffer(0.1, cap_style=2), crest=5.0)
+    original = module._CROSSED_CHUNK
+    try:
+        module._CROSSED_CHUNK = 10 ** 9              # one pass, as it used to be
+        reference, _ = apply_to_bed([diagonal], xy, np.zeros(len(xy)), triangles=tris)
+        assert (reference == 5.0).any()             # the shape does cross the mesh
+        for size in (1, 3, 97, len(tris), 10 ** 9):
+            module._CROSSED_CHUNK = size
+            chunked, _ = apply_to_bed([diagonal], xy, np.zeros(len(xy)), triangles=tris)
+            assert np.array_equal(chunked, reference), f"chunk size {size} disagrees"
+    finally:
+        module._CROSSED_CHUNK = original
+
+
 def test_the_raise_and_the_solid_mask_agree_about_who_is_on_the_wall():
     """They must use one rule. A node raised onto a crest but still counted as open
     water is what perches the initial seed on a wall and puts a liquid boundary on it.
