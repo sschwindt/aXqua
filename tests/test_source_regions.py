@@ -390,15 +390,20 @@ def test_fortran_compiles(tmp_path):
     """
     import shutil
     import subprocess
-    from pathlib import Path
 
     from axqua import fortran
     from axqua.config import Percolation
 
     if not shutil.which("gfortran"):
         pytest.skip("gfortran not available")
-    mods = [p for p in Path("/home/modelling").glob("**/builds/*/modules")
-            if (p / "declarations_telemac2d.mod").exists()]
+    # Derived from wherever TELEMAC actually is on this machine, not from one
+    # developer's home directory (which made this skip everywhere else).
+    from axqua.core.machine import resolve
+
+    found = resolve("telemac")
+    root = found.path.parent.parent if found and found.path else None
+    mods = [p for p in root.glob("**/builds/*/modules")
+            if (p / "declarations_telemac2d.mod").exists()] if root else []
     if not mods:
         pytest.skip("no compiled TELEMAC modules found")
 
