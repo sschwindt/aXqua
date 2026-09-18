@@ -523,15 +523,37 @@ def wall_footprints(surface: Surface, *, min_slope_deg: float = WALL_MIN_SLOPE_D
     wall is thousands of slivers, and a raster union at the mesh's own resolution is
     both faster and free of the invalid-geometry problems that a shapely union of
     slivers reliably produces.
+
+    The footprint is the union of two burns, because neither alone is the solid:
+
+    * the **edges** of the near-vertical facets, which is the only way to see a wall
+      that is thinner than a cell (a few-mm steel sheet), and
+    * the **body** those traces enclose, recovered as a plan hole fill, which is what
+      makes a wall with thickness solid rather than hollow.
+
+    Burning the edges alone was the original rule and it is wrong for any wall with a
+    thickness: a closed CAD solid has a vertical facet on each face, so a 0.30 m
+    concrete wall arrived as two ribbons 3-4 cm wide with its 0.24 m core left open.
+    Measured on the Munich fish pass, that put 2.9 m of stagnant water *inside* the
+    walls (a free surface 2 m above the channel one cell away, which is what a rigid
+    lid cannot carry) and opened a phantom conduit beside the pass carrying 15-57% of
+    the discharge. Casting rays across the 14 baffles, the old rule found three
+    openings per baffle with the widest, 0.71 m, straight through solid concrete; the
+    union finds one, at the slot, 0.353 m against a CAD truth of 0.380 m.
+
+    The remaining bias is one cell of rasterisation per side, uniform over walls and
+    openings alike, and it shrinks with *resolution*.
     """
     from rasterio import features
+    from scipy import ndimage
     from shapely.geometry import shape
 
     walls = surface.select(split_by_slope(surface, min_slope_deg=min_slope_deg)["wall"])
     if len(walls) == 0:
         return []
 
-    xmin, ymin, _, xmax, ymax, _ = walls.bounds
+    # the whole part, not just its wall facets: the area burn below needs the caps
+    xmin, ymin, _, xmax, ymax, _ = surface.bounds
     transform, width, height = grid_from_bounds((xmin, ymin, xmax, ymax), resolution)
     crest = np.full((height, width), -np.inf)
     origin_x, origin_y = transform.c, transform.f
@@ -551,10 +573,26 @@ def wall_footprints(surface: Surface, *, min_slope_deg: float = WALL_MIN_SLOPE_D
             rows = np.clip(((origin_y - pts[:, 1]) / resolution).astype(int),
                            0, height - 1)
             np.maximum.at(crest, (rows, cols), pts[:, 2])
-    # close the one-cell gaps between the projected corners of a long thin facet
-    covered = np.isfinite(crest)
-    filled = _dilate(covered)
-    crest[filled & ~covered] = -np.inf
+    # Close the one-cell gaps between the projected corners of a long thin facet.
+    # A closing, not a dilation: both fill the gap, but a dilation also grows the
+    # outline by a cell on every side, and it grows the walls into the openings
+    # between them. On the Munich baffles that alone cost 0.04 m of a 0.38 m slot.
+    filled = _close(np.isfinite(crest))
+
+    # Fill the body of the wall. A wall with thickness has a vertical facet on each
+    # face, so the burn above traces both of them and the wall's own end faces close
+    # the ring; everything the ring encloses is concrete. Filling it needs nothing but
+    # the traces, which is why this is a plan hole fill rather than a projection of
+    # the caps: a wall modelled as an extruded surface has no bottom cap to project.
+    #
+    # The fill cannot swallow water. A region only counts as enclosed if no path
+    # reaches the array border, and a fish-pass pool always has its slots open.
+    core = ndimage.binary_fill_holes(filled) & ~filled
+    if core.any():
+        log.debug("%s: filled %.3g m2 of wall body enclosed by its own faces",
+                  surface.name, core.sum() * resolution * resolution)
+    filled |= core
+    crest[~filled] = -np.inf
 
     out: list[tuple[object, float]] = []
     mask = filled.astype("uint8")
@@ -568,8 +606,15 @@ def wall_footprints(surface: Surface, *, min_slope_deg: float = WALL_MIN_SLOPE_D
             continue
         window = features.geometry_mask([polygon], out_shape=crest.shape,
                                         transform=transform, invert=True)
-        heights = crest[window & covered]
+        heights = crest[window & np.isfinite(crest)]
         if heights.size == 0:
+            # Only reachable if the polygon covers no cell centre at all, which for a
+            # raster polygon means it was simplified away. Say so: this used to drop
+            # the footprint silently, and a part reaching the GPKG with 0 m2 and no
+            # log line is how a wall goes missing without anyone noticing.
+            log.warning("%s: a %.3g m2 footprint carries no elevation and is dropped; "
+                        "lower surfaces.simplify (%s) or raise surfaces.resolution",
+                        surface.name, polygon.area, simplify)
             continue
         out.append((polygon, float(heights.max())))
     return out
@@ -583,6 +628,27 @@ def _dilate(mask: np.ndarray) -> np.ndarray:
     out[:, :-1] |= mask[:, 1:]
     out[:, 1:] |= mask[:, :-1]
     return out
+
+
+def _erode(mask: np.ndarray) -> np.ndarray:
+    """One-cell binary erosion, the counterpart of :func:`_dilate`."""
+    out = mask.copy()
+    out[:-1, :] &= mask[1:, :]
+    out[1:, :] &= mask[:-1, :]
+    out[:, :-1] &= mask[:, 1:]
+    out[:, 1:] &= mask[:, :-1]
+    return out
+
+
+def _close(mask: np.ndarray) -> np.ndarray:
+    """One-cell binary closing: fill gaps a cell wide without growing the outline.
+
+    A dilation fills the same gaps but also fattens every wall by a cell on each side,
+    which on a fish pass is taken straight out of the slot between two walls. The
+    union with *mask* keeps the operation extensive at the array border, where the
+    erosion would otherwise eat the outermost row.
+    """
+    return mask | _erode(_dilate(mask))
 
 
 def patch_line(surface: Surface, *, simplify: float | None = None):

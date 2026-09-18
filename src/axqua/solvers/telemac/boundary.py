@@ -343,6 +343,29 @@ def _solid_footprint(cfg: Config):
         return None
 
 
+def _on_solid(cfg: Config, mesh: Mesh):
+    """Nodes a solid structure stands on, by the element rule the bed raise uses.
+
+    Testing a node's own centre is not enough. A wall thinner than an element raises
+    the bed of every node of the elements it crosses, so a node can end up standing on
+    a crest while its centre falls outside the footprint. Keeping such a node as a
+    liquid boundary prescribes a discharge or a stage on top of the wall.
+    """
+    import numpy as np
+
+    try:
+        from axqua.core.structures import load_structures, solid_mask
+
+        structures = load_structures(cfg)
+    except Exception as error:                       # report-only: never block a build
+        log.debug("no solid footprints available for boundary classification: %s", error)
+        return None
+    if not structures:
+        return None
+    xy = np.column_stack([mesh.x, mesh.y])
+    return solid_mask(structures, xy, triangles=mesh.triangles)
+
+
 def _median_boundary_edge(mesh: Mesh) -> float:
     """Median distance between consecutive contour nodes of the mesh."""
     import numpy as np
@@ -563,7 +586,7 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
     tol = _match_tolerance(cfg, mesh)
     log.info("  liquid-boundary matching tolerance %.3f m (two median contour edges)",
              tol)
-    solids = _solid_footprint(cfg)
+    on_solid_node = _on_solid(cfg, mesh)
 
     kinds: list[str] = []
     on_solid = 0
@@ -579,7 +602,7 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
         # or more above the opening beside it, and prescribing a discharge or a stage
         # there pours water onto the crest. It shows up as a single node metres deep at
         # the boundary while its neighbours run at several m/s.
-        if best_kind != "wall" and solids is not None and solids.contains(p):
+        if best_kind != "wall" and on_solid_node is not None and on_solid_node[node]:
             best_kind = "wall"
             on_solid += 1
         kinds.append(best_kind)
