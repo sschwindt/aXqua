@@ -28,6 +28,15 @@ Either answer is useful. Run::
     python cases/slot-flume/slot_resistance_study.py            # the three levels
     python cases/slot-flume/slot_resistance_study.py 0.05       # just one
     python cases/slot-flume/slot_resistance_study.py --report   # re-read finished runs
+    python cases/slot-flume/slot_resistance_study.py --q=0.060 0.10   # another discharge
+
+**The discharge sweep answers a different question**, and it is worth having. The
+Munich comparison that started this puts a 2D result at 0.135 m3/s beside a reference
+3D model at 0.060 m3/s and reads the level difference as model error. A vertical slot
+passes Q ~ h sqrt(2 g dh) with dh fixed by the geometry, so the pool depth rises
+roughly in proportion to the discharge - and 0.135/0.060 is a factor of 2.25. Running
+this flume at both says how much of a level difference that alone accounts for,
+without any model being wrong.
 """
 
 from __future__ import annotations
@@ -60,15 +69,32 @@ POOL_NEAR = 0.20        # [m] upstream of the baffle face
 POOL_FAR = 1.20         # [m] upstream of the baffle face
 
 
-def level_dir(cfg, size: float) -> Path:
-    return Path(cfg.postprocessing_dir) / "slot-resistance" / f"dx{1000 * size:.0f}mm"
+def level_dir(cfg, size: float, discharge: float | None = None) -> Path:
+    name = f"dx{1000 * size:.0f}mm"
+    if discharge is not None:
+        name += f"-q{1000 * discharge:.0f}"
+    return Path(cfg.postprocessing_dir) / "slot-resistance" / name
 
 
-def build_and_run(base, size: float, *, run: bool = True) -> Path:
-    """Build the flume at *size* in its own folder and run the steady case there."""
+def build_and_run(base, size: float, *, run: bool = True,
+                  discharge: float | None = None,
+                  duration: float | None = None) -> Path:
+    """Build the flume at *size* in its own folder and run the steady case there.
+
+    *duration* shortens the march. Measured on the coarse level: the domain volume
+    stops changing at t = 302 s and the imbalance is oscillating around 1e-3 by
+    t = 221 s, so the configured 900 s is 3.6x longer than the flume needs. That
+    matters only at the finest level, where it is the difference between four hours
+    and eight. Each level's own balance is reported, so a run that was cut short
+    would be visible rather than quietly averaged in.
+    """
     cfg = copy.deepcopy(base)
     cfg.mesh.size_scale = size / base.mesh.default_size
-    target = level_dir(base, size)
+    if discharge is not None:
+        cfg.boundaries.prescribed_flowrate = float(discharge)
+    if duration is not None:
+        cfg.hydrodynamics.duration = float(duration)
+    target = level_dir(base, size, discharge)
     cfg.model_dir = target
     cfg.preprocessing_dir = target / "preprocessing"
     cfg.postprocessing_dir = target / "postprocessing"
@@ -157,11 +183,13 @@ def balance(model_dir: Path, cfg) -> dict:
             "q_out": float(data.gross_out[-1]) if data.gross_out.size else None}
 
 
-def measure(base, size: float) -> dict:
+def measure(base, size: float, discharge: float | None = None) -> dict:
     cfg = copy.deepcopy(base)
-    target = level_dir(base, size)
+    target = level_dir(base, size, discharge)
     cfg.model_dir = target
-    record = {"dx": size, "cells_across_slot": design.SLOT_WIDTH / size}
+    record = {"dx": size, "cells_across_slot": design.SLOT_WIDTH / size,
+              "discharge": float(discharge if discharge is not None
+                                 else base.boundaries.prescribed_flowrate)}
     record.update(balance(target, cfg))
     record.update(pool_levels(target, cfg))
     slots = realised_slots(target, cfg)
@@ -236,6 +264,55 @@ def report(records: list[dict]) -> list[str]:
     return out
 
 
+def discharge_report(store: Path) -> list[str]:
+    """Every discharge measured at the same mesh, and what it says about a comparison.
+
+    The Munich comparison that prompted this study reads a 2D result at 0.135 m3/s
+    against a reference 3D model at 0.060 m3/s and calls the difference model error.
+    A vertical slot passes Q = Cd b h sqrt(2 g dh) with dh fixed by the bed geometry,
+    so h ~ Q: the pool is deeper at a higher discharge *by design*, and comparing the
+    two levels compares two different flows.
+    """
+    records = []
+    for path in sorted(store.glob("slot-resistance*.json")):
+        for r in json.loads(path.read_text()):
+            if r.get("discharge") is not None:
+                records.append(r)
+    records = [r for r in records if not np.isnan(r.get("pool_depth", float("nan")))]
+    if len(records) < 2:
+        return []
+    records.sort(key=lambda r: r["discharge"])
+    out = ["", "=" * 78,
+           "The same flume at different discharges (same mesh)", "=" * 78,
+           f"{'Q [m3/s]':>9} {'dx [m]':>7} {'pool h [m]':>11} {'head [m]':>9} "
+           f"{'vs design':>10}"]
+    for r in records:
+        out.append(f"{r['discharge']:>9.3f} {r['dx']:>7.3f} {r['pool_depth']:>11.3f} "
+                   f"{r['total_head']:>9.3f} {r['excess_ratio']:>9.2f}x")
+    q = np.array([r["discharge"] for r in records])
+    h = np.array([r["pool_depth"] for r in records])
+    exponent = float(np.polyfit(np.log(q), np.log(h), 1)[0])
+    out += ["",
+            f"pool depth ~ Q^{exponent:.2f} over {q.min():g}-{q.max():g} m3/s "
+            "(the slot relation says Q ~ h, i.e. an exponent of 1)",
+            f"the head is unchanged across a {q.max() / q.min():.1f}x discharge range "
+            f"({min(r['total_head'] for r in records):.3f}-"
+            f"{max(r['total_head'] for r in records):.3f} m) - it is set by the BED, "
+            "not by the flow, which is what a fishway is designed to do"]
+    pair = [r for r in records if abs(r["discharge"] - 0.060) < 1e-9
+            or abs(r["discharge"] - 0.135) < 1e-9]
+    if len(pair) == 2:
+        lo, hi = sorted(pair, key=lambda r: r["discharge"])
+        out.append("")
+        out.append(f"MUNICH-RELEVANT: {lo['discharge']:g} -> {hi['discharge']:g} m3/s "
+                   f"deepens every pool from {lo['pool_depth']:.3f} to "
+                   f"{hi['pool_depth']:.3f} m, a factor of "
+                   f"{hi['pool_depth'] / lo['pool_depth']:.2f} on a discharge ratio of "
+                   f"{hi['discharge'] / lo['discharge']:.2f}. A level comparison across "
+                   "those two discharges is not a like-for-like comparison.")
+    return out
+
+
 def main() -> None:
     base = load_config(Path(__file__).resolve().parent / "case-config.yml")
     base.ensure_dirs()
@@ -245,25 +322,31 @@ def main() -> None:
 
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     only_report = "--report" in sys.argv
+    q = next((float(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--q=")),
+             None)
+    duration = next((float(a.split("=", 1)[1]) for a in sys.argv
+                     if a.startswith("--duration=")), None)
     sizes = [float(a) for a in args] if args else list(LEVELS)
 
     records = []
     for size in sizes:
         if not only_report:
             print(f"\n=== dx = {size:g} m "
-                  f"({design.SLOT_WIDTH / size:.1f} cells across the slot) ===")
-            build_and_run(base, size)
+                  f"({design.SLOT_WIDTH / size:.1f} cells across the slot"
+                  + (f", Q = {q:g} m3/s" if q is not None else "") + ") ===")
+            build_and_run(base, size, discharge=q, duration=duration)
         try:
-            records.append(measure(base, size))
+            records.append(measure(base, size, discharge=q))
         except Exception as exc:                      # noqa: BLE001
             print(f"dx={size}: could not measure ({type(exc).__name__}: {exc})")
 
     if records:
-        (store / "slot-resistance.json").write_text(
+        name = "slot-resistance" + (f"-q{1000 * q:.0f}" if q is not None else "")
+        (store / f"{name}.json").write_text(
             json.dumps(records, indent=2) + "\n")
-        lines = report(records)
+        lines = report(records) + discharge_report(store)
         print("\n".join(lines))
-        (store / "slot-resistance.txt").write_text("\n".join(lines) + "\n")
+        (store / f"{name}.txt").write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":
