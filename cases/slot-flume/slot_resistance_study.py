@@ -148,6 +148,34 @@ def pool_levels(model_dir: Path, cfg) -> dict:
             "wet_nodes": int(wet.sum()), "nodes": int(len(x))}
 
 
+def pool_flatness(model_dir: Path, cfg) -> float:
+    """Median surface fall WITHIN a pool, as a fraction of the fall taken per pool.
+
+    The qualitative counterpart to the head number, and it has to be checked before
+    the head means anything. A vertical-slot fishway works because each pool is a
+    near-horizontal body and the whole fall is taken at the slots; if the model
+    instead produces a sloping sheet then it is not modelling a fishway, and
+    comparing its head against the design is comparing two different things.
+    """
+    result = selafin.read_slf(model_dir / cfg.results_slf)
+    x = np.asarray(result["x"], dtype=float)
+    depth = np.asarray(result["values"]["WATER DEPTH"], dtype=float)
+    surface = np.asarray(result["values"]["FREE SURFACE"], dtype=float)
+    wet = depth > cfg.hydrodynamics.wet_depth
+
+    falls = []
+    for i in range(design.N_BAFFLES - 1):
+        a = design.baffle_x(i) + design.WALL_THICKNESS
+        b = design.baffle_x(i + 1) - design.WALL_THICKNESS
+        band = wet & (x > a) & (x < b)
+        if band.sum() >= 5:
+            lo, hi = np.percentile(surface[band], [10, 90])
+            falls.append(hi - lo)
+    if not falls:
+        return float("nan")
+    return float(np.median(falls) / design.DESIGN_PER_POOL)
+
+
 def realised_slots(model_dir: Path, cfg) -> list[float]:
     """Open width at each baffle in the mesh that was actually solved.
 
@@ -204,6 +232,7 @@ def measure(base, size: float, discharge: float | None = None) -> dict:
     record["excess"] = record["total_head"] - design.DESIGN_HEAD
     record["excess_ratio"] = record["total_head"] / design.DESIGN_HEAD
     record["pool_depth"] = float(np.nanmedian(record["depths"]))
+    record["in_pool_fraction"] = pool_flatness(target, cfg)
     record["slot_speed_mean"] = float(np.nanmean(record["slot_speed"]))
     # What the design relation asks of a slot passing Q under the design head:
     # Q = Cd b h sqrt(2 g dh). Quoted, not asserted - Cd for a vertical slot is
@@ -238,6 +267,15 @@ def report(records: list[dict]) -> list[str]:
                    f"{r['head_per_pool']:>9.4f} {r['excess_ratio']:>9.2f}x "
                    f"{r['pool_depth']:>8.3f} {r['slot_speed_mean']:>8.2f} "
                    f"{imb:>10}")
+    out.append("")
+    fractions = [r["in_pool_fraction"] for r in records
+                 if not np.isnan(r.get("in_pool_fraction", float("nan")))]
+    if fractions:
+        share = 100 * float(np.median(fractions))
+        out.append(f"the surface falls {share:.0f}% of the per-pool drop ALONG the "
+                   f"pools and {100 - share:.0f}% at the slots, so the model is "
+                   "producing a fishway rather than a chute - which is what makes the "
+                   "head above comparable with the design at all")
     out.append("")
     out.append(f"the design relation Q = Cd b h sqrt(2 g dh) at Cd 0.70 wants a slot "
                f"{records[0]['design_slot_depth']:.3f} m deep to pass "
