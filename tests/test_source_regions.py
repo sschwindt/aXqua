@@ -206,6 +206,28 @@ def test_fortran_template(tmp_path):
         fortran.write_user_fortran(cfg, _regions()[:1])
 
 
+def _compiled_telemac_modules() -> list:
+    """Directories holding a compiled TELEMAC-2D module, on this machine.
+
+    Resolved when the module is imported rather than when the test runs, for the same
+    reason `tests/test_environment.py` does it: `tests/conftest.py` points solver
+    resolution at a tmp dir for every test, so that the suite cannot pass or fail on
+    whether the developer has `~/.config/axqua/solvers.yml`. Collection happens first,
+    so this still sees the real install.
+    """
+    from axqua.core.machine import resolve
+
+    found = resolve("telemac")
+    root = found.path.parent.parent if found and found.path else None
+    if root is None:
+        return []
+    return [p for p in root.glob("**/builds/*/modules")
+            if (p / "declarations_telemac2d.mod").exists()]
+
+
+_TELEMAC_MODULES = _compiled_telemac_modules()
+
+
 def _patch_zone(tmp_path, poly=None):
     """A real one-polygon percolation-zone layer (patch_drain reads its geometry)."""
     import geopandas as gpd
@@ -396,16 +418,13 @@ def test_fortran_compiles(tmp_path):
 
     if not shutil.which("gfortran"):
         pytest.skip("gfortran not available")
-    # Derived from wherever TELEMAC actually is on this machine, not from one
-    # developer's home directory (which made this skip everywhere else).
-    from axqua.core.machine import resolve
-
-    found = resolve("telemac")
-    root = found.path.parent.parent if found and found.path else None
-    mods = [p for p in root.glob("**/builds/*/modules")
-            if (p / "declarations_telemac2d.mod").exists()] if root else []
-    if not mods:
+    # Resolved at IMPORT time (see _TELEMAC_MODULES): the suite isolates solver
+    # resolution per test so its result cannot depend on whether the developer
+    # happens to have a machine settings file, and asking inside the test would
+    # therefore find nothing and skip on every machine.
+    if not _TELEMAC_MODULES:
         pytest.skip("no compiled TELEMAC modules found")
+    mods = _TELEMAC_MODULES
 
     # every emitted variant: prescribed / Green-Ampt exchange, with and without the
     # patch drain (each takes a different branch of the generator)

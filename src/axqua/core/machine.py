@@ -163,7 +163,17 @@ def resolve(key: str, *, configured=None, case_dir=None) -> Resolved:
             return Resolved(Path(str(value)).expanduser(), str(machine))
 
     if configured:
-        return Resolved(Path(str(configured)).expanduser(), "case config")
+        # Relative to the CASE, exactly as the case-local override above is. A config
+        # has always been allowed to say `pysource: pysource.sh` and mean the one
+        # beside it, and `load_config` used to resolve that against the config's own
+        # directory before handing it over. Returning it unresolved here made the
+        # meaning depend on the working directory instead, so a case that had always
+        # loaded stopped validating - and only on a machine with no settings file,
+        # because one of those outranks the config and hid it.
+        path = Path(str(configured)).expanduser()
+        if not path.is_absolute() and case_dir is not None:
+            path = (Path(case_dir) / path).resolve()
+        return Resolved(path, "case config")
 
     found = _discover(key)
     if found:

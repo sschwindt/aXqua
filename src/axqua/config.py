@@ -1831,11 +1831,18 @@ class Config:
             log.warning("%s; HydroBayesCal setup will be skipped", problem)
         cond = self.boundaries.outflow_condition
         if cond == "stage_discharge" and self.boundaries.stage_discharge is None:
-            raise ValueError(
-                "outflow_condition: stage_discharge requires boundaries.stage_discharge "
-                "(a Q-h rating CSV alongside the config). Generate one from a "
-                "Manning/Strickler value and channel geometry with `axqua rating`."
-            )
+            # A MISSING rating is a supported state, not an error: `rating_method`
+            # exists to say how one is synthesised, and `workflow.prepare_steady_inputs`
+            # does it from the outflow liquid line and the DEM before the build. So
+            # this refused cases that work - munich-vsf among them, where
+            # `preprocessing.py` runs fine but a bare `load_config(...).validate()`
+            # raised. It refuses only when synthesis is impossible too.
+            # What synthesis needs - the outflow liquid line and the DEM - is
+            # required of every case and has been validated above, so there is
+            # nothing left to refuse on. Say what will happen instead.
+            log.info("boundaries.stage_discharge is not set; the outflow rating will "
+                     "be synthesised (rating_method: %s) from the outflow line and "
+                     "the DEM", self.boundaries.rating_method)
         if cond == "elevation" and self.boundaries.prescribed_elevation is None:
             raise ValueError(
                 "outflow_condition: elevation requires boundaries.prescribed_elevation"

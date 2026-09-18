@@ -58,6 +58,49 @@ def test_the_case_config_still_works_when_nothing_else_is_set(clean_env):
     assert got.source == "case config"
 
 
+def test_a_relative_config_path_is_relative_to_the_CASE(clean_env, tmp_path):
+    """`pysource: pysource.sh` has always meant the one beside the config, and
+    `load_config` resolved it that way before solver resolution moved here. Returning
+    it unresolved made the meaning depend on the working directory, so three
+    surface-stage tests - and any case carrying a relative path - stopped validating.
+
+    It only showed up on a machine with no settings file, because one of those
+    outranks the case config and hid it. The case-local override beside it has always
+    resolved relative paths this way; this is the same rule.
+    """
+    case = tmp_path / "case"
+    case.mkdir()
+    (case / "pysource.sh").write_text("# a stand-in\n")
+
+    got = machine.resolve("telemac", configured="pysource.sh", case_dir=case)
+    assert got.path == (case / "pysource.sh").resolve()
+    assert got.path.is_file()
+
+    # ...and an absolute one is still taken as it stands
+    absolute = machine.resolve("telemac", configured="/opt/telemac/pysource.sh",
+                               case_dir=case)
+    assert absolute.path == Path("/opt/telemac/pysource.sh")
+
+
+def test_the_suite_cannot_see_this_machines_solver_settings():
+    """The suite's result must not depend on the developer's ~/.config.
+
+    A machine settings file OUTRANKS the case config, so tests that write a stub
+    pysource and expect it to be used passed on a machine that had one and failed on
+    a machine that did not - with no difference in the code under test. The autouse
+    fixture in conftest points AXQUA_HOME at a tmp dir; this asserts it is in force,
+    because a fixture that silently stops working would put the divergence straight
+    back.
+    """
+    import os
+
+    assert "AXQUA_HOME" in os.environ
+    settings = machine.settings_path()
+    assert not settings.is_file(), f"the suite is reading real settings at {settings}"
+    for var in machine.ENV_VARS.values():
+        assert var not in os.environ
+
+
 def test_nothing_configured_resolves_to_nothing_not_to_a_guess(clean_env,
                                                                monkeypatch):
     monkeypatch.setattr(machine, "DISCOVERY", {"telemac": ()})
@@ -130,3 +173,39 @@ def test_no_tracked_source_or_test_hard_codes_a_home_directory():
     offenders = [ln for ln in out.splitlines()
                  if not re.search(r"#|\"\"\"|'''", ln.split(":", 2)[-1][:4])]
     assert not offenders, "hard-coded home directory:\n" + "\n".join(offenders)
+
+
+def test_a_synthesisable_outflow_rating_is_not_a_validation_error(tmp_path):
+    """`rating_method` exists to say how a MISSING rating is synthesised, so refusing
+    to validate without one contradicted the config's own documented behaviour.
+
+    munich-vsf is the case: `preprocessing.py` runs fine because
+    `workflow.prepare_steady_inputs` synthesises the rating from the outflow line and
+    the DEM, but a bare `load_config(...).validate()` raised.
+    """
+    from axqua.config import load_config
+
+    for name in ("dem.tif", "roi.gpkg", "liquid.gpkg"):
+        (tmp_path / name).touch()
+    (tmp_path / "pysource.sh").write_text("# stand-in\n")
+
+    def write(extra: str) -> Path:
+        path = tmp_path / "case-config.yml"
+        path.write_text(f"""
+project:
+  name: rating-case
+  crs_epsg: 25832
+telemac:
+  pysource: pysource.sh
+geodata:
+{extra}  boundary: roi.gpkg
+boundaries:
+  liquid_boundaries: liquid.gpkg
+  outflow_condition: stage_discharge
+  prescribed_flowrate: 0.135
+""")
+        return path
+
+    cfg = load_config(write("  dem_initial: dem.tif\n"))
+    cfg.validate()                                       # must not raise
+    assert cfg.boundaries.stage_discharge is None        # still to be synthesised
