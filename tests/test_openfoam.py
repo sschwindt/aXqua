@@ -25,6 +25,7 @@ import numpy as np
 import pytest
 
 from axqua.solvers.openfoam import mesh as ofmesh
+from axqua.solvers.openfoam import report as ofreport
 from axqua.solvers.openfoam import polymesh
 from axqua.solvers.openfoam.quality import (
     aspect_ratios, cell_geometry, face_geometry, non_orthogonality, skewness,
@@ -660,6 +661,26 @@ def test_a_stepped_surface_is_reported_as_unfit_for_a_rigid_lid():
     stepped = np.where(grid.vert_xy[:, 0] < 0.3, 1.6, 0.6)
     med, p99 = ofmesh.lid_steps(grid, stepped, bed)
     assert p99 > 0.5                                    # a 1 m step in a 0.6 m column
+
+
+def test_a_lid_steeper_than_the_water_is_deep_refuses_to_build():
+    """Agreed with lww-134: a graded warning is right for a default, but a p99 above
+    1.0 means the lid is not a lid, and silently producing a number is worse than
+    stopping. Two munich-vsf runs finished, balanced to -0.000%, held Courant at 0.90
+    for 61 hours, and were invalid - so building anyway costs days and refusing costs
+    a rebuild.
+
+    The override exists because 1.0 is still a heuristic and a deliberate comparison
+    against the two-phase answer is a legitimate thing to want.
+    """
+    grid = _plan_grid(20, 6, 0.03)
+    bed = np.zeros(grid.vert_xy.shape[0])
+    stepped = np.where(grid.vert_xy[:, 0] < 0.3, 1.6, 0.6)
+    _, p99 = ofmesh.lid_steps(grid, stepped, bed)
+    assert p99 > ofreport.LID_STEP_SEVERE          # the fixture is in the refusal band
+
+    # the two grades are one pair of numbers, not two copies that can drift
+    assert ofreport.LID_STEP_WARN < ofreport.LID_STEP_SEVERE
 
 
 def test_the_lid_step_verdict_reaches_the_finished_run(tmp_path):

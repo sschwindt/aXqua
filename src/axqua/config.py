@@ -1535,6 +1535,22 @@ class OpenFoam:
     # cells without collapsing into slivers that checkMesh rejects. 0.20 m took the
     # isar 5x test mesh to zero bad faces.
     min_water_depth: float = 0.20
+    # rigid-lid only: build anyway when the lid-step test says the mode does not
+    # apply. The test measures how far the PRESCRIBED free surface moves within two
+    # cells as a fraction of the local depth (mesh.lid_steps). Above ~0.5 the lid is
+    # doubtful and the build warns; above 1.0 the surface steps further than the
+    # water is deep - a weir, a drop structure, or the slots of a fish pass - and a
+    # lid cannot answer a drop by plunging, so it converts the head into velocity
+    # instead. That is not a lid, and the build refuses rather than spend days
+    # producing a number nobody should use: two munich-vsf runs finished, balanced
+    # their discharge to -0.000%, held Courant at 0.90 for 61 hours, and were
+    # invalid.
+    #
+    # Set true to build anyway - for a deliberate experiment, or to compare against
+    # the two-phase answer. The verdict still reaches the result either way
+    # (report.lid_applicability -> run-verdict.txt), so overriding suppresses the
+    # refusal, never the finding.
+    allow_stepped_lid: bool = False
     boundary_tolerance: float | None = None  # [m] liquid-line match (default 1.5*dx)
     max_plan_columns: int = 4_000_000
 

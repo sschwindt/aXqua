@@ -1022,9 +1022,36 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         lid_step_median, lid_step_p99 = step_med, step_p99 = lid_steps(grid, lid, bed)
         notes.append(f"lid steps: the prescribed surface moves {100 * step_med:.1f}% "
                      f"of the local depth within 2 cells (p99 {100 * step_p99:.0f}%)")
-        if step_p99 > 0.5:
+        # from `report`, which owns the two grades, so the refusal here and the
+        # verdict a reader sees afterwards are the same numbers rather than copies
+        from axqua.solvers.openfoam.report import LID_STEP_SEVERE, LID_STEP_WARN
+
+        if step_p99 > LID_STEP_SEVERE and not of.allow_stepped_lid:
+            # A refusal, not a warning: above one depth the surface steps further than
+            # the water is deep, which is a weir, a drop, or the slots of a fish pass.
+            # A lid is a WALL there, and the velocity it produces is an artefact of
+            # the mode. Two munich-vsf runs finished, balanced their discharge to
+            # -0.000%, held Courant at 0.90 for 61 hours, and were invalid - so the
+            # cost of building anyway is days, and the cost of stopping is a rebuild.
+            raise ValueError(
+                f"RIGID LID DOES NOT APPLY HERE: at the 99th percentile the "
+                f"prescribed free surface steps {100 * step_p99:.0f}% of the local "
+                f"water depth within two cells (median {100 * step_med:.1f}%), which "
+                f"is more than the water is deep. A lid is a WALL, so it cannot "
+                f"answer a drop by plunging the way a free surface does - it converts "
+                f"the head into velocity instead (sqrt(2 g dz): a 1 m step drives "
+                f"4.4 m/s), and the fastest cells in the result will be that artefact "
+                f"rather than the flow.\n"
+                f"  Use openfoam.mode: vof where the surface has to move; or check "
+                f"that the steps are real rather than the 2D result read across a "
+                f"structure the lattice is too coarse to seal; or set "
+                f"openfoam.allow_stepped_lid: true to build anyway (the verdict still "
+                f"reaches the result either way).")
+        if step_p99 > LID_STEP_WARN:
+            severe = step_p99 > LID_STEP_SEVERE
             message = (
-                f"RIGID LID MAY NOT APPLY HERE: at the 99th percentile the prescribed "
+                f"RIGID LID {'DOES NOT APPLY' if severe else 'MAY NOT APPLY'} HERE: "
+                f"at the 99th percentile the prescribed "
                 f"free surface steps {100 * step_p99:.0f}% of the local water depth "
                 f"within two cells. A lid is a WALL, so it cannot answer a drop by "
                 f"plunging the way a free surface does - it converts the head into "
@@ -1032,7 +1059,9 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
                 f"Expect the fastest cells to sit at those steps and the velocity cap "
                 f"to become load-bearing. Either use mode: vof where the surface has "
                 f"to move, or check that the steps are real rather than the 2D result "
-                f"read across a structure the lattice is too coarse to seal.")
+                f"read across a structure the lattice is too coarse to seal."
+                + (" Built anyway: openfoam.allow_stepped_lid is set." if severe
+                   else ""))
             notes.append(message)
             log.warning("%s", message)
 

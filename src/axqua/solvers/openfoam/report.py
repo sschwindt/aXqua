@@ -355,14 +355,18 @@ def _patch_area(path: Path) -> float:
 # was the rigid lid applicable, and does the finished run still say so?
 # --------------------------------------------------------------------------- #
 
-#: p99 lid step, as a fraction of the local depth, above which the mode is doubtful.
-#: 0.5 is a heuristic - half the water depth lost within two cells is a drop, not a
-#: slope - which is why it warns rather than refuses.
+#: p99 lid step, as a fraction of the local depth, above which the mode is doubtful:
+#: half the water depth lost within two cells is a drop, not a slope. A heuristic,
+#: which is why the build warns here rather than refusing.
 LID_STEP_WARN = 0.5
-#: ...and above this the prescribed surface steps by more than the water is deep,
-#: which is a weir, a drop structure or the slots of a fish pass. Reported separately
-#: because "doubtful" and "this is not a lid problem, it is the wrong mode" are
-#: different messages.
+#: ...and above this the prescribed surface steps further than the water is deep -
+#: a weir, a drop structure, or the slots of a fish pass. The build REFUSES here
+#: unless ``openfoam.allow_stepped_lid`` is set; the verdict reaches the result
+#: either way.
+#:
+#: Both live in this module, not in `mesh`, so that reading a finished run's verdict
+#: costs nothing heavier than numpy - and so the build-time grade and the reported
+#: grade are the same two numbers rather than two copies that can drift.
 LID_STEP_SEVERE = 1.0
 
 
