@@ -342,3 +342,16 @@ def test_a_wall_across_the_whole_domain_is_reported_not_silently_halved(caplog):
                                blocked=Polygon([(14, -1), (16, -1), (16, 31), (14, 31)]))
     assert "cut the domain in two" in caplog.text
     assert grid.n_columns < 30 * 30 / 2 + 30      # only one side survived
+
+    # ...but the same severing done by the rigid lid's DRY trim is not a structure,
+    # and saying so sends the reader looking for a wall nobody drew. Measured on
+    # inn-KB15, which has no structures at all: 2 blocks, 51 columns dropped, blamed
+    # on a structure.
+    caplog.clear()
+    with caplog.at_level(logging.INFO, logger="axqua"):
+        build_plan_grid(domain, 1.0,
+                        blocked=Polygon([(14, -1), (16, -1), (16, 31), (14, 31)]),
+                        blocked_by_structures=False)
+    assert "connected blocks" in caplog.text      # still reported
+    assert "cut the domain in two" not in caplog.text
+    assert "solid structures" not in caplog.text

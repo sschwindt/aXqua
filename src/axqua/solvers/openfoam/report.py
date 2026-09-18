@@ -351,6 +351,117 @@ def _patch_area(path: Path) -> float:
     return 0.0
 
 
+# --------------------------------------------------------------------------- #
+# was the rigid lid applicable, and does the finished run still say so?
+# --------------------------------------------------------------------------- #
+
+#: p99 lid step, as a fraction of the local depth, above which the mode is doubtful.
+#: 0.5 is a heuristic - half the water depth lost within two cells is a drop, not a
+#: slope - which is why it warns rather than refuses.
+LID_STEP_WARN = 0.5
+#: ...and above this the prescribed surface steps by more than the water is deep,
+#: which is a weir, a drop structure or the slots of a fish pass. Reported separately
+#: because "doubtful" and "this is not a lid problem, it is the wrong mode" are
+#: different messages.
+LID_STEP_SEVERE = 1.0
+
+
+@dataclass
+class LidApplicability:
+    """The build's rigid-lid verdict, carried forward to the finished run.
+
+    A rigid lid is a slip *wall* on the prescribed free surface, so the applicability
+    question - does that surface step sharply on the scale of a cell? - can only be
+    asked of the **input**, at build time. The result cannot answer it afterwards: a
+    run whose lid is wrong converges, balances its discharge and looks like a river.
+    munich-vsf did exactly that for 61 hours, twice, and in both cases the output
+    carried no trace of the build-time warning.
+
+    So the numbers are written into the case at build time
+    (:data:`axqua.solvers.openfoam.case.BUILD_RECORD`) and read back here, which is
+    the same role :class:`SurfaceFreedom` plays for the two-phase case: a statement
+    about whether the answer was set by a meshing decision rather than by the flow.
+    """
+
+    rigid_lid: bool = False
+    median: float | None = None       # lid range within 2 cells / local depth
+    p99: float | None = None
+    recorded: bool = False            # was there a build record to read at all?
+
+    @property
+    def doubtful(self) -> bool:
+        return self.p99 is not None and self.p99 > LID_STEP_WARN
+
+    @property
+    def severe(self) -> bool:
+        return self.p99 is not None and self.p99 > LID_STEP_SEVERE
+
+    def lines(self, cfg) -> list[str]:
+        if not self.rigid_lid:
+            return []
+        if not self.recorded or self.p99 is None:
+            return ["lid       : ? this case was built before the lid-step test was "
+                    "recorded, so whether a rigid lid applies here is unknown. "
+                    "Rebuild to find out - it costs no solver time."]
+        head = (f"lid       : the prescribed surface steps {100 * self.p99:.0f}% of "
+                f"the local depth within two cells at the 99th percentile "
+                f"(median {100 * self.median:.1f}%)")
+        if not self.doubtful:
+            return [head + " - smooth on the scale of a cell, so the lid is a fair "
+                           "approximation here"]
+        out = [head]
+        if self.severe:
+            out.append("  ! THE RIGID LID DOES NOT APPLY TO THIS RESULT. The surface "
+                       "steps further than the water is deep, which is a weir, a drop "
+                       "structure or a slot - and a lid cannot answer a drop by "
+                       "plunging, so it converts the head into velocity instead "
+                       "(sqrt(2 g dz): a 1 m step drives 4.4 m/s). The velocity at "
+                       "those steps is an artefact of the mode, whatever the "
+                       "discharge balance and the Courant number say.")
+        else:
+            out.append("  ! the rigid lid is doubtful here. Expect the fastest cells "
+                       "to sit at the steps and the velocity cap to be load-bearing; "
+                       "read bulk routing and levels, not local velocity.")
+        out.append("  Use openfoam.mode: vof where the surface has to move, or check "
+                   "that the steps are real rather than the 2D result read across a "
+                   "structure the lattice is too coarse to seal.")
+        return out
+
+
+def lid_applicability(cfg, case_dir: str | Path | None = None) -> LidApplicability:
+    """Read the build record's lid-step test back out of a built case."""
+    import json
+
+    from axqua.solvers.openfoam.case import BUILD_RECORD
+
+    rigid = cfg.openfoam.mode == "rigid-lid"
+    root = Path(case_dir) if case_dir else cfg.openfoam_case_dir
+    path = root / BUILD_RECORD
+    if not path.is_file():
+        return LidApplicability(rigid_lid=rigid)
+    try:
+        record = json.loads(path.read_text())
+    except (OSError, ValueError) as exc:
+        log.debug("could not read %s: %s", path, exc)
+        return LidApplicability(rigid_lid=rigid)
+    p99 = record.get("lid_step_p99")
+    return LidApplicability(
+        rigid_lid=bool(record.get("rigid_lid", rigid)),
+        median=record.get("lid_step_median"), p99=p99,
+        recorded=True)
+
+
+def verdict_lines(cfg, case_dir: str | Path | None = None,
+                  history: "DischargeHistory | None" = None) -> list[str]:
+    """Everything a finished run has to be read against, in one place."""
+    out: list[str] = []
+    if history is not None:
+        out += history.lines()             # DischargeHistory.lines takes no config
+    out += surface_freedom(cfg, case_dir).lines(cfg)
+    out += lid_applicability(cfg, case_dir).lines(cfg)
+    return out
+
+
 def write_report(cfg, case_dir: str | Path | None = None, *,
                  out_dir: str | Path | None = None,
                  target: float | None = None) -> tuple[DischargeHistory, list[Path]]:
@@ -366,8 +477,16 @@ def write_report(cfg, case_dir: str | Path | None = None, *,
     plot = _write_plot(history, out_dir / "discharge-convergence.png")
     if plot is not None:
         written.append(plot)
-    for line in surface_freedom(cfg, case_dir).lines(cfg):
+    lines = verdict_lines(cfg, case_dir)
+    for line in lines:
         log.info("%s", line)
+    if lines:
+        # ...and to a file, because the whole point is that the finding outlives the
+        # terminal it was printed in.
+        summary = out_dir / "run-verdict.txt"
+        summary.write_text("\n".join(lines) + "\n")
+        log.info("wrote %s", summary)
+        written.append(summary)
     return history, written
 
 

@@ -662,6 +662,64 @@ def test_a_stepped_surface_is_reported_as_unfit_for_a_rigid_lid():
     assert p99 > 0.5                                    # a 1 m step in a 0.6 m column
 
 
+def test_the_lid_step_verdict_reaches_the_finished_run(tmp_path):
+    """The applicability question can only be asked of the INPUT: it is measured from
+    the *prescribed* surface, so no amount of looking at the result recovers it.
+
+    That is why it has to be recorded at build time and read back afterwards, the
+    same role surface_freedom plays for the two-phase case. Two munich-vsf runs
+    finished, balanced their discharge to -0.000% and were invalid, and in both the
+    output carried no trace of the build-time warning.
+    """
+    import json
+
+    from axqua.solvers.openfoam import report
+    from axqua.solvers.openfoam.case import BUILD_RECORD
+
+    class _Cfg:
+        class openfoam:
+            mode = "rigid-lid"
+
+    def record(**kw):
+        (tmp_path / BUILD_RECORD).write_text(json.dumps(
+            {"mode": "rigid-lid", "rigid_lid": True, **kw}))
+        return report.lid_applicability(_Cfg(), tmp_path)
+
+    smooth = record(lid_step_median=0.01, lid_step_p99=0.04)
+    assert smooth.recorded and not smooth.doubtful and not smooth.severe
+    assert "fair approximation" in " ".join(smooth.lines(_Cfg()))
+
+    doubtful = record(lid_step_median=0.1, lid_step_p99=0.7)
+    assert doubtful.doubtful and not doubtful.severe
+    text = " ".join(doubtful.lines(_Cfg()))
+    assert "doubtful" in text and "velocity cap" in text
+
+    # munich-vsf's own number: the surface steps further than the water is deep
+    severe = record(lid_step_median=0.3, lid_step_p99=1.8)
+    assert severe.severe
+    assert "DOES NOT APPLY" in " ".join(severe.lines(_Cfg()))
+
+    # a case built before the test existed must say so rather than imply it passed
+    (tmp_path / BUILD_RECORD).unlink()
+    unknown = report.lid_applicability(_Cfg(), tmp_path)
+    assert not unknown.recorded
+    assert "unknown" in " ".join(unknown.lines(_Cfg()))
+
+
+def test_a_two_phase_run_is_not_asked_the_lid_question(tmp_path):
+    """Under a solved free surface the question does not arise, and answering it
+    anyway would be noise in every two-phase report."""
+    from axqua.solvers.openfoam import report
+
+    class _Cfg:
+        class openfoam:
+            mode = "vof"
+
+    verdict = report.lid_applicability(_Cfg(), tmp_path)
+    assert verdict.rigid_lid is False
+    assert verdict.lines(_Cfg()) == []
+
+
 def test_a_wall_thinner_than_a_cell_still_blocks():
     """A column is blanked on its CENTRE, so a baffle thinner than the lattice - or
     one that passes between two centres - used to block nothing and the mesh joined
@@ -856,6 +914,39 @@ def test_surface_freedom_reads_the_monitors_and_names_the_knob(tmp_path):
     assert verdict.lid_fraction == pytest.approx(0.0125)
     text = " ".join(verdict.lines(_Cfg()))
     assert "freeboard" in text and "not physical" in text
+
+
+def test_the_verdict_is_written_to_a_file_beside_the_csv(tmp_path):
+    """Logging it is not enough - that is the failure this whole thread is about. A
+    finished run has to carry its own verdict, so a reader who comes back to it a
+    week later finds the lid warning next to the discharge plot."""
+    import json
+
+    from axqua.solvers.openfoam.case import BUILD_RECORD
+    from axqua.solvers.openfoam.report import write_report
+
+    for name, values in (("Q_inlet-1", [0.0, 0.135, 0.135]),
+                         ("Q_outlet-1", [0.0, -0.130, -0.135])):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            "# Area   : 10\n# Time\tsum(phi)\n"
+            + "".join(f"{i}\t{v}\n" for i, v in enumerate(values)))
+    (tmp_path / BUILD_RECORD).write_text(json.dumps(
+        {"mode": "rigid-lid", "rigid_lid": True,
+         "lid_step_median": 0.3, "lid_step_p99": 1.8}))
+
+    from axqua.config import Boundaries
+
+    cfg = _Cfg(mode="rigid-lid")
+    cfg.boundaries = Boundaries(prescribed_flowrate=0.135)
+    history, written = write_report(cfg, tmp_path, out_dir=tmp_path)
+    assert history.time.size == 3
+    verdict = tmp_path / "run-verdict.txt"
+    assert verdict in written
+    text = verdict.read_text()
+    assert "DOES NOT APPLY" in text            # the build-time finding, in the result
+    assert "discharge balance" in text         # ...next to the run's own numbers
 
 
 def test_the_wall_tolerance_absorbs_the_inflow_and_outflow_corners(tmp_path):

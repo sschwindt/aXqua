@@ -180,6 +180,10 @@ class OpenFoamBackend(BaseBackend):
             # the answer was set by a meshing decision rather than by the hydraulics,
             # which nothing else in the output reveals.
             out["surface_freedom"] = report.surface_freedom(cfg, case_dir)
+            # ...and, under a rigid lid, whether the mode applied at all. That is a
+            # property of the prescribed surface, so it is recorded at build time and
+            # read back rather than measured from the result.
+            out["lid_applicability"] = report.lid_applicability(cfg, case_dir)
         except Exception as exc:  # noqa: BLE001
             log.debug("surface-freedom report skipped: %s: %s", type(exc).__name__, exc)
 

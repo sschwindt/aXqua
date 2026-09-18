@@ -211,6 +211,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
                                       uniform_bed_ks=uniform_bed_ks)
     dict_files = dicts.write_dicts(of_mesh, cfg, case_dir, velocity_cap=cap)
     (case_dir / "case.foam").write_text("")     # so ParaView can open the folder
+    _write_build_record(cfg, of_mesh, case_dir, velocity_cap=float(cap))
 
     report = quality.assess(of_mesh, state=state,
                             roughness_constant=of.roughness_constant)
@@ -226,6 +227,38 @@ def build_case(cfg: Config, *, state: State2D | None = None,
     for line in art.lines():
         log.info("%s", line)
     return art
+
+
+#: Written beside ``case.foam`` so the build's own findings survive the terminal.
+#: A build-time warning that only reaches a log is the failure this exists to stop:
+#: munich-vsf ran 61 hours, balanced its discharge to -0.000%, held Courant at 0.90,
+#: and carried no trace of the warning that said the answer could not be trusted.
+BUILD_RECORD = "axqua-build.json"
+
+
+def _write_build_record(cfg: Config, of_mesh, case_dir: Path, *,
+                        velocity_cap: float) -> Path:
+    """Record the build-time judgements the finished run has to be read against.
+
+    Only what the run itself cannot tell you afterwards. The lid-step ratio is the
+    whole point: it is measured from the *prescribed* surface, so no amount of
+    looking at the result recovers it - and it is the number that decides whether a
+    rigid-lid answer is usable at all.
+    """
+    import json
+
+    record = {
+        "mode": cfg.openfoam.mode,
+        "rigid_lid": bool(of_mesh.rigid_lid),
+        "velocity_cap": velocity_cap,
+        "n_cells": int(of_mesh.n_cells),
+    }
+    if of_mesh.lid_step_p99 is not None:
+        record["lid_step_median"] = float(of_mesh.lid_step_median)
+        record["lid_step_p99"] = float(of_mesh.lid_step_p99)
+    path = case_dir / BUILD_RECORD
+    path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+    return path
 
 
 def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> float:
