@@ -64,8 +64,24 @@ surfaces:
   parts:
     # --- the bed: substrate over lean concrete, each its own roughness zone --------
     - {file: user-sources/geodata/cad/substratum.stl, role: bed, zone_id: 1, ks: 0.08}
-    - {file: user-sources/geodata/cad/substratum_amphibienweg.stl, role: bed, zone_id: 2, ks: 0.10}
-    - {file: user-sources/geodata/cad/magerbeton.stl, role: bed, zone_id: 3, ks: 0.003}
+    # The amphibian path never conveys water: it sits above the channel and is not
+    # part of the flow domain at any modelled discharge. Left as a bed it ran as a
+    # parallel supercritical chute (Fr up to 1.44, 6-9 cm deep at 1.1 m/s) taking
+    # 0.069 of the 0.135 m3/s - half the fish pass's design flow - fed over a sill at
+    # its head that the upstream pool overtopped by 0.74 m. It supplies 7.70 m2 of bed
+    # here at 0.980..2.750 m, of which 5.89 m2 nothing else covers; that 5.89 m2 is
+    # the path itself and leaves the domain with it.
+    - {file: user-sources/geodata/cad/substratum_amphibienweg.stl, role: ignore}
+    # Magerbeton is the lean-concrete blinding the pass is founded on, NOT a bed.
+    # Declared `role: bed` it supplied 41.65 m2 of the pass reach at 0.130..0.725 m -
+    # its own plan area beside the pass, overlapping the substrate by 0.01 m2 - and
+    # since the upstream channel's thalweg drops 1.79 m straight into the head of it
+    # at y = 46, the model grew a parallel channel 1 to 2 m below the fish pass that
+    # carried half the discharge (0.053..0.069 m3/s against the pass's 0.057..0.069)
+    # for the whole length of the reach. The reference model treats the same surface
+    # as a wall patch, not a bed. None of it lies above 1.0 m, so dropping it takes
+    # the apron out and leaves the pass's own bed (0.220..2.800 m) untouched.
+    - {file: user-sources/geodata/cad/magerbeton.stl, role: ignore}
     # --- the structure: walls and baffles become solid footprints -----------------
     - {file: user-sources/geodata/cad/stahlbeton.stl, role: wall}
     - {file: user-sources/geodata/cad/stahlblech.stl, role: wall}
@@ -78,16 +94,49 @@ surfaces:
     - {file: user-sources/geodata/cad/air-sides.stl, role: ignore}
     - {file: user-sources/geodata/cad/air-top.stl, role: ignore}
 
+geodata:
+  # THE REACH AXIS, and the input that was missing all along. Without it flow_angle()
+  # returns 0 (mesh.py: "falls back to 0 with no centerline") and every derived thing
+  # is axis-aligned while the pass runs at +14.3 deg: the plan lattice, the crop faces,
+  # and any graded refinement. That is not cosmetic - a 0.100 m slot crossing the grid
+  # at 14 deg is stair-stepped, and each cell spent on the stair is one not spent on
+  # the jet. It is also what made a y-normal crop face read 0.18 m3/s against a
+  # prescribed 0.135: an oblique slice is not a cross-section.
+  #
+  # The config used to say a fish pass "does not really have" a centerline. That is
+  # true of the ANISOTROPIC MESH path, which is what the remark was about, and false
+  # for orientation, which this is. Written by make_rotated_roi.py from the wetted
+  # corridor of the pass.
+  # NB: geodata paths resolve from the case directory, not from preprocessing/ the way
+  # openfoam.roi does, so this one is spelled out in full.
+  channel_centerline: axqua-case/preprocessing/channel-centerline.gpkg
+
 boundaries:
   # the middle design discharge; the other two are derived from the built case by
   # lab_reference.py / write_flow_cas rather than by re-meshing
   prescribed_flowrate: 0.135
-  outflow_condition: elevation
-  # Local datum, from the derived DEM: the bed at the outlet end (y > 104 m) sits at
-  # 0.33..1.01 m, and the flume measured 0.36 m of water at the downstream section
-  # (XS4/US7) at MQ. 0.33 + 0.36 = 0.69. This is an estimate to start the run from,
-  # not a surveyed tailwater - check it against the drawing's elevation labels, and
-  # re-derive it per discharge (0.60 at Q30, 1.17 at HQ100 by the same arithmetic).
+  # The tailwater comes from the outlet section itself, not from a guessed level.
+  #
+  # Two things were tried first and are recorded so they are not tried again.
+  # `elevation: 0.69` was an estimate (outlet bed 0.33 m plus the flume's 0.36 m at
+  # the downstream section); the build warned it "sits ABOVE the reach's own level",
+  # and once the wall footprints became solid the run settled with its upstream pool
+  # at 3.37 m, 0.57 m over the top of the concrete, spilling half the discharge around
+  # the pass. `free` is what the reference model of this structure uses
+  # (/home/modelling/OpenFOAM/Munich-VSF/6_v5_HQ100: Outlet is `p_rgh zeroGradient`
+  # with `U inletOutlet`, and that dataset holds no rating curve at all) - but a
+  # Neumann outlet is not stable here: the moment the water reached the boundary at
+  # t = 571.7 s it drew down supercritically and TELEMAC stopped with LIMIT VALUES
+  # TRESPASSED, the last section reporting 121 m of depth at 82 m/s.
+  outflow_condition: stage_discharge
+  # `section`, not `trapezoid`: the trapezoid puts the full outflow width at the full
+  # depth, over-estimates the area and returns a stage that is too low - which is the
+  # same supercritical drawdown the free outlet just produced. `section` reads the
+  # conveyance of the actual DEM cross-section along the outflow line with the ks of
+  # the roughness zone each sample falls in.
+  rating_method: section
+  # unused while the outflow is a rating; kept for the elevation variant and its
+  # per-discharge re-derivation (0.60 at Q30, 1.17 at HQ100 by the same arithmetic)
   prescribed_elevation: 0.69
 
 initialization:
@@ -163,7 +212,36 @@ openfoam:
   # fixes the level there - prescribing a stage as well would over-determine it).
   # correct_lid.py buys it back: p_rgh on the lid is dz = p_rgh/(rho g), the elevation
   # the surface wanted, and feeding surface+dz back as the seed converges in 2-3 passes.
+  # BACK TO VOF, after three rigid-lid runs established that the mode cannot answer
+  # this geometry. The lid is a slip WALL, so where the prescribed surface drops it
+  # becomes a sluice: mesh.lid_steps measures the surface stepping 180% of the local
+  # depth at the 99th percentile here, because a vertical-slot fishway IS thirteen
+  # discrete drops. Measured on the first sealed run: 679 cells pinned at the
+  # velocity cap, 92% of them in the 5% of columns where the lid steps more than
+  # 0.30 m within 15 cm - which is to say, at the slots, which is the one thing this
+  # sub-model exists to resolve.
+  #
+  # Everything else the rigid-lid detour produced is kept and still applies: the
+  # crop, the sealed structures, the sub-model boundaries, the 3D pre-run seed.
+  # The two-phase cost is no longer what it was either - the 22-day figure came from
+  # a mesh whose baffles leaked, and with them sealed the interface is no longer
+  # setting the time step (lww-133 measured Interface Courant at ~42% of Courant max
+  # rather than equal to it on every step).
+  # rigid-lid, not vof. The two-phase cost estimate above was made before the geometry
+  # was right; what settles it is that the finest real feature is now known and the
+  # mesh has to resolve it everywhere. The slot is 0.380 m (measured twice: at all 13
+  # interior baffles of the reference model's snapped mesh, and by plane-slicing
+  # stahlbeton.stl), the baffle walls are 0.15 m, and the mid-channel nose is
+  # 0.15 x 0.24 m. At the 0.02 m below that is 19 cells across a slot and 7.5 across
+  # the nose - uniform, with no local refinement anywhere. Paying for an air phase on
+  # top of that is what the rigid lid exists to avoid.
   mode: rigid-lid
+  # Rotate the lattice onto the reach. The pass runs 15.54 deg off the y axis and is
+  # dead straight over its whole 22 m, so one rotation puts both channel walls and
+  # every baffle on lattice lines instead of stair-stepping them. The reference model
+  # could not do this - its background block is axis-aligned, so its 0.05 m cells cut
+  # every slot cheek obliquely. Needs geodata.channel_centerline, written above.
+  align_to_flow: true
   # Measured on the first attempt: 3.14 M cells, dt 5.2e-4 s, 27.6 s/step on 16 ranks
   # = 0.765 s of river in 7.8 h. The 30 s spin-up would have been 13 days and the 300 s
   # production stage 128. The four settings below are what make it finishable.
@@ -187,7 +265,14 @@ openfoam:
   # at the outlet, so the patch gets p_rgh = 0 instead. It still sets the lid there,
   # through the seed the lid is sampled from, and it is what a switch back to vof uses.
   outlet_stage: 0.715
-  cell_size: 0.03
+  # 0.02 m, uniform. Sized on the 0.380 m slot (19 cells) and the 0.15 m baffle nose
+  # (7.5), so nothing in this geometry is under-resolved and no graded band is needed.
+  # Cost from anchors measured on this box (853,664 cells at 0.03 m, 5.02 s/step,
+  # spin-up dt 4.97e-4 s at Courant 0.3): ~1.3 M cells, ~7.5 s/step, roughly 12 days
+  # for the full 120 s. Fall back to 0.025 (15 cells across the slot, ~6 days) if that
+  # is too long, and drop nCorrectors 3->2 with nNonOrthogonalCorrectors 2->1 first:
+  # 9 pressure solves per outer iteration down to 6, worth about 25%.
+  cell_size: 0.02
   # 8 layers, ALL of them in the water. The VOF mesh had 12 spanning water plus air, of
   # which ~5 were water: this is finer where it matters and half the cells.
   n_layers: 8
