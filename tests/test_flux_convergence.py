@@ -387,3 +387,127 @@ def test_tolerance_grade_comes_from_the_config_and_scales_the_absolute_criterion
     strict = analyze_flux_convergence(cfg, tolerance=fcmod.HOTSTART_TOLERANCE)
     assert strict.converged is False                     # 5e-4 misses the 1e-4 grade
     assert strict.steady_abs_tolerance == pytest.approx(2e-4)
+
+
+# --------------------------------------------------------------------------- #
+# the TELEMAC-3D listing
+#
+# A different block entirely (telemac3d/bil3d.f), and until it was read a 3D seed's
+# flux balance could not be judged at all: read_sortie raised, prerun._judge swallowed
+# it, and `openfoam.pre_run.require: error` could never fire under `dimension: 3d`.
+# The shapes below are transcribed from real listings on this machine
+# (hotstart3d_hydrostatic.cas_*.sortie, inn3d.cas_*.sortie).
+# --------------------------------------------------------------------------- #
+
+
+def _write_sortie_3d(model_dir, fluxes, *, times=None, volumes=None,
+                     cas="hotstart3d_hydrostatic.cas",
+                     stamp="2026-01-01-00h00min00s", study="stub 3d",
+                     initial_block=True, final_block=True, totals=True):
+    """A listing in TELEMAC-3D's format.
+
+    *initial_block* writes the ``INITIAL VOLUME OF WATER IN THE DOMAIN`` block the run
+    opens with (no fluxes, so it must be dropped); *final_block* the end-of-run ``FINAL
+    MASS BALANCE`` summary (which is not a printout and must not become a row);
+    *totals* controls whether the ITERATION header carries the cumulated ``( N S)``
+    form or only the D/H/MN breakdown.
+    """
+    fluxes = np.atleast_2d(np.asarray(fluxes, dtype=float))
+    n, n_bnd = fluxes.shape
+    times = np.arange(1, n + 1, dtype=float) if times is None else np.asarray(times, float)
+    volumes = np.full(n, 105.0) if volumes is None else np.asarray(volumes, float)
+
+    def header(step, t):
+        mn, sec = divmod(float(t), 60.0)
+        hr, mn = divmod(mn, 60.0)
+        day, hr = divmod(hr, 24.0)
+        line = (f"ITERATION {step:8d} TIME {int(day):4d} D {int(hr):2d} H "
+                f"{int(mn):2d} MN {sec:8.4f} S")
+        return line + (f"   ({t:16.4f} S)" if totals else "")
+
+    lines = [" EXITING LECDON. NAME OF THE STUDY:", f"    {study}", ""]
+    if initial_block:
+        lines += [header(0, 0.0), "                MASS BALANCE",
+                  " INITIAL VOLUME OF WATER IN THE DOMAIN :   106.70328359999993"]
+    for i in range(n):
+        lines.append(header((i + 1) * 100, times[i]))
+        lines.append(" GRACJG (BIEF) :      111 ITERATIONS, RELATIVE PRECISION:   0.9E-08")
+        lines += ["                MASS BALANCE", "", "  WATER",
+                  f"VOLUME AT THE PREVIOUS TIME STEP              : {volumes[i] + 1:13.7g}",
+                  f"VOLUME AT THE PRESENT TIME STEP               : {volumes[i]:13.7g}",
+                  "VOLUME LEAVING DOMAIN DURING THIS TIME STEP   :    0.7793448E-02",
+                  "ERROR ON THE VOLUME DURING THIS TIME STEP     :   -0.1874828E-12",
+                  "  BOUNDARY FLUXES FOR WATER IN M3/S ( >0 : ENTERING )"]
+        for b in range(n_bnd):
+            lines.append(f"FLUX BOUNDARY {b + 1:6d}                          : "
+                         f"{fluxes[i, b]:13.7f}")
+    if final_block:
+        lines += ["                FINAL MASS BALANCE", f"T = {times[-1]:16.4f}", "",
+                  "--- WATER ---", "INITIAL VOLUME                      :     106.7033",
+                  f"FINAL VOLUME                        : {volumes[-1]:13.7g}",
+                  "VOLUME EXITING (BOUNDARY OR SOURCE) :     16.54855"]
+    lines += ["", " 3 MINUTES", ""]
+
+    main = Path(model_dir) / f"{cas}_{stamp}.sortie"
+    main.write_text("\n".join(lines) + "\n")
+    return main
+
+
+def test_sortie_reads_the_telemac_3d_mass_balance(tmp_path):
+    """The 3D block names its volume differently, carries no time of its own, and has
+    no closing line - so it is committed when the next one starts."""
+    fluxes = np.array([[0.135, -0.4133], [0.135, -0.1350], [0.135, -0.1349]])
+    path = _write_sortie_3d(tmp_path, fluxes, times=[2.8, 5.6, 8.4],
+                            volumes=[105.4497, 104.9062, 104.2838])
+    s = read_sortie(path)
+
+    assert s.dimension == "3d"
+    assert s.n_boundaries == 2
+    # the time comes from the ITERATION header above each block, in order
+    assert s.time == pytest.approx([2.8, 5.6, 8.4])
+    assert s.iteration.tolist() == [100, 200, 300]
+    assert s.volume == pytest.approx([105.4497, 104.9062, 104.2838])
+    assert s.gross_in == pytest.approx([0.135, 0.135, 0.135])
+    assert s.gross_out == pytest.approx([0.4133, 0.1350, 0.1349])
+    assert s.exec_seconds == 180.0
+    # the opening INITIAL VOLUME block and the closing FINAL MASS BALANCE are not
+    # printouts and must not become rows
+    assert s.fluxes.shape == (3, 2)
+
+
+def test_sortie_3d_falls_back_to_the_time_breakdown(tmp_path):
+    """Without the cumulated '( N S)' the D/H/MN/S breakdown has to be summed, or a
+    run past the first minute would report the wrong instant."""
+    path = _write_sortie_3d(tmp_path, [[0.135, -0.135]], times=[3725.5], totals=False)
+    assert read_sortie(path).time == pytest.approx([3725.5])
+
+
+def test_sortie_3d_drops_a_block_with_no_time_above_it(tmp_path):
+    """Nothing is fabricated: a block whose ITERATION header is missing has no
+    defensible time, so it is dropped rather than committed at a guessed one."""
+    path = _write_sortie_3d(tmp_path, [[0.135, -0.135]], initial_block=False,
+                            final_block=False)
+    text = path.read_text().splitlines()
+    path.write_text("\n".join(ln for ln in text if not ln.startswith("ITERATION")))
+    with pytest.raises(ValueError, match="PRINTING CUMULATED FLOWRATES"):
+        read_sortie(path)
+
+
+def test_sortie_3d_does_not_mistake_a_gaia_mass_balance_for_a_block(tmp_path):
+    """GAIA prints 'MASS-BALANCE' headings of its own. The 3D header is the whole
+    line, so they cannot collide - this pins that."""
+    path = _write_sortie_3d(tmp_path, [[0.135, -0.135], [0.135, -0.134]])
+    with open(path, "a") as fh:
+        fh.write("        GAIA MASS-BALANCE OF SEDIMENTS OVER ALL CLASSES\n")
+        fh.write("TOTAL MASS                              =   1234.5\n")
+    s = read_sortie(path)
+    assert s.dimension == "3d" and s.time.size == 2
+
+
+def test_sortie_2d_listing_is_still_read_as_2d(tmp_path):
+    """The 3D shape is additive: nothing about the 2D path changes, including that its
+    volume_error is the relative one TELEMAC-2D prints."""
+    path = _write_sortie(tmp_path, _two_boundary(np.array([0.5, 0.1])))
+    s = read_sortie(path)
+    assert s.dimension == "2d"
+    assert s.volume_error == pytest.approx([-0.1008281e-14, -0.1008281e-14])
