@@ -64,24 +64,21 @@ surfaces:
   parts:
     # --- the bed: substrate over lean concrete, each its own roughness zone --------
     - {file: user-sources/geodata/cad/substratum.stl, role: bed, zone_id: 1, ks: 0.08}
-    # The amphibian path never conveys water: it sits above the channel and is not
-    # part of the flow domain at any modelled discharge. Left as a bed it ran as a
-    # parallel supercritical chute (Fr up to 1.44, 6-9 cm deep at 1.1 m/s) taking
-    # 0.069 of the 0.135 m3/s - half the fish pass's design flow - fed over a sill at
-    # its head that the upstream pool overtopped by 0.74 m. It supplies 7.70 m2 of bed
-    # here at 0.980..2.750 m, of which 5.89 m2 nothing else covers; that 5.89 m2 is
-    # the path itself and leaves the domain with it.
-    - {file: user-sources/geodata/cad/substratum_amphibienweg.stl, role: ignore}
-    # Magerbeton is the lean-concrete blinding the pass is founded on, NOT a bed.
-    # Declared `role: bed` it supplied 41.65 m2 of the pass reach at 0.130..0.725 m -
-    # its own plan area beside the pass, overlapping the substrate by 0.01 m2 - and
-    # since the upstream channel's thalweg drops 1.79 m straight into the head of it
-    # at y = 46, the model grew a parallel channel 1 to 2 m below the fish pass that
-    # carried half the discharge (0.053..0.069 m3/s against the pass's 0.057..0.069)
-    # for the whole length of the reach. The reference model treats the same surface
-    # as a wall patch, not a bed. None of it lies above 1.0 m, so dropping it takes
-    # the apron out and leaves the pass's own bed (0.220..2.800 m) untouched.
-    - {file: user-sources/geodata/cad/magerbeton.stl, role: ignore}
+    # The amphibian path. It is real ground and it belongs in the model: checked
+    # against the reference simulation's own mesh, it runs 0.76 to 1.14 m ABOVE the
+    # fish pass invert at every station, offset 3 to 4 m to the side. At the design
+    # discharge it is dry, and it only took water in our runs because our water level
+    # was too high (see below). Do not remove it: it also carries 5.9 m2 of the pass's
+    # own bed near the outlet, and taking that out left a hole the mesher bridged into
+    # a dam that ponded the whole pass.
+    - {file: user-sources/geodata/cad/substratum_amphibienweg.stl, role: bed, zone_id: 2, ks: 0.10}
+    # The lean-concrete apron the pass stands beside, 0.13 to 0.73 m, about 48 m2. It
+    # is the largest single bed surface in the reach - larger than the pass invert -
+    # and the reference simulation treats it as wetted ground too. The pass is a flume
+    # with 2.845 m walls standing beside this lower apron; at the design discharge the
+    # apron is dry and the walls keep the two apart. It only conveyed in our runs
+    # because our level ran over the top of those walls.
+    - {file: user-sources/geodata/cad/magerbeton.stl, role: bed, zone_id: 3, ks: 0.003}
     # --- the structure: walls and baffles become solid footprints -----------------
     - {file: user-sources/geodata/cad/stahlbeton.stl, role: wall}
     - {file: user-sources/geodata/cad/stahlblech.stl, role: wall}
