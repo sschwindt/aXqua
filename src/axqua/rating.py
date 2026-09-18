@@ -333,6 +333,21 @@ def section_rating(out, discharges, *, station, bed, ks, slope, log_label=""):
     return out
 
 
+def _valid(z, dem):
+    """Samples that carry a real elevation.
+
+    ``np.isfinite`` alone is not that test: rasterio returns the raster's nodata fill
+    where nothing covers a cell, and a fill of -9999 passes ``isfinite``.
+    """
+    import numpy as np
+
+    good = np.isfinite(z)
+    nodata = getattr(dem, "nodata", None)
+    if nodata is not None:
+        good &= z != nodata
+    return good
+
+
 def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=None,
                                            n_samples: int = 300):
     """Outflow rating from the DEM cross-section along the outflow boundary line.
@@ -367,8 +382,21 @@ def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=No
     station = np.linspace(0.0, line.length, n_samples)
     pts = [line.interpolate(t) for t in station]
     with rasterio.open(cfg.geodata.dem_initial) as dem:
-        xs, ys = warp_transform(f"EPSG:{cfg.crs_epsg}", dem.crs,
-                                [p.x for p in pts], [p.y for p in pts])
+        def _to_dem(points):
+            """Sample coordinates in the DEM's own frame.
+
+            A case built from a CAD assembly runs in local coordinates: the DEM has no
+            CRS even where ``crs_epsg`` names the grid the drawing is set out in,
+            because the two have never been tied together (see `axqua georef`).
+            Reprojecting into ``None`` raises, so when the DEM carries no CRS the line
+            is already in its frame and is sampled as it stands.
+            """
+            if dem.crs is None or not cfg.crs_epsg:
+                return [p.x for p in points], [p.y for p in points]
+            return warp_transform(f"EPSG:{cfg.crs_epsg}", dem.crs,
+                                  [p.x for p in points], [p.y for p in points])
+
+        xs, ys = _to_dem(pts)
         bed = np.array([s[0] for s in dem.sample(zip(xs, ys))], dtype=float)
         if slope is None:
             cl = gpd.read_file(cfg.geodata.channel_centerline)
@@ -379,14 +407,23 @@ def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=No
                      else max(merged.geoms, key=lambda g: g.length))
             sc = np.linspace(0.0, cline.length, 400)
             cp = [cline.interpolate(t) for t in sc]
-            cx, cy = warp_transform(f"EPSG:{cfg.crs_epsg}", dem.crs,
-                                    [p.x for p in cp], [p.y for p in cp])
+            cx, cy = _to_dem(cp)
             zc = np.array([s[0] for s in dem.sample(zip(cx, cy))], dtype=float)
-            good = np.isfinite(zc)
+            # nodata, not just NaN: rasterio hands back the raster's fill value, and
+            # -9999 is perfectly finite. Fitting a slope through it is not a small
+            # error - on munich-vsf, whose centreline crosses walls the bed rasters
+            # leave empty, it returned 44.5 instead of 0.053, and a slope three orders
+            # of magnitude too steep gives a normal depth of 29 mm at the outlet.
+            good = _valid(zc, dem)
+            if good.sum() < 2:
+                raise ValueError(
+                    "geodata.channel_centerline samples no bed elevation in "
+                    f"{cfg.geodata.dem_initial.name}, so the reach slope cannot be "
+                    "inferred. Check that the centerline lies over the DEM's covered "
+                    "area, or pass an explicit slope to "
+                    "synthesize_outflow_rating_from_section().")
             slope = abs(float(np.polyfit(sc[good], zc[good], 1)[0]))
-    good = np.isfinite(bed)
-    if dem_nodata := getattr(dem, "nodata", None):
-        good &= bed != dem_nodata
+    good = _valid(bed, dem)
     station, bed, pts = station[good], bed[good], [p for p, g in zip(pts, good) if g]
 
     # roughness per sample from the roughness zones, else the lateral-boundary value
