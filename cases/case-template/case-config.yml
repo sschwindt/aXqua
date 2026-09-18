@@ -533,6 +533,18 @@ dem_of_difference:
 #   #                         # can trim away a shallow INLET section - check the
 #   #                         # patch list. n_layers is then fitted to it, since cells
 #   #                         # thinner than the bed grains are meaningless.
+#   #
+#   # AND THE BUILD CHECKS WHETHER A LID APPLIES AT ALL. A lid is a WALL, so where
+#   # the prescribed surface drops sharply the flow must squeeze under a sluice that
+#   # does not exist - it converts the head into velocity, sqrt(2 g dz), which for a
+#   # 1 m step is 4.4 m/s in a reach whose own water moves at 0.4. The build measures
+#   # how far the surface moves within two cells as a fraction of the local depth:
+#   # past ~50% it warns, and past 100% - a weir, a drop, the slots of a fish pass -
+#   # it REFUSES, because two such runs finished, balanced their discharge to
+#   # -0.000%, held Courant at 0.90 for 61 hours, and were invalid.
+#   # allow_stepped_lid: true  # build anyway (a deliberate experiment, or a
+#   #                          # comparison against the two-phase answer). The verdict
+#   #                          # still lands in the run's own run-verdict.txt.
 #   domain: wetted          # wetted (the 2D wetted corridor) | roi (the whole ROI)
 #   wet_margin: 5.0         # [m] buffer, so the bank walls stand on DRY ground
 #   align_to_flow: true     # rotate the lattice onto the reach's principal axis
