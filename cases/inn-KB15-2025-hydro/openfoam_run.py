@@ -132,8 +132,13 @@ def main() -> None:
     # its own level: the lid and the footprint were both sized from the 2D seed, and
     # a run that pressed against either was constrained by a meshing decision rather
     # than by the flow - which nothing else in the output would reveal.
-    print("\n=== was the surface free? ===")
-    for line in report.surface_freedom(cfg, case_dir).lines(cfg):
+    # ...and under a rigid lid, whether the prescribed surface was smooth enough on
+    # the scale of a cell for the mode to apply at all. That is a property of the
+    # INPUT, so the finished run cannot be asked - it is recorded at build time and
+    # read back here, which is why it reaches the result instead of scrolling past
+    # in a build log.
+    print("\n=== was the surface free, and did the lid apply? ===")
+    for line in report.verdict_lines(cfg, case_dir):
         print(line)
     print(f"\nopen {case_dir / 'case.foam'} in ParaView to view the result "
           "(threshold alpha.water > 0.5 to see the water phase alone).")

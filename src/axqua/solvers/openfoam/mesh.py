@@ -123,7 +123,8 @@ def flow_angle(cfg: Config) -> float:
 
 
 def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
-                    max_columns: int = 4_000_000, blocked=None) -> PlanGrid:
+                    max_columns: int = 4_000_000, blocked=None,
+                    blocked_by_structures: bool = True) -> PlanGrid:
     """Lay a uniform lattice of spacing *dx* over *polygon* (a shapely geometry).
 
     A column is kept when its centre lies inside the polygon; the kept set is then
@@ -131,6 +132,19 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
     is a single block with no interior voids (an interior void would become a
     spurious internal wall, and a detached island a disconnected mesh region that
     ``decomposePar`` and the pressure solve both dislike).
+
+    *blocked* is geometry to cut out of the footprint. Under a rigid lid that is not
+    only the solid structures: the **dry** part of the reach is cut out too, because
+    a column with no water in it has nothing to mesh. *blocked_by_structures* says
+    which, and exists only so the diagnostics name the right cause - a braided reach
+    routinely loses a few pockets to the dry trim, and reporting that as "a solid
+    structure has cut the domain in two" sends the reader looking for a wall that was
+    never drawn. Measured on inn-KB15, which has no structures at all: 2 blocks, 51
+    columns dropped, blamed on a structure.
+
+    It defaults to True so that a caller who cuts out geometry and says nothing still
+    gets the warning - being told about a wall that turns out to be a dry bar is a
+    smaller failure than not being told the domain was severed.
     """
     import shapely
     from scipy import ndimage
@@ -207,23 +221,29 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
         removed = int((keep & solid).sum())
         keep = keep & ~solid
         if removed:
-            log.info("plan grid: %d columns removed by solid structures (%.0f m2), "
+            # Same count, honest attribution: under a rigid lid `blocked` carries the
+            # dry part of the reach as well as the structures, and calling a trimmed
+            # gravel bar a "solid structure" is how a reader goes looking for a wall
+            # that was never drawn.
+            what = ("solid structures" if blocked_by_structures
+                    else "the blanking footprint")
+            log.info("plan grid: %d columns removed by %s (%.0f m2), "
                      "of which %d come from sealing them to the lattice (a column is "
-                     "blanked where the solid crosses its %.3f m cell, so none of "
+                     "blanked where the geometry crosses its %.3f m cell, so none of "
                      "them leak)",
-                     removed, removed * dx * dx, leaky, float(dx))
+                     removed, what, removed * dx * dx, leaky, float(dx))
     labels, n = ndimage.label(keep)          # 4-connectivity (the default structure)
     if n > 1:
         sizes = ndimage.sum(keep, labels, range(1, n + 1))
         largest = labels == (int(np.argmax(sizes)) + 1)
         dropped = int(keep.sum() - largest.sum())
         keep = largest
-        level = log.warning if (blocked is not None and dropped) else log.info
+        by_structure = blocked_by_structures and dropped
+        level = log.warning if by_structure else log.info
         level("plan grid: kept the largest of %d connected blocks (%d columns, "
               "%d dropped)%s", n, int(keep.sum()), dropped,
               " - a solid structure has cut the domain in two; check that a wall was "
-              "not drawn right across the channel" if blocked is not None and dropped
-              else "")
+              "not drawn right across the channel" if by_structure else "")
     if not keep.any():
         raise ValueError("the plan lattice has no column inside the domain polygon; "
                          "check openfoam.cell_size against the domain size")
@@ -323,6 +343,11 @@ class OpenFoamMesh:
     column_uv: np.ndarray | None = None       # (n_columns, 2) hotstart depth-averaged U
     bed_ks: np.ndarray | None = None          # (n bed faces,) Nikuradse ks per bed face
     rigid_lid: bool = False                   # water-only domain under a slip lid
+    #: :func:`lid_steps` of the lid this mesh was built with - the rigid lid's
+    #: applicability test, kept rather than logged and forgotten. `None` under a
+    #: two-phase lid, where the surface is solved and the question does not arise.
+    lid_step_median: float | None = None
+    lid_step_p99: float | None = None
     inlet_patches: list[str] = field(default_factory=list)
     outlet_patches: list[str] = field(default_factory=list)
     inlet_discharge: dict[str, float] = field(default_factory=dict)
@@ -913,6 +938,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
     dx = plan_spacing(cfg)
     dem = Path(dem) if dem is not None else Path(cfg.geodata.dem_initial)
     notes: list[str] = []
+    lid_step_median = lid_step_p99 = None
     if of.cell_size_factor:
         notes.append(f"plan spacing {dx:.2f} m = {of.cell_size_factor:g}x the 2D "
                      f"channel size ({geodata.nominal_channel_size(cfg):.2f} m)")
@@ -949,16 +975,17 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
 
             blocked = (dry_footprint if blocked is None
                        else unary_union([blocked, dry_footprint]))
-    if blocked is not None:
-        notes.append(f"{sum(1 for s in structures if s.mode == SOLID)} solid "
-                     "structure(s) removed from the domain: their sides become "
-                     "no-slip walls from bed to lid")
+    n_solid = sum(1 for s in structures if s.mode == SOLID)
+    if n_solid:
+        notes.append(f"{n_solid} solid structure(s) removed from the domain: their "
+                     "sides become no-slip walls from bed to lid")
 
     angle = flow_angle(cfg) if of.align_to_flow else 0.0
     if of.align_to_flow:
         notes.append(f"lattice rotated {np.degrees(angle):+.1f} deg onto the reach axis")
     grid = build_plan_grid(polygon, dx, angle=angle,
-                           max_columns=of.max_plan_columns, blocked=blocked)
+                           max_columns=of.max_plan_columns, blocked=blocked,
+                           blocked_by_structures=bool(n_solid))
     if rigid:
         notes.append("domain trimmed to the wetted body; the waterline is a vertical "
                      "wall and cannot move")
@@ -992,7 +1019,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         # applicable at all - and the run itself will not tell you. munich-vsf
         # finished, balanced its discharge to -0.000% and reported a healthy Courant
         # number for 61 hours while its velocity cap held 3,719 cells together.
-        step_med, step_p99 = lid_steps(grid, lid, bed)
+        lid_step_median, lid_step_p99 = step_med, step_p99 = lid_steps(grid, lid, bed)
         notes.append(f"lid steps: the prescribed surface moves {100 * step_med:.1f}% "
                      f"of the local depth within 2 cells (p99 {100 * step_p99:.0f}%)")
         if step_p99 > 0.5:
@@ -1078,6 +1105,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         column_bed=column_bed, column_wse=column_wse, column_depth=column_depth,
         column_uv=column_uv, bed_ks=bed_ks,
         rigid_lid=rigid,
+        lid_step_median=lid_step_median, lid_step_p99=lid_step_p99,
         inlet_patches=[n for n in liquid_names if n.startswith(INLET_PREFIX)],
         outlet_patches=[n for n in liquid_names if n.startswith(OUTLET_PREFIX)],
         inlet_discharge=discharges, notes=notes,
