@@ -289,16 +289,35 @@ def report(records: list[dict]) -> list[str]:
         out.append(f"head from coarsest to finest: {heads[0]:.3f} -> {heads[-1]:.3f} m "
                    f"({trend:+.3f} m)")
         finest = ordered[-1]
-        if finest["excess"] <= 0.05 * design.DESIGN_HEAD:
-            out.append("VERDICT: the model sheds the design head. No over-resistance "
-                       "to explain the Munich levels with.")
-        elif trend < -0.05 * design.DESIGN_HEAD:
-            out.append("VERDICT: the excess FALLS with refinement - discretisation, "
-                       "not physics. Refine the slot and the level follows.")
+        per_pool = finest["excess"] / (design.N_BAFFLES - 1)
+        out.append(f"VERDICT: at the finest level the model needs "
+                   f"{finest['excess']:+.3f} m more head than the design over all "
+                   f"{design.N_BAFFLES - 1} pools, i.e. {per_pool:+.4f} m per pool "
+                   f"({100 * finest['excess'] / design.DESIGN_HEAD:+.0f}%).")
+        if trend < -0.05 * design.DESIGN_HEAD:
+            out.append("         It FALLS with refinement, so what there is of it is "
+                       "discretisation rather than physics.")
+        elif abs(trend) <= 0.05 * design.DESIGN_HEAD:
+            out.append("         It is flat across the sweep, so it is not a "
+                       "resolution artefact - but at this size it is also not an "
+                       "explanation for a level that is half a metre out.")
         else:
-            out.append("VERDICT: the excess PLATEAUS above the design head - the "
-                       "physics of a depth-averaged model, which refinement will not "
-                       "fix. A 2D pass interior cannot set a 3D model's levels.")
+            out.append("         It GROWS with refinement, which is not a "
+                       "discretisation signature and is worth understanding before "
+                       "the number is used.")
+        # The mesh moves the LEVEL far more than it moves the head, and a level is
+        # what a cross-model comparison actually reads.
+        depths = [r["pool_depth"] for r in ordered]
+        slots = [r["slot_mean"] for r in ordered]
+        if len(depths) >= 2 and all(np.isfinite(depths)):
+            out.append("")
+            out.append(f"But the LEVEL is a different matter: the pool depth goes "
+                       f"{depths[0]:.3f} -> {depths[-1]:.3f} m "
+                       f"({100 * (depths[-1] / depths[0] - 1):+.0f}%) as the realised "
+                       f"slot goes {slots[0]:.3f} -> {slots[-1]:.3f} m. The head is a "
+                       "property of the bed; the depth is a property of the slot the "
+                       "mesh actually built, and a cross-model comparison reads the "
+                       "depth.")
     return out
 
 
@@ -317,6 +336,13 @@ def discharge_report(store: Path) -> list[str]:
             if r.get("discharge") is not None:
                 records.append(r)
     records = [r for r in records if not np.isnan(r.get("pool_depth", float("nan")))]
+    # ONE mesh, or the comparison is not about discharge. The pool depth is strongly
+    # mesh-sensitive (it follows the realised slot width), so mixing levels here put a
+    # mesh effect into the discharge exponent and moved it from 0.97 to 0.80.
+    if records:
+        dx = max({r["dx"] for r in records},
+                 key=lambda v: sum(1 for r in records if r["dx"] == v))
+        records = [r for r in records if r["dx"] == dx]
     if len(records) < 2:
         return []
     records.sort(key=lambda r: r["discharge"])
