@@ -1376,9 +1376,14 @@ class PreRun:
     duration: float | None = None   # [s] else hydrodynamics.duration
     n_processors: int | None = None  # else telemac.n_processors
     directory: str = "pre-run"      # under model_dir
-    # What to do when the pre-run does not reach flux balance. A seed that is merely
+    # What to do when the seed has not reached flux balance. A seed that is merely
     # close is still far better than a cold start, so `warn` is the default; `error`
-    # is for a workflow that must not build on an unconverged surface.
+    # is for a workflow that must not build on an unconverged surface. It applies to
+    # whichever seed is adopted - a reused r2d.slf, a coarse pre-run, or the 3D run
+    # under `dimension: 3d` - not only to one this block produced. A seed whose flux
+    # balance cannot be judged at all (no listing beside it) is reported as such and
+    # does not raise: refusing a result carried in from another machine would be
+    # obstructive.
     require: str = "warn"           # warn | error
 
     def validate(self) -> None:

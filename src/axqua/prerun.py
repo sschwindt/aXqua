@@ -99,14 +99,45 @@ class SeedResult:
             out.append(f"  flux balance reached (relative imbalance "
                        f"{self.imbalance:.2e})" if self.imbalance is not None
                        else "  flux balance reached")
+        elif self.converged is None:
+            out.append("  ? the seed's flux balance could not be judged - there is no "
+                       "readable listing beside it. It may or may not be steady.")
         elif self.converged is False:
-            out.append("  ! the 2D run had NOT reached flux balance"
+            out.append("  ! the run behind this seed had NOT reached flux balance"
                        + (f" (relative imbalance {self.imbalance:.2e})"
                           if self.imbalance is not None else "")
                        + ". The seed is still far better than a cold start, but the "
                        "surface it carries is a transient one.")
         out += [f"  {note}" for note in self.notes]
         return out
+
+
+def _require_converged(cfg, result: SeedResult) -> None:
+    """Stop the build when the seed is not steady and the user asked to be stopped.
+
+    Applied wherever a seed is adopted - a reused ``r2d.slf``, a coarse pre-run, or a
+    3D pre-run - rather than only where one is produced. It used to live inside
+    :func:`_coarse_pre_run` alone, which meant ``require: error`` could not fire for
+    the two commonest seeds there are: the existing result that ``reuse`` picks up,
+    and the 3D result the seed is replaced by. Under ``dimension: 3d`` it could not
+    fire at all.
+
+    ``converged is None`` - no listing, or one this cannot read - deliberately does
+    **not** raise. A result carried in from another machine has no ``.sortie`` beside
+    it and refusing to build on it would be obstructive; the summary says out loud
+    that it could not be judged.
+    """
+    if result.converged is not False or cfg.openfoam.pre_run.require != "error":
+        return
+    where = Path(result.path).name if result.path else "the TELEMAC pre-run"
+    raise RuntimeError(
+        f"the seed {where} has not reached flux balance"
+        + (f" (relative imbalance {result.imbalance:.2e}, tolerance "
+           f"{cfg.hydrodynamics.flux_tolerance:.1e})"
+           if result.imbalance is not None else "")
+        + ". openfoam.pre_run.require is 'error'; set it to 'warn' to seed from the "
+        "transient state anyway, lengthen hydrodynamics.duration, or coarsen "
+        "openfoam.pre_run.size_scale further so the run reaches steady state.")
 
 
 def ensure_seed(cfg, *, enabled: bool | None = None,
@@ -130,8 +161,10 @@ def ensure_seed(cfg, *, enabled: bool | None = None,
 
     if not on:
         if existing.exists():
-            return _judge(SeedResult(path=existing, source=DISABLED), cfg.model_dir,
-                          cfg)
+            result = _judge(SeedResult(path=existing, source=DISABLED), cfg.model_dir,
+                            cfg)
+            _require_converged(cfg, result)
+            return result
         log.info("TELEMAC pre-run disabled and no %s: building cold", existing.name)
         return SeedResult(source=DISABLED)
 
@@ -140,6 +173,9 @@ def ensure_seed(cfg, *, enabled: bool | None = None,
         result = _judge(SeedResult(path=existing, source=EXISTING), cfg.model_dir, cfg)
     else:
         result = _coarse_pre_run(cfg, validate_env=validate_env)
+    # Gate here as well as after the 3D step, so an unconverged 2D seed stops the
+    # build before it spends hours of telemac3d on top of it.
+    _require_converged(cfg, result)
 
     # The 3D extension applies to whichever 2D result we ended up with - including a
     # reused one. Hanging it off the coarse-pre-run branch alone (as it first was)
@@ -147,6 +183,7 @@ def ensure_seed(cfg, *, enabled: bool | None = None,
     # r2d.slf, which with `reuse: true` is the normal one.
     if result.ok and pre.dimension == "3d":
         result = _extend_to_3d(cfg, result)
+        _require_converged(cfg, result)
     return result
 
 
@@ -219,14 +256,6 @@ def _coarse_pre_run(cfg, *, validate_env: bool) -> SeedResult:
     result.notes.insert(0, f"coarsened x{pre.size_scale:g} (channel ~{dx:.2f} m), "
                            f"pre-wetted {pre.prewet_depth:g} m, Courant "
                            f"{pre.courant:g}")
-    if result.converged is False and cfg.openfoam.pre_run.require == "error":
-        raise RuntimeError(
-            f"the TELEMAC pre-run in {target} did not reach flux balance"
-            + (f" (relative imbalance {result.imbalance:.2e})"
-               if result.imbalance is not None else "")
-            + ". openfoam.pre_run.require is 'error'; set it to 'warn' to seed from "
-            "the transient state anyway, lengthen hydrodynamics.duration, or coarsen "
-            "openfoam.pre_run.size_scale further so the run reaches steady state.")
     return result
 
 
@@ -266,12 +295,23 @@ def _judge(result: SeedResult, model_dir, cfg) -> SeedResult:
     Best-effort by design: a result handed over by a user, or copied in from another
     machine, has no ``.sortie`` beside it, and "I cannot tell" (``converged=None``)
     is the honest answer there rather than a failure.
+
+    **A listing that exists but will not parse is a different thing entirely, and is
+    no longer silent.** That case used to be swallowed at ``log.debug`` alongside the
+    legitimate one, which is how a whole class of seed went unjudged without anyone
+    noticing: :func:`axqua.sortie.read_sortie` could not read a TELEMAC-3D listing at
+    all, so every ``dimension: 3d`` seed returned ``converged=None`` and
+    ``pre_run.require: error`` could never fire. The 3D block is read now, and if a
+    listing still defeats the reader it is warned about and recorded on the seed.
     """
+    listing = None
     try:
         from axqua.solvers.telemac import flux_convergence, sortie
 
         listing = _listing_for(Path(model_dir), cfg, result)
         if listing is None:
+            log.debug("no listing beside %s: its convergence cannot be judged",
+                      result.path)
             return result
         data = sortie.read_sortie(listing)
         imbalance = flux_convergence.relative_imbalance(data.gross_in, data.gross_out)
@@ -279,8 +319,18 @@ def _judge(result: SeedResult, model_dir, cfg) -> SeedResult:
             result.imbalance = float(imbalance[-1])
             result.converged = bool(
                 result.imbalance <= cfg.hydrodynamics.flux_tolerance)
+            log.debug("%s judged against %s (%s): imbalance %.2e, converged %s",
+                      getattr(result.path, "name", result.path), listing.name,
+                      data.dimension, result.imbalance, result.converged)
     except Exception as exc:  # noqa: BLE001 - a diagnostic must not break the build
-        log.debug("could not judge the seed's convergence: %s", exc)
+        if listing is None:
+            log.debug("could not judge the seed's convergence: %s", exc)
+        else:
+            log.warning("could not judge the seed against %s (%s: %s); its flux "
+                        "balance is unknown", listing.name, type(exc).__name__, exc)
+            result.notes.append(
+                f"the listing {listing.name} could not be read "
+                f"({type(exc).__name__}), so the seed's flux balance is unknown")
     return result
 
 
@@ -341,7 +391,8 @@ def _extend_to_3d(cfg, seed: SeedResult) -> SeedResult:
                      existing.name)
             seed.path, seed.source = existing, PRE_RUN_3D
             seed.notes.append(f"reused the existing 3D pre-run {existing.name}")
-            return seed
+            seed.converged, seed.imbalance = None, None
+            return _judge(seed, lc.model_dir, lc)
 
         data = selafin.read_slf(seed.path)
         vertical = threed.infer_vertical_layers(lc, data=data)
@@ -383,6 +434,12 @@ def _extend_to_3d(cfg, seed: SeedResult) -> SeedResult:
         produced = lc.model_path(threed.HYDROSTATIC_RESULT_3D)
         if produced.exists() and _is_finite(produced):
             seed.path = produced
+            # The imbalance carried here so far is the 2D run's. Re-judge against the
+            # 3D listing, which `_listing_for` now picks by proximity to this result -
+            # otherwise the seed reports a number belonging to a different run, and
+            # on the Munich fish pass the two were 3.7e-4 and 2.4e+0.
+            seed.converged, seed.imbalance = None, None
+            seed = _judge(seed, lc.model_dir, lc)
             # not PRE_RUN: the 2D result may well have been reused, and only the 3D
             # run is new. Saying "a dedicated coarse pre-run" there would claim work
             # that did not happen.
