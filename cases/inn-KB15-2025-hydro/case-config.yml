@@ -22,7 +22,11 @@ project:
 
 telemac:
   # [REQUIRED] the pysource.*.sh of YOUR TELEMAC install; sourced (not imported).
-  pysource: //home/IWS/public/telemac/telemac-mascaret/configs/pysource.debian12.sh
+  # Machine-specific, so it does NOT belong in a shared config. Resolution order:
+  #   $AXQUA_TELEMAC_PYSOURCE > ~/.config/axqua/solvers.yml > solvers.local.yml
+  #   beside this file > the value here > discovery. Left as a placeholder so a
+  #   checkout on any machine works without editing a tracked file.
+  pysource: /path/to/telemac/configs/pysource.sh
   solver: telemac2d            # telemac2d | telemac3d
   n_processors: 16              # = physical cores (OpenMPI slots; 16 CPUs are hyperthreads)
 

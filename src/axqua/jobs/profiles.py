@@ -12,7 +12,7 @@ The schema is the plan's, verbatim, so the example in §6 parses unchanged::
       telemac_linux:
         solver: telemac
         environment: posix
-        setup_script: /home/user/telemac/v9.1/configs/pysource.sh
+        setup_script: /opt/telemac/v9.1/configs/pysource.sh
         mpi_launcher: mpirun
         mpi_processes: 16
         working_root: /scratch/axqua
