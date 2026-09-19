@@ -92,6 +92,11 @@ class Structure:
     polygon: object                # shapely Polygon/MultiPolygon footprint
     crest: float | None = None     # level crest [m a.s.l.]
     height: float | None = None    # or: constant height above local ground [m]
+    #: The line the footprint was buffered from, when there was one. It is the
+    #: structure's medial axis, and `blanking_rule: area` needs it: any path from one
+    #: side of a wall to the other must cross it, so blanking the elements it passes
+    #: through is what keeps the tighter rule sound on a wall thinner than an element.
+    spine: object | None = None
 
     @property
     def describes_level_crest(self) -> bool:
@@ -149,9 +154,11 @@ def load_structures(cfg) -> list[Structure]:
         geom = row.geometry
         if geom is None or geom.is_empty:
             continue
+        spine = None
         if geom.geom_type in ("LineString", "MultiLineString"):
             width = (parse_decimal(row[width_field]) if width_field else None)
             width = width if (width and width > 0) else sc.default_width
+            spine = geom
             geom = geom.buffer(width / 2.0, cap_style=2, join_style=2)  # flat, mitred
         elif geom.geom_type not in ("Polygon", "MultiPolygon"):
             log.warning("structure %s: unsupported geometry %s; skipped",
@@ -174,7 +181,7 @@ def load_structures(cfg) -> list[Structure]:
 
         name = str(row[name_field]) if name_field else f"structure-{index}"
         out.append(Structure(name=name, mode=mode, polygon=geom, crest=crest,
-                             height=height))
+                             height=height, spine=spine))
 
     for structure in out:
         log.info("  %s", structure.summary())
@@ -196,7 +203,33 @@ def _inside(polygon, xy: np.ndarray) -> np.ndarray:
 _CROSSED_CHUNK = 100_000
 
 
-def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray) -> np.ndarray:
+def medial_axis(structure):
+    """The curve any path across *structure* must cross.
+
+    The line it was buffered from when there was one - exact, and the usual case,
+    since a wall is drawn as a line with a thickness. For a polygon footprint the long
+    axis of its minimum rotated rectangle, which is exact for a rectangle and is
+    checked against the footprint's own area before being trusted.
+
+    ``None`` when neither applies, which is the caller's signal to fall back to the
+    conservative rule rather than guess.
+    """
+    import shapely
+
+    if structure.spine is not None:
+        return structure.spine
+    rect = structure.polygon.minimum_rotated_rectangle
+    if rect.area <= 0 or structure.polygon.area < 0.9 * rect.area:
+        return None                      # not rectangular enough to trust an axis
+    corners = np.asarray(rect.exterior.coords)[:4]
+    sides = sorted(((corners[i], corners[(i + 1) % 4]) for i in range(4)),
+                   key=lambda ab: float(np.hypot(*(ab[1] - ab[0]))))
+    (a1, b1), (a2, b2) = sides[2], sides[3]
+    return shapely.linestrings([(a1 + b2) / 2.0, (b1 + a2) / 2.0])
+
+
+def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
+             *, min_area: float = 0.0, spine=None) -> np.ndarray:
     """Nodes of every element the *polygon* crosses, not merely nodes inside it.
 
     A node test alone cannot represent a wall thinner than an element. On the Munich
@@ -237,13 +270,31 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray) -> np.ndarray:
     # so a mesh twice the size costs twice the time and the same memory.
     for start in range(0, cand.size, _CROSSED_CHUNK):
         part = cand[start:start + _CROSSED_CHUNK]
-        hit = shapely.intersects(polygon, shapely.polygons(tri_xy[part]))
+        cells = shapely.polygons(tri_xy[part])
+        hit = shapely.intersects(polygon, cells)
+        if min_area > 0.0 and spine is not None and hit.any():
+            # `structures.blanking_rule: area`: blank an element the footprint really
+            # COVERS, or one the medial axis passes THROUGH. An element merely clipped
+            # at a corner is neither, and leaving it open is what stops a narrow
+            # opening losing half a cell on each side.
+            #
+            # The medial-axis clause is not decoration - the coverage test alone is
+            # unsound and fails silently. A wall thinner than an element covers no
+            # element by half, so nothing is blanked at all and the wall disappears:
+            # a 0.20 m wall on a 1 m mesh blanks zero elements. Any path across a wall
+            # must cross its medial axis, so blanking what the axis touches restores
+            # the guarantee at every resolution.
+            keep = np.flatnonzero(hit)
+            covered = shapely.area(shapely.intersection(polygon, cells[keep]))
+            enough = covered >= min_area * shapely.area(cells[keep])
+            hit[keep] = enough | shapely.intersects(spine, cells[keep])
         mask[triangles[part[hit]].ravel()] = True
     return mask
 
 
 def solid_mask(structures: list[Structure], xy: np.ndarray, *,
-               triangles: np.ndarray | None = None) -> np.ndarray:
+               triangles: np.ndarray | None = None,
+               min_area: float = 0.0) -> np.ndarray:
     """Points that fall inside a ``solid`` structure and must leave the domain.
 
     Pass *triangles* to use the element rule of :func:`_crossed`, which is what the
@@ -255,12 +306,15 @@ def solid_mask(structures: list[Structure], xy: np.ndarray, *,
     for structure in structures:
         if structure.mode == SOLID:
             mask |= (_inside(structure.polygon, xy) if triangles is None
-                     else _crossed(structure.polygon, xy, triangles))
+                     else _crossed(structure.polygon, xy, triangles,
+                                   min_area=min_area,
+                                   spine=medial_axis(structure)))
     return mask
 
 
 def covered_mask(structures: list[Structure], xy: np.ndarray, *,
-                 triangles: np.ndarray | None = None) -> np.ndarray:
+                 triangles: np.ndarray | None = None,
+                 min_area: float = 0.0) -> np.ndarray:
     """Points any structure covers, whatever its mode.
 
     Every structure raises the bed where it stands, so this is the set of nodes whose
@@ -270,13 +324,29 @@ def covered_mask(structures: list[Structure], xy: np.ndarray, *,
     mask = np.zeros(len(xy), dtype=bool)
     for structure in structures:
         mask |= (_inside(structure.polygon, xy) if triangles is None
-                 else _crossed(structure.polygon, xy, triangles))
+                 else _crossed(structure.polygon, xy, triangles,
+                               min_area=min_area,
+                               spine=medial_axis(structure)))
     return mask
+
+
+def blanking_area(cfg) -> float:
+    """``structures.blanking_area`` when the ``area`` rule is chosen, else 0.
+
+    One place, so the bed raise, the boundary classification and the dry-start plug
+    cannot disagree about which elements a wall stands on - an inconsistency there
+    perches water on a wall or prescribes a discharge onto one.
+    """
+    sc = getattr(cfg, "structures", None)
+    if sc is None or getattr(sc, "blanking_rule", "touch") != "area":
+        return 0.0
+    return float(getattr(sc, "blanking_area", 0.5))
 
 
 def apply_to_bed(structures: list[Structure], xy: np.ndarray,
                  bed: np.ndarray, *,
-                 triangles: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray]:
+                 triangles: np.ndarray | None = None,
+                 min_area: float = 0.0) -> tuple[np.ndarray, np.ndarray]:
     """Raise *bed* to every ``overflow`` structure's crest.
 
     Returns ``(bed, touched)``. The bed is only ever raised, never lowered
@@ -293,7 +363,9 @@ def apply_to_bed(structures: list[Structure], xy: np.ndarray,
         if structure.mode != OVERFLOW:
             continue
         inside = (_inside(structure.polygon, xy) if triangles is None
-                  else _crossed(structure.polygon, xy, triangles))
+                  else _crossed(structure.polygon, xy, triangles,
+                                min_area=min_area,
+                                spine=medial_axis(structure)))
         if not inside.any():
             log.warning("structure %s covers no mesh point - is it inside the ROI, "
                         "and is the layer in the project CRS?", structure.name)

@@ -198,17 +198,43 @@ def realised_slots(model_dir: Path, cfg) -> list[float]:
     return out
 
 
+#: Printouts averaged over when judging a noisy steady state.
+STEADY_WINDOW = 40
+
+
 def balance(model_dir: Path, cfg) -> dict:
-    """The run's own flux balance, so a head is never quoted from a transient."""
+    """The run's own flux balance, so a head is never quoted from a transient.
+
+    **The instantaneous imbalance is the wrong statistic here, and quoting it called a
+    steady run unconverged.** A free (Neumann) outlet on a 7.87% slope leaves
+    supercritically and its discharge oscillates: at dx 0.025 m the outflow is
+    0.1357 +/- 0.0083 m3/s against an inflow of 0.13499 +/- 0.00004, so the last
+    printout read 7.2e-2 while the run had been steady for hundreds of seconds. The
+    witness that settles it is the **domain volume**, which oscillation does not move:
+    5.203-5.210 m3 with a drift of -0.003 m3 per 900 s on a 5.2 m3 body.
+
+    So all three are reported - the mean over the window, the instantaneous value, and
+    the volume drift - and the mean is what the verdict uses, which is the same
+    fallback :func:`axqua.flux_convergence.find_steady_window` already applies.
+    """
     listing = sortie.latest_sortie(model_dir, cfg.cas_file)
     if listing is None:
         return {"imbalance": None, "time": None}
     data = sortie.read_sortie(listing)
     imb = relative_imbalance(data.gross_in, data.gross_out)
-    return {"imbalance": float(imb[-1]) if len(imb) else None,
+    n = min(STEADY_WINDOW, len(data.time))
+    q_in, q_out = data.gross_in[-n:], data.gross_out[-n:]
+    mean_imb = (abs(q_in.mean() - q_out.mean()) / abs(q_in.mean())
+                if n and q_in.mean() else None)
+    drift = (float(np.polyfit(data.time[-n:], data.volume[-n:], 1)[0]) * 900.0
+             if n > 2 else None)
+    return {"imbalance": float(mean_imb) if mean_imb is not None else None,
+            "imbalance_last": float(imb[-1]) if len(imb) else None,
+            "volume_drift_per_900s": drift,
+            "volume": float(data.volume[-1]) if data.volume.size else None,
             "time": float(data.time[-1]) if data.time.size else None,
-            "q_in": float(data.gross_in[-1]) if data.gross_in.size else None,
-            "q_out": float(data.gross_out[-1]) if data.gross_out.size else None}
+            "q_in": float(q_in.mean()) if n else None,
+            "q_out": float(q_out.mean()) if n else None}
 
 
 def measure(base, size: float, discharge: float | None = None) -> dict:
@@ -258,15 +284,17 @@ def report(records: list[dict]) -> list[str]:
         "",
         f"{'dx [m]':>7} {'cells/slot':>11} {'slot [m]':>9} {'head [m]':>9} "
         f"{'per pool':>9} {'vs design':>10} {'pool h':>8} {'slot U':>8} "
-        f"{'imbalance':>10}",
+        f"{'imbal(mean)':>12} {'dV/900s':>9}",
     ]
     for r in sorted(records, key=lambda r: -r["dx"]):
         imb = "-" if r["imbalance"] is None else f"{r['imbalance']:.2e}"
+        drift = ("-" if r.get("volume_drift_per_900s") is None
+                 else f"{r['volume_drift_per_900s']:+.4f}")
         out.append(f"{r['dx']:>7.3f} {r['cells_across_slot']:>11.1f} "
                    f"{r['slot_mean']:>9.3f} {r['total_head']:>9.3f} "
                    f"{r['head_per_pool']:>9.4f} {r['excess_ratio']:>9.2f}x "
                    f"{r['pool_depth']:>8.3f} {r['slot_speed_mean']:>8.2f} "
-                   f"{imb:>10}")
+                   f"{imb:>12} {drift:>9}")
     out.append("")
     fractions = [r["in_pool_fraction"] for r in records
                  if not np.isnan(r.get("in_pool_fraction", float("nan")))]
@@ -298,9 +326,14 @@ def report(records: list[dict]) -> list[str]:
             out.append("         It FALLS with refinement, so what there is of it is "
                        "discretisation rather than physics.")
         elif abs(trend) <= 0.05 * design.DESIGN_HEAD:
-            out.append("         It is flat across the sweep, so it is not a "
-                       "resolution artefact - but at this size it is also not an "
-                       "explanation for a level that is half a metre out.")
+            monotone = all(b >= a for a, b in zip(heads, heads[1:]))
+            out.append("         It is small across the whole sweep, so it is not a "
+                       "resolution artefact - and at this size it is not an "
+                       "explanation for a level half a metre out either.")
+            if monotone:
+                out.append("         It does still rise monotonically with "
+                           "refinement, so treat the finest figure as a lower bound "
+                           "rather than a converged one.")
         else:
             out.append("         It GROWS with refinement, which is not a "
                        "discretisation signature and is worth understanding before "
