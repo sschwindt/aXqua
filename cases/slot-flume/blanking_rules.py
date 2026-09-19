@@ -173,8 +173,8 @@ def leaks(wall, spine, xy, tri, blocked) -> tuple[int, int]:
 def throat(xy, tri, blocked, structures) -> float:
     """Median realised throat, measured AT each baffle rather than globally.
 
-    Per baffle: union the blocked elements near its own footprint, do the same for its
-    nose, and take the distance between the two - the same corner-to-corner diagonal
+    Per baffle: union the blocked elements belonging to it, do the same for its slot
+    block, and take the distance between the two - the same corner-to-corner diagonal
     the drawing gives, which no ray across the channel can see.
 
     Measuring the global minimum distance between blocked bodies instead looks
@@ -190,12 +190,12 @@ def throat(xy, tri, blocked, structures) -> float:
         return float("nan")
     centres = xy[tri][blocked].mean(axis=1)
     baffles = [s for s in structures if s.name.startswith("baffle")]
-    noses = {s.name.split("-")[1]: s for s in structures
-             if s.name.startswith("nose")}
+    blocks = {s.name.split("-")[1]: s for s in structures
+              if s.name.startswith("block")}
 
     # Each blocked element belongs to the structure it is nearest to. Unambiguous,
-    # and it keeps a baffle's blanket from swallowing its own nose - which a radius
-    # around the footprint does, making every throat read zero.
+    # and it keeps a baffle's blanket from swallowing its own slot block - which a
+    # radius around the footprint does, making every throat read zero.
     owners = np.argmin(np.stack([
         shapely.distance(shapely.points(centres), s.polygon) for s in structures]),
         axis=0)
@@ -207,9 +207,9 @@ def throat(xy, tri, blocked, structures) -> float:
 
     gaps = []
     for baffle in baffles:
-        nose = noses.get(baffle.name.split("-")[1])
+        block = blocks.get(baffle.name.split("-")[1])
         a = by_owner.get(baffle.name)
-        b = by_owner.get(nose.name) if nose is not None else None
+        b = by_owner.get(block.name) if block is not None else None
         if a is None or b is None or a.is_empty or b.is_empty:
             continue
         gaps.append(a.distance(b))
@@ -223,7 +223,8 @@ def main() -> None:
     structures = load_structures(cfg)
     wall = shapely.union_all([s.polygon for s in structures])
     print(f"{len(structures)} structures; drawn throat {design.THROAT:.4f} m "
-          f"(baffle tip to nose), gap to the far wall {design.SLOT_WIDTH:.3f} m\n")
+          f"(baffle tip to slot block), gap to the far wall "
+          f"{design.SLOT_WIDTH:.3f} m\n")
 
     from axqua import mesh as meshmod
     import copy
