@@ -118,10 +118,15 @@ def main() -> None:
     print("segment of that length finds only coincidences.")
 
     # --- but the gap to the wall is NOT the slot ----------------------------- #
-    # Opposite every baffle there is a NOSE projecting from the other wall, offset
-    # downstream so the two never share a cross-section. A ray cast across the channel
-    # at the baffle station therefore misses it entirely and reports the gap to the
-    # wall. The throat is the narrowest opening between the two solids.
+    # Opposite every baffle there is a rectangular concrete SLOT BLOCK projecting from
+    # the other wall, offset downstream so the two never share a cross-section. A ray
+    # cast across the channel at the baffle station therefore misses it entirely and
+    # reports the gap to the wall. The throat is the narrowest opening between the two
+    # solids.
+    #
+    # (The vertical-slot literature calls this the short baffle. Not a "nose": that
+    # word means a ROUNDED feature, and this is a square-cornered rectangle - the
+    # corner is what sets the throat, so the shape is the whole point.)
     from shapely.ops import polygonize, unary_union
     from shapely.geometry import LineString
 
@@ -132,29 +137,30 @@ def main() -> None:
     baffles = sorted((p for p in bodies
                       if abs((p.bounds[3] - p.bounds[1]) - reach) < TOL),
                      key=lambda p: p.bounds[0])
-    noses = sorted((p for p in bodies if p.bounds[1] > tip
-                    and 0.01 < p.area < 0.1), key=lambda p: p.bounds[0])
-    print(f"\nopposite the {len(baffles)} baffles the drawing carries {len(noses)} "
-          f"noses, {float(np.median([p.bounds[2]-p.bounds[0] for p in noses])):.3f} x "
-          f"{float(np.median([p.bounds[3]-p.bounds[1] for p in noses])):.3f} m,")
+    blocks = sorted((p for p in bodies if p.bounds[1] > tip
+                     and 0.01 < p.area < 0.1), key=lambda p: p.bounds[0])
+    print(f"\nopposite the {len(baffles)} baffles the drawing carries {len(blocks)} "
+          f"slot blocks, "
+          f"{float(np.median([p.bounds[2]-p.bounds[0] for p in blocks])):.3f} x "
+          f"{float(np.median([p.bounds[3]-p.bounds[1] for p in blocks])):.3f} m,")
     offs = []
     throats = []
     for baffle in baffles:
-        later = [q for q in noses if q.bounds[0] > baffle.bounds[0]]
+        later = [q for q in blocks if q.bounds[0] > baffle.bounds[0]]
         if not later:
             continue
-        nose = min(later, key=lambda q: q.bounds[0])
-        offs.append(nose.bounds[0] - baffle.bounds[2])
-        throats.append(baffle.distance(nose))
+        block = min(later, key=lambda q: q.bounds[0])
+        offs.append(block.bounds[0] - baffle.bounds[2])
+        throats.append(baffle.distance(block))
     if throats:
         t = np.array(throats)
         print(f"each offset {float(np.median(offs)):.3f} m downstream of its baffle, "
               "so the two never share a cross-section.")
-        print(f"\n  THROAT (baffle to nose)  {t.mean():.4f} m   "
+        print(f"\n  THROAT (baffle to slot block)  {t.mean():.4f} m   "
               f"(sd {t.std():.4f} over {len(t)} baffles)")
-        print(f"\nThat, not {to_wall:.3f} m, is the opening the flow passes through. A "
-              "ray cast across\nthe channel AT a baffle station cannot see it, because "
-              "the nose is not there yet.")
+        print(f"\nThat, not {to_wall:.3f} m, is the opening the flow passes "
+              "through. A ray cast across\nthe channel AT a baffle station cannot see "
+              "it, because the block is not there yet.")
 
 
 if __name__ == "__main__":

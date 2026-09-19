@@ -354,7 +354,8 @@ def _on_solid(cfg: Config, mesh: Mesh):
     import numpy as np
 
     try:
-        from axqua.core.structures import load_structures, solid_mask
+        from axqua.core.structures import (blanking_area, load_structures,
+                                           solid_mask)
 
         structures = load_structures(cfg)
     except Exception as error:                       # report-only: never block a build
@@ -363,7 +364,8 @@ def _on_solid(cfg: Config, mesh: Mesh):
     if not structures:
         return None
     xy = np.column_stack([mesh.x, mesh.y])
-    return solid_mask(structures, xy, triangles=mesh.triangles)
+    return solid_mask(structures, xy, triangles=mesh.triangles,
+                      min_area=blanking_area(cfg))
 
 
 def _median_boundary_edge(mesh: Mesh) -> float:

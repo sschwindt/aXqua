@@ -259,6 +259,85 @@ def test_a_wall_thinner_than_an_element_still_raises_a_continuous_ridge():
         assert by_element[tri].min() == pytest.approx(5.0)
 
 
+def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
+    """`touch` blanks any element a wall grazes, so it eats about 0.45 of a cell on
+    each side of an opening. On a fish-pass throat only a few cells wide that is most
+    of the opening, which is what lww-134 raised.
+
+    `structures.blanking_rule: area` blanks only elements the wall really covers.
+    Measured on a synthetic vertical-slot flume with a 0.170 m DIAGONAL throat
+    (cases/slot-flume/blanking_rules.py): zero crossings through a wall at dx 0.10 to
+    0.025 m, and a realised throat of 102-104% of drawn against 74-86% for `touch`.
+
+    The guarantee both must keep: no element may have open water on both sides of a
+    wall. Here that is pinned as "every element the wall passes through is raised".
+    """
+    import shapely
+
+    from axqua.core.structures import _crossed
+
+    # A finer mesh than the strip default, and a wall that STOPS PART WAY so there is
+    # an opening: the saving is entirely at the tip, where the footprint grazes
+    # elements its axis never reaches. A wall spanning the full width has no tip and
+    # nothing to save.
+    xy, tris = _strip_mesh(nx=41, ny=21, step=0.1)
+    thin = Polygon([(2.0, -1.0), (2.15, -1.0), (2.15, 1.2), (2.0, 1.2)])
+    spine = shapely.linestrings([[2.075, -1.0], [2.075, 1.2]])
+
+    touched = _crossed(thin, xy, tris)
+    covered = _crossed(thin, xy, tris, min_area=0.5, spine=spine)
+    assert 0 < covered.sum() < touched.sum()        # blanks fewer, but not none
+
+    # ...and every element the wall passes THROUGH still has all three nodes raised,
+    # so no element spans it with water on each side
+    cells = shapely.polygons(xy[tris])
+    for tri, crossed in zip(tris, shapely.intersects(spine, cells)):
+        if crossed:
+            assert covered[tri].all(), "a wall crosses an element left open"
+
+    # The coverage clause ALONE is unsound and fails silently: this wall is thinner
+    # than an element, so it covers none of them by half and would blank nothing at
+    # all. The medial axis is what keeps the rule honest at any resolution.
+    without_axis = _crossed(thin, xy, tris, min_area=0.5, spine=None)
+    assert np.array_equal(without_axis, touched)    # no axis -> the safe rule
+
+
+def test_a_footprint_with_no_usable_medial_axis_falls_back(tmp_path):
+    """A line-sourced wall keeps the line it was buffered from, which IS its medial
+    axis. An L-shaped or blobby polygon has no axis worth guessing, and guessing one
+    would silently unseal it - so `medial_axis` returns None and the caller reverts to
+    blanking everything the footprint touches."""
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.core.structures import OVERFLOW, Structure, medial_axis
+
+    line = LineString([(0, 0), (10, 0)])
+    buffered = Structure("wall", OVERFLOW, line.buffer(0.1, cap_style=2),
+                         crest=1.0, spine=line)
+    assert medial_axis(buffered) is line            # exact, not reconstructed
+
+    rect = Structure("dam", OVERFLOW, Polygon([(0, 0), (8, 0), (8, 1), (0, 1)]),
+                     crest=1.0)
+    axis = medial_axis(rect)
+    assert axis is not None and axis.length == pytest.approx(8.0)
+
+    blob = Structure("odd", OVERFLOW,
+                     Polygon([(0, 0), (8, 0), (8, 1), (3, 1), (3, 6), (0, 6)]),
+                     crest=1.0)
+    assert medial_axis(blob) is None                # an L: no axis to trust
+
+
+def test_the_blanking_rule_is_validated_and_defaults_to_the_safe_one():
+    from axqua.config import Structures
+
+    assert Structures().blanking_rule == "touch"     # unchanged for every case
+    Structures(blanking_rule="area").validate()
+    with pytest.raises(ValueError, match="blanking_rule"):
+        Structures(blanking_rule="corner").validate()
+    with pytest.raises(ValueError, match="blanking_area"):
+        Structures(blanking_rule="area", blanking_area=0.0).validate()
+
+
 def test_the_element_rule_is_chunked_without_changing_its_answer():
     """`shapely.polygons` materialises one GEOS polygon per candidate element, and
     the bbox prefilter cannot help the case that matters: a wall drawn diagonally
