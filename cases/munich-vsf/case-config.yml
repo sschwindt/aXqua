@@ -226,12 +226,21 @@ openfoam:
   # rather than equal to it on every step).
   # rigid-lid, not vof. The two-phase cost estimate above was made before the geometry
   # was right; what settles it is that the finest real feature is now known and the
-  # mesh has to resolve it everywhere. The slot is 0.380 m (measured twice: at all 13
-  # interior baffles of the reference model's snapped mesh, and by plane-slicing
-  # stahlbeton.stl), the baffle walls are 0.15 m, and the mid-channel nose is
-  # 0.15 x 0.24 m. At the 0.02 m below that is 19 cells across a slot and 7.5 across
-  # the nose - uniform, with no local refinement anywhere. Paying for an air phase on
-  # top of that is what the rigid lid exists to avoid.
+  # mesh has to resolve it everywhere.
+  #
+  # CORRECTED 2026-09-19 against the drawing itself (measure_slot_from_dxf.py) and the
+  # reference polyMesh. 0.380 m is the gap from a baffle tip to the FAR WALL, and it
+  # is not the opening the flow uses. Opposite every baffle stands a rectangular
+  # concrete SLOT BLOCK, 0.150 x 0.260 m, offset 0.120 m downstream and running full
+  # height to the invert - so the throat is the DIAGONAL between the two corners:
+  # 0.1697 m drawn, 0.134 m as our own footprints realise it. A ray cast across the
+  # channel cannot see a diagonal throat, which is how 0.380 survived two independent
+  # checks. (Earlier comments called the block a "nose". It is square-cornered, and
+  # the corner is what sets the throat, so the word has been dropped.)
+  #
+  # At 0.02 m that throat is 8.5 cells on the drawing and 6.7 on our footprints - not
+  # the 19 this was sized on. Still uniform with no local refinement, but the margin
+  # is gone, and a coarser lattice is no longer defensible.
   mode: rigid-lid
   # Rotate the lattice onto the reach. The pass runs 15.54 deg off the y axis and is
   # dead straight over its whole 22 m, so one rotation puts both channel walls and
@@ -262,8 +271,9 @@ openfoam:
   # at the outlet, so the patch gets p_rgh = 0 instead. It still sets the lid there,
   # through the seed the lid is sampled from, and it is what a switch back to vof uses.
   outlet_stage: 0.715
-  # 0.02 m, uniform. Sized on the 0.380 m slot (19 cells) and the 0.15 m baffle nose
-  # (7.5), so nothing in this geometry is under-resolved and no graded band is needed.
+  # 0.02 m, uniform. Sized on the 0.1697 m THROAT (8.5 cells drawn, 6.7 as our
+  # footprints realise it) and the 0.15 m baffle wall (7.5) - see the note above; this
+  # was originally sized on a 0.380 m slot that turned out to be the wrong opening.
   # Cost from anchors measured on this box (853,664 cells at 0.03 m, 5.02 s/step,
   # spin-up dt 4.97e-4 s at Courant 0.3): ~1.3 M cells, ~7.5 s/step, roughly 12 days
   # for the full 120 s. Fall back to 0.025 (15 cells across the slot, ~6 days) if that

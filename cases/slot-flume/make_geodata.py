@@ -40,14 +40,19 @@ N_BAFFLES = 14
 PITCH = 1.650            # [m] baffle spacing
 WALL_THICKNESS = 0.15    # [m]
 SLOT_WIDTH = 0.380       # [m] baffle tip to the far wall
-# Opposite every baffle the drawing carries a NOSE projecting from the other wall,
-# offset downstream so the two never share a cross-section (measured from the DXF by
-# cases/munich-vsf/measure_slot_from_dxf.py). The flow's real throat is the DIAGONAL
-# between the two corners, 0.120 x sqrt(2) = 0.1697 m - less than half the gap to the
-# wall, and the reason a ray cast across the channel cannot find it.
-NOSE_REACH = 0.260       # [m] how far the nose projects from the far wall
-NOSE_THICKNESS = 0.150   # [m] streamwise, same as a baffle
-NOSE_OFFSET = 0.120      # [m] downstream from the baffle's downstream face
+# Opposite every baffle the drawing carries a rectangular concrete SLOT BLOCK
+# projecting from the other wall, offset downstream so the two never share a
+# cross-section (measured from the DXF by munich-vsf/measure_slot_from_dxf.py). The
+# flow's real throat is the DIAGONAL between the two corners, 0.120 x sqrt(2) =
+# 0.1697 m - less than half the gap to the wall, and the reason a ray cast across the
+# channel cannot find it.
+#
+# The vertical-slot literature would call this the short baffle. It is NOT a "nose":
+# that word means a rounded feature, and this is a 0.150 x 0.260 m rectangle with
+# square corners - and the corner is precisely what sets the throat.
+BLOCK_REACH = 0.260       # [m] how far the block projects from the far wall
+BLOCK_THICKNESS = 0.150   # [m] streamwise, same as a baffle
+BLOCK_OFFSET = 0.120      # [m] downstream from the baffle's downstream face
 BAFFLE_HEIGHT = 1.00     # [m] above the local bed - never overtopped at this Q
 DISCHARGE = 0.135        # [m3/s]
 BED_KS = 0.08            # [m] Nikuradse, the Munich pass bed
@@ -74,10 +79,9 @@ def baffle_x(index: int) -> float:
 LENGTH = baffle_x(N_BAFFLES - 1) + LEAD_OUT
 DESIGN_HEAD = (N_BAFFLES - 1) * PITCH * SLOPE      # 1.690 m over 13 pitches
 DESIGN_PER_POOL = PITCH * SLOPE                    # 0.130 m
-#: The throat: the diagonal between the baffle's downstream tip corner and the nose's
-#: upstream tip corner. This, not SLOT_WIDTH, is the opening the flow passes through.
-THROAT = float(np.hypot(NOSE_OFFSET,
-                        SLOT_WIDTH - NOSE_REACH)) if True else 0.0
+#: The throat: the diagonal between the baffle's downstream tip corner and the slot
+#: block's upstream tip corner. This, not SLOT_WIDTH, is what the flow passes through.
+THROAT = float(np.hypot(BLOCK_OFFSET, SLOT_WIDTH - BLOCK_REACH))
 
 
 def bed_z(x_local: np.ndarray | float):
@@ -157,13 +161,13 @@ def write_vectors(folder: Path) -> dict[str, Path]:
                      "Width (m)": WALL_THICKNESS,
                      # a LEVEL crest: the wall top, one metre over its own bed
                      "Crest (m)": float(bed_z(x)) + BAFFLE_HEIGHT})
-        # the nose, projecting from the far wall, offset downstream
-        nx = x + WALL_THICKNESS / 2 + NOSE_OFFSET + NOSE_THICKNESS / 2
-        geoms.append(LineString(_world([(nx, CLEAR_WIDTH + 0.05),
-                                        (nx, CLEAR_WIDTH - NOSE_REACH)])))
-        rows.append({"Name": f"nose-{i:02d}", "Type": "wall",
-                     "Width (m)": NOSE_THICKNESS,
-                     "Crest (m)": float(bed_z(nx)) + BAFFLE_HEIGHT})
+        # the slot block, projecting from the far wall, offset downstream
+        bx = x + WALL_THICKNESS / 2 + BLOCK_OFFSET + BLOCK_THICKNESS / 2
+        geoms.append(LineString(_world([(bx, CLEAR_WIDTH + 0.05),
+                                        (bx, CLEAR_WIDTH - BLOCK_REACH)])))
+        rows.append({"Name": f"block-{i:02d}", "Type": "wall",
+                     "Width (m)": BLOCK_THICKNESS,
+                     "Crest (m)": float(bed_z(bx)) + BAFFLE_HEIGHT})
     out["structures"] = folder / "baffles.gpkg"
     gpd.GeoDataFrame(rows, geometry=geoms,
                      crs="EPSG:25832").to_file(out["structures"], driver="GPKG")
@@ -178,8 +182,8 @@ def main() -> None:
     print(f"flume: {LENGTH:.3f} m long, {CLEAR_WIDTH:g} m wide, slope {SLOPE:.4f}")
     print(f"  {N_BAFFLES} baffles at {PITCH:g} m, {WALL_THICKNESS:g} m thick, "
           f"{SLOT_WIDTH:g} m to the far wall")
-    print(f"  {N_BAFFLES} noses {NOSE_THICKNESS:g} x {NOSE_REACH:g} m, offset "
-          f"{NOSE_OFFSET:g} m downstream -> THROAT {THROAT:.4f} m")
+    print(f"  {N_BAFFLES} slot blocks {BLOCK_THICKNESS:g} x {BLOCK_REACH:g} m, "
+          f"offset {BLOCK_OFFSET:g} m downstream -> THROAT {THROAT:.4f} m")
     print(f"  bed {bed_z(0):.3f} -> {bed_z(LENGTH):.3f} m")
     print(f"  design head over {N_BAFFLES - 1} pitches: {DESIGN_HEAD:.3f} m "
           f"({DESIGN_PER_POOL:.4f} m per pool)")
