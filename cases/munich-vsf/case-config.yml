@@ -107,6 +107,18 @@ geodata:
   # NB: geodata paths resolve from the case directory, not from preprocessing/ the way
   # openfoam.roi does, so this one is spelled out in full.
   channel_centerline: axqua-case/preprocessing/channel-centerline.gpkg
+  # LOCAL REFINEMENT AT THE THROATS. The control in this fish pass is not the slot
+  # between the baffle and the far wall (0.380 m) but the DIAGONAL gap between each
+  # baffle tip and the nose opposite it, offset 0.120 m downstream: 0.1697 m in the
+  # drawing, 0.1342 m once our footprints have rasterised it. At default_size 0.035 a
+  # 0.134 m diagonal opening is under four elements wide, and raising every element a
+  # wall touches eats about one element each side - so the mesh welded 3 of the 14
+  # throats shut and choked the rest to 32-66%. That, not the tailwater or the apron,
+  # is what backed the level half a metre over the 2.845 m wall tops.
+  # One short line spans each throat plus 0.10 m of approach either side; gmsh refines
+  # to mesh.breakline_size there and grows back to default_size within 3 x 0.035 m, so
+  # the mesh stays block-like everywhere else.
+  breaklines: axqua-case/preprocessing/throat-breaklines.gpkg
 
 boundaries:
   # the middle design discharge; the other two are derived from the built case by
@@ -147,13 +159,13 @@ mesh:
   # Pools are metres, slots are decimetres. These are the fallbacks; the anisotropic
   # path needs mesh zones and a centerline, which a fish pass does not really have -
   # the isotropic fallback at this size is the right tool here.
-  default_size: 0.05
-  min_size: 0.02
+  default_size: 0.035
+  min_size: 0.008              # floor on the mesh size; must sit below breakline_size
   # The default of 3 m is coarser than the mesh itself here, and it used to set the
   # liquid-boundary matching tolerance. It no longer does (that comes from the built
   # mesh), but leaving a size 60x the cell size in the config invites the next
   # surprise.
-  breakline_size: 0.05
+  breakline_size: 0.00875      # default_size / 4, applied only at the throats
 
 structures:
   # A fish-pass baffle stands about a metre above its pool; the 2 m default freeboard
