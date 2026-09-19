@@ -300,10 +300,35 @@ class Structures:
     # remove, so the bed is raised to the crest plus this freeboard instead - the
     # standard practice for a never-overtopped wall in TELEMAC.
     solid_freeboard_2d: float = 2.0
+    # Which elements a structure blanks, on a 2D mesh. Both guarantee that no element
+    # spans a wall with open water on each side; they differ in what they cost.
+    #
+    #   "touch" (default) - every element the footprint intersects at all. Safe by
+    #       construction and errs CLOSED: it eats about 0.45 of a cell on each side of
+    #       an opening, so a drawn throat of w realises w - 0.9 dx.
+    #   "area"  - only elements the footprint covers by at least `blanking_area`.
+    #       Measured on a synthetic vertical-slot flume with a 0.170 m diagonal throat
+    #       (cases/slot-flume/blanking_rules.py): zero through-crossings at dx 0.10 to
+    #       0.025 m, and a realised throat of 102-104% of drawn against 74-86% for
+    #       "touch". It errs slightly OPEN instead: a few slivers of water stand inside
+    #       the concrete without passing through it.
+    #
+    # `touch` remains the default because it is the conservative error on a structure
+    # whose job is to stop water, and because it is what every existing result was
+    # produced with. Choose `area` when an opening is only a few elements wide and
+    # eroding it half a cell a side matters more than a sliver of water in a wall.
+    blanking_rule: str = "touch"        # touch | area
+    blanking_area: float = 0.5          # `area` only: covered fraction that blanks
 
     def validate(self) -> None:
         if self.default_width <= 0:
             raise ValueError("structures.default_width must be > 0")
+        if self.blanking_rule not in ("touch", "area"):
+            raise ValueError("structures.blanking_rule must be 'touch' or 'area', "
+                             f"got {self.blanking_rule!r}")
+        if not 0.0 < self.blanking_area <= 1.0:
+            raise ValueError("structures.blanking_area must be in (0, 1], got "
+                             f"{self.blanking_area}")
 
 
 #: what a CAD part is, and therefore what it becomes downstream

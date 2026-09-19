@@ -734,7 +734,8 @@ def _drop_plug_on_structures(cfg: Config, mesh, plug):
     import numpy as np
 
     try:
-        from axqua.core.structures import covered_mask, load_structures
+        from axqua.core.structures import (blanking_area, covered_mask,
+                                           load_structures)
 
         structures = load_structures(cfg)
     except Exception as exc:  # noqa: BLE001 - a seed must not fail on a bad layer
@@ -743,7 +744,8 @@ def _drop_plug_on_structures(cfg: Config, mesh, plug):
     if not structures:
         return plug
     xy = np.column_stack([mesh.x, mesh.y])
-    covered = covered_mask(structures, xy, triangles=mesh.triangles)
+    covered = covered_mask(structures, xy, triangles=mesh.triangles,
+                           min_area=blanking_area(cfg))
     dropped = int((plug & covered).sum())
     if dropped:
         log.info("  inflow plug: %d node(s) dropped, they stand on a structure and "
