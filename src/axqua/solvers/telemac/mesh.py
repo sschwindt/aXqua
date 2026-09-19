@@ -745,7 +745,7 @@ def interpolate_elevations(mesh: Mesh, dem_path: Path, *, decimals: int = 4,
 def _burn_structures(cfg: Config, mesh: Mesh, z: np.ndarray) -> np.ndarray:
     """Raise the bed for this case's structures (see :func:`interpolate_elevations`)."""
     from axqua.core.structures import (
-        OVERFLOW, SOLID, Structure, apply_to_bed, load_structures,
+        OVERFLOW, SOLID, Structure, apply_to_bed, blanking_area, load_structures,
     )
 
     structures = load_structures(cfg)
@@ -766,7 +766,8 @@ def _burn_structures(cfg: Config, mesh: Mesh, z: np.ndarray) -> np.ndarray:
     if any(s.mode == SOLID for s in structures):
         log.info("  solid structures raised to crest + %.2f m freeboard: a 2D mesh "
                  "has no vertical wall to remove", freeboard)
-    z, _ = apply_to_bed(as_terrain, xy, z, triangles=mesh.triangles)
+    z, _ = apply_to_bed(as_terrain, xy, z, triangles=mesh.triangles,
+                        min_area=blanking_area(cfg))
     return z
 
 
