@@ -302,35 +302,44 @@ def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     assert np.array_equal(without_axis, touched)    # no axis -> the safe rule
 
 
-def test_a_rule_that_would_leak_is_caught_and_reverted_per_structure(caplog):
+def test_the_seal_check_refuses_a_mask_that_leaves_a_way_across():
     """What makes the tighter rule safe without trusting the skeleton: try it, CHECK
     it on this mesh, and fall back to `touch` for any structure where it did not hold.
 
-    The check is made against the UNPRUNED skeleton, a superset of the true medial
-    axis, so no pruning threshold can be tuned into passing it. Here the blanking
-    curve is deliberately deficient - it covers only half a wall that spans the whole
-    mesh - so the upper half is left with open elements on both sides of it. That is a
-    path through solid material, and it must be refused rather than shipped.
+    Tested on the check itself rather than on a contrived rule, because the rule now
+    seals the obvious contrivance by construction - it blanks any element the wall
+    CUTS IN TWO, whatever its coverage. What is left to verify is that the check still
+    refuses a mask which leaves such an element open, since that is the guard standing
+    behind every future change to the rule.
     """
-    import logging
-
     import shapely
 
-    from axqua.core.structures import _crossed
+    from axqua.core.structures import _crossed, _seal_fails
 
     xy, tris = _strip_mesh(nx=41, ny=21, step=0.1)
-    # sub-cell thickness, spanning the whole mesh: any hole in the blanking is a
-    # genuine way across, and coverage alone can never seal it
-    thin = Polygon([(2.02, -1.0), (2.07, -1.0), (2.07, 3.0), (2.02, 3.0)])
-    whole = shapely.linestrings([[2.045, -1.0], [2.045, 3.0]])
-    half = shapely.linestrings([[2.045, -1.0], [2.045, 1.0]])
+    # sub-cell thickness, spanning the whole mesh: every element it passes through is
+    # severed, so leaving one open is unambiguously a way across
+    thin = Polygon([(2.02, -1.0), (2.06, -1.0), (2.06, 3.0), (2.02, 3.0)])
+    axis = shapely.linestrings([[2.04, -1.0], [2.04, 3.0]])
 
-    touched = _crossed(thin, xy, tris)
-    with caplog.at_level(logging.WARNING, logger="axqua"):
-        reverted = _crossed(thin, xy, tris, min_area=0.5, spine=half, verify=whole,
-                            name="deficient-wall")
-    assert np.array_equal(reverted, touched)        # caught and reverted
-    assert "deficient-wall" in caplog.text and "'touch'" in caplog.text
+    cells = shapely.polygons(xy[tris])
+    candidates = np.flatnonzero(shapely.intersects(thin, cells))
+    assert candidates.size > 4
+
+    sealed = np.ones(candidates.size, bool)
+    assert not _seal_fails(thin, xy, tris, sealed, candidates, axis)
+
+    holed = sealed.copy()
+    holed[candidates.size // 2] = False          # one element left open
+    assert _seal_fails(thin, xy, tris, holed, candidates, axis)
+
+    # ...and the shipped rule does not produce such a mask: nothing it leaves open is
+    # cut in two by the wall
+    blanked = _crossed(thin, xy, tris, min_area=0.5, spine=axis, verify=axis)
+    still_open = candidates[~blanked[tris[candidates]].all(axis=1)]
+    if still_open.size:
+        rest = shapely.difference(shapely.polygons(xy[tris[still_open]]), thin)
+        assert not (shapely.get_num_geometries(rest) > 1).any()
 
 
 def test_every_footprint_shape_gets_an_axis_from_the_right_source():
