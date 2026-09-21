@@ -161,6 +161,17 @@ structures:
   # solver a 3 m terrain step to march water into at the inflow. A quarter of that is
   # still far above any water level this case produces.
   solid_freeboard_2d: 0.5
+  # The throat here is 0.1342 m as our own footprints carry it, and at dx 0.035 the
+  # default `touch` rule welds 3 of 14 shut and chokes the rest to 32-66% - which is
+  # what holds the level over the wall tops. `area` blanks what a footprint COVERS or
+  # what its medial axis passes through, and keeps 90-98% of the throat with zero
+  # crossings through a wall (measured on a rasterised-footprint flume, which
+  # reproduces how a CAD part arrives: cases/slot-flume/blanking_rules.py).
+  #
+  # It needs the Voronoi skeleton to reach a CAD footprint at all; with the earlier
+  # rotated-rectangle axis it was inert here, silently behaving as `touch` on 19 of 20
+  # structures. The build now says so if that ever happens again.
+  blanking_rule: area
 
 friction:
   roughness_law: 5               # Nikuradse
