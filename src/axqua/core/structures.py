@@ -203,33 +203,194 @@ def _inside(polygon, xy: np.ndarray) -> np.ndarray:
 _CROSSED_CHUNK = 100_000
 
 
+#: Voronoi edges closer to the boundary than this fraction of the footprint's own
+#: half-width are rasterisation noise, not structure. A CAD footprint comes out of
+#: `wall_footprints` as a stair-stepped outline, and every step throws a Voronoi spur
+#: that reaches almost to the boundary; keeping them would blank exactly what `touch`
+#: blanks and the tighter rule would buy nothing. Measured on munich-vsf's real
+#: footprints: unpruned 188 m of skeleton on a 61 m wall, 116 m at this threshold.
+_SPUR_CLEARANCE = 0.5
+
+
+def _voronoi_skeleton(polygon):
+    """``(pruned, full)`` skeletons of *polygon*, or ``(None, None)``.
+
+    The medial axis of a polygon is a subset of the Voronoi diagram of its boundary,
+    so the Voronoi edges that fall inside are a superset of it - and a superset is
+    what soundness wants, since any path across the shape must cross the true axis and
+    therefore crosses the superset too.
+
+    Two are returned because they do different jobs. **full** is that superset,
+    unpruned, and it is what the seal is VERIFIED against - it depends on no threshold,
+    so the check cannot be tuned into passing. **pruned** drops the spurs a rasterised
+    outline throws at every stair step, and is what is actually blanked, because an
+    unpruned skeleton reaches the boundary and blanks everything `touch` would.
+    """
+    import shapely
+
+    parts = (list(polygon.geoms) if polygon.geom_type == "MultiPolygon"
+             else [polygon])
+    full, pruned = [], []
+    for part in parts:
+        rings = [part.exterior, *part.interiors]
+        try:
+            pts = np.concatenate([np.asarray(r.coords)[:-1, :2] for r in rings])
+        except ValueError:
+            continue
+        if len(pts) < 4:
+            continue
+        edges = shapely.intersection(
+            shapely.voronoi_polygons(shapely.multipoints(pts), only_edges=True), part)
+        if edges.is_empty:
+            continue
+        full.append(edges)
+        pieces = [g for g in (edges.geoms if hasattr(edges, "geoms") else [edges])
+                  if g.geom_type == "LineString" and g.length > 0]
+        if not pieces:
+            continue
+        half_width = part.area / part.length if part.length else 0.0
+        mids = shapely.points([g.interpolate(0.5, normalized=True).coords[0]
+                               for g in pieces])
+        clear = shapely.distance(mids, part.exterior)
+        keep = clear >= _SPUR_CLEARANCE * half_width
+        if keep.any():
+            pruned.append(shapely.union_all([g for g, k in zip(pieces, keep) if k]))
+    if not full:
+        return None, None
+    return (shapely.union_all(pruned) if pruned else None), shapely.union_all(full)
+
+
 def medial_axis(structure):
-    """The curve any path across *structure* must cross.
+    """``(blank_along, verify_against)`` - the curve any path across *structure* crosses.
 
-    The line it was buffered from when there was one - exact, and the usual case,
-    since a wall is drawn as a line with a thickness. For a polygon footprint the long
-    axis of its minimum rotated rectangle, which is exact for a rectangle and is
-    checked against the footprint's own area before being trusted.
+    Three sources, in order:
 
-    ``None`` when neither applies, which is the caller's signal to fall back to the
-    conservative rule rather than guess.
+    * the **line it was buffered from**, when there was one. Exact, and the usual case:
+      a wall is normally drawn as a line with a thickness.
+    * a **Voronoi skeleton** of the footprint. This is what a CAD-derived footprint
+      needs, and it is why the previous rotated-rectangle shortcut was useless here -
+      it is guarded by a rectangularity test that correctly refuses an 11.87 m2
+      L-shaped snake, and 19 of munich-vsf's 20 structures are exactly that, so the
+      tighter rule silently never fired.
+    * the **long axis of the minimum rotated rectangle**, kept for a genuinely
+      rectangular footprint, where it is exact and free.
+
+    ``(None, None)`` when none applies, which is the caller's signal to fall back to
+    the conservative rule rather than guess an axis and silently unseal a wall.
     """
     import shapely
 
     if structure.spine is not None:
-        return structure.spine
-    rect = structure.polygon.minimum_rotated_rectangle
-    if rect.area <= 0 or structure.polygon.area < 0.9 * rect.area:
-        return None                      # not rectangular enough to trust an axis
-    corners = np.asarray(rect.exterior.coords)[:4]
-    sides = sorted(((corners[i], corners[(i + 1) % 4]) for i in range(4)),
-                   key=lambda ab: float(np.hypot(*(ab[1] - ab[0]))))
-    (a1, b1), (a2, b2) = sides[2], sides[3]
-    return shapely.linestrings([(a1 + b2) / 2.0, (b1 + a2) / 2.0])
+        return structure.spine, structure.spine
+
+    polygon = structure.polygon
+    rect = polygon.minimum_rotated_rectangle
+    if rect.area > 0 and polygon.area >= 0.9 * rect.area:
+        corners = np.asarray(rect.exterior.coords)[:4]
+        sides = sorted(((corners[i], corners[(i + 1) % 4]) for i in range(4)),
+                       key=lambda ab: float(np.hypot(*(ab[1] - ab[0]))))
+        (a1, b1), (a2, b2) = sides[2], sides[3]
+        axis = shapely.linestrings([(a1 + b2) / 2.0, (b1 + a2) / 2.0])
+        return axis, axis
+
+    pruned, full = _voronoi_skeleton(polygon)
+    if full is None:
+        return None, None
+    return (pruned if pruned is not None else full), full
+
+
+def _one(structure, xy, triangles, min_area, report) -> np.ndarray:
+    """Blank one structure, recording when the tighter rule could not be applied."""
+    if triangles is None:
+        return _inside(structure.polygon, xy)
+    spine = verify = None
+    if min_area > 0.0:
+        spine, verify = medial_axis(structure)
+        report["asked"] += 1
+        if spine is None:
+            report["no_axis"] += 1
+            report["names"].append(structure.name)
+    return _crossed(structure.polygon, xy, triangles, min_area=min_area,
+                    spine=spine, verify=verify, name=structure.name)
+
+
+def _new_report() -> dict:
+    return {"asked": 0, "no_axis": 0, "names": []}
+
+
+def _log_report(report: dict) -> None:
+    """Say out loud when `blanking_rule: area` did not actually apply.
+
+    Choosing `area` and silently getting `touch` is worse than not offering it: it
+    costs a build and a measurement to discover that nothing changed, and the only way
+    to find out was to read the source. One line per build, with a count.
+    """
+    if report["no_axis"]:
+        shown = ", ".join(report["names"][:4])
+        more = "" if report["no_axis"] <= 4 else f", +{report['no_axis'] - 4} more"
+        log.warning("blanking_rule 'area': %d of %d structures have no usable medial "
+                    "axis and fall back to 'touch' (%s%s)",
+                    report["no_axis"], report["asked"], shown, more)
+    elif report["asked"]:
+        log.info("blanking_rule 'area' applied to all %d structures", report["asked"])
+
+
+def _seal_fails(polygon, xy, triangles, keep, candidates, verify) -> bool:
+    """Whether the tighter rule left a way across *polygon* on this mesh.
+
+    Run per structure, per build, and it is what makes the rule safe without trusting
+    the skeleton: try it, check it, and fall back to `touch` for this structure if it
+    did not hold. Two clauses, because there are two ways across and the obvious check
+    only sees one of them:
+
+    * **one element cut in two.** The wall passes clean through an open element, so
+      water enters one side and leaves the other. Caught by `element - wall` having
+      more than one piece.
+    * **two elements chained.** The wall is thinner than an element pair, so each of
+      two neighbours straddles one face and neither is individually cut. Caught by the
+      segment joining their centroids crossing the skeleton. This needs the candidate
+      band widened by a ring - the elements on the far side of a sub-cell wall are not
+      themselves touched by it, and checking only the touched ones misses the chain
+      entirely, which is the bug this docstring exists to stop coming back.
+
+    The check uses the UNPRUNED skeleton, a superset of the true medial axis, so a
+    pruning threshold cannot be tuned into passing it.
+    """
+    import shapely
+
+    open_cells = candidates[~keep]
+    if not open_cells.size:
+        return False
+    cells = shapely.polygons(xy[triangles[open_cells]])
+    rest = shapely.difference(cells, polygon)
+    if bool((shapely.get_num_geometries(rest) > 1).any()):
+        return True
+
+    # widen by a ring: a sub-cell wall's opposite neighbours are not candidates
+    touched_nodes = np.unique(triangles[candidates])
+    near = np.isin(triangles, touched_nodes).any(axis=1)
+    ring = np.flatnonzero(near)
+    blocked = np.zeros(len(triangles), bool)
+    blocked[candidates[keep]] = True
+    usable = ring[~blocked[ring]]
+    if usable.size < 2:
+        return False
+    edges: dict[tuple[int, int], list[int]] = {}
+    for e in usable:
+        a, b, c = triangles[e]
+        for u, v in ((a, b), (b, c), (c, a)):
+            edges.setdefault((u, v) if u < v else (v, u), []).append(int(e))
+    pairs = [v for v in edges.values() if len(v) == 2]
+    if not pairs:
+        return False
+    centres = xy[triangles].mean(axis=1)
+    links = shapely.linestrings([[centres[i], centres[j]] for i, j in pairs])
+    return bool(shapely.intersects(verify, links).any())
 
 
 def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
-             *, min_area: float = 0.0, spine=None) -> np.ndarray:
+             *, min_area: float = 0.0, spine=None, verify=None,
+             name: str = "structure") -> np.ndarray:
     """Nodes of every element the *polygon* crosses, not merely nodes inside it.
 
     A node test alone cannot represent a wall thinner than an element. On the Munich
@@ -284,10 +445,19 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
             # a 0.20 m wall on a 1 m mesh blanks zero elements. Any path across a wall
             # must cross its medial axis, so blanking what the axis touches restores
             # the guarantee at every resolution.
+            touched = hit.copy()
             keep = np.flatnonzero(hit)
             covered = shapely.area(shapely.intersection(polygon, cells[keep]))
             enough = covered >= min_area * shapely.area(cells[keep])
             hit[keep] = enough | shapely.intersects(spine, cells[keep])
+            if _seal_fails(polygon, xy, triangles, hit, part,
+                           verify if verify is not None else spine):
+                # Measured, not assumed: this footprint on this mesh is not sealed by
+                # the tighter rule, so it does not get it.
+                log.warning("  %s: blanking_rule 'area' would leave a path through "
+                            "this structure on this mesh; using 'touch' for it",
+                            name)
+                hit = touched
         mask[triangles[part[hit]].ravel()] = True
     return mask
 
@@ -303,12 +473,11 @@ def solid_mask(structures: list[Structure], xy: np.ndarray, *,
     on a wall or prescribes a discharge onto one.
     """
     mask = np.zeros(len(xy), dtype=bool)
+    report = _new_report()
     for structure in structures:
         if structure.mode == SOLID:
-            mask |= (_inside(structure.polygon, xy) if triangles is None
-                     else _crossed(structure.polygon, xy, triangles,
-                                   min_area=min_area,
-                                   spine=medial_axis(structure)))
+            mask |= _one(structure, xy, triangles, min_area, report)
+    _log_report(report)
     return mask
 
 
@@ -322,11 +491,10 @@ def covered_mask(structures: list[Structure], xy: np.ndarray, *,
     must not wet.
     """
     mask = np.zeros(len(xy), dtype=bool)
+    report = _new_report()
     for structure in structures:
-        mask |= (_inside(structure.polygon, xy) if triangles is None
-                 else _crossed(structure.polygon, xy, triangles,
-                               min_area=min_area,
-                               spine=medial_axis(structure)))
+        mask |= _one(structure, xy, triangles, min_area, report)
+    _log_report(report)
     return mask
 
 
@@ -359,13 +527,11 @@ def apply_to_bed(structures: list[Structure], xy: np.ndarray,
     """
     bed = np.array(bed, dtype=float, copy=True)
     touched = np.zeros(len(bed), dtype=bool)
+    report = _new_report()
     for structure in structures:
         if structure.mode != OVERFLOW:
             continue
-        inside = (_inside(structure.polygon, xy) if triangles is None
-                  else _crossed(structure.polygon, xy, triangles,
-                                min_area=min_area,
-                                spine=medial_axis(structure)))
+        inside = _one(structure, xy, triangles, min_area, report)
         if not inside.any():
             log.warning("structure %s covers no mesh point - is it inside the ROI, "
                         "and is the layer in the project CRS?", structure.name)
@@ -381,6 +547,7 @@ def apply_to_bed(structures: list[Structure], xy: np.ndarray,
         touched |= inside
         log.info("  %s: raised %d points, up to +%.3f m", structure.name,
                  int(inside.sum()), gain)
+    _log_report(report)
     return bed, touched
 
 

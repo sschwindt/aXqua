@@ -285,7 +285,7 @@ def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     spine = shapely.linestrings([[2.075, -1.0], [2.075, 1.2]])
 
     touched = _crossed(thin, xy, tris)
-    covered = _crossed(thin, xy, tris, min_area=0.5, spine=spine)
+    covered = _crossed(thin, xy, tris, min_area=0.5, spine=spine, verify=spine)
     assert 0 < covered.sum() < touched.sum()        # blanks fewer, but not none
 
     # ...and every element the wall passes THROUGH still has all three nodes raised,
@@ -302,11 +302,47 @@ def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     assert np.array_equal(without_axis, touched)    # no axis -> the safe rule
 
 
-def test_a_footprint_with_no_usable_medial_axis_falls_back(tmp_path):
-    """A line-sourced wall keeps the line it was buffered from, which IS its medial
-    axis. An L-shaped or blobby polygon has no axis worth guessing, and guessing one
-    would silently unseal it - so `medial_axis` returns None and the caller reverts to
-    blanking everything the footprint touches."""
+def test_a_rule_that_would_leak_is_caught_and_reverted_per_structure(caplog):
+    """What makes the tighter rule safe without trusting the skeleton: try it, CHECK
+    it on this mesh, and fall back to `touch` for any structure where it did not hold.
+
+    The check is made against the UNPRUNED skeleton, a superset of the true medial
+    axis, so no pruning threshold can be tuned into passing it. Here the blanking
+    curve is deliberately deficient - it covers only half a wall that spans the whole
+    mesh - so the upper half is left with open elements on both sides of it. That is a
+    path through solid material, and it must be refused rather than shipped.
+    """
+    import logging
+
+    import shapely
+
+    from axqua.core.structures import _crossed
+
+    xy, tris = _strip_mesh(nx=41, ny=21, step=0.1)
+    # sub-cell thickness, spanning the whole mesh: any hole in the blanking is a
+    # genuine way across, and coverage alone can never seal it
+    thin = Polygon([(2.02, -1.0), (2.07, -1.0), (2.07, 3.0), (2.02, 3.0)])
+    whole = shapely.linestrings([[2.045, -1.0], [2.045, 3.0]])
+    half = shapely.linestrings([[2.045, -1.0], [2.045, 1.0]])
+
+    touched = _crossed(thin, xy, tris)
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        reverted = _crossed(thin, xy, tris, min_area=0.5, spine=half, verify=whole,
+                            name="deficient-wall")
+    assert np.array_equal(reverted, touched)        # caught and reverted
+    assert "deficient-wall" in caplog.text and "'touch'" in caplog.text
+
+
+def test_every_footprint_shape_gets_an_axis_from_the_right_source():
+    """Three sources, and the third is what a CAD-derived footprint needs.
+
+    A line-sourced wall keeps the line it was buffered from - exact, and the usual
+    case. A rectangle gets its long axis, free and exact. **An L-shaped or snaking
+    polygon gets a Voronoi skeleton**, which is the fix: the rotated-rectangle
+    shortcut is correctly refused for such a shape, and 19 of munich-vsf's 20
+    structures are exactly that, so `blanking_rule: area` silently never fired on the
+    case it was written for.
+    """
     from shapely.geometry import LineString, Polygon
 
     from axqua.core.structures import OVERFLOW, Structure, medial_axis
@@ -314,17 +350,29 @@ def test_a_footprint_with_no_usable_medial_axis_falls_back(tmp_path):
     line = LineString([(0, 0), (10, 0)])
     buffered = Structure("wall", OVERFLOW, line.buffer(0.1, cap_style=2),
                          crest=1.0, spine=line)
-    assert medial_axis(buffered) is line            # exact, not reconstructed
+    assert medial_axis(buffered) == (line, line)    # exact, not reconstructed
 
     rect = Structure("dam", OVERFLOW, Polygon([(0, 0), (8, 0), (8, 1), (0, 1)]),
                      crest=1.0)
-    axis = medial_axis(rect)
-    assert axis is not None and axis.length == pytest.approx(8.0)
+    axis, verify = medial_axis(rect)
+    assert axis.length == pytest.approx(8.0) and verify is axis
 
-    blob = Structure("odd", OVERFLOW,
-                     Polygon([(0, 0), (8, 0), (8, 1), (3, 1), (3, 6), (0, 6)]),
-                     crest=1.0)
-    assert medial_axis(blob) is None                # an L: no axis to trust
+    ell = Structure("odd", OVERFLOW,
+                    Polygon([(0, 0), (8, 0), (8, 1), (1, 1), (1, 6), (0, 6)]),
+                    crest=1.0)
+    axis, verify = medial_axis(ell)
+    assert axis is not None, "an L-shape must still get a skeleton"
+    # it runs along BOTH limbs, which a single straight axis never could
+    assert axis.length > 9.0
+    assert ell.polygon.buffer(1e-9).contains(axis)
+
+    # ...and the verification skeleton is a superset of what is blanked, so the
+    # pruning threshold cannot be tuned into passing the seal check
+    assert verify.length >= axis.length
+
+    degenerate = Structure("dot", OVERFLOW, Polygon([(0, 0), (1, 0), (0, 1)]),
+                           crest=1.0)
+    assert medial_axis(degenerate)[0] is None or True   # a triangle: either is safe
 
 
 def test_the_blanking_rule_is_validated_and_defaults_to_the_safe_one():

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import sys
 from collections import defaultdict
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -33,6 +34,44 @@ from axqua.config import load_config                            # noqa: E402
 from axqua.core.structures import load_structures               # noqa: E402
 
 LEVELS = (0.10, 0.05, 0.035, 0.025)
+
+#: Resolution `wall_footprints` rasterises CAD at on munich-vsf.
+CAD_RASTER = 0.02
+
+
+def rasterised(structures):
+    """Re-author each footprint the way a CAD part arrives, and say so.
+
+    The line-authored flume is the CONTROL: its footprints are clean rectangles with
+    four corners, and `medial_axis` takes the line they were buffered from. A CAD part
+    never arrives like that. `wall_footprints` rasterises it at 0.02 m and hole-fills,
+    so the footprint is a stair-stepped polygon of thousands of vertices whose rotated
+    rectangle is nothing like it - which is why the rotated-rectangle shortcut refused
+    19 of munich-vsf's 20 structures and the tighter rule silently never fired there.
+
+    This reproduces that failure mode in a case that runs in seconds: rasterise each
+    footprint onto a 0.02 m grid, take the polygon back out of the raster, and drop
+    the buffered line so nothing can fall back to it.
+    """
+    import shapely
+    from rasterio import features, transform
+    from shapely.geometry import shape
+
+    out = []
+    for s in structures:
+        minx, miny, maxx, maxy = s.polygon.bounds
+        pad = 4 * CAD_RASTER
+        width = int(np.ceil((maxx - minx + 2 * pad) / CAD_RASTER))
+        height = int(np.ceil((maxy - miny + 2 * pad) / CAD_RASTER))
+        tr = transform.from_origin(minx - pad, maxy + pad, CAD_RASTER, CAD_RASTER)
+        grid = features.rasterize([(s.polygon, 1)], out_shape=(height, width),
+                                  transform=tr, all_touched=True)
+        polys = [shape(g) for g, v in features.shapes(grid, mask=grid.astype(bool),
+                                                      transform=tr) if v]
+        if not polys:
+            continue
+        out.append(replace(s, polygon=shapely.union_all(polys), spine=None))
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -53,7 +92,7 @@ def rule_touch(wall, xy, tri):
 
 
 def rule_area(wall, xy, tri, fraction=0.5):
-    """lww-134's suggestion: only when the wall really covers the element."""
+    """Coverage alone - unsound, kept to show what the medial axis adds."""
     import shapely
     cells = shapely.polygons(xy[tri])
     near = shapely.intersects(wall, cells)
@@ -62,6 +101,22 @@ def rule_area(wall, xy, tri, fraction=0.5):
         part = shapely.intersection(wall, cells[near])
         out[near] = shapely.area(part) >= fraction * shapely.area(cells[near])
     return out
+
+
+def rule_shipped(wall, xy, tri, structures=None):
+    """What `structures.blanking_rule: area` actually does, per structure.
+
+    Coverage OR the medial axis, with the per-structure seal check and the fallback to
+    `touch` - i.e. the shipped code path, not a re-implementation of it.
+    """
+    from axqua.core.structures import _one, _new_report
+
+    mask = np.zeros(len(xy), bool)
+    report = _new_report()
+    for s in structures or []:
+        mask |= _one(s, xy, tri, 0.5, report)
+    # node mask -> element mask: an element is blocked when all three nodes are
+    return mask[tri].all(axis=1)
 
 
 def rule_separating(wall, xy, tri):
@@ -128,8 +183,8 @@ def rule_centreline(wall, xy, tri, structures=None):
 
 
 RULES = {"node (pre-fix)": rule_node, "touch (current)": rule_touch,
-         "area >= 50%": rule_area, "separating": rule_separating,
-         "centreline": rule_centreline}
+         "area >= 50% only": rule_area, "separating": rule_separating,
+         "centreline": rule_centreline, "SHIPPED area rule": rule_shipped}
 
 
 # --------------------------------------------------------------------------- #
@@ -220,7 +275,13 @@ def main() -> None:
     import shapely
 
     cfg = load_config(Path(__file__).resolve().parent / "case-config.yml")
-    structures = load_structures(cfg)
+    drawn = load_structures(cfg)
+    variant = "rasterised" if "--rasterised" in sys.argv else "line-authored"
+    structures = rasterised(drawn) if variant == "rasterised" else drawn
+    print(f"footprints: {variant}"
+          + (f" (re-rasterised at {CAD_RASTER:g} m, as wall_footprints delivers a CAD "
+             "part)" if variant == "rasterised" else " (the control: clean rectangles "
+             "from buffered lines)"))
     wall = shapely.union_all([s.polygon for s in structures])
     print(f"{len(structures)} structures; drawn throat {design.THROAT:.4f} m "
           f"(baffle tip to slot block), gap to the far wall "
@@ -241,7 +302,8 @@ def main() -> None:
         xy = np.column_stack([m.x, m.y])
         tri = np.asarray(m.triangles)
         for name, rule in RULES.items():
-            kw = {"structures": structures} if name == "centreline" else {}
+            kw = ({"structures": structures}
+                  if name in ("centreline", "SHIPPED area rule") else {})
             blocked = np.asarray(rule(wall, xy, tri, **kw))
             t = throat(xy, tri, blocked, structures)
             through, into = leaks(wall, spine, xy, tri, blocked)
