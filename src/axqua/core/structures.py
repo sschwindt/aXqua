@@ -443,10 +443,14 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
     # unchunked construction, against 234 ms for the intersects itself. Chunking
     # leaves the result and the runtime alone and caps the allocation at the chunk,
     # so a mesh twice the size costs twice the time and the same memory.
+    decided = np.zeros(cand.size, dtype=bool)      # per candidate, across chunks
+    touched = np.zeros(cand.size, dtype=bool)
     for start in range(0, cand.size, _CROSSED_CHUNK):
-        part = cand[start:start + _CROSSED_CHUNK]
+        sl = slice(start, start + _CROSSED_CHUNK)
+        part = cand[sl]
         cells = shapely.polygons(tri_xy[part])
         hit = shapely.intersects(polygon, cells)
+        touched[sl] = hit
         if min_area > 0.0 and spine is not None and hit.any():
             # `structures.blanking_rule: area`: blank an element the footprint really
             # COVERS, or one the medial axis passes THROUGH. An element merely clipped
@@ -459,20 +463,34 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
             # a 0.20 m wall on a 1 m mesh blanks zero elements. Any path across a wall
             # must cross its medial axis, so blanking what the axis touches restores
             # the guarantee at every resolution.
-            touched = hit.copy()
             keep = np.flatnonzero(hit)
             covered = shapely.area(shapely.intersection(polygon, cells[keep]))
             enough = covered >= min_area * shapely.area(cells[keep])
-            hit[keep] = enough | shapely.intersects(spine, cells[keep])
-            if _seal_fails(polygon, xy, triangles, hit, part,
-                           verify if verify is not None else spine):
-                # Measured, not assumed: this footprint on this mesh is not sealed by
-                # the tighter rule, so it does not get it.
-                log.warning("  %s: blanking_rule 'area' would leave a path through "
-                            "this structure on this mesh; using 'touch' for it",
-                            name)
-                hit = touched
-        mask[triangles[part[hit]].ravel()] = True
+            crossed = shapely.intersects(spine, cells[keep])
+            # ...and any element the wall CUTS IN TWO, whatever its coverage. Water
+            # would enter one piece and leave the other, so it is a crossing by
+            # itself. The axis ought to catch these and mostly does, but a rasterised
+            # outline makes the local clearance oscillate, which breaks the pruned
+            # trunk into pieces and leaves gaps - measured on munich-vsf, 17 such
+            # elements on stahlbeton-1 and 21 on stahlbeton-2, enough to revert six
+            # of nine structures to `touch`. Testing for it directly is exact and
+            # costs one difference per candidate.
+            rest = shapely.difference(cells[keep], polygon)
+            severed = shapely.get_num_geometries(rest) > 1
+            hit[keep] = enough | crossed | severed
+        decided[sl] = hit
+
+    # ONE seal check per structure, over the whole candidate set. Doing it per chunk
+    # checked partial data: an element blanked in another chunk reads as open here, so
+    # a structure spanning a chunk boundary reported a leak that was an artefact of
+    # where the boundary fell. It reverted 6 of munich-vsf's 9 structures that way.
+    if min_area > 0.0 and spine is not None and decided.any():
+        if _seal_fails(polygon, xy, triangles, decided, cand,
+                       verify if verify is not None else spine):
+            log.warning("  %s: blanking_rule 'area' would leave a path through this "
+                        "structure on this mesh; using 'touch' for it", name)
+            decided = touched
+    mask[triangles[cand[decided]].ravel()] = True
     return mask
 
 
