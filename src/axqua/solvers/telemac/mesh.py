@@ -62,8 +62,56 @@ class Mesh:
 
 
 def roi_polygon(cfg: Config):
-    """Return the ROI as a shapely Polygon (polygonising lines if needed)."""
-    return dataset(cfg).roi_polygon()
+    """Return the ROI as a shapely Polygon (polygonising lines if needed).
+
+    Under ``structures.solid_mode: cut`` the solid footprints are **removed from the
+    domain here**, which is the whole of that feature: the geometry code already turns
+    every interior ring into a gmsh curve loop and hands it to ``addPlaneSurface``, so
+    a wall subtracted from the ROI becomes a meshed hole with no change to the mesher
+    at all. Its edges are then mesh edges, the opening beside it is exact, and none of
+    the blanking machinery applies - there is nothing to blank, because the elements
+    were never created.
+    """
+    poly = dataset(cfg).roi_polygon()
+    return _cut_solids(cfg, poly)
+
+
+def _cut_solids(cfg: Config, poly):
+    """Subtract the ``solid`` footprints from *poly*, for ``solid_mode: cut``."""
+    sc = getattr(cfg, "structures", None)
+    if sc is None or getattr(sc, "solid_mode", "raise") != "cut":
+        return poly
+
+    from axqua.core.structures import load_structures, solid_footprint
+
+    structures = load_structures(cfg)
+    footprint = solid_footprint(structures)
+    if footprint is None or footprint.is_empty:
+        return poly
+    tol = float(getattr(sc, "cut_simplify", 0.0) or 0.0)
+    if tol > 0:
+        # a CAD-derived outline carries a vertex per raster cell, and every vertex
+        # becomes a gmsh point; 5 mm is three orders below the 0.17 m that matters
+        footprint = footprint.simplify(tol, preserve_topology=True)
+    cut = poly.difference(footprint)
+    if cut.is_empty:
+        raise ValueError(
+            "structures.solid_mode: cut removed the whole domain - the solid "
+            "footprints cover the ROI. Check the structures layer.")
+    if cut.geom_type == "MultiPolygon":
+        # a solid touching the ROI edge can split it; keep the largest and say so
+        parts = sorted(cut.geoms, key=lambda g: g.area, reverse=True)
+        dropped = sum(g.area for g in parts[1:])
+        log.warning("solid_mode 'cut' split the domain into %d pieces; keeping the "
+                    "largest (%.1f m2) and dropping %.1f m2. A solid may cross the "
+                    "ROI boundary.", len(parts), parts[0].area, dropped)
+        cut = parts[0]
+    n_holes = len(cut.interiors)
+    log.info("solid_mode 'cut': %d solid structure(s) removed from the domain "
+             "(%.2f m2, %d holes); their edges become no-slip mesh boundary",
+             sum(1 for s in structures if s.mode == "solid"),
+             poly.area - cut.area, n_holes)
+    return cut
 
 
 def _read_lines(path: Path, crs_epsg: int):
@@ -752,6 +800,15 @@ def _burn_structures(cfg: Config, mesh: Mesh, z: np.ndarray) -> np.ndarray:
     if not structures:
         return z
     xy = np.column_stack([mesh.x, mesh.y])
+    cut = getattr(cfg.structures, "solid_mode", "raise") == "cut"
+    if cut:
+        # Under `solid_mode: cut` the solids were removed from the domain before
+        # meshing, so there are no elements inside them to raise - and raising the
+        # ring of elements around a hole would narrow the very opening the cut exists
+        # to keep exact. Overflow structures are terrain either way and still burn.
+        structures = [s for s in structures if s.mode == OVERFLOW]
+        if not structures:
+            return z
     # a 2D mesh cannot delete a footprint, so a solid structure becomes an
     # un-overtoppable ridge: crest + freeboard, as terrain
     freeboard = float(cfg.structures.solid_freeboard_2d)
@@ -763,7 +820,7 @@ def _burn_structures(cfg: Config, mesh: Mesh, z: np.ndarray) -> np.ndarray:
             height=None if s.height is None else s.height + freeboard)
         for s in structures
     ]
-    if any(s.mode == SOLID for s in structures):
+    if not cut and any(s.mode == SOLID for s in structures):
         log.info("  solid structures raised to crest + %.2f m freeboard: a 2D mesh "
                  "has no vertical wall to remove", freeboard)
     z, _ = apply_to_bed(as_terrain, xy, z, triangles=mesh.triangles,

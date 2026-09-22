@@ -491,3 +491,70 @@ def test_a_wall_across_the_whole_domain_is_reported_not_silently_halved(caplog):
     assert "connected blocks" in caplog.text      # still reported
     assert "cut the domain in two" not in caplog.text
     assert "solid structures" not in caplog.text
+
+
+def test_solid_mode_cut_removes_the_footprint_from_the_domain(tmp_path):
+    """`raise` paints a wall onto a mesh that does not know it is there, and every
+    question about blanking, erosion and medial axes follows from that. `cut` removes
+    the footprint from the domain instead, so the wall is a no-slip boundary and the
+    opening beside it is bounded by mesh edges.
+
+    The whole feature is one polygon operation: the geometry code already turns every
+    interior ring into a gmsh curve loop, so a hole in the ROI is a hole in the mesh.
+    """
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.config import Structures
+    from axqua.solvers.telemac.mesh import _cut_solids
+
+    roi = Polygon([(0, 0), (20, 0), (20, 10), (0, 10)])
+    wall = LineString([(10, -1), (10, 6)]).buffer(0.1, cap_style=2)
+
+    class _Cfg:
+        def __init__(self, mode):
+            self.structures = Structures(solid_mode=mode, cut_simplify=0.0)
+
+    import axqua.solvers.telemac.mesh as meshmod
+    original = meshmod.load_structures if hasattr(meshmod, "load_structures") else None
+    from axqua.core import structures as stmod
+
+    made = [Structure("wall", SOLID, wall, crest=5.0)]
+    stmod.load_structures = lambda cfg: made          # noqa: ARG005
+    try:
+        kept = _cut_solids(_Cfg("raise"), roi)
+        assert kept is roi                            # default leaves the ROI alone
+
+        cut = _cut_solids(_Cfg("cut"), roi)
+        assert cut.area == pytest.approx(roi.area - wall.intersection(roi).area)
+        # the wall reaches the ROI edge, so it is a notch rather than an island - and
+        # the domain must stay in one piece either way
+        assert cut.geom_type == "Polygon"
+        assert not cut.contains(wall.centroid)
+    finally:
+        stmod.load_structures = original or stmod.load_structures
+    del original
+
+
+def test_solid_mode_cut_makes_an_island_a_hole(tmp_path):
+    """A wall wholly inside the ROI becomes an interior ring, which is what gmsh
+    meshes around - that ring is the exact opening the flow sees."""
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.config import Structures
+    from axqua.core import structures as stmod
+    from axqua.solvers.telemac.mesh import _cut_solids
+
+    roi = Polygon([(0, 0), (20, 0), (20, 10), (0, 10)])
+    island = LineString([(10, 3), (10, 7)]).buffer(0.1, cap_style=2)
+
+    class _Cfg:
+        structures = Structures(solid_mode="cut", cut_simplify=0.0)
+
+    keep = stmod.load_structures
+    stmod.load_structures = lambda cfg: [Structure("pier", SOLID, island, crest=5.0)]
+    try:
+        cut = _cut_solids(_Cfg(), roi)
+        assert len(cut.interiors) == 1                # a genuine hole
+        assert cut.area == pytest.approx(roi.area - island.area)
+    finally:
+        stmod.load_structures = keep
