@@ -92,6 +92,10 @@ surfaces:
     - {file: user-sources/geodata/cad/air-top.stl, role: ignore}
 
 geodata:
+  # Explicit, so it wins over the one the surfaces stage derives. Draped from the
+  # repaired watertight CAD: a cell is wall where solid material stands anywhere in
+  # the water column above the local bed. Covers the fish pass window only.
+  structures: user-sources/geodata/walls-drape.gpkg
   # THE REACH AXIS, and the input that was missing all along. Without it flow_angle()
   # returns 0 (mesh.py: "falls back to 0 with no centerline") and every derived thing
   # is axis-aligned while the pass runs at +14.3 deg: the plan lattice, the crop faces,
@@ -183,6 +187,22 @@ structures:
   # solver a 3 m terrain step to march water into at the inflow. A quarter of that is
   # still far above any water level this case produces.
   solid_freeboard_2d: 0.5
+  # The throat here is 0.1342 m as our own footprints carry it, and at dx 0.035 the
+  # default `touch` rule welds 3 of 14 shut and chokes the rest to 32-66% - which is
+  # what holds the level over the wall tops. `area` blanks what a footprint COVERS or
+  # what its medial axis passes through, and keeps 90-98% of the throat with zero
+  # crossings through a wall (measured on a rasterised-footprint flume, which
+  # reproduces how a CAD part arrives: cases/slot-flume/blanking_rules.py).
+  #
+  # It needs the Voronoi skeleton to reach a CAD footprint at all; with the earlier
+  # rotated-rectangle axis it was inert here, silently behaving as `touch` on 19 of 20
+  # structures. The build now says so if that ever happens again.
+  blanking_rule: area
+  # CUT the walls out of the domain instead of painting them onto the bed. The throat
+  # is then bounded by mesh edges cut from the footprint polygon - exact by
+  # construction - and none of the blanking machinery applies. See the reasoning in
+  # axqua.config.Structures.solid_mode.
+  solid_mode: cut
 
 friction:
   roughness_law: 5               # Nikuradse

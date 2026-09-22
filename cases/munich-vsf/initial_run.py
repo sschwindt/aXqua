@@ -45,7 +45,7 @@ cfg = load_config(CONFIG)
 # Number of parallel MPI processes for this test run. None -> use the core
 # count assigned in preprocessing (case-config.yml telemac.n_processors);
 # set an integer here to override it for this run only (e.g. NCSIZE = 8).
-NCSIZE: int | None = None
+NCSIZE: int | None = 16   # lww-133 is idle (32 threads); the config's 8 is sized for a shared box
 
 
 def main() -> None:
