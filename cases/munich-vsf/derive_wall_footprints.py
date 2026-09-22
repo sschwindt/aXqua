@@ -25,7 +25,9 @@ is whether a wall occupies the column at all, so the test is ORed over several h
 Restricted to DEM-covered cells, which is also most of the cost.
 """
 import time
-import numpy as np, pyvista as pv, rasterio
+import numpy as np
+import pyvista as pv
+import rasterio
 from pathlib import Path
 from scipy import ndimage
 
@@ -38,7 +40,8 @@ solid = pv.read(G / "cad-repaired" / "stahlblech.stl").merge(
         pv.read(G / "cad-repaired" / "stahlbeton.stl"))
 b = pv.read(G / "cad-repaired" / "stahlblech.stl").bounds
 x0, x1, y0, y1 = b[0] - 0.3, b[1] + 0.3, b[2] - 0.3, b[3] + 0.3
-xs = np.arange(x0, x1, RES); ys = np.arange(y0, y1, RES)
+xs = np.arange(x0, x1, RES)
+ys = np.arange(y0, y1, RES)
 gx, gy = np.meshgrid(xs, ys)
 with rasterio.open(DEM) as src:
     bed = np.array([v[0] for v in src.sample(
