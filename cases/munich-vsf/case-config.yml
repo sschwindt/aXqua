@@ -118,7 +118,7 @@ geodata:
   # One short line spans each throat plus 0.10 m of approach either side; gmsh refines
   # to mesh.breakline_size there and grows back to default_size within 3 x 0.035 m, so
   # the mesh stays block-like everywhere else.
-  breaklines: axqua-case/preprocessing/throat-breaklines.gpkg
+  # breaklines: axqua-case/preprocessing/throat-breaklines.gpkg  # see mesh.breakline_size
 
 boundaries:
   # the middle design discharge; the other two are derived from the built case by
@@ -165,9 +165,19 @@ mesh:
   # liquid-boundary matching tolerance. It no longer does (that comes from the built
   # mesh), but leaving a size 60x the cell size in the config invites the next
   # surprise.
-  breakline_size: 0.00875      # default_size / 4, applied only at the throats
+  breakline_size: 0.00875      # default_size / 4 at the throats. PARKED: with the 14
+                               # throat breaklines enabled gmsh did not finish the
+                               # triangulation in 2 h 10 min on this 24 x 88 m domain -
+                               # 0.00875 m islands inside a 0.035 m field is too steep a
+                               # size gradient for it. Re-enable with a gentler ratio.
 
 structures:
+  # The throat here is only a few elements wide and `touch` eats ~0.45 of an element
+  # on each side, which welded 3 of 14 throats shut at dx 0.035. Measured on the
+  # synthetic flume (cases/slot-flume/blanking_rules.py): `area` realises 102-104%
+  # of the drawn throat against 74-86% for `touch`, with zero through-crossings at
+  # every mesh size tested, so it still seals.
+  blanking_rule: area
   # A fish-pass baffle stands about a metre above its pool; the 2 m default freeboard
   # (meant for a river floodwall) turns a 3.3 m wall into a 5.3 m one and gives the
   # solver a 3 m terrain step to march water into at the inflow. A quarter of that is
