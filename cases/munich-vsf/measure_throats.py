@@ -52,30 +52,58 @@ def main() -> None:
     blocked = raised[tri].all(axis=1)
     print(f"raised nodes {raised.sum():,}; blocked elements {blocked.sum():,}")
 
-    cells = shapely.polygons(np.column_stack([x, y])[tri[blocked]])
-    body = shapely.union_all(cells)
-    parts = [p for p in (body.geoms if body.geom_type == "MultiPolygon" else [body])
-             if p.area > 1e-6]
-    print(f"{len(parts)} distinct raised regions")
-    del ndimage
+    # --- the narrowest constriction, without needing separable footprints ------ #
+    # Distance-between-regions is the natural measure and it does not work here: these
+    # footprints are merged CAD parts, so the raised set comes out as hundreds of
+    # fragments and the nearest pair is two bits of the same wall. Instead rasterise
+    # the OPEN area and take its distance transform - twice the largest inscribed
+    # radius at a station is the width of the opening there, and the minimum along the
+    # pass is the throat. It sees a diagonal throat, which a ray across the channel
+    # cannot, and it needs no assumption about which fragment belongs to which baffle.
 
-    gaps = []
-    for i, a in enumerate(parts):
-        for b in parts[i + 1:]:
-            d = a.distance(b)
-            if d < 1.0:                     # neighbours across an opening
-                gaps.append(d)
-    gaps = np.sort(np.array(gaps))
-    if not gaps.size:
-        print("no opening found between raised regions - everything is welded")
-        return
-    print(f"\n{len(gaps)} openings under 1 m; the 20 narrowest [m]:")
-    print("  " + "  ".join(f"{g:.4f}" for g in gaps[:20]))
-    closed = int((gaps < 1e-6).sum())
-    print(f"\nclosed (0 m): {closed}")
-    print(f"median {np.median(gaps):.4f} m = {100*np.median(gaps)/DRAWN:.0f}% of drawn "
-          f"{DRAWN:.4f}, {100*np.median(gaps)/FOOTPRINT:.0f}% of the footprint "
-          f"{FOOTPRINT:.4f}")
+    res = 0.01
+    corridor = 1.5                     # [m] either side of the pass axis
+    import geopandas as gpd
+
+    axis = gpd.read_file(cfg.geodata.channel_centerline).geometry.iloc[0]
+    band = axis.buffer(corridor)
+    minx, miny, maxx, maxy = band.bounds
+    nx = int((maxx - minx) / res) + 2
+    ny = int((maxy - miny) / res) + 2
+
+    open_cells = shapely.polygons(np.column_stack([x, y])[tri[~blocked]])
+    from rasterio import features, transform as rtransform
+
+    tr = rtransform.from_origin(minx, maxy, res, res)
+    grid = features.rasterize(
+        [(g, 1) for g in open_cells if g.intersects(band)],
+        out_shape=(ny, nx), transform=tr, all_touched=False).astype(bool)
+    inside = features.rasterize([(band, 1)], out_shape=(ny, nx),
+                                transform=tr).astype(bool)
+    grid &= inside
+    dist = ndimage.distance_transform_edt(grid) * res
+
+    print(f"\nopen corridor rasterised at {res:g} m: {grid.sum():,} cells "
+          f"({grid.sum() * res * res:.1f} m2)")
+    widths = []
+    for d0 in np.arange(0, axis.length, 0.25):
+        pt = axis.interpolate(d0)
+        col = int((pt.x - minx) / res)
+        row = int((maxy - pt.y) / res)
+        w = 6                               # +/- 6 cm window on the axis
+        patch = dist[max(0, row - w):row + w, max(0, col - w):col + w]
+        if patch.size:
+            widths.append((d0, 2.0 * float(patch.max())))
+    if widths:
+        arr = np.array(widths)
+        narrow = arr[np.argsort(arr[:, 1])][:12]
+        print("\nnarrowest openings along the pass axis [station m, width m]:")
+        for d0, w in narrow:
+            print(f"   s {d0:6.2f}   {w:.4f} m"
+                  + ("   CLOSED" if w < 1e-6 else
+                     f"   {100 * w / FOOTPRINT:.0f}% of the {FOOTPRINT:.4f} footprint"))
+        print(f"\nminimum along the pass: {arr[:, 1].min():.4f} m; "
+              f"median {np.median(arr[:, 1]):.4f} m")
 
 
 if __name__ == "__main__":
