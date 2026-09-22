@@ -319,10 +319,38 @@ class Structures:
     # eroding it half a cell a side matters more than a sliver of water in a wall.
     blanking_rule: str = "touch"        # touch | area
     blanking_area: float = 0.5          # `area` only: covered fraction that blanks
+    # How a SOLID structure reaches a 2D mesh.
+    #
+    #   "raise" (default) - the bed is lifted to crest + solid_freeboard_2d where the
+    #       structure stands. The mesh does not know the wall is there, so the wall is
+    #       PAINTED ONTO it: whether an opening survives depends on which elements got
+    #       raised, and that is where `blanking_rule`, the medial axis and the whole
+    #       erosion question come from. Every existing result was produced this way.
+    #   "cut"   - the footprint is removed from the meshed domain, so the wall becomes
+    #       a no-slip boundary and the opening is bounded by MESH EDGES cut from the
+    #       polygon. The throat is then exact by construction: no blanking rule, no
+    #       erosion, no medial axis, no seal check, and no need for a finer mesh -
+    #       the geometry lives in the boundary rather than in the bed.
+    #
+    # `cut` is what a wall physically is and is the better representation where an
+    # opening matters: on munich-vsf the pass throat is 0.1697 m drawn, the raise path
+    # delivers 0.0894 m, and the level follows the narrowest throat (slot relation,
+    # within 5%). It is not the default because it changes the domain itself, so every
+    # result produced under `raise` would move.
+    solid_mode: str = "raise"           # raise | cut
+    # Vertices closer together than this are dropped from a cut footprint before it
+    # becomes mesh boundary. A CAD-derived outline carries a vertex every raster cell,
+    # and gmsh would put a node on each; 5 mm is far below the 0.17 m that matters.
+    cut_simplify: float = 0.005
 
     def validate(self) -> None:
         if self.default_width <= 0:
             raise ValueError("structures.default_width must be > 0")
+        if self.solid_mode not in ("raise", "cut"):
+            raise ValueError("structures.solid_mode must be 'raise' or 'cut', "
+                             f"got {self.solid_mode!r}")
+        if self.cut_simplify < 0:
+            raise ValueError("structures.cut_simplify must be >= 0")
         if self.blanking_rule not in ("touch", "area"):
             raise ValueError("structures.blanking_rule must be 'touch' or 'area', "
                              f"got {self.blanking_rule!r}")
