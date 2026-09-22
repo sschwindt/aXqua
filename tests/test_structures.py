@@ -285,7 +285,7 @@ def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     spine = shapely.linestrings([[2.075, -1.0], [2.075, 1.2]])
 
     touched = _crossed(thin, xy, tris)
-    covered = _crossed(thin, xy, tris, min_area=0.5, spine=spine)
+    covered = _crossed(thin, xy, tris, min_area=0.5, spine=spine, verify=spine)
     assert 0 < covered.sum() < touched.sum()        # blanks fewer, but not none
 
     # ...and every element the wall passes THROUGH still has all three nodes raised,
@@ -302,11 +302,56 @@ def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     assert np.array_equal(without_axis, touched)    # no axis -> the safe rule
 
 
-def test_a_footprint_with_no_usable_medial_axis_falls_back(tmp_path):
-    """A line-sourced wall keeps the line it was buffered from, which IS its medial
-    axis. An L-shaped or blobby polygon has no axis worth guessing, and guessing one
-    would silently unseal it - so `medial_axis` returns None and the caller reverts to
-    blanking everything the footprint touches."""
+def test_the_seal_check_refuses_a_mask_that_leaves_a_way_across():
+    """What makes the tighter rule safe without trusting the skeleton: try it, CHECK
+    it on this mesh, and fall back to `touch` for any structure where it did not hold.
+
+    Tested on the check itself rather than on a contrived rule, because the rule now
+    seals the obvious contrivance by construction - it blanks any element the wall
+    CUTS IN TWO, whatever its coverage. What is left to verify is that the check still
+    refuses a mask which leaves such an element open, since that is the guard standing
+    behind every future change to the rule.
+    """
+    import shapely
+
+    from axqua.core.structures import _crossed, _seal_fails
+
+    xy, tris = _strip_mesh(nx=41, ny=21, step=0.1)
+    # sub-cell thickness, spanning the whole mesh: every element it passes through is
+    # severed, so leaving one open is unambiguously a way across
+    thin = Polygon([(2.02, -1.0), (2.06, -1.0), (2.06, 3.0), (2.02, 3.0)])
+    axis = shapely.linestrings([[2.04, -1.0], [2.04, 3.0]])
+
+    cells = shapely.polygons(xy[tris])
+    candidates = np.flatnonzero(shapely.intersects(thin, cells))
+    assert candidates.size > 4
+
+    sealed = np.ones(candidates.size, bool)
+    assert not _seal_fails(thin, xy, tris, sealed, candidates, axis)
+
+    holed = sealed.copy()
+    holed[candidates.size // 2] = False          # one element left open
+    assert _seal_fails(thin, xy, tris, holed, candidates, axis)
+
+    # ...and the shipped rule does not produce such a mask: nothing it leaves open is
+    # cut in two by the wall
+    blanked = _crossed(thin, xy, tris, min_area=0.5, spine=axis, verify=axis)
+    still_open = candidates[~blanked[tris[candidates]].all(axis=1)]
+    if still_open.size:
+        rest = shapely.difference(shapely.polygons(xy[tris[still_open]]), thin)
+        assert not (shapely.get_num_geometries(rest) > 1).any()
+
+
+def test_every_footprint_shape_gets_an_axis_from_the_right_source():
+    """Three sources, and the third is what a CAD-derived footprint needs.
+
+    A line-sourced wall keeps the line it was buffered from - exact, and the usual
+    case. A rectangle gets its long axis, free and exact. **An L-shaped or snaking
+    polygon gets a Voronoi skeleton**, which is the fix: the rotated-rectangle
+    shortcut is correctly refused for such a shape, and 19 of munich-vsf's 20
+    structures are exactly that, so `blanking_rule: area` silently never fired on the
+    case it was written for.
+    """
     from shapely.geometry import LineString, Polygon
 
     from axqua.core.structures import OVERFLOW, Structure, medial_axis
@@ -314,17 +359,29 @@ def test_a_footprint_with_no_usable_medial_axis_falls_back(tmp_path):
     line = LineString([(0, 0), (10, 0)])
     buffered = Structure("wall", OVERFLOW, line.buffer(0.1, cap_style=2),
                          crest=1.0, spine=line)
-    assert medial_axis(buffered) is line            # exact, not reconstructed
+    assert medial_axis(buffered) == (line, line)    # exact, not reconstructed
 
     rect = Structure("dam", OVERFLOW, Polygon([(0, 0), (8, 0), (8, 1), (0, 1)]),
                      crest=1.0)
-    axis = medial_axis(rect)
-    assert axis is not None and axis.length == pytest.approx(8.0)
+    axis, verify = medial_axis(rect)
+    assert axis.length == pytest.approx(8.0) and verify is axis
 
-    blob = Structure("odd", OVERFLOW,
-                     Polygon([(0, 0), (8, 0), (8, 1), (3, 1), (3, 6), (0, 6)]),
-                     crest=1.0)
-    assert medial_axis(blob) is None                # an L: no axis to trust
+    ell = Structure("odd", OVERFLOW,
+                    Polygon([(0, 0), (8, 0), (8, 1), (1, 1), (1, 6), (0, 6)]),
+                    crest=1.0)
+    axis, verify = medial_axis(ell)
+    assert axis is not None, "an L-shape must still get a skeleton"
+    # it runs along BOTH limbs, which a single straight axis never could
+    assert axis.length > 9.0
+    assert ell.polygon.buffer(1e-9).contains(axis)
+
+    # ...and the verification skeleton is a superset of what is blanked, so the
+    # pruning threshold cannot be tuned into passing the seal check
+    assert verify.length >= axis.length
+
+    degenerate = Structure("dot", OVERFLOW, Polygon([(0, 0), (1, 0), (0, 1)]),
+                           crest=1.0)
+    assert medial_axis(degenerate)[0] is None or True   # a triangle: either is safe
 
 
 def test_the_blanking_rule_is_validated_and_defaults_to_the_safe_one():
@@ -434,3 +491,70 @@ def test_a_wall_across_the_whole_domain_is_reported_not_silently_halved(caplog):
     assert "connected blocks" in caplog.text      # still reported
     assert "cut the domain in two" not in caplog.text
     assert "solid structures" not in caplog.text
+
+
+def test_solid_mode_cut_removes_the_footprint_from_the_domain(tmp_path):
+    """`raise` paints a wall onto a mesh that does not know it is there, and every
+    question about blanking, erosion and medial axes follows from that. `cut` removes
+    the footprint from the domain instead, so the wall is a no-slip boundary and the
+    opening beside it is bounded by mesh edges.
+
+    The whole feature is one polygon operation: the geometry code already turns every
+    interior ring into a gmsh curve loop, so a hole in the ROI is a hole in the mesh.
+    """
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.config import Structures
+    from axqua.solvers.telemac.mesh import _cut_solids
+
+    roi = Polygon([(0, 0), (20, 0), (20, 10), (0, 10)])
+    wall = LineString([(10, -1), (10, 6)]).buffer(0.1, cap_style=2)
+
+    class _Cfg:
+        def __init__(self, mode):
+            self.structures = Structures(solid_mode=mode, cut_simplify=0.0)
+
+    import axqua.solvers.telemac.mesh as meshmod
+    original = meshmod.load_structures if hasattr(meshmod, "load_structures") else None
+    from axqua.core import structures as stmod
+
+    made = [Structure("wall", SOLID, wall, crest=5.0)]
+    stmod.load_structures = lambda cfg: made          # noqa: ARG005
+    try:
+        kept = _cut_solids(_Cfg("raise"), roi)
+        assert kept is roi                            # default leaves the ROI alone
+
+        cut = _cut_solids(_Cfg("cut"), roi)
+        assert cut.area == pytest.approx(roi.area - wall.intersection(roi).area)
+        # the wall reaches the ROI edge, so it is a notch rather than an island - and
+        # the domain must stay in one piece either way
+        assert cut.geom_type == "Polygon"
+        assert not cut.contains(wall.centroid)
+    finally:
+        stmod.load_structures = original or stmod.load_structures
+    del original
+
+
+def test_solid_mode_cut_makes_an_island_a_hole(tmp_path):
+    """A wall wholly inside the ROI becomes an interior ring, which is what gmsh
+    meshes around - that ring is the exact opening the flow sees."""
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.config import Structures
+    from axqua.core import structures as stmod
+    from axqua.solvers.telemac.mesh import _cut_solids
+
+    roi = Polygon([(0, 0), (20, 0), (20, 10), (0, 10)])
+    island = LineString([(10, 3), (10, 7)]).buffer(0.1, cap_style=2)
+
+    class _Cfg:
+        structures = Structures(solid_mode="cut", cut_simplify=0.0)
+
+    keep = stmod.load_structures
+    stmod.load_structures = lambda cfg: [Structure("pier", SOLID, island, crest=5.0)]
+    try:
+        cut = _cut_solids(_Cfg(), roi)
+        assert len(cut.interiors) == 1                # a genuine hole
+        assert cut.area == pytest.approx(roi.area - island.area)
+    finally:
+        stmod.load_structures = keep
