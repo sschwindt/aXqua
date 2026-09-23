@@ -5,15 +5,15 @@ the drawing is in DHDN / GK zone 4 and the case runs in LOCAL CAD metres, and th
 cannot be matched by bounding box (see `README.md`, "Georeferencing is unresolved").
 So a number measured on the drawing cannot be pointed at a *place* in the STLs. This
 measures the same features in the STLs themselves, so the answer is usable by anything
-that reads the CAD: a slice at a baffle's own invert, a throat breakline, a refinement
+that reads the CAD: a slice at a baffle's own invert, a slot breakline, a refinement
 box, a probe line.
 
 **The pass is in `stahlbeton.stl`.** Both the baffles and the slot blocks opposite them
 are concrete and live in that one part. `stahlblech.stl` is something else entirely: a
 single 24 m sheet-steel wall standing 2 to 3.3 m off the pass centreline on the OTHER
 side, the outer wall of the parallel channel. It holds no baffle and no slot block, so
-a throat sought inside its bounding box finds the parallel channel (~1.2 m) and never
-the slot.
+a slot sought inside its bounding box measures the parallel channel (~1.2 m) and never
+finds one.
 
 **How the fourteen are found.** Two facts about this CAD rule out the obvious routes:
 
@@ -30,7 +30,7 @@ islands - 14 baffles and the 14 slot blocks - and a baffle is the island that re
 the near wall's inner face, a block the one that does not.
 
 The raster only says where to look. Each island's outline is then rebuilt from the
-STL's own horizontal facets, and the throat is `baffle.distance(block)` on those exact
+STL's own horizontal facets, and the slot is `baffle.distance(block)` on those exact
 polygons: the shortest line between the two solids, which runs diagonally, which is
 why no ray cast across the channel ever finds it.
 
@@ -244,7 +244,7 @@ def invert_line(bed, band, window, res):
     Per cell rather than per station is the obvious thing and it is wrong here.
     `dem-from-surfaces.tif` has a hole right under the fourteenth slot block, so a
     per-cell test drops that block silently and the pass comes back with thirteen
-    throats. The invert is flat across the channel at any station, so a median over
+    slots. The invert is flat across the channel at any station, so a median over
     the channel is both more robust and no less true; stations with no bed at all are
     interpolated along the pass.
     """
@@ -418,7 +418,7 @@ def main() -> None:
         if pb is None or pk is None:
             print(f"  baffle {k} at s {baffle['s0']:.2f}: no cap facets, skipped")
             continue
-        throat = pb.distance(pk)
+        slot = pb.distance(pk)
         shapes.append((k, "baffle", pb))
         shapes.append((k, "slot_block", pk))
         qa, qb = nearest_points(pb, pk)
@@ -431,31 +431,31 @@ def main() -> None:
         rows.append({
             "baffle": k,
             "s": round(float(mid[0]), 4),
-            "throat_x": round(float(mid_xy[0]), 4),
-            "throat_y": round(float(mid_xy[1]), 4),
+            "slot_x": round(float(mid_xy[0]), 4),
+            "slot_y": round(float(mid_xy[1]), 4),
             "baffle_tip_x": round(float(tip_xy[0]), 4),
             "baffle_tip_y": round(float(tip_xy[1]), 4),
             "block_corner_x": round(float(blk_xy[0]), 4),
             "block_corner_y": round(float(blk_xy[1]), 4),
-            "throat_m": round(float(throat), 4),
+            "slot_m": round(float(slot), 4),
             "invert_z": round(float(bed_line[j]), 4),
             "baffle_top_z": round(float(baffle["top"]), 4),
             "block_top_z": round(float(block["top"]), 4),
             "baffle_area_m2": round(float(baffle["area"]), 4),
         })
 
-    print(f"\n{'#':>2} {'s':>7} {'x':>9} {'y':>9} {'throat':>7} {'invert':>7} "
+    print(f"\n{'#':>2} {'s':>7} {'x':>9} {'y':>9} {'slot':>7} {'invert':>7} "
           f"{'b_top':>7} {'k_top':>7}")
     for r in rows:
-        print(f"{r['baffle']:>2} {r['s']:7.3f} {r['throat_x']:9.4f} "
-              f"{r['throat_y']:9.4f} {r['throat_m']:7.4f} {r['invert_z']:7.3f} "
+        print(f"{r['baffle']:>2} {r['s']:7.3f} {r['slot_x']:9.4f} "
+              f"{r['slot_y']:9.4f} {r['slot_m']:7.4f} {r['invert_z']:7.3f} "
               f"{r['baffle_top_z']:7.3f} {r['block_top_z']:7.3f}")
 
     if not rows:
         raise SystemExit("no baffle/block pairs found")
-    t = np.array([r["throat_m"] for r in rows])
+    t = np.array([r["slot_m"] for r in rows])
     s = np.array([r["s"] for r in rows])
-    print(f"\nTHROAT over {t.size} baffles: mean {t.mean():.4f} m, sd {t.std():.4f}, "
+    print(f"\nSLOT over {t.size} baffles: mean {t.mean():.4f} m, sd {t.std():.4f}, "
           f"min {t.min():.4f}, max {t.max():.4f}")
     print(f"pitch: median {np.median(np.diff(s)):.4f} m over "
           f"{s.max() - s.min():.3f} m of pass")

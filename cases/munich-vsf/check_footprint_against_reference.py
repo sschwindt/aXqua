@@ -26,7 +26,7 @@ rather than one:
     The 28 baffle and slot-block outlines read straight off the CAD by
     `measure_baffle_stations.py`, at the CAD's own precision. This is the check on
     width: how much of each solid the footprint realises, and - the number that
-    decides this case - what is left of the 0.1697 m throat between them.
+    decides this case - what is left of the 0.1697 m slot between them.
 
     python cases/munich-vsf/check_footprint_against_reference.py <footprint.gpkg> ...
 
@@ -133,9 +133,9 @@ def exclusion_check(union, ref):
 
 
 def width_check(union, solids, drawn=0.1697):
-    """What the footprint makes of each solid, and of the throat between them.
+    """What the footprint makes of each solid, and of the slot between them.
 
-    The throat is measured on the FOOTPRINT, not on the CAD: the two solids are
+    The slot is measured on the FOOTPRINT, not on the CAD: the two solids are
     located from the CAD, but the opening reported is the gap this layer actually
     leaves between the piece of itself standing on the baffle and the piece standing
     on the slot block. Intersecting the exact polygons with the layer and measuring
@@ -173,15 +173,15 @@ def width_check(union, solids, drawn=0.1697):
         missing = int(np.isnan(t).sum())
         open_ = t[np.isfinite(t) & (t > 1e-9)]
         if open_.size:
-            print(f"  THROAT      drawn {drawn:.4f} m -> this layer leaves "
+            print(f"  SLOT        drawn {drawn:.4f} m -> this layer leaves "
                   f"{open_.mean():.4f} m mean, {open_.min():.4f} min "
                   f"({100 * open_.mean() / drawn:.0f}% of drawn) "
-                  f"over {open_.size} of {len(t)} throats")
+                  f"over {open_.size} of {len(t)} slots")
         if shut:
-            print(f"  THROAT      {shut} of {len(t)} are WELDED SHUT by this "
+            print(f"  SLOT        {shut} of {len(t)} are WELDED SHUT by this "
                   "footprint")
         if missing:
-            print(f"  THROAT      {missing} of {len(t)} have no footprint on one "
+            print(f"  SLOT        {missing} of {len(t)} have no footprint on one "
                   "of the two solids")
 
 

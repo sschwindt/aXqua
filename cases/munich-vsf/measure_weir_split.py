@@ -15,9 +15,9 @@ The two controls:
 
 * **the weir**, a flat sill measured off the reference model's own `Substratum_weir`
   patch. Broad-crested (Poleni): ``Q = 2/3 mu b sqrt(2g) h**1.5``.
-* **the pass**, whose throat, drop per pool and first invert are measured off the CAD
+* **the pass**, whose slot, drop per pool and first invert are measured off the CAD
   by `measure_baffle_stations.py`. The standard vertical-slot relation:
-  ``Q = Cd b_slot h sqrt(2 g dh)``, with the measured 0.1697 m throat and the
+  ``Q = Cd b_slot h sqrt(2 g dh)``, with the measured 0.1697 m slot and the
   measured 0.1297 m drop per pool.
 
 Both are first-order: free overfall, no approach velocity, no submergence, and one
@@ -76,17 +76,17 @@ def weir_geometry():
 
 
 def pass_geometry():
-    """Throat, drop per pool and head-pool invert, from the CAD."""
+    """Slot, drop per pool and head-pool invert, from the CAD."""
     import pandas as pd
 
     if not STATIONS.is_file():
         raise SystemExit(f"{STATIONS.name} not built - run "
                          "measure_baffle_stations.py first")
     s = pd.read_csv(STATIONS)
-    throat = float(s.throat_m.median())
+    slot = float(s.slot_m.median())
     drop = float(np.median(-np.diff(s.invert_z.to_numpy())))
     invert = float(s.invert_z.max())
-    return throat, drop, invert, len(s)
+    return slot, drop, invert, len(s)
 
 
 def q_weir(level, crest, width, mu=MU):
@@ -94,17 +94,17 @@ def q_weir(level, crest, width, mu=MU):
     return (2 / 3) * mu * width * np.sqrt(2 * G) * h ** 1.5
 
 
-def q_pass(level, invert, throat, drop, cd=CD):
+def q_pass(level, invert, slot, drop, cd=CD):
     h = np.maximum(level - invert, 0.0)
-    return cd * throat * h * np.sqrt(2 * G * drop)
+    return cd * slot * h * np.sqrt(2 * G * drop)
 
 
-def solve_level(total, crest, width, invert, throat, drop, mu=MU, cd=CD):
+def solve_level(total, crest, width, invert, slot, drop, mu=MU, cd=CD):
     """The upstream level at which the two structures together pass *total*."""
     lo, hi = invert, invert + 5.0
     for _ in range(200):
         mid = (lo + hi) / 2
-        q = q_weir(mid, crest, width, mu) + q_pass(mid, invert, throat, drop, cd)
+        q = q_weir(mid, crest, width, mu) + q_pass(mid, invert, slot, drop, cd)
         if q < total:
             lo = mid
         else:
@@ -114,7 +114,7 @@ def solve_level(total, crest, width, invert, throat, drop, mu=MU, cd=CD):
 
 def main() -> None:
     crest, width, n_sill, patch_area = weir_geometry()
-    throat, drop, invert, n_baffles = pass_geometry()
+    slot, drop, invert, n_baffles = pass_geometry()
 
     print("HW weir, from the reference model's own patch")
     print(f"  crest          {crest:.3f} m local, flat over {n_sill} cells "
@@ -125,16 +125,16 @@ def main() -> None:
           "better")
     print("  the drawing calls it HW-Wehr and the parallel channel HW-Ableitung")
     print("\nfish pass, from the CAD")
-    print(f"  throat         {throat:.4f} m at each of {n_baffles} baffles")
+    print(f"  slot           {slot:.4f} m at each of {n_baffles} baffles")
     print(f"  drop per pool  {drop:.4f} m")
     print(f"  head invert    {invert:.3f} m local")
     print(f"\n  the weir crest stands {crest - invert:.3f} m above the pass's first "
           f"pool,\n  and {WALL_TOP - crest:.3f} m BELOW the {WALL_TOP:.3f} m wall "
           "tops")
 
-    level = solve_level(DESIGN_Q, crest, width, invert, throat, drop)
+    level = solve_level(DESIGN_Q, crest, width, invert, slot, drop)
     qw = q_weir(level, crest, width)
-    qp = q_pass(level, invert, throat, drop)
+    qp = q_pass(level, invert, slot, drop)
     print(f"\nat the design discharge {DESIGN_Q:.3f} m3/s (mu {MU}, Cd {CD}):")
     print(f"  upstream level {level:.3f} m, {WALL_TOP - level:.3f} m under the "
           "wall tops")
@@ -145,15 +145,15 @@ def main() -> None:
     print(f"  {'mu':>5} {'Cd':>5} {'level':>7} {'pass':>7} {'weir':>7} {'pass %':>7}")
     for mu in (0.50, 0.60, 0.70):
         for cd in (0.65, 0.85, 0.95):
-            lv = solve_level(DESIGN_Q, crest, width, invert, throat, drop, mu, cd)
-            p = q_pass(lv, invert, throat, drop, cd)
+            lv = solve_level(DESIGN_Q, crest, width, invert, slot, drop, mu, cd)
+            p = q_pass(lv, invert, slot, drop, cd)
             print(f"  {mu:5.2f} {cd:5.2f} {lv:7.3f} {p * 1000:6.1f} "
                   f"{(DESIGN_Q - p) * 1000:6.1f} {100 * p / DESIGN_Q:6.0f}")
 
     print("\nwhat this settles")
     print(f"  The pool cannot reach the wall tops. Sending all {DESIGN_Q:.3f} m3/s")
     print("  through the pass alone needs "
-          f"{invert + DESIGN_Q / (CD * throat * np.sqrt(2 * G * drop)):.3f} m, and "
+          f"{invert + DESIGN_Q / (CD * slot * np.sqrt(2 * G * drop)):.3f} m, and "
           f"the weir spills at {crest:.3f} m,")
     print("  so the weir takes the difference long before the concrete is at risk.")
     for lv in (2.823, 3.011, 3.397):
