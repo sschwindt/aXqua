@@ -261,13 +261,13 @@ def test_a_wall_thinner_than_an_element_still_raises_a_continuous_ridge():
 
 def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     """`touch` blanks any element a wall grazes, so it eats about 0.45 of a cell on
-    each side of an opening. On a fish-pass throat only a few cells wide that is most
+    each side of an opening. On a fish-pass slot only a few cells wide that is most
     of the opening, which is what lww-134 raised.
 
     `structures.blanking_rule: area` blanks only elements the wall really covers.
-    Measured on a synthetic vertical-slot flume with a 0.170 m DIAGONAL throat
+    Measured on a synthetic vertical-slot flume with a 0.170 m DIAGONAL slot
     (cases/slot-flume/blanking_rules.py): zero crossings through a wall at dx 0.10 to
-    0.025 m, and a realised throat of 102-104% of drawn against 74-86% for `touch`.
+    0.025 m, and a realised slot of 102-104% of drawn against 74-86% for `touch`.
 
     The guarantee both must keep: no element may have open water on both sides of a
     wall. Here that is pinned as "every element the wall passes through is raised".

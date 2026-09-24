@@ -28,7 +28,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-from shapely.geometry import MultiPoint, Polygon
+from shapely.geometry import MultiPoint, MultiPolygon, Polygon
 
 CASE = Path(__file__).resolve().parent
 GEO = CASE / "user-sources" / "geodata"
@@ -178,8 +178,58 @@ def main() -> None:
     # between two CORNERS, and Douglas-Peucker keeps corners. Measured over all 14
     # baffles, every tolerance from 0 to 0.05 m leaves the slot at 0.1697 m - 100.0% of
     # CAD - so this is chosen against mesh.min_size, not against the slot.
+    # 0.010. A coarser boundary would buy a LOT of time - the tolerance sets the
+    # smallest segment, that sets the smallest element, and TELEMAC's global time step
+    # follows it, so 0.020 plus vertex thinning promised ~6x on an 11.4 h fill.
+    #
+    # It was measured and REJECTED. Thinning moves corners by up to its threshold, and
+    # the slot is the distance between two corners on DIFFERENT solids - the baffle tip
+    # and the block corner - so each moving inward by 0.02 m cost 0.04 m of a 0.1697 m
+    # opening. The dissolved layer came out at 0.1257 m, 74% of CAD.
+    #
+    # The earlier per-footprint test that passed at every tolerance to 0.05 m was not
+    # wrong, it was the wrong test: it simplified each baffle ALONE, where those two
+    # corners survive. What the mesh cuts is the dissolved geometry.
     SIMPLIFY = 0.010
+    def _thin(geom, minseg):
+        """Drop vertices closer than *minseg* to the last kept one.
+
+        simplify() removes collinear points but leaves short segments where rings
+        meet and at corners, and it is the MINIMUM segment that sets the smallest
+        element and therefore the time step. Corners survive: a corner is where the
+        direction changes and both its legs are longer than minseg.
+        """
+        def ring(coords):
+            q = np.asarray(coords)
+            keep = [q[0]]
+            for v in q[1:-1]:
+                if np.hypot(*(v - keep[-1])) >= minseg:
+                    keep.append(v)
+            # the CLOSING segment counts too: if the last kept vertex sits closer to
+            # the start than minseg, keeping it leaves exactly the short edge this
+            # function exists to remove
+            while len(keep) > 3 and np.hypot(*(keep[-1] - q[0])) < minseg:
+                keep.pop()
+            keep.append(q[0])
+            return np.asarray(keep)
+        if geom.geom_type == "Polygon":
+            e = ring(geom.exterior.coords)
+            if len(e) < 4:
+                return geom
+            holes = [ring(i.coords) for i in geom.interiors]
+            return Polygon(e, [h for h in holes if len(h) >= 4])
+        return MultiPolygon([_thin(g, minseg) for g in geom.geoms])
+
     rec = [{**r, "geometry": r["geometry"].simplify(SIMPLIFY)} for r in rec]
+    # Drop fragments too small to represent anything. They are 0.00-0.02 m2 out of
+    # ~35 m2 and block nothing, but _thin leaves their outlines alone (too few
+    # vertices to decimate) and TELEMAC's time step is GLOBAL - one 3 mm edge anywhere
+    # in the domain sets dt for the whole mesh, wherever the water actually is.
+    MIN_AREA = 0.05
+    small = [r for r in rec if r["geometry"].area < MIN_AREA]
+    for r in small:
+        print(f"  drop {r['Name']:<12} {r['geometry'].area:.4f} m2 -- below {MIN_AREA} m2")
+    rec = [r for r in rec if r["geometry"].area >= MIN_AREA]
     rec = [r for r in rec if not r["geometry"].is_empty and r["geometry"].is_valid]
     segs = []
     for r in rec:

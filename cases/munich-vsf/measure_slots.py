@@ -1,14 +1,14 @@
-"""The acceptance gate: the realised throat at all 14 baffles of the built mesh.
+"""The acceptance gate: the realised slot at all 14 baffles of the built mesh.
 
 lww-134's criterion, and the one that decides whether anything downstream is worth
 running. Measured as the shortest distance between DISTINCT raised regions - a
-perpendicular ray cannot see a diagonal throat, which cost three wrong answers.
+perpendicular ray cannot see a diagonal slot, which cost three wrong answers.
 
     drawn      0.1697 m   (the drawing, measure_slot_from_dxf.py)
     footprints 0.1342 m   (what wall_footprints delivers at surfaces.resolution 0.02)
     at dx 0.035 with `touch`: 3 of 14 CLOSED, the rest 32-66%
 
-    python cases/munich-vsf/measure_throats.py
+    python cases/munich-vsf/measure_slots.py
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ def main() -> None:
     # fragments and the nearest pair is two bits of the same wall. Instead rasterise
     # the OPEN area and take its distance transform - twice the largest inscribed
     # radius at a station is the width of the opening there, and the minimum along the
-    # pass is the throat. It sees a diagonal throat, which a ray across the channel
+    # pass is the slot. It sees a diagonal slot, which a ray across the channel
     # cannot, and it needs no assumption about which fragment belongs to which baffle.
 
     res = 0.01

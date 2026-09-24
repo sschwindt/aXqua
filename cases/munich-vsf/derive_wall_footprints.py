@@ -1,7 +1,7 @@
 """Wall footprints from the REPAIRED CAD: material anywhere in the water column.
 
 Replaces rasterise-and-hole-fill, which cannot do better on an open surface and costs
-0.036 m of the 0.1697 m throat. A watertight solid can be asked directly whether it
+0.036 m of the 0.1697 m slot. A watertight solid can be asked directly whether it
 occupies a point.
 
 TWO BUGS THIS FILE EXISTS TO STOP REPEATING, both of which produced plausible-looking

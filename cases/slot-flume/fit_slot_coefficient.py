@@ -128,7 +128,7 @@ def main() -> None:
         raise SystemExit(f"no sweep results in {store} - run the sweep first")
 
     crest = design.BAFFLE_HEIGHT + cfg.structures.solid_freeboard_2d
-    b = design.THROAT
+    b = design.SLOT
     print(f"slot b        {b:.4f} m  (the diagonal; the gap to the far wall is "
           f"{design.SLOT_WIDTH:.3f} m)")
     print(f"baffle crest  {design.BAFFLE_HEIGHT:.2f} m + "
