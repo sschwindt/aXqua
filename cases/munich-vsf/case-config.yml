@@ -92,10 +92,22 @@ surfaces:
     - {file: user-sources/geodata/cad/air-top.stl, role: ignore}
 
 geodata:
-  # Explicit, so it wins over the one the surfaces stage derives. Draped from the
-  # repaired watertight CAD: a cell is wall where solid material stands anywhere in
-  # the water column above the local bed. Covers the fish pass window only.
-  structures: user-sources/geodata/walls-drape.gpkg
+  # Explicit, so it wins over the one the surfaces stage derives.
+  #
+  # NOT walls-drape.gpkg. That layer is the CAD rasterised and polygonised, which
+  # works for a long continuous wall and fails for the baffles: at its resolution the
+  # fourteen 0.15 m cross-walls fuse into the side wall they touch, leaving seven blobs
+  # instead of fourteen baffles plus their walls. Built through it the pass has NO
+  # baffles over its upper two thirds - which is why 2D sat at 3.397 m against 2.845 m
+  # wall tops, and why the hydrostatic 3D pre-run retained 105% of its inflow.
+  #
+  # structures-merged.gpkg takes the baffles from the CAD instead (28 outlines at CAD
+  # precision, slot 0.1697 m sd 0.0000 at all fourteen, crests measured per baffle
+  # because the pass falls 1.9 m) and keeps the drape only for the side walls and weir,
+  # where a merged strip IS the correct shape. Regenerate both with:
+  #   python cases/munich-vsf/measure_baffle_stations.py   # writes the CAD outlines
+  #   python cases/munich-vsf/build_structures_layer.py    # merges them with the drape
+  structures: user-sources/geodata/structures-merged.gpkg
   # THE REACH AXIS, and the input that was missing all along. Without it flow_angle()
   # returns 0 (mesh.py: "falls back to 0 with no centerline") and every derived thing
   # is axis-aligned while the pass runs at +14.3 deg: the plan lattice, the crop faces,
