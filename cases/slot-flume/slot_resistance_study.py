@@ -81,12 +81,29 @@ def build_and_run(base, size: float, *, run: bool = True,
                   duration: float | None = None) -> Path:
     """Build the flume at *size* in its own folder and run the steady case there.
 
-    *duration* shortens the march. Measured on the coarse level: the domain volume
-    stops changing at t = 302 s and the imbalance is oscillating around 1e-3 by
-    t = 221 s, so the configured 900 s is 3.6x longer than the flume needs. That
-    matters only at the finest level, where it is the difference between four hours
-    and eight. Each level's own balance is reported, so a run that was cut short
-    would be visible rather than quietly averaged in.
+    *duration* shortens the march. **Settling time depends on the DISCHARGE, and the
+    note that used to be here did not say so.** It read "the domain volume stops
+    changing at t = 302 s", measured at the design discharge, and taking that as
+    general produced a five-point sweep at 400 s in which three runs were still
+    passing barely 80% of their own inflow - and whose apparent discharge coefficients
+    agreed with each other to 0.6%, because runs stopped at the same wall-clock sit at
+    the same fraction-filled state. The whole sweep had to be retracted.
+
+    Measured settling times, taken as the first t within 1% of the run's own final
+    volume:
+
+        dx 0.025 m, Q 0.040 m3/s   t = 210 s, flat and out/in = 1.0000 from t = 384 s
+        dx 0.050 m, Q 0.200 m3/s   t = 253 s
+        dx 0.050 m, Q 0.040-0.090  still filling at t = 400 s
+
+    So the flume settles FASTER at higher discharge, for the obvious reason, and
+    faster on a finer mesh, because a coarse lattice throttles the slots and ponds it.
+    At dx 0.025 the configured 900 s is about 2.3x more than even the slowest
+    discharge needs; at dx 0.05 it is not obviously enough for the low ones.
+
+    Do not shorten this without measuring the case in hand. `fit_slot_coefficient.py`
+    gates on the volume trace and refuses a run that was cut short, rather than
+    averaging it in.
     """
     cfg = copy.deepcopy(base)
     cfg.mesh.size_scale = size / base.mesh.default_size
