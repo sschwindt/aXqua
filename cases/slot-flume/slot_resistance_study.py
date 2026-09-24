@@ -439,8 +439,24 @@ def main() -> None:
 
     if records:
         name = "slot-resistance" + (f"-q{1000 * q:.0f}" if q is not None else "")
-        (store / f"{name}.json").write_text(
-            json.dumps(records, indent=2) + "\n")
+        # MERGE, do not overwrite. One invocation runs one `sizes` list, so writing
+        # the file plainly drops every other mesh level already measured at this
+        # discharge - which is how a three-level sweep run one level at a time came
+        # back as a single point, with nothing saying the other two had been lost.
+        # Keyed on dx, so re-running a level replaces it rather than duplicating it.
+        merged = {}
+        path = store / f"{name}.json"
+        if path.is_file():
+            try:
+                for old in json.loads(path.read_text()):
+                    merged[old["dx"]] = old
+            except Exception as exc:                  # noqa: BLE001
+                print(f"could not read {path} ({type(exc).__name__}: {exc}); "
+                      "starting fresh")
+        for new in records:
+            merged[new["dx"]] = new
+        records = [merged[k] for k in sorted(merged)]
+        path.write_text(json.dumps(records, indent=2) + "\n")
         lines = report(records) + discharge_report(store)
         print("\n".join(lines))
         (store / f"{name}.txt").write_text("\n".join(lines) + "\n")
