@@ -1,9 +1,15 @@
-"""Measure Cd for a vertical slot, instead of assuming it.
+"""Measure C_Q for a vertical slot, instead of assuming it.
 
-``Q = Cd b h sqrt(2 g dh)`` is the design relation for a vertical-slot fishway, and
+**C_Q, not Cd.** This is the slot's DISCHARGE coefficient. In fluid mechanics Cd
+conventionally means the drag coefficient, and this repository carries velocity and
+force work where that collision is live, so the discharge coefficient is spelled C_Q
+throughout - here and in `measure_weir_split.py`. The weir's Poleni coefficient keeps
+its own conventional symbol, mu.
+
+``Q = C_Q b h sqrt(2 g dh)`` is the design relation for a vertical-slot fishway, and
 aXqua leans on it in two places - `rating.synthesize_outflow_rating` fabricates a
 stage-discharge curve when a case has no measured one, and `measure_weir_split.py`
-divides the munich discharge between the pass and the HW weir. Both currently take Cd
+divides the munich discharge between the pass and the HW weir. Both currently take C_Q
 from the literature (0.65-0.85). Nobody has measured it for OUR geometry as OUR solver
 resolves it.
 
@@ -24,10 +30,10 @@ A point is used only if it passes **both** gates, and the first one is here beca
 skipping it produced a confident wrong answer:
 
 **1. The run must have finished filling.** A flume still filling has shallow pools, and
-Cd goes like 1/h, so an unconverged run reads HIGH. Worse, a set of runs all stopped at
-the same wall-clock are all at a similar fraction-filled state, so their Cd values agree
+C_Q goes like 1/h, so an unconverged run reads HIGH. Worse, a set of runs all stopped at
+the same wall-clock are all at a similar fraction-filled state, so their C_Q values agree
 with each other beautifully and the agreement means nothing. That happened here: five
-runs at `--duration=400` gave Cd = 0.242 with a standard deviation of 0.6%, and three of
+runs at `--duration=400` gave C_Q = 0.242 with a standard deviation of 0.6%, and three of
 those five were passing barely 80% of their own inflow at the final step. The witness is
 the **domain volume**, as `slot_resistance_study.balance` argues - outflow oscillates on
 this Neumann boundary and the instantaneous imbalance is unreliable, but volume is not
@@ -38,7 +44,7 @@ printouts, which on a short run reaches back into the transient.
 `BAFFLE_HEIGHT` over their own bed and the 2D build adds
 `structures.solid_freeboard_2d`, so the realised crest is the sum. Above it the water
 is going OVER the baffle as well as through the slot, the relation no longer describes
-what is happening, and Cd absorbs the error.
+what is happening, and C_Q absorbs the error.
 
 Points failing either gate are printed with the reason, never averaged in.
 """
@@ -118,60 +124,60 @@ def main() -> None:
           "over its own bed")
     print(f"design drop   {design.DESIGN_PER_POOL:.4f} m per pool\n")
 
-    print(f"{'Q':>7} {'dx':>6} {'pool h':>8} {'drop dh':>8} {'Cd':>7}  verdict")
+    print(f"{'Q':>7} {'dx':>6} {'pool h':>8} {'drop dh':>8} {'C_Q':>7}  verdict")
     used = []
     for r in rows:
         h = float(np.nanmedian(r["depths"]))
         dh = float(r["head_per_pool"])
-        cd = r["discharge"] / (b * h * np.sqrt(2 * G * dh))
+        c_q = r["discharge"] / (b * h * np.sqrt(2 * G * dh))
         ok, why = filled(store, cfg, r["dx"], r["discharge"])
         if ok and h >= crest:
             ok, why = False, f"OVERTOPPED: pool {h:.3f} >= crest {crest:.2f}"
         if ok:
-            used.append((r["discharge"], cd, h, dh, r["dx"]))
-        print(f"{r['discharge']:7.3f} {r['dx']:6.3f} {h:8.3f} {dh:8.4f} {cd:7.3f}  "
+            used.append((r["discharge"], c_q, h, dh, r["dx"]))
+        print(f"{r['discharge']:7.3f} {r['dx']:6.3f} {h:8.3f} {dh:8.4f} {c_q:7.3f}  "
               f"{'USED, ' + why if ok else 'rejected - ' + why}")
 
     if len(used) < 2:
         print(f"\n{len(used)} of {len(rows)} runs are usable - not enough to fit a "
               "coefficient.")
         if used:
-            q, cd, h, dh, dx = used[0]
+            q, c_q, h, dh, dx = used[0]
             print(f"The one that is: Q = {q:g} m3/s at dx = {dx:g} m, "
-                  f"pool {h:.3f} m, Cd = {cd:.3f}.")
+                  f"pool {h:.3f} m, C_Q = {c_q:.3f}.")
         print("A sweep needs several converged discharges at ONE mesh size. Re-run "
               "the\nsweep at the configured duration rather than a shortened one.")
         raise SystemExit(1)
     if len({v[4] for v in used}) > 1:
         print("\nWARNING: the usable points are not all at the same mesh size, so "
-              "they\nare not a discharge sweep - mesh size moves Cd here by more "
+              "they\nare not a discharge sweep - mesh size moves C_Q here by more "
               "than discharge does.")
     q = np.array([v[0] for v in used])
-    cd = np.array([v[1] for v in used])
+    c_q = np.array([v[1] for v in used])
     h = np.array([v[2] for v in used])
     print(f"\nCd over the {len(used)} points below the crest "
           f"({q.min():g}-{q.max():g} m3/s):")
-    print(f"  mean {cd.mean():.3f}, sd {cd.std():.4f}, "
-          f"range {cd.min():.3f}-{cd.max():.3f}")
+    print(f"  mean {c_q.mean():.3f}, sd {c_q.std():.4f}, "
+          f"range {c_q.min():.3f}-{c_q.max():.3f}")
     print(f"  literature for a vertical slot is 0.65-0.85, so this is "
-          f"{0.75 / cd.mean():.1f}x more resistant")
+          f"{0.75 / c_q.mean():.1f}x more resistant")
 
-    # Does the relation hold, or does Cd drift with submergence? Q ~ h at fixed dh,
-    # so the exponent is the test that does not need Cd at all.
+    # Does the relation hold, or does C_Q drift with submergence? Q ~ h at fixed dh,
+    # so the exponent is the test that does not need C_Q at all.
     exponent = float(np.polyfit(np.log(q), np.log(h), 1)[0])
     print(f"\n  pool depth ~ Q^{exponent:.2f} over these points "
           f"(the relation says Q ~ h, exponent 1.00)")
-    drift = float(np.polyfit(np.log(q), cd, 1)[0])
-    print(f"  Cd drifts {drift:+.3f} per e-fold of Q - "
+    drift = float(np.polyfit(np.log(q), c_q, 1)[0])
+    print(f"  C_Q drifts {drift:+.3f} per e-fold of Q - "
           + ("flat enough for a single rating"
              if abs(drift) < 0.05 else "NOT flat; a single rating is wrong here"))
 
     out = store / "slot-coefficient.txt"
-    print(f"\nb = {b:.4f} m, Cd = {cd.mean():.3f} +/- {cd.std():.4f}, "
+    print(f"\nb = {b:.4f} m, C_Q = {c_q.mean():.3f} +/- {c_q.std():.4f}, "
           f"measured not assumed")
     out.write_text(
         f"slot width b (diagonal)  {b:.4f} m\n"
-        f"Cd                       {cd.mean():.4f} +/- {cd.std():.4f}\n"
+        f"C_Q                       {c_q.mean():.4f} +/- {c_q.std():.4f}\n"
         f"fitted over              {q.min():g}-{q.max():g} m3/s, {len(used)} points\n"
         f"excluded (overtopped)    {len(rows) - len(used)} points\n"
         f"pool depth exponent      {exponent:.3f} (relation says 1.0)\n")

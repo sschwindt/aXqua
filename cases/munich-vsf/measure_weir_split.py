@@ -17,7 +17,7 @@ The two controls:
   patch. Broad-crested (Poleni): ``Q = 2/3 mu b sqrt(2g) h**1.5``.
 * **the pass**, whose slot, drop per pool and first invert are measured off the CAD
   by `measure_baffle_stations.py`. The standard vertical-slot relation:
-  ``Q = Cd b_slot h sqrt(2 g dh)``, with the measured 0.1697 m slot and the
+  ``Q = C_Q b_slot h sqrt(2 g dh)``, with the measured 0.1697 m slot and the
   measured 0.1297 m drop per pool.
 
 Both are first-order: free overfall, no approach velocity, no submergence, and one
@@ -41,7 +41,10 @@ G = 9.81
 DESIGN_Q = 0.135                 #: [m3/s] MQ, `boundaries.prescribed_flowrate`
 WALL_TOP = 2.845                 #: [m] local, the top of the concrete
 MU = 0.60                        #: Poleni discharge coefficient, broad-crested
-CD = 0.85                        #: vertical-slot discharge coefficient
+#: Vertical-slot DISCHARGE coefficient. Named C_Q, not Cd: in fluid mechanics Cd is
+#: the drag coefficient, and these scripts sit next to velocity and force work where
+#: that collision is live.
+C_Q_DEFAULT = 0.85
 CELL = 0.25                      #: the reference grid step
 #: [m] "4.13 m (weir width)" on the dimension slide of
 #: `user-sources/geodata/fishpass-dimensions-ssc.fodp`. Kept as a cross-check only:
@@ -94,17 +97,17 @@ def q_weir(level, crest, width, mu=MU):
     return (2 / 3) * mu * width * np.sqrt(2 * G) * h ** 1.5
 
 
-def q_pass(level, invert, slot, drop, cd=CD):
+def q_pass(level, invert, slot, drop, c_q=C_Q_DEFAULT):
     h = np.maximum(level - invert, 0.0)
-    return cd * slot * h * np.sqrt(2 * G * drop)
+    return c_q * slot * h * np.sqrt(2 * G * drop)
 
 
-def solve_level(total, crest, width, invert, slot, drop, mu=MU, cd=CD):
+def solve_level(total, crest, width, invert, slot, drop, mu=MU, c_q=C_Q_DEFAULT):
     """The upstream level at which the two structures together pass *total*."""
     lo, hi = invert, invert + 5.0
     for _ in range(200):
         mid = (lo + hi) / 2
-        q = q_weir(mid, crest, width, mu) + q_pass(mid, invert, slot, drop, cd)
+        q = q_weir(mid, crest, width, mu) + q_pass(mid, invert, slot, drop, c_q)
         if q < total:
             lo = mid
         else:
@@ -135,25 +138,25 @@ def main() -> None:
     level = solve_level(DESIGN_Q, crest, width, invert, slot, drop)
     qw = q_weir(level, crest, width)
     qp = q_pass(level, invert, slot, drop)
-    print(f"\nat the design discharge {DESIGN_Q:.3f} m3/s (mu {MU}, Cd {CD}):")
+    print(f"\nat the design discharge {DESIGN_Q:.3f} m3/s (mu {MU}, C_Q {C_Q_DEFAULT}):")
     print(f"  upstream level {level:.3f} m, {WALL_TOP - level:.3f} m under the "
           "wall tops")
     print(f"  through the pass {qp * 1000:5.1f} l/s  ({100 * qp / DESIGN_Q:.0f}%)")
     print(f"  over the weir    {qw * 1000:5.1f} l/s  ({100 * qw / DESIGN_Q:.0f}%)")
 
     print("\nsensitivity - these two coefficients are the whole uncertainty:")
-    print(f"  {'mu':>5} {'Cd':>5} {'level':>7} {'pass':>7} {'weir':>7} {'pass %':>7}")
+    print(f"  {'mu':>5} {'C_Q':>5} {'level':>7} {'pass':>7} {'weir':>7} {'pass %':>7}")
     for mu in (0.50, 0.60, 0.70):
-        for cd in (0.65, 0.85, 0.95):
-            lv = solve_level(DESIGN_Q, crest, width, invert, slot, drop, mu, cd)
-            p = q_pass(lv, invert, slot, drop, cd)
-            print(f"  {mu:5.2f} {cd:5.2f} {lv:7.3f} {p * 1000:6.1f} "
+        for c_q in (0.65, 0.85, 0.95):
+            lv = solve_level(DESIGN_Q, crest, width, invert, slot, drop, mu, c_q)
+            p = q_pass(lv, invert, slot, drop, c_q)
+            print(f"  {mu:5.2f} {c_q:5.2f} {lv:7.3f} {p * 1000:6.1f} "
                   f"{(DESIGN_Q - p) * 1000:6.1f} {100 * p / DESIGN_Q:6.0f}")
 
     print("\nwhat this settles")
     print(f"  The pool cannot reach the wall tops. Sending all {DESIGN_Q:.3f} m3/s")
     print("  through the pass alone needs "
-          f"{invert + DESIGN_Q / (CD * slot * np.sqrt(2 * G * drop)):.3f} m, and "
+          f"{invert + DESIGN_Q / (C_Q_DEFAULT * slot * np.sqrt(2 * G * drop)):.3f} m, and "
           f"the weir spills at {crest:.3f} m,")
     print("  so the weir takes the difference long before the concrete is at risk.")
     for lv in (2.823, 3.011, 3.397):
