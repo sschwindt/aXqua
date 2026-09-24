@@ -121,12 +121,12 @@ def main() -> None:
     # Opposite every baffle there is a rectangular concrete SLOT BLOCK projecting from
     # the other wall, offset downstream so the two never share a cross-section. A ray
     # cast across the channel at the baffle station therefore misses it entirely and
-    # reports the gap to the wall. The throat is the narrowest opening between the two
+    # reports the gap to the wall. The slot is the narrowest opening between the two
     # solids.
     #
     # (The vertical-slot literature calls this the short baffle. Not a "nose": that
     # word means a ROUNDED feature, and this is a square-cornered rectangle - the
-    # corner is what sets the throat, so the shape is the whole point.)
+    # corner is what sets the slot, so the shape is the whole point.)
     from shapely.ops import polygonize, unary_union
     from shapely.geometry import LineString
 
@@ -144,19 +144,19 @@ def main() -> None:
           f"{float(np.median([p.bounds[2]-p.bounds[0] for p in blocks])):.3f} x "
           f"{float(np.median([p.bounds[3]-p.bounds[1] for p in blocks])):.3f} m,")
     offs = []
-    throats = []
+    slots = []
     for baffle in baffles:
         later = [q for q in blocks if q.bounds[0] > baffle.bounds[0]]
         if not later:
             continue
         block = min(later, key=lambda q: q.bounds[0])
         offs.append(block.bounds[0] - baffle.bounds[2])
-        throats.append(baffle.distance(block))
-    if throats:
-        t = np.array(throats)
+        slots.append(baffle.distance(block))
+    if slots:
+        t = np.array(slots)
         print(f"each offset {float(np.median(offs)):.3f} m downstream of its baffle, "
               "so the two never share a cross-section.")
-        print(f"\n  THROAT (baffle to slot block)  {t.mean():.4f} m   "
+        print(f"\n  SLOT (baffle to slot block)  {t.mean():.4f} m   "
               f"(sd {t.std():.4f} over {len(t)} baffles)")
         print(f"\nThat, not {to_wall:.3f} m, is the opening the flow passes "
               "through. A ray cast across\nthe channel AT a baffle station cannot see "

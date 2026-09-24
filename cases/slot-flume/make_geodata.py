@@ -43,13 +43,13 @@ SLOT_WIDTH = 0.380       # [m] baffle tip to the far wall
 # Opposite every baffle the drawing carries a rectangular concrete SLOT BLOCK
 # projecting from the other wall, offset downstream so the two never share a
 # cross-section (measured from the DXF by munich-vsf/measure_slot_from_dxf.py). The
-# flow's real throat is the DIAGONAL between the two corners, 0.120 x sqrt(2) =
+# flow's real slot is the DIAGONAL between the two corners, 0.120 x sqrt(2) =
 # 0.1697 m - less than half the gap to the wall, and the reason a ray cast across the
 # channel cannot find it.
 #
 # The vertical-slot literature would call this the short baffle. It is NOT a "nose":
 # that word means a rounded feature, and this is a 0.150 x 0.260 m rectangle with
-# square corners - and the corner is precisely what sets the throat.
+# square corners - and the corner is precisely what sets the slot.
 BLOCK_REACH = 0.260       # [m] how far the block projects from the far wall
 BLOCK_THICKNESS = 0.150   # [m] streamwise, same as a baffle
 BLOCK_OFFSET = 0.120      # [m] downstream from the baffle's downstream face
@@ -79,9 +79,9 @@ def baffle_x(index: int) -> float:
 LENGTH = baffle_x(N_BAFFLES - 1) + LEAD_OUT
 DESIGN_HEAD = (N_BAFFLES - 1) * PITCH * SLOPE      # 1.690 m over 13 pitches
 DESIGN_PER_POOL = PITCH * SLOPE                    # 0.130 m
-#: The throat: the diagonal between the baffle's downstream tip corner and the slot
+#: The slot: the diagonal between the baffle's downstream tip corner and the slot
 #: block's upstream tip corner. This, not SLOT_WIDTH, is what the flow passes through.
-THROAT = float(np.hypot(BLOCK_OFFSET, SLOT_WIDTH - BLOCK_REACH))
+SLOT = float(np.hypot(BLOCK_OFFSET, SLOT_WIDTH - BLOCK_REACH))
 
 
 def bed_z(x_local: np.ndarray | float):
@@ -183,7 +183,7 @@ def main() -> None:
     print(f"  {N_BAFFLES} baffles at {PITCH:g} m, {WALL_THICKNESS:g} m thick, "
           f"{SLOT_WIDTH:g} m to the far wall")
     print(f"  {N_BAFFLES} slot blocks {BLOCK_THICKNESS:g} x {BLOCK_REACH:g} m, "
-          f"offset {BLOCK_OFFSET:g} m downstream -> THROAT {THROAT:.4f} m")
+          f"offset {BLOCK_OFFSET:g} m downstream -> SLOT {SLOT:.4f} m")
     print(f"  bed {bed_z(0):.3f} -> {bed_z(LENGTH):.3f} m")
     print(f"  design head over {N_BAFFLES - 1} pitches: {DESIGN_HEAD:.3f} m "
           f"({DESIGN_PER_POOL:.4f} m per pool)")

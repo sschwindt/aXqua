@@ -12,7 +12,7 @@ be an artefact of STL's per-triangle vertices - the points are already merged
 An open surface cannot be sliced (the contours do not close) and cannot be booleaned,
 which is why `core.surfaces.wall_footprints` rasterises at `surfaces.resolution` and
 hole-fills instead. That workaround costs **0.036 m of the fish pass's 0.1697 m
-throat**, and the structure clears its own wall tops by 22 mm, so the workaround is the
+slot**, and the structure clears its own wall tops by 22 mm, so the workaround is the
 level problem.
 
 Originals are left alone; repaired parts are written to `cad-repaired/`.
@@ -27,7 +27,7 @@ HERE = Path(__file__).resolve().parent
 SRC = HERE / "user-sources" / "geodata" / "cad"
 OUT = HERE / "user-sources" / "geodata" / "cad-repaired"
 
-#: Merge vertices closer than this. The throat is 0.17 m and the CAD is drawn to the
+#: Merge vertices closer than this. The slot is 0.17 m and the CAD is drawn to the
 #: millimetre, so 0.1 mm closes float-level seams without moving anything real.
 MERGE = 1.0e-4
 

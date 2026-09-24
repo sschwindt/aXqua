@@ -1,15 +1,15 @@
-"""How much of a throat does each blanking rule eat, and does it still seal?
+"""How much of a slot does each blanking rule eat, and does it still seal?
 
 `structures.apply_to_bed(triangles=)` raises every node of every element a wall
 crosses. That is safe by construction - a crossing path must use an element the wall
 touches - but it costs up to one element of width on each side of an opening. On a
-0.380 m slot that is tolerable; on the Munich pass's real 0.170 m throat at dx 0.035 it
+0.380 m slot that is tolerable; on the Munich pass's real 0.170 m slot at dx 0.035 it
 leaves under two elements, which is the resolution question lww-134 raised.
 
 This measures the alternatives on the flume, geometrically - no solver, seconds per
 mesh. Two numbers per rule, and both matter:
 
-* **the realised throat**, against the 0.1697 m drawn one;
+* **the realised slot**, against the 0.1697 m drawn one;
 * **whether it still seals**, tested independently of the rule: for every pair of
   adjacent UNBLOCKED elements, does the segment joining their centroids cross a wall?
   If any does, water has a path through solid concrete. This is the guarantee the
@@ -131,7 +131,7 @@ def rule_separating(wall, xy, tri):
     So the test is whether `element - wall` is disconnected (or empty, the element
     being buried in the wall). It is the same guarantee as `touch`, stated on what
     actually matters, and it declines to raise the corner-grazed elements that make a
-    narrow throat narrower.
+    narrow slot narrower.
     """
     import shapely
     cells = shapely.polygons(xy[tri])
@@ -225,8 +225,8 @@ def leaks(wall, spine, xy, tri, blocked) -> tuple[int, int]:
     return int(through.sum()), int((into & ~through).sum())
 
 
-def throat(xy, tri, blocked, structures) -> float:
-    """Median realised throat, measured AT each baffle rather than globally.
+def slot(xy, tri, blocked, structures) -> float:
+    """Median realised slot, measured AT each baffle rather than globally.
 
     Per baffle: union the blocked elements belonging to it, do the same for its slot
     block, and take the distance between the two - the same corner-to-corner diagonal
@@ -234,7 +234,7 @@ def throat(xy, tri, blocked, structures) -> float:
 
     Measuring the global minimum distance between blocked bodies instead looks
     simpler and is wrong: a rule that leaves a hole inside one wall produces two
-    fragments millimetres apart somewhere irrelevant, and the throat then reads zero
+    fragments millimetres apart somewhere irrelevant, and the slot then reads zero
     while every opening is fine. That is not hypothetical - `area >= 50%` does it at
     dx 0.025.
     """
@@ -250,7 +250,7 @@ def throat(xy, tri, blocked, structures) -> float:
 
     # Each blocked element belongs to the structure it is nearest to. Unambiguous,
     # and it keeps a baffle's blanket from swallowing its own slot block - which a
-    # radius around the footprint does, making every throat read zero.
+    # radius around the footprint does, making every slot read zero.
     owners = np.argmin(np.stack([
         shapely.distance(shapely.points(centres), s.polygon) for s in structures]),
         axis=0)
@@ -283,7 +283,7 @@ def main() -> None:
              "part)" if variant == "rasterised" else " (the control: clean rectangles "
              "from buffered lines)"))
     wall = shapely.union_all([s.polygon for s in structures])
-    print(f"{len(structures)} structures; drawn throat {design.THROAT:.4f} m "
+    print(f"{len(structures)} structures; drawn slot {design.SLOT:.4f} m "
           f"(baffle tip to slot block), gap to the far wall "
           f"{design.SLOT_WIDTH:.3f} m\n")
 
@@ -291,7 +291,7 @@ def main() -> None:
     import copy
 
     spine = centrelines(structures)
-    header = (f"{'dx':>7} {'rule':<18} {'raised':>7} {'throat':>9} {'% drawn':>8} "
+    header = (f"{'dx':>7} {'rule':<18} {'raised':>7} {'slot':>9} {'% drawn':>8} "
               f"{'THROUGH':>8} {'into':>6}")
     print(header)
     print("-" * len(header))
@@ -305,10 +305,10 @@ def main() -> None:
             kw = ({"structures": structures}
                   if name in ("centreline", "SHIPPED area rule") else {})
             blocked = np.asarray(rule(wall, xy, tri, **kw))
-            t = throat(xy, tri, blocked, structures)
+            t = slot(xy, tri, blocked, structures)
             through, into = leaks(wall, spine, xy, tri, blocked)
             print(f"{dx:>7.3f} {name:<18} {blocked.sum():>7} {t:>9.4f} "
-                  f"{100 * t / design.THROAT:>7.0f}% {through:>8} {into:>6}")
+                  f"{100 * t / design.SLOT:>7.0f}% {through:>8} {into:>6}")
         print()
 
 

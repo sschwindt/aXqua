@@ -305,11 +305,11 @@ class Structures:
     #
     #   "touch" (default) - every element the footprint intersects at all. Safe by
     #       construction and errs CLOSED: it eats about 0.45 of a cell on each side of
-    #       an opening, so a drawn throat of w realises w - 0.9 dx.
+    #       an opening, so a drawn slot of w realises w - 0.9 dx.
     #   "area"  - only elements the footprint covers by at least `blanking_area`.
-    #       Measured on a synthetic vertical-slot flume with a 0.170 m diagonal throat
+    #       Measured on a synthetic vertical-slot flume with a 0.170 m diagonal slot
     #       (cases/slot-flume/blanking_rules.py): zero through-crossings at dx 0.10 to
-    #       0.025 m, and a realised throat of 102-104% of drawn against 74-86% for
+    #       0.025 m, and a realised slot of 102-104% of drawn against 74-86% for
     #       "touch". It errs slightly OPEN instead: a few slivers of water stand inside
     #       the concrete without passing through it.
     #
@@ -328,13 +328,13 @@ class Structures:
     #       erosion question come from. Every existing result was produced this way.
     #   "cut"   - the footprint is removed from the meshed domain, so the wall becomes
     #       a no-slip boundary and the opening is bounded by MESH EDGES cut from the
-    #       polygon. The throat is then exact by construction: no blanking rule, no
+    #       polygon. The slot is then exact by construction: no blanking rule, no
     #       erosion, no medial axis, no seal check, and no need for a finer mesh -
     #       the geometry lives in the boundary rather than in the bed.
     #
     # `cut` is what a wall physically is and is the better representation where an
-    # opening matters: on munich-vsf the pass throat is 0.1697 m drawn, the raise path
-    # delivers 0.0894 m, and the level follows the narrowest throat (slot relation,
+    # opening matters: on munich-vsf the pass slot is 0.1697 m drawn, the raise path
+    # delivers 0.0894 m, and the level follows the narrowest slot (slot relation,
     # within 5%). It is not the default because it changes the domain itself, so every
     # result produced under `raise` would move.
     solid_mode: str = "raise"           # raise | cut
