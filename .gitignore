@@ -60,7 +60,12 @@ dist/
 # --- Environments / editors / tooling --------------------------------------
 .venv/
 .env
-.claude/
+# `.claude/*`, not `.claude/`: git cannot re-include anything inside an excluded
+# DIRECTORY, so excluding the contents is what lets the skills below be negated.
+.claude/*
+# the skills carry design documentation that used to live in CLAUDE.md, so they
+# stay in version control; settings.local.json and the rest stay ignored.
+!.claude/skills/
 .idea/
 .vscode/
 .spyproject/
