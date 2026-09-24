@@ -20,12 +20,27 @@ every baffle stands a slot block offset downstream, so the opening the flow uses
 the diagonal between the two corners. `slot_resistance_study.py` still reports
 `design.SLOT_WIDTH` in its own table; this does not.
 
-**A point is only used if its pool stayed below the baffle crest.** The flume's
-baffles stand `BAFFLE_HEIGHT` over their own bed and the 2D build adds
-`structures.solid_freeboard_2d`, so the realised crest is the sum. Above that the
-water is going OVER the baffle as well as through the slot, the relation no longer
-describes what is happening, and Cd absorbs the error and drifts upward. Those points
-are reported and excluded, not silently averaged in.
+A point is used only if it passes **both** gates, and the first one is here because
+skipping it produced a confident wrong answer:
+
+**1. The run must have finished filling.** A flume still filling has shallow pools, and
+Cd goes like 1/h, so an unconverged run reads HIGH. Worse, a set of runs all stopped at
+the same wall-clock are all at a similar fraction-filled state, so their Cd values agree
+with each other beautifully and the agreement means nothing. That happened here: five
+runs at `--duration=400` gave Cd = 0.242 with a standard deviation of 0.6%, and three of
+those five were passing barely 80% of their own inflow at the final step. The witness is
+the **domain volume**, as `slot_resistance_study.balance` argues - outflow oscillates on
+this Neumann boundary and the instantaneous imbalance is unreliable, but volume is not
+moved by oscillation. Measured over the last quarter of the run, not the last 40
+printouts, which on a short run reaches back into the transient.
+
+**2. The pool must have stayed below the baffle crest.** The flume's baffles stand
+`BAFFLE_HEIGHT` over their own bed and the 2D build adds
+`structures.solid_freeboard_2d`, so the realised crest is the sum. Above it the water
+is going OVER the baffle as well as through the slot, the relation no longer describes
+what is happening, and Cd absorbs the error.
+
+Points failing either gate are printed with the reason, never averaged in.
 """
 
 from __future__ import annotations
@@ -45,11 +60,46 @@ G = 9.81
 HERE = Path(__file__).resolve().parent
 
 
+#: Volume may drift this much of itself per 900 s and still count as filled.
+DRIFT_TOL = 0.02
+#: ...and the outflow must match the inflow this closely over the same window.
+FLUX_TOL = 0.05
+
+
 def records(store: Path) -> list[dict]:
     out = []
     for path in sorted(store.glob("slot-resistance-q*.json")):
         out += json.loads(path.read_text())
-    return sorted(out, key=lambda r: r["discharge"])
+    return sorted(out, key=lambda r: (r["discharge"], -r["dx"]))
+
+
+def filled(store: Path, cfg, size: float, discharge: float) -> tuple[bool, str]:
+    """Has this run stopped filling? Judged on the LAST QUARTER of its own series.
+
+    The stored `volume_drift_per_900s` fits the last 40 printouts, which on a 400 s
+    run reaches back into the transient and condemns runs that had in fact settled.
+    """
+    from axqua.solvers.telemac import sortie
+
+    name = f"dx{1000 * size:.0f}mm-q{1000 * discharge:.0f}"
+    listing = sortie.latest_sortie(store / name, cfg.cas_file)
+    if listing is None:
+        return False, "no listing"
+    data = sortie.read_sortie(listing)
+    if data.time.size < 8:
+        return False, "too few printouts"
+    n = max(4, data.time.size // 4)
+    t, vol = data.time[-n:], data.volume[-n:]
+    drift = float(np.polyfit(t, vol, 1)[0]) * 900.0
+    rel = abs(drift) / max(float(vol.mean()), 1e-9)
+    q_in = float(data.gross_in[-n:].mean())
+    q_out = float(data.gross_out[-n:].mean())
+    flux = abs(q_out - q_in) / max(abs(q_in), 1e-9)
+    if rel > DRIFT_TOL:
+        return False, f"still filling: volume {rel:+.0%}/900s"
+    if flux > FLUX_TOL:
+        return False, f"flux short: out/in {q_out / q_in:.2f}"
+    return True, f"volume {rel:+.1%}/900s, out/in {q_out / q_in:.3f}"
 
 
 def main() -> None:
@@ -68,23 +118,34 @@ def main() -> None:
           "over its own bed")
     print(f"design drop   {design.DESIGN_PER_POOL:.4f} m per pool\n")
 
-    print(f"{'Q':>7} {'dx':>6} {'pool h':>8} {'drop dh':>8} {'slot U':>7} "
-          f"{'Cd':>7} {'over crest?':>12}")
+    print(f"{'Q':>7} {'dx':>6} {'pool h':>8} {'drop dh':>8} {'Cd':>7}  verdict")
     used = []
     for r in rows:
         h = float(np.nanmedian(r["depths"]))
         dh = float(r["head_per_pool"])
         cd = r["discharge"] / (b * h * np.sqrt(2 * G * dh))
-        over = h >= crest
-        if not over:
-            used.append((r["discharge"], cd, h, dh))
-        print(f"{r['discharge']:7.3f} {r['dx']:6.3f} {h:8.3f} {dh:8.4f} "
-              f"{r['slot_speed_mean']:7.2f} {cd:7.3f} "
-              f"{'OVERTOPPED' if over else 'no':>12}")
+        ok, why = filled(store, cfg, r["dx"], r["discharge"])
+        if ok and h >= crest:
+            ok, why = False, f"OVERTOPPED: pool {h:.3f} >= crest {crest:.2f}"
+        if ok:
+            used.append((r["discharge"], cd, h, dh, r["dx"]))
+        print(f"{r['discharge']:7.3f} {r['dx']:6.3f} {h:8.3f} {dh:8.4f} {cd:7.3f}  "
+              f"{'USED, ' + why if ok else 'rejected - ' + why}")
 
     if len(used) < 2:
-        raise SystemExit("\nfewer than two points stayed below the crest - "
-                         "nothing to fit")
+        print(f"\n{len(used)} of {len(rows)} runs are usable - not enough to fit a "
+              "coefficient.")
+        if used:
+            q, cd, h, dh, dx = used[0]
+            print(f"The one that is: Q = {q:g} m3/s at dx = {dx:g} m, "
+                  f"pool {h:.3f} m, Cd = {cd:.3f}.")
+        print("A sweep needs several converged discharges at ONE mesh size. Re-run "
+              "the\nsweep at the configured duration rather than a shortened one.")
+        raise SystemExit(1)
+    if len({v[4] for v in used}) > 1:
+        print("\nWARNING: the usable points are not all at the same mesh size, so "
+              "they\nare not a discharge sweep - mesh size moves Cd here by more "
+              "than discharge does.")
     q = np.array([v[0] for v in used])
     cd = np.array([v[1] for v in used])
     h = np.array([v[2] for v in used])
