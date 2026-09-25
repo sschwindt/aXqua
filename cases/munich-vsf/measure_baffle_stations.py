@@ -50,6 +50,7 @@ CENTERLINE = HERE / "axqua-case" / "preprocessing" / "channel-centerline.gpkg"
 DEM = HERE / "axqua-case" / "preprocessing" / "dem-from-surfaces.tif"
 OUT = HERE / "user-sources" / "geodata" / "baffle-stations.csv"
 OUT_GPKG = HERE / "user-sources" / "geodata" / "baffle-footprints.gpkg"
+OUT_GPKG_MESH = HERE / "user-sources" / "geodata" / "baffle-footprints-mesh.gpkg"
 
 PART = "stahlbeton.stl"
 RES = 0.005                      #: [m] raster step; it locates islands, never sizes them
@@ -65,6 +66,11 @@ MIN_RISE = 0.25                  #: [m] a baffle stands about a metre above its 
 BELOW_TOP = 0.05                 #: [m] clear of the 2.845 m wall tops, which are the
                                  #: only other horizontal concrete in the channel
 MIN_ISLAND = 0.01                #: [m2] below this is tessellation speckle
+#: [m] Douglas-Peucker tolerance for the meshing copy of the outlines. gmsh puts a
+#: node on every vertex, so the boundary sets a floor on element size; 10 mm is well
+#: under the 0.1697 m slot and, because DP keeps corners and the slot is measured
+#: corner to corner, provably does not move it. Verified on write, not assumed.
+MESH_SIMPLIFY = 0.010
 
 
 # --------------------------------------------------------------------------- #
@@ -357,6 +363,29 @@ def write_footprints(shapes, frame):
         geoms.append(Polygon(ring))
     gpd.GeoDataFrame(recs, geometry=geoms, crs=None).to_file(OUT_GPKG, driver="GPKG")
 
+    # A second, DECIMATED copy, for cutting holes in a mesh. gmsh puts a node on
+    # every polygon vertex, so a mesh can be no coarser than the boundary it is cut
+    # with, and an outline carrying hundreds of short segments produces slivers and
+    # a diverging solve. Douglas-Peucker keeps corners, and the slot is a
+    # corner-to-corner distance, so decimating does not move it - but that is
+    # asserted here rather than assumed, and the exact copy above is kept for
+    # measurement.
+    thin, worst = [], None
+    for (k, kind, poly), geom in zip(shapes, geoms):
+        thin.append(geom.simplify(MESH_SIMPLIFY))
+    for k in sorted({s[0] for s in shapes}):
+        pair = [t for (kk, _, _), t in zip(shapes, thin) if kk == k]
+        if len(pair) == 2:
+            gap = pair[0].distance(pair[1])
+            worst = gap if worst is None else min(worst, gap)
+    gpd.GeoDataFrame(recs, geometry=thin, crs=None).to_file(
+        OUT_GPKG_MESH, driver="GPKG")
+    before = sum(len(g.exterior.coords) for g in geoms)
+    after = sum(len(g.exterior.coords) for g in thin)
+    print(f"decimated at {1000 * MESH_SIMPLIFY:.0f} mm for meshing: "
+          f"{before:,} -> {after:,} vertices, narrowest slot still "
+          f"{worst:.4f} m")
+
 
 # --------------------------------------------------------------------------- #
 def main() -> None:
@@ -470,7 +499,8 @@ def main() -> None:
         w.writerows(rows)
     write_footprints(shapes, frame)
     print(f"\nwrote {OUT}")
-    print(f"wrote {OUT_GPKG}")
+    print(f"wrote {OUT_GPKG}       (exact, for measuring)")
+    print(f"wrote {OUT_GPKG_MESH}  (decimated, for cutting)")
     print(f"pass frame, to reproduce s and n: origin "
           f"({origin[0]:.6f}, {origin[1]:.6f}) local m, bearing {bearing:.6f} deg "
           f"off +y; s = (p - origin) . (sin b, cos b), n = (p - origin) . (cos b, -sin b)")
