@@ -17,9 +17,21 @@ The synthetic flume is the right place to do that: correct by construction, no C
 survey, no calibration. Run the sweep first, one invocation per discharge::
 
     for q in 0.040 0.060 0.090 0.135 0.200; do
-        python cases/slot-flume/slot_resistance_study.py --q=$q --duration=400 0.05
+        python cases/slot-flume/slot_resistance_study.py --q=$q --duration=900 0.025
     done
     python cases/slot-flume/fit_slot_coefficient.py
+
+dx 0.025 and 900 s, not something cheaper: at dx 0.05 the pools are deep enough to
+overtop the baffles at the top two discharges, and at 400 s the low ones have not
+finished filling. Both are measured, both are gated below, and both cost a retraction
+to learn.
+
+**Mesh-independence is NOT established and the answer depends on it.** At Q = 0.060
+the pool goes 1.555 -> 0.837 -> 0.448 m over dx 0.10 -> 0.05 -> 0.025, still falling
+by 46% on the last halving, so C_Q is still rising with refinement. The number below
+is therefore a LOWER bound on the coefficient this geometry would show on a converged
+mesh, not the converged value. Settling that needs dx 0.0125, which is four times the
+cells of the most expensive run here.
 
 **b is the 0.1697 m diagonal slot, not the 0.380 m gap to the far wall.** Opposite
 every baffle stands a slot block offset downstream, so the opening the flow uses is
@@ -155,12 +167,15 @@ def main() -> None:
     q = np.array([v[0] for v in used])
     c_q = np.array([v[1] for v in used])
     h = np.array([v[2] for v in used])
-    print(f"\nCd over the {len(used)} points below the crest "
+    print(f"\nC_Q over the {len(used)} points below the crest "
           f"({q.min():g}-{q.max():g} m3/s):")
     print(f"  mean {c_q.mean():.3f}, sd {c_q.std():.4f}, "
           f"range {c_q.min():.3f}-{c_q.max():.3f}")
     print(f"  literature for a vertical slot is 0.65-0.85, so this is "
           f"{0.75 / c_q.mean():.1f}x more resistant")
+    print("  and it is a LOWER BOUND: the mesh series has not plateaued, so a finer "
+          "mesh\n  would open the slot further and raise this. See the module "
+          "docstring.")
 
     # Does the relation hold, or does C_Q drift with submergence? Q ~ h at fixed dh,
     # so the exponent is the test that does not need C_Q at all.
