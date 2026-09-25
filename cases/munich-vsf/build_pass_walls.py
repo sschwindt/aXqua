@@ -28,7 +28,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, Polygon
 
 from measure_baffle_stations import read_ascii_stl, facet_normals
 

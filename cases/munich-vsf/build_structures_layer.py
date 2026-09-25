@@ -45,6 +45,22 @@ def _frame():
     return np.array([np.sin(b), np.cos(b)]), np.array([np.cos(b), -np.sin(b)])
 
 
+def bed_part_stems():
+    """Lower-cased stems of every CAD part the config declares `role: bed`.
+
+    The reference's patch names are the CAD part names with a suffix
+    (`substratum.stl` -> `Substratum_fishpass`, `Substratum_weir`, ...), so a stem
+    prefix match maps one to the other without either side hard-coding the list.
+    """
+    import yaml
+
+    cfg = yaml.safe_load((CASE / "case-config.yml").read_text())
+    stems = [Path(p["file"]).stem.lower()
+             for p in cfg["surfaces"]["parts"] if p.get("role") == "bed"]
+    # longest first, so `substratum_amphibienweg` is not swallowed by `substratum`
+    return sorted(stems, key=len, reverse=True)
+
+
 def _verts(geom):
     if geom.geom_type == "Polygon":
         return np.asarray(geom.exterior.coords)
@@ -58,7 +74,6 @@ def main() -> None:
 
     baffles = gpd.read_file(GEO / "baffle-footprints.gpkg")
     drape = gpd.read_file(GEO / "walls-drape.gpkg")
-    s_max = max(float(r["s"]) for r in stations.values())
 
     rows = []
     for _, r in baffles.iterrows():
@@ -106,11 +121,22 @@ def main() -> None:
     # the pass over the weir into the flood channel. The DEM carries all of these
     # patches as terrain, so water passes over them by elevation and none of them
     # should ever be a structure.
+    # WHICH patches are bed comes from `case-config.yml`, not from a name prefix.
+    # `Substratum*` alone leaves `Magerbeton` and `Magerbeton_refinement` unprotected -
+    # 844 of the reference's 1,893 points, and by its own README the largest bed area
+    # in the reach, 48.5 m2 against the pass invert's 32.5. That is this same bug one
+    # level up: generalising from "the weir" to "every Substratum_*" is still a guess
+    # about names, and the config already states the answer. A part declared
+    # `role: bed` is terrain; the DEM carries it; it must never become a structure.
     ref = list(csv.DictReader((CASE / "user-sources" / "reference"
                                / "federica-wetted-bed.csv").open()))
-    patches = sorted({r["patch"] for r in ref if r["patch"].startswith("Substratum")})
+    stems = bed_part_stems()
+    def is_bed(patch):
+        return any(patch.lower().startswith(s) for s in stems)
+
+    patches = sorted({r["patch"] for r in ref if is_bed(r["patch"])})
     weir = MultiPoint([(float(r["x"]), float(r["y"])) for r in ref
-                       if r["patch"].startswith("Substratum")]).buffer(0.125).buffer(0)
+                       if is_bed(r["patch"])]).buffer(0.125).buffer(0)
     print(f"bed terrain to protect: {weir.area:.2f} m2 over {len(patches)} patches")
     for q in patches:
         n_ = sum(1 for r in ref if r["patch"] == q)
