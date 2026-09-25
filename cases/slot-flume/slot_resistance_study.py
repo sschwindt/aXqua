@@ -156,7 +156,7 @@ def pool_levels(model_dir: Path, cfg) -> dict:
         # the pool's own depth, for a sanity check against a reference model's levels
         depths.append(float(np.median(depth[band])) if band.any() else float("nan"))
         # and what the jet does AT the slot: the design relation for a vertical slot
-        # is Q = Cd b h sqrt(2 g dh), so the slot velocity is the one quantity that
+        # is Q = C_Q b h sqrt(2 g dh), so the slot velocity is the one quantity that
         # says whether the model is passing the discharge the way the design does
         at_slot = wet & (np.abs(x - xb) < design.WALL_THICKNESS)
         slot_u.append(float(np.max(speed[at_slot])) if at_slot.any() else float("nan"))
@@ -278,7 +278,7 @@ def measure(base, size: float, discharge: float | None = None) -> dict:
     record["in_pool_fraction"] = pool_flatness(target, cfg)
     record["slot_speed_mean"] = float(np.nanmean(record["slot_speed"]))
     # What the design relation asks of a slot passing Q under the design head:
-    # Q = Cd b h sqrt(2 g dh). Quoted, not asserted - Cd for a vertical slot is
+    # Q = C_Q b h sqrt(2 g dh). Quoted, not asserted - C_Q for a vertical slot is
     # 0.65-0.85 in the literature, so this is an order check, not a target.
     record["design_slot_depth"] = float(
         design.DISCHARGE / (0.70 * design.SLOT_WIDTH
@@ -322,10 +322,10 @@ def report(records: list[dict]) -> list[str]:
                    "producing a fishway rather than a chute - which is what makes the "
                    "head above comparable with the design at all")
     out.append("")
-    out.append(f"the design relation Q = Cd b h sqrt(2 g dh) at Cd 0.70 wants a slot "
+    out.append(f"the design relation Q = C_Q b h sqrt(2 g dh) at C_Q 0.70 wants a slot "
                f"{records[0]['design_slot_depth']:.3f} m deep to pass "
                f"{design.DISCHARGE:g} m3/s under {design.DESIGN_PER_POOL:.3f} m "
-               f"(an order check, not a target: Cd is 0.65-0.85 in the literature)")
+               f"(an order check, not a target: C_Q is 0.65-0.85 in the literature)")
     out.append("")
     if len(records) >= 2:
         ordered = sorted(records, key=lambda r: -r["dx"])
@@ -376,7 +376,7 @@ def discharge_report(store: Path) -> list[str]:
 
     The Munich comparison that prompted this study reads a 2D result at 0.135 m3/s
     against a reference 3D model at 0.060 m3/s and calls the difference model error.
-    A vertical slot passes Q = Cd b h sqrt(2 g dh) with dh fixed by the bed geometry,
+    A vertical slot passes Q = C_Q b h sqrt(2 g dh) with dh fixed by the bed geometry,
     so h ~ Q: the pool is deeper at a higher discharge *by design*, and comparing the
     two levels compares two different flows.
     """
