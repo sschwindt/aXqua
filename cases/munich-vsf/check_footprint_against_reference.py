@@ -43,6 +43,7 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 REFERENCE = HERE / "user-sources" / "reference" / "federica-wetted-bed.csv"
 EXACT = HERE / "user-sources" / "geodata" / "baffle-footprints.gpkg"
+STATIONS = HERE / "user-sources" / "geodata" / "baffle-stations.csv"
 CANDIDATES = [
     HERE / "axqua-case" / "preprocessing" / "structures-from-surfaces.gpkg",
     HERE / "user-sources" / "geodata" / "walls-drape.gpkg",
@@ -132,6 +133,130 @@ def exclusion_check(union, ref):
     return worst
 
 
+def terrain_check(union, ref, solids):
+    """Is raised BED being typed as structure? lww-133's class of bug, made testable.
+
+    A drape or column test asks "is there CAD material above the local bed here", and
+    a weir, an invert, a ramp and an exit apron all answer yes - so bed becomes wall,
+    and under `solid_mode: cut` those cells leave the domain. Counting claimed cells
+    does not separate that from a footprint merely being fat, and the two want
+    opposite fixes.
+
+    What separates them is DISTANCE to a solid known to be real. Fattening sits a few
+    centimetres off a baffle; mis-typed terrain sits metres away in open ground.
+
+    **Only judged INSIDE the baffled corridor**, and that restriction is the whole
+    care of this function. The exact outlines are baffles and slot blocks - they
+    contain no wall, by construction. So outside the corridor a cell correctly sitting
+    on a side wall is metres from the nearest baffle and would be flagged as mis-typed
+    terrain, which is the same "reference set is not the full set" error that made
+    lww-133 drop `wall-004`. Cells outside are counted and reported, never judged.
+    """
+    from shapely.geometry import Point
+
+    if solids is None:
+        print("  TERRAIN     skipped, no exact solids to measure distance from")
+        return
+    known = solids.union_all()
+    corridor = known.convex_hull.buffer(0.35)
+    print(f"  {'bed patch':26s} {'cells':>6} {'claimed':>8} {'far, in corridor':>17} "
+          f"{'outside':>8}")
+    stranded = outside = 0
+    for patch, group in ref.groupby("patch"):
+        if not (patch.startswith("Substratum") or patch.startswith("Magerbeton")):
+            continue
+        hit = far = out = 0
+        for x, y in zip(group.x, group.y):
+            p = Point(x, y)
+            if not union.contains(p):
+                continue
+            hit += 1
+            if not corridor.contains(p):
+                out += 1
+            elif known.distance(p) > 0.5:
+                far += 1
+        stranded += far
+        outside += out
+        if hit:
+            print(f"  {patch:26s} {len(group):6d} {hit:8d} {far:17d} {out:8d}")
+    print(f"  TERRAIN     {stranded} claimed cells inside the corridor sit >0.5 m "
+          "from a known solid,")
+    print(f"              {outside} more are outside it. These are CANDIDATES for "
+          "mis-typed bed,\n              not a verdict: the exact outlines are "
+          "baffles and slot blocks only, so\n              a cell correctly on a "
+          "SIDE WALL is also far from anything known. Separating\n              the "
+          "two needs exact wall outlines, which this case does not yet have.")
+    print("              What the number is good for is a BEFORE/AFTER: apply a "
+          "terrain\n              protection and it should fall sharply. Absolute, "
+          "it over-counts.")
+
+
+def patency_check(union, stations, solids, step=0.005, pad=0.10):
+    """Can water get down the pass, and OUT of it?
+
+    The check that matters most and the one nobody runs. lww-133 lost a 10 h run to a
+    footprint that walled off the pass OUTLET: the level gate passed - 2.350 m against
+    2.845 m wall tops - because a perched pond sits under the wall tops too. What gave
+    it away was the longitudinal profile, a flat surface where a vertical-slot fishway
+    must step down ~0.13 m per pool.
+
+    So this walks the pass axis and reports the widest continuous opening across it.
+    Inside the baffled reach it should pinch at every baffle and open between them;
+    PAST the last baffle it must stay open, all the way out.
+
+    **The scan is bounded to the channel**, and that matters more than it looks. Run
+    across a fixed half-width it eventually leaves the pass, and then open ground
+    beyond the far wall joins the "continuous opening" and a genuine choke inside the
+    channel reads as wide open. A check that cannot fail is worse than no check, so
+    the width comes from the known solids' own extent across the axis.
+    """
+    from shapely.geometry import Point
+
+    p = stations[["slot_x", "slot_y"]].to_numpy()
+    centre = p.mean(axis=0)
+    _, _, vt = np.linalg.svd(p - centre, full_matrices=False)
+    along = vt[0] / np.linalg.norm(vt[0])
+    if along @ (p[-1] - p[0]) < 0:
+        along = -along
+    across = np.array([along[1], -along[0]])
+    s0 = float((p[0] - centre) @ along)
+    s1 = float((p[-1] - centre) @ along)
+
+    corners = np.vstack([np.asarray(g.exterior.coords) for g in solids.geometry])
+    n_of = (corners - centre) @ across
+    lo, hi = float(n_of.min()) - pad, float(n_of.max()) + pad
+    print(f"  channel     scanned across n {lo:+.3f}..{hi:+.3f} m "
+          f"({hi - lo:.3f} m, from the solids' own extent)")
+    ns = np.arange(lo, hi + step, step)
+    worst_in, worst_out, out_at = None, None, None
+    for s in np.arange(s0 - 2.0, s1 + 10.0, 0.25):
+        pts = centre + s * along + ns[:, None] * across
+        blocked = np.array([union.contains(Point(*q)) for q in pts])
+        runs, cur = [], 0
+        for v in blocked:
+            if v:
+                runs.append(cur)
+                cur = 0
+            else:
+                cur += 1
+        runs.append(cur)
+        gap = max(runs) * step
+        if s <= s1:
+            worst_in = gap if worst_in is None else min(worst_in, gap)
+        elif worst_out is None or gap < worst_out:
+            worst_out, out_at = gap, s
+    print(f"  pass axis   {s0:.2f} to {s1:.2f} m baffled, then 10 m past the last one")
+    print(f"  in the reach          narrowest continuous opening {worst_in:.3f} m")
+    print(f"  past the last baffle  narrowest {worst_out:.3f} m at s = {out_at:.2f}")
+    if worst_out < 0.3:
+        print("  PATENCY     the OUTLET IS CHOKED - the pass would pond rather than "
+              "convey,\n              and a level check cannot see that")
+    elif worst_in <= 0.0:
+        print("  PATENCY     a station inside the reach is fully blocked")
+    else:
+        print("  PATENCY     ok, the pass conveys and its outlet is open")
+
+
 def width_check(union, solids, drawn=0.1697):
     """What the footprint makes of each solid, and of the slot between them.
 
@@ -202,6 +327,10 @@ def main() -> None:
     else:
         print(f"exact solids: {EXACT.name} not built, width checks skipped\n")
 
+    stations = pd.read_csv(STATIONS) if STATIONS.is_file() else None
+    if stations is None:
+        print("no baffle-stations.csv, so no patency check\n")
+
     paths = [Path(a) for a in sys.argv[1:]] or [p for p in CANDIDATES if p.is_file()]
     if not paths:
         raise SystemExit("no footprint layer given and none of the usual ones exist")
@@ -218,7 +347,10 @@ def main() -> None:
             continue
         orientation_check(union, solids)
         exclusion_check(union, ref)
+        terrain_check(union, ref, solids)
         width_check(union, solids)
+        if stations is not None:
+            patency_check(union, stations, solids)
         print()
 
 
