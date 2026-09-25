@@ -94,11 +94,27 @@ def main() -> None:
     # that deletes the overflow path, and under `overflow` it dams it. The flood
     # evacuation channel runs off this weir, so at the high discharges that is the
     # whole point of the channel, it would be the difference between spilling and not.
-    weir = MultiPoint([(float(r["x"]), float(r["y"]))
-                       for r in csv.DictReader((CASE / "user-sources" / "reference"
-                                                / "federica-wetted-bed.csv").open())
-                       if r["patch"] == "Substratum_weir"]).buffer(0.125).buffer(0)
-    print(f"weir terrain to protect: {weir.area:.2f} m2 (crest ~2.15 m, carried by the DEM)")
+    # EVERY Substratum_* patch, not just the weir. The drape asks "is there CAD
+    # material standing above the local bed here", which cannot tell a wall from
+    # terrain, so it types bed as wall wherever the bed is raised. Protecting only
+    # the weir fixed one instance of that and left the rest: `Substratum_final`, the
+    # exit basin the pass discharges into, was claimed by a ~20 m2 drape blob, and
+    # under `cut` that WALLED OFF THE PASS OUTLET. The 600 s fill showed the result:
+    # the water surface elevation in the pass stood flat at 2.350 m, which is 1.631 m
+    # ABOVE the water surface elevation 1 m beyond its exit (0.719 m) and 0.200 m above
+    # the weir crest (2.150 m), with near-zero velocity throughout. The flow bypassed
+    # the pass over the weir into the flood channel. The DEM carries all of these
+    # patches as terrain, so water passes over them by elevation and none of them
+    # should ever be a structure.
+    ref = list(csv.DictReader((CASE / "user-sources" / "reference"
+                               / "federica-wetted-bed.csv").open()))
+    patches = sorted({r["patch"] for r in ref if r["patch"].startswith("Substratum")})
+    weir = MultiPoint([(float(r["x"]), float(r["y"])) for r in ref
+                       if r["patch"].startswith("Substratum")]).buffer(0.125).buffer(0)
+    print(f"bed terrain to protect: {weir.area:.2f} m2 over {len(patches)} patches")
+    for q in patches:
+        n_ = sum(1 for r in ref if r["patch"] == q)
+        print(f"    {q:<26} {n_:4d} reference points")
 
     # Inside the clear channel the CAD outlines are the authority; outside it the drape
     # is. So drape features are CLIPPED to outside the channel, not dropped whole.
