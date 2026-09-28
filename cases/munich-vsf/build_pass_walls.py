@@ -28,7 +28,7 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-from shapely.geometry import LineString, Polygon
+from shapely.geometry import LineString, MultiPoint, Point, Polygon
 
 from measure_baffle_stations import read_ascii_stl, facet_normals
 
@@ -126,6 +126,44 @@ def main() -> None:
               f"(other side would be {overlaps[1-k]:.2f})")
         if wall.is_empty or bad > 0.02:
             raise SystemExit(f"REFUSING: {name} cannot be built clear of the channel")
+        # TRIM AGAINST THE REFERENCE BED. S0..S1 is a fixed extent along a STRAIGHT
+        # axis, and the channel turns east near s=26 - so a wall traced to s=27 runs
+        # straight on past the turn and cuts across the pass outlet. That is what
+        # choked the outlet: solids on bed, blocking 32-40% of the exit band and its
+        # centreline at y 67.0..67.5, while the pass sat at a flat 2.350 m carrying 4%
+        # of the discharge.
+        #
+        # The rule, and it is the one the user set: Federica's model is correct, so a
+        # constructed wall must never stand where her mesh says BED. This is not a
+        # tuned extent - it is a falsifiable constraint that also catches any future
+        # wall built past the end of the geometry it was traced from.
+        ref = HERE / "user-sources" / "reference" / "federica-bed-reach.csv"
+        if ref.exists():
+            import csv as _csv
+            pts = [(float(r["x"]), float(r["y"])) for r in _csv.DictReader(ref.open())]
+            # 0.071 m = half the diagonal of the 0.1 m sample grid, so the disks
+            # just close into a surface. NO morphological closing: the pass walls are
+            # 0.15-0.29 m thick with bed on BOTH sides, and a 0.20 m closing bridges
+            # straight across them - it deleted the near wall entirely (7.41 -> 0.00).
+            bed = MultiPoint(pts).buffer(0.071)
+            before = wall.area
+            wall = wall.difference(bed)
+            # The mask is buffered point disks, so the cut edge follows 0.071 m arcs.
+            # Handed to the mesher raw that is a scalloped boundary and it produced a
+            # zero-area triangle and a 45:1 sliver. Simplify to the mesh scale and drop
+            # the crumbs the difference leaves behind; 0.02 m is well under the 0.15 m
+            # wall thickness, so the wall itself is unaffected.
+            wall = wall.simplify(0.02).buffer(0)
+            parts = [g for g in (wall.geoms if wall.geom_type == "MultiPolygon"
+                                 else [wall]) if g.area >= 0.05]
+            if not parts:
+                raise SystemExit(f"REFUSING: {name} was trimmed away entirely")
+            wall = max(parts, key=lambda g: g.area)
+            print(f"    trimmed against the reference bed: {before:.2f} -> "
+                  f"{wall.area:.2f} m2 ({len(parts)} piece(s) kept)")
+        else:
+            print(f"    WARNING: {ref.name} missing - wall NOT trimmed against the "
+                  f"reference bed; it may stand on bed past the end of the pass")
         recs.append({"Name": name, "Type": "wall", "Crest (m)": CREST, "geometry": wall})
 
     gpd.GeoDataFrame([{"Name": "clear-channel", "geometry": corridor}],
