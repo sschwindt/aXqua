@@ -23,6 +23,15 @@
 # Still to do: the cross-section lines XS1-XS4 for the lab comparison, and a decision
 # on the velocity scale of the flume data (see README.md).
 
+# The VOF case hotstarts from the 2D result, so it must name the RIGHT one. The
+# r2d.slf that was on disk dated from 2026-09-21 and the broken geometry - the era
+# when the pass carried 4% of the discharge and the water surface sat at 3.397 m. It
+# is archived as r2d-STALE-2026-09-21-broken-geometry.slf. r2d-fill.slf is the
+# converged run that reaches steady in = out with the pass stepping at the design
+# rate, and it is what the pre-wetting seed must come from.
+outputs:
+  results_slf: r2d-fill.slf
+
 project:
   name: munich-vsf
   # The drawing is set out in DHDN / Gauss-Krueger zone 4 (easting 4 473 041,
@@ -88,7 +97,7 @@ boundaries:
   # (XS4/US7) at MQ. 0.33 + 0.36 = 0.69. This is an estimate to start the run from,
   # not a surveyed tailwater - check it against the drawing's elevation labels, and
   # re-derive it per discharge (0.60 at Q30, 1.17 at HQ100 by the same arithmetic).
-  prescribed_elevation: 0.69
+  prescribed_elevation: 0.613
 
 initialization:
   # A fish pass fills from its inflow; the plug lets the prescribed-Q boundary
@@ -143,6 +152,11 @@ hydrodynamics:
   flux_tolerance: 1.0e-3
 
 openfoam:
+  # THE SUB-MODEL. Written by make_openfoam_roi.py off the converged r2d-fill.slf.
+  # 119.4 m2 against the parent's 231 m2, and it contains BOTH controls - all 14
+  # slots and 174 of the weir's 187 reference points - so the pass/weir split
+  # happens inside the domain rather than across its boundary.
+  roi: roi-fishpass.gpkg
   bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
   # RIGID LID, not vof. Measured on the VOF run this replaces (logs in
   # axqua-case/openfoam/vof-record/): 60.5% of the cells were air, and `Interface
