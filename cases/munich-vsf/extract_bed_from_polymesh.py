@@ -24,13 +24,16 @@ from __future__ import annotations
 
 import csv
 import re
+import os
 import sys
 from pathlib import Path
 
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-MESH = Path("/home/modelling/OpenFOAM/Munich-VSF/6_v5_HQ100/constant/polyMesh")
+MESH = Path(os.environ.get(
+    "AXQUA_REFERENCE_POLYMESH",
+    "/home/modelling/OpenFOAM/Munich-VSF/6_v5_HQ100/constant/polyMesh"))
 OUT = HERE / "user-sources" / "reference" / "federica-bed-outlet.csv"
 
 #: The pass outlet, where our CAD runs out of bed. The pass mouth is near

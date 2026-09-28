@@ -53,6 +53,44 @@ surfaces:
   #     --control-point 2.81,19.22:4473050.0,5332080.0 \
   #     --control-point 26.69,106.77:4473150.0,5332100.0
   # then paste the reported block here. Add a third point to check the fit.
+  # GEOREFERENCE, local CAD metres -> EPSG:31468 (DHDN / GK zone 4).
+  # Fitted by georeference_from_baffles.py on the 14 baffle tips, which exist in both
+  # the STLs (local) and the DXF (already in GK4: x 4473041..4473180).
+  #
+  # The fit's own residual (5e-5 m) is NOT evidence and must not be quoted as such:
+  # fourteen identical features on a straight line at fixed pitch fit onto each other
+  # exactly under ANY pairing, including the 180-degree reversal. lww-134 caught that.
+  #
+  # Verified instead OFF the axis, which is what the collinear control cannot do. The
+  # slot blocks sit 0.1202 m to one side of the baffle tips; reversed, they would sit
+  # on the other. Transformed into GK4 they land at +0.1200 m northing, and the DXF
+  # carries 112 vertices in the +0.10..+0.15 m band and ZERO in -0.15..-0.05. So the
+  # reversal is excluded by the drawing's own geometry. That agrees with lww-134's
+  # independent orientation from the drawing's `Oberwasser`/`Unterwasser` labels.
+  # NOT APPLIED YET, and that is deliberate - see the verified values below.
+  #
+  # Applying it moves the DEM and ROI into GK4 while every other layer in this case
+  # (structures-merged, pass-walls, clear-channel, baffle-stations, the drape) and ALL
+  # of Federica's reference data are in local CAD metres - her model carries no
+  # georeference at all. Switching mid-debug puts the case in two frames at once, and
+  # frame confusion has caused more wrong conclusions here than anything else.
+  #
+  # Sequence: get the model right in local coordinates, then georeference everything in
+  # one pass and re-verify. To apply, set rotation_deg/dx/dy to the values below and
+  # re-run the surfaces stage with force=True, then regenerate the derived layers.
+  #
+  #   rotation_deg: -74.559804     dx: 4473052.6711     dy: 5332085.5380
+  #
+  # Fitted by georeference_from_baffles.py on the 14 baffle tips, which exist in both
+  # the STLs (local) and the DXF (already GK4: x 4473041..4473180). The fit's residual
+  # is NOT evidence - 14 identical features on a straight line fit under any pairing,
+  # including the 180-degree reversal (lww-134 caught this).
+  #
+  # VERIFIED off-axis instead: the slot blocks sit 0.1202 m to one side of the baffle
+  # tips, so a reversal puts them on the other. Transformed into GK4 they land at
+  # +0.1200 m northing, where the DXF carries 112 vertices; the -0.15..-0.05 band the
+  # reversal would need is EMPTY. That agrees with lww-134's independent orientation
+  # from the drawing's `Oberwasser`/`Unterwasser` labels.
   scale: 1.0
   rotation_deg: 0.0
   dx: 0.0
