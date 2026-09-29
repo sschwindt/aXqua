@@ -191,47 +191,38 @@ def terrain_check(union, ref, solids):
           "it over-counts.")
 
 
-def patency_check(union, stations, solids, step=0.005, pad=0.10):
-    """Can water get down the pass, and OUT of it?
+def patency_check(union, ref, step=0.005, half_cell=0.125):
+    """Can water get down the pass, and OUT of it? Followed along the BED, not an axis.
 
-    The check that matters most and the one nobody runs. lww-133 lost a 10 h run to a
-    footprint that walled off the pass OUTLET: the level gate passed - 2.350 m against
-    2.845 m wall tops - because a perched pond sits under the wall tops too. What gave
-    it away was the longitudinal profile, a flat surface where a vertical-slot fishway
-    must step down ~0.13 m per pool.
+    The first version of this walked the straight pass axis, and lww-133 was right to
+    reject it: **it passed for the wrong reason.** The channel turns east-north-east
+    past the last baffle - measured on the reference, the bed band's centre migrates
+    from x 13.6 at y 62 to x 16.5 at y 70 - so an axis extended past the reach leaves
+    the channel and measures the open ground beside it. The reported "0.905 m past the
+    last baffle" was that. A straight ruler through a bend is the same error that cost
+    lww-133 a day, and it had been baked into the check meant to catch it.
 
-    So this walks the pass axis and reports the widest continuous opening across it.
-    Inside the baffled reach it should pinch at every baffle and open between them;
-    PAST the last baffle it must stay open, all the way out.
-
-    **The scan is bounded to the channel**, and that matters more than it looks. Run
-    across a fixed half-width it eventually leaves the pass, and then open ground
-    beyond the far wall joins the "continuous opening" and a genuine choke inside the
-    channel reads as wide open. A check that cannot fail is worse than no check, so
-    the width comes from the known solids' own extent across the axis.
+    So the channel comes from the reference model's own wetted bed, row by row: the
+    flow path is `Substratum_fishpass` into `Substratum_final`, and at each northing
+    the opening is the widest continuous run across THAT band which the footprint does
+    not claim. No axis, no projection, no assumption that the pass is straight.
     """
     from shapely.geometry import Point
 
-    p = stations[["slot_x", "slot_y"]].to_numpy()
-    centre = p.mean(axis=0)
-    _, _, vt = np.linalg.svd(p - centre, full_matrices=False)
-    along = vt[0] / np.linalg.norm(vt[0])
-    if along @ (p[-1] - p[0]) < 0:
-        along = -along
-    across = np.array([along[1], -along[0]])
-    s0 = float((p[0] - centre) @ along)
-    s1 = float((p[-1] - centre) @ along)
+    path = ref[ref.patch.isin(("Substratum_fishpass", "Substratum_final"))]
+    if path.empty:
+        print("  PATENCY     skipped, no pass/exit patches in the reference")
+        return
+    rows = sorted(path.y.unique())
+    print(f"  channel     from the reference bed, {len(rows)} rows "
+          f"y {rows[0]:.2f}..{rows[-1]:.2f}, following the bend")
 
-    corners = np.vstack([np.asarray(g.exterior.coords) for g in solids.geometry])
-    n_of = (corners - centre) @ across
-    lo, hi = float(n_of.min()) - pad, float(n_of.max()) + pad
-    print(f"  channel     scanned across n {lo:+.3f}..{hi:+.3f} m "
-          f"({hi - lo:.3f} m, from the solids' own extent)")
-    ns = np.arange(lo, hi + step, step)
-    worst_in, worst_out, out_at = None, None, None
-    for s in np.arange(s0 - 2.0, s1 + 10.0, 0.25):
-        pts = centre + s * along + ns[:, None] * across
-        blocked = np.array([union.contains(Point(*q)) for q in pts])
+    worst, worst_y, closed = None, None, []
+    for y in rows:
+        band = path[path.y == y]
+        x0, x1 = band.x.min() - half_cell, band.x.max() + half_cell
+        xs = np.arange(x0, x1 + step, step)
+        blocked = np.array([union.contains(Point(x, y)) for x in xs])
         runs, cur = [], 0
         for v in blocked:
             if v:
@@ -241,20 +232,17 @@ def patency_check(union, stations, solids, step=0.005, pad=0.10):
                 cur += 1
         runs.append(cur)
         gap = max(runs) * step
-        if s <= s1:
-            worst_in = gap if worst_in is None else min(worst_in, gap)
-        elif worst_out is None or gap < worst_out:
-            worst_out, out_at = gap, s
-    print(f"  pass axis   {s0:.2f} to {s1:.2f} m baffled, then 10 m past the last one")
-    print(f"  in the reach          narrowest continuous opening {worst_in:.3f} m")
-    print(f"  past the last baffle  narrowest {worst_out:.3f} m at s = {out_at:.2f}")
-    if worst_out < 0.3:
-        print("  PATENCY     the OUTLET IS CHOKED - the pass would pond rather than "
-              "convey,\n              and a level check cannot see that")
-    elif worst_in <= 0.0:
-        print("  PATENCY     a station inside the reach is fully blocked")
+        if gap <= 0.02:
+            closed.append((y, gap))
+        if worst is None or gap < worst:
+            worst, worst_y = gap, y
+    print(f"  narrowest continuous opening {worst:.3f} m at y = {worst_y:.2f}")
+    if closed:
+        print(f"  PATENCY     CHOKED at {len(closed)} of {len(rows)} rows, "
+              f"first at y = {closed[0][0]:.2f} - the pass would pond rather than\n"
+              "              convey, and a level check cannot see that")
     else:
-        print("  PATENCY     ok, the pass conveys and its outlet is open")
+        print("  PATENCY     ok, every row of the pass and its exit has an opening")
 
 
 def width_check(union, solids, drawn=0.1697):
@@ -349,8 +337,7 @@ def main() -> None:
         exclusion_check(union, ref)
         terrain_check(union, ref, solids)
         width_check(union, solids)
-        if stations is not None:
-            patency_check(union, stations, solids)
+        patency_check(union, ref)
         print()
 
 
