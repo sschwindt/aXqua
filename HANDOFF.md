@@ -1,127 +1,200 @@
-# Handoff: munich-vsf across two machines
+# munich-vsf: state for a restarting session
 
-Written from **lww-134** on 2026-09-14 for the Claude instance on **lww-133**. Temporary coordination file; delete it when the work rejoins.
+Rewritten 2026-09-29 on **lww-133**. Replaces the 2026-09-14 two-machine file, whose
+premise (none of the case data is in git, so lww-133 cannot run it) no longer holds.
 
-## The constraint that decides everything
+---
 
-**None of the munich-vsf data is in git**, so lww-133 cannot rebuild or run this case:
-
-| what | where | status |
-| --- | --- | --- |
-| `cases/munich-vsf/axqua-case/` | results, meshes, OpenFOAM case (~2.6 GB) | **gitignored** (`.gitignore:19`) |
-| `cases/munich-vsf/user-sources/` | the contractor CAD, heightmap, flume data (1.6 GB) | not ignored, but **0 files committed** |
-
-Only the scripts, `case-config.yml` and `README.md` are in the repo (20 files). So on lww-133: `git pull` gives you the *instructions* for this case and none of its *inputs*.
-
-Do not try to fix this by committing the data. It is 4.2 GB of CAD and binary results; that is a deliberate `.gitignore` decision, not an oversight.
-
-## The user is copying the data across
-
-**The user has said they will rsync it to lww-133 by hand.** Until it arrives, take the library tasks (§ Tasks) and do not attempt to run the case. Once it arrives, § "If the data has landed" below applies and the division of labour changes.
-
-**Check before assuming either way:**
+## 1. Something is probably running
 
 ```bash
-ls -la cases/munich-vsf/axqua-case/simulation/r2d.slf \
-       cases/munich-vsf/axqua-case/simulation/r3d-hydrostatic.slf \
-       cases/munich-vsf/axqua-case/preprocessing/ 2>&1
+pgrep -af 'interFoam|telemac2d|telemac3d'
 ```
 
-### What is being copied
+At the time of writing: **interFoam, 16 ranks**, the VOF run of the fish-pass
+sub-model. Logs live in the session scratchpad, not the repo:
 
-**Tier 1, ~860 MB, enough to run the OpenFOAM work without touching the CAD:**
+```
+/tmp/claude-11003/-srv-private-hydromate/<session>/scratchpad/of-run.log
+```
 
-| path | size | why |
-| --- | --- | --- |
-| `axqua-case/preprocessing/` | 6.4 M | DEM (`dem-initial-roi.tif`), `roi-fishpass.gpkg`, `liquid-boundaries-fishpass.gpkg`, roughness zones and table, structures |
-| `axqua-case/simulation/r2d.slf` | 549 M | the converged 2D run: the lid, the wetted footprint, the boundary values |
-| `axqua-case/simulation/r3d-hydrostatic.slf` | 263 M | the TELEMAC-3D pre-run, which is where the vertical velocity profile comes from |
-| `axqua-case/simulation/*.cas`, `*.sortie` | ~2 M | `prerun` reads the listing to confirm the flux balance before reusing the seed |
+A restarted session gets a NEW scratchpad, so that path is gone. Find the live log via
+the OpenFOAM case directory instead:
 
-Deliberately excluded: `r2d-initial.slf` (518 M, superseded by `r2d.slf`) and `*_old1.slf` (287 M, byte-identical duplicates).
+```bash
+ls -t cases/munich-vsf/axqua-case/openfoam/          # the case
+ls -t cases/munich-vsf/axqua-case/openfoam/processor0/   # written times = progress
+```
 
-**Tier 2, ~1.1 GB, only needed to rebuild from CAD** (a change of geometry or of `surfaces.resolution`): `user-sources/`, excluding `user-of-poor/` (459 M, the old user OpenFOAM case, reference only, read by nothing). `user-sources/ground-truth/` is 32 KB and holds the flume velocities and depths, so it is needed for any lab comparison regardless of tier.
+**Do not kill it to "start clean".** See §5 on orphaned ranks.
 
-**Not copied:** `axqua-case/openfoam/` (2.6 GB). Build your own from `case-config.yml`; copying it would hand over a half-finished run as well.
+## 2. The goal, in the user's own framing
 
-### If the data has landed
+> The target is steady discharge across inlet and outlet. Calibration and validation
+> will follow with lab flume velocity and depth readings (scaled). Federica's model is
+> just fine but very slow and without georeferences. And this is why I put you on this
+> task: remesh with a possibly regular clean channel mesh, cut off air fraction as well
+> as possible with the help of telemac, and put georeferences.
 
-With Tier 1 present, `openfoam_preprocessing.py` reuses the existing seed rather than re-running TELEMAC (`pre_run.reuse: true`), so lww-133 can build and run an OpenFOAM case in minutes of setup.
+So: **Federica's model is correct.** We are not reproducing or beating her physics; we
+are building a faster, regular, georeferenced equivalent. Where our CAD-derived
+geometry disagrees with her mesh, she is right.
 
-**Then lww-133 should take the VOF run**, and say so on the issue before starting so the work is not done twice. Rationale: lww-134 is finishing the rigid-lid run and is shared with another user who periodically takes 16 of its 16 physical cores, so it is the worse machine for a second long job. Set `openfoam.mode: vof` and leave every other setting alone: the crop (`roi: roi-fishpass.gpkg`), the sealed structures, `liquid_boundaries`, `outlet_stage`, and the 3D pre-run all still apply.
+Her baseline: interFoam, 1,748,288 cells, 8 ranks, 1,039,163 steps to t=3168 s. No logs
+survive, so there is no wall-clock figure and none should be invented.
 
-Two things about that run:
+Standing constraints from the user:
+- **physical correctness outranks speed**, even when slow;
+- cost levers are (1) a possibly regular mesh, (2) cut the air fraction via TELEMAC
+  pre-wetting;
+- **"hydromate" is a protected name we do not own** - never in directories, env names
+  or new writing. Legacy compat shims are deliberately kept;
+- the pass/weir **discharge split cannot be measured in the lab and never was**. Do not
+  validate against it. The ~108 l/s / 80% figure is design intent, not data.
 
-* **measure dt and s/step over the first 50 steps and post them before committing days to it.** The 22-day figure quoted above predates the seal, and that run had the same leaking baffles suppressing its time step, so it is probably pessimistic. Do not repeat it as though it were a prediction.
-* the user's plan is for VOF to be **seeded from the finished rigid-lid run** via `mapFields`. That seed lives on lww-134 and is not worth moving (2.6 GB). So either run VOF cold on lww-133 in parallel, which is still useful and independent, or wait for lww-134 to do the mapped version. Say which you are doing.
+## 3. Where the work stands
 
-## Division of labour
+| deliverable | state |
+| --- | --- |
+| steady discharge in = out | **DONE** - 100.19% over T 1088..1200 s, mass error 1e-15 |
+| georeference | **DERIVED AND VERIFIED, not applied** - see §4 |
+| regular clean channel mesh | **BUILT** - 0.03 m lattice, 889,152 cells, 49% fewer than Federica |
+| cut the air fraction | **PARTIAL** - 70% of cells are still air at t=0; dt is set by the air |
 
-**lww-134 (this machine) owns every run of the munich-vsf case.** The mesh, the 2D result, the TELEMAC-3D pre-run and the OpenFOAM case all live here, some of them representing days of compute that cannot be reproduced elsewhere without the source data. It is a 16-physical-core Ryzen 9 5950X shared with another user (`hunter`), who periodically takes 16 ranks for their own TELEMAC-3D work; expect this machine's throughput to halve without warning when that happens.
+The 2D result `r2d-fill.slf` is the converged parent and the seed for everything
+downstream. The pass steps **0.1251 m per pool** against the 0.1297 m drawn, and the
+head-pool water surface elevation is **2.219 m** - within 11 mm of lww-134's
+independent two-control (slot + weir) prediction of 2.208 m. That agreement is the
+strongest cross-check the project has.
 
-**lww-133 takes the library and the documentation**, all of which is fully in the repo and needs no case data.
+Known limits of that result: pools 10-14 drown as tailwater backs in (steps decay
+0.102 -> 0.030 m), so the pass runs free over roughly its upper two thirds only.
 
-## Where the modelling stands
+Cost so far: 889,152 cells x 74,667 steps = 6.6e10 cell-steps against Federica's
+1.8e12 - **27x less work**, mostly because 120 s is enough where she ran 3168 s. But
+per simulated second we take 622 steps to her 328: the air still sets the time step
+(velocity cap 6 m/s on a 0.021 m layer). The lever is `openfoam.freeboard`, currently
+0.30 m over water 0.26-0.62 m deep.
 
-The 3D sub-model of the fish pass has been through three configurations. The short version, with the numbers that matter:
+## 4. The georeference: verified, deliberately not applied
 
-**VOF (two-phase interFoam) was abandoned on cost.** 1,340,928 cells, 8.70 s/step, dt 5.7e-4 s, throughput 6.5e-5 s/s: about 22 days for the 120 s run. 60.5 % of the cells were air, and `Interface Courant Number max` equalled `Courant Number max` on every step in the log, so the air-water interface was setting the entire time step. Logs kept at `axqua-case/openfoam/vof-record/`.
+```
+rotation_deg: -74.559804   dx: 4473052.6711   dy: 5332085.5380   scale: 1.0
+```
 
-**Rigid lid (`openfoam.mode: rigid-lid`) was tried instead**, because the requirement was only that the free surface be non-horizontal, not that it be solved. The lid is built from `State2D.sample_surface` per plan vertex, so it *is* the converged 2D free surface. That ran 12x faster (3.79 s/step, dt 3.0e-3, 61 h for 120 s) and its discharge balanced to -0.000 %.
+Local CAD metres -> EPSG:31468 (DHDN / GK zone 4). Recorded in
+`cases/munich-vsf/case-config.yml` under `surfaces:` with the full reasoning.
 
-**But the first rigid-lid run was wrong, and nothing in the solver output said so.** 3,719 of its cells sat pinned at the `limitVelocity` cap while continuity error stayed at 3e-8 and the Courant number sat neatly at its 0.90 ceiling for 61 hours. Two causes, both now fixed on branch `rigid-lid-applicability`:
+**The fit's residual is not evidence.** The 14 baffle tips are collinear to 0.1 mm and
+equally spaced, so they fit onto the DXF under ANY pairing, including the 180-degree
+reversal (lww-134 caught this; the residual collapses to 5e-5 m either way).
 
-1. **A wall thinner than the lattice blocked nothing.** `build_plan_grid` blanks a column on its *centre*, so the sheet-steel baffles (thinner than the 3 cm lattice) left the mesh joined straight through them. 8,222 columns were straddling a baffle. Solids are now blanked against themselves grown by half a cell diagonal.
-2. **A rigid lid cannot represent a plunging surface.** New `mesh.lid_steps` measures the prescribed surface's local range as a fraction of the local depth; the build now warns when the 99th percentile passes 0.5. On this case it reports **172 %**, and it is right to: a vertical-slot fishway is thirteen discrete drops, so its surface steps by more than the water is deep at every slot. A lid is a slip *wall*, so it converts that head into velocity instead, `sqrt(2 g dz)`.
+**Verified off-axis instead:** the slot blocks sit 0.1202 m to one side of the tips, so
+a reversal flips them. Transformed to GK4 they land at +0.1200 m northing, where the
+DXF carries 112 vertices; the -0.15..-0.05 m band the reversal needs is EMPTY. This
+agrees with lww-134's independent orientation from the drawing's
+`Oberwasser`/`Unterwasser` labels.
 
-After sealing, the capped cells fell from 3,719 to 679, and **92.3 % of what remains sits in the 5.17 % of columns where the lid steps more than 0.30 m within 15 cm**. Those columns are the slots. The bulk field is now physical (median 0.109 m/s, p95 1.09 m/s), but the slot jets, which are the entire reason for a 3D sub-model here, are not.
+**Why it is not applied:** every other layer (structures-merged, pass-walls,
+clear-channel, baffle-stations, the drape) and ALL of Federica's reference data are in
+local metres - her model carries no georeference at all. Applying the transform puts
+the case in two frames at once, and frame confusion caused more wrong conclusions in
+this work than anything else. Sequence: finish in local, then georeference everything
+in one pass and re-verify.
 
-**The decision (the user's, on 2026-09-12): let the rigid-lid run finish, then run VOF seeded from it.** The sealed rigid-lid run is at t=111 of 120 as this is written, ~9 h out. VOF then gets `mapFields` from the finished rigid-lid case onto its `0/`: the rigid-lid domain stops at the water surface, so the VOF freeboard cells have no source and keep their built values while every water cell starts with a developed `U`, `k` and `omega`. Note the 22-day VOF figure above predates the seal, and that run had the same leaking baffles suppressing its time step, so it is probably pessimistic. It will be measured over the first 50 steps, not assumed.
+To apply: set the three values in `surfaces:`, re-run the surfaces stage with
+`force=True`, then regenerate every derived layer.
 
-## Tasks for lww-133
+## 5. Traps this work actually fell into
 
-Take them in this order. Work on a branch off `rigid-lid-applicability` (not `main`, which is 6 commits behind it) and open a PR per task rather than pushing to a shared branch.
+Read this before trusting any measurement.
 
-### 1. Review `rigid-lid-applicability` and run the suite
+**Coordinate frames - seven times.** Six cross-channel "rulers" and one along-axis scan
+each produced a confident wrong answer, because they sampled a PROJECTED frame instead
+of the real geometry. The pass axis is straight; the channel turns east near s=26. The
+worst cost a 10-hour run and sent lww-134 chasing a hole in the CAD that does not
+exist.
 
-`git fetch && git checkout rigid-lid-applicability && python -m pytest tests/ -q && python -m ruff check src/ tests/ cases/munich-vsf/`
+> Measure along the actual geometry. For patency, walk the reference bed band
+> (`federica-bed-reach.csv`), not the pass axis. For the slot, take the minimum distance
+> between the two mesh holes - it runs diagonally between two corners, so no ray across
+> the channel can ever find it.
 
-Expected: 681 pass, ruff clean. A second machine and a second Python are worth having on this; everything here has only ever run on one interpreter. Read commit `c038c4a` in full, and push back on anything in it. In particular I would like a second opinion on two judgement calls:
+**Stale artifacts - three times.** A `geometry.slf` from the previous night; a mesh read
+while the solver was still writing partitions; and an `r2d.slf` a week old from the
+broken geometry, which the OpenFOAM chain would have read silently. **Check the
+timestamp before believing a result.** The stale one is archived as
+`r2d-STALE-2026-09-21-broken-geometry.slf`.
 
-* **sealing grows every solid by half a cell diagonal**, unconditionally. It changed `tests/test_structures.py::test_a_solid_structure_removes_columns_from_the_openfoam_lattice` from 100 removed columns to 140, and I updated the test to state the new contract. Is unconditional right, or should it be a config flag? My argument for unconditional: a wall that does not separate is not a wall, and a mesh cannot represent a solid thinner than its own cells anyway. Counter-argument worth weighing: it silently thickens every structure in every existing case, `cases/isar-2025/` included.
-* **`lid_steps` warns but does not refuse.** Given it correctly predicted a 61-hour wasted run, is a `log.warning` enough?
+**Orphaned MPI ranks.** `timeout`-wrapped solver calls kill the Python parent but NOT
+the MPI children. Eleven survived one killed run and cost a factor of 3.3 in contention
+while producing a plausible-looking but meaningless timing. Before trusting any rate:
 
-### 2. Regression-check `cases/isar-2025/`
+```bash
+for p in $(pgrep -f 'telemac3d|telemac2d|interFoam'); do
+  echo "$p $(ps -o etimes= -p $p)"; done      # wildly different ages = strays
+```
 
-That case also uses structures and its OpenFOAM mode has been exercised before. You will not have its data either, so this is a code-reading and test-writing task, not a run: establish whether the seal changes its mesh materially, and if you cannot tell without running it, say so plainly rather than guessing. If it matters, the run has to happen here.
+**Absurd numbers, not failing checks, caught most of these.** A closing buffer that
+deleted a wall (7.41 -> 0.00 m2), a scalloped cut edge that broke the mesher, a 39-hour
+estimate for a 45-second run. None errored. That is not a system to rely on.
 
-### 3. Promote the binary field reader out of the case
+## 6. Geometry: how it is built, and the rules that keep it right
 
-`cases/munich-vsf/correct_lid.py` has `read_patch_values` / `_read_list`, which read a patch's `boundaryField` values out of an OpenFOAM field in **either ASCII or binary** format. Binary matters: the case writes `writeFormat binary`, and converting a case to ASCII to read one patch rewrites every field on disk. This is generally useful and belongs in the library, probably `axqua.solvers.openfoam.postprocess` or beside `report.py`. Move it, give it tests against small fixtures of both formats, and have `correct_lid.py` import it.
+The CAD alone is not enough. Three things are constructed:
 
-Watch for the two traps already paid for: the OpenFOAM banner is ~700 bytes, so a fixed-size slice looking for the `format` keyword misses it; and in binary the payload contains `)` bytes, so the list must be found by reading its count and computing the length, never by searching for the closing paren.
+- **`build_pass_walls.py`** - both pass walls. The far one is a ZERO-THICKNESS sheet in
+  `stahlbeton.stl`, so no footprint method can ever see it; the near one was inside a
+  drape blob that an earlier fix deleted. Without them the pass is open along its
+  length and water leaves sideways.
+  **Rule: a constructed wall must never stand where the reference mesh says BED.** The
+  walls are traced over a fixed extent along a STRAIGHT axis while the channel turns,
+  so without this they run past the turn and choke the outlet - which is exactly what
+  happened.
+- **`build_structures_layer.py`** - merges CAD baffles with the drape. **Inside the
+  clear channel the CAD is the authority; outside it the drape stands, CLIPPED not
+  dropped.** Dropping whole features deleted the near wall once.
+- **`extract_bed_from_polymesh.py`** - the reference bed from Federica's mesh. Path via
+  `AXQUA_REFERENCE_POLYMESH` (here: `/home/IWS/schwindt/Munich-VSF-reference/6_v5_HQ100/polyMesh`).
 
-### 4. Document when a rigid lid applies
+**A part declared `role: bed` is terrain and must never become a structure.** The
+column-occupancy test cannot tell a wall from raised terrain, so it typed the weir and
+the exit apron as wall; under `solid_mode: cut` that DELETES the overflow path and the
+pass outlet. All 7 `Substratum_*`/`Magerbeton*` patches are protected, read from the
+config rather than guessed from names (lww-134's fix - my name-prefix version missed
+844 of 1,893 reference points).
 
-There is no guidance in `docs/` on choosing between `mode: vof` and `mode: rigid-lid`, and the choice is not obvious. Write it, using this case as the worked example. The rule that emerged: a rigid lid is right when the free surface is smooth on the scale of a cell and wrong when it has steps comparable to the depth, so it suits a graded channel and rules itself out at a weir, a drop structure or a fish pass slot. Cover what the mode costs even when it applies (the surface cannot rise, overtop or wet a dry bar; the waterline is a fixed vertical wall; `outlet_stage` becomes a pressure datum rather than a stage) and how to recover the surface afterwards via `correct_lid.py`.
+Current geometry, verified: slots **0.1698 m = 100.1% of the 0.1697 m CAD at all 14**;
+clear width median 1.150 m vs 1.165 design; patency along the true channel narrowest
+1.82 m of a 2.60 m band.
 
-### 5. If you run out of the above
+## 7. The other machine
 
-`correct_lid.py` is written but has never completed a real pass, because the run it was pointed at turned out to be invalid. It writes a corrected 2D SELAFIN via `axqua.core.selafin._write_selafin`, using a private function. Either make that public with a supported signature or give the script a sanctioned route. Its `IMPLAUSIBLE = 0.5` m guard fired correctly on the bad run, which is the only part of it proven so far.
+lww-134, coordinated on **GitHub issue #3 of `sschwindt/aXqua`**. Both push to
+`rigid-lid-applicability`. They are a careful reviewer and have caught real errors -
+the collinear-control warning, the `Magerbeton` omission, the missing weir in a
+discharge calculation. Read their comments before re-deriving anything.
 
-## Rules of engagement
+Open with them: their `patency_check` walks the pass axis, the frame that hid the
+outlet choke - it should follow the reference bed band instead. Their measured
+**C_Q = 0.496 +/- 0.011** for the slot geometry is the first non-assumed discharge
+coefficient the project has.
 
-**Do not run anything in `/srv/private/axqua/cases/munich-vsf/axqua-case/` from lww-133**, even if the directory somehow exists there. Long runs on this machine are stopped and restarted by hand and a second writer would corrupt them silently.
+## 8. Running things
 
-**Do not merge to `main`.** `main` is 6 commits behind `rigid-lid-applicability` and the user has not asked for a merge. Open PRs and leave them.
+```bash
+# build the 2D case (surfaces stage is cached; force=True to redo it)
+mamba run -n axqua-env python cases/munich-vsf/preprocessing.py
 
-**State what you measured and what you assumed, separately.** The 61 hours lost on this case were lost because "continuity error 3e-8, Courant 0.90, discharge balanced" was reported as a healthy run. Those numbers were all true. They measure the solver's bookkeeping and say nothing about whether the physics is right, and no one had written down which is which. If you report a check passing, say what it would have caught.
+# the OpenFOAM scripts DEFAULT TO case-config.yml, which is rigid-lid, and will
+# correctly REFUSE (the surface steps 152% of the local depth at the slots).
+# Pass the VOF config explicitly:
+mamba run -n axqua-env python cases/munich-vsf/openfoam_preprocessing.py case-config-vof.yml
+mamba run -n axqua-env python cases/munich-vsf/openfoam_run.py case-config-vof.yml
+```
 
-## Report back
+Merging partitioned TELEMAC results for a mid-run look (gretel prompts in this order):
 
-In the PR, or by commenting on the issue that points here:
-
-1. whether the Tier 1 data has arrived yet (this re-divides the work, see above), and whether Tier 2 came with it;
-2. its core count and whether TELEMAC and OpenFOAM are installed, and at what paths (do not assume they match lww-134's `/home/modelling/...`);
-3. `pytest` and `ruff` results on a second interpreter;
-4. your verdict on the two judgement calls in task 1.
+```
+T2DGEO / SERAFIN / T2DCLI / T2DRES / SERAFIN / <ncsize> / 0 / 2
+```
