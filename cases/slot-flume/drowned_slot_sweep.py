@@ -208,11 +208,39 @@ def main() -> None:
     c = np.array([r["c_q"] for _, r in allrows])
     print(f"\n{len(allrows)} slot-points over {len(records)} runs")
     print(f"  submergence {s.min():.3f}..{s.max():.3f}, C_Q {c.min():.3f}..{c.max():.3f}")
-    for lo, hi in ((0.0, 0.6), (0.6, 0.75), (0.75, 0.85), (0.85, 0.95), (0.95, 1.01)):
-        m = (s >= lo) & (s < hi)
-        if m.sum() >= 3:
-            print(f"  submergence {lo:.2f}-{hi:.2f}: C_Q {c[m].mean():.3f} "
-                  f"+/- {c[m].std():.3f}  (n={m.sum()})")
+
+    # PAIRED BY SLOT, and binning by submergence instead is a trap. The tailwater
+    # only reaches the lower slots, so a low-submergence bin is made of UPSTREAM
+    # slots and a high one of downstream slots - and C_Q varies slot to slot for
+    # reasons that have nothing to do with the regime. Binned, this sweep reads as a
+    # +18% rise; paired against each slot's own free value, it is +8%. The rest was
+    # position.
+    levels = sorted(records)
+    by_slot = {}
+    for level, r in allrows:
+        by_slot.setdefault(r["slot"], {})[level] = r
+    lo, hi = levels[0], levels[-1]
+    drowned = [k for k, v in by_slot.items()
+               if hi in v and lo in v
+               and v[hi]["submergence"] - v[lo]["submergence"] > 0.02]
+    dry = [k for k in by_slot if k not in drowned and hi in by_slot[k]
+           and lo in by_slot[k]]
+    print(f"\n  paired across tailwater {lo:g} -> {hi:g} m:")
+    for name, keys in (("slots the tailwater reached", drowned),
+                       ("slots it never reached  ", dry)):
+        if not keys:
+            continue
+        a = np.array([by_slot[k][lo]["c_q"] for k in keys])
+        b = np.array([by_slot[k][hi]["c_q"] for k in keys])
+        print(f"    {name} (n={len(keys)}): C_Q {a.mean():.3f} -> {b.mean():.3f} "
+              f"({100 * (b.mean() / a.mean() - 1):+.1f}%)")
+    first = np.array([by_slot[k][lo]["c_q"] for k in sorted(by_slot) if lo in by_slot[k]])
+    print(f"\n  slot-to-slot scatter at one tailwater: sd {first.std():.3f} on mean "
+          f"{first.mean():.3f} ({100 * first.std() / first.mean():.0f}%),")
+    print("  which is LARGER than the submergence effect and larger than the "
+          "+/-0.011 in\n  fit_slot_coefficient.py - that figure averages the pool "
+          "depth over all\n  fourteen slots, so it reports run-to-run spread and "
+          "hides slot-to-slot.")
     print("\nfree-slot reference from fit_slot_coefficient.py: C_Q 0.496 +/- 0.011")
     print("As with that one, this is at dx 0.025 and the mesh series has not "
           "plateaued,\nso treat it as the same kind of lower bound and compare only "
