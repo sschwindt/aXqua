@@ -57,13 +57,26 @@ from axqua.workflow import run_solver_streaming                 # noqa: E402
 
 G = 9.81
 DX = 0.025               #: the level fit_slot_coefficient.py trusts
-Q = 0.135                #: design discharge, held fixed; tailwater is the variable
+#: Discharge, held fixed while the tailwater varies. 0.060, NOT the 0.135 design
+#: value, and that choice is the whole validity of the experiment. At 0.135 the FREE
+#: pool is already 0.93 m deep against a 1.00 m baffle, so any tailwater rise puts the
+#: water over the baffle and the measurement stops being about a slot. Measured on the
+#: first attempt: 52% of its points sat deeper than the physical baffle. At 0.060 the
+#: free depth is 0.44-0.53 m, leaving room to sweep through munich's regime.
+Q = 0.060
 DURATION = 900.0         #: as the free sweep, and for the same measured reason
 
-#: [m] prescribed outflow water surface elevation. The free run sits at 1.949 m at the
-#: last baffle, so 2.05 drowns roughly the last pool and 2.65 roughly the last five -
-#: which is the span lww-133 measures on munich.
-LEVELS = (2.05, 2.20, 2.35, 2.50, 2.65)
+#: [m] prescribed outflow water surface elevation. Sized against the FREE Q=0.060 run,
+#: which sits at 1.616 m at the last baffle with the bed at 1.154 m. These four put
+#: 0.50 / 0.65 / 0.80 / 0.95 m of water on that last baffle, i.e. 50-95% of its
+#: height - which spans munich's drowned pools at 35-99% of theirs.
+LEVELS = (1.65, 1.80, 1.95, 2.10)
+
+#: A slot-point is only usable if the pool is shallower than the PHYSICAL baffle. The
+#: 2D build adds `structures.solid_freeboard_2d` on top, so the model happily runs
+#: water 1.4 m deep past a 1.0 m baffle and calls it slot flow - it is not, and the
+#: first attempt at this sweep reported 65 such points before the gate existed.
+MAX_DEPTH_FRACTION = 1.0
 
 
 def run_dir(cfg, level):
@@ -92,6 +105,37 @@ def build_and_run(base, level, *, run=True):
     return target
 
 
+def converged(base, level):
+    """Did this run finish filling? Same witness fit_slot_coefficient.py uses.
+
+    A drowned run holds far more water than a free one - 25 to 31 m3 here against 7.5 -
+    so it has further to fill, and the first C_Q sweep on this flume had to be
+    retracted for exactly this.
+    """
+    import copy as _copy
+
+    from axqua.solvers.telemac import sortie
+
+    cfg = _copy.deepcopy(base)
+    target = run_dir(base, level)
+    listing = sortie.latest_sortie(target, cfg.cas_file)
+    if listing is None:
+        return False, "no listing"
+    data = sortie.read_sortie(listing)
+    if data.time.size < 8:
+        return False, "too few printouts"
+    n = max(4, data.time.size // 4)
+    drift = float(np.polyfit(data.time[-n:], data.volume[-n:], 1)[0]) * 900.0
+    rel = abs(drift) / max(float(data.volume[-n:].mean()), 1e-9)
+    qi = float(data.gross_in[-n:].mean())
+    qo = float(data.gross_out[-n:].mean())
+    if rel > 0.02:
+        return False, f"still filling: volume {rel:+.0%}/900s"
+    if abs(qo - qi) / max(abs(qi), 1e-9) > 0.05:
+        return False, f"flux short: out/in {qo / qi:.2f}"
+    return True, f"volume {rel:+.2%}/900s, out/in {qo / qi:.3f}"
+
+
 def per_slot(base, level):
     """C_Q and submergence at every slot of one run.
 
@@ -112,6 +156,8 @@ def per_slot(base, level):
         invert = design.bed_z(design.baffle_x(i))
         if not np.isfinite(dh) or dh <= 1e-4 or not np.isfinite(h) or h <= 0:
             continue
+        if h > MAX_DEPTH_FRACTION * design.BAFFLE_HEIGHT:
+            continue            # over the baffle: not slot flow, see MAX_DEPTH_FRACTION
         # Submergence: how much of the upstream head over the slot invert is still
         # there on the downstream side. 0 = free overfall, 1 = no drop at all.
         s = (down - invert) / max(up - invert, 1e-9)
@@ -133,6 +179,11 @@ def main() -> None:
         if not only_report:
             print(f"\n=== tailwater {level:g} m, Q {Q:g} m3/s, dx {DX:g} m ===")
             build_and_run(base, level)
+        ok, why = converged(base, level)
+        print(f"  tw {level:g}: {why}")
+        if not ok:
+            print(f"  tw={level}: REJECTED, {why}")
+            continue
         try:
             rows = per_slot(base, level)
         except Exception as exc:                          # noqa: BLE001
