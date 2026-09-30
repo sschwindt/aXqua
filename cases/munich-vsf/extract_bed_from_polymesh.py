@@ -18,6 +18,12 @@ source, no case to be valid, and it works on a case that would not run.
 
     python cases/munich-vsf/extract_bed_from_polymesh.py                # the outlet gap
     python cases/munich-vsf/extract_bed_from_polymesh.py 13.5 15.5 66.5 69.5 0.05
+    python cases/munich-vsf/extract_bed_from_polymesh.py 2.5 27 19 107 0.10 \
+        federica-bed-reach.csv                                          # the whole reach
+
+The output name is the sixth argument, because a window and a filename go together:
+writing every window to one default silently replaced the outlet extract with the
+full-reach one the first time both were wanted.
 """
 
 from __future__ import annotations
@@ -100,6 +106,7 @@ def main() -> None:
     args = sys.argv[1:]
     box = tuple(float(v) for v in args[:4]) if len(args) >= 4 else BOX
     res = float(args[4]) if len(args) >= 5 else RES
+    out = OUT.with_name(args[5]) if len(args) >= 6 else OUT
     x0, x1, y0, y1 = box
 
     if not MESH.is_dir():
@@ -165,12 +172,12 @@ def main() -> None:
         line = "".join("#" if filled[i, j] else "." for j in range(nx))
         print(f"  y={y0 + (i + 0.5) * res:6.2f}  {line}")
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUT, "w", newline="") as fh:
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with open(out, "w", newline="") as fh:
         w = csv.DictWriter(fh, fieldnames=["x", "y", "bed_z", "patch"])
         w.writeheader()
         w.writerows(rows)
-    print(f"\nwrote {OUT}  ({len(rows):,} rows, same schema as "
+    print(f"\nwrote {out}  ({len(rows):,} rows, same schema as "
           "federica-wetted-bed.csv)")
 
 
