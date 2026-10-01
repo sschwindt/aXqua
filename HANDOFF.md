@@ -15,7 +15,7 @@ At the time of writing: **interFoam, 16 ranks**, the VOF run of the fish-pass
 sub-model. Logs live in the session scratchpad, not the repo:
 
 ```
-/tmp/claude-11003/-srv-private-hydromate/<session>/scratchpad/of-run.log
+<your session scratchpad>/of-run.log
 ```
 
 A restarted session gets a NEW scratchpad, so that path is gone. Find the live log via
@@ -47,8 +47,10 @@ Standing constraints from the user:
 - **physical correctness outranks speed**, even when slow;
 - cost levers are (1) a possibly regular mesh, (2) cut the air fraction via TELEMAC
   pre-wetting;
-- **"hydromate" is a protected name we do not own** - never in directories, env names
-  or new writing. Legacy compat shims are deliberately kept;
+- the project was **renamed off a protected name we do not own** (2026-09-23). It must
+  not reappear in directories, environment names or new writing; the legacy
+  compatibility shims are deliberately kept so users can migrate. `tests/
+  test_rename_compat.py` enforces this and will fail the suite if it creeps back;
 - the pass/weir **discharge split cannot be measured in the lab and never was**. Do not
   validate against it. The ~108 l/s / 80% figure is design intent, not data.
 
