@@ -10,11 +10,26 @@ description:
 - in the aXqua plugin UI use tabs for each relevant configuration, that is, plugin must have:
     - a "Configuration" tab that holds all definitions explained in the subsections "Plugin Setup", "Postprocessors"
     - a "Case Setup" tab linked to "aXqua Case Setup" docs section
-    - a "Preprocessing" tab linked to "Preprocessing"
-    - a "Hydraulic simulation" tab that links to "Hydraulic simulations" -- consider to create subtabs in this quite complex section
-    - a "Mesh convergence" tab that links to "Mesh convergence"
-
-
+    - a "Preprocessing" tab linked to "Preprocessing" docs section
+    - a "Hydraulic simulation" tab with sub-tabs for "Telemac" and "OpenFOAM", which link to "Hydraulic simulations" docs section and according subsections
+    - a "Mesh convergence" tab that links to "Mesh convergence" docs section
+    - a "Morphodynamic simulation" tab with sub-tabs for "Telemac" and "OpenFOAM", which link to "Morphodynamic simulations" docs section and according subsections
+    - a "Calibration & validation" tab that links to "Calibration & validation" docs section
+    - a "Postprocessing" tab with sub-tabs for QGIS, ParaView and visit-DAV (see below), which link to "Postprocessing" docs section and according subsections
+    - a "Batch-processing" tab with visual batch-processing options and a "Detach" section that enables detaching the plugin session from the current QGIS session (so aXqua keeps running when one closes QGIS) and "Generate batch-processing script"; their help-click links to "Batch-processing" docs section and relevant subsections there
+- the complex setup of config files for users, cases (projects), simulations (see "aXqua case setup" docs section) must be handled in pop-up windows (sub-apps?) where users can find "Save", "Cancel", and "Exit" buttons at the bottom-right with according save-functionality for `.axqua-profile` and `axqua-case` files that need to be updated according to user input and directly checked for correctness (files, factual, functional); correctness check must throw a warning if anything is not OK but should not hinder saving nor exiting the pop-up windows savely; 
+- everytime and item concerned by an error or warning message should be tagged with an orange (warning) or dark-red bold (error) warning triangle in the plugin UI and clicking on the triangle will open the error message with direct link to that warning or error message in the docs section (see below)
+- this computer for development purposes runs on Debian12 and has already all relevant software installed, including QGIS, Telemac, OpenFOAM, ParaView, and visit-DAV; you find the installation directories in the use CLAUDE.md file.
+- we were currently working with OpenFOAM v9; however, we must switch to `OpenFOAM v2406`, which I already did on this server with (no conda env activated):
+```bash
+curl -fsSL https://dl.openfoam.com/add-debian-repo.sh \
+  -o /tmp/add-openfoam-repo.sh
+less /tmp/add-openfoam-repo.sh
+sudo bash /tmp/add-openfoam-repo.sh
+sudo apt update
+apt-cache policy openfoam2406-default
+sudo apt install -y openfoam2406-default
+```
 """
 ---
 * Purpose # meaning, perform standardized, state-of-the-art numerical simulations of georeferenced cases with open-source codes Telemac and OpenFOAM, including mesh convergence studies according to <cite-literature> and Bayesian calibration
@@ -22,18 +37,18 @@ description:
 * Installation & Configuration
 	* QGIS plugin # say where one gets qgis from and how one can install this plugin through QGIS plugin manage (once it is published) -- if this requires the installation of dependencies, tell users how to get them; simulation software, however, is treated in the next section -- aXqua is probably OK to be executed by the QGIS-inherent Python installation
 	* Simulation Software # aXqua QGIS plugin needs a wizard that runs users through the installation of Telemac and OpenFOAM on their systems, where users select their operating system (well, aXqua should be able to detect on what platform it is running)
-		* TELEMAC # explain workflow through telemac installation wizard -- this may be based for linux on `/home/schwindt/github/hyhome-v2/get-started/install-telemac-autoinstaller.md`
+		* TELEMAC # explain workflow through telemac installation wizard -- this may be based for linux on `/home/IWS/schwindt/hyhome-v2/get-started/install-telemac-autoinstaller.md`
 		* OpenFOAM # this might be tricky -- mention that OpenFOAM users definitely also want to install Telemac because aXqua pulls a huge share of its computational efficiency from Telemac warm-up runs
 	* Plugin setup
 		* Plugin profile # users must be able to define a plugin profile (`.axq-profile` -- functionality to be created) that automatically configures paths Python, simulation software (see next subsubsection) and anything else that is necessary
 		* Define solver bindings # explain how users can setup / configure the plugin -- these sections replace the current `telemac:` entry in the `case-config.yml` and add the same for OpenFOAM
 		* <anything-needed-for-plugin-profile> # add this and if needed more subsubsections if users need to do other computer-specific definitions to make the plugin function but keep this reasonable and don't exaggerate on complexity of these sections
 	* Postprocessors
-        	* Visit # add -- I mean https://sd.llnl.gov/simulation/computer-codes/visit
+        	* Visit # add -- I mean https://visit-dav.github.io/visit-website/
         	* ParaView # add
 
 * Usage
-	* aXqua Case Setup # explain what is an aXqua case and that a case config can be stored as `.axq-case` file -- that case file replaces the current `case-config.yml`
+	* aXqua case setup # explain what is an aXqua case and that a case config can be stored as `.axq-case` file -- that case file replaces the current `case-config.yml`
 	     * Project paths # see `case-config.yml`, entry `project:` -- add some logical explanations for what users need to understand -- use must be able to just click through the plugin UI to define paths, they should have the option to but must not be required to manually type in directories
 	     * Geodata # see `case-config.yml`, entry `geodata:` -- mention that for morphodynamics, aXqua can generate its own DEM of Differences (see below subsubsection)
 	     * Boundaries # see `case-config.yml`, entry `boundaries:` -- add some logical explanations for what users need to understand -- place the `cases/gauge_data.py` script into the `scripts/` folder and explain how users can use it to autocomplete boundaries
@@ -58,11 +73,11 @@ description:
         * Run mesh convergences study # say that this can take a while and use considerable disk storage -- add some logical explanations for what users need to understand
         * Study report # explain the result of the mesh convergence study, what it tells, how the information should be used in the following considering the accuracy--computing-time tradeoff and that mesh independence is practically a myth
     * Morphodynamic simulations
-        * Concept # explain sediment transport and active layer concepts; you may pick stuff from `/home/schwindt/github/hyhome-v2/numerics/telemac/gaia-<*>.md`, including graphics
+        * Concept # explain sediment transport and active layer concepts; you may pick stuff from `/home/IWS/schwindt/hyhome-v2/numerics/telemac/gaia-<*>.md`, including graphics
         * Telemac-Gaia Setup # capacity to be added for `.cas` file generation?
-        * OpenFOAM Setup # capacity to be added through Nils Reidar Olsen's toolboxs, like `https://pvv.ntnu.no/~nilsol/sediDriftFoam2/` and related
+        * OpenFOAM Setup # capacity to be added through Nils Reidar Olsen's toolboxs, that is pull in information from `https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/`; I already downloaded the source code into `/home/IWS/schwindt/Downloads/sediDriftFoam/sourceCode/`; there also is a newer version of that code at  `https://pvv.ntnu.no/~nilsol/sediDriftFoam2/` which, I think uses some kind of volume-of-solid method to simulate topographic change and therefore is more computationally efficient
     * Calibration & validation
-        * Introduction to Bayesian calibration # pull from my papers and `/home/schwindt/github/hydrobayescal/`
+        * Introduction to Bayesian calibration # pull from my papers and `/home/IWS/schwindt/hydrobayescal/`
         * Ground truth data setup # adopt from `case-config.yml`, entry `ground_truth:`
         * Bayesian calibration & validation setup # adopt from `case-config.yml`, entry `calibration:` and what type of data split to use or different datasets to define for use for statistically independent calibration and validation
         * Run hydroBayesCal # explain how to run hydrobayescal through aXqua and also how to do a validation with data splitting
