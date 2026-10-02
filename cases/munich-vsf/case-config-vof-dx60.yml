@@ -55,6 +55,13 @@ project:
   # georeferenced. Unused while the case runs in local CAD coordinates.
   crs_epsg: 31468                # DHDN / GK zone 4
   sim_dir: axqua-case
+  # A VARIANT MUST NOT SHARE THE PARENT'S OpenFOAM CASE DIRECTORY.
+  # openfoam_case_dir defaults to <model_dir>/../openfoam, which is derived from
+  # sim_dir alone and therefore IDENTICAL for every config of this case. Building a
+  # variant in that default rewrites constant/polyMesh and system/ underneath whatever
+  # is already running there: a coarse-mesh check launched beside a live production run
+  # destroys the run's mesh while it is marching. Each variant gets its own root.
+  openfoam_dir: axqua-case/openfoam-dx60
 
 telemac:
   pysource: /home/modelling/telemac-v911/telemac-mascaret/configs/pysource.debian12.sh
