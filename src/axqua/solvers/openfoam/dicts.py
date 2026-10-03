@@ -471,21 +471,78 @@ def _alpha_mules(cfg, stage: Stage) -> str:
             "        MULESCorr       yes;")
 
 
-def fv_solution(cfg, stage: Stage) -> str:
-    alpha_mules = _alpha_mules(cfg, stage)
-    body = f"""solvers
-{{
-    "alpha.water.*"
-    {{
-        nAlphaCorr      2;
+#: isoAdvector reconstruction schemes ESI v2406 ships, in increasing order of
+#: fidelity. `isoAlpha` is the original isosurface cut; the two PLIC schemes fit a
+#: plane per interface cell, `plicRDF` iterating it against a reconstructed distance
+#: function. On aXqua's own structured hex lattice - isoAdvector's best case - PLIC
+#: is the one worth having.
+ISO_RECONSTRUCTION = ("isoAlpha", "gradAlpha", "plicRDF")
+
+
+def _alpha_iso(cfg) -> str:
+    """The ``alpha.water`` entries for ``interIsoFoam``, in place of MULES.
+
+    isoAdvector advects the interface GEOMETRICALLY - it reconstructs a surface in
+    each interface cell and fluxes the volume that crosses each face - rather than
+    solving a transport equation and fighting the resulting smearing with a
+    compression term. Two things follow that this case needs.
+
+    **The discharge stops being wrong.** The inflow condition controls the MIXTURE
+    flux, so the water entering is `Q*<alpha^2>/<alpha>`, which equals Q only for a
+    sharp interface. Under MULES on munich-vsf that ratio was 0.821, steady: the
+    case believed 0.135 m3/s and delivered 0.111, and the discharge balance could
+    not see it because inflow and outflow were short by the same amount. Measured on
+    the v2406 tutorial, isoAdvector holds `min(alpha) = 0, max(alpha) = 1 + 8e-10`,
+    against this case's `-1.3e-08 .. 1.0001118` under MULES.
+
+    **The interface stops setting the time step.** There is no compression flux to
+    resolve, so the Interface Courant number is not a separate limit - the one that
+    climbed to 93% of the flow Courant on the 0.045 m run and became the limiter.
+
+    `cAlpha` is written although isoAdvector ignores it: `interfaceProperties` reads
+    it when it is constructed, and the run aborts without it.
+    """
+    scheme = getattr(cfg.openfoam, "iso_reconstruction", "plicRDF")
+    if scheme not in ISO_RECONSTRUCTION:
+        raise ValueError(
+            f"openfoam.iso_reconstruction {scheme!r} is not one of "
+            f"{', '.join(ISO_RECONSTRUCTION)}")
+    return f"""        // GEOMETRIC interface advection: no compression flux, so no
+        // interface Courant limit and no smearing for the inlet to lose
+        // discharge to. See axqua.solvers.openfoam.dicts._alpha_iso.
+        reconstructionScheme {scheme};
+        isoFaceTol      1e-6;
+        surfCellTol     1e-6;
+        nAlphaBounds    3;
+        snapTol         1e-12;
+        clip            true;
+        writeFields     false;
+
+        nAlphaSubCycles 1;
+        // ignored by isoAdvector, but interfaceProperties reads it on construction
+        cAlpha          1;"""
+
+
+def _alpha_block(cfg, stage: Stage) -> str:
+    if cfg.openfoam.solver == "interIsoFoam":
+        return _alpha_iso(cfg)
+    return f"""        nAlphaCorr      2;
         nAlphaSubCycles 1;
         // interface compression strength. Foundation carried this as a trailing
         // number on the div(phi,alpha) scheme; ESI reads it here.
         cAlpha          {stage.c_alpha:g};
 
-        {alpha_mules}
+        {_alpha_mules(cfg, stage)}
         nLimiterIter    5;
-        alphaApplyPrevCorr yes;
+        alphaApplyPrevCorr yes;"""
+
+
+def fv_solution(cfg, stage: Stage) -> str:
+    body = f"""solvers
+{{
+    "alpha.water.*"
+    {{
+{_alpha_block(cfg, stage)}
 
         solver          smoothSolver;
         smoother        symGaussSeidel;

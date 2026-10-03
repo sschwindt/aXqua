@@ -1484,7 +1484,12 @@ class OpenFoam:
     # because the Foundation OpenFOAM axqua targets has no native Windows build.
     environment: Environment = field(default_factory=Environment)
     n_processors: int = 1
+    #: ``interFoam`` (algebraic VOF with interface compression) or ``interIsoFoam``
+    #: (isoAdvector, geometric interface advection). ESI v2406 only for the latter.
     solver: str = "interFoam"
+    #: Reconstruction scheme when ``solver`` is ``interIsoFoam``: ``plicRDF``,
+    #: ``gradAlpha`` or ``isoAlpha``. Ignored by ``interFoam``.
+    iso_reconstruction: str = "plicRDF"
 
     # ---- the TELEMAC pre-run that seeds this case ---------------------------
     pre_run: PreRun = field(default_factory=PreRun)

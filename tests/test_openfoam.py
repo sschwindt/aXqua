@@ -1389,3 +1389,44 @@ def test_a_sharp_inlet_delivers_what_it_was_asked_and_says_nothing():
                                inflow=q, outflow=-q, target=0.135)
     assert history.delivered == pytest.approx(1.0)
     assert "DELIVERS ONLY" not in " ".join(history.lines())
+
+
+def test_interisofoam_gets_isoadvector_instead_of_mules():
+    """Geometric advection has no compression flux, so none of the MULES machinery
+    applies - and the entries that do apply are different ones, not a subset."""
+    from axqua.solvers.openfoam.dicts import fv_solution, stages
+
+    cfg = _Cfg(mode="vof", solver="interIsoFoam")
+    run = [s for s in stages(cfg) if s.name == "run"][0]
+    text = fv_solution(cfg, run)
+
+    assert "reconstructionScheme plicRDF;" in text      # the default, PLIC
+    assert "MULESCorr" not in text
+    assert "nAlphaCorr" not in text and "alphaApplyPrevCorr" not in text
+    # ...but cAlpha must survive, unused: interfaceProperties reads it on
+    # construction and the run aborts without it
+    assert "cAlpha          1;" in text
+
+
+def test_interfoam_is_untouched_by_the_isoadvector_branch():
+    from axqua.solvers.openfoam.dicts import fv_solution, stages
+
+    cfg = _Cfg(mode="vof")
+    run = [s for s in stages(cfg) if s.name == "run"][0]
+    text = fv_solution(cfg, run)
+    assert "MULESCorr       yes;" in text
+    assert "reconstructionScheme" not in text
+
+
+def test_an_unknown_reconstruction_scheme_is_refused_not_passed_through():
+    """OpenFOAM would abort at run time with a list of valid names; this fails at
+    build time, before a job is queued."""
+    import pytest as _pytest
+
+    from axqua.solvers.openfoam.dicts import fv_solution, stages
+
+    cfg = _Cfg(mode="vof", solver="interIsoFoam")
+    cfg.openfoam.iso_reconstruction = "plic"      # near-miss for plicRDF
+    run = [s for s in stages(cfg) if s.name == "run"][0]
+    with _pytest.raises(ValueError, match="iso_reconstruction"):
+        fv_solution(cfg, run)
