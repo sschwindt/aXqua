@@ -558,3 +558,60 @@ def test_solid_mode_cut_makes_an_island_a_hole(tmp_path):
         assert cut.area == pytest.approx(roi.area - island.area)
     finally:
         stmod.load_structures = keep
+
+
+def test_structure_sides_are_patched_apart_from_the_domain_edge():
+    """Water against a baffle is a fish pass working; water against the domain edge
+    means the footprint is too tight. One `banks` patch cannot tell them apart, and
+    on munich-vsf that made a correct geometry report as a boxed-in domain."""
+    import numpy as np
+    from shapely.geometry import Polygon
+
+    from axqua.solvers.openfoam.mesh import split_structure_sides
+
+    solid = Polygon([(10, 10), (20, 10), (20, 20), (10, 20)])
+    midpoints = np.array([
+        (10.0, 15.0),    # on the solid's west face
+        (20.0, 15.0),    # on its east face
+        (15.0, 10.0),    # its south face
+        (0.0, 5.0),      # the domain edge, far away
+        (30.0, 25.0),    # the domain edge
+        (15.0, 15.0),    # inside the solid (a blanked column's own face)
+    ])
+    banks = np.ones(len(midpoints), dtype=bool)
+
+    edge, structure = split_structure_sides(midpoints, banks, solid, dx=1.0)
+    assert structure.tolist() == [True, True, True, False, False, True]
+    assert edge.tolist() == [False, False, False, True, True, False]
+    # the split is a partition of the wall faces: nothing gained, nothing lost
+    assert (edge | structure).tolist() == banks.tolist()
+    assert not (edge & structure).any()
+
+
+def test_a_case_with_no_solids_keeps_every_wall_face_on_the_domain_edge():
+    """`structures` must not appear when there is nothing to put in it, or every
+    existing case grows an empty patch."""
+    import numpy as np
+
+    from axqua.solvers.openfoam.mesh import split_structure_sides
+
+    midpoints = np.array([(0.0, 0.0), (5.0, 5.0)])
+    banks = np.ones(2, dtype=bool)
+    edge, structure = split_structure_sides(midpoints, banks, None, dx=1.0)
+    assert edge.all() and not structure.any()
+
+
+def test_faces_that_are_not_wall_faces_are_never_claimed_by_either():
+    """The liquid boundaries sit inside the same array; a face already classified as
+    an inlet must not be reclassified because it happens to lie near a structure."""
+    import numpy as np
+    from shapely.geometry import Polygon
+
+    from axqua.solvers.openfoam.mesh import split_structure_sides
+
+    solid = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    midpoints = np.array([(5.0, 5.0), (5.0, 5.0)])
+    banks = np.array([True, False])          # the second is an inlet face
+    edge, structure = split_structure_sides(midpoints, banks, solid, dx=1.0)
+    assert structure.tolist() == [True, False]
+    assert edge.tolist() == [False, False]

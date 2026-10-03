@@ -273,8 +273,14 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     zero = case_dir / "0"
     zero.mkdir(parents=True, exist_ok=True)
     discharges = discharges or {}
-    walls = ["bed", "banks"]
     top = of_mesh.top_patch if hasattr(of_mesh, "top_patch") else "atmosphere"
+    # Every wall-type patch the mesher actually made, not a hardcoded pair: the
+    # lateral faces are split into `banks` (the domain edge) and `structures` (the
+    # sides of blanked solids), and a mesh with no solids has only the first. They
+    # take the same conditions - a wall is a wall to the solver - so the only thing
+    # that must not happen is one of them being left without any. Under a rigid lid
+    # the top patch is a wall too, and it is excluded: it takes slip, not noSlip.
+    walls = list(getattr(of_mesh, "wall_patches", None) or ["bed", "banks"])
     written: list[Path] = []
 
     # Under a rigid lid the domain is water only, so alpha is identically 1: no

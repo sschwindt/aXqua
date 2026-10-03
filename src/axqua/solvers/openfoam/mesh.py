@@ -48,6 +48,14 @@ BED_PATCH = "bed"
 ATMOSPHERE_PATCH = "atmosphere"
 LID_PATCH = "lid"      # rigid-lid mode: the free surface, as a slip wall
 BANKS_PATCH = "banks"
+#: Lateral faces that bound a SOLID STRUCTURE rather than the edge of the domain.
+#: Kept apart from `banks` because the two answer opposite questions. Water against
+#: the domain edge means the footprint was drawn too tight and the result is wrong;
+#: water against a baffle is what a fish pass IS. Merged, the `wallContact` monitor
+#: reported 44.8% on munich-vsf and was read as "the domain stopped the flow
+#: spreading" - on a geometry whose 20 baffles were already 41.5% wet in the seed,
+#: at t=0, before a single 3D step.
+STRUCTURES_PATCH = "structures"
 INLET_PREFIX = "inlet"
 OUTLET_PREFIX = "outlet"
 
@@ -358,6 +366,19 @@ class OpenFoamMesh:
         return self.polymesh.n_cells
 
     @property
+    def wall_patches(self) -> list[str]:
+        """Every no-slip wall patch: the bed, the domain edge, the structure sides.
+
+        Read off the mesh that was actually built rather than listed as a constant,
+        because `structures` exists only when the case has solid structures to blank.
+        The top patch is excluded even under a rigid lid, where it IS a wall: an
+        air-water interface carries negligible shear, so it takes slip.
+        """
+        top = self.top_patch
+        return [p.name for p in self.polymesh.patches
+                if p.type == "wall" and p.name != top]
+
+    @property
     def top_patch(self) -> str:
         """``lid`` under a rigid lid, ``atmosphere`` for the two-phase case."""
         return LID_PATCH if self.rigid_lid else ATMOSPHERE_PATCH
@@ -537,6 +558,35 @@ def extrude(grid: PlanGrid, bed: np.ndarray, lid: np.ndarray, n_layers: int, *,
 # --------------------------------------------------------------------------- #
 # patch classification
 # --------------------------------------------------------------------------- #
+
+
+def split_structure_sides(midpoints: np.ndarray, banks: np.ndarray,
+                          blocked, dx: float) -> tuple[np.ndarray, np.ndarray]:
+    """Split the lateral wall faces into ``(domain edge, structure sides)``.
+
+    The two answer opposite questions, which is the whole reason to separate them.
+    Water against the domain edge means the footprint was drawn too tight and the
+    result is not trustworthy; water against a baffle is a vertical-slot fish pass
+    working as designed. Merged into one ``banks`` patch they are indistinguishable,
+    and on munich-vsf the combined monitor read 44.8% and was reported as "the
+    footprint stopped the flow spreading" - on a geometry whose twenty baffles were
+    already 41.5% wet in the TELEMAC seed, at t=0, before a single 3D step was taken.
+
+    A face belongs to a structure when its midpoint falls on the blanked footprint
+    grown by half a cell diagonal. The slack is needed, not cosmetic: the face lies
+    on the *boundary* of the blanked columns rather than inside them, and blanking
+    is by cell-square intersection, so a face can legitimately stand that far from
+    the solid it bounds. Growing by more would start claiming the domain edge where
+    a structure happens to sit against it.
+    """
+    import shapely
+
+    on_structure = np.zeros(banks.shape, dtype=bool)
+    if blocked is not None and not blocked.is_empty and banks.any():
+        mid = midpoints[banks]
+        near = blocked.buffer(float(dx) * np.sqrt(2.0) / 2.0)
+        on_structure[banks] = shapely.contains_xy(near, mid[:, 0], mid[:, 1])
+    return banks & ~on_structure, on_structure
 
 
 def classify_sides(cfg: Config, midpoints: np.ndarray,
@@ -1114,7 +1164,21 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         sel = labels == name
         boundary.append((name, "patch", sides["owner"][sel], sides["quads"][sel]))
     banks = labels == BANKS_PATCH
-    boundary.append((BANKS_PATCH, "wall", sides["owner"][banks], sides["quads"][banks]))
+    # Split the solid structures out of the domain edge. A lateral face belongs to a
+    # structure when its midpoint sits on the blanked footprint; half a cell diagonal
+    # of slack, because the face lies on the boundary of the blanked columns rather
+    # than inside them, and the blanking is by cell-square INTERSECTION (above), so a
+    # face can stand up to that far from the solid it bounds.
+    edge, on_structure = split_structure_sides(sides["midpoint"], banks, blocked, dx)
+    boundary.append((BANKS_PATCH, "wall", sides["owner"][edge], sides["quads"][edge]))
+    if on_structure.any():
+        boundary.append((STRUCTURES_PATCH, "wall",
+                         sides["owner"][on_structure], sides["quads"][on_structure]))
+        notes.append(
+            f"{int(on_structure.sum()):,} lateral faces bound a solid structure and "
+            f"are patched as '{STRUCTURES_PATCH}', apart from the {int(edge.sum()):,} "
+            f"on the domain edge - water touching a baffle is the flow doing its job, "
+            "water touching the edge means the footprint is too tight")
     top_name = LID_PATCH if rigid else ATMOSPHERE_PATCH
     # a wall type, because a rigid lid IS a boundary the flow cannot cross; the slip
     # condition on U is what keeps it shear-free, as an air-water interface is

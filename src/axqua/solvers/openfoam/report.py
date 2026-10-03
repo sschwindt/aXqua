@@ -30,6 +30,17 @@ log = logging.getLogger("axqua")
 
 STEADY_WINDOW = 10          # consecutive samples that must hold the tolerance
 
+#: How far the WATER actually entering may fall short of the prescribed discharge
+#: before it is a finding. ``variableHeightFlowRateInletVelocity`` sets the velocity
+#: proportional to alpha, so the MIXTURE flux integrates to the prescription exactly
+#: while the water flux integrates to ``Q * <alpha^2>/<alpha>`` - short by whatever
+#: the interface is smeared by. On munich-vsf that ratio was 0.821, steady from t=10
+#: to t=97: the case believed 0.135 m3/s and delivered 0.111. Nothing in the output
+#: said so, because the balance only ever compared the inflow against the OUTflow,
+#: and both were equally short. 2% is tight on purpose - this is the one number a
+#: calibration cannot absorb.
+DELIVERY_TOLERANCE = 0.02   # shortfall of water inflow against the prescription
+
 
 @dataclass
 class DischargeHistory:
@@ -72,6 +83,33 @@ class DischargeHistory:
             return None
         return float(finite[-STEADY_WINDOW:].mean())
 
+    @property
+    def delivered(self) -> float | None:
+        """Water actually entering, over the discharge the case prescribes.
+
+        The inflow monitor is alpha-weighted, so it is the WATER flux; the
+        prescription is handed to a boundary condition that controls the MIXTURE.
+        Those are not the same number whenever the inlet interface is smeared over
+        more than nothing, and the gap is a straight bias on every result.
+        """
+        if self.inflow is None or self.target <= 0 or self.inflow.size == 0:
+            return None
+        settled = np.abs(self.inflow[-STEADY_WINDOW:])
+        return float(settled.mean() / self.target)
+
+    def _delivery_lines(self) -> list[str]:
+        ratio = self.delivered
+        if ratio is None or ratio >= 1.0 - DELIVERY_TOLERANCE:
+            return []
+        return [
+            f"  ! the inlet DELIVERS ONLY {ratio:.1%} of the prescribed discharge "
+            f"({self.target * ratio:.4f} against {self.target:g} m3/s). The flow-rate "
+            "condition controls the mixture flux, so the water flux falls short by "
+            "<alpha^2>/<alpha> - the smearing of the inlet interface. The balance "
+            "below cannot see this: inflow and outflow are short by the same amount. "
+            "Sharpen the inlet (more layers through the inflow depth) or raise the "
+            "prescription to compensate, and state which in the writeup."]
+
     def lines(self) -> list[str]:
         if self.time.size == 0:
             return ["no discharge monitors found - has the run written any output yet?"]
@@ -84,6 +122,7 @@ class DischargeHistory:
             imb = self.imbalance
             out.append(f"  inflow total : {np.abs(self.inflow[-1]):8.4f} m3/s "
                        f"(prescribed {self.target:g})")
+            out.extend(self._delivery_lines())
             out.append(f"  outflow total: {np.abs(self.outflow[-1]):8.4f} m3/s")
             out.append(f"  imbalance    : {100 * imb[-1]:+8.3f}% "
                        f"(tolerance {100 * self.tolerance:g}%)")
@@ -228,6 +267,15 @@ def _find_steady(history: DischargeHistory) -> None:
 LID_CONTACT_TOLERANCE = 0.001    # of the lid patch area
 WALL_CONTACT_TOLERANCE = 0.02    # of the banks patch area
 
+#: Water leaving through the lid, as a fraction of the prescribed discharge, above
+#: which the run is not a result. Area is the wrong scale for a breach and this is
+#: the right one: on munich-vsf the lid was wet over 0.47% of its area - a figure
+#: that reads as noise - while venting FIFTEEN TIMES the discharge. The pressure
+#: outlet silently replaced what left, so the domain ran a steady spurious
+#: circulation and every other diagnostic stayed healthy. 1% is already generous:
+#: a lid is a boundary water has no business crossing at all.
+LID_LEAK_TOLERANCE = 0.01        # of the prescribed discharge
+
 
 @dataclass
 class SurfaceFreedom:
@@ -237,6 +285,8 @@ class SurfaceFreedom:
     wall_area: float = 0.0       # peak water area on the lateral wall [m2]
     lid_total: float = 0.0       # the top patch's own area [m2]
     wall_total: float = 0.0      # the banks patch's own area [m2]
+    lid_leak: float = 0.0        # peak water flux OUT through the lid [m3/s]
+    discharge: float = 0.0       # the prescribed discharge, to scale the leak against
     prescribed: bool = False     # rigid lid: the surface never had freedom to lose
     measured: bool = False       # were the monitors there to read at all?
 
@@ -249,8 +299,14 @@ class SurfaceFreedom:
         return self.wall_area / self.wall_total if self.wall_total > 0 else 0.0
 
     @property
+    def leak_fraction(self) -> float:
+        """Water lost through the lid, over the discharge the case prescribes."""
+        return self.lid_leak / self.discharge if self.discharge > 0 else 0.0
+
+    @property
     def hit_lid(self) -> bool:
-        return self.lid_fraction > LID_CONTACT_TOLERANCE
+        return (self.lid_fraction > LID_CONTACT_TOLERANCE
+                or self.leak_fraction > LID_LEAK_TOLERANCE)
 
     @property
     def hit_wall(self) -> bool:
@@ -270,7 +326,8 @@ class SurfaceFreedom:
         of = cfg.openfoam
         if self.free:
             return [f"surface   : free - it stayed clear of the lid "
-                    f"({self.lid_fraction:.2%} of that patch ever wet) and of the "
+                    f"({self.lid_fraction:.2%} of that patch ever wet, leaking "
+                    f"{self.leak_fraction:.2%} of the discharge) and of the "
                     f"lateral wall ({self.wall_fraction:.2%}), so the 2D seed bounded "
                     "it without constraining it"]
         out = ["surface   : ! CONSTRAINED by the mesh, not by the flow"]
@@ -280,6 +337,14 @@ class SurfaceFreedom:
                        f"({of.freeboard:g} m) was too small, so the surface could not "
                        "rise as far as the hydraulics wanted. Raise openfoam.freeboard "
                        "and rebuild - the result at that level is not physical.")
+            if self.lid_leak > 0:
+                out.append(
+                    f"  and it did not merely touch: up to {self.lid_leak:,.3f} m3/s "
+                    f"LEFT through the lid, {self.leak_fraction:.0%} of the "
+                    f"{self.discharge:g} m3/s this case prescribes. Whatever leaves "
+                    "that way is replaced through the pressure outlet, so the domain "
+                    "carries a spurious circulation of that size while the discharge "
+                    "balance still closes. Read no velocity or level off this run.")
         if self.hit_wall:
             out.append(f"  water reached the lateral wall over up to "
                        f"{self.wall_area:,.1f} m2 ({self.wall_fraction:.1%} of it, "
@@ -307,13 +372,24 @@ def surface_freedom(cfg, case_dir: str | Path | None = None) -> SurfaceFreedom:
     root = Path(case_dir) if case_dir else cfg.openfoam_case_dir
     lid = _read_named_monitor(root, "lidContact")
     wall = _read_named_monitor(root, "wallContact")
+    leak = _read_named_monitor(root, "lidLeak")
     if lid is None and wall is None:
         return SurfaceFreedom()
     lid = lid or (np.zeros(0), 0.0)
     wall = wall or (np.zeros(0), 0.0)
+    # Positive phi is OUT of the domain, so only the positive part is a leak; a
+    # negative sample is air being drawn back in, which is what an atmosphere patch
+    # is for. Older runs have no lidLeak folder at all, and read as zero rather than
+    # as a failure - the area check still stands on its own.
+    leaked = leak[0] if leak is not None else np.zeros(0)
     return SurfaceFreedom(
         lid_area=float(np.max(lid[0])) if lid[0].size else 0.0,
         wall_area=float(np.max(wall[0])) if wall[0].size else 0.0,
+        lid_leak=float(np.max(np.maximum(leaked, 0.0))) if leaked.size else 0.0,
+        # Defensively: this is a diagnostic, and a verdict that raises because a
+        # config is missing a field is worse than one that cannot scale the leak.
+        discharge=float(getattr(getattr(cfg, "boundaries", None),
+                                "prescribed_flowrate", 0.0) or 0.0),
         lid_total=lid[1], wall_total=wall[1], measured=True)
 
 

@@ -1283,3 +1283,109 @@ def test_outflow_description_reports_the_spread():
     assert "every outlet" in shared
     spread = _describe_outflow({"a": 375.007, "b": 376.183})
     assert "spread 1.176 m" in spread
+
+
+# --------------------------------------------------------------------------- #
+# the three things that let a ruined run read as healthy on munich-vsf
+# --------------------------------------------------------------------------- #
+
+def test_the_lid_monitor_reports_flux_because_area_is_the_wrong_scale(tmp_path):
+    """0.47% of the lid wet sounds like rounding; it was venting FIFTEEN TIMES the
+    discharge. Area says how much of the lid is touched, flux says whether the result
+    survives, and only the second is a verdict."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    class _WithQ(_Cfg):
+        class boundaries:
+            prescribed_flowrate = 0.135
+
+    def monitor(name, peak, area):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            f"# Area   : {area}\n# Time\tvalue\n0\t0.0\n1\t{peak}\n")
+
+    # exactly what the 0.03 m run reported at t=90
+    monitor("lidContact", 0.5605, 119.39)      # 0.47% of the lid: under the AREA bar
+    monitor("wallContact", 0.0, 168.91)
+    monitor("lidLeak", 1.6692, 119.39)         # ...while leaking 12x the discharge
+
+    verdict = surface_freedom(_WithQ(), tmp_path)
+    assert verdict.lid_leak == pytest.approx(1.6692)
+    assert verdict.leak_fraction == pytest.approx(1.6692 / 0.135, rel=1e-6)
+    assert verdict.hit_lid and not verdict.free
+    text = " ".join(verdict.lines(_WithQ()))
+    assert "LEFT through the lid" in text and "spurious circulation" in text
+
+
+def test_a_lid_touched_without_leaking_is_not_a_leak_finding(tmp_path):
+    """Negative samples are air drawn back IN, which is what an atmosphere patch is
+    for; only the positive part is water lost. A run whose lid is merely brushed must
+    not be condemned by the new check."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    class _WithQ(_Cfg):
+        class boundaries:
+            prescribed_flowrate = 0.135
+
+    def monitor(name, values, area):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            f"# Area   : {area}\n# Time\tvalue\n"
+            + "".join(f"{i}\t{v}\n" for i, v in enumerate(values)))
+
+    monitor("lidContact", [0.0, 0.02], 119.39)        # 0.017%, under the area bar
+    monitor("wallContact", [0.0, 0.0], 168.91)
+    monitor("lidLeak", [-0.4, -0.2, 0.0005], 119.39)  # air in, then a trickle out
+
+    verdict = surface_freedom(_WithQ(), tmp_path)
+    assert verdict.lid_leak == pytest.approx(0.0005)
+    assert not verdict.hit_lid and verdict.free
+
+
+def test_an_old_run_without_the_leak_monitor_still_reads(tmp_path):
+    """The monitor is new; results already on disk predate it. A missing folder is
+    zero, not a crash and not a failure - the area check still stands alone."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    d = tmp_path / "postProcessing" / "lidContact" / "0"
+    d.mkdir(parents=True)
+    (d / "surfaceFieldValue.dat").write_text(
+        "# Area   : 119.39\n# Time\tvalue\n0\t0.0\n1\t0.5605\n")
+
+    verdict = surface_freedom(_Cfg(), tmp_path)
+    assert verdict.lid_leak == 0.0
+    assert verdict.hit_lid          # 0.47% still trips the AREA bar on its own
+
+
+def test_the_inlet_shortfall_is_reported_because_the_balance_cannot_see_it():
+    """The flow-rate condition controls the MIXTURE flux, so the water delivered is
+    short by the smearing of the inlet interface. Inflow and outflow are short by the
+    same amount, so the balance closes and says nothing."""
+    import numpy as np
+    from axqua.solvers.openfoam.report import DischargeHistory
+
+    t = np.arange(20.0)
+    water_in = np.full(20, -0.1109)          # measured on munich-vsf at t=90
+    history = DischargeHistory(
+        time=t, per_patch={"inlet-1": water_in, "outlet-1": -water_in},
+        inflow=water_in, outflow=-water_in, target=0.135)
+
+    assert history.delivered == pytest.approx(0.1109 / 0.135, rel=1e-6)
+    text = " ".join(history.lines())
+    assert "DELIVERS ONLY 82.1%" in text
+    # and the balance it hides behind is perfect
+    assert abs(history.final_imbalance) < 1e-12
+
+
+def test_a_sharp_inlet_delivers_what_it_was_asked_and_says_nothing():
+    import numpy as np
+    from axqua.solvers.openfoam.report import DischargeHistory
+
+    t = np.arange(20.0)
+    q = np.full(20, -0.135)
+    history = DischargeHistory(time=t, per_patch={"inlet-1": q},
+                               inflow=q, outflow=-q, target=0.135)
+    assert history.delivered == pytest.approx(1.0)
+    assert "DELIVERS ONLY" not in " ".join(history.lines())

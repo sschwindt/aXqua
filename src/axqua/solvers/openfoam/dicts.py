@@ -301,6 +301,30 @@ def _freedom_functions(cfg, boundary_patches, interval: float) -> str:
         operation       areaIntegrate;
         fields          (alpha.water);
     }}""")
+
+    # WETTED AREA IS THE WRONG SCALE FOR HOW BAD A LID BREACH IS, so measure the
+    # flux through it as well. Measured on munich-vsf: 0.47% of the lid patch ever
+    # wet - a figure that reads like rounding error - while that same 0.47% vented
+    # 1.67 m3/s against a 0.111 m3/s pass. The leak is replaced through the
+    # pressure outlet, so the domain carries a steady spurious circulation at
+    # fifteen times the discharge and every other diagnostic still looks healthy:
+    # the balance closes, the surface is stepped and monotonic, the run converges.
+    # Area says how much of the lid is touched; only the flux says whether the
+    # result is ruined.
+    blocks.append(f"""    lidLeak
+    {{
+        type            surfaceFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    runTime;
+        writeInterval   {interval:g};
+        log             no;
+        writeFields     no;
+        regionType      patch;
+        name            {top};
+        operation       sum;
+        weightField     alpha.water;
+        fields          (phi);
+    }}""")
     return "\n\n".join(blocks)
 
 
