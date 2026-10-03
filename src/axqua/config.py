@@ -1617,7 +1617,7 @@ class OpenFoam:
     roughness_constant: float = 0.5   # nutkRoughWallFunction Cs
     friction_ks: float = 0.05         # fallback ks [m] with no roughness zones
     # k-epsilon closure coefficients, at OpenFOAM's own defaults. Written into
-    # constant/momentumTransport only when turbulence == "kEpsilon", so a kOmegaSST
+    # constant/turbulenceProperties only when turbulence == "kEpsilon", so a kOmegaSST
     # case is unaffected. They exist as config fields because they are calibration
     # PARAMETERS (see axqua.solvers.openfoam.calibration): OpenFOAM silently falls
     # back to built-in values for a coefficient that is absent from the file, so a

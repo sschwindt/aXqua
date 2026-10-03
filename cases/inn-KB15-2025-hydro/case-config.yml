@@ -256,7 +256,13 @@ openfoam:
   # writes constant/momentumTransport, system/fvConstraints and a
   # "Gauss interfaceCompression vanLeer" alpha scheme, all of which are Foundation
   # spellings.
-  bashrc: /home/IWS/public/openfoam/OpenFOAM-9/etc/bashrc
+  # NO bashrc here on purpose. aXqua now writes ESI OpenFOAM dictionaries
+  # (constant/turbulenceProperties with RASModel, system/fvOptions, cAlpha in
+  # fvSolution), which Foundation OpenFOAM does not read. Which ESI install to
+  # source is a property of the machine, not of this case, so it comes from
+  # axqua.core.machine: $AXQUA_OPENFOAM_BASHRC, a case-local solvers.local.yml,
+  # or ~/.config/axqua/solvers.yml. Naming a path here would hard-code one
+  # machine's layout into the repository.
   n_processors: 8
 
   pre_run:

@@ -292,8 +292,13 @@ def test_the_real_openfoam_environment_validates():
     status = SolverEnvironment(kind="posix",
                                setup_script=OPENFOAM_BASHRC).validate("openfoam")
     assert status, status.detail
-    assert status.variables["WM_PROJECT_VERSION"] == "9"
-    assert "OpenFOAM 9" in status.detail
+    # NOT a literal version. Which OpenFOAM is installed is a property of the machine,
+    # not of this project: this assertion read "9" while the box had v12 and then
+    # v2406, and failed for a week on a difference that was never a defect. What has
+    # to hold is that the environment initialises and names some version.
+    assert status.variables["WM_PROJECT"] == "OpenFOAM"
+    assert status.variables["WM_PROJECT_VERSION"].strip()
+    assert "OpenFOAM" in status.detail
 
 
 # --------------------------------------------------------------------------- #

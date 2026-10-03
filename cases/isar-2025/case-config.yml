@@ -304,7 +304,13 @@ openfoam:
   # Purely additive: delete this block and nothing about the TELEMAC case changes.
   # The 3D case is built from the converged 2D result (simulation/r2d.slf), so run
   # preprocessing.py -> initial_run.py first.
-  bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
+  # NO bashrc here on purpose. aXqua now writes ESI OpenFOAM dictionaries
+  # (constant/turbulenceProperties with RASModel, system/fvOptions, cAlpha in
+  # fvSolution), which Foundation OpenFOAM does not read. Which ESI install to
+  # source is a property of the machine, not of this case, so it comes from
+  # axqua.core.machine: $AXQUA_OPENFOAM_BASHRC, a case-local solvers.local.yml,
+  # or ~/.config/axqua/solvers.yml. Naming a path here would hard-code one
+  # machine's layout into the repository.
   n_processors: 16
 
   # ---- the TELEMAC pre-run that seeds this case ---------------------------

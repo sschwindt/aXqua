@@ -180,7 +180,13 @@ openfoam:
   # slots and 174 of the weir's 187 reference points - so the pass/weir split
   # happens inside the domain rather than across its boundary.
   roi: roi-fishpass.gpkg
-  bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
+  # NO bashrc here on purpose. aXqua now writes ESI OpenFOAM dictionaries
+  # (constant/turbulenceProperties with RASModel, system/fvOptions, cAlpha in
+  # fvSolution), which Foundation OpenFOAM does not read. Which ESI install to
+  # source is a property of the machine, not of this case, so it comes from
+  # axqua.core.machine: $AXQUA_OPENFOAM_BASHRC, a case-local solvers.local.yml,
+  # or ~/.config/axqua/solvers.yml. Naming a path here would hard-code one
+  # machine's layout into the repository.
   # RIGID LID, not vof. Measured on the VOF run this replaces (logs in
   # axqua-case/openfoam/vof-record/): 60.5% of the cells were air, and `Interface
   # Courant Number max` equalled `Courant Number max` on every step in the log - the

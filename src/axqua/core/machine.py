@@ -104,18 +104,35 @@ def _read_yaml(path: Path) -> dict:
 
 
 def _discover(key: str) -> Path | None:
+    """Find an install by convention. A SITE root outranks a system one.
+
+    ``AXQUA_SOLVER_ROOT`` exists so a site can point at its own builds, and the
+    absolute patterns below are ordered before the relative ones. Searching them in
+    written order therefore let any system install silently outrank the variable - on
+    a machine carrying /usr/lib/openfoam/openfoam2406 the variable did nothing at all,
+    which is precisely the machine someone sets it on. The relative patterns are tried
+    against the explicitly named roots first; everything after that is unchanged.
+    """
     patterns = DISCOVERY.get(key, ())
-    for pattern in patterns:
-        if pattern.startswith("/"):
-            matches = sorted(Path("/").glob(pattern.lstrip("/")))
-        else:
-            matches = []
-            for root in _discovery_roots():
-                if root.is_dir():
-                    matches += sorted(root.glob(pattern))
-        readable = [m for m in matches if m.is_file()]
-        if readable:
-            return readable[-1]         # the highest-sorting, i.e. newest version
+    named = [Path(p) for p in
+             os.environ.get("AXQUA_SOLVER_ROOT", "").split(os.pathsep) if p]
+    passes: list[tuple[list[Path], tuple[str, ...]]] = []
+    if named:
+        passes.append((named, tuple(p for p in patterns if not p.startswith("/"))))
+    passes.append((_discovery_roots(), patterns))
+
+    for roots, group in passes:
+        for pattern in group:
+            if pattern.startswith("/"):
+                matches = sorted(Path("/").glob(pattern.lstrip("/")))
+            else:
+                matches = []
+                for root in roots:
+                    if root.is_dir():
+                        matches += sorted(root.glob(pattern))
+            readable = [m for m in matches if m.is_file()]
+            if readable:
+                return readable[-1]     # the highest-sorting, i.e. newest version
     return None
 
 

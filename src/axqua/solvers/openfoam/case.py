@@ -11,10 +11,10 @@ What it produces, under ``<sim_dir>/openfoam/``::
     0/                alpha.water, U, p_rgh, nut, k, omega   (seeded from r2d.slf)
     constant/
       polyMesh/       points, faces, owner, neighbour, boundary
-      g, transportProperties, momentumTransport
+      g, transportProperties, turbulenceProperties
     system/
       controlDict, fvSchemes, fvSolution                     (the ACTIVE stage)
-      fvConstraints, decomposeParDict
+      fvOptions, decomposeParDict
       stage1-spinup/, stage2-run/                            (both dict sets)
     case.foam                                                (ParaView marker)
 """

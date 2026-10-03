@@ -204,19 +204,19 @@ def test_kepsilon_coefficient_needs_the_kepsilon_closure(tmp_path):
     ofcal.check_turbulence(cfg, [CalibrationParameter(name="ks", min=0.02, max=0.3)])
 
 
-def test_momentum_transport_emits_coefficients_only_for_kepsilon(tmp_path):
-    from axqua.solvers.openfoam.dicts import momentum_transport
+def test_turbulence_properties_emits_coefficients_only_for_kepsilon(tmp_path):
+    from axqua.solvers.openfoam.dicts import turbulence_properties
 
     cfg = _cfg(tmp_path)
     cfg.openfoam.turbulence = "kEpsilon"
-    text = momentum_transport(cfg)
+    text = turbulence_properties(cfg)
     assert "kEpsilonCoeffs" in text
     for key in ("Cmu", "C1", "C2", "sigmak", "sigmaEps"):
         assert re.search(rf"^\s*{key}\s+[0-9.]+;", text, re.M), key
 
     # a kOmegaSST case must be byte-for-byte what it always was
     cfg.openfoam.turbulence = "kOmegaSST"
-    assert "kEpsilonCoeffs" not in momentum_transport(cfg)
+    assert "kEpsilonCoeffs" not in turbulence_properties(cfg)
 
 
 def test_uniform_bed_ks_replaces_the_per_face_list(tmp_path):
@@ -292,7 +292,7 @@ def _template(tmp_path, *, ks="uniform 0.05", coeffs=True, start="startTime",
     if coeffs:
         body += ("    kEpsilonCoeffs\n    {\n        Cmu             0.09;\n"
                  "        C1              1.44;\n    }\n")
-    (case / "constant" / "momentumTransport").write_text(body + "}\n")
+    (case / "constant" / "turbulenceProperties").write_text(body + "}\n")
     # a real controlDict always carries writeInterval; _assert_template reads
     # endTime/writeInterval from HERE rather than from the config, because
     # this file is what every copied run actually obeys
@@ -794,7 +794,8 @@ def test_single_collapses_a_two_phase_case_to_one_production_stage(tmp_path):
     assert single[0].name == "run"
     assert single[0].start_from == "startTime"             # not latestTime
     assert single[0].end_time == 300.0                     # not the 30 s spin-up
-    assert "interfaceCompression vanLeer 1" in single[0].alpha_scheme
+    assert single[0].alpha_scheme == "Gauss vanLeer"
+    assert single[0].c_alpha == 1.0        # full compression, not the spin-up 0.5
 
 
 def test_single_leaves_a_rigid_lid_case_alone(tmp_path):
