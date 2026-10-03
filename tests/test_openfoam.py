@@ -270,25 +270,33 @@ def test_fvsolution_carries_the_settings_that_tame_the_air_phase():
     assert "solver          GAMG;" in text        # p_rgh on a large mesh
 
 
-def test_fvconstraints_caps_the_velocity():
-    from axqua.solvers.openfoam.dicts import fv_constraints
+def test_fvoptions_caps_the_velocity():
+    from axqua.solvers.openfoam.dicts import fv_options
 
-    text = fv_constraints(_Cfg(), 4.5)
+    text = fv_options(_Cfg(), 4.5)
     assert "type            limitVelocity;" in text
     assert "max             4.5;" in text
     assert "selectionMode   all;" in text
 
 
 def test_stage_schemes_differ_in_compression_not_in_kind():
-    """Stage 1 must still compress the interface, only less - OF9 puts cAlpha in the
-    scheme, so dropping interfaceCompression entirely would demand a legacy
-    fvSolution key and smear the surface through the whole spin-up."""
-    from axqua.solvers.openfoam.dicts import fv_schemes, stages
+    """Stage 1 must still compress the interface, only less.
+
+    ESI carries the strength as ``cAlpha`` in fvSolution rather than as a trailing
+    number on the scheme, so the halving has to be asserted there; the scheme itself
+    is the same ``Gauss vanLeer`` in both stages, which is the "not in kind" half of
+    the name.
+    """
+    from axqua.solvers.openfoam.dicts import fv_schemes, fv_solution, stages
 
     cfg = _Cfg()
     spinup, run = stages(cfg)
-    assert "interfaceCompression vanLeer 0.5" in fv_schemes(cfg, spinup)
-    assert "interfaceCompression vanLeer 1" in fv_schemes(cfg, run)
+    for stage in (spinup, run):
+        assert "div(phi,alpha)  Gauss vanLeer;" in fv_schemes(cfg, stage)
+        assert "div(phirb,alpha) Gauss linear;" in fv_schemes(cfg, stage)
+        assert "Gauss interfaceCompression" not in fv_schemes(cfg, stage)
+    assert "cAlpha          0.5;" in fv_solution(cfg, spinup)
+    assert "cAlpha          1;" in fv_solution(cfg, run)
     assert spinup.max_courant < run.max_courant
     for stage in (spinup, run):
         assert "wallDist" in fv_schemes(cfg, stage)     # kOmegaSST needs it

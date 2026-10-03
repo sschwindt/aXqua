@@ -55,6 +55,12 @@ project:
   # georeferenced. Unused while the case runs in local CAD coordinates.
   crs_epsg: 31468                # DHDN / GK zone 4
   sim_dir: axqua-case
+  # Its own OpenFOAM root, for the reason spelled out in case-config-vof-dx60.yml:
+  # openfoam_case_dir is derived from sim_dir alone and is otherwise identical for
+  # every config of this case, so a build here would rewrite constant/polyMesh under
+  # whatever else is in the shared directory. Pinned once the v9-built run that used
+  # the shared root had finished.
+  openfoam_dir: axqua-case/openfoam-dx45
 
 telemac:
   pysource: /home/modelling/telemac-v911/telemac-mascaret/configs/pysource.debian12.sh
@@ -173,7 +179,13 @@ openfoam:
   # slots and 174 of the weir's 187 reference points - so the pass/weir split
   # happens inside the domain rather than across its boundary.
   roi: roi-fishpass.gpkg
-  bashrc: /home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc
+  # NO bashrc here on purpose. aXqua now writes ESI OpenFOAM dictionaries
+  # (constant/turbulenceProperties with RASModel, system/fvOptions, cAlpha in
+  # fvSolution), which Foundation OpenFOAM does not read. Which ESI install to
+  # source is a property of the machine, not of this case, so it comes from
+  # axqua.core.machine: $AXQUA_OPENFOAM_BASHRC, a case-local solvers.local.yml,
+  # or ~/.config/axqua/solvers.yml. Naming a path here would hard-code one
+  # machine's layout into the repository.
   # RIGID LID, not vof. Measured on the VOF run this replaces (logs in
   # axqua-case/openfoam/vof-record/): 60.5% of the cells were air, and `Interface
   # Courant Number max` equalled `Courant Number max` on every step in the log - the

@@ -170,7 +170,7 @@ def _assert_template(case_dir: Path, cfg: Config, parameters: Sequence[Any],
 
     coeffs = [p for p in parameters if _canonical(p.name) != "ks"]
     if coeffs:
-        mt = case_dir / "constant" / "momentumTransport"
+        mt = case_dir / "constant" / "turbulenceProperties"
         if not mt.is_file():
             raise SystemExit(
                 f"calibrating {', '.join(p.name for p in coeffs)} needs "
@@ -451,7 +451,7 @@ def check_turbulence(cfg: Config, parameters: Sequence[Any]) -> None:
             f"openfoam.turbulence is {cfg.openfoam.turbulence!r}. Set\n"
             "    openfoam:\n      turbulence: kEpsilon\n"
             "in case-config.yml and rebuild the calibration template. (Without it "
-            "constant/momentumTransport carries no kEpsilonCoeffs subdictionary, so "
+            "constant/turbulenceProperties carries no kEpsilonCoeffs subdictionary, so "
             "every run would fail once the design had already been sampled.)")
 
 
@@ -562,7 +562,7 @@ interfoam = {{
 
 calibration = {{
     # 'ks' goes to the rough-wall BC in 0/nut; the k-epsilon coefficients go to
-    # the kEpsilonCoeffs subdictionary of constant/momentumTransport.
+    # the kEpsilonCoeffs subdictionary of constant/turbulenceProperties.
     'parameters':   {pylist(names)},
     'param_values': {ranges},
     'extraction_quantities':  {pylist(extraction_quantities)},

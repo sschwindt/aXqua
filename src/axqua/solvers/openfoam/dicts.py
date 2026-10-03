@@ -10,7 +10,7 @@ settings", and the settings that matter are these four:
    time step is set by the flow rather than by the interface and ``maxCo`` /
    ``maxAlphaCo`` can go to ~0.9 - a three- to four-fold larger step for the same
    physics.
-2. **``limitVelocity`` in ``system/fvConstraints``.** Air is a thousand times
+2. **``limitVelocity`` in ``system/fvOptions``.** Air is a thousand times
    lighter than water, so a small pressure error accelerates it enormously; the
    resulting air jet then sets the Courant number and the time step collapses on a
    phase nobody is interested in. Capping ``|U|`` at a few times the expected water
@@ -64,6 +64,7 @@ class Stage:
     end_time: float
     max_courant: float
     alpha_scheme: str        # the div(phi,alpha) scheme
+    c_alpha: float           # interface compression; ESI puts it in fvSolution
     velocity_scheme: str     # the div(rhoPhi,U) scheme
     n_outer_correctors: int
     purpose: str
@@ -83,7 +84,7 @@ def stages(cfg, *, single: bool = False) -> list[Stage]:
     if single and of.mode != "rigid-lid":
         return [Stage(name="run", start_from="startTime", end_time=of.end_time,
                       max_courant=of.max_courant,
-                      alpha_scheme="Gauss interfaceCompression vanLeer 1",
+                      alpha_scheme="Gauss vanLeer", c_alpha=1.0,
                       velocity_scheme="Gauss limitedLinearV 1",
                       n_outer_correctors=2,
                       purpose="production run from a pre-spun interface "
@@ -95,27 +96,27 @@ def stages(cfg, *, single: bool = False) -> list[Stage]:
         # interface. One stage, at the full Courant number.
         return [Stage(name="run", start_from="startTime", end_time=of.end_time,
                       max_courant=of.max_courant,
-                      alpha_scheme="Gauss interfaceCompression vanLeer 1",
+                      alpha_scheme="Gauss vanLeer", c_alpha=1.0,
                       velocity_scheme="Gauss limitedLinearV 1",
                       n_outer_correctors=2,
                       purpose="single-phase run under a rigid lid")]
     return [
         Stage(name="spinup", start_from="startTime", end_time=of.spinup_time,
               max_courant=of.spinup_courant,
-              # HALF the interface compression of the production stage. In OpenFOAM 9
-              # cAlpha lives in the scheme, not in fvSolution, so this is where it is
-              # set. Compressing hard while the hotstart still has no vertical
-              # velocity structure sharpens the interface into an instability;
-              # dropping compression altogether instead smears it over 30 s of
-              # spin-up, which is just as unhelpful.
-              alpha_scheme="Gauss interfaceCompression vanLeer 0.5",
+              # HALF the interface compression of the production stage. Compressing
+              # hard while the hotstart still has no vertical velocity structure
+              # sharpens the interface into an instability; dropping compression
+              # altogether instead smears it over 30 s of spin-up, which is just as
+              # unhelpful. ESI carries the coefficient as `cAlpha` in fvSolution,
+              # not as a trailing number on the scheme the way Foundation did.
+              alpha_scheme="Gauss vanLeer", c_alpha=0.5,
               velocity_scheme="Gauss upwind",
               n_outer_correctors=3,
               purpose="settle the interface and the vertical profile from the "
                       "depth-averaged 2D hotstart"),
         Stage(name="run", start_from="latestTime", end_time=of.end_time,
               max_courant=of.max_courant,
-              alpha_scheme="Gauss interfaceCompression vanLeer 1",
+              alpha_scheme="Gauss vanLeer", c_alpha=1.0,
               velocity_scheme="Gauss limitedLinearV 1",
               n_outer_correctors=2,
               purpose="production run at the full Courant number"),
@@ -154,8 +155,12 @@ sigma           {of.surface_tension:g};
     return _dict_file("transportProperties", body, location="constant")
 
 
-def momentum_transport(cfg) -> str:
-    """``constant/momentumTransport`` - the Foundation 8+ name for the RAS settings.
+def turbulence_properties(cfg) -> str:
+    """``constant/turbulenceProperties`` - the ESI name for the RAS settings.
+
+    Foundation 8+ called this ``momentumTransport`` and keyed the model as ``model``;
+    ESI v2406 knows neither, so a Foundation-shaped file is read as an empty
+    dictionary and the run silently falls back to the built-in defaults.
 
     Under ``kEpsilon`` the closure coefficients are written **explicitly**, at the
     model's own defaults. Two reasons, both about calibration: OpenFOAM falls back
@@ -184,14 +189,14 @@ def momentum_transport(cfg) -> str:
 
 RAS
 {{
-    model           {of.turbulence};
+    RASModel        {of.turbulence};
 
     turbulence      on;
 
     printCoeffs     on;
 {coeffs}}}
 """
-    return _dict_file("momentumTransport", body, location="constant")
+    return _dict_file("turbulenceProperties", body, location="constant")
 
 
 def gravity() -> str:
@@ -378,6 +383,10 @@ divSchemes
 {{
     div(rhoPhi,U)   {stage.velocity_scheme};
     div(phi,alpha)  {stage.alpha_scheme};
+    // the compression flux term. Foundation folded this into an
+    // `interfaceCompression` scheme on div(phi,alpha); ESI keeps it a separate
+    // divergence with its strength set by cAlpha in fvSolution.
+    div(phirb,alpha) Gauss linear;
     div(phi,k)      Gauss upwind;
     div(phi,omega)  Gauss upwind;
     div(phi,epsilon) Gauss upwind;
@@ -446,6 +455,9 @@ def fv_solution(cfg, stage: Stage) -> str:
     {{
         nAlphaCorr      2;
         nAlphaSubCycles 1;
+        // interface compression strength. Foundation carried this as a trailing
+        // number on the div(phi,alpha) scheme; ESI reads it here.
+        cAlpha          {stage.c_alpha:g};
 
         {alpha_mules}
         nLimiterIter    5;
@@ -522,7 +534,7 @@ relaxationFactors
     return _dict_file("fvSolution", body, location="system")
 
 
-def fv_constraints(cfg, velocity_cap: float) -> str:
+def fv_options(cfg, velocity_cap: float) -> str:
     body = f"""// Cap on the velocity magnitude. In the two-phase case this is the single most
 // effective stop on the AIR phase destroying the time step; under a rigid lid there
 // is no air, and it remains only as a cheap divergence guard. Air is ~1000x lighter than water, so a small pressure
@@ -542,7 +554,7 @@ limitU
     max             {velocity_cap:.4g};
 }}
 """
-    return _dict_file("fvConstraints", body, location="system")
+    return _dict_file("fvOptions", body, location="system")
 
 
 def decompose_par_dict(cfg) -> str:
@@ -573,12 +585,22 @@ def write_dicts(of_mesh, cfg, case_dir: str | Path, *,
     written: list[Path] = []
 
     for name, text in (("transportProperties", transport_properties(cfg)),
-                       ("momentumTransport", momentum_transport(cfg)),
+                       ("turbulenceProperties", turbulence_properties(cfg)),
                        ("g", gravity())):
         written.append(_write(constant / name, text))
 
     written.append(_write(system / "decomposeParDict", decompose_par_dict(cfg)))
-    written.append(_write(system / "fvConstraints", fv_constraints(cfg, velocity_cap)))
+    written.append(_write(system / "fvOptions", fv_options(cfg, velocity_cap)))
+
+    # A case built by an older aXqua against Foundation OpenFOAM carries
+    # constant/momentumTransport and system/fvConstraints. ESI reads neither, so
+    # leaving them is worse than clutter: the run proceeds on built-in turbulence
+    # defaults and with no velocity cap, and nothing in the log says the files were
+    # ignored. Same class as a stale reconstructed time directory.
+    for stale in (constant / "momentumTransport", system / "fvConstraints"):
+        if stale.is_file():
+            stale.unlink()
+            log.info("removed %s, which only Foundation OpenFOAM reads", stale.name)
 
     patches = of_mesh.inlet_patches + of_mesh.outlet_patches
     wanted = {STAGE_DIRS[s.name] for s in stages(cfg)}
