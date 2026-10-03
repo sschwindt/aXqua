@@ -23,12 +23,24 @@ is the convention adopted, lifted verbatim:
 
 Munich runs along the pass axis, so the band is in `s` rather than `x`.
 
+Both the 2D SELAFIN and the 3D VOF result go through the SAME band, because that is
+the only way the mesh-convergence comparison means anything. A VOF case has no "free
+surface" field to read, so one is derived per plan column: the lattice is aXqua's own
+structured grid of `n_columns x n_layers` cells ordered column-major (mesh.py line 392
+ravels `(n_columns, n_layers+1)` vertex levels), so cell `i` belongs to column
+`i // n_layers`. Column depth is the mass-conservative `sum(alpha * h)` with
+`h = V / dx**2`, and the surface is the bed plus that depth - not the highest cell with
+alpha > 0.5, which would quantise the answer to the layer thickness (~0.05 m here,
+larger than the difference being measured).
+
     python cases/munich-vsf/measure_pool_levels.py                       # the 2D seed
     python cases/munich-vsf/measure_pool_levels.py <result.slf>
+    python cases/munich-vsf/measure_pool_levels.py <openfoam-case-dir>   # VOF
 """
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -77,6 +89,67 @@ def pool_levels(x, y, depth, surface, wet_depth, stations, channel=None):
     return out
 
 
+def lattice_spacing(cx: np.ndarray, cy: np.ndarray) -> float:
+    """The lattice pitch, measured from the column centres themselves.
+
+    NOT taken from a config, and not guessed from the case-directory name. Every VOF
+    variant of this case resolves to the same `openfoam_case_dir`, so the directory
+    name does not say which `cell_size` built what is in it - reading 0.03 for a 0.045 m
+    build scales the column area by 2.25 and every depth with it. The grid is uniform,
+    so its own nearest-neighbour spacing is the authoritative answer.
+    """
+    from scipy.spatial import cKDTree
+
+    d, _ = cKDTree(np.column_stack([cx, cy])).query(
+        np.column_stack([cx, cy]), k=2)
+    return float(np.median(d[:, 1]))
+
+
+def read_vof_columns(case_dir: Path, n_layers: int):
+    """Per-column (x, y, depth, surface) from a reconstructed interFoam time.
+
+    Reuses `correct_lid._read_list`, which already handles `writeFormat binary` - the
+    case writes binary, and converting it to ASCII to read one field would rewrite
+    every field on disk.
+    """
+    sys.path.insert(0, str(HERE))
+    from correct_lid import _LIST, _read_list
+
+    times = sorted((float(p.name), p) for p in case_dir.iterdir()
+                   if p.is_dir() and p.name.replace(".", "").isdigit()
+                   and (p / "alpha.water").is_file())
+    if not times:
+        raise SystemExit(f"no reconstructed time with alpha.water in {case_dir} - "
+                         "run `reconstructPar -latestTime` first")
+    t, tdir = times[-1]
+
+    def field(name):
+        buf = (tdir / name).read_bytes()
+        fmt = re.search(rb"format\s+(\w+)\s*;", buf[:2000])
+        binary = bool(fmt) and fmt.group(1) == b"binary"
+        at = buf.index(b"internalField")
+        if _LIST.search(buf, at) is None:
+            raise SystemExit(f"{name} has no nonuniform internalField list")
+        vals, _ = _read_list(buf, at, binary)
+        return vals
+
+    alpha = field("alpha.water")
+    cx, cy, cz, vol = (field(n) for n in ("Cx", "Cy", "Cz", "V"))
+
+    if alpha.size % n_layers:
+        raise SystemExit(f"{alpha.size} cells is not a multiple of n_layers "
+                         f"{n_layers}; the column assumption does not hold")
+    shape = (alpha.size // n_layers, n_layers)
+    a = alpha.reshape(shape)
+    cell_size = lattice_spacing(cx.reshape(shape)[:, 0], cy.reshape(shape)[:, 0])
+    h = (vol / (cell_size * cell_size)).reshape(shape)
+    z = cz.reshape(shape)
+    depth = (a * h).sum(axis=1)
+    bed = z[:, 0] - h[:, 0] / 2.0
+    return (cx.reshape(shape)[:, 0], cy.reshape(shape)[:, 0],
+            depth, bed + depth, t, shape, cell_size)
+
+
 def main() -> None:
     import geopandas as gpd
     import pandas as pd
@@ -87,7 +160,7 @@ def main() -> None:
     cfg = load_config(HERE / "case-config-vof.yml")
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else (
         Path(cfg.model_dir) / cfg.results_slf)
-    if not path.is_file():
+    if not path.exists():
         raise SystemExit(f"no result at {path}")
 
     stations = pd.read_csv(STATIONS).sort_values("s")
@@ -98,14 +171,24 @@ def main() -> None:
         print(f"WARNING: {CHANNEL.name} missing - the band is NOT clipped to the "
               "channel,\n         so a pool near a bend may straddle its baffle")
 
-    r = selafin.read_slf(path)
-    v = r["values"]
-    rows = pool_levels(np.asarray(r["x"]), np.asarray(r["y"]),
-                       np.asarray(v["WATER DEPTH"]),
-                       np.asarray(v["FREE SURFACE"]),
+    if path.is_dir():
+        # A VOF case: the config whose cell_size built it decides the column area.
+        x, y, depth, surface, t, shape, dx = read_vof_columns(
+            path, cfg.openfoam.n_layers)
+        label = (f"{path.name} t={t:g} s, {shape[0]:,} columns x {shape[1]} layers, "
+                 f"lattice {dx:.4f} m measured from the grid")
+    else:
+        r = selafin.read_slf(path)
+        v = r["values"]
+        x, y = np.asarray(r["x"]), np.asarray(r["y"])
+        depth = np.asarray(v["WATER DEPTH"])
+        surface = np.asarray(v["FREE SURFACE"])
+        label = path.name
+
+    rows = pool_levels(x, y, depth, surface,
                        cfg.hydrodynamics.wet_depth, stations, channel)
 
-    print(f"{path.name}, band {POOL_NEAR}-{POOL_FAR} m upstream of each baffle, "
+    print(f"{label}, band {POOL_NEAR}-{POOL_FAR} m upstream of each baffle, "
           "median, inside the clear channel")
     print(f"\n{'#':>2} {'s':>7} {'WSE':>8} {'mean':>8} {'depth':>7} {'nodes':>6} "
           f"{'step':>7}")
