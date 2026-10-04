@@ -168,6 +168,40 @@ def _read_monitor(path: Path) -> tuple[np.ndarray, np.ndarray]:
     return np.asarray(times), np.asarray(values)
 
 
+def _monitor_files(start: Path) -> list[Path]:
+    """Every ``surfaceFieldValue*.dat`` in one start-time folder, in write order.
+
+    A restart into a folder that already holds a file does NOT append to it:
+    OpenFOAM opens ``surfaceFieldValue_0.dat`` beside it, then ``_1`` and so on.
+    Reading only the unsuffixed name therefore returns the FIRST leg of a staged
+    run and silently discards every later one - and every aXqua case is staged,
+    spin-up then run. Measured on the dx45 comparison: the reader reported "8
+    samples (t = 1.00 .. 8.00 s)" on a run that was at t = 23.8, so the verdict
+    was being formed entirely from the spin-up.
+    """
+    files = sorted(start.glob("surfaceFieldValue*.dat"),
+                   key=lambda f: (len(f.stem), f.stem))
+    return [f for f in files if f.is_file()]
+
+
+def _concat_monitor(start_dirs) -> tuple[np.ndarray, np.ndarray]:
+    """``(time, value)`` across every leg, sorted, with restart overlaps dropped."""
+    chunks = []
+    for start in start_dirs:
+        for dat in _monitor_files(start):
+            chunks.append(_read_monitor(dat))
+    if not chunks:
+        return np.zeros(0), np.zeros(0)
+    time = np.concatenate([c[0] for c in chunks])
+    value = np.concatenate([c[1] for c in chunks])
+    order = np.argsort(time, kind="stable")
+    time, value = time[order], value[order]
+    # a restart re-reports its start time; keep the later sample
+    keep = np.ones(time.size, dtype=bool)
+    keep[:-1] = time[1:] != time[:-1]
+    return time[keep], value[keep]
+
+
 def read_monitors(case_dir: str | Path) -> dict[str, tuple[np.ndarray, np.ndarray]]:
     """Every ``Q_*`` monitor in the case, concatenated across restart directories.
 
@@ -182,22 +216,12 @@ def read_monitors(case_dir: str | Path) -> dict[str, tuple[np.ndarray, np.ndarra
     for monitor in sorted(root.iterdir()):
         if not monitor.is_dir() or not monitor.name.startswith("Q_"):
             continue
-        chunks = []
-        for start in sorted(monitor.iterdir(), key=lambda p: _as_float(p.name)):
-            dat = start / "surfaceFieldValue.dat"
-            if dat.is_file():
-                chunks.append(_read_monitor(dat))
-        if not chunks:
+        time, value = _concat_monitor(
+            sorted(monitor.iterdir(), key=lambda p: _as_float(p.name)))
+        if time.size == 0:
             continue
-        time = np.concatenate([c[0] for c in chunks])
-        value = np.concatenate([c[1] for c in chunks])
-        order = np.argsort(time, kind="stable")
-        # a restart re-reports its start time; keep the later sample
-        time, value = time[order], value[order]
-        keep = np.ones(time.size, dtype=bool)
-        keep[:-1] = time[1:] != time[:-1]
         name = monitor.name[2:].replace("_", "-")
-        out[name] = (time[keep], value[keep])
+        out[name] = (time, value)
     return out
 
 
@@ -289,6 +313,12 @@ class SurfaceFreedom:
     discharge: float = 0.0       # the prescribed discharge, to scale the leak against
     prescribed: bool = False     # rigid lid: the surface never had freedom to lose
     measured: bool = False       # were the monitors there to read at all?
+    #: False while the run has not yet passed its spin-up. The monitors exist and
+    #: are being written, but every sample so far belongs to a transient that is
+    #: violent by design, so there is no verdict to give. Distinguished from
+    #: `free` deliberately: "nothing to report yet" and "the surface was free" look
+    #: identical in a dataclass of zeros, and one of them is a false all-clear.
+    settled: bool = True
 
     @property
     def lid_fraction(self) -> float:
@@ -317,6 +347,11 @@ class SurfaceFreedom:
         return not self.hit_lid and not self.hit_wall
 
     def lines(self, cfg) -> list[str]:
+        if self.measured and not self.settled:
+            return ["surface   : no verdict yet - the run has not passed its "
+                    f"spin-up ({getattr(cfg.openfoam, 'spinup_time', 0):g} s), and "
+                    "the spin-up is a deliberately violent transient whose peaks say "
+                    "nothing about the result"]
         if self.prescribed:
             return ["surface   : prescribed by the 2D seed (mode: rigid-lid), not "
                     "solved - this run cannot show a jump, a standing wave or "
@@ -370,9 +405,12 @@ def surface_freedom(cfg, case_dir: str | Path | None = None) -> SurfaceFreedom:
     if cfg.openfoam.mode == "rigid-lid":
         return SurfaceFreedom(prescribed=True, measured=True)
     root = Path(case_dir) if case_dir else cfg.openfoam_case_dir
-    lid = _read_named_monitor(root, "lidContact")
-    wall = _read_named_monitor(root, "wallContact")
-    leak = _read_named_monitor(root, "lidLeak")
+    # Judge the RUN, not the spin-up: see _read_named_monitor. A case with no
+    # spin-up stage has spinup_time 0 and nothing is dropped.
+    since = float(getattr(cfg.openfoam, "spinup_time", 0.0) or 0.0)
+    lid = _read_named_monitor(root, "lidContact", since=since)
+    wall = _read_named_monitor(root, "wallContact", since=since)
+    leak = _read_named_monitor(root, "lidLeak", since=since)
     if lid is None and wall is None:
         return SurfaceFreedom()
     lid = lid or (np.zeros(0), 0.0)
@@ -382,7 +420,11 @@ def surface_freedom(cfg, case_dir: str | Path | None = None) -> SurfaceFreedom:
     # is for. Older runs have no lidLeak folder at all, and read as zero rather than
     # as a failure - the area check still stands on its own.
     leaked = leak[0] if leak is not None else np.zeros(0)
+    # The lid/wall monitors are always written, so "both empty after the spin-up
+    # filter" means the run has not got there yet - not that nothing happened.
+    settled = bool(lid[0].size or wall[0].size)
     return SurfaceFreedom(
+        settled=settled,
         lid_area=float(np.max(lid[0])) if lid[0].size else 0.0,
         wall_area=float(np.max(wall[0])) if wall[0].size else 0.0,
         lid_leak=float(np.max(np.maximum(leaked, 0.0))) if leaked.size else 0.0,
@@ -393,24 +435,33 @@ def surface_freedom(cfg, case_dir: str | Path | None = None) -> SurfaceFreedom:
         lid_total=lid[1], wall_total=wall[1], measured=True)
 
 
-def _read_named_monitor(root: Path, name: str) -> tuple[np.ndarray, float] | None:
+def _read_named_monitor(root: Path, name: str, *, since: float = 0.0
+                        ) -> tuple[np.ndarray, float] | None:
     """``(values, patch area)`` for one non-``Q_`` monitor, across restart folders.
 
     The patch area comes out of the ``# Area :`` header OpenFOAM writes, which is what
     turns a bare contact area into a fraction - and a fraction is the only form in
     which "did the water touch this?" has a threshold that means the same thing on a
     30 m side channel and a 300 m reach.
+
+    ``since`` drops everything before a time. The caller passes the spin-up length,
+    because the spin-up is a deliberately violent transient - a dry-ish domain being
+    filled against a prescribed stage - and its peaks are not evidence about the
+    result. Judging the lid on them condemns every run: on the dx45 pair the spin-up
+    peak was 7.4 m3/s through the lid while the question is what the settled flow does.
     """
     folder = root / "postProcessing" / name
     if not folder.is_dir():
         return None
-    chunks, area = [], 0.0
-    for start in sorted(folder.iterdir(), key=lambda p: _as_float(p.name)):
-        dat = start / "surfaceFieldValue.dat"
-        if dat.is_file():
-            chunks.append(_read_monitor(dat)[1])
-            area = max(area, _patch_area(dat))
-    return (np.concatenate(chunks) if chunks else np.zeros(0)), area
+    starts = sorted(folder.iterdir(), key=lambda p: _as_float(p.name))
+    time, values = _concat_monitor(starts)
+    area = max((_patch_area(f) for s in starts for f in _monitor_files(s)),
+               default=0.0)
+    if since > 0 and time.size:
+        # strictly after: the sample AT the spin-up end time is the spin-up's last,
+        # not the run's first, and a restart re-reports that instant anyway
+        values = values[time > since]
+    return values, area
 
 
 def _patch_area(path: Path) -> float:

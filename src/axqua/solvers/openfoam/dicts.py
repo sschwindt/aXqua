@@ -321,7 +321,15 @@ def _freedom_functions(cfg, boundary_patches, interval: float) -> str:
         writeFields     no;
         regionType      patch;
         name            {top};
-        operation       sum;
+        // weightedSum, NOT sum. ESI treats weighting as a SEPARATE OPERATION
+        // (typeWeighted is a bitmask on the enum, opSum is not in it), so
+        // `operation sum` silently IGNORES weightField and reports the mixture
+        // flux - water and air together. Foundation v9 applied the weight to
+        // plain sum, so the v9 -> v2406 move changed what every discharge
+        // monitor meant without changing a line of the case. It was caught by
+        // an impossibility: the lid "leaked" 7.69 m3/s through 0.1 m2 of wetted
+        // area, which needs 77 m/s against a 6 m/s velocity cap.
+        operation       weightedSum;
         weightField     alpha.water;
         fields          (phi);
     }}""")
@@ -385,7 +393,15 @@ def _flux_functions(patches: list[str], interval: float) -> str:
         writeFields     no;
         regionType      patch;
         name            {patch};
-        operation       sum;
+        // weightedSum, NOT sum. ESI treats weighting as a SEPARATE OPERATION
+        // (typeWeighted is a bitmask on the enum, opSum is not in it), so
+        // `operation sum` silently IGNORES weightField and reports the mixture
+        // flux - water and air together. Foundation v9 applied the weight to
+        // plain sum, so the v9 -> v2406 move changed what every discharge
+        // monitor meant without changing a line of the case. It was caught by
+        // an impossibility: the lid "leaked" 7.69 m3/s through 0.1 m2 of wetted
+        // area, which needs 77 m/s against a 6 m/s velocity cap.
+        operation       weightedSum;
         weightField     alpha.water;
         fields          (phi);
     }}""")

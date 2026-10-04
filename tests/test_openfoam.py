@@ -926,13 +926,13 @@ def test_surface_freedom_reads_the_monitors_and_names_the_knob(tmp_path):
     nothing else in the output would say so."""
     from axqua.solvers.openfoam.report import surface_freedom
 
-    def monitor(name, values, area=1000.0):
+    def monitor(name, values, area=1000.0, t0=100):
         d = tmp_path / "postProcessing" / name / "0"
         d.mkdir(parents=True)
         (d / "surfaceFieldValue.dat").write_text(
             f"# Region type : patch x\n# Area   : {area}\n"
             "# Time areaIntegrate(alpha.water)\n"
-            + "".join(f"{i}\t{v}\n" for i, v in enumerate(values)))
+            + "".join(f"{t0 + i}\t{v}\n" for i, v in enumerate(values)))
 
     monitor("lidContact", [0.0, 0.0, 12.5, 4.0])
     monitor("wallContact", [0.0, 0.0, 0.0, 0.0])
@@ -986,10 +986,11 @@ def test_the_wall_tolerance_absorbs_the_inflow_and_outflow_corners(tmp_path):
     from axqua.solvers.openfoam.report import surface_freedom
 
     def monitor(name, peak, area):
+        # after the spin-up: the verdict deliberately ignores samples inside it
         d = tmp_path / "postProcessing" / name / "0"
         d.mkdir(parents=True)
         (d / "surfaceFieldValue.dat").write_text(
-            f"# Area   : {area}\n# Time\tvalue\n0\t0.0\n1\t{peak}\n")
+            f"# Area   : {area}\n# Time\tvalue\n100\t0.0\n101\t{peak}\n")
 
     monitor("lidContact", 0.0, 4000.0)
     monitor("wallContact", 14.0, 1450.0)       # ~1% of the banks patch
@@ -1303,7 +1304,7 @@ def test_the_lid_monitor_reports_flux_because_area_is_the_wrong_scale(tmp_path):
         d = tmp_path / "postProcessing" / name / "0"
         d.mkdir(parents=True)
         (d / "surfaceFieldValue.dat").write_text(
-            f"# Area   : {area}\n# Time\tvalue\n0\t0.0\n1\t{peak}\n")
+            f"# Area   : {area}\n# Time\tvalue\n100\t0.0\n101\t{peak}\n")
 
     # exactly what the 0.03 m run reported at t=90
     monitor("lidContact", 0.5605, 119.39)      # 0.47% of the lid: under the AREA bar
@@ -1333,7 +1334,7 @@ def test_a_lid_touched_without_leaking_is_not_a_leak_finding(tmp_path):
         d.mkdir(parents=True)
         (d / "surfaceFieldValue.dat").write_text(
             f"# Area   : {area}\n# Time\tvalue\n"
-            + "".join(f"{i}\t{v}\n" for i, v in enumerate(values)))
+            + "".join(f"{100 + i}\t{v}\n" for i, v in enumerate(values)))
 
     monitor("lidContact", [0.0, 0.02], 119.39)        # 0.017%, under the area bar
     monitor("wallContact", [0.0, 0.0], 168.91)
@@ -1352,7 +1353,7 @@ def test_an_old_run_without_the_leak_monitor_still_reads(tmp_path):
     d = tmp_path / "postProcessing" / "lidContact" / "0"
     d.mkdir(parents=True)
     (d / "surfaceFieldValue.dat").write_text(
-        "# Area   : 119.39\n# Time\tvalue\n0\t0.0\n1\t0.5605\n")
+        "# Area   : 119.39\n# Time\tvalue\n100\t0.0\n101\t0.5605\n")
 
     verdict = surface_freedom(_Cfg(), tmp_path)
     assert verdict.lid_leak == 0.0
@@ -1430,3 +1431,108 @@ def test_an_unknown_reconstruction_scheme_is_refused_not_passed_through():
     run = [s for s in stages(cfg) if s.name == "run"][0]
     with _pytest.raises(ValueError, match="iso_reconstruction"):
         fv_solution(cfg, run)
+
+
+def test_a_restarted_run_is_read_whole_not_just_its_first_leg(tmp_path):
+    """A restart does not append: OpenFOAM opens `surfaceFieldValue_0.dat` beside
+    the existing file. Every aXqua case is staged, so reading only the unsuffixed
+    name reports the SPIN-UP and silently discards the run - which is exactly what
+    happened on the dx45 pair, reporting 8 samples to t=8 on a run at t=23.8."""
+    from axqua.solvers.openfoam.report import read_monitors
+
+    d = tmp_path / "postProcessing" / "Q_inlet_1" / "0"
+    d.mkdir(parents=True)
+    (d / "surfaceFieldValue.dat").write_text(
+        "# Time\tsum(phi)\n1\t-0.10\n2\t-0.11\n")
+    (d / "surfaceFieldValue_0.dat").write_text(
+        "# Time\tsum(phi)\n2\t-0.11\n3\t-0.13\n4\t-0.135\n")
+
+    time, value = read_monitors(tmp_path)["inlet-1"]
+    assert time.tolist() == [1.0, 2.0, 3.0, 4.0]        # both legs, t=2 not doubled
+    assert value[-1] == pytest.approx(-0.135)
+
+
+def test_the_verdict_waits_for_the_spinup_instead_of_reporting_it(tmp_path):
+    """The spin-up fills a near-dry domain against a prescribed stage; it is violent
+    by construction. Its peaks condemned both dx45 runs at 7.4 m3/s through the lid
+    while the settled question was still open."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    class _WithQ(_Cfg):
+        class boundaries:
+            prescribed_flowrate = 0.135
+
+    cfg = _WithQ(mode="vof", spinup_time=8)
+
+    def monitor(name, rows, area):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            f"# Area   : {area}\n# Time\tvalue\n"
+            + "".join(f"{t}\t{v}\n" for t, v in rows))
+
+    # a violent spin-up, and nothing past it yet
+    monitor("lidContact", [(1, 0.0), (4, 9.9), (8, 8.0)], 119.39)
+    monitor("wallContact", [(1, 0.0), (4, 90.0), (8, 80.0)], 168.91)
+    monitor("lidLeak", [(1, 0.0), (4, 7.4), (8, 6.0)], 119.39)
+
+    verdict = surface_freedom(cfg, tmp_path)
+    assert not verdict.settled
+    assert verdict.lid_leak == 0.0 and verdict.lid_area == 0.0
+    text = " ".join(verdict.lines(cfg))
+    assert "no verdict yet" in text
+    # and crucially it must NOT read as an all-clear
+    assert "free" not in text and "CONSTRAINED" not in text
+
+
+def test_once_past_the_spinup_only_the_run_is_judged(tmp_path):
+    """Same violent spin-up, now with a calm run after it: the verdict is the run's."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    class _WithQ(_Cfg):
+        class boundaries:
+            prescribed_flowrate = 0.135
+
+    cfg = _WithQ(mode="vof", spinup_time=8)
+
+    def monitor(name, rows, area):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            f"# Area   : {area}\n# Time\tvalue\n"
+            + "".join(f"{t}\t{v}\n" for t, v in rows[:2]))
+        (d / "surfaceFieldValue_0.dat").write_text(
+            f"# Area   : {area}\n# Time\tvalue\n"
+            + "".join(f"{t}\t{v}\n" for t, v in rows[2:]))
+
+    monitor("lidContact", [(1, 9.9), (8, 8.0), (10, 0.0), (20, 0.01)], 119.39)
+    monitor("wallContact", [(1, 90.0), (8, 80.0), (10, 1.0), (20, 1.2)], 168.91)
+    monitor("lidLeak", [(1, 7.4), (8, 6.0), (10, 0.0), (20, 0.0002)], 119.39)
+
+    verdict = surface_freedom(cfg, tmp_path)
+    assert verdict.settled
+    assert verdict.lid_leak == pytest.approx(0.0002)   # the run's peak, not 7.4
+    assert verdict.lid_area == pytest.approx(0.01)
+    assert verdict.free
+
+
+def test_the_discharge_monitors_use_weightedsum_not_sum():
+    """ESI makes weighting a SEPARATE OPERATION: `typeWeighted` is a bitmask on the
+    operationType enum and `opSum` is not in it, so `operation sum` ignores
+    weightField and reports the MIXTURE flux. Foundation v9 applied the weight to
+    plain sum, so the v9 -> v2406 move silently changed what every discharge monitor
+    measured. Caught by an impossibility: the lid reported 7.69 m3/s of water leaving
+    through 0.1 m2 of wetted area, which needs 77 m/s against a 6 m/s cap."""
+    from axqua.solvers.openfoam.dicts import control_dict, stages
+
+    cfg = _Cfg(mode="vof")
+    run = [s for s in stages(cfg) if s.name == "run"][0]
+    text = control_dict(cfg, run, patches=["inlet-1", "outlet-1"],
+                        boundary_patches=("atmosphere", "banks"))
+
+    # every monitor that carries a weightField must use the weighted operation
+    for block in text.split("weightField     alpha.water;")[:-1]:
+        assert block.rstrip().endswith("operation       weightedSum;"), block[-200:]
+    assert "operation       sum;\n        weightField" not in text
+    # all three of them: the two discharges and the lid leak
+    assert text.count("operation       weightedSum;") == 3
