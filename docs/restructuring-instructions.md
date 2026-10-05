@@ -20,16 +20,7 @@ description:
 - the complex setup of config files for users, cases (projects), simulations (see "aXqua case setup" docs section) must be handled in pop-up windows (sub-apps?) where users can find "Save", "Cancel", and "Exit" buttons at the bottom-right with according save-functionality for `.axqua-profile` and `axqua-case` files that need to be updated according to user input and directly checked for correctness (files, factual, functional); correctness check must throw a warning if anything is not OK but should not hinder saving nor exiting the pop-up windows savely; 
 - everytime and item concerned by an error or warning message should be tagged with an orange (warning) or dark-red bold (error) warning triangle in the plugin UI and clicking on the triangle will open the error message with direct link to that warning or error message in the docs section (see below)
 - this computer for development purposes runs on Debian12 and has already all relevant software installed, including QGIS, Telemac, OpenFOAM, ParaView, and visit-DAV; you find the installation directories in the use CLAUDE.md file.
-- we were currently working with OpenFOAM v9; however, we must switch to `OpenFOAM v2406`, which I already did on this server with (no conda env activated):
-```bash
-curl -fsSL https://dl.openfoam.com/add-debian-repo.sh \
-  -o /tmp/add-openfoam-repo.sh
-less /tmp/add-openfoam-repo.sh
-sudo bash /tmp/add-openfoam-repo.sh
-sudo apt update
-apt-cache policy openfoam2406-default
-sudo apt install -y openfoam2406-default
-```
+- we must use `OpenFOAM v2406`, and I placed an auto-installer script for this and seidDriftFoam and sediDriftFoam2 and an additionally needed stage-discharge relation outflow condition and postprocessing tools PrawView and visit-DAV here on this server into `/home/modelling/OpenFOAM/OpenFOAM-installer/` -- this should run with `python3 install.py --install-system-packages --examples --smoke-test` but that will require sudo rights
 """
 ---
 * Purpose # meaning, perform standardized, state-of-the-art numerical simulations of georeferenced cases with open-source codes Telemac and OpenFOAM, including mesh convergence studies according to <cite-literature> and Bayesian calibration
