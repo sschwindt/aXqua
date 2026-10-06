@@ -330,7 +330,19 @@ openfoam:
   # the air. Column ~1.03 m over 12 layers: a 0.16 m bed layer plus 0.079 m
   # above it, so the ~0.43 m of water still gets ~4.4 layers - the same as the
   # discarded run had, with twice the freeboard.
-  n_layers: 12
+  # 5, NOT the 12 legs A and B use, and the difference is the whole point of a
+  # water-only domain. A two-phase column is depth PLUS freeboard - about 1.0 m here
+  # - so 12 layers give ~0.08 m cells. This column IS the depth: measured on the
+  # built mesh, 0.200 to 0.797 m with a median of 0.265. Twelve layers over that
+  # gave 0.0167 m cells, 81.7% of them thinner than leg A's minimum edge, and
+  # checkMesh went from 368 under-determined cells to 1,988, from 6 highly skew
+  # faces to 143 (max skewness 30), plus 222 concave cells leg A does not have.
+  # The pressure solve diverged globally within 0.003 s.
+  #
+  # 5 layers over the 0.200 m thinnest column gives 0.040 m - exactly leg A's
+  # minimum edge. And it is MORE vertical resolution where it matters, not less:
+  # these 5 layers are all in the water, where only ~2.6 of leg A's 12 are.
+  n_layers: 5
   turbulence: kOmegaSST
   # Ignored under a rigid lid: there is no interface to settle, so dicts.stages() emits
   # a single `run` stage. Kept for the same reason as freeboard.
