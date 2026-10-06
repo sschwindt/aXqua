@@ -257,7 +257,7 @@ maxDeltaT       {of.max_time_step:g};
 
 functions
 {{
-{_flux_functions(patches, monitor_interval(of))}
+{_flux_functions(cfg, patches, monitor_interval(of))}
 
 {_freedom_functions(cfg, boundary_patches, monitor_interval(of))}
 }}
@@ -283,6 +283,16 @@ def _freedom_functions(cfg, boundary_patches, interval: float) -> str:
     Emitted only for a two-phase run: under a rigid lid the surface is prescribed by
     construction, so "did it touch the lid" is not a question with an answer.
     """
+    from . import potential
+
+    if potential.is_potential(cfg):
+        # No alpha to integrate, and nothing to find: flow THROUGH the top patch is
+        # how the surface moves in this formulation, so a "leak" there is the
+        # kinematics rather than a defect. The question leg C has to answer instead
+        # is whether zeta stayed small against the depth, which measure_pool_levels
+        # reads off zeta itself.
+        return ("    // single phase: the free surface is a boundary condition, so\n"
+                "    // there is no alpha to integrate and no lid to breach")
     if cfg.openfoam.mode == "rigid-lid" or not boundary_patches:
         return "    // rigid lid: the free surface is prescribed, not solved"
     top, walls = boundary_patches
@@ -321,14 +331,9 @@ def _freedom_functions(cfg, boundary_patches, interval: float) -> str:
         writeFields     no;
         regionType      patch;
         name            {top};
-        // weightedSum, NOT sum. ESI treats weighting as a SEPARATE OPERATION
-        // (typeWeighted is a bitmask on the enum, opSum is not in it), so
-        // `operation sum` silently IGNORES weightField and reports the mixture
-        // flux - water and air together. Foundation v9 applied the weight to
-        // plain sum, so the v9 -> v2406 move changed what every discharge
-        // monitor meant without changing a line of the case. It was caught by
-        // an impossibility: the lid "leaked" 7.69 m3/s through 0.1 m2 of wetted
-        // area, which needs 77 m/s against a 6 m/s velocity cap.
+        // weightedSum, not sum: ESI treats weighting as a separate operation, so
+        // plain sum would report the AIR leaving the lid. That is how a 0.054 m3/s
+        // water leak first read as 7.7 m3/s.
         operation       weightedSum;
         weightField     alpha.water;
         fields          (phi);
@@ -366,7 +371,7 @@ def monitor_interval(of) -> float:
     return max(of.write_interval / 10.0, 1e-6)
 
 
-def _flux_functions(patches: list[str], interval: float) -> str:
+def _flux_functions(cfg, patches: list[str], interval: float) -> str:
     """``surfaceFieldValue`` monitors giving the WATER discharge through each patch.
 
     ``phi`` is the total volumetric flux, water and air together; weighting it by
@@ -376,6 +381,21 @@ def _flux_functions(patches: list[str], interval: float) -> str:
     boundary-flux balance :mod:`axqua.flux_convergence` reads out of a TELEMAC
     listing.
     """
+    from . import potential
+
+    # SINGLE PHASE: phi IS the water flux, so weighting it by a phase fraction
+    # that does not exist would abort the run on a missing field. The monitor is
+    # also exact here rather than alpha-weighted, which is the point of leg C.
+    # weightedSum, NOT sum, for a two-phase case. ESI treats weighting as a
+    # SEPARATE OPERATION (typeWeighted is a bitmask on the enum and opSum is not in
+    # it), so `operation sum` silently ignores weightField and reports the MIXTURE
+    # flux. Foundation v9 applied the weight to plain sum, so the v9 -> v2406 move
+    # changed what every discharge monitor meant without changing a line of any
+    # case. Caught by an impossibility: a lid "leaking" 7.69 m3/s of water through
+    # 0.1 m2 of wetted area, which needs 77 m/s against a 6 m/s cap.
+    weight = ("" if potential.is_potential(cfg)
+              else "\n        weightField     alpha.water;")
+    op = "sum" if potential.is_potential(cfg) else "weightedSum"
     blocks = []
     for patch in patches:
         blocks.append(f"""    Q_{patch.replace('-', '_')}
@@ -393,16 +413,7 @@ def _flux_functions(patches: list[str], interval: float) -> str:
         writeFields     no;
         regionType      patch;
         name            {patch};
-        // weightedSum, NOT sum. ESI treats weighting as a SEPARATE OPERATION
-        // (typeWeighted is a bitmask on the enum, opSum is not in it), so
-        // `operation sum` silently IGNORES weightField and reports the mixture
-        // flux - water and air together. Foundation v9 applied the weight to
-        // plain sum, so the v9 -> v2406 move changed what every discharge
-        // monitor meant without changing a line of the case. It was caught by
-        // an impossibility: the lid "leaked" 7.69 m3/s through 0.1 m2 of wetted
-        // area, which needs 77 m/s against a 6 m/s velocity cap.
-        operation       weightedSum;
-        weightField     alpha.water;
+        operation       {op};{weight}
         fields          (phi);
     }}""")
     return "\n\n".join(blocks)
@@ -681,12 +692,27 @@ def write_dicts(of_mesh, cfg, case_dir: str | Path, *,
     system.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
 
-    for name, text in (("transportProperties", transport_properties(cfg)),
+    from . import potential
+
+    leg_c = potential.is_potential(cfg)
+    for name, text in (("transportProperties",
+                        potential.transport_properties(cfg) if leg_c
+                        else transport_properties(cfg)),
                        ("turbulenceProperties", turbulence_properties(cfg)),
                        ("g", gravity())):
         written.append(_write(constant / name, text))
 
     written.append(_write(system / "decomposeParDict", decompose_par_dict(cfg)))
+    # limitVelocity is kept for leg C too, and dropping it was a mistake worth
+    # recording. The argument for dropping it was that the cap exists to keep the
+    # AIR off the time step and leg C has no air - true, but it is also the only
+    # thing bounding a bad seed, and this case's 3D pre-run has not reached flux
+    # balance (imbalance 0.58, and one node carrying a 14.9 km free surface).
+    # Without the cap, leg C went from Courant 0.65 to 2.54 in a single step and
+    # died with SIGFPE inside kOmegaSST::correct(). Here the cap bounds WATER, so
+    # it is a startup safeguard rather than a phase trick, and the run reports how
+    # many cells it touched - if that number is not ~0 once settled, the result is
+    # not to be read.
     written.append(_write(system / "fvOptions", fv_options(cfg, velocity_cap)))
 
     # A case built by an older aXqua against Foundation OpenFOAM carries
@@ -721,8 +747,12 @@ def write_dicts(of_mesh, cfg, case_dir: str | Path, *,
                               control_dict(cfg, stage, patches=patches,
                                            boundary_patches=_boundary_patches(
                                                of_mesh))))
-        written.append(_write(stage_dir / "fvSchemes", fv_schemes(cfg, stage)))
-        written.append(_write(stage_dir / "fvSolution", fv_solution(cfg, stage)))
+        written.append(_write(stage_dir / "fvSchemes",
+                              potential.fv_schemes() if leg_c
+                              else fv_schemes(cfg, stage)))
+        written.append(_write(stage_dir / "fvSolution",
+                              potential.fv_solution(cfg) if leg_c
+                              else fv_solution(cfg, stage)))
 
     # activate the first stage so the case is runnable straight out of the build.
     # Named rather than hardcoded: a rigid-lid case has one stage ("run"), because
@@ -768,8 +798,19 @@ def activate(case_dir: str | Path, stage: str, cfg=None, *,
         bounds = (top, BANKS_PATCH) if top and BANKS_PATCH in names else None
         (src / "controlDict").write_text(
             control_dict(cfg, target, patches=patches, boundary_patches=bounds))
-        (src / "fvSchemes").write_text(fv_schemes(cfg, target))
-        (src / "fvSolution").write_text(fv_solution(cfg, target))
+        # Leg C has its own single-phase numerics. This branch matters more than
+        # the one in write_dicts: activate() REGENERATES from the config on every
+        # run, so without it a correctly built leg C case is overwritten with
+        # two-phase dictionaries at launch - which is exactly how it first failed,
+        # on `div(phi,alpha)` in a case that has no alpha.
+        from . import potential
+
+        if potential.is_potential(cfg):
+            (src / "fvSchemes").write_text(potential.fv_schemes())
+            (src / "fvSolution").write_text(potential.fv_solution(cfg))
+        else:
+            (src / "fvSchemes").write_text(fv_schemes(cfg, target))
+            (src / "fvSolution").write_text(fv_solution(cfg, target))
 
     if not src.is_dir():
         raise FileNotFoundError(

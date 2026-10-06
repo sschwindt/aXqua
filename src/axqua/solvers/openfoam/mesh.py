@@ -1076,7 +1076,23 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         # verdict a reader sees afterwards are the same numbers rather than copies
         from axqua.solvers.openfoam.report import LID_STEP_SEVERE, LID_STEP_WARN
 
-        if step_p99 > LID_STEP_SEVERE and not of.allow_stepped_lid:
+        # LEG C IS EXEMPT, and the exemption is the whole reason it exists. The
+        # refusal below rests on the top boundary being a WALL: a wall cannot answer
+        # a drop by plunging, so it converts the head into velocity instead. Under
+        # potentialFreeSurfaceFoam the top is not a wall - the surface is free to
+        # move there, carried as `zeta` - so the premise does not hold and the step
+        # is a mesh-quality question (which `quality` reports) rather than a mode
+        # error. Keeping the lid ON the stepped 2D surface is also what keeps leg C's
+        # OWN validity condition satisfied: its linearisation needs |zeta - z_lid|
+        # small, and a lid that already follows the surface leaves only the 3D
+        # correction for zeta to carry.
+        from . import potential
+
+        if potential.is_potential(cfg):
+            notes.append(
+                "lid steps are not a refusal here: the top boundary is a free "
+                "surface (zeta), not a wall, so it answers a drop by moving")
+        elif step_p99 > LID_STEP_SEVERE and not of.allow_stepped_lid:
             # A refusal, not a warning: above one depth the surface steps further than
             # the water is deep, which is a weir, a drop, or the slots of a fish pass.
             # A lid is a WALL there, and the velocity it produces is an artefact of
@@ -1180,9 +1196,19 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
             f"on the domain edge - water touching a baffle is the flow doing its job, "
             "water touching the edge means the footprint is too tight")
     top_name = LID_PATCH if rigid else ATMOSPHERE_PATCH
-    # a wall type, because a rigid lid IS a boundary the flow cannot cross; the slip
-    # condition on U is what keeps it shear-free, as an air-water interface is
-    boundary.append((top_name, "wall" if rigid else "patch", top_owner, top_quads))
+    # A rigid lid IS a boundary the flow cannot cross, so `wall` is right for it; the
+    # slip condition on U is what keeps it shear-free, as an air-water interface is.
+    #
+    # LEG C IS THE EXCEPTION, and getting this wrong cost an evening. Under
+    # potentialFreeSurfaceFoam the surface MOVES BY FLUX THROUGH THIS PATCH, and the
+    # `wall` type puts it in the `wall` group - so kOmegaSST applied wall functions
+    # and a zero wall distance at the free surface. The symptom was not subtle and
+    # also not diagnostic: 100% of cells velocity-limited at 6 m/s within three time
+    # steps, and SIGFPE inside kOmegaSSTBase::correct().
+    from . import potential
+
+    top_type = "patch" if (potential.is_potential(cfg) or not rigid) else "wall"
+    boundary.append((top_name, top_type, top_owner, top_quads))
 
     mesh = assemble(points, internal, boundary, cell_centres)
     problems = validate(mesh)

@@ -29,7 +29,8 @@ import numpy as np
 
 from axqua.config import Config
 from axqua.core.capabilities import refresh_markers
-from axqua.solvers.openfoam import dicts, fields, mesh as ofmesh, quality
+from axqua.solvers.openfoam import (dicts, fields, mesh as ofmesh,
+                                    potential, quality)
 from axqua.solvers.openfoam.hotstart import State2D, load_hotstart
 from axqua.solvers.openfoam.polymesh import write_polymesh
 
@@ -206,9 +207,16 @@ def build_case(cfg: Config, *, state: State2D | None = None,
                      f"({DEFAULT_VELOCITY_CAP_FACTOR:g}x the reach's p95 water speed)")
 
     polymesh_dir = write_polymesh(of_mesh.polymesh, case_dir)
-    field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
-                                      outflow_stage=stage, discharges=inlets,
-                                      uniform_bed_ks=uniform_bed_ks)
+    if potential.is_potential(cfg):
+        # Leg C: single phase, the free surface carried as `zeta` on the top
+        # boundary rather than resolved as an interface. Different field set
+        # (p/p_gh/U/zeta, no alpha) on the same water-only mesh the rigid lid uses.
+        field_files = potential.write_potential_fields(of_mesh, cfg, case_dir,
+                                                      state=state)
+    else:
+        field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
+                                          outflow_stage=stage, discharges=inlets,
+                                          uniform_bed_ks=uniform_bed_ks)
     dict_files = dicts.write_dicts(of_mesh, cfg, case_dir, velocity_cap=cap)
     (case_dir / "case.foam").write_text("")     # so ParaView can open the folder
     _write_build_record(cfg, of_mesh, case_dir, velocity_cap=float(cap))
