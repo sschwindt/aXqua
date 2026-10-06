@@ -1536,3 +1536,52 @@ def test_the_discharge_monitors_use_weightedsum_not_sum():
     assert "operation       sum;\n        weightField" not in text
     # all three of them: the two discharges and the lid leak
     assert text.count("operation       weightedSum;") == 3
+
+
+def test_a_stepped_lid_is_refused_for_the_single_phase_surface(caplog):
+    """waveSurfacePressure moves the surface along the FACE NORMAL and then reads only
+    its vertical part, so a steep top face displaces water sideways instead of up.
+    On munich-vsf (14 slots, so a stepped lid) that drained zeta from 0.33 m to
+    -2.9 m in one second of simulated time."""
+    import logging
+    import types
+
+    import numpy as np
+
+    from axqua.solvers.openfoam import potential
+
+    # two faces: one horizontal, one near-vertical
+    pts = np.array([
+        [0, 0, 1.0], [1, 0, 1.0], [1, 1, 1.0], [0, 1, 1.0],      # flat
+        [2, 0, 1.0], [2, 0, 2.0], [2, 1, 2.0], [2, 1, 1.0],      # vertical
+    ], dtype=float)
+    faces = np.array([[0, 1, 2, 3], [4, 5, 6, 7]])
+    pm = types.SimpleNamespace(
+        points=pts, faces=faces,
+        patch_face_ids=lambda name: np.array([0, 1]))
+    mesh = types.SimpleNamespace(polymesh=pm)
+
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        steep, flattest = potential.check_lid_is_flat_enough(mesh)
+    assert steep == pytest.approx(0.5)          # one of the two
+    assert flattest == pytest.approx(0.0, abs=1e-12)
+    assert "DOES NOT APPLY TO THIS LID" in caplog.text
+    assert "mode: vof" in caplog.text
+
+
+def test_a_flat_lid_passes_without_a_warning(caplog):
+    import logging
+    import types
+
+    import numpy as np
+
+    from axqua.solvers.openfoam import potential
+
+    pts = np.array([[0, 0, 1.0], [1, 0, 1.0], [1, 1, 1.0], [0, 1, 1.0]], dtype=float)
+    pm = types.SimpleNamespace(points=pts, faces=np.array([[0, 1, 2, 3]]),
+                               patch_face_ids=lambda name: np.array([0]))
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        steep, flattest = potential.check_lid_is_flat_enough(
+            types.SimpleNamespace(polymesh=pm))
+    assert steep == 0.0 and flattest == pytest.approx(1.0)
+    assert "DOES NOT APPLY" not in caplog.text

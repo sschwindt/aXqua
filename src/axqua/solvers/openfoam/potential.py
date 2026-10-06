@@ -63,6 +63,54 @@ def is_potential(cfg) -> bool:
     return getattr(cfg.openfoam, "solver", "") == SOLVER
 
 
+#: Fraction of top faces that may be steeper than 45 degrees before the surface
+#: condition stops meaning anything. `waveSurfacePressure` advances the surface as
+#: `zeta += dt * nf * phi/|Sf|` - ALONG THE FACE NORMAL - and then imposes
+#: `p_gh = -(g & zeta)`, which reads only the vertical component. On a near-horizontal
+#: top face those are the same thing. On a steep one the displacement is mostly
+#: HORIZONTAL, which is not a free-surface motion at all, and the vertical part that
+#: survives is whatever the slope leaves behind.
+STEEP_FACE_FRACTION = 0.005
+STEEP_COS = 0.707                 # 45 degrees from horizontal
+
+
+def check_lid_is_flat_enough(of_mesh) -> tuple[float, float]:
+    """``(steep fraction, flattest |n_z|)`` for the top patch, and log the verdict.
+
+    Measured on munich-vsf, whose lid follows a 14-slot stepped 2D surface: 4.1% of
+    top faces steeper than 45 degrees, the worst at |n_z| = 0.068 - 86 degrees from
+    horizontal, effectively a vertical wall being asked to behave as a free surface.
+    The consequence was not subtle once found: zeta collapsed from its seeded 0.33 m
+    to -2.9 m within one second of simulated time, monotonically, on a column 0.2 m
+    deep. The giveaway was that the first reported `min/max zetap` was 0.0479 in
+    every run regardless of what else changed, and `z * |n_z|` over the lid
+    reproduces 0.0479 / 2.7512 exactly - so what the BC reports, and works with, is
+    the projection onto the face normal.
+    """
+    pm = of_mesh.polymesh
+    ids = pm.patch_face_ids(TOP_PATCH)
+    q = np.asarray(pm.faces)[ids]
+    pts = np.asarray(pm.points, dtype=float)
+    n = np.cross(pts[q[:, 2]] - pts[q[:, 0]], pts[q[:, 3]] - pts[q[:, 1]]) / 2.0
+    nz = np.abs(n[:, 2]) / np.linalg.norm(n, axis=1)
+    steep = float((nz < STEEP_COS).mean())
+    log.info("lid faces: %.1f%% steeper than 45 deg, flattest |n_z| = %.3f",
+             100 * steep, float(nz.min()))
+    if steep > STEEP_FACE_FRACTION:
+        log.warning(
+            "THE SURFACE CONDITION DOES NOT APPLY TO THIS LID: %.1f%% of its faces "
+            "are steeper than 45 degrees (worst %.0f deg from horizontal). "
+            "waveSurfacePressure moves the surface along the FACE NORMAL, so on "
+            "those faces it displaces water sideways rather than up, and the run "
+            "drains - measured, zeta 0.33 m to -2.9 m in one second. Smoothing the "
+            "lid (openfoam.lid_smoothing) makes the faces flat but then zeta has to "
+            "carry the whole fall of the reach, which the linearisation cannot do "
+            "either. On a stepped surface - a fish pass, a cascade, a chute - this "
+            "solver is the wrong tool and mode: vof is the right one.",
+            100 * steep, np.degrees(np.arccos(float(nz.min()))))
+    return steep, float(nz.min())
+
+
 def check_applicable(cfg) -> None:
     """Refuse the combinations that would run and be wrong.
 
@@ -80,20 +128,53 @@ def check_applicable(cfg) -> None:
             "or carries a moving surface through zeta.")
 
 
-def lid_elevation_per_column(of_mesh) -> np.ndarray:
-    """Lid elevation per plan column, taken from the top faces themselves.
+def lid_elevation_by_column(of_mesh) -> np.ndarray:
+    """Free-surface elevation per plan COLUMN, indexed by column id.
 
-    Not from ``of_mesh.lid`` (which is per plan VERTEX) and not from
-    ``column_wse`` (the 2D seed, which the mesher may have clipped): the
-    reference has to be the elevation of the very faces ``waveSurfacePressure``
-    acts on, or the seeded datum and the boundary disagree by whatever the
-    mesher did. The top patch carries one face per column, in column order.
+    Built from the top faces themselves, via each face's owner cell, so it needs no
+    assumption about patch face ordering. The first version indexed the lid patch's
+    face list as though it were in column order; that happens to be true for this
+    mesher, but it is not stated anywhere and `p`, `zeta` and the outlet condition
+    all depend on it agreeing. Reading the owner is one array lookup and removes the
+    question.
+
+    Not `of_mesh.lid` (per plan VERTEX) and not `column_wse` (the 2D seed, which the
+    mesher may have clipped): the reference has to be the elevation of the very
+    faces `waveSurfacePressure` acts on.
     """
-    polymesh = of_mesh.polymesh
-    ids = polymesh.patch_face_ids(TOP_PATCH)
-    points = np.asarray(polymesh.points, dtype=float)
-    quads = np.asarray(polymesh.faces)[ids]
-    return points[quads][:, :, 2].mean(axis=1)
+    pm = of_mesh.polymesh
+    ids = pm.patch_face_ids(TOP_PATCH)
+    z = pm.face_centres(ids)[:, 2]
+    columns = np.asarray(of_mesh.cell_column)[np.asarray(pm.owner)[ids]]
+    out = np.zeros(int(columns.max()) + 1)
+    out[columns] = z
+    return out
+
+
+def top_face_elevation(of_mesh) -> np.ndarray:
+    """Top-patch face-centre elevations, in the patch's own face order.
+
+    This is what `0/zeta` needs: the boundary value list is read in patch order.
+    """
+    pm = of_mesh.polymesh
+    return pm.face_centres(pm.patch_face_ids(TOP_PATCH))[:, 2]
+
+
+def surface_pgh_on_patch(of_mesh, patch: str, g: float) -> np.ndarray:
+    """``p_gh`` per face on a lateral patch, from the free surface above it.
+
+    ``p_gh = |g| z_s`` IS the statement "the free surface here is at z_s", so a
+    lateral boundary that wants a prescribed tailwater has to say it face by face.
+    Writing ONE value over the whole patch asserts a single level across a face
+    whose own lid varies - on munich-vsf the outlet spans z 0.321 to 0.823 - and
+    the mismatch is a sustained head error that drains the domain. That is what
+    collapsed zeta from 0.33 to -3.0 m in the first second of the first run that
+    got as far as running.
+    """
+    pm = of_mesh.polymesh
+    ids = pm.patch_face_ids(patch)
+    columns = np.asarray(of_mesh.cell_column)[np.asarray(pm.owner)[ids]]
+    return g * lid_elevation_by_column(of_mesh)[columns]
 
 
 def hydrostatic_pressure(of_mesh, g: float = 9.81) -> np.ndarray:
@@ -106,8 +187,8 @@ def hydrostatic_pressure(of_mesh, g: float = 9.81) -> np.ndarray:
     surface exactly where the 2D seed put it.
     """
     z = np.asarray(of_mesh.cell_centres, dtype=float)[:, 2]
-    per_column = lid_elevation_per_column(of_mesh)
-    return g * (per_column[of_mesh.cell_column] - z)
+    by_column = lid_elevation_by_column(of_mesh)
+    return g * (by_column[of_mesh.cell_column] - z)
 
 
 # --------------------------------------------------------------------------- #
@@ -128,7 +209,8 @@ def write_potential_fields(of_mesh, cfg, case_dir, *, state=None) -> list[Path]:
     walls = [p for p in of_mesh.wall_patches]
     inlets, outlets = of_mesh.inlet_patches, of_mesh.outlet_patches
     stages = F.outlet_stages(_outflow_stage(cfg), outlets) or {}
-    lid_z = lid_elevation_per_column(of_mesh)
+    check_lid_is_flat_enough(of_mesh)
+    lid_z = top_face_elevation(of_mesh)      # patch face order, for 0/zeta
 
     # ---- p: kinematic, and the field that actually sets the initial state ----
     p = hydrostatic_pressure(of_mesh, g)
@@ -139,9 +221,26 @@ def write_potential_fields(of_mesh, cfg, case_dir, *, state=None) -> list[Path]:
     for name in outlets:
         # A prescribed tailwater IS a prescribed p_gh here: p_gh = |g| z_s says
         # "the free surface at this face is at z_s", with no depth to interpolate
-        # and no alpha profile to get wrong.
+        # and no alpha profile to get wrong. PER FACE, not one value for the patch:
+        # see surface_pgh_on_patch for what one value did.
+        pgh = surface_pgh_on_patch(of_mesh, name, g)
         bc[name] = {"type": "fixedValue",
-                    "value": f"uniform {g * stages.get(name, 0.0):.6f}"}
+                    "value": F.scalar_list(pgh)}
+        # ...and the configured stage is kept as a CHECK rather than as the value.
+        # If the two disagree the lid and the tailwater are describing different
+        # water surfaces, which is a config error the run would otherwise absorb as
+        # a slow drain.
+        want = stages.get(name)
+        if want:
+            got = float(np.median(pgh)) / g
+            if abs(got - want) > 0.05:
+                log.warning(
+                    "%s: openfoam.outlet_stage says %.3f m a.s.l. but the lid above "
+                    "that patch sits at a median %.3f m - a %.3f m disagreement "
+                    "about where the free surface is. The lid wins (it is what the "
+                    "surface condition references); check outlet_stage against the "
+                    "2D result the mesh was built from.",
+                    name, want, got, abs(got - want))
     # p gets PLAIN boundary conditions, and this is not cosmetic. `p` is read but
     # never solved - only `p_gh` is - and `waveSurfacePressure` is not a passive
     # value: its updateCoeffs INTEGRATES zeta from the patch flux. Attaching it to
