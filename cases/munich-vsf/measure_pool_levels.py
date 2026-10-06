@@ -36,6 +36,7 @@ larger than the difference being measured).
     python cases/munich-vsf/measure_pool_levels.py                       # the 2D seed
     python cases/munich-vsf/measure_pool_levels.py <result.slf>
     python cases/munich-vsf/measure_pool_levels.py <openfoam-case-dir>   # VOF
+    python cases/munich-vsf/measure_pool_levels.py <openfoam-case-dir> 40  # at t=40
 """
 
 from __future__ import annotations
@@ -105,7 +106,47 @@ def lattice_spacing(cx: np.ndarray, cy: np.ndarray) -> float:
     return float(np.median(d[:, 1]))
 
 
-def read_vof_columns(case_dir: Path, n_layers: int):
+def layer_count(cx: np.ndarray, cy: np.ndarray) -> int:
+    """Layers per column, counted from the mesh rather than read from a config.
+
+    Same argument that already applies to the lattice pitch: nothing in a case
+    directory says which config built it, and `case-config-vof.yml` is one of
+    several now (0.03 m, 0.045 m x interFoam/interIsoFoam, the single-phase leg).
+    Reading 8 for a 12-layer build does not fail loudly - it reshapes the cells into
+    the wrong columns and reports depths that look entirely plausible.
+
+    Counting DISTINCT plan positions does not work: the extrusion warps the cells
+    very slightly, so a column's twelve centres differ in the seventh decimal
+    (7.912500, 7.912493, 7.912492 ...) and every cell looks like its own column.
+    The lattice is column-major, so the run length of consecutive cells sharing a
+    plan position is the answer - with the tolerance set from the pitch itself, well
+    below one cell and well above the warp.
+    """
+    xy = np.column_stack([cx, cy])
+    step = np.linalg.norm(np.diff(xy, axis=0), axis=1)
+    # The pitch comes from the steps BETWEEN columns, not from all of them: 11 of
+    # every 12 consecutive pairs sit inside one column, so the median step is the
+    # warp (about 1e-6 m) rather than the lattice spacing, and a tolerance built
+    # from it breaks every column into single cells.
+    large = step[step > 1e-4]
+    if large.size == 0:
+        raise SystemExit("every cell shares one plan position; not a column lattice")
+    pitch = float(np.median(large))
+    tol = pitch / 4.0
+    breaks = np.flatnonzero(step > tol) + 1
+    if breaks.size == 0:
+        raise SystemExit("every cell shares one plan position; not a column lattice")
+    runs = np.diff(np.concatenate([[0], breaks, [cx.size]]))
+    n_layers = int(runs[0])
+    if not np.all(runs == n_layers):
+        raise SystemExit(
+            f"columns do not all have the same number of layers "
+            f"({runs.min()}..{runs.max()}); the column assumption does not hold")
+    return n_layers
+
+
+def read_vof_columns(case_dir: Path, n_layers: int | None = None,
+                     want_time: float | None = None):
     """Per-column (x, y, depth, surface) from a reconstructed interFoam time.
 
     Reuses `correct_lid._read_list`, which already handles `writeFormat binary` - the
@@ -121,7 +162,18 @@ def read_vof_columns(case_dir: Path, n_layers: int):
     if not times:
         raise SystemExit(f"no reconstructed time with alpha.water in {case_dir} - "
                          "run `reconstructPar -latestTime` first")
-    t, tdir = times[-1]
+    if want_time is None:
+        t, tdir = times[-1]
+    else:
+        # An explicit time, because the LATEST is not always the one to read. Both
+        # 0.045 m legs are clean to t=40 and then vent 1.2-1.5 m3/s through the lid,
+        # so their t=60 surface is a contaminated state and t=40 is the comparison.
+        match = [(tt, dd) for tt, dd in times if abs(tt - want_time) < 1e-6]
+        if not match:
+            raise SystemExit(
+                f"no reconstructed t={want_time:g} in {case_dir}; have "
+                + ", ".join(f"{tt:g}" for tt, _ in times))
+        t, tdir = match[0]
 
     def field(name):
         buf = (tdir / name).read_bytes()
@@ -136,6 +188,8 @@ def read_vof_columns(case_dir: Path, n_layers: int):
     alpha = field("alpha.water")
     cx, cy, cz, vol = (field(n) for n in ("Cx", "Cy", "Cz", "V"))
 
+    if n_layers is None:
+        n_layers = layer_count(cx, cy)
     if alpha.size % n_layers:
         raise SystemExit(f"{alpha.size} cells is not a multiple of n_layers "
                          f"{n_layers}; the column assumption does not hold")
@@ -158,6 +212,7 @@ def main() -> None:
     from axqua.core import selafin
 
     cfg = load_config(HERE / "case-config-vof.yml")
+    want_time = float(sys.argv[2]) if len(sys.argv) > 2 else None
     path = Path(sys.argv[1]) if len(sys.argv) > 1 else (
         Path(cfg.model_dir) / cfg.results_slf)
     if not path.exists():
@@ -174,7 +229,7 @@ def main() -> None:
     if path.is_dir():
         # A VOF case: the config whose cell_size built it decides the column area.
         x, y, depth, surface, t, shape, dx = read_vof_columns(
-            path, cfg.openfoam.n_layers)
+            path, want_time=want_time)
         label = (f"{path.name} t={t:g} s, {shape[0]:,} columns x {shape[1]} layers, "
                  f"lattice {dx:.4f} m measured from the grid")
     else:
