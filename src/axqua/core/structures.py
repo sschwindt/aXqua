@@ -1,7 +1,7 @@
 """Dams, weirs, walls and buildings - authored in QGIS, meshed by either solver.
 
 Why there is no STL here
------------------------
+------------------------
 The usual reason a river CFD workflow needs an STL is ``snappyHexMesh``: it meshes a
 background block and *snaps* it onto a triangulated surface, so every solid object has
 to arrive as triangles. axqua does not use snappyHexMesh (see

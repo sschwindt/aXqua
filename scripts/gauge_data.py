@@ -24,11 +24,11 @@ Everything is normalised to **metric** (m³/s, m) so the exports feed axqua dire
 
 Run it (from the repository root)::
 
-    mamba run -n axqua-env python cases/gauge_data.py
-    # equivalently:  streamlit run cases/gauge_data.py
+    mamba run -n axqua-env python scripts/gauge_data.py
+    # equivalently:  streamlit run scripts/gauge_data.py
 
 Running it with plain ``python`` re-launches it under Streamlit automatically; extra
-arguments are forwarded (e.g. ``python cases/gauge_data.py --server.port 8600``).
+arguments are forwarded (e.g. ``python scripts/gauge_data.py --server.port 8600``).
 """
 
 from __future__ import annotations
@@ -506,7 +506,7 @@ def _relaunch() -> int:
     except ModuleNotFoundError:
         sys.stderr.write(
             "Streamlit is not installed. Run in the axqua GUI env, e.g.:\n"
-            "    mamba run -n axqua-env streamlit run cases/gauge_data.py\n")
+            "    mamba run -n axqua-env streamlit run scripts/gauge_data.py\n")
         return 1
     sys.argv = ["streamlit", "run", __file__, *sys.argv[1:]]
     return stcli.main()

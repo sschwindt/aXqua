@@ -1,0 +1,46 @@
+/* Navigation menu of the aXqua documentation.
+
+   The theme folds every level below the current page. The documentation outline asks
+   for more: sections and their subsections are always listed, and only the
+   subsubsection level opens on demand. */
+
+/* Level 2 (subsections) is always visible. */
+.wy-menu-vertical li.toctree-l1 > ul {
+    display: block;
+}
+
+/* A section no longer needs its own fold button. */
+.wy-menu-vertical li.toctree-l1 > a > button.toctree-expand {
+    display: none;
+}
+
+/* Subsections of a section other than the current one sit on the dark menu background,
+   where the theme's dark link color would be unreadable. */
+.wy-menu-vertical li.toctree-l1:not(.current) > ul > li.toctree-l2:not(.current) > a {
+    color: #d9d9d9;
+    padding: 0.4045em 1.618em 0.4045em 2.8em;
+}
+
+.wy-menu-vertical li.toctree-l1:not(.current) > ul > li.toctree-l2:not(.current) > a:hover {
+    background-color: #4e4a4a;
+}
+
+.wy-menu-vertical li.toctree-l1:not(.current) > ul > li.toctree-l2:not(.current) > a > button.toctree-expand {
+    color: #b3b3b3;
+}
+
+/* Level 3 (subsubsections) opens when its subsection is opened with the fold button. */
+.wy-menu-vertical li.toctree-l1:not(.current) > ul > li.toctree-l2.current > ul {
+    display: block;
+}
+
+/* Tables: the theme keeps every cell on one line and lets the table scroll sideways,
+   which hides the explanatory column of the settings tables. Cells wrap instead. */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    white-space: normal;
+}
+
+.wy-table-responsive {
+    overflow: visible;
+}

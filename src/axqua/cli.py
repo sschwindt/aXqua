@@ -212,7 +212,7 @@ def _run_surface(argv: list[str]) -> int:
             raise ConfigError(
                 f"{args.config} declares no surfaces block with parts - nothing to "
                 "derive", subject="surfaces",
-                remedy="See the surfaces section of docs/preprocessing.rst.")
+                remedy="See the CAD drawings part of docs/usage/case-setup.rst.")
         cfg.ensure_dirs()
         produced = surface_stage.run(cfg, force=args.force)
     except Exception as exc:

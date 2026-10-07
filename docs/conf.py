@@ -1,6 +1,7 @@
 """Sphinx configuration for the axqua documentation (Read the Docs)."""
 
 import os
+import re
 import sys
 from datetime import datetime
 
@@ -24,7 +25,8 @@ extensions = [
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+# _incoming/ is a drop folder for text that still has to be folded into the tree.
+exclude_patterns = ["_build", "_incoming", "Thumbs.db", ".DS_Store"]
 
 # -- Autodoc ------------------------------------------------------------------
 autodoc_member_order = "bysource"
@@ -39,12 +41,33 @@ autodoc_default_options = {
 autodoc_mock_imports = [
     "numpy", "pandas", "scipy", "yaml", "pyproj",
     "shapely", "geopandas", "rasterio", "gmsh",
+    "matplotlib", "openpyxl",
 ]
 
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_use_param = True
 napoleon_use_rtype = True
+
+# Docstrings write absolute values the way hydraulics does, |Q_in| - |Q_out|, which
+# reStructuredText reads as a substitution reference and reports as an error. They are
+# turned into literals when the docstring is read, so the sources stay as they are
+# written. A bar with a space next to it (a table row, a shell pipe) is left alone, and
+# so is anything that already stands inside an inline literal.
+_ABSOLUTE_VALUE = re.compile(r"(?<![`|\w])\|(\S(?:[^|`\n]{0,38}\S)?)\|(?![`|\w])")
+_INLINE_LITERAL = re.compile(r"(``.+?``)")
+
+
+def _literal_absolute_values(app, what, name, obj, options, lines):
+    for index, line in enumerate(lines):
+        parts = _INLINE_LITERAL.split(line)
+        parts[::2] = [_ABSOLUTE_VALUE.sub(r"``|\1|``", part) for part in parts[::2]]
+        lines[index] = "".join(parts)
+
+
+def setup(app):
+    app.connect("autodoc-process-docstring", _literal_absolute_values)
+
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
@@ -55,3 +78,14 @@ intersphinx_mapping = {
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_title = "aXqua"
+# The menu lists sections and their subsections at all times; a subsubsection level opens
+# with its parent. The full tree has to be in the page for that (collapse_navigation), and
+# _static/axqua.css is what keeps the second level unfolded for sections other than the
+# current one.
+html_theme_options = {
+    "collapse_navigation": False,
+    "navigation_depth": 3,
+    "titles_only": False,
+    "sticky_navigation": True,
+}
+html_css_files = ["axqua.css"]

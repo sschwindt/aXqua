@@ -49,7 +49,7 @@ cases/<your-case>/
 ------------------------------------------------------------------------------
  PRINCIPAL WORK STEPS
 ------------------------------------------------------------------------------
-0. Install the env and activate it (see docs/installation.rst):
+0. Install the env and activate it (see docs/installation/):
      mamba env create -f environment.yml && mamba activate axqua-env
      pip install -e .
 
@@ -129,7 +129,7 @@ warnings and errors.
  WHERE TO READ MORE
 ------------------------------------------------------------------------------
   README.md                 overview, pipeline stages, case layout, CLI
-  docs/installation.rst     environment + TELEMAC setup
+  docs/installation/        environment + TELEMAC setup
   OPTIONAL OpenFOAM free-surface (VOF) extension - after step 1b, and
   independent of the TELEMAC-3D one. For when the vertical structure matters
   AND the water surface has a gradient (which rules out simpleFoam):
@@ -199,16 +199,16 @@ warnings and errors.
       axqua execute <JOB_ID>
 
     Then read runner.log (axqua's narration, with the error and a remedy)
-    and solver/*.log (the solver talking). See docs/jobs.rst.
+    and solver/*.log (the solver talking). See docs/automation/batch-headless.rst.
 
   THE SCRIPTS ARE NOT DEPRECATED. They remain the supported standalone path and
   call the same functions the job system does - the job backends are adapters
   over them, not a second implementation.
 
-  docs/jobs.rst             submitting, monitoring, cancelling; solver profiles
-  docs/qgis_plugin.rst      the QGIS frontend
-  docs/architecture.rst     how the pieces fit together, and why
-  docs/usage.rst            CLI, GUI editor, example scripts, inputs
+  docs/automation/             submitting, monitoring, cancelling; solver profiles
+  docs/installation/qgis-plugin.rst  the QGIS frontend
+  docs/code/structure-uml.rst  how the pieces fit together, and why
+  docs/usage/                    CLI, GUI editor, example scripts, inputs
   CLAUDE.md                 in-depth design notes (meshing, boundaries,
                             friction, ground truth, conventions)
   cases/example-Inn/        a complete, filled-in worked example

@@ -384,7 +384,7 @@ def test_the_flow_arrow_follows_a_centerline_rather_than_the_canvas(project):
 
 
 def test_messages_reach_the_qgis_log_tab(qgis_app):
-    """``help.rst`` tells users to copy the aXqua tab into a bug report, so something
+    """The troubleshooting page tells users to copy the aXqua tab into a bug report, so something
     has to write to it. Nothing did."""
     from qgis.core import QgsApplication as _App
 

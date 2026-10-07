@@ -1,0 +1,131 @@
+Terminal syntax
+===============
+
+The QGIS plugin and the terminal use the same program. A simulation that is started from a terminal therefore produces the same files as one that is started from the plugin, and both appear in the job list of the other.
+
+.. important::
+
+   A terminal shows neither the input layers nor the results. Open the geodata in QGIS before the first run to verify that the layers fit together (:ref:`case-geodata`), and inspect the results of each step on a map before the next step is started. A model can run without any error message and still be wrong, for example because an inflow line lies at the wrong place.
+
+Open a terminal
+---------------
+
+On **Linux**, open a terminal and activate the Python environment in which aXqua is installed:
+
+.. code-block:: bash
+
+   mamba activate axqua-env
+   axqua --version
+
+On **Windows**, open the *Miniforge Prompt* from the start menu and enter the same two commands. If the simulation software is installed in the Windows Subsystem for Linux, open the terminal of the Linux distribution instead and proceed as on Linux.
+
+Commands
+--------
+
+A command consists of the program name, an action and, for most actions, the case file:
+
+.. code-block:: text
+
+   axqua <action> <case-file> [options]
+
+Preparing and checking a case:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua <case-file> --check``
+     - Check the case file, the input files and the simulation software.
+   * - ``axqua <case-file>``
+     - Run the preprocessing and write the TELEMAC model.
+   * - ``axqua <case-file> --dry-run``
+     - Run the preprocessing and start TELEMAC once, to verify that it accepts the model.
+   * - ``axqua surface <case-file>``
+     - Convert CAD files into the terrain and the layers of a case.
+   * - ``axqua status <case-file>``
+     - Show which simulations are configured, built and run.
+   * - ``axqua openfoam <case-file> --check``
+     - Show the number of cells of the OpenFOAM mesh without building it.
+   * - ``axqua targets <case-file>``
+     - Create the workbook for field measurements.
+   * - ``axqua check-gt <case-file>``
+     - Compare the elevations of the measurement points with the terrain model.
+   * - ``axqua postproc <case-file>``
+     - Render the predefined figures with VisIt.
+
+Tools for input data:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua clip <raster> -b <polygon> -o <output>``
+     - Cut a raster, for example a DEM, to a polygon.
+   * - ``axqua rating -o <output.csv> ...``
+     - Estimate a rating curve from channel width, bed slope and roughness.
+   * - ``axqua migrate <case-file> --in-place``
+     - Rewrite a case file of an older aXqua version in the current format.
+
+Running simulations as jobs (:doc:`batch-headless`):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua submit <case-file> --kind <kind>``
+     - Start a simulation as a job and print its ID.
+   * - ``axqua list``
+     - List all jobs.
+   * - ``axqua status <job-id>``
+     - Show the state and the progress of a job.
+   * - ``axqua logs <job-id> --follow``
+     - Show the log of a job while it runs.
+   * - ``axqua cancel <job-id>``
+     - Stop a job and all processes that it started.
+
+Each command explains its options with ``--help``, for example ``axqua submit --help``.
+
+Options for scripts
+-------------------
+
+With the option ``--json``, every command prints its result as one JSON document, which other programs can read reliably. If a command fails, its exit code indicates the cause, so that a script can react without reading the message:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+
+   * - Exit code
+     - Cause
+   * - 0
+     - Success
+   * - 2
+     - Error in the case file
+   * - 3
+     - Error in the geodata
+   * - 4
+     - Simulation software not reachable
+   * - 5
+     - The simulation failed
+   * - 6
+     - The mesh could not be created
+   * - 1
+     - Any other error
+   * - 130
+     - Cancelled by the user
+
+Scripts in the case folder
+--------------------------
+
+The template folder ``cases/case-template/`` contains one Python script per working step, for example ``preprocessing.py``, ``initial_run.py`` and ``mesh_convergence_study.py``. They perform the same steps as the commands above and run in the foreground, so that the output of the simulation code appears directly in the terminal. Settings that apply to one step only are listed at the top of each script.
+
+.. code-block:: bash
+
+   cd cases/my-reach
+   python preprocessing.py
+   python initial_run.py

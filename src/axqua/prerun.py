@@ -144,16 +144,18 @@ def ensure_seed(cfg, *, enabled: bool | None = None,
                 validate_env: bool = True) -> SeedResult:
     """Find or produce the TELEMAC result an OpenFOAM build should be seeded from.
 
-    Parameters
-    ----------
-    enabled : per-invocation override of ``openfoam.pre_run.enabled``. ``None``
-        follows the config; ``False`` is the "uncheck the box for this run" path used
-        by ``--no-pre-run`` and the case scripts' module-level switch.
-    validate_env : passed to :func:`axqua.pipeline.run` for the pre-run.
-
     Never raises for an absent or unconverged seed - a cold build is a legitimate
     outcome and the caller reports it - except under ``pre_run.require: error``, where
     an unconverged pre-run is exactly what the user asked to be stopped for.
+
+    Parameters
+    ----------
+    enabled : bool, optional
+        Per-invocation override of ``openfoam.pre_run.enabled``. ``None`` follows the
+        config; ``False`` is the "uncheck the box for this run" path used by
+        ``--no-pre-run`` and the case scripts' module-level switch.
+    validate_env : bool
+        Passed to :func:`axqua.pipeline.run` for the pre-run.
     """
     pre = cfg.openfoam.pre_run
     on = pre.enabled if enabled is None else bool(enabled)
