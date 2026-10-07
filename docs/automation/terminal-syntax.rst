@@ -28,6 +28,21 @@ A command consists of the program name, an action and, for most actions, the cas
 
    axqua <action> <case-file> [options]
 
+Setting up the computer (:doc:`../installation/plugin-setup`):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua profile init``
+     - Create the profile of the computer from the software that is found on it.
+   * - ``axqua profile check``
+     - Verify the profile, including whether TELEMAC and OpenFOAM can be started.
+   * - ``axqua profile show``
+     - Print the profile in use.
+
 Preparing and checking a case:
 
 .. list-table::
@@ -67,8 +82,8 @@ Tools for input data:
      - Cut a raster, for example a DEM, to a polygon.
    * - ``axqua rating -o <output.csv> ...``
      - Estimate a rating curve from channel width, bed slope and roughness.
-   * - ``axqua migrate <case-file> --in-place``
-     - Rewrite a case file of an older aXqua version in the current format.
+   * - ``axqua migrate <old-file> --to-case``
+     - Write a case file of the current type (``.axq-case``) next to a case file of an older aXqua version.
 
 Running simulations as jobs (:doc:`batch-headless`):
 

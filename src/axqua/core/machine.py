@@ -19,17 +19,20 @@ Resolution order, first hit wins:
    gitignored. For a case that legitimately needs a different build from the rest
    of the machine. Ahead of the machine setting, because precedence follows
    specificity.
-3. the **machine settings file** - ``$AXQUA_HOME/solvers.yml``, else
+3. the **active profile** - the ``*.axq-profile`` of this computer
+   (:mod:`axqua.core.profile`). This is what the QGIS plugin edits, and the
+   documented place for these paths.
+4. the **machine settings file** - ``$AXQUA_HOME/solvers.yml``, else
    ``$XDG_CONFIG_HOME/axqua/solvers.yml``, else ``~/.config/axqua/solvers.yml``.
-   Outside the repository by construction, so it can never be committed. This is
-   what the QGIS plugin writes when the user picks or installs a solver.
-4. whatever the case config itself says - kept so every existing config keeps
+   The mechanism that preceded the profile; still read, so an installation that
+   was set up with it keeps working.
+5. whatever the case config itself says - kept so every existing config keeps
    working unchanged, and because a self-contained case on a single-user machine
    is a reasonable thing to have.
-5. **discovery** of the usual install layouts, so a fresh checkout on a machine
+6. **discovery** of the usual install layouts, so a fresh checkout on a machine
    that has the solver often needs no configuration at all.
 
-Only step 4 is in the repository, and it is now the fallback rather than the
+Only step 5 is in the repository, and it is the fallback rather than the
 mechanism.
 """
 
@@ -47,6 +50,7 @@ ENV_VARS = {
     "telemac": "AXQUA_TELEMAC_PYSOURCE",
     "openfoam": "AXQUA_OPENFOAM_BASHRC",
     "visit": "AXQUA_VISIT",
+    "paraview": "AXQUA_PARAVIEW",
 }
 
 #: Filename of the per-machine settings, wherever it is found.
@@ -72,6 +76,8 @@ DISCOVERY = {
         "*/OpenFOAM-*/etc/bashrc",
     ),
     "visit": ("/opt/visit*/bin/visit", "visit*/bin/visit", "*/visit*/bin/visit"),
+    "paraview": ("/opt/ParaView*/bin/paraview", "ParaView*/bin/paraview",
+                 "*/ParaView*/bin/paraview"),
 }
 
 #: Roots the relative DISCOVERY patterns are joined to. ``AXQUA_SOLVER_ROOT``
@@ -153,8 +159,14 @@ class Resolved:
         return f"{key}: {self.path}  (from {self.source})"
 
 
-def resolve(key: str, *, configured=None, case_dir=None) -> Resolved:
-    """Find *key*'s setup script for this machine. See the module docstring."""
+def resolve(key: str, *, configured=None, case_dir=None,
+            use_profile: bool = True) -> Resolved:
+    """Find *key*'s setup script for this machine. See the module docstring.
+
+    *use_profile* False skips the active profile. That is how a profile is first
+    *written* from what a computer already has: detection must see the settings the
+    profile is about to replace, not the profile.
+    """
     env = os.environ.get(ENV_VARS.get(key, ""))
     if env:
         return Resolved(Path(env).expanduser(), f"${ENV_VARS[key]}")
@@ -172,6 +184,15 @@ def resolve(key: str, *, configured=None, case_dir=None) -> Resolved:
                 if not path.is_absolute():
                     path = (Path(case_dir) / path).resolve()
                 return Resolved(path, str(local))
+
+    if use_profile:
+        # Imported here: the profile module locates its default file through this one.
+        from axqua.core import profile as _profile
+
+        active = _profile.load_active()
+        script = active.script(key) if active is not None else None
+        if script is not None:
+            return Resolved(Path(script), str(active.path))
 
     machine = settings_path()
     if machine.is_file():

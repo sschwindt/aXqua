@@ -2174,8 +2174,12 @@ def load_config(path: str | os.PathLike) -> Config:
 
     # Post-processing: absent block -> defaults, and nothing consults them
     ppdict = dict(raw.get("postproc") or {})
-    if ppdict.get("visit") is not None:
-        ppdict["visit"] = _resolve(cfg_dir, ppdict["visit"])
+    # The VisIt launcher is resolved like a solver's setup script: it is a path on
+    # this computer, so the profile is where it belongs and the case value is the
+    # fallback. Nothing found leaves it unset, and the bare command `visit` is tried.
+    _visit = _machine.resolve("visit", configured=ppdict.get("visit"), case_dir=cfg_dir)
+    if _visit:
+        ppdict["visit"] = _visit.path
     ppdict["environment"] = _load_environment(ppdict.get("environment"), cfg_dir)
     postproc = PostProcessing(**_only_known(PostProcessing, ppdict))
 
@@ -2249,8 +2253,16 @@ def _dump_value(value: Any, base: Path) -> Any:
     return value
 
 
-def config_to_dict(cfg: "Config", *, base: Path | None = None) -> dict[str, Any]:
-    """The config as plain data, shaped the way ``load_config`` reads it back."""
+def config_to_dict(cfg: "Config", *, base: Path | None = None,
+                   portable: bool = False) -> dict[str, Any]:
+    """The config as plain data, shaped the way ``load_config`` reads it back.
+
+    *portable* leaves out the settings that describe the computer
+    (:data:`axqua.core.schema.MACHINE_FIELDS`), which is the form a case file is
+    shared in. The default keeps them, because the other caller is a job record: a
+    job has to be reproducible from its own folder, including the installation it ran
+    with.
+    """
     base = Path(base) if base else Path(cfg.config_dir)
     out: dict[str, Any] = {"project": {
         "name": cfg.name,
@@ -2278,11 +2290,13 @@ def config_to_dict(cfg: "Config", *, base: Path | None = None) -> dict[str, Any]
                if hasattr(cfg, k) and getattr(cfg, k) != v}
     if outputs:
         out["outputs"] = outputs
+    if portable:
+        schema.strip_machine_fields(out)
     return out
 
 
 def dump_config(cfg: "Config", path: str | os.PathLike | None = None, *,
-                base: Path | None = None) -> str:
+                base: Path | None = None, portable: bool = False) -> str:
     """Write *cfg* back out as YAML; returns the text, and writes it if given a path.
 
     The counterpart to :func:`load_config`, and the reason it exists is that anything
@@ -2295,8 +2309,8 @@ def dump_config(cfg: "Config", path: str | os.PathLike | None = None, *,
     longer describes is worse than no comment, and the template configs in
     ``cases/case-template/`` are where the explanations are meant to live.
     """
-    text = yaml.safe_dump(config_to_dict(cfg, base=base), sort_keys=False,
-                          default_flow_style=False, allow_unicode=True)
+    text = yaml.safe_dump(config_to_dict(cfg, base=base, portable=portable),
+                          sort_keys=False, default_flow_style=False, allow_unicode=True)
     if path is not None:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)

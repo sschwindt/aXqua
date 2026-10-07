@@ -1,7 +1,7 @@
 """Preprocessing + case build (TEMPLATE, workflow step 1).
 
 Assembles a complete, ready-to-run TELEMAC-2D case at the steady discharge set in
-``case-config.yml`` (``boundaries.prescribed_flowrate``): clips the DEM(s), builds
+the case file (``boundaries.prescribed_flowrate``): clips the DEM(s), builds
 the mesh (anisotropic + roughness), classifies the liquid boundaries and writes the
 case into ``axqua-case/simulation/`` -- the final mesh ``geometry.slf``, the
 boundary-conditions ``boundaries.cli``, the friction ``friction.tbl`` and the steering
@@ -26,8 +26,9 @@ from pathlib import Path
 
 from axqua import pipeline, prepare_steady_inputs, setup_logging
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = find_case_file(Path(__file__).resolve().parent)
 cfg = load_config(CONFIG)
 
 
@@ -48,7 +49,8 @@ def main() -> None:
         art = pipeline.run(cfg, validate_env=False, dry_run=False)
     except Exception as exc:  # noqa: BLE001 - report what is still missing
         print(f"build not ready: {type(exc).__name__}: {exc}")
-        print("complete the inputs and telemac.pysource in case-config.yml, then re-run.")
+        print("complete the inputs in the case file and the TELEMAC binding in the profile "
+              "of this computer (axqua profile), then re-run.")
         return
 
     # keep a copy of the rating curve next to the case for traceability

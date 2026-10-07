@@ -9,8 +9,10 @@ import pytest
 
 from axqua.core import errors, schema
 
-CASES = sorted((Path(__file__).resolve().parent.parent / "cases").glob(
-    "*/case-config*.yml"))
+_CASE_ROOT = Path(__file__).resolve().parent.parent / "cases"
+# Both spellings: the case file type, and the name it had before the type existed
+# (still used by the cases that have not been converted).
+CASES = sorted([*_CASE_ROOT.glob("*/*.axq-case"), *_CASE_ROOT.glob("*/case-config*.yml")])
 
 
 # --------------------------------------------------------------------------- #

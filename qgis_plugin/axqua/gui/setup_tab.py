@@ -200,7 +200,9 @@ class SetupTab(QWidget):
 
     def add_case(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Add a case configuration", "", "aXqua case (*.yml *.yaml)")
+            # The case file type first; the YAML names are what a case file was
+            # called before the type existed, and such cases keep working.
+            self, "Add a case", "", "aXqua case (*.axq-case *.yml *.yaml)")
         if path:
             self.ctx.add_case(Path(path))
 
@@ -267,7 +269,7 @@ class SetupTab(QWidget):
             # real and fixable state - and used to produce an empty panel with no
             # explanation anywhere.
             lines.append("This case enables no solver. Add a <tt>telemac:</tt> or "
-                         "<tt>openfoam:</tt> block to its case-config.yml.")
+                         "<tt>openfoam:</tt> block to its case file.")
         self.capability_label.setText("<br>".join(lines))
 
 

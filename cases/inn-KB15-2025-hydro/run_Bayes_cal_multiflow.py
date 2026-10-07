@@ -11,7 +11,7 @@ into one Bayesian inference by the additive ``bal_telemac_multiflow.py`` +
 ``user-sources/geodata/roughness-table.csv`` (``zone_id, ks_min, ks_max,
 calibration``): every zone flagged ``calibration=True`` becomes a ``zone<N>``
 parameter over its own bounds. As of the August-2026 restart that is zones 1, 3, 4
-and 5, plus VELOCITY DIFFUSIVITY from ``case-config.yml`` - 5 parameters. Zone 2
+and 5, plus VELOCITY DIFFUSIVITY from ``inn-KB15-2025-hydro.axq-case`` - 5 parameters. Zone 2
 (floodplain, 3% wet) and zone 6 (84% dry, flow shallower than its own roughness
 height) are pinned. Add or retire a zone by editing the CSV, nothing else.
 
@@ -47,7 +47,7 @@ from axqua import FlowSpec, run_multiflow_calibration
 from axqua.config import DEFAULT_SIM_DIR, LEGACY_SIM_DIR, load_config
 
 HERE = Path(__file__).resolve().parent
-CONFIG = HERE / "case-config.yml"
+CONFIG = HERE / "inn-KB15-2025-hydro.axq-case"
 GT = HERE / "user-sources/ground-truth/hydraulics"
 GEO = HERE / "user-sources/geodata"
 

@@ -50,8 +50,7 @@ TEMPLATE: dict = {
                 "model_dir": "axqua-case/simulation",
                 "postprocessing_dir": "axqua-case/postprocessing",
                 "calibration_dir": "axqua-case/calibration-validation"},
-    "telemac": {"pysource": "/path/to/telemac/configs/pysource.sh",
-                "solver": "telemac2d", "n_processors": 4},
+    "telemac": {"solver": "telemac2d", "n_processors": 4},
     "geodata": {"dem_initial": "path/to/dem.tif", "boundary": "path/to/roi.gpkg"},
     "boundaries": {"liquid_boundaries": "path/to/liquid-boundaries.gpkg",
                    "outflow_condition": "elevation", "prescribed_flowrate": 47.2,
@@ -92,6 +91,10 @@ def _opt_float(label, value, *, fmt="%.4f", help=None):
 def build_yaml(cfg: dict) -> str:
     """Serialise the working config to YAML, dropping empty / inapplicable fields."""
     out = copy.deepcopy(cfg)
+    # Where TELEMAC is installed belongs to the profile of the computer; an empty
+    # field must not be written as a path that does not exist.
+    if not (out.get("telemac") or {}).get("pysource"):
+        (out.get("telemac") or {}).pop("pysource", None)
     out["geodata"] = {k: v for k, v in out.get("geodata", {}).items()
                       if v not in (None, "", "path/to/")}
     # boundaries: drop blank optional knobs; the rating only matters for
@@ -317,7 +320,8 @@ with tabs[0]:
 with tabs[1]:
     t = cfg.setdefault("telemac", {})
     t["pysource"] = st.text_input(
-        "pysource.*.sh (TELEMAC environment script) - sourced, not imported",
+        "pysource.*.sh (TELEMAC environment script). Leave empty: it is set once per "
+        "computer in its profile ('axqua profile init')",
         _get(cfg, "telemac", "pysource", default=""))
     c1, c2 = st.columns(2)
     sol = _get(cfg, "telemac", "solver", default="telemac2d")
@@ -879,11 +883,11 @@ with left:
     yaml_text = build_yaml(cfg)
     st.code(yaml_text, language="yaml")
     st.download_button("Download YAML", yaml_text,
-                       file_name=f"{_get(cfg, 'project', 'name', default='case')}.yml")
+                       file_name=f"{_get(cfg, 'project', 'name', default='case')}.axq-case")
 
 with right:
     st.subheader("Save & run")
-    save_path = st.text_input("Save to path", value="cases/my-case/case-config-edited.yml")
+    save_path = st.text_input("Save to path", value="cases/my-case/my-case.axq-case")
     if st.button("💾 Save YAML"):
         path = Path(save_path)
         path.parent.mkdir(parents=True, exist_ok=True)

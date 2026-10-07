@@ -10,50 +10,108 @@ The plugin setup contains everything that describes the **computer** and not the
 Plugin profile
 --------------
 
+All settings of a computer are stored in one file, the **profile**. Its name ends with ``.axq-profile``. The default profile is the file ``default.axq-profile`` in the aXqua configuration folder of the user (``~/.config/axqua/`` on Linux).
+
+To create the profile, let aXqua detect what is installed on the computer:
+
+.. code-block:: text
+
+   axqua profile init
+
+The command searches for Python, TELEMAC, OpenFOAM, ParaView and VisIt, writes what it finds into the default profile and prints the location of the file. It never overwrites an existing profile. Afterwards, verify the profile:
+
+.. code-block:: text
+
+   axqua profile check
+
+The check reports everything that is missing or wrong, each item with the entry of the profile that it concerns. It also enters the environment of TELEMAC and of OpenFOAM, to verify that the codes can actually be started, which takes a few seconds. ``axqua profile show`` prints the profile in use.
+
+The profile is a text file in YAML format and can be completed with a text editor:
+
+.. code-block:: yaml
+
+   schema_version: 1
+   name: workstation
+   python:
+     executable: /home/user/miniforge3/envs/axqua-env/bin/python
+     axqua: /home/user/miniforge3/envs/axqua-env/bin/axqua
+   solvers:
+     telemac:
+       setup_script: /home/user/opt/telemac-mascaret/configs/pysource.debian12.sh
+       mpi_processes: 12
+     openfoam:
+       setup_script: /usr/lib/openfoam/openfoam2406/etc/bashrc
+       mpi_processes: 16
+   postprocessors:
+     paraview: /usr/bin/paraview
+     visit: /home/user/opt/visit/bin/visit
+   jobs:
+     root: /scratch/axqua-jobs
+   display:
+     min_depth: 0.01
+     velocity_cap: 5.0
+
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
+
+   * - Block
+     - Content
+   * - ``python``
+     - The Python interpreter in which aXqua is installed, and the ``axqua`` program that the plugin calls.
+   * - ``solvers``
+     - One binding per simulation code (:ref:`solver-bindings`).
+   * - ``postprocessors``
+     - The programs for three-dimensional figures (:doc:`postprocessors`).
+   * - ``jobs``
+     - Where and how simulations are run (:ref:`plugin-job-execution`).
+   * - ``display``
+     - Two values for maps in QGIS. ``min_depth`` is the minimum water depth in meters. Shallower water is drawn transparent, because a water film of a few millimeters stands between the roughness elements of the bed and does not flow. ``velocity_cap`` is the upper limit of the velocity color scale in m/s. Higher depth-averaged velocities typically occur in almost dry cells at the edge of the water and would otherwise flatten the color scale of the entire map.
+
+To use another profile than the default one, for example on a computing cluster, set the environment variable ``AXQUA_PROFILE`` to its path, or pass ``--profile <file>`` when a job is submitted.
+
 .. note::
 
-   A single profile file (``.axq-profile``) that holds all computer-specific settings is not yet available in this version. Until then, the settings are made in the three places described on this page.
-
-The plugin itself stores three values, which are set in *aXqua > Settings*:
-
-* the path of the ``axqua`` program (:doc:`qgis-plugin`);
-* the **minimum water depth** for maps (default 0.01 m). Shallower water is drawn transparent, because a water film of a few millimeters stands between the roughness elements of the bed and does not flow;
-* the **upper limit of the velocity color scale** (default 5 m/s). Higher depth-averaged velocities typically occur in almost dry cells at the edge of the water and would otherwise flatten the color scale of the entire map.
+   Editing the profile in a window of the plugin is not yet available in this version. Until then, the plugin stores the path of the ``axqua`` program and the two display values in *aXqua > Settings*.
 
 .. _solver-bindings:
 
 Define solver bindings
 ----------------------
 
-A solver binding tells aXqua which environment script belongs to which code. The bindings are stored in the file ``solvers.yml`` in the aXqua configuration folder of the user (``~/.config/axqua/`` on Linux):
+A solver binding tells aXqua how to reach one simulation code. Its central entry is ``setup_script``, the environment script of the installation (:doc:`simulation-software`):
 
-.. code-block:: yaml
+.. list-table::
+   :header-rows: 1
+   :widths: 24 76
 
-   telemac: /home/user/opt/telemac-mascaret/configs/pysource.debian12.sh
-   openfoam: /usr/lib/openfoam/openfoam2406/etc/bashrc
+   * - Entry
+     - Meaning
+   * - ``setup_script``
+     - The environment script of the code: ``pysource.<system>.sh`` for TELEMAC and ``etc/bashrc`` for OpenFOAM.
+   * - ``mpi_processes``
+     - Number of processor cores that a simulation uses on this computer. Without this entry, the number in the case file applies. Use the number of physical cores, not of logical cores.
+   * - ``environment``
+     - ``posix`` (Linux and macOS, the default there), ``windows`` (an installation directly on Windows) or ``wsl`` (an installation in the Windows Subsystem for Linux).
+   * - ``distro``
+     - Name of the Linux distribution, for ``environment: wsl`` only. The ``setup_script`` is then a path inside that distribution.
+   * - ``mpi_launcher``
+     - The program that starts parallel runs, if it is not ``mpirun`` (``mpiexec`` on Windows).
 
-aXqua looks for the environment script of a code in the following order and uses the first one that it finds:
+A code without a binding cannot be used on the computer. This is no error: a computer on which only TELEMAC is installed simply has no ``openfoam`` entry.
 
-#. the environment variable ``AXQUA_TELEMAC_PYSOURCE`` or ``AXQUA_OPENFOAM_BASHRC``;
-#. a file ``solvers.local.yml`` next to the case file, for a case that requires a different installation than the rest of the computer;
-#. the file ``solvers.yml`` described above;
-#. the entry ``telemac.pysource`` or ``openfoam.bashrc`` in the case file;
-#. the usual installation folders ``/opt`` and ``/usr/local``.
+A profile takes precedence over machine settings that a case file may still contain. Three sources take precedence over the profile, for special situations: the environment variables ``AXQUA_TELEMAC_PYSOURCE`` and ``AXQUA_OPENFOAM_BASHRC``, and a file ``solvers.local.yml`` next to a case file, which binds another installation for this one case.
 
-To verify the bindings, run the following command for any case. It enters the environment of each code and reports whether the code can be reached:
+Installations that were set up with an earlier version of aXqua keep working without a profile. Their settings in the files ``solvers.yml`` and ``profiles.yml`` of the configuration folder are still read. ``axqua profile init`` takes over the bindings of ``solvers.yml``.
 
-.. code-block:: text
-
-   axqua status <case-file> --check-env
+.. _plugin-job-execution:
 
 Job execution
 -------------
 
-Every simulation runs as a **job**: an independent process with its own folder, which continues when QGIS is closed. Two settings on the *Setup* tab control how jobs are run:
+Every simulation runs as a **job**: an independent process with its own folder, which continues when QGIS is closed. Two entries of the ``jobs`` block control how jobs are run:
 
-* **Job root** is the folder in which the job folders are created. Select a drive with sufficient free space, because the results of a single simulation can reach tens of gigabytes.
-* **Launcher** is the method that detaches a job from QGIS. The default ``auto`` selects a suitable method for the operating system and rarely needs to be changed.
+* ``root`` is the folder in which the job folders are created. Select a drive with sufficient free space, because the results of a single simulation can reach tens of gigabytes. Without this entry, jobs are written to the aXqua data folder of the user.
+* ``launcher`` is the method that detaches a job from QGIS. The default ``auto`` selects a suitable method for the operating system and rarely needs to be changed.
 
-The number of processor cores is taken from the case file (``telemac.n_processors`` and ``openfoam.n_processors``) and can be changed for a single run in the tab from which the run is started.
-
-A computer with several installations of a code can describe each of them as a **solver profile** in the file ``profiles.yml`` of the aXqua configuration folder. A profile names the environment script, the number of processor cores and the job root. It is selected on the *Setup* tab. ``axqua profiles validate`` verifies all profiles. :doc:`../automation/batch-headless` describes jobs in detail.
+:doc:`../automation/batch-headless` describes jobs in detail.

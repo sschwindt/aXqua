@@ -1,6 +1,6 @@
 """Plugin settings: where axqua is, and the two styling defaults.
 
-Deliberately small. Everything about the *model* belongs in ``case-config.yml`` and
+Deliberately small. Everything about the *model* belongs in the case file and
 everything about the *machine* belongs in axqua's own ``profiles.yml``; duplicating
 either here would create a second place to look when something disagrees.
 

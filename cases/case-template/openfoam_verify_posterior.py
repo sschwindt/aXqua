@@ -31,12 +31,13 @@ from pathlib import Path
 
 from axqua import setup_logging
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 from axqua.prerun import ensure_seed
 from axqua.solvers.openfoam import build_case, estimate_cells, load_hotstart, summarise
 from axqua.solvers.openfoam.calibration import (CAMPAIGN_SUBDIR, apply_posterior,
                                                 read_posterior)
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = find_case_file(Path(__file__).resolve().parent)
 
 # "map" = the posterior's highest-density point (default; a roughness posterior is
 # often skewed, and its mean can sit where the sample has little mass), or "mean".

@@ -34,7 +34,7 @@ from axqua import FlowSpec, run_multiflow_calibration
 from axqua.config import load_config
 
 HERE = Path(__file__).resolve().parent
-CONFIG = HERE / "case-config.yml"
+CONFIG = HERE / "isar-2025.axq-case"
 GT = HERE / "user-sources/ground-truth/hydraulics"
 GEO = HERE / "user-sources/geodata"
 

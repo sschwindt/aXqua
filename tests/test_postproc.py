@@ -311,7 +311,7 @@ def test_postproc_survives_a_config_round_trip(tmp_path):
 
     from axqua.config import dump_config, load_config
 
-    source = Path("cases/inn-KB15-2025-hydro/case-config.yml")
+    source = Path("cases/inn-KB15-2025-hydro/inn-KB15-2025-hydro.axq-case")
     if not source.exists():                      # pragma: no cover - case-dependent
         pytest.skip("KB15 case not present")
     cfg = load_config(source)

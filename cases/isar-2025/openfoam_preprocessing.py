@@ -30,8 +30,8 @@ approximated by snappyHexMesh's castellate-and-snap. See
 ``axqua.solvers.openfoam.polymesh`` for the reasoning.
 
 Prerequisites: ``preprocessing.py`` and ``initial_run.py`` have run, so the case has
-a converged ``r2d.slf``; and ``openfoam.bashrc`` in case-config.yml points at your
-OpenFOAM ``etc/bashrc``. Ideally ``mesh_convergence_study.py`` has run too - this
+a converged ``r2d.slf``; and the profile of this computer (``axqua profile``) binds
+OpenFOAM v2406. Ideally ``mesh_convergence_study.py`` has run too - this
 case reuses the horizontal resolution decision implicitly through ``cell_size``.
 
 Run: mamba run -n axqua-env python cases/<your-case>/openfoam_preprocessing.py
@@ -48,9 +48,9 @@ from axqua.prerun import ensure_seed
 from axqua.solvers.openfoam import build_case, estimate_cells, load_hotstart, summarise
 
 # optional CLI arg selects the scenario config, e.g.
-#   python openfoam_preprocessing.py case-config-greenampt.yml
+#   python openfoam_preprocessing.py isar-2025-greenampt.axq-case
 CONFIG = Path(__file__).resolve().parent / (
-    sys.argv[1] if len(sys.argv) > 1 else "case-config.yml")
+    sys.argv[1] if len(sys.argv) > 1 else "isar-2025.axq-case")
 cfg = load_config(CONFIG)
 
 # Refuse to build past this many cells without being asked again. A terrain-following
@@ -59,7 +59,7 @@ cfg = load_config(CONFIG)
 CELL_BUDGET = 4_000_000
 
 # Uncheck the TELEMAC pre-run for this run only, without editing the config.
-#   None  - follow openfoam.pre_run.enabled in case-config.yml (normally True)
+#   None  - follow openfoam.pre_run.enabled in isar-2025.axq-case (normally True)
 #   False - never start TELEMAC: seed from an existing r2d.slf if there is one,
 #           otherwise build COLD under a flat lid (many times more air cells, plus
 #           the whole filling transient to pay for in the slowest solver you have)

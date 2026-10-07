@@ -33,11 +33,12 @@ from pathlib import Path
 
 from axqua import setup_logging
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 from axqua.postproc import render as render_mod
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = find_case_file(Path(__file__).resolve().parent)
 
-# None -> postproc.scenes from case-config.yml
+# None -> postproc.scenes from the case file
 SCENES: list[str] | None = None
 SOLVER: str | None = None       # "openfoam" | "telemac" | None for both
 

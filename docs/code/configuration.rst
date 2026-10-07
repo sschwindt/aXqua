@@ -1,7 +1,7 @@
 Configuration
 =============
 
-The case description and everything that locates the simulation software on a computer. ``axqua.config`` holds one data class per block of the case file. ``axqua.core.schema`` states which settings describe the river reach and which belong to one simulation code.
+The case description and everything that locates the simulation software on a computer. ``axqua.config`` holds one data class per block of the case file. ``axqua.core.schema`` states which settings describe the river reach, which belong to one simulation code, and which describe the computer. The settings of the computer are stored in the profile (``axqua.core.profile``).
 
 Case description
 ----------------
@@ -9,10 +9,28 @@ Case description
 .. automodule:: axqua.config
    :members:
 
+Case file type
+--------------
+
+.. automodule:: axqua.core.casefile
+   :members:
+
 Classification of settings
 --------------------------
 
 .. automodule:: axqua.core.schema
+   :members:
+
+Profile of the computer
+-----------------------
+
+.. automodule:: axqua.core.profile
+   :members:
+
+Findings of checks
+------------------
+
+.. automodule:: axqua.core.diagnostics
    :members:
 
 Error types

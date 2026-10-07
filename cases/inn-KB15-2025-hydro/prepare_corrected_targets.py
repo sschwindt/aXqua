@@ -52,7 +52,7 @@ GT = HERE / "user-sources/ground-truth/hydraulics"
 # not break the script again.
 from axqua.config import load_config                     # noqa: E402
 
-_CFG = load_config(HERE / "case-config.yml")
+_CFG = load_config(HERE / "inn-KB15-2025-hydro.axq-case")
 OUT = Path(_CFG.preprocessing_dir)
 
 DGPS_CORRECTED = GEO / "flowtracker2/dgps-flowtracker-kb15-sept25-zcorrected.gpkg"

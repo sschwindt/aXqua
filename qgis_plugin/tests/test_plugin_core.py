@@ -446,7 +446,7 @@ def test_a_capability_the_case_does_not_ask_for_says_so():
     view = CaseView.from_payload(MATRIX)
     capability = view.solver("telemac").capability("unsteady2d")
     assert capability.enabled is True and capability.can_submit is False
-    assert "case-config.yml" in capability.reason
+    assert "the case file" in capability.reason
 
 
 def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():

@@ -3,14 +3,14 @@
 ==============================================================================
 This folder is a ready-to-copy scaffold for one TELEMAC-2D (+ optional GAIA)
 simulation case driven by the `axqua` package. Copy the whole folder to
-cases/<your-case>/, drop your data into user-sources/, edit case-config.yml,
+cases/<your-case>/, drop your data into user-sources/, edit isar-2025.axq-case,
 then run the three workflow scripts. A worked example is in cases/example-Inn/.
 
 ------------------------------------------------------------------------------
  FOLDER STRUCTURE
 ------------------------------------------------------------------------------
 cases/<your-case>/
-  case-config.yml      the case configuration (paths, mesh, friction,
+  isar-2025.axq-case      the case configuration (paths, mesh, friction,
                        hydrodynamics, calibration). All paths resolve relative
                        to this file. [edit this]
   preprocessing.py            step 1: build the full TELEMAC case into simulation/
@@ -56,8 +56,8 @@ cases/<your-case>/
 1. Put your data in user-sources/ (EPSG:25832 / a metric CRS; see
    user-sources/README.md and the "Coordinate system" note in CLAUDE.md).
 
-2. Edit case-config.yml:
-     - telemac.pysource  -> your TELEMAC pysource.*.sh
+2. Edit isar-2025.axq-case:
+     - (the TELEMAC installation is set once per computer: axqua profile init)
      - inputs.*          -> your files under user-sources/
      - mesh / friction / hydrodynamics / calibration -> your values
    No measured outlet rating curve? Synthesise one from normal-flow hydraulics:
@@ -65,7 +65,7 @@ cases/<your-case>/
        --manning 0.035 --slope <S0> --width <b> --bed-elevation <z> --q <Q>
 
 3. Validate the configuration:
-     axqua cases/<your-case>/case-config.yml --check
+     axqua cases/<your-case>/isar-2025.axq-case --check
 
 4. Step 1 - build the complete TELEMAC case into tm-simulation/simulation/
    (final mesh, .cli, .tbl, .cas; the inflow + outflow rating are synthesised
@@ -77,7 +77,7 @@ cases/<your-case>/
    and - once the fluxes stay balanced (<1e-3 m3/s over 10 printouts, or in the
    10-printout mean) - generate hotstart2d.cas (a continuation of r2d.slf capped
    at that steady time, Q/H prescriptions kept). This ends the preprocessing
-   step; needs telemac.pysource set:
+   step; needs TELEMAC bound in the profile (axqua profile check):
      python cases/<your-case>/initial_run.py
 
 6. Step 2 - mesh-convergence (grid-independence) study: runs five meshes
@@ -119,7 +119,7 @@ tm-simulation/postprocessing/vertical-convergence/). Runs telemac3d once per cou
 and is slow:
      python cases/<your-case>/vertical_convergence_3d.py
 
-   (A one-shot build without the scripts: axqua cases/<your-case>/case-config.yml)
+   (A one-shot build without the scripts: axqua cases/<your-case>/isar-2025.axq-case)
 
 Logging: every script writes a compound, timestamped axqua.log into the
 folder it outputs to, with the elapsed time of each calculation step plus all

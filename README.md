@@ -66,6 +66,18 @@ tested rather than assumed.
 Jobs submitted before the rename keep running - they are ordinary system processes and
 know nothing about the package name.
 
+## One file for the reach, one for the computer
+
+A case is described by a **case file** (`*.axq-case`): terrain, boundaries, roughness, simulation settings and measurements. It names nothing that belongs to one computer, so a case folder can be copied or published as it is. Where Python, TELEMAC, OpenFOAM, ParaView and VisIt are installed is the **profile** of the computer (`*.axq-profile`):
+
+```bash
+axqua profile init     # detect what is installed and write the profile
+axqua profile check    # verify it, including whether the simulation software starts
+axqua migrate case-config.yml --to-case   # convert a case file of an earlier version
+```
+
+Case files named `case-config.yml` and the settings files of earlier versions keep working.
+
 ## Documentation
 
 Full docs (Sphinx) live in `docs/`, in the order you need them:

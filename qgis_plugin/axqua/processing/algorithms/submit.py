@@ -85,9 +85,11 @@ class SubmitJobAlgorithm(QgsProcessingAlgorithm):
         # Frozen here so the index the user picks means the same thing when the
         # algorithm runs, even if axqua is asked again in between.
         self._kinds = available_kinds()
+        # A filter rather than one extension: the case file type, plus the YAML names a
+        # case file had before the type existed.
         self.addParameter(QgsProcessingParameterFile(
-            self.CONFIG, "Case configuration (case-config.yml)",
-            extension="yml"))
+            self.CONFIG, "Case file",
+            fileFilter="aXqua case (*.axq-case *.yml *.yaml)"))
         self.addParameter(QgsProcessingParameterEnum(
             self.KIND, "What to run", options=self._kinds, defaultValue=1))
         self.addParameter(QgsProcessingParameterString(

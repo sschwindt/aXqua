@@ -1,19 +1,19 @@
 # =============================================================================
-# axqua case configuration - Inn river (Bavaria), 2020 baseline
+# axqua case configuration - Ering reach (Inn river)
 # =============================================================================
 # All relative paths resolve against THIS file's directory. The co-development
 # dataset lives under user-sources/ (kept out of version control).
 # Build with:
-#   axqua cases/inn-2020-25/case-config.yml --check    # validate first
-#   axqua cases/inn-2020-25/case-config.yml            # build the case
+#   axqua cases/ering-revised/ering-revised.axq-case --check    # validate first
+#   axqua cases/ering-revised/ering-revised.axq-case            # build the case
 #
 # Sections: project / telemac / geodata / boundaries / initialization / mesh /
 #           friction / hydrodynamics / morphodynamics / ground_truth / calibration
 # -----------------------------------------------------------------------------
 
 project:
-  name: inn                    # case name; used in titles and file headers
-  crs_epsg: 25832              # [REQUIRED] project CRS, metric. 25832 = ETRS89/UTM32N
+  name: ering                  # case name; used in titles and file headers
+  crs_epsg: 25833              # [REQUIRED] project CRS, metric. 25833 = ETRS89/UTM33N
   sim_dir: axqua-case
   preprocessing_dir: axqua-case/preprocessing
   model_dir: axqua-case/simulation
@@ -21,8 +21,8 @@ project:
   calibration_dir: axqua-case/calibration-validation
 
 telemac:
-  # [REQUIRED] the pysource.*.sh of YOUR TELEMAC install; sourced (not imported).
-  pysource: /home/schwindt/opt/telemac-v911/telemac-mascaret/configs/pysource.mint22.sh
+  # Where TELEMAC is installed is a setting of the computer, not of the case:
+  # see `axqua profile` (the Configuration tab of the QGIS plugin).
   solver: telemac2d            # telemac2d | telemac3d
   n_processors: 8
 
@@ -30,10 +30,10 @@ geodata:
   # Pure geodata files (boundary CONDITIONS are in `boundaries`, ground truth in
   # `ground_truth`). Paths resolve relative to THIS file; data under user-sources/.
   # ---- required -----------------------------------------------------------
-  dem_initial: user-sources/geodata/dem-2020.tif       # [REQUIRED] baseline terrain (GeoTIFF)
-  boundary: user-sources/geodata/roi-kb15.gpkg         # [REQUIRED] ROI / max wetted extent polygon
+  dem_initial: user-sources/geodata/dem-afterflush-Ering.tif  # [REQUIRED] baseline terrain (GeoTIFF)
+  boundary: user-sources/geodata/roi-ering.gpkg               # [REQUIRED] ROI / max wetted extent polygon
   # ---- optional -----------------------------------------------------------
-  dem_target: user-sources/geodata/DEM-2025-20cm.tif   # 2nd DEM, enables morphodynamic target
+  # dem_target: user-sources/geodata/DEM-2025-20cm.tif   # 2nd DEM, enables morphodynamic target
   # mesh zones + channel centerline drive the anisotropic, flow-aligned meshing.
   mesh_zones: user-sources/geodata/mesh-zones.gpkg
   channel_centerline: user-sources/geodata/channel-centerline.gpkg
@@ -41,7 +41,6 @@ geodata:
   # zonation (zone 1 = channel ks ~0.2 m, zone 2 = floodplain ks ~0.5 m).
   roughness_zones: user-sources/geodata/roughness-zones.gpkg
   roughness_table: user-sources/geodata/roughness-table.csv
-  # dem_of_difference: path/to/dod.tif         # precomputed bed-change raster (else from DEMs)
 
 boundaries:
   # liquid boundaries: a LINE layer whose 'Type (inflow/outflow)' field tags each
@@ -49,15 +48,15 @@ boundaries:
   # nodes get 4 5 5, outflow nodes 5 4 4 (prescribed elevation) or 4 4 4 (free),
   # every other outer node a solid wall 2 2 2.
   liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg  # [REQUIRED for a build]
-  # inflow: user-sources/hydraulics/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
+  inflow: user-sources/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
   # THIS case's steady boundary conditions, read straight from here for steady2d.cas:
-  prescribed_flowrate: 47.2    # inflow Q [m3/s] for steady2d.cas
+  prescribed_flowrate: 2.0     # inflow Q [m3/s] for steady2d.cas
   # outflow (downstream) boundary type: stage_discharge (WSE from the rating curve
   # at the simulated Q) | elevation (fixed prescribed_elevation) | free (Neumann).
   outflow_condition: stage_discharge
-  # prescribed_elevation: 0.0  # m a.s.l.; only for outflow_condition: elevation
+  prescribed_elevation: 329.24  # m a.s.l.; only for outflow_condition: elevation
   # outlet rating curve (Q,WSE): one Q-h pair at the steady discharge suffices.
-  stage_discharge: user-sources/geodata/rating-curve.csv
+  stage_discharge: user-sources/rating-curve.csv
 
 initialization:
   # dry start (default): the domain starts dry except a thin plug at the inflow line
@@ -70,10 +69,10 @@ mesh:
   # Anisotropic, flow-aligned strategy (used when geodata.mesh_zones +
   # geodata.channel_centerline are set). Each mesh-zone polygon is sized by its own
   # 'Max Edge Length (m)' field; the *_size values below are FALLBACKS.
-  channel_size: 0.5            # fallback channel edge length (m)
-  floodplain_size: 1.5         # fallback floodplain edge length (m); default outside all zones
-  refinement_size: 0.5         # fallback 'refinement' zone edge length (m)
-  # zone_size_field: "Max Edge Length (m)"  # per-polygon edge length field (default shown)
+  channel_size: 0.25           # fallback channel edge length (m)
+  floodplain_size: 1.3         # fallback floodplain edge length (m); default outside all zones
+  refinement_size: 0.15        # fallback 'refinement' zone edge length (m)
+  zone_size_field: "Max Edge Length (m)"  # per-polygon edge length field (default shown)
   growth_ratio: 1.2            # max edge-size growth per element (channel -> floodplain)
   channel_anisotropy: 4.0      # along-flow / cross-flow edge ratio in the channel
   max_aspect_ratio: 4.0        # hard cap on cell aspect ratio (AnisoMax + post-mesh edge flips)
@@ -112,15 +111,15 @@ hydrodynamics:
 #     - { diameter: 0.0008, density: 2650, shields: 0.047 }
 
 dem_of_difference:
-  # 2020 baseline (dem_initial) -> 2025 survey (dem_target) bed change, computed in
-  # pre-processing on the ROI-clipped grid and thresholded by the propagated minimum
-  # level of detection LoD = t*sqrt(u_2020^2 + u_2025^2). The 0.5 m 2020 DEM and the
-  # 0.20 m 2025 survey carry ~0.10 / ~0.05 m vertical error -> minLoD ~0.22 m at 95%.
-  enabled: true
-  uncertainty_initial: 0.10    # vertical 1-sigma error of dem-2020 [m]
-  uncertainty_target: 0.05     # vertical 1-sigma error of DEM-2025-20cm [m]
-  confidence_level: 0.95       # two-tailed confidence for the propagated LoD
-  mask_below_lod: true         # |dz| < LoD -> nodata (below-detection change = no data)
+  # Optional DoD (geodata.dem_target - geodata.dem_initial) with a minimum level of
+  # detection; off here (no dem_target set). See cases/case-template for the full
+  # options (propagated survey uncertainty or an explicit min_lod).
+  enabled: false
+  # uncertainty_initial: 0.05
+  # uncertainty_target: 0.03
+  # confidence_level: 0.95
+  # min_lod: 0.10
+  mask_below_lod: true
 
 ground_truth:
   # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
@@ -129,13 +128,13 @@ ground_truth:
   # measurements: path/to/ground-truth.xlsx    # (a) user-authored tidy table
   sources:                                      # (b) raw sources -> compiled tidy table
     # FlowTracker velocities (values) joined by ID to the DGPS survey points
-    # (positions, reprojected to the project CRS); two survey days -> one tab.
+    # (positions, reprojected to the project CRS); two survey reaches -> one tab.
     - { category: hydraulics, kind: flowtracker, join_key: ID,
-        values: user-sources/ground-truth/hydraulics/FlowTracker2-KB15-day1.xlsx,
-        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-day1_utm33.shp }
+        values: user-sources/ground-truth/hydraulics/DOWNSTREAM_20220330-tke-stats-withXY.xlsx,
+        positions: user-sources/geodata/flowtracker2/FT-DOWNSTREAM_20220320-tke-stats-withXY.shp }
     - { category: hydraulics, kind: flowtracker, join_key: ID,
-        values: user-sources/ground-truth/hydraulics/FlowTracker2-KB15-day2.xlsx,
-        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-day2_utm33.shp }
+        values: user-sources/ground-truth/hydraulics/UPSTREAM_20220330-tke-stats-with-XY.xlsx,
+        positions: user-sources/geodata/flowtracker2/FT-UPSTREAM_20220320-tke-stats-withXY.shp }
 
 calibration:
   calibration_quantities: ["WATER DEPTH"]                    # measured columns used for calibration

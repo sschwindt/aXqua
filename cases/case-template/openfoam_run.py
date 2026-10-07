@@ -39,11 +39,12 @@ from pathlib import Path
 
 from axqua import setup_logging
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 from axqua.solvers.openfoam import OpenFoamRuntime, report
 
 # optional CLI arg selects the scenario config
-CONFIG = Path(__file__).resolve().parent / (
-    sys.argv[1] if len(sys.argv) > 1 else "case-config.yml")
+CONFIG = (Path(__file__).resolve().parent / sys.argv[1] if len(sys.argv) > 1
+          else find_case_file(Path(__file__).resolve().parent))
 cfg = load_config(CONFIG)
 
 # Number of MPI ranks for this run. None -> openfoam.n_processors from the config.

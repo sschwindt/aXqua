@@ -42,7 +42,8 @@ from axqua.core.environment import EnvStatus, SolverEnvironment
 from axqua.core.errors import ConfigError
 from axqua.jobs import paths as jobpaths
 
-__all__ = ["Profile", "load_profiles", "resolve", "save_profiles"]
+__all__ = ["Profile", "from_plugin_profile", "implicit", "load_profiles", "resolve",
+           "save_profiles"]
 
 #: TELEMAC's ``systel`` configuration name has no home in ``SolverEnvironment`` and does
 #: not deserve one - it is a TELEMAC concept, and widening a solver-neutral class for it
@@ -204,6 +205,17 @@ def resolve(name: str | None, *, solver: str | None = None, cfg: Any = None,
     ``openfoam.bashrc``), so a user who has never written a ``profiles.yml`` can still
     submit a job. The profile system is an addition, not a new prerequisite.
     """
+    if name and _is_profile_file(name):
+        # `--profile /path/to/office.axq-profile`: the computer's own profile file
+        # rather than a name out of profiles.yml. The solver comes from the job kind.
+        from axqua.core import profile as plugin_profile
+        found = from_plugin_profile(plugin_profile.load(name), solver or "telemac", cfg)
+        if found is None:
+            raise ConfigError(
+                f"{name} has no binding for {solver or 'telemac'}",
+                subject=f"solvers.{solver or 'telemac'}",
+                remedy="Add the environment script of that code to the profile.")
+        return found
     profiles = load_profiles(path)
     if name:
         if name not in profiles:
@@ -226,12 +238,58 @@ def resolve(name: str | None, *, solver: str | None = None, cfg: Any = None,
                        + ", ".join(sorted(p.name for p in matching)),
             )
     if cfg is not None:
-        return from_config(cfg, solver or "telemac")
+        return implicit(cfg, solver or "telemac")
     raise ConfigError(
         "no solver profile and no case configuration to derive one from",
         subject="profile",
         remedy=f"Create a profile in {jobpaths.profiles_path()} or pass a case config.",
     )
+
+
+def _is_profile_file(name: str) -> bool:
+    from axqua.core.profile import SUFFIX
+    return str(name).endswith(SUFFIX) or Path(str(name)).is_file()
+
+
+def from_plugin_profile(plugin: Any, solver: str = "telemac", cfg: Any = None
+                        ) -> Profile | None:
+    """The job-system view of one binding of an ``*.axq-profile``.
+
+    ``None`` when the profile does not bind *solver*, so the caller can fall back. The
+    case's own process count fills in where the binding names none: the profile says
+    what the computer has, and a binding without a number has no opinion.
+    """
+    binding = plugin.solvers.get(solver) if plugin is not None else None
+    if binding is None or binding.setup_script is None:
+        return None
+    configured = getattr(getattr(cfg, solver, None), "n_processors", None)
+    from axqua.core.environment import default_kind
+    return Profile(
+        name=f"{plugin.name or 'profile'}:{solver}",
+        solver=solver,
+        environment=str(binding.environment or default_kind()),
+        setup_script=Path(binding.setup_script),
+        shell=binding.shell,
+        distro=binding.distro,
+        config_name=binding.config_name,
+        mpi_launcher=binding.mpi_launcher,
+        mpi_processes=int(binding.mpi_processes or configured or 1),
+        working_root=Path(plugin.job_root) if plugin.job_root else None,
+        launcher=plugin.launcher or "auto",
+        overrides=dict(binding.overrides),
+    )
+
+
+def implicit(cfg: Any, solver: str = "telemac") -> Profile:
+    """The profile a job uses when none is named.
+
+    The active ``*.axq-profile`` where it binds *solver*, otherwise whatever the case
+    config resolved to (:func:`from_config`). The second half is what keeps a computer
+    without a profile working exactly as before.
+    """
+    from axqua.core import profile as plugin_profile
+    found = from_plugin_profile(plugin_profile.load_active(), solver, cfg)
+    return found if found is not None else from_config(cfg, solver)
 
 
 def from_config(cfg: Any, solver: str = "telemac") -> Profile:

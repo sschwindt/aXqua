@@ -15,7 +15,7 @@ from ..compat import PARTIALLY_CHECKED, UNCHECKED
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 
-#: Per-kind knobs worth exposing. Everything else stays in ``case-config.yml``, where it
+#: Per-kind knobs worth exposing. Everything else stays in the case file, where it
 #: is documented - a form that duplicated the whole config would be a second, undocumented
 #: copy of it.
 OPTION_FIELDS = {
@@ -117,14 +117,14 @@ class CapabilityTab(QWidget):
                 # touched sends nothing. A plain two-state box has no way to say "leave
                 # it to the case config": every submit would carry
                 # `--option reconstruct=true --option to_vtk=false` and silently
-                # override case-config.yml with the widget's defaults, which is the
+                # override the case file with the widget's defaults, which is the
                 # opposite of what the config file is for. The third state is that
                 # sentence, and the tooltip says which way the case will go.
                 widget = QCheckBox()
                 widget.setTristate(True)
                 widget.setCheckState(PARTIALLY_CHECKED)
                 widget.setToolTip(
-                    "Partly checked: leave this to case-config.yml"
+                    "Partly checked: leave this to the case file"
                     f" (its default here is {'on' if default else 'off'}).")
             self.options_form.addRow(label, widget)
             self._fields[key] = widget
@@ -134,7 +134,7 @@ class CapabilityTab(QWidget):
 
         Both widget types have an explicit "not set" state - 0 for the spin box, the
         partial state for the check box - and neither is sent. An option the plugin does
-        not send is one ``case-config.yml`` still decides.
+        not send is one the case file still decides.
         """
         out = {}
         for key, widget in self._fields.items():

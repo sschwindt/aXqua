@@ -4,8 +4,8 @@
 # All relative paths resolve against THIS file's directory. The co-development
 # dataset lives under user-sources/ (kept out of version control).
 # Build with:
-#   axqua cases/inn-2025-hydro/case-config.yml --check    # validate first
-#   axqua cases/inn-2025-hydro/case-config.yml            # build the case
+#   axqua cases/inn-2025-hydro/inn-KB15-2025-hydro.axq-case --check    # validate first
+#   axqua cases/inn-2025-hydro/inn-KB15-2025-hydro.axq-case            # build the case
 #
 # Sections: project / telemac / geodata / boundaries / initialization / mesh /
 #           friction / hydrodynamics / morphodynamics / ground_truth / calibration
@@ -26,7 +26,8 @@ telemac:
   #   $AXQUA_TELEMAC_PYSOURCE > ~/.config/axqua/solvers.yml > solvers.local.yml
   #   beside this file > the value here > discovery. Left as a placeholder so a
   #   checkout on any machine works without editing a tracked file.
-  pysource: /path/to/telemac/configs/pysource.sh
+  # Where TELEMAC is installed is a setting of the computer, not of the case:
+  # see `axqua profile` (the Configuration tab of the QGIS plugin).
   solver: telemac2d            # telemac2d | telemac3d
   n_processors: 16              # = physical cores (OpenMPI slots; 16 CPUs are hyperthreads)
 
@@ -315,7 +316,7 @@ openfoam:
 # importing anything - `visit` below is the LAUNCHER executable, which is why it
 # is not spelled like telemac.pysource / openfoam.bashrc.
 postproc:
-  visit: /home/IWS/public/visit/bin/visit
+  # The VisIt launcher is a setting of the computer: see `axqua profile`.
   backend: visit
   scenes: ["free-surface", "velocity-plan", "profiles"]
   image_width: 1600

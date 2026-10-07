@@ -52,8 +52,11 @@ def _isolate_axqua_dirs(tmp_path_factory, monkeypatch):
     # wandering into a site install.
     monkeypatch.setenv("AXQUA_HOME", str(root / "solvers"))
     (root / "solvers").mkdir(parents=True, exist_ok=True)
+    # ... and the profile, which outranks the settings file: the default one is found
+    # beside it (so it moves with AXQUA_HOME), and one named through the environment is
+    # cleared like the solver variables.
     for var in ("AXQUA_TELEMAC_PYSOURCE", "AXQUA_OPENFOAM_BASHRC", "AXQUA_VISIT",
-                "AXQUA_SOLVER_ROOT"):
+                "AXQUA_PARAVIEW", "AXQUA_SOLVER_ROOT", "AXQUA_PROFILE"):
         monkeypatch.delenv(var, raising=False)
     yield root
 

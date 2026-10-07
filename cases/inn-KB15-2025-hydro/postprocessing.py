@@ -35,9 +35,9 @@ from axqua import setup_logging
 from axqua.config import load_config
 from axqua.postproc import render as render_mod
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "inn-KB15-2025-hydro.axq-case"
 
-# None -> postproc.scenes from case-config.yml
+# None -> postproc.scenes from inn-KB15-2025-hydro.axq-case
 SCENES: list[str] | None = None
 SOLVER: str | None = None       # "openfoam" | "telemac" | None for both
 

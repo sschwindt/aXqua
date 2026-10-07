@@ -23,7 +23,7 @@ with that steady time as ``DURATION`` and the constant Q / H prescriptions kept
 alive. The per-processor ``*_p0000N.sortie`` copies of a parallel run are deleted.
 See ``axqua.flux_convergence``.
 
-Needs ``telemac.pysource`` in case-config.yml to point at a real TELEMAC env. The
+Needs a TELEMAC binding in the profile of this computer (``axqua profile``). The
 convergence analysis is built in (it used to require the external ``pythomac``
 package).
 
@@ -47,13 +47,13 @@ from axqua.env import TelemacRuntime
 from axqua.flux_convergence import analyze_flux_convergence
 
 # optional CLI arg selects the scenario config, e.g.
-#   python initial_run.py case-config-greenampt.yml
+#   python initial_run.py isar-2025-greenampt.axq-case
 CONFIG = Path(__file__).resolve().parent / (
-    sys.argv[1] if len(sys.argv) > 1 else "case-config.yml")
+    sys.argv[1] if len(sys.argv) > 1 else "isar-2025.axq-case")
 cfg = load_config(CONFIG)
 
 # Number of parallel MPI processes for this test run. None -> use the core
-# count assigned in preprocessing (case-config.yml telemac.n_processors);
+# count assigned in preprocessing (isar-2025.axq-case telemac.n_processors);
 # set an integer here to override it for this run only (e.g. NCSIZE = 8).
 NCSIZE: int | None = None
 

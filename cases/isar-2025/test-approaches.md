@@ -128,7 +128,7 @@ and floodplain and drains very slowly. Because the roughness zones run up to
 `EXTREMLY HIGH VALUE OF FRICTION` warnings and the linear system becomes badly
 conditioned. On top of that, `duration` had been cut from 25000 s to **2500 s**, so
 even a healthy run could not have drained the surplus and balanced in time.
-*(`case-config-Mint.yml` already carried this diagnosis and the 0.30 m fix - it had
+*(`isar-2025-Mint.axq-case` already carried this diagnosis and the 0.30 m fix - it had
 simply not been carried over to the main config.)*
 
 **2. A concentrated sink dries cells, and that is what collapsed the time step.**
@@ -323,7 +323,7 @@ exchanged. Both were run end to end through the normal workflow.
 
 | | **A - prescribed** | **B - Green-Ampt (conductivity)** |
 |--|--------------------|-----------------------------------|
-| config | `case-config.yml` | `case-config-greenampt.yml` |
+| config | `isar-2025.axq-case` | `isar-2025-greenampt.axq-case` |
 | tree | `axqua-case/scenarios/prescribed-q/` | `axqua-case/scenarios/green-ampt/` |
 | exchange | fixed 0.065 m3/s (the gpkg's `Target flow`) | `f = kf*(h + Lz + hf)/Lz` per node |
 | parameters | - | `kf` 3.0e-4 m/s, `Lz` 0.5 m (patch attribute), `hf` 0.2 m |
@@ -405,7 +405,7 @@ mamba run -n axqua-env python cases/isar-2025/ladder.py T3 --build-only
 ```
 
 Each rung writes `rung.json` (settings + the flux verdict). What every rung changes
-relative to `case-config.yml` is listed explicitly in the `RUNGS` dict at the top of
+relative to `isar-2025.axq-case` is listed explicitly in the `RUNGS` dict at the top of
 `ladder.py` - nothing is hidden.
 
 **Note on `pythomac`:** aXqua's `analyze_flux_convergence` (and therefore
@@ -449,10 +449,10 @@ the rung, record it here, and escalate to the next mechanism.
 
 ## Promoting the winning rung to production
 
-Once a rung balances, put its setting into `case-config.yml` and rebuild the real
+Once a rung balances, put its setting into `isar-2025.axq-case` and rebuild the real
 case (`axqua-case/simulation/`) - the ladder folders are scratch:
 
-1. set `percolation.mode` in `case-config.yml` to the winning mode
+1. set `percolation.mode` in `isar-2025.axq-case` to the winning mode
    (`off` = 3 m strips, `region` = percolation patch, `fortran` = USER_RAIN);
 2. raise `hydrodynamics.duration` to comfortably past the time the rung needed to
    balance (read it off the rung's flux summary, then add ~50 %);
@@ -562,7 +562,7 @@ tunable knob.
   cap.
 * `unsteady.py`: the unsteady case now carries the internal exchange too - it was
   silently dropping it, so a hydrograph run would have lost the side-channel feed.
-* `case-config.yml`: prewet 1.0 → **0.30 m**, duration 2500 → **4000 s**,
+* `isar-2025.axq-case`: prewet 1.0 → **0.30 m**, duration 2500 → **4000 s**,
   implicitation and the limits guard pinned explicitly in config.
 
 **Verified against the TELEMAC v9.1.1 install** (`sources/telemac2d/`): the region
@@ -1533,7 +1533,7 @@ still comes out wet.
 
 ### R2.7 Scenario C: free (Neumann) outflow
 
-`case-config-freeoutflow.yml` is `case-config-greenampt.yml` with
+`isar-2025-freeoutflow.axq-case` is `isar-2025-greenampt.axq-case` with
 `outflow_condition: free` and its own `scenarios/free-outflow/` tree - one setting
 different, so the comparison isolates the downstream boundary. Caution recorded up
 front: a 4 4 4 Neumann outlet is under-specified for subcritical flow (Fr ~ 0.45-0.5
@@ -1611,7 +1611,7 @@ were seed film standing up to 0.5 m above the prescribed stage, not backwater.
 
 #### Scenario C (free outflow): the boundary is NOT optional
 
-`case-config-freeoutflow.yml` built correctly - 29 outflow nodes coded `4 4 4`, all
+`isar-2025-freeoutflow.axq-case` built correctly - 29 outflow nodes coded `4 4 4`, all
 `PRESCRIBED ELEVATIONS` placeholders - and TELEMAC **diverged after 13 s of simulated
 time**:
 
@@ -1793,7 +1793,7 @@ make kf calibratable - and the run reproduces R3:
 
 The old `percolation:` spelling still loads (mapped `mode`->`enabled`,
 `losing_region`->`faces`) with a deprecation warning, and `cfg.percolation` remains
-an alias - `case-config-freeoutflow.yml` is left on it deliberately, as a live check
+an alias - `isar-2025-freeoutflow.axq-case` is left on it deliberately, as a live check
 that the alias works.
 
 ## Open questions / ideas not yet pursued

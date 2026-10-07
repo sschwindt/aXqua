@@ -3,13 +3,21 @@
 aXqua case setup
 ================
 
-An **aXqua case** is the complete description of one river reach for one modeling task: the terrain, the boundaries of the model, the roughness of the riverbed, the settings of the simulation, and the field measurements for the calibration. The description is stored in one **case file**. All simulation steps read this file, so that a 2D TELEMAC model and a 3D OpenFOAM model of the same reach use the same input.
+An **aXqua case** is the complete description of one river reach for one modeling task: the terrain, the boundaries of the model, the roughness of the riverbed, the settings of the simulation, and the field measurements for the calibration. The description is stored in one **case file**, whose name ends with ``.axq-case``. All simulation steps read this file, so that a 2D TELEMAC model and a 3D OpenFOAM model of the same reach use the same input.
+
+A case file contains nothing that is specific to a computer. Where the simulation software is installed is stored in the profile of the computer (:ref:`plugin-profile`). A case folder can therefore be copied to another computer, or published together with a study, and used there without changes.
+
+The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is provided in the folder ``cases/case-template/`` of the repository. Copy this folder to start a new case, and rename the case file. The case file can be edited with a text editor.
 
 .. note::
 
-   The case file is currently named ``case-config.yml``. The file type ``.axq-case``, which is edited in a window of the plugin, is not yet available in this version.
+   Editing the case file in a window of the plugin is not yet available in this version.
 
-The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is provided in the folder ``cases/case-template/`` of the repository. Copy this folder to start a new case. The case file can be edited with a text editor or with the form-based editor ``axqua-gui``, which opens in a web browser (``pip install ".[gui]"``).
+Case files of earlier aXqua versions are named ``case-config.yml`` and may contain the location of the simulation software. They are still read. The following command writes a case file of the current type next to such a file:
+
+.. code-block:: text
+
+   axqua migrate case-config.yml --to-case
 
 A minimal case file looks as follows:
 
@@ -49,7 +57,7 @@ A case folder has two parts with different roles. The folder ``user-sources/`` c
 .. code-block:: text
 
    my-reach/
-     case-config.yml              the case file
+     my-reach.axq-case            the case file
      user-sources/                input data (read only)
      axqua-case/
        preprocessing/             clipped terrain models, compiled measurements
@@ -270,7 +278,7 @@ The ``hydrodynamics`` block controls the hydraulic simulation with TELEMAC. Most
 
 With ``turbulence_model: auto``, aXqua selects the turbulence model from the mesh resolution relative to the water depth. The time step is adapted automatically during the run, so that the simulation remains stable (``desired_courant``).
 
-The number of processor cores is set by ``telemac.n_processors``. The settings of the 3D simulation with OpenFOAM are described in :ref:`preprocessing-openfoam-choices`.
+The number of processor cores is a property of the computer and is set in its profile (``mpi_processes``, :ref:`solver-bindings`). Where the profile names no number, ``telemac.n_processors`` of the case file applies. The settings of the 3D simulation with OpenFOAM are described in :ref:`preprocessing-openfoam-choices`.
 
 .. _case-morphodynamics:
 

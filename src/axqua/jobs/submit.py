@@ -51,7 +51,7 @@ def build_spec(cfg: Any, kind: str | JobKind, *, profile: profiles.Profile | Non
 
     kind = kind if isinstance(kind, JobKind) else parse_kind(kind)
     meta = KIND_META[kind]
-    profile = profile or profiles.from_config(cfg, meta.solver)
+    profile = profile or profiles.implicit(cfg, meta.solver)
     job_id = job_id or ids.make_job_id(getattr(cfg, "name", "case"), meta.slug)
 
     # Process count, most specific wins, and the *resolved* number is frozen - so a job
@@ -149,7 +149,7 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
         # directory behind for the user to clean up.
         return spec
 
-    resolved = profile or profiles.from_config(cfg, spec.solver)
+    resolved = profile or profiles.implicit(cfg, spec.solver)
     env = resolved.solver_environment()
     captured: dict[str, str] = {}
     if validate_env and spec.meta.needs_environment:
@@ -211,7 +211,12 @@ def _launch(jd: JobDir, spec: JobSpec, env, captured: dict[str, str],
     if env.distro:
         captured["AXQUA_WSL_DISTRO"] = str(env.distro)
 
-    requested = spec.launcher.get("requested") or profile.launcher or "auto"
+    # "auto" on the command line means "no opinion", so the profile's choice applies.
+    # Reading it as a choice of its own - which `or` does, since the string is truthy -
+    # meant a launcher set in a profile was never used.
+    requested = spec.launcher.get("requested") or "auto"
+    if requested == "auto":
+        requested = profile.launcher or "auto"
     chosen = launcher_mod.select_launcher(env, prefer=requested)
     argv = launcher_mod.runner_argv(jd.root)
     handle = chosen.submit(jd, argv, env=captured, cwd=jd.root)

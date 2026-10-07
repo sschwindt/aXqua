@@ -56,6 +56,9 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "core.errors": ("ConfigError", "ErrorRecord", "GeodataError",
                     "AxquaError", "MeshError", "SolverError"),
     "core.schema": ("Layer", "classify_setting"),
+    "core.casefile": ("find_case_file",),
+    "core.profile": ("AxquaProfile",),
+    "core.diagnostics": ("Finding",),
     "core.geodata": ("read_roughness_table", "read_roughness_zones", "ZoneRoughness"),
     "dem": ("clip_dem_to_roi", "clip_to_roi", "dem_of_difference", "propagated_lod",
             "resolve_lod"),
@@ -113,7 +116,8 @@ _NAME_TO_MODULE = {name: module
 # tells them these names exist. tests/test_capabilities.py asserts it stays in step
 # with _EXPORTS, so the duplication cannot drift.
 __all__ = [
-    "BackendSpec", "Capability", "CapabilitySpec", "CapabilityState", "CaseStatus",
+    "AxquaProfile", "BackendSpec", "Capability", "CapabilitySpec", "CapabilityState",
+    "CaseStatus", "Finding", "find_case_file",
     "Config", "ConfigError", "ErrorRecord", "FlowSpec", "FluxConvergence",
     "GeodataError", "AxquaError", "hbc", "Layer", "MeshError", "MeshValidity",
     "OutletProfile", "SolverError", "ZoneRoughness",

@@ -90,6 +90,17 @@ SHARED_FIELDS: dict[str, tuple[str, ...]] = {
                       "desired_courant"),
 }
 
+# Settings that describe the COMPUTER rather than the reach: where a simulation code is
+# installed and how its environment is entered. They belong to the profile of the
+# computer (axqua.core.profile). A case file written for sharing leaves them out
+# (config.dump_config(portable=True)); a case file that still carries them keeps
+# loading, with the profile taking precedence.
+MACHINE_FIELDS: dict[str, tuple[str, ...]] = {
+    "telemac": ("pysource", "environment", "version", "solver_python"),
+    "openfoam": ("bashrc", "environment"),
+    "postproc": ("visit", "environment"),
+}
+
 # Legacy key -> canonical key, applied at load. Dotted, so a block rename and a field
 # rename use one mechanism. This is what makes a future field move safe: add the
 # mapping here, and every existing config keeps loading.
@@ -153,6 +164,31 @@ def warn_legacy(renamed: list[str], source: str = "") -> None:
     where = f" in {source}" if source else ""
     log.warning("deprecated config keys%s, still loaded but rename them: %s",
                 where, "; ".join(sorted(renamed)))
+
+
+def strip_machine_fields(data: dict) -> list[str]:
+    """Remove the :data:`MACHINE_FIELDS` from a config mapping, in place.
+
+    Returns the dotted keys that were removed, so the caller can say what moved to the
+    profile instead of dropping it without a word.
+    """
+    removed: list[str] = []
+    for block, names in MACHINE_FIELDS.items():
+        section = data.get(block)
+        if not isinstance(section, dict):
+            continue
+        for name in names:
+            if name in section:
+                value = section.pop(name)
+                # An empty `environment:` block is a default, not a setting that moved.
+                if value not in (None, "", {}) and not _is_default_environment(value):
+                    removed.append(f"{block}.{name}")
+    return removed
+
+
+def _is_default_environment(value) -> bool:
+    return isinstance(value, dict) and not any(
+        v not in (None, "", {}, []) for v in value.values())
 
 
 # `classify` reads fine inside this module; at package level it says nothing about

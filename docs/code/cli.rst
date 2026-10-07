@@ -14,3 +14,9 @@ Job commands
 
 .. automodule:: axqua.jobcli
    :members:
+
+Profile commands
+----------------
+
+.. automodule:: axqua.profilecli
+   :members:

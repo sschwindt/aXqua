@@ -43,7 +43,7 @@ from pathlib import Path
 from axqua.config import load_config
 from axqua.solvers.openfoam.calibration import run_openfoam_calibration
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "inn-KB15-2025-hydro.axq-case"
 
 # What the surrogate is trained against. U_z is the weakest of the three - a
 # side-looking ADV's vertical component at 0.6*h is dominated by mounting tilt -

@@ -8,7 +8,7 @@ to have read.
 
 So the division is (plan §3):
 
-* ``case-config.yml`` - the **model**. Versioned with the case, git-friendly.
+* the case file (``*.axq-case``) - the **model**. Versioned with the case, git-friendly.
 * ``<name>.axqua-prj`` - which cases belong to this project, which solver profile to
   use, where the job root is, and plugin view state. User-owned, git-friendly, and the
   **plugin is its only writer**.

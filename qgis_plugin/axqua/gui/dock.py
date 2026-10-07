@@ -308,7 +308,7 @@ class AxquaDock(QDockWidget):
             names = ", ".join(s.name for s in view.solvers)
             self._placeholder.setText(
                 f"This case enables none of the solvers axqua knows about ({names}).\n\n"
-                "A solver is enabled by having its block in case-config.yml - a "
+                "A solver is enabled by having its block in the case file - a "
                 "'telemac:' block for TELEMAC, an 'openfoam:' block for OpenFOAM. Add "
                 "one (see the annotated template in the docs) and press Check on the "
                 "Setup tab.")

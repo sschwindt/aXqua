@@ -4,8 +4,8 @@
 # All relative paths resolve against THIS file's directory. The co-development
 # dataset lives under user-sources/ (kept out of version control).
 # Build with:
-#   axqua cases/inn-2025-hydro/case-config.yml --check    # validate first
-#   axqua cases/inn-2025-hydro/case-config.yml            # build the case
+#   axqua cases/inn-2025-hydro/inn-KB08-2025-hydro.axq-case --check    # validate first
+#   axqua cases/inn-2025-hydro/inn-KB08-2025-hydro.axq-case            # build the case
 #
 # Sections: project / telemac / geodata / boundaries / initialization / mesh /
 #           friction / hydrodynamics / morphodynamics / ground_truth / calibration
@@ -21,8 +21,8 @@ project:
   calibration_dir: axqua-case/calibration-validation
 
 telemac:
-  # [REQUIRED] the pysource.*.sh of YOUR TELEMAC install; sourced (not imported).
-  pysource: /home/schwindt/opt/telemac-v911/telemac-mascaret/configs/pysource.mint22.sh
+  # Where TELEMAC is installed is a setting of the computer, not of the case:
+  # see `axqua profile` (the Configuration tab of the QGIS plugin).
   solver: telemac2d            # telemac2d | telemac3d
   n_processors: 8
 

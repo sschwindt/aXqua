@@ -85,7 +85,7 @@ DOCK_RIGHT = enum_value(Qt, "DockWidgetArea.RightDockWidgetArea", "RightDockWidg
 #: Qt 6 requires a real MatchFlag here; Qt 5 silently accepted a bare int, which is
 #: exactly the kind of difference that only shows up when the widget is constructed.
 MATCH_EXACTLY = enum_value(Qt, "MatchFlag.MatchExactly", "MatchExactly")
-#: Tri-state check boxes: the third state is the plugin's "leave it to case-config.yml".
+#: Tri-state check boxes: the third state is the plugin's "leave it to the case file".
 UNCHECKED = enum_value(Qt, "CheckState.Unchecked", "Unchecked")
 PARTIALLY_CHECKED = enum_value(Qt, "CheckState.PartiallyChecked", "PartiallyChecked")
 CHECKED = enum_value(Qt, "CheckState.Checked", "Checked")

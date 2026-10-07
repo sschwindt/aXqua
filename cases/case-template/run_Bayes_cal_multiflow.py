@@ -32,9 +32,10 @@ from pathlib import Path
 
 from axqua import FlowSpec, run_multiflow_calibration
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 
 HERE = Path(__file__).resolve().parent
-CONFIG = HERE / "case-config.yml"
+CONFIG = find_case_file(HERE)
 GT = HERE / "user-sources/ground-truth/hydraulics"
 GEO = HERE / "user-sources/geodata"
 

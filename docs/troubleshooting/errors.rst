@@ -53,7 +53,7 @@ Case file
     A block of the case file contains an entry that aXqua does not know, usually because of a typing error. The message names the block and the entry. Compare the spelling with the template in ``cases/case-template/``.
 
 ``telemac.pysource is not set`` or ``TELEMAC pysource script not found``
-    aXqua does not know where TELEMAC is installed, or the stated environment script does not exist. Define the solver binding for TELEMAC (:ref:`solver-bindings`).
+    aXqua does not know where TELEMAC is installed, or the stated environment script does not exist. Create the profile of the computer with ``axqua profile init``, or correct its binding for TELEMAC (:ref:`solver-bindings`).
 
 ``outflow_condition: elevation requires boundaries.prescribed_elevation``
     The outflow boundary is set to a constant water surface elevation, but no elevation is given. Enter ``boundaries.prescribed_elevation``, or select another outflow condition (:ref:`case-boundaries`).
@@ -80,7 +80,7 @@ Jobs
 ----
 
 A job fails immediately after its start
-    In most cases, the simulation software cannot be reached from the job. Read ``runner.log`` of the job and verify the solver bindings with ``axqua status <case-file> --check-env`` (:ref:`solver-bindings`). Note the warning about the ambient environment (:doc:`warnings`): a job does not inherit the settings of the terminal or of QGIS.
+    In most cases, the simulation software cannot be reached from the job. Read ``runner.log`` of the job and verify the profile with ``axqua profile check`` (:ref:`solver-bindings`). Note the warning about the ambient environment (:doc:`warnings`): a job does not inherit the settings of the terminal or of QGIS.
 
 ``the 'systemd' launcher is not available on this machine``
     The Linux user services that aXqua uses by default are not available, which is typical for some remote sessions. Submit the job with the option ``--launcher posix``, or select the launcher ``posix`` on the *Setup* tab of the plugin.

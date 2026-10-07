@@ -8,7 +8,7 @@ of the channel roughness).
 ## Structure and workflow
 
 Standard aXqua case layout (see the repository `README.md` and
-`CLAUDE.md`); everything is driven by `case-config.yml` (all paths relative to
+`CLAUDE.md`); everything is driven by `inn-KB15-2025-hydro.axq-case` (all paths relative to
 this folder). Ordered steps:
 
 1. `preprocessing.py` - full case build into `axqua-case/simulation/`
@@ -340,7 +340,7 @@ errors:
 
 | layer | magnitude | nature |
 |---|---|---|
-| GNSS antenna height | **+2.26 / 2.51 / 2.70 m** | `case-config.yml` joined ground truth to the RAW DGPS layer, whose z is the antenna. Fixed: it now points at `-zcorrected.gpkg`. |
+| GNSS antenna height | **+2.26 / 2.51 / 2.70 m** | `inn-KB15-2025-hydro.axq-case` joined ground truth to the RAW DGPS layer, whose z is the antenna. Fixed: it now points at `-zcorrected.gpkg`. |
 | measurement height never added | **-0.34 m** | `calibration.build_calibration_csv` wrote `z = df["z"]`, the BED, so the extraction point sat on the bed where the wall function gives ~0. Fixed by model-relative placement. |
 | DEM bathymetry bias | **+0.28 / 0.37 m** | real, physical, depth-proportional (+0.72 m per m of depth). Bathymetric-LiDAR attenuation plus some DGPS rod-foot sinking. Unchanged - and now irrelevant to target placement. |
 

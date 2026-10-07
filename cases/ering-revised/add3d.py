@@ -32,7 +32,7 @@ from axqua import (build_3d_cases, format_3d_cases, run_solver_streaming,
 from axqua.config import load_config
 from axqua.env import TelemacRuntime
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "ering-revised.axq-case"
 cfg = load_config(CONFIG)
 
 # Step count / listing spacing of the hydrostatic flux-convergence run. None ->

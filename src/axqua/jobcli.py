@@ -153,7 +153,9 @@ def _submit_parser() -> argparse.ArgumentParser:
     p.add_argument("--kind", help="what to run; see 'axqua submit --help-kinds'")
     p.add_argument("--help-kinds", action="store_true",
                    help="list the job kinds and exit")
-    p.add_argument("--profile", help="solver profile from profiles.yml")
+    p.add_argument("--profile",
+                   help="an .axq-profile file, or the name of a solver profile from "
+                        "profiles.yml (default: the active profile of this computer)")
     p.add_argument("--job-root", type=Path, help="where the job directory is created")
     p.add_argument("--np", type=int, help="MPI processes (overrides profile and config)")
     p.add_argument("--launcher", default="auto",
@@ -198,8 +200,13 @@ def run_submit(argv: list[str]) -> int:
                 remedy="Run 'axqua submit --help-kinds' to see them.",
             )
         cfg = load_config(args.target)
-        profile = resolve_profile(args.profile, solver=None, cfg=cfg) \
-            if args.profile else None
+        profile = None
+        if args.profile:
+            # A profile FILE binds several codes, so the job kind says which one is
+            # meant. A name out of profiles.yml is one code already and ignores it.
+            from axqua.jobs.model import parse_kind
+            solver = KIND_META[parse_kind(args.kind)].solver
+            profile = resolve_profile(args.profile, solver=solver, cfg=cfg)
         result = submit_mod.submit_job(
             cfg, args.kind, profile=profile, options=_options(args.option),
             job_root=args.job_root, np=args.np, workspace=args.workspace,

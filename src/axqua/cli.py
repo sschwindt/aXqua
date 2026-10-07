@@ -508,6 +508,11 @@ def _migrate_parser() -> argparse.ArgumentParser:
                    help="write here (default: print to stdout)")
     p.add_argument("--in-place", action="store_true",
                    help="overwrite the config, keeping a .bak copy beside it")
+    p.add_argument("--to-case", action="store_true",
+                   help="write an .axq-case file beside the config (or to --out): the "
+                        "same case without the settings that describe this computer, "
+                        "which belong to its profile ('axqua profile'). The original "
+                        "file is left as it is.")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
@@ -518,13 +523,28 @@ def _run_migrate(argv: list[str]) -> int:
     log = logging.getLogger("axqua")
     from axqua.config import dump_config
 
+    from axqua.core import casefile, schema
+
+    if args.to_case and args.in_place:
+        log.error("--to-case writes a new file and cannot be combined with --in-place")
+        return 2
+    if args.to_case and not args.out:
+        # Named after the case folder, so a folder of cases is a folder of files that
+        # say which reach they are. A variant keeps its own name (case-config-vof.yml
+        # becomes case-config-vof.axq-case), since that is what tells variants apart.
+        stem = (args.config.resolve().parent.name
+                if args.config.name in casefile.LEGACY_NAMES else args.config.stem)
+        args.out = args.config.with_name(stem + casefile.SUFFIX)
+    # A file of the case type never carries machine settings, however it was asked for.
+    portable = bool(args.to_case or (args.out and casefile.is_case_file(args.out)))
     try:
         cfg = load_config(args.config)
         # Written relative to where the file will LIVE, not where it came from, so
         # `-o elsewhere/case.yml` does not silently break every relative data path.
         target = args.config if args.in_place else args.out
         base = Path(target).resolve().parent if target else Path(cfg.config_dir)
-        text = dump_config(cfg, base=base)
+        text = dump_config(cfg, base=base, portable=portable)
+        moved = schema.strip_machine_fields(_raw_config(args.config)) if portable else []
     except Exception as exc:
         log.error("%s: %s", type(exc).__name__, exc)
         if args.verbose:
@@ -540,9 +560,20 @@ def _run_migrate(argv: list[str]) -> int:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(text)
         log.info("wrote %s", args.out)
+        if moved:
+            log.info("left out, because they describe this computer and belong to its "
+                     "profile: %s. Run 'axqua profile init' if it has none yet.",
+                     ", ".join(moved))
     else:
         print(text, end="")
     return 0
+
+
+def _raw_config(path: Path) -> dict:
+    """The config as written, to report which machine settings a case file carried."""
+    import yaml
+    with open(path, encoding="utf-8") as handle:
+        return yaml.safe_load(handle) or {}
 
 def _job(name: str):
     """Late-bind a job verb.
@@ -555,6 +586,12 @@ def _job(name: str):
         from axqua import jobcli
         return getattr(jobcli, name)(argv)
     return run
+
+
+def _run_profile(argv: list[str]) -> int:
+    """``axqua profile`` - late-bound like the job verbs, and for the same reason."""
+    from axqua import profilecli
+    return profilecli.run_profile(argv)
 
 
 #: The whole command surface, as a table. A verb is one entry here plus its ``_run_*``;
@@ -650,6 +687,7 @@ _DISPATCH = {
     "logs": _job("run_logs"),
     "list": _job("run_list"),
     "profiles": _job("run_profiles"),
+    "profile": lambda argv: _run_profile(argv),
 }
 
 

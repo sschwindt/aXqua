@@ -39,7 +39,7 @@ Nothing is bundled: no TELEMAC, no OpenFOAM, no MPI, no scientific Python stack.
 3. On the **Setup** tab, press **Check**. If aXqua is not on `PATH`, set its path in
    **Settings…** — this is validated immediately, so a wrong path is caught here rather
    than when you submit a six-hour run.
-4. **Add case…** and pick a `case-config.yml`, then **Save as…** to write a
+4. **Add case…** and pick a case file (`*.axq-case`), then **Save as…** to write a
    `.axqua-prj` next to it.
 
 Optionally describe your solver installs once, in `~/.config/axqua/profiles.yml`, and
@@ -70,7 +70,7 @@ in about a second — it never blocks on the simulation.
 
 | what | where | who writes it |
 |---|---|---|
-| the model | `case-config.yml` | you (or aXqua) |
+| the model | the case file (`*.axq-case`) | you (or aXqua) |
 | which cases and where jobs go | `<name>.axqua-prj` | this plugin |
 | your solver installs | `~/.config/axqua/profiles.yml` | you |
 | what a job was asked to do | `<job>/job.json` | aXqua, once |

@@ -113,7 +113,7 @@ def main() -> int:
                         help="write the corrected raster (default: report only)")
     args = parser.parse_args()
 
-    cfg = load_config(HERE / "case-config.yml")
+    cfg = load_config(HERE / "inn-KB15-2025-hydro.axq-case")
     intercept, slope, s = fit_correction(cfg)
 
     print(f"DEM - surveyed bed over {s['n']} DGPS verticals:")
@@ -208,7 +208,7 @@ def main() -> int:
         print(f"  {deeper:,} cells are deeper than any surveyed vertical and take "
               "the capped correction - the fit does not extend there")
     print("\nNext, in order - each depends on the one before:")
-    print(f"  1. point geodata.dem_initial at {OUT_NAME} in case-config.yml")
+    print(f"  1. point geodata.dem_initial at {OUT_NAME} in inn-KB15-2025-hydro.axq-case")
     print("  2. python preprocessing.py      # rebuild the mesh on the new bed")
     print("  3. python initial_run.py        # a NEW r2d.slf; the old one is invalid")
     print("  4. python run_Bayes_cal_openfoam.py --prepare-only   # check placement")

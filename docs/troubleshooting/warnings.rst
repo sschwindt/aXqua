@@ -11,7 +11,7 @@ Case file
 ---------
 
 ``deprecated config keys ..., still loaded but rename them``
-    The case file uses entries of an older aXqua version. The case is read correctly. Run ``axqua migrate <case-file> --in-place`` to rewrite the file in the current format. A copy of the previous file is kept.
+    The case file uses entries of an older aXqua version. The case is read correctly. Run ``axqua migrate <case-file> --to-case`` to write a case file of the current type next to it.
 
 ``using the pre-rename artifact folder hydromate-case/``
     The case was built with an earlier version, in which the output folder had another name. aXqua continues to use the existing folder. Rename the folder to ``axqua-case`` when no job of this case is running.

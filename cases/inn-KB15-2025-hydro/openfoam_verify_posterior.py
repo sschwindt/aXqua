@@ -36,7 +36,7 @@ from axqua.solvers.openfoam import build_case, estimate_cells, load_hotstart, su
 from axqua.solvers.openfoam.calibration import (CAMPAIGN_SUBDIR, apply_posterior,
                                                 read_posterior)
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "inn-KB15-2025-hydro.axq-case"
 
 # "map" = the posterior's highest-density point (default; a roughness posterior is
 # often skewed, and its mean can sit where the sample has little mass), or "mean".

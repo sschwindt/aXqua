@@ -67,7 +67,7 @@ NOT_IMPLEMENTED_REASON = (
     "axqua does not implement this for {solver} yet. It is a gap in axqua, not "
     "a limitation of your case.")
 NOT_CONFIGURED_REASON = (
-    "This case does not ask for {title} yet. Add the relevant block to case-config.yml "
+    "This case does not ask for {title} yet. Add the relevant block to the case file "
     "(see the annotated template) and refresh.")
 #: Some capabilities are implemented in axqua's library but have no job kind, so there
 #: is no ``--kind`` the runner could be given. Morphodynamics, the gain-lose reach and

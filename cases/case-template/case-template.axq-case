@@ -3,8 +3,8 @@
 # =============================================================================
 # Copy the whole cases/case-template/ folder to cases/<your-case>/, drop your
 # data into user-sources/, edit the paths/values below, then:
-#   axqua cases/<your-case>/case-config.yml --check    # validate first
-#   axqua cases/<your-case>/case-config.yml            # build the case
+#   axqua cases/<your-case>/<your-case>.axq-case --check    # validate first
+#   axqua cases/<your-case>/<your-case>.axq-case            # build the case
 # or run the example scripts (see USAGE.info).
 #
 # Conventions:
@@ -30,29 +30,12 @@ project:
   calibration_dir: axqua-case/calibration-validation   # HydroBayesCal artifacts (calibration CSV, config_Telemac.py)
 
 telemac:
-  # ---- WHERE TELEMAC IS, AND HOW TO ENTER IT ------------------------------
-  # `environment:` is optional. Omitted, axqua sources `pysource` in a POSIX
-  # shell - which is what every Linux case wants and what older configs did.
-  #
-  #   environment: posix              # bash -lc 'source <pysource>; ...'   (Linux/macOS)
-  #
-  #   environment:                    # native Windows: a .bat through cmd
-  #     kind: windows
-  #     setup_script: C:\telemac\v9.1\configs\pysource.bat
-  #     mpi_launcher: mpiexec         # MS-MPI, not mpirun
-  #
-  #   environment:                    # or through WSL
-  #     kind: wsl
-  #     distro: Ubuntu-22.04
-  #     setup_script: /opt/telemac/configs/pysource.sh   # a path INSIDE the distro
-  #
-  # `shell:` points at a bundled bash where a distribution ships one (blueCFD-Core
-  # and the ESI OpenFOAM package both do). Check any of this with:
-  #     axqua status case-config.yml --check-env
-
-  # [REQUIRED] the pysource.*.sh of YOUR TELEMAC install; sourced (not imported)
-  # whenever the solver or SELAFIN tooling is needed. Machine-specific.
-  pysource: /path/to/telemac/configs/pysource.sh
+  # This block declares that the case uses TELEMAC and holds what is specific to the
+  # case. WHERE TELEMAC is installed, and how its environment is entered (Linux,
+  # Windows or WSL), is a setting of the computer and lives in its profile:
+  #     axqua profile init      # create one from what this computer already has
+  #     axqua profile check     # verify that TELEMAC and OpenFOAM can be reached
+  # In the QGIS plugin, the profile is edited on the Configuration tab.
   solver: telemac2d            # telemac2d | telemac3d
   n_processors: 4
 
@@ -397,7 +380,7 @@ dem_of_difference:
 #   ignore   parts that are not geometry - the air patches of a VOF export
 #
 # Inspect the result before building the case:
-#   axqua surface cases/<your-case>/case-config.yml
+#   axqua surface cases/<your-case>/case-template.axq-case
 #
 # surfaces:
 #   resolution: 0.05             # DEM cell size [m]; the mesh cannot resolve below it
@@ -512,7 +495,7 @@ dem_of_difference:
 #   cell_size: 0.5          # plan dx [m]
 #   n_layers: 14            # sigma layers per column
 #   # Check the cost before building:
-#   #   axqua openfoam case-config.yml --check
+#   #   axqua openfoam case-template.axq-case --check
 #
 #   # ---- what is actually solved: vof | rigid-lid --------------------------
 #   # `vof` (default) is the real two-phase model: the free surface is FOUND. That
@@ -610,7 +593,7 @@ ground_truth:
   # CRS), then quantity columns. Provide it one of three ways:
   #
   #   (a) RECOMMENDED - the calibration-target template: run
-  #           axqua targets case-config.yml
+  #           axqua targets case-template.axq-case
   #       to generate user-sources/ground-truth/calibration-target-data.xlsx (plus
   #       a co-located extract_flowtracker.py helper), fill it in, and reference it
   #       under `targets` below. Its tabs:

@@ -80,7 +80,7 @@ A sequence in which each step uses the result of the previous one has to wait fo
 .. code-block:: bash
 
    #!/bin/bash
-   CASE=cases/my-reach/case-config.yml
+   CASE=cases/my-reach/my-reach.axq-case
 
    run_step () {
        job=$(axqua submit "$CASE" --kind "$1" --json | python -c "import json, sys; print(json.load(sys.stdin)['data']['job_id'])")
