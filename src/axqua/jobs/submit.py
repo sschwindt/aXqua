@@ -156,6 +156,16 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
         captured = _validate_and_capture(resolved, env, spec)
 
     jd = create_job(cfg, spec, job_root=job_root)
+    if spec.workspace.mode == "case":
+        # The ticket that fixes this job's place among the jobs of its case. Written
+        # here and not by the runner, so that the order is the order of submission and
+        # not the order in which the detached runners happen to start.
+        from axqua.jobs import workspace as case_queue
+
+        try:
+            case_queue.enqueue(cfg.model_dir, spec, jd.root)
+        except OSError as exc:
+            log.debug("no ticket written (%s); the runner writes it when it starts", exc)
     try:
         _launch(jd, spec, env, captured, resolved)
     except Exception as exc:                        # noqa: BLE001

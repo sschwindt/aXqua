@@ -40,6 +40,8 @@ class AxquaPlugin:
         self.dock = AxquaDock(self.iface, self.iface.mainWindow())
         self.iface.addDockWidget(DOCK_RIGHT, self.dock)
         self.dock.hide()
+        # what the Postprocessing tab can start, by name
+        self.dock.ctx.actions.update(layout=self._add_layout, movie=self._export_movie)
 
         show = QAction(icon("axqua.svg"), "aXqua panel",
                        self.iface.mainWindow())
@@ -59,6 +61,11 @@ class AxquaPlugin:
         movie = QAction("Export movie...", self.iface.mainWindow())
         movie.triggered.connect(self._export_movie)
         self._register(movie)
+
+        # The documentation, at the section of the tab that is showing in the panel.
+        help_action = QAction("Help", self.iface.mainWindow())
+        help_action.triggered.connect(lambda: self.dock.open_help())
+        self._register(help_action)
 
         self._add_provider()
 

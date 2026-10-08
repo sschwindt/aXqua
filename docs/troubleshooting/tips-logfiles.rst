@@ -33,7 +33,7 @@ aXqua records every step in log files. Which file to read depends on how the ste
    * - ``checkMesh.log``
      - The mesh check of OpenFOAM, in the OpenFOAM case folder.
 
-In the plugin, *View logs* on the *Jobs* tab opens the log of the selected job. The messages of the plugin itself are listed in the QGIS panel *Log Messages* on the tab *aXqua*.
+In the plugin, *View logs* below the job list opens the log of the selected job. The messages of the plugin itself are listed in the QGIS panel *Log Messages* on the tab *aXqua*.
 
 A line of ``axqua.log`` consists of the time, the level of the message and the text. Search the file for the two levels that require attention:
 

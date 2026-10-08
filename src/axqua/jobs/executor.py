@@ -265,7 +265,7 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
             # Another job of this case may be working in the same folder. This one
             # waits for it, still QUEUED, and says whom it waits for.
             held.enter_context(workspace.held_for(cfg.model_dir, spec, cancel=cancel,
-                                                  sink=combined))
+                                                  sink=combined, job_dir=jd.root))
 
             status.transition(JobState.STARTING)
             status_sink.state_changed()

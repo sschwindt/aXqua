@@ -98,7 +98,12 @@ class Job:
         This is why progress is typed per kind rather than flattened: a steady run has a
         simulated-time fraction, a convergence study has levels, and a calibration has an
         objective. A single set of columns would leave most of them empty.
+
+        A job that waits for another job of its case says that first: its progress is
+        still empty, and "iter 0" beside STARTING reads as a job that hangs.
         """
+        if self.phase.startswith("waiting for") and not self.is_terminal:
+            return self.phase
         p = self.progress or {}
         kind = str(p.get("kind", ""))
         if kind == "solver_run":

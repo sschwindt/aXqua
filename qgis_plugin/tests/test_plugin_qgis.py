@@ -510,3 +510,289 @@ def test_the_encode_command_is_an_argument_list_with_the_output_last(tmp_path):
     # A shell metacharacter in a path stays one argument, because there is no shell.
     weird = encode_command(tmp_path, tmp_path / "a; rm -rf b.webm", 8)
     assert weird[-1].endswith("a; rm -rf b.webm")
+
+
+# ----------------------------------------------------------------- the fixed tabs
+
+EXAMPLE = {
+    "case_dir": "/cases/example-isar",
+    "solvers": [
+        {"solver": "telemac", "enabled": True, "env_ok": True, "capabilities": [
+            {"capability": name, "implemented": "yes", "configured": configured,
+             "built": built, "run": run}
+            for name, configured, built, run in (
+                ("steady2d", True, True, True), ("unsteady2d", False, None, None),
+                ("steady3d", True, False, False), ("unsteady3d", False, None, None),
+                ("morphodynamics", False, None, None), ("gain_lose", True, True, True),
+                ("mesh_convergence", True, False, False),
+                ("vertical_convergence", True, False, False),
+                ("calibration", True, True, False))]},
+        {"solver": "openfoam", "enabled": False, "env_ok": None, "capabilities": [
+            {"capability": "steady2d", "implemented": "n/a"},
+            {"capability": "free_surface_3d", "implemented": "yes"}]},
+    ],
+}
+
+
+@pytest.fixture
+def dock(qgis_app, monkeypatch):
+    """The panel, with every call to axqua answered as 'not installed'."""
+    def no_axqua(*args, **kwargs):
+        raise FileNotFoundError("axqua is not installed in this test")
+
+    monkeypatch.setattr(runner_client.subprocess, "run", no_axqua)
+    from axqua_plugin.gui.dock import AxquaDock
+    panel = AxquaDock(FakeIface())
+    yield panel
+    panel.deleteLater()
+
+
+def test_the_panel_has_the_prescribed_tabs_and_sub_tabs(dock):
+    titles = [dock.tabs.tabText(i).replace("&&", "&") for i in range(dock.tabs.count())]
+    assert titles == ["Configuration", "Case Setup", "Preprocessing",
+                      "Hydraulic simulation", "Mesh convergence",
+                      "Morphodynamic simulation", "Calibration & validation",
+                      "Postprocessing", "Batch-processing"]
+    inner = {key: [tabs.tabText(i) for i in range(tabs.count())]
+             for key, tabs in dock.subtabs.items()}
+    assert inner == {"hydraulics": ["Telemac", "OpenFOAM"],
+                     "morphodynamics": ["Telemac", "OpenFOAM"],
+                     "postprocessing": ["QGIS", "ParaView", "VisIt"]}
+    # the job list is below the tabs and not one of them
+    assert dock.jobs_tab.parent() is not None and dock.tabs.indexOf(dock.jobs_tab) == -1
+
+
+def test_help_opens_the_section_of_the_tab_that_is_showing(dock, monkeypatch):
+    from axqua_plugin.gui import help as help_pages
+
+    opened = []
+    monkeypatch.setattr(help_pages, "open_url", lambda url: opened.append(url) or True)
+    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
+    dock.show_section("case")
+    dock.open_help()
+    dock.show_section("hydraulics", "openfoam")
+    assert dock.current_section() == ("hydraulics", "openfoam")
+    dock.open_help()
+    dock.show_section("postprocessing", "paraview")
+    dock.open_help()
+    assert [url.split("/latest/")[1] for url in opened] == [
+        "usage/case-setup.html#help-case-setup",
+        "usage/hydraulic-simulations.html#help-hydraulics-openfoam",
+        "usage/postprocessing.html#help-postprocessing-paraview"]
+
+
+def test_the_capabilities_of_a_case_appear_on_the_tabs_of_their_sections(dock):
+    from axqua_plugin.gui.capability_tabs import CaseView
+
+    dock._apply_case_view(CaseView.from_payload(EXAMPLE))
+    telemac = dock.page("hydraulics", "telemac")
+    assert [key[1] for key in telemac._boxes] == [
+        "steady2d", "steady3d", "unsteady2d", "unsteady3d", "gain_lose"]
+    # the build of the 2D model has a tab of its own; the 3D build stays with its run
+    assert telemac.tab("telemac", "steady2d").build_button.isHidden()
+    assert not telemac.tab("telemac", "steady3d").build_button.isHidden()
+    assert [key[1] for key in dock.page("mesh")._boxes] == [
+        "mesh_convergence", "vertical_convergence"]
+    assert list(dock.page("calibration")._boxes) == [("telemac", "calibration")]
+    assert list(dock.page("morphodynamics", "telemac")._boxes) == [
+        ("telemac", "morphodynamics")]
+    # a case without an openfoam block: the sub-tab says so instead of being empty
+    openfoam = dock.page("hydraulics", "openfoam")
+    assert openfoam._boxes == {} and "does not use OpenFOAM" in openfoam.note.text()
+
+
+def test_the_preprocessing_tab_builds_and_shows_what_is_built(dock):
+    from axqua_plugin.gui.capability_tabs import CaseView
+
+    page = dock.page("preprocessing")
+    assert not page.build_button.isEnabled()                 # no case yet
+    dock._apply_case_view(CaseView.from_payload(EXAMPLE))
+    assert page.build_button.isEnabled()
+    assert page.state.text() == "The model is built."
+    rows = {page.table.item(r, 0).text(): [page.table.item(r, c).text()
+                                           for c in range(1, 5)]
+            for r in range(page.table.rowCount())}
+    assert rows["Steady 2D"] == ["telemac", "yes", "yes", "yes"]
+    assert rows["Mesh convergence"] == ["telemac", "yes", "no", "no"]
+    assert rows["Unsteady 2D"] == ["telemac", "no", "-", "-"]
+
+    sent = []
+    dock.submit = lambda kinds, options=None: sent.append(list(kinds))
+    page.build_button.click()
+    assert sent == [["preprocessing"]]
+
+
+def test_a_batch_is_submitted_in_the_order_of_the_workflow(dock):
+    from axqua_plugin.compat import CHECKED
+    from axqua_plugin.gui.capability_tabs import CaseView
+
+    dock._apply_case_view(CaseView.from_payload(EXAMPLE))
+    page = dock.page("batch")
+    assert page.ticked() == ["preprocessing", "steady"]      # what is ticked at first
+    page.steps.item(5).setCheckState(CHECKED)                # calibration, the last
+    sent = []
+    dock.submit = lambda kinds, options=None: sent.append(list(kinds))
+    page.submit_button.click()
+    assert sent == [["preprocessing", "steady", "calibration"]]
+
+
+def test_the_batch_script_is_written_for_the_active_case(dock, tmp_path, monkeypatch):
+    from qgis.PyQt.QtWidgets import QFileDialog
+
+    case = tmp_path / "reach.axq-case"
+    case.write_text("project: {name: reach}\n", encoding="utf-8")
+    dock.ctx.project.add_case(case)
+    target = tmp_path / "reach-batch.sh"
+    monkeypatch.setattr(QFileDialog, "getSaveFileName",
+                        staticmethod(lambda *a, **k: (str(target), "")))
+    dock.page("batch").script_button.click()
+    text = target.read_text(encoding="utf-8")
+    assert f"CASE={case}" in text.replace("'", "")
+    assert "run_step preprocessing\nrun_step steady\n" in text
+
+
+def test_a_finding_puts_a_triangle_on_its_row_and_on_the_tab(dock):
+    from axqua_plugin.gui import findings as fnd
+
+    tab = dock.configuration_tab
+    tab.show_profile({"path": "/home/x/default.axq-profile", "exists": True},
+                     {"name": "bench", "solvers": {"telemac": {"setup_script": "/t.sh"}}})
+    assert tab.edit_button.text() == "Edit profile..." and tab.check_button.isEnabled()
+    assert tab._summary["solvers.telemac.setup_script"].text() == "/t.sh"
+    index = dock.index_of("configuration")
+    assert dock.tabs.tabIcon(index).isNull()
+
+    tab.show_findings([fnd.Finding("warning", "axqua.environment.ambient", "ambient",
+                                   "solvers.openfoam.setup_script", "enter the script")],
+                      checked=True)
+    assert not tab._triangles["solvers.openfoam.setup_script"].isHidden()
+    assert tab._triangles["solvers.telemac.setup_script"].isHidden()
+    assert not dock.tabs.tabIcon(index).isNull()             # the tab carries it too
+    tab.show_findings([], checked=True)
+    assert dock.tabs.tabIcon(index).isNull()
+
+
+def test_a_computer_without_a_profile_is_offered_one(dock):
+    tab = dock.configuration_tab
+    tab.show_profile({"path": "/home/x/default.axq-profile", "exists": False}, None)
+    assert tab.edit_button.text() == "Create profile..."
+    assert not tab.check_button.isEnabled()
+    assert "no profile yet" in tab.profile_path.text()
+
+
+# ------------------------------------------------------------ the profile editor
+
+PROFILE = {
+    "path": "/home/x/default.axq-profile", "schema_version": 1, "name": "bench",
+    "python": {"executable": "/env/bin/python"},
+    "solvers": {"telemac": {"setup_script": "/opt/telemac/pysource.sh",
+                            "mpi_processes": 12,
+                            # an entry the editor has no row for must survive a save
+                            "overrides": {"USETELCFG": "debian"}}},
+    "postprocessors": {"visit": "/opt/visit/bin/visit"},
+}
+
+
+class _ProfileClient:
+    def __init__(self, findings=()):
+        self.written, self.findings = [], list(findings)
+
+    def profile_write(self, data):
+        self.written.append(data)
+        return {"path": "/home/x/default.axq-profile", "findings": []}
+
+    def profile_check(self, *, probe=True):
+        return {"path": "/home/x/default.axq-profile", "findings": self.findings}
+
+
+def _run_now(monkeypatch):
+    """Run a background call at once: these tests are about what is sent and shown."""
+    from axqua_plugin.gui import profile_editor
+
+    def now(title, call, on_success=None, on_error=None, owner=None):
+        try:
+            answer = call()
+        except Exception as exc:                 # noqa: BLE001 - as the task would
+            on_error(exc)
+        else:
+            on_success(answer)
+
+    monkeypatch.setattr(profile_editor, "run_async", now)
+
+
+def test_the_editor_writes_what_its_rows_say_and_keeps_the_rest(qgis_app, monkeypatch):
+    from axqua_plugin.gui.profile_editor import ProfileEditor, get
+
+    _run_now(monkeypatch)
+    client = _ProfileClient()
+    editor = ProfileEditor(client, PROFILE)
+    assert not editor.dirty                                   # just opened
+    editor._widgets["solvers.openfoam.setup_script"].setText("/usr/lib/of/bashrc")
+    editor._widgets["postprocessors.visit"].setText("")       # removed by the user
+    assert editor.dirty
+    editor.save()
+    (written,) = client.written
+    assert get(written, "solvers.openfoam.setup_script") == "/usr/lib/of/bashrc"
+    assert get(written, "solvers.telemac.overrides") == {"USETELCFG": "debian"}
+    assert get(written, "solvers.telemac.mpi_processes") == 12
+    assert "postprocessors" not in written                     # nothing left in it
+    assert "path" not in written                               # where, not what
+    assert editor.saved_once and not editor.dirty
+    editor.deleteLater()
+
+
+def test_saving_is_never_refused_because_of_a_finding(qgis_app, monkeypatch):
+    """A profile is incomplete while it is filled in. One that cannot be saved until it
+    is complete is lost work."""
+    from axqua_plugin.gui.profile_editor import ProfileEditor
+
+    _run_now(monkeypatch)
+    client = _ProfileClient([{"severity": "error", "code": "axqua.environment.script_missing",
+                              "subject": "solvers.telemac.setup_script",
+                              "message": "the script does not exist",
+                              "remedy": "select the script"}])
+    editor = ProfileEditor(client, PROFILE)
+    editor._widgets["name"].setText("bench-2")
+    editor.save()
+    assert len(client.written) == 1 and editor.saved_once
+    assert "Saved" in editor.status.text()
+    assert not editor._triangles["solvers.telemac.setup_script"].isHidden()
+    assert editor._triangles["name"].isHidden()
+    assert len(editor.finding_list.findings) == 1
+    editor.deleteLater()
+
+
+def test_cancel_discards_and_exit_asks_only_when_something_changed(qgis_app, monkeypatch):
+    from axqua_plugin.gui import profile_editor
+    from axqua_plugin.gui.profile_editor import ProfileEditor
+
+    _run_now(monkeypatch)
+    asked = []
+    monkeypatch.setattr(profile_editor, "exec_dialog",
+                        lambda box: asked.append(box.text()))
+    client = _ProfileClient()
+
+    untouched = ProfileEditor(client, PROFILE)
+    untouched.exit()                                 # nothing changed: closes at once
+    assert asked == [] and untouched.result() == 1
+
+    changed = ProfileEditor(client, PROFILE)
+    changed._widgets["name"].setText("other")
+    changed.exit()                                   # asks, and no button was chosen
+    assert asked == ["The profile has changes that are not saved."]
+    changed.reject()                                 # Cancel
+    assert client.written == []
+    for editor in (untouched, changed):
+        editor.deleteLater()
+
+
+def test_a_value_is_read_and_written_by_its_dotted_key(qgis_app):
+    from axqua_plugin.gui.profile_editor import get, put
+
+    data = {"solvers": {"telemac": {"setup_script": "/a"}}}
+    assert get(data, "solvers.telemac.setup_script") == "/a"
+    assert get(data, "solvers.openfoam.setup_script", "none") == "none"
+    put(data, "jobs.root", "/scratch")
+    assert data["jobs"] == {"root": "/scratch"}
+    put(data, "solvers.telemac.setup_script", "")    # emptied: removed with its parents
+    assert "solvers" not in data

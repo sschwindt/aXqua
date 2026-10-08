@@ -26,7 +26,7 @@ KINDS = ["preprocessing", "steady", "mesh-convergence", "build-3d", "steady-3d",
 
 #: What ``axqua submit --help-kinds`` reported, once anything has asked it.
 #:
-#: Filled by the Setup tab's background probe rather than by a call from here: this
+#: Filled by the Configuration tab's background probe rather than by a call from here: this
 #: module's ``initAlgorithm`` runs when the Processing provider is *registered*, which
 #: is during QGIS startup, and a subprocess there is the very thing the audit removed.
 #: So the list improves as soon as the dock has talked to axqua once, and until then

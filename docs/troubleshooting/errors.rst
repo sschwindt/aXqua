@@ -28,7 +28,7 @@ Each error belongs to one of five categories. The category determines where to l
      - ``axqua.mesh``
      - The mesh could not be created or is not usable.
 
-Where aXqua knows a remedy, the error message contains it. For a failed job, the error is stored with its code and its remedy in the file ``status.json`` of the job and is shown on the *Jobs* tab of the plugin.
+Where aXqua knows a remedy, the error message contains it. For a failed job, the error is stored with its code and its remedy in the file ``status.json`` of the job and is shown below the job list of the plugin.
 
 .. note::
 
@@ -45,6 +45,36 @@ Installation
 
 ``axqua could not be found`` (plugin)
     The plugin did not find the program ``axqua``. The message lists the three places that were searched. Enter the full path of the program in *aXqua > Settings* and click *Test* (:doc:`../installation/qgis-plugin`).
+
+Profile of this computer
+------------------------
+
+The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following errors. The plugin shows each of them as a dark red triangle next to the entry concerned. An error does not prevent saving the profile, but the function that depends on the entry does not work until the entry is corrected.
+
+.. _axqua-environment-program-missing:
+
+``the ... does not exist`` or ``the ... launcher ... is not executable``
+    The profile names a program file that is not on this computer, or that may not be started. Select the file again in the profile editor.
+
+.. _axqua-environment-script-missing:
+
+``the environment script of ... does not exist``
+    The profile names an environment script that is not on this computer. Select the script of the installation (:ref:`solver-bindings`).
+
+.. _axqua-environment-solver-unreachable:
+
+``... cannot be reached``
+    aXqua loaded the environment script and could not start the simulation program. The message states what is missing. Verify in a terminal that the installation works by itself, and that the profile names the environment script of this installation.
+
+.. _axqua-environment-job-root-not-writable:
+
+``the job root ... cannot be written to``
+    aXqua cannot create files in the folder for jobs. Select a folder on a drive with write access and sufficient free space.
+
+.. _axqua-config-invalid-value:
+
+``the launcher must be one of ...``, ``the number of processes must be at least 1`` and similar
+    An entry of the profile has a value that is not possible. The message names the entry and the permitted values.
 
 Case file
 ---------
@@ -86,10 +116,10 @@ A job fails immediately after its start
     In most cases, the simulation software cannot be reached from the job. Read ``runner.log`` of the job and verify the profile with ``axqua profile check`` (:ref:`solver-bindings`). Note the warning about the ambient environment (:doc:`warnings`): a job does not inherit the settings of the terminal or of QGIS.
 
 ``the 'systemd' launcher is not available on this machine``
-    The Linux user services that aXqua uses by default are not available, which is typical for some remote sessions. Submit the job with the option ``--launcher posix``, or select the launcher ``posix`` on the *Setup* tab of the plugin.
+    The Linux user services that aXqua uses by default are not available, which is typical for some remote sessions. Submit the job with the option ``--launcher posix``, or select ``posix`` under *How jobs are detached* in the profile editor of the plugin (*Configuration* tab).
 
 A job remains in the state ``RUNNING`` although nothing is computed
-    Query the state with ``axqua status <job-id>`` or refresh the *Jobs* tab. aXqua then verifies whether the process still exists and marks the job as ``FAILED`` if it does not, for example after a restart of the computer. The job can be submitted again.
+    Query the state with ``axqua status <job-id>`` or click *Refresh* below the job list. aXqua then verifies whether the process still exists and marks the job as ``FAILED`` if it does not, for example after a restart of the computer. The job can be submitted again.
 
 Plugin
 ------
@@ -97,8 +127,8 @@ Plugin
 aXqua is missing from the list of installed plugins
     QGIS lists a plugin only if it can read the file ``metadata.txt`` in the plugin folder, and it skips a plugin with an unreadable file without a message. Run ``python scripts/build_plugin_zip.py --check`` in the repository, which reads the file in the same way as QGIS and reports the line that cannot be read.
 
-The panel shows only the tabs *Setup* and *Jobs*
-    No case is selected, or the case file could not be read. Add a case on the *Setup* tab. If the tabs remain missing, run ``axqua case-status <case-file> --no-write`` in a terminal to obtain the error message.
+The tabs of the workflow show only the note to add a case
+    No case is selected, or the case file could not be read. Add a case on the *Case Setup* tab. If the tabs remain empty, run ``axqua case-status <case-file> --no-write`` in a terminal to obtain the error message.
 
 A result layer is loaded without colors
     The name of a result variable differs from the expected one. The file is intact. Assign the style in the QGIS layer properties.

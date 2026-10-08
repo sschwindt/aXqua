@@ -40,6 +40,8 @@ Until the plugin is listed in the QGIS plugin repository, download the plugin ar
 Connect the plugin to the aXqua program
 ---------------------------------------
 
-Open the aXqua panel from the toolbar and click *Check* on the *Setup* tab. The plugin searches for the ``axqua`` program in three places, in this order: the path entered in *aXqua > Settings*, the environment variable ``AXQUA_EXE``, and the system search path. If the program is not found, enter its full path in *Settings* and click *Test*. With the environment from above, the path ends with ``envs/axqua-env/bin/axqua`` (Linux) or ``envs\axqua-env\Scripts\axqua.exe`` (Windows).
+Open the aXqua panel from the toolbar and click *Check* on the *Configuration* tab. The plugin searches for the ``axqua`` program in three places, in this order: the path entered in *aXqua > Settings*, the environment variable ``AXQUA_EXE``, and the system search path. If the program is not found, enter its full path in *Settings* and click *Test*. With the environment from above, the path ends with ``envs/axqua-env/bin/axqua`` (Linux) or ``envs\axqua-env\Scripts\axqua.exe`` (Windows).
 
 The test reports the version that was found. A wrong path is therefore detected at this point and not later, when a simulation is started.
+
+**The panel.** The tabs of the panel follow the sections of this documentation in the order of the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing* and *Batch-processing*. The button *Help* at the top right of the panel opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.

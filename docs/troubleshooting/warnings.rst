@@ -58,6 +58,31 @@ Simulations
 ``checkMesh flagged marginal faces (the mesh is still runnable)``
     The mesh check of OpenFOAM found a small number of cells of low quality, typically at steps in the terrain. The simulation can be run. If it becomes unstable, increase the cell size or smooth the terrain at the reported locations.
 
+Profile of this computer
+------------------------
+
+The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following warnings. The plugin shows each of them as an orange triangle next to the entry concerned. A click on the triangle opens the message. A warning does not prevent saving the profile.
+
+.. _axqua-environment-solver-unbound:
+
+``no environment script is set for ..., so simulations with it cannot be started``
+    The profile does not state where TELEMAC or OpenFOAM is installed. Enter the environment script of the installation in the profile (:ref:`solver-bindings`). Leave the entry empty if the program is not used on this computer.
+
+.. _axqua-environment-ambient:
+
+``the variables of ... were already set before its environment script ran``
+    The terminal or QGIS session already contained the settings of the simulation program before aXqua loaded the environment script, typically because a system-wide startup file loads them. A job does not inherit these settings. Verify that the environment script of the profile alone sets up the installation, in particular if several versions of the program are installed.
+
+.. _axqua-environment-too-many-processes:
+
+``... processes are requested for ..., but this computer has ... logical cores``
+    More processes than processor cores slow a simulation down. Reduce the number of processor cores in the profile.
+
+.. _axqua-environment-openfoam-version:
+
+``this is OpenFOAM ...; aXqua writes input files for v2406``
+    The environment script belongs to another OpenFOAM version. aXqua writes its input files for the version v2406, and other versions may reject them. Enter the environment script of OpenFOAM v2406 in the profile.
+
 Simulation software
 -------------------
 

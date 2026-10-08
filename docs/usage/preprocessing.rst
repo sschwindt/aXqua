@@ -20,7 +20,7 @@ aXqua builds a model in five steps, each of which uses the result of the previou
 
 Because all files originate from one case file, they are consistent with each other. For example, the order of the boundary nodes in the boundary file always matches the mesh.
 
-To start preprocessing in the plugin, select the case on the *Setup* tab and click *Build* on the *Steady 2D* tab. In a terminal, the command is:
+To start preprocessing in the plugin, select the case on the *Case Setup* tab and click *Build* on the *Preprocessing* tab. The table *Preprocessing checkup* on that tab then states for every simulation of the case whether the case file asks for it, whether it is built, and whether it has been run. In a terminal, the command is:
 
 .. code-block:: text
 

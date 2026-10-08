@@ -12,7 +12,15 @@ Plugin profile
 
 All settings of a computer are stored in one file, the **profile**. Its name ends with ``.axq-profile``. The default profile is the file ``default.axq-profile`` in the aXqua configuration folder of the user (``~/.config/axqua/`` on Linux).
 
-To create the profile, let aXqua detect what is installed on the computer:
+**In the plugin.** The *Configuration* tab shows the profile of this computer. On a computer without a profile, click *Create profile...*: aXqua searches for Python, TELEMAC, OpenFOAM, ParaView and VisIt and opens the profile editor with what it found. With a profile, the button reads *Edit profile...*. Every path in the editor has a button that opens a file dialog, so that nothing has to be typed. The editor has three buttons at the bottom right:
+
+* *Save* writes the profile and checks it. The window stays open and shows what the check found.
+* *Cancel* discards the changes since the last save and closes the window.
+* *Exit* closes the window and asks first if there are changes that were not saved.
+
+The check never prevents saving. It marks each entry that is not in order with a triangle, orange for a warning and dark red for an error. A click on a triangle opens the message with its remedy and a button that opens this documentation at the explanation of the message (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). The button *Check* on the *Configuration* tab repeats the check at any time.
+
+**In a terminal.** To create the profile, let aXqua detect what is installed on the computer:
 
 .. code-block:: text
 

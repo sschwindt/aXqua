@@ -13,16 +13,27 @@ here rather than discovered when an upload is rejected:
 * no compiled or generated files, no ``__pycache__``, no VCS directories;
 * under 25 MB.
 
+The documentation is built into the archive, so that *Help* in the plugin works without
+a network connection and shows the documentation of the installed version. That needs
+Sphinx (``pip install -r docs/requirements-docs.txt``). Without Sphinx the archive is
+built without it and *Help* opens the published documentation.
+
 Usage::
 
     python scripts/build_plugin_zip.py                 # -> dist/axqua-qgis-<ver>.zip
     python scripts/build_plugin_zip.py --check         # validate only, build nothing
     python scripts/build_plugin_zip.py -o somewhere.zip
+    python scripts/build_plugin_zip.py --help-only     # only build the help into the
+                                                       # plugin folder (linked installs)
+    python scripts/build_plugin_zip.py --no-help       # an archive without the help
 """
 
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import shutil
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -121,6 +132,59 @@ def validate(plugin_dir: Path) -> tuple[dict[str, str], list[str]]:
     return fields, problems
 
 
+def _sections(plugin_dir: Path):
+    """The table of tabs, loaded by path: the plugin package itself needs QGIS."""
+    spec = importlib.util.spec_from_file_location(
+        "axqua_plugin_sections", plugin_dir / "gui" / "sections.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module          # dataclasses look their module up there
+    spec.loader.exec_module(module)
+    return module
+
+
+def build_help(plugin_dir: Path, docs_dir: Path | None = None) -> Path | None:
+    """Build the documentation into ``<plugin>/help`` with one redirect page per tab.
+
+    ``help/html/`` holds the documentation; ``help/<tab>.html`` sends the browser to
+    the page and the anchor of that tab. Returns the folder, or ``None`` where Sphinx
+    is not installed - the plugin then opens the published documentation.
+    """
+    docs_dir = docs_dir or (REPO / "docs")
+    if importlib.util.find_spec("sphinx") is None:
+        print("  Sphinx is not installed: the help is not built into the plugin "
+              "(Help will open the published documentation)")
+        return None
+    target = plugin_dir / "help"
+    if target.exists():
+        shutil.rmtree(target)
+    html = target / "html"
+    # The tag switches the source listings off (docs/conf.py): they are 10 MB, and the
+    # archive has a limit of 25.
+    subprocess.run([sys.executable, "-m", "sphinx", "-q", "-b", "html", "-t",
+                    "plugin_help", str(docs_dir), str(html)], check=True)
+    # what a reader of the pages does not need, and what would only add megabytes
+    for junk in (html / ".doctrees", html / "_sources"):
+        shutil.rmtree(junk, ignore_errors=True)
+    for junk in (html / ".buildinfo", html / "objects.inv"):
+        junk.unlink(missing_ok=True)
+    # The theme ships every font in five formats. Every browser of the last ten years
+    # reads woff2, and the style sheets fall back to a system font without the others.
+    for font in html.rglob("*"):
+        if font.suffix in {".eot", ".ttf", ".woff", ".svg"} and "fonts" in font.parts:
+            font.unlink()
+    sections = _sections(plugin_dir)
+    for key, page, label in sections.help_keys():
+        if not (html / f"{page}.html").is_file():
+            raise SystemExit(f"the help for the tab {key!r} needs {page}.html, which "
+                             "the documentation build did not produce")
+        (target / f"{key}.html").write_text(sections.redirect_page(page, label),
+                                            encoding="utf-8")
+    size = sum(f.stat().st_size for f in target.rglob("*") if f.is_file())
+    print(f"  help: {len(sections.help_keys())} tabs, {size / 1024 / 1024:.1f} MiB "
+          f"in {target}")
+    return target
+
+
 def included(path: Path, root: Path) -> bool:
     relative = path.relative_to(root)
     if any(part in EXCLUDE_DIRS for part in relative.parts):
@@ -150,6 +214,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("-o", "--out", type=Path, default=None)
     parser.add_argument("--check", action="store_true",
                         help="validate only; build nothing")
+    parser.add_argument("--help-only", action="store_true",
+                        help="build the documentation into the plugin folder and stop")
+    parser.add_argument("--no-help", action="store_true",
+                        help="build the archive without the documentation")
     args = parser.parse_args(argv)
 
     fields, problems = validate(args.plugin_dir)
@@ -163,6 +231,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  QGIS {fields['qgisMinimumVersion']} to "
           f"{fields.get('qgisMaximumVersion', '(unbounded)')}")
     if args.check:
+        return 0
+    if not args.no_help:
+        build_help(args.plugin_dir)
+    if args.help_only:
         return 0
 
     out = args.out or (DEFAULT_OUT / f"axqua-qgis-{version}.zip")

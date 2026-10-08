@@ -293,6 +293,22 @@ def test_a_job_takes_its_binding_from_the_active_profile(tmp_path, fake_pysource
     assert (found.working_root, found.launcher) == (tmp_path / "scratch", "posix")
 
 
+def test_every_job_verb_looks_in_the_folder_the_profile_names(tmp_path, monkeypatch):
+    """``submit`` put a job into the folder of the profile, and ``list``, ``status``,
+    ``logs`` and ``cancel`` then looked in the default folder and did not find it."""
+    from axqua.jobs import paths as job_paths
+
+    monkeypatch.delenv(job_paths.ENV_JOB_ROOT, raising=False)
+    assert job_paths.job_root() == job_paths.data_dir() / "jobs"       # no profile yet
+    profiles.save(profiles.AxquaProfile(name="bench", job_root=tmp_path / "scratch"),
+                  profiles.default_path())
+    assert job_paths.job_root() == (tmp_path / "scratch").resolve()
+    # the more specific settings still win
+    monkeypatch.setenv(job_paths.ENV_JOB_ROOT, str(tmp_path / "from-env"))
+    assert job_paths.job_root() == (tmp_path / "from-env").resolve()
+    assert job_paths.job_root(explicit=tmp_path / "flag") == (tmp_path / "flag").resolve()
+
+
 def test_a_binding_without_a_process_count_leaves_it_to_the_case(tmp_path, fake_pysource):
     _profile(tmp_path, telemac=str(fake_pysource))
     cfg = load_config(_case(tmp_path, telemac="  n_processors: 7"))
@@ -426,3 +442,19 @@ def test_the_command_replaces_a_profile_from_json_and_reports_findings(
     monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"solvres": {}})))
     assert not _run(capsys, "write")["ok"]
     assert profiles.load_active(strict=True).name == "from-plugin"
+
+
+def test_every_code_of_the_profile_check_is_explained_in_the_documentation():
+    """A triangle in the plugin opens the documentation at the anchor of its code. A
+    code without an anchor opens the right page at the wrong place, silently."""
+    import re
+
+    root = Path(__file__).resolve().parent.parent
+    source = (root / "src" / "axqua" / "core" / "profile.py").read_text(encoding="utf-8")
+    codes = set(re.findall(r'"(axqua\.(?:environment|config)\.[a-z_]+)"', source))
+    assert len(codes) >= 9
+    pages = "".join((root / "docs" / "troubleshooting" / name).read_text(encoding="utf-8")
+                    for name in ("warnings.rst", "errors.rst"))
+    missing = sorted(code for code in codes
+                     if f".. _{code.replace('.', '-').replace('_', '-')}:" not in pages)
+    assert missing == []

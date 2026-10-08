@@ -1,29 +1,61 @@
-"""The dock: Setup, the capability tabs, and the job dashboard.
+"""The panel: the tabs of the workflow, and the job list below them.
 
-The tab set is rebuilt whenever the case changes, from ``axqua case-status --json``.
-That is the design point (plan §17): the plugin does not know what TELEMAC or OpenFOAM can
-do, it *asks*, so a capability added to axqua appears here without a plugin release.
+The tabs are fixed and follow the documentation section by section
+(:mod:`.sections`): Configuration, Case Setup, Preprocessing, Hydraulic simulation,
+Mesh convergence, Morphodynamic simulation, Calibration & validation, Postprocessing and
+Batch-processing. *Help* opens the documentation at the section of the tab that is
+showing.
 
-The dock also carries the :class:`PluginContext` - the small object every widget uses to
-reach the runner client, the project and the message bar. Passing one context beats
+What a tab offers still comes from ``axqua case-status --json``: the plugin does not
+know what TELEMAC or OpenFOAM can do, it *asks*, so a capability added to aXqua appears
+here without a plugin release. The capability matrix decides which boxes a tab shows and
+which of their buttons are enabled.
+
+The job list is below the tabs and stays visible from every one of them, because a job
+is submitted on one tab and its result is used on another.
+
+The panel also carries the :class:`PluginContext` - the small object every widget uses
+to reach the runner client, the project and the message bar. Passing one context beats
 threading four constructor arguments through every widget, and it keeps the widgets free
-of solver knowledge (plan §31).
+of solver knowledge.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from qgis.PyQt.QtWidgets import (QDockWidget, QLabel, QTabWidget, QVBoxLayout, QWidget)
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import (QDockWidget, QGroupBox, QPushButton, QSplitter,
+                                 QTabWidget, QVBoxLayout, QWidget)
 
-from ..compat import CRITICAL, INFO, WARNING, exec_dialog, log_message, push_message
+from ..compat import (CRITICAL, INFO, WARNING, enum_value, exec_dialog, log_message,
+                      push_message)
 from ..core import project as project_io
 from ..core.runner_client import RunnerClient, user_text
-from .capability_tab_widget import CapabilityTab
+from . import findings as fnd
+from . import help as help_pages
+from . import sections
 from .capability_tabs import CaseView
+from .case_tab import CaseTab
+from .configuration_tab import ConfigurationTab
 from .jobs_widget import JobsWidget
+from .section_pages import (BatchPage, PreprocessingPage, ProgramPage, QgisPage,
+                            SectionPage)
 from .settings_dialog import SettingsDialog, read_settings
-from .setup_tab import SetupTab
+
+#: What a sub-tab says when the active case has nothing for it.
+EMPTY = {
+    ("hydraulics", "telemac"): "This case does not use TELEMAC. Add a telemac: block to "
+                               "its case file.",
+    ("hydraulics", "openfoam"): "This case does not use OpenFOAM. Add an openfoam: "
+                                "block to its case file to simulate the free surface "
+                                "in three dimensions.",
+    ("mesh", ""): "This case has no simulation for which a mesh study can be run.",
+    ("morphodynamics", "telemac"): "This case does not use TELEMAC.",
+    ("morphodynamics", "openfoam"): "Morphodynamic simulations with OpenFOAM are not "
+                                    "yet available in this version.",
+    ("calibration", ""): "This case has no simulation that can be calibrated.",
+}
 
 
 class PluginContext:
@@ -38,6 +70,8 @@ class PluginContext:
         self.velocity_cap = settings["velocity_cap"]
         self.project = project_io.AxquaProject()
         self.case_view: CaseView | None = None
+        self.profile: dict | None = None
+        self.actions: dict = {}             # what the plugin menu can do, by name
         self.runner_ok = False
         self.runner_checked = False
         self.runner_error = ""
@@ -61,7 +95,7 @@ class PluginContext:
 
     # -- the runner ---------------------------------------------------------------
     def set_runner_ok(self, ok: bool, detail: str = "") -> None:
-        """Record what the Setup tab's background probe found."""
+        """Record what the Configuration tab's background probe found."""
         self.runner_ok = ok
         self.runner_checked = True
         self.runner_error = detail
@@ -72,9 +106,9 @@ class PluginContext:
         Every action goes through this, so "axqua is not installed" is reported once,
         clearly, rather than as a different traceback per button.
 
-        It answers from what the Setup tab's probe already found and **never probes
-        here**: this runs inside a button handler, a probe is a subprocess, and one
-        against an unreachable path costs 30 s per candidate before the click does
+        It answers from what the Configuration tab's probe already found and **never
+        probes here**: this runs inside a button handler, a probe is a subprocess, and
+        one against an unreachable path costs 30 s per candidate before the click does
         anything at all. While the first probe is still in flight the action proceeds -
         the background call resolves the executable itself and reports any failure
         through its own error path, which is where that message belongs anyway.
@@ -88,7 +122,7 @@ class PluginContext:
     def active_case_or_warn(self) -> Path | None:
         case = self.project.active_case_path()
         if case is None:
-            self.warn("Add a case configuration on the Setup tab first.")
+            self.warn("Add a case on the tab Case Setup first.")
             return None
         if not case.exists():
             self.warn(f"{case} is listed in the project but is not on disk.")
@@ -111,11 +145,33 @@ class PluginContext:
     def set_active_case(self, stored: str) -> None:
         self.dock.set_active_case(stored)
 
+    def refresh_case(self) -> None:
+        self.dock.refresh_case()
+
     def job_submitted(self, job_id: str) -> None:
         self.dock.job_submitted(job_id)
 
     def load_latest_results(self, kind: str) -> None:
         self.dock.load_latest_results(kind)
+
+    def load_selected_results(self) -> None:
+        self.dock.jobs_tab._load_results()
+
+    def submit(self, kind: str, options: dict | None = None) -> None:
+        self.dock.submit([kind], options)
+
+    def submit_sequence(self, kinds) -> None:
+        self.dock.submit(list(kinds))
+
+    def profile_changed(self, profile) -> None:
+        self.dock.profile_changed(profile)
+
+    def run_action(self, name: str) -> None:
+        action = self.actions.get(name)
+        if action is None:
+            self.warn("This function is not available.")
+            return
+        action()
 
 
 class AxquaDock(QDockWidget):
@@ -130,24 +186,105 @@ class AxquaDock(QDockWidget):
         container = QWidget()
         layout = QVBoxLayout(container)
         layout.setContentsMargins(2, 2, 2, 2)
-
-        self.tabs = QTabWidget()
-        layout.addWidget(self.tabs)
+        splitter = QSplitter(enum_value(_qt(), "Orientation.Vertical", "Vertical"))
+        layout.addWidget(splitter)
         self.setWidget(container)
 
-        self.setup_tab = SetupTab(self.ctx)
-        self.tabs.addTab(self.setup_tab, "Setup")
+        self.tabs = QTabWidget()
+        self.tabs.setUsesScrollButtons(True)
+        self.help_button = QPushButton("Help")
+        self.help_button.setToolTip("Open the documentation at the section of this tab")
+        self.help_button.clicked.connect(self.open_help)
+        self.tabs.setCornerWidget(self.help_button)
+        splitter.addWidget(self.tabs)
 
+        #: every page that follows the active case, by (section key, sub key)
+        self.pages: dict[tuple[str, str], QWidget] = {}
+        #: the tab widget inside a section that has sub-tabs
+        self.subtabs: dict[str, QTabWidget] = {}
+        self._build_tabs()
+
+        jobs_box = QGroupBox("Jobs")
+        jobs_layout = QVBoxLayout(jobs_box)
+        jobs_layout.setContentsMargins(2, 2, 2, 2)
         self.jobs_tab = JobsWidget(self.ctx)
-        self.tabs.addTab(self.jobs_tab, "Jobs")
+        jobs_layout.addWidget(self.jobs_tab)
+        splitter.addWidget(jobs_box)
+        splitter.setStretchFactor(0, 3)
+        splitter.setStretchFactor(1, 2)
+        splitter.setSizes([600, 320])
+        self.jobs_tab.setMinimumHeight(170)
 
-        self._capability_tabs: dict[str, CapabilityTab] = {}
-        self._placeholder = QLabel(
-            "Choose a case on the Setup tab. The tabs available here are generated from "
-            "what axqua reports this case can actually do.")
-        self._placeholder.setWordWrap(True)
+        self.configuration_tab.check_runner()
 
-        self.setup_tab.check_runner()
+    # -- construction -------------------------------------------------------------
+    def _build_tabs(self) -> None:
+        self.configuration_tab = ConfigurationTab(self.ctx)
+        self.configuration_tab.on_findings = lambda level: self.mark("configuration",
+                                                                     level)
+        self.case_tab = CaseTab(self.ctx)
+        special = {
+            "configuration": self.configuration_tab,
+            "case": self.case_tab,
+            "preprocessing": PreprocessingPage(self.ctx),
+            "batch": BatchPage(self.ctx),
+        }
+        for item in sections.SECTIONS:
+            if item.key in special:
+                widget = special[item.key]
+                if hasattr(widget, "apply"):
+                    self.pages[(item.key, "")] = widget
+            elif item.subsections:
+                widget = QTabWidget()
+                self.subtabs[item.key] = widget
+                for sub in item.subsections:
+                    page = self._page(item.key, sub.key, sub.title)
+                    self.pages[(item.key, sub.key)] = page
+                    widget.addTab(page, sub.title)
+            else:
+                widget = self._page(item.key, "", item.title)
+                self.pages[(item.key, "")] = widget
+            self.tabs.addTab(widget, item.title.replace("&", "&&"))
+
+    def _page(self, key: str, sub: str, title: str) -> QWidget:
+        if key == "postprocessing":
+            return (QgisPage(self.ctx) if sub == "qgis"
+                    else ProgramPage(self.ctx, sub, title))
+        # the build of the 2D model has a tab of its own
+        hide = (sections.PREPROCESSING_CAPABILITY,) if key == "hydraulics" else ()
+        return SectionPage(self.ctx, key, sub, empty_text=EMPTY.get((key, sub), ""),
+                           hide_build=hide)
+
+    def page(self, key: str, sub: str = "") -> QWidget | None:
+        return self.pages.get((key, sub))
+
+    def index_of(self, key: str) -> int:
+        return [item.key for item in sections.SECTIONS].index(key)
+
+    def show_section(self, key: str, sub: str = "") -> None:
+        """Bring a tab, and one of its sub-tabs, to the front."""
+        self.tabs.setCurrentIndex(self.index_of(key))
+        inner = self.subtabs.get(key)
+        if inner is not None and sub:
+            keys = [s.key for s in sections.section(key).subsections]
+            inner.setCurrentIndex(keys.index(sub))
+
+    def current_section(self) -> tuple[str, str]:
+        """``(section key, sub key)`` of what is showing."""
+        item = sections.SECTIONS[max(self.tabs.currentIndex(), 0)]
+        inner = self.subtabs.get(item.key)
+        sub = item.subsections[inner.currentIndex()].key if inner is not None else ""
+        return item.key, sub
+
+    def mark(self, key: str, level: str) -> None:
+        """Put a warning triangle on a tab, or take it off (level '')."""
+        self.tabs.setTabIcon(self.index_of(key),
+                             fnd.triangle(level) if level else QIcon())
+
+    # -- help ---------------------------------------------------------------------
+    def open_help(self) -> str:
+        key, sub = self.current_section()
+        return help_pages.open_help(key, sub)
 
     # -- project ------------------------------------------------------------------
     def open_project(self, path: Path) -> None:
@@ -156,10 +293,10 @@ class AxquaDock(QDockWidget):
         except (OSError, ValueError) as exc:
             self.ctx.error(f"Could not open {path.name}: {exc}")
             return
-        self.setup_tab.refresh()
+        self.case_tab.refresh()
         self.ctx.info(f"Opened {path.name} with {len(self.ctx.project.cases)} case(s).")
-        # Rediscovery (plan §19): the project names the job root, and the jobs under it
-        # are found with whatever state they have reached while QGIS was closed.
+        # Rediscovery: the jobs are found with whatever state they have reached while
+        # QGIS was closed.
         self.refresh_case()
         self.jobs_tab.refresh()
 
@@ -169,12 +306,12 @@ class AxquaDock(QDockWidget):
         except (OSError, ValueError) as exc:
             self.ctx.error(f"Could not save the project: {exc}")
             return
-        self.setup_tab.refresh()
+        self.case_tab.refresh()
         self.ctx.info(f"Saved {written.name}.")
 
     def add_case(self, path: Path) -> None:
         self.ctx.project.add_case(path)
-        self.setup_tab.refresh()
+        self.case_tab.refresh()
         self.refresh_case()
 
     def set_active_case(self, stored: str) -> None:
@@ -183,7 +320,7 @@ class AxquaDock(QDockWidget):
 
     # -- capabilities -------------------------------------------------------------
     def refresh_case(self) -> None:
-        """Re-read the capability matrix and rebuild the tabs from it.
+        """Re-read the capability matrix and bring every tab into line with it.
 
         Nothing here touches the executable on the GUI thread. Resolving *where* axqua
         is can itself mean running ``--version`` against three candidate paths, so that
@@ -211,9 +348,8 @@ class AxquaDock(QDockWidget):
 
         Two calls rather than one because they answer at different speeds: the capability
         matrix is a few file stats and must not wait, while probing a solver environment
-        sources a shell profile and can take seconds. So the tabs appear immediately and
-        the Setup tab's "environment not checked" - which it used to print for ever,
-        because nothing ever asked - is replaced when the answer arrives.
+        sources a shell profile and can take seconds. So the tabs fill immediately and
+        "checking the environment..." is replaced when the answer arrives.
         """
         from ..core.tasks import run_async
         client = self.ctx.client
@@ -222,7 +358,7 @@ class AxquaDock(QDockWidget):
                   on_success=lambda payload: self._env_checked(
                       CaseView.from_payload(payload or {})),
                   # A failed environment probe is not worth a banner: the tabs are
-                  # already up and everything except the one status line still works.
+                  # already filled and everything except the one status line works.
                   on_error=lambda exc: log_message(
                       f"environment check failed: {user_text(exc)}", WARNING),
                   owner=self)
@@ -230,90 +366,19 @@ class AxquaDock(QDockWidget):
     def _env_checked(self, view: CaseView) -> None:
         if self.ctx.case_view is not None:
             self.ctx.case_view = view
-        self.setup_tab.show_capabilities(view)
+        self.case_tab.show_capabilities(view)
 
     def _apply_case_view(self, view: CaseView | None) -> None:
         self.ctx.case_view = view
-        self.setup_tab.show_capabilities(view)
-        self._rebuild_tabs(view)
+        self.case_tab.show_capabilities(view)
+        for page in self.pages.values():
+            if hasattr(page, "apply"):
+                page.apply(view)
 
-    def _rebuild_tabs(self, view: CaseView | None) -> None:
-        """Bring the generated tabs into line with *view*, reusing what fits.
-
-        A refresh happens on every case change and after every environment check, and a
-        capability tab is not cheap to build. Tabs whose key survives are re-rendered
-        through ``CapabilityTab.apply`` instead - which also keeps whatever the user had
-        typed into the options form.
-        """
-        wanted: list[tuple[str, str, object]] = []
-        if view is not None:
-            multi = len(view.enabled_solvers) > 1
-            for solver in view.enabled_solvers:
-                for capability in solver.visible_capabilities:
-                    label = (f"{capability.title} ({solver.name})" if multi
-                             else capability.title)
-                    wanted.append((f"{solver.name}:{capability.name}", label, capability))
-
-        keep = {key for key, _, _ in wanted}
-        for key, tab in list(self._capability_tabs.items()):
-            if key not in keep:
-                index = self.tabs.indexOf(tab)
-                if index >= 0:
-                    self.tabs.removeTab(index)
-                tab.deleteLater()
-                del self._capability_tabs[key]
-
-        for position, (key, label, capability) in enumerate(wanted):
-            tab = self._capability_tabs.get(key)
-            if tab is None:
-                tab = CapabilityTab(capability, self.ctx)
-                self._capability_tabs[key] = tab
-                self.tabs.insertTab(position + 1, tab, label)
-            else:
-                tab.apply(capability)
-                index = self.tabs.indexOf(tab)
-                if index != position + 1 and index >= 0:
-                    self.tabs.removeTab(index)
-                    self.tabs.insertTab(position + 1, tab, label)
-                self.tabs.setTabText(self.tabs.indexOf(tab), label)
-            # Shown but disabled where axqua has not implemented it, or implements it
-            # with no job kind - a gap in axqua is worth seeing, and is different from a
-            # category error, which is hidden entirely.
-            tab.setEnabled(capability.enabled)
-            self.tabs.setTabToolTip(self.tabs.indexOf(tab), capability.reason)
-
-        self._show_placeholder(view)
-
-    def _show_placeholder(self, view: CaseView | None) -> None:
-        """Say why there are no tabs, rather than showing an empty dock.
-
-        A case whose config has no ``telemac:`` block gets ``enabled: false`` for every
-        solver, and so no tabs at all. Without this the dock is simply blank, which
-        reads as a broken plugin rather than as an unconfigured case.
-        """
-        index = self.tabs.indexOf(self._placeholder)
-        if self._capability_tabs:
-            if index >= 0:
-                self.tabs.removeTab(index)
-            return
-        if view is None:
-            self._placeholder.setText(
-                "Choose a case on the Setup tab. The tabs available here are generated "
-                "from what axqua reports this case can actually do.")
-        elif not view.solvers:
-            self._placeholder.setText(
-                "axqua reported no solvers for this case. Check that the file really is "
-                "an aXqua case configuration.")
-        else:
-            names = ", ".join(s.name for s in view.solvers)
-            self._placeholder.setText(
-                f"This case enables none of the solvers axqua knows about ({names}).\n\n"
-                "A solver is enabled by having its block in the case file - a "
-                "'telemac:' block for TELEMAC, an 'openfoam:' block for OpenFOAM. Add "
-                "one (see the annotated template in the docs) and press Check on the "
-                "Setup tab.")
-        if index < 0:
-            self.tabs.insertTab(1, self._placeholder, "Capabilities")
+    def profile_changed(self, profile) -> None:
+        for page in self.pages.values():
+            if hasattr(page, "show_profile"):
+                page.show_profile(profile)
 
     # -- actions ------------------------------------------------------------------
     def open_settings(self) -> None:
@@ -323,20 +388,61 @@ class AxquaDock(QDockWidget):
             self.ctx.client = RunnerClient(values["executable"] or None)
             self.ctx.min_depth = values["min_depth"]
             self.ctx.velocity_cap = values["velocity_cap"]
-            self.setup_tab.check_runner()
+            self.configuration_tab.check_runner()
+
+    def submit(self, kinds, options: dict | None = None) -> None:
+        """Submit one job, or several of the active case in the order given.
+
+        Several jobs are handed over one after the other in **one** background call, so
+        that their tickets are written in this order: jobs of one case start in the
+        order they were submitted.
+        """
+        client = self.ctx.client_or_warn()
+        config = self.ctx.active_case_or_warn()
+        if client is None or config is None or not kinds:
+            return
+        project = self.ctx.project
+        kinds = list(kinds)
+
+        def work():
+            submitted = []
+            for kind in kinds:
+                data = client.submit(config, kind, profile=project.profile or None,
+                                     job_root=project.job_root or None,
+                                     launcher=project.launcher,
+                                     options=options if len(kinds) == 1 else None)
+                submitted.append(str((data or {}).get("job_id") or ""))
+            return submitted
+
+        from ..core.tasks import run_async
+        run_async("aXqua: submitting " + ", ".join(kinds), work,
+                  on_success=self._submitted,
+                  on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
+
+    def _submitted(self, job_ids) -> None:
+        count = len(job_ids)
+        self.ctx.info((f"Submitted {job_ids[0]}." if count == 1 else
+                       f"Submitted {count} jobs. Each waits for the one before it.")
+                      + " They keep running if you close QGIS.")
+        self.job_submitted(job_ids[-1] if job_ids else "")
 
     def job_submitted(self, job_id: str) -> None:
+        # The job list is below every tab, so there is nowhere to switch to.
         self.jobs_tab.refresh()
-        self.tabs.setCurrentWidget(self.jobs_tab)
 
     def load_latest_results(self, kind: str) -> None:
         """Load the newest completed job of *kind* for the active case."""
         jobs = [j for j in self.jobs_tab.table_model
                 if j.state == "COMPLETED" and (not kind or j.kind == kind)]
         if not jobs:
-            self.ctx.warn("No completed job of that kind yet. Refresh the Jobs tab if "
+            self.ctx.warn("No completed job of that kind yet. Refresh the job list if "
                           "one finished while this was open.")
             return
         newest = max(jobs, key=lambda j: j.finished or j.updated or "")
         self.jobs_tab.select(newest.job_id)
         self.jobs_tab._load_results()
+
+
+def _qt():
+    from qgis.PyQt.QtCore import Qt
+    return Qt

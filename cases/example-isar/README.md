@@ -25,16 +25,16 @@ Measured run times with 8 processor cores on a workstation with 16 cores:
 
 | Step | Button in the plugin | Run time |
 | --- | --- | --- |
-| Build the model | *Steady 2D* > *Build* | 1 min |
-| Steady simulation | *Steady 2D* > *Submit* | 1.5 min |
-| Bayesian calibration | *Calibration (BAL)* > *Submit* | 18 min |
+| Build the model | *Preprocessing* > *Build* | 1 min |
+| Steady simulation | *Hydraulic simulation* > *Telemac* > *Steady 2D* > *Submit* | 1.5 min |
+| Bayesian calibration | *Calibration & validation* > *Submit* | 18 min |
 | Mesh convergence study (optional) | *Mesh convergence* > *Submit* | 20 min |
-| Three-dimensional model (optional) | *Steady 3D* > *Build*, then *Submit* | 19 min |
+| Three-dimensional model (optional) | *Hydraulic simulation* > *Telemac* > *Steady 3D* > *Build*, then *Submit* | 19 min |
 
 ## Requirements
 
 1. **The input data of the Isar case.** The case file reads its geodata and measurements from `../isar-2025/user-sources`. This folder is not part of the repository because of its size (about 0.9 GB). The example writes nothing into it.
-2. **aXqua with a TELEMAC installation.** Run `axqua profile init` once in a terminal. It writes the profile of this computer with the TELEMAC installation it finds. Then run `axqua profile check`, which starts TELEMAC once and reports every problem with its remedy. A warning about OpenFOAM does not affect this example. The section *Installation & Configuration* of the documentation explains how to register a TELEMAC installation that aXqua does not find by itself.
+2. **aXqua with a TELEMAC installation.** aXqua has to know where TELEMAC is installed. Step 1 below sets this up in the plugin. In a terminal, `axqua profile init` writes the profile of this computer with the TELEMAC installation it finds, and `axqua profile check` starts TELEMAC once and reports every problem with its remedy.
 3. **HydroBayesCal 1.8.1 or newer** in the Python environment of aXqua. The Python Package Index currently provides version 1.7.0 only, so install it from the tagged source:
 
    ```bash
@@ -55,33 +55,33 @@ scripts/qgis_dev.sh
 
 The script starts QGIS with a user profile of its own (`axqua-dev`), links the plugin folder of this repository into that profile, and enables the plugin. Other QGIS profiles are not changed. The script also tells the plugin which `axqua` program to call: the one of the conda environment `axqua-env` if it exists, otherwise the first one on the search path. To use another program, set the variable `AXQUA_EXE` before starting the script or enter the path in the plugin under *Plugins > aXqua > Settings...*.
 
-In QGIS, open the panel with the aXqua button in the toolbar or with *Plugins > aXqua > aXqua panel*. The panel docks on the right side of the window.
+In QGIS, open the panel with the aXqua button in the toolbar or with *Plugins > aXqua > aXqua panel*. The panel docks on the right side of the window. Its tabs follow the workflow from left to right, and the list of jobs below the tabs is visible from every tab. The button *Help* at the top right opens the documentation at the section of the tab that is showing.
 
-## Step 1: Open the case
+## Step 1: Configure the computer and open the case
 
-1. Go to the tab *Setup*. The first line names the `axqua` program and its version. If it reports an error, click *Settings...* and select the program.
-2. Click *Add case...* and select `cases/example-isar/example-isar.axq-case`.
-3. The line at the bottom of the tab now reads `telemac - environment ok`, followed by what the case can do. The plugin has added one tab for each of these capabilities.
+1. Go to the tab *Configuration*. The first line names the `axqua` program and its version. If it reports an error, click *Settings...* and select the program.
+2. On a computer without a profile, click *Create profile...*. aXqua enters what it finds on the computer into the profile editor: Python, TELEMAC, OpenFOAM, ParaView and VisIt. Click *Save*. The editor checks the profile and marks each entry that is not in order with a triangle, orange for a warning and dark red for an error. A click on a triangle opens the message with its remedy. A warning about OpenFOAM does not affect this example. Close the editor with *Exit*.
+3. Go to the tab *Case Setup*, click *Add case...* and select `cases/example-isar/example-isar.axq-case`.
+4. The line below the list of cases now reads `telemac - environment ok`, followed by what the case can do.
 
-*Save project* stores the list of cases in a small project file (`.axqua-prj`), so that the case is listed again after a restart of QGIS. This is optional.
+*Save project* on the same tab stores the list of cases in a small project file (`.axqua-prj`), so that the case is listed again after a restart of QGIS. This is optional.
 
 ## Step 2: Build the model
 
-1. Go to the tab *Steady 2D*. The first line states `configured`: the case file asks for a steady 2D simulation, and nothing has been built yet.
-2. Click *Build*. The plugin submits a job and switches to the tab *Jobs*.
-3. Wait until the state of the job is `COMPLETED` (about 1 min).
+1. Go to the tab *Preprocessing* and click *Build*. The job appears in the list of jobs below the tabs.
+2. Wait until the state of the job is `COMPLETED` (about 1 min). The tab then states `The model is built.`
 
-The build clips the terrain model to the model outline, generates the mesh, interpolates the bed elevation and the roughness zones onto the mesh nodes, assigns the boundary conditions, and writes the TELEMAC input files into `axqua-case/simulation/`. The file `axqua.log` in the same folder reports the mesh quality and every decision of the build, for example the selected turbulence model.
+The build clips the terrain model to the model outline, generates the mesh, interpolates the bed elevation and the roughness zones onto the mesh nodes, assigns the boundary conditions, and writes the TELEMAC input files into `axqua-case/simulation/`. The file `axqua.log` in the same folder reports the mesh quality and every decision of the build, for example the selected turbulence model. The table *Preprocessing checkup* states for every simulation of the case whether the case file asks for it, whether it is built, and whether it has been run.
 
-A job runs independently of QGIS. QGIS can be closed while a job runs, and the *Jobs* tab shows the job with its current state when QGIS is opened again.
+A job runs independently of QGIS. QGIS can be closed while a job runs, and the list of jobs shows the job with its current state when QGIS is opened again.
 
-Jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits for it, and the column *Progress* shows `waiting for` with the name of that job. *Build* and *Submit* can therefore be clicked in direct succession.
+Jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits for it, and the column *Progress* shows `waiting for` with the name of that job. *Build* and the *Submit* of the next step can therefore be clicked in direct succession.
 
 ## Step 3: Run the steady simulation and load the result
 
-1. Go back to the tab *Steady 2D*, which now states `configured, built`, and click *Submit*.
-2. On the tab *Jobs*, the column *Progress* shows the simulated share of the 3000 s and the number of time steps. The run is complete after about 1.5 min.
-3. Select the completed job and click *Load results*.
+1. Go to the tab *Hydraulic simulation*, sub-tab *Telemac*. In the box *Steady 2D*, click *Submit*.
+2. In the list of jobs, the column *Progress* shows the simulated share of the 3000 s and the number of time steps. The run is complete after about 1.5 min.
+3. Select the completed job in the list and click *Load results* below the list.
 
 QGIS adds three layers in the group `axqua` of the layer panel:
 
@@ -106,16 +106,16 @@ A steady simulation is only useful when the discharge that leaves the model equa
 | `wetting-report.csv` | wetted area split into flowing water, stagnant film, and isolated puddles |
 | `outlet-profile.csv` | water surface, depth, and Froude number in bands upstream of the outflow line |
 
-In this example, the difference between inflow and outflow falls below 0.1 % after about 2200 s of simulated time. The button *View logs* on the tab *Jobs* shows the same numbers in the log of the job.
+In this example, the difference between inflow and outflow falls below 0.1 % after about 2200 s of simulated time. The button *View logs* below the list of jobs shows the same numbers in the log of the selected job.
 
 ## Step 5: Calibrate the roughness
 
-1. Go to the tab *Calibration (BAL)* and click *Submit*. Leave the option *Prepare only* unchecked.
-2. The tab *Jobs* shows the number of the current simulation in the column *Progress*, for example `iter 5/12`. The calibration takes about 18 min.
+1. Go to the tab *Calibration & validation* and click *Submit*. Leave the option *Prepare only* as it is.
+2. The list of jobs shows the number of the current simulation in the column *Progress*, for example `iter 5/12`. The calibration takes about 18 min.
 
 The calibration first writes the measurements into the table `axqua-case/calibration-validation/measurements-calibration.csv`, with one row per vertical. HydroBayesCal then proceeds in two stages. It runs the model for eight combinations of the two roughness values that cover the ranges given in the case file (0.02 to 0.30 m for zone 4 and 0.10 to 0.80 m for zone 6), and trains a surrogate model on the results. A surrogate model is a fast statistical approximation of the simulation, here a Gaussian process. In the second stage, Bayesian active learning selects four additional combinations, one after the other, at which a simulation improves the estimate of the roughness values the most.
 
-With *Prepare only* checked, the job writes the table of measurements and the configuration of HydroBayesCal and stops. This is a quick way to inspect the calibration inputs before spending the computing time.
+With *Prepare only* ticked, the job writes the table of measurements and the configuration of HydroBayesCal and stops. This is a quick way to inspect the calibration inputs before spending the computing time.
 
 HydroBayesCal runs its simulations in the folder of the built case and writes each tested roughness value into the friction table there. A job that is submitted during the calibration therefore waits until the calibration has ended. aXqua then restores the friction table and the steering file of the built case.
 
@@ -144,20 +144,24 @@ A calibration that determines the roughness of this reach requires velocity meas
 
 ## Optional steps
 
-**Mesh convergence.** The tab *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 84 measurement verticals. The study takes about 20 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 6 % and the flow velocity by 7 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the tab *Jobs* shows the number of completed meshes, for example `level 2/4`.
+**Mesh convergence.** On the tab *Mesh convergence*, the box *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 84 measurement verticals. The study takes about 20 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 6 % and the flow velocity by 7 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the list of jobs shows the number of completed meshes, for example `level 2/4`.
 
-**Three-dimensional model.** The tab *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the variant that is selected under *Variant*: the hydrostatic simulation, which verifies the discharge balance in 3D and takes about 19 min, or the non-hydrostatic simulation, which takes about 10 min. *Load results* then adds the depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The tab *Vertical convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
+**Three-dimensional model.** On the tab *Hydraulic simulation*, sub-tab *Telemac*, the box *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the variant that is selected under *Variant*: the hydrostatic simulation, which verifies the discharge balance in 3D and takes about 19 min, or the non-hydrostatic simulation, which takes about 10 min. *Load results* then adds the depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The box *Vertical convergence* on the tab *Mesh convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
 
-## The other tabs
+**Several steps at once.** On the tab *Batch-processing*, tick the steps to run and click *Submit the ticked steps*. The jobs are submitted in the order of the list, and each waits for the one before it. *Generate batch-processing script...* writes a shell script that runs the same steps without QGIS and stops when a step fails.
 
-| Tab | State in this example |
+## The other tabs and boxes
+
+| Tab or box | State in this example |
 | --- | --- |
-| *Unsteady 2D*, *Unsteady 3D* | inactive, because the case file prescribes a constant discharge and no hydrograph (`boundaries.inflow`) |
-| *Morphodynamics* | nothing to submit. Sediment transport is switched on with the block `morphodynamics` of the case file and is then computed together with the flow. This example has no such block |
-| *Gain-lose reach* | nothing to submit. The exchange with the gravel bar is a block of the case file, and it is built and simulated together with the steady 2D model. The tab states `configured, built, run` after step 3 |
-| *Jobs* | all jobs with their state. *Cancel* stops a running job, *View logs* shows its log, *Open job directory* opens its folder |
+| *Hydraulic simulation* > *Telemac*: *Unsteady 2D*, *Unsteady 3D* | inactive, because the case file prescribes a constant discharge and no hydrograph (`boundaries.inflow`) |
+| *Hydraulic simulation* > *Telemac*: *Gain-lose reach* | nothing to submit. The exchange with the gravel bar is a block of the case file, and it is built and simulated together with the steady 2D model. The box states `configured, built, run` after step 3 |
+| *Hydraulic simulation* > *OpenFOAM* | states that this case does not use OpenFOAM |
+| *Morphodynamic simulation* | nothing to submit. Sediment transport is switched on with the block `morphodynamics` of the case file and is then computed together with the flow. This example has no such block |
+| *Postprocessing* > *QGIS* | loads the result of the selected job, adds an A3 print layout, and exports a movie of an unsteady result |
+| *Postprocessing* > *ParaView*, *VisIt* | name the program of the profile. The export of TELEMAC results to these programs is not yet available |
 
-The algorithms *Submit a simulation job*, *Check job status*, and *Import job results* in the Processing Toolbox do the same from a model or a script.
+The list of jobs below the tabs shows all jobs with their state. *Cancel* stops a running or waiting job, *View logs* shows its log, and *Open job directory* opens its folder. The algorithms *Submit a simulation job*, *Check job status*, and *Import job results* in the Processing Toolbox do the same from a model or a script.
 
 ## The same workflow in a terminal
 
@@ -178,4 +182,4 @@ Set `size_scale: 1.0` in the block `mesh` of the case file and `duration: 5000.0
 
 ## Start over
 
-Delete the folder `cases/example-isar/axqua-case/` to remove everything the example has produced. The jobs listed on the tab *Jobs* are stored separately in the job folder of aXqua (by default `~/.local/share/axqua/jobs/`) and can be deleted there.
+Delete the folder `cases/example-isar/axqua-case/` to remove everything the example has produced. The jobs in the list below the tabs are stored separately in the job folder of aXqua (by default `~/.local/share/axqua/jobs/`) and can be deleted there.

@@ -274,8 +274,8 @@ class RunnerClient:
 
     # -- the call -----------------------------------------------------------------
     def call(self, args: Sequence[str], *, timeout: float | None = None,
-             expect_json: bool = True) -> Result:
-        """Run one axqua command.
+             expect_json: bool = True, input_text: str | None = None) -> Result:
+        """Run one axqua command. *input_text* is what the command reads on stdin.
 
         The argument list is passed as a **list**, never joined into a shell string, so
         a path with a space or a quote in it cannot become two arguments or a second
@@ -291,7 +291,7 @@ class RunnerClient:
             # space, a quote or a semicolon stays one argument and cannot start a
             # second command.
             proc = subprocess.run(  # nosec B603
-                argv, capture_output=True, text=True,
+                argv, capture_output=True, text=True, input=input_text,
                 timeout=timeout or self.timeout, **_no_window())
         except subprocess.TimeoutExpired as exc:
             raise RunnerError(
@@ -396,6 +396,30 @@ class RunnerClient:
 
     def profiles(self) -> dict:
         return self.call(["profiles", "list"]).data or {}
+
+    # -- the profile of this computer ---------------------------------------------
+    def profile_path(self) -> dict:
+        """``{path, exists}`` of the active profile."""
+        return self.call(["profile", "path"]).data or {}
+
+    def profile_show(self) -> dict:
+        """The active profile. Raises :class:`RunnerError` where there is none."""
+        return self.call(["profile", "show"]).data or {}
+
+    def profile_detect(self) -> dict:
+        """What aXqua finds on this computer, as a profile that is not saved yet."""
+        return self.call(["profile", "detect"], timeout=60).data or {}
+
+    def profile_check(self, *, probe: bool = True) -> dict:
+        """``{path, findings}``. With *probe*, the simulation programs are started
+        once, which is what tells a working installation from a path that exists."""
+        args = ["profile", "check"] + ([] if probe else ["--no-probe"])
+        return self.call(args, timeout=180).data or {}
+
+    def profile_write(self, profile: dict) -> dict:
+        """Save *profile* as the active profile. Returns ``{path, findings}``."""
+        return self.call(["profile", "write"], input_text=json.dumps(profile),
+                         timeout=60).data or {}
 
     def kinds(self) -> list[dict]:
         return list(self.call(["submit", "x", "--help-kinds"]).data or [])

@@ -24,6 +24,13 @@ extensions = [
     "sphinx.ext.intersphinx",  # cross-link to numpy/python docs
 ]
 
+# The copy of the documentation that is built into the QGIS plugin
+# (scripts/build_plugin_zip.py passes "-t plugin_help") leaves the source listings out:
+# they are 10 MB of the 25 MB an archive may have, and Help is opened for the workflow
+# sections, not to read source code. "tags" is provided by Sphinx when it runs this file.
+if tags.has("plugin_help"):  # noqa: F821
+    extensions.remove("sphinx.ext.viewcode")
+
 templates_path = ["_templates"]
 # _incoming/ is a drop folder for text that still has to be folded into the tree.
 exclude_patterns = ["_build", "_incoming", "Thumbs.db", ".DS_Store"]

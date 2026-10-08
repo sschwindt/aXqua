@@ -14,12 +14,48 @@ old `supportsQt6` flag was removed from core and is ignored. So: `qgis.PyQt` imp
 version, and **no `.qrc`/`pyrcc`** - a compiled resource module is built against one Qt
 major version and is the most common reason a plugin loads on one QGIS and not the other.
 
-**The tabs are generated from `axqua case-status --json`**, not hardcoded: `n/a` hides
-a tab (OpenFOAM has no depth-averaged mode - a category error, not a gap), `no` shows it
-disabled *with the reason*, and the buttons enable from `configured`/`built`/`run`. Adding
-a capability to aXqua surfaces in the plugin with no plugin change - the point of the
-registry. A capability the plugin has never heard of still gets a tab, titled from its own
-name.
+**The tabs are fixed and follow the documentation** (`gui/sections.py`, pure data):
+Configuration, Case Setup, Preprocessing, Hydraulic simulation [Telemac | OpenFOAM], Mesh
+convergence, Morphodynamic simulation [Telemac | OpenFOAM], Calibration & validation,
+Postprocessing [QGIS | ParaView | VisIt], Batch-processing - the order prescribed by
+`docs/restructuring-instructions.md` and pinned by `test_the_tabs_are_the_prescribed_ones`.
+**What a tab offers still comes from `axqua case-status --json`**: `sections.placement`
+only says *where* a capability is shown, as a box (`section_pages.SectionPage` wrapping the
+unchanged `CapabilityTab`); `n/a` hides a box (OpenFOAM has no depth-averaged mode - a
+category error, not a gap), `no` shows it disabled *with the reason*, and the buttons
+enable from `configured`/`built`/`run`. A capability nobody has placed is shown under
+Hydraulic simulation in the sub-tab of its solver, so adding a capability to aXqua still
+surfaces with no plugin change. The build of the 2D model has the Preprocessing tab to
+itself (its button is hidden in the Steady 2D box), with the capability matrix as the
+"checkup" table. **The job list is below the tabs**, not one of them: a job is submitted on
+one tab and its result is used on another.
+
+**Help opens the docs at the section of the tab that is showing** (`gui/help.py`). Each
+section and sub-section names its page and `help-...` label, and a test reads the `.rst`
+files to assert every label is on its page. `scripts/build_plugin_zip.py` builds the docs
+into `<plugin>/help/html` and writes **one redirect page per tab key**
+(`help/hydraulics-telemac.html`), because a `file://` address does not reliably keep its
+`#anchor` through the desktop opener. The bundled build passes `-t plugin_help`, which
+drops `sphinx.ext.viewcode` in `docs/conf.py`, and prunes every font format but woff2:
+25 MiB became 8.4 (3.7 MB zipped; the repository limit is 25). A linked dev folder has no
+bundle unless `--help-only` was run (it is gitignored), and Help then opens Read the Docs.
+
+**Findings and triangles** (`gui/findings.py`): what `axqua profile check` returns, shown
+as an orange (warning) or dark-red (error) triangle at the row whose dotted key equals the
+finding's `subject`, on the tab title (`dock.mark`), and in a list. A click opens the
+message, its remedy and a button into `troubleshooting/{warnings,errors}.html#<code>`;
+`tests/test_profile.py` asserts every code the check can emit has that anchor. **Findings
+never disable anything**: the profile editor (`gui/profile_editor.py`) saves whatever its
+rows say and *then* shows the check. Its buttons are the three the instructions name -
+Save (write, check, stay open), Cancel (discard since the last save), Exit (ask if
+unsaved) - and `values()` starts from the loaded dictionary, so an entry without a row
+(`solvers.telemac.overrides`) survives a save. The editor talks to `axqua profile
+show|detect|write|check --json`; the plugin still never imports `axqua`.
+
+**Batch** (`core/batch.py`, pure): the steps are job kinds in workflow order; *Submit the
+ticked steps* hands them over in ONE background call so their queue tickets are written in
+that order (see the workspace queue in `src/axqua/jobs/CLAUDE.md`), and *Generate
+batch-processing script* writes the `run_step` loop that also stops at a failed step.
 
 **Polling policy** (`core/job_model.py`): only visible non-terminal rows; **stat before
 parse** (compare `status.json`'s mtime and skip the read - most polls find nothing, so this

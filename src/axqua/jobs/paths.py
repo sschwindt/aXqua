@@ -138,15 +138,38 @@ def job_root(*, explicit: str | os.PathLike | None = None,
     """Resolve the job root, first hit wins.
 
     ``--job-root`` beats ``$AXQUA_JOB_ROOT`` beats the solver profile's
-    ``working_root`` beats the case config's ``project.job_root`` beats
-    ``data_dir()/jobs``. The ordering runs most-specific to least: an explicit flag is
-    about *this* submission, a profile is about this machine, and the config is about
-    this case.
+    ``working_root`` beats ``jobs.root`` of the profile of this computer beats the case
+    config's ``project.job_root`` beats ``data_dir()/jobs``. The ordering runs
+    most-specific to least: an explicit flag is about *this* submission, a profile is
+    about this machine, and the config is about this case.
+
+    The profile of this computer is consulted here and not only by ``submit``, because
+    ``list``, ``status``, ``logs`` and ``cancel`` resolve the root through this function
+    too. When only ``submit`` knew the folder a profile names, a job was created there
+    and then not found by any of the commands that follow it.
     """
-    for candidate in (explicit, _env(ENV_JOB_ROOT), profile_root, config_root):
+    for candidate in (explicit, _env(ENV_JOB_ROOT), profile_root,
+                      _profile_job_root(), config_root):
         if candidate:
             return Path(candidate).expanduser().resolve()
     return data_dir() / "jobs"
+
+
+def _profile_job_root() -> str | None:
+    """``jobs.root`` of the active ``.axq-profile``; ``None`` without one.
+
+    Imported here and not at the top: this module is standard library only, so that a
+    job verb costs no more than a capability listing, and a computer without a profile
+    never loads the YAML reader for this.
+    """
+    try:
+        from axqua.core import profile as profiles
+
+        active = profiles.load_active()
+    except Exception:                               # noqa: BLE001 - never fatal here
+        return None
+    root = getattr(active, "job_root", None) if active is not None else None
+    return str(root) if root else None
 
 
 def index_path() -> Path:

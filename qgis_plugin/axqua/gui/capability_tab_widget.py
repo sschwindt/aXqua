@@ -44,8 +44,10 @@ OPTION_FIELDS = {
 class CapabilityTab(QWidget):
     """A tab for one capability of one solver."""
 
-    def __init__(self, view, context, parent=None) -> None:
+    def __init__(self, view, context, parent=None, *, titled: bool = True) -> None:
         super().__init__(parent)
+        #: False inside a box that already carries the title of the capability
+        self.titled = titled
         self.view = view
         self.ctx = context
         self._fields: dict[str, QWidget] = {}
@@ -88,8 +90,9 @@ class CapabilityTab(QWidget):
     def apply(self, view) -> None:
         """Re-render from a fresh capability matrix."""
         self.view = view
-        self.state_label.setText(f"<b>{view.title}</b> ({view.solver}) - "
-                                 f"{view.state_text}")
+        self.state_label.setText(
+            f"<b>{view.title}</b> ({view.solver}) - {view.state_text}" if self.titled
+            else f"State: {view.state_text}")
         self.reason_label.setText(view.reason)
         self.reason_label.setVisible(bool(view.reason))
 
@@ -115,7 +118,7 @@ class CapabilityTab(QWidget):
             if dtype == "int":
                 widget = QSpinBox()
                 widget.setRange(0, 4096)
-                widget.setSpecialValueText("from the case config")
+                widget.setSpecialValueText("as set for the case")
                 widget.setValue(int(default))
             elif dtype == "choice":
                 widget = QComboBox()

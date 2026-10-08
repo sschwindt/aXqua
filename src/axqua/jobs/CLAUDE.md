@@ -83,6 +83,25 @@ executor runs), and **a waiting job does not check that its predecessor succeede
 **OpenFOAM jobs take no part**: their legs work in case folders of their own that may share
 one TELEMAC `model_dir` and run side by side on purpose.
 
+**The order is the order of submission, and a lock alone does not give that.** Of two
+waiting jobs, whichever polls first when the folder frees would take it, and three jobs
+submitted in a row are started by three detached processes that reach the lock in any
+order - the run before its build. So `submit_job` leaves a **ticket** in
+`model_dir/.axqua-queue/` (`<time_ns>-<job id>.json`, written by the *submitter*, before the
+runner is launched) and a job may only try the lock while no older live ticket exists. A
+ticket is dropped when its job is terminal (asked through `reaper.reconcile`, so a runner
+that died while waiting is noticed without anybody polling it), when its job folder is gone,
+or when its runner never appeared within `TICKET_GRACE`. The plugin's batch submits its
+steps in ONE background call for the same reason. Verified live: build, steady and a
+calibration preparation submitted within a second ran 13:58:58-14:00:50, 14:00:52-14:05:53,
+14:05:57-14:05:58.
+
+**Every verb resolves the job root the same way** (`paths.job_root`): flag, `AXQUA_JOB_ROOT`,
+solver profile, **`jobs.root` of the active `.axq-profile`**, case, default. Only `submit`
+used to know the profile's folder, so a job was created there and then not found by `list`,
+`status`, `logs` or `cancel`. The profile is imported inside the function, which keeps
+`paths.py` standard-library-only at import time.
+
 **Staleness** is `(host, boot_id, pid, process start time)`, in that order: a different
 host is **never** judged (a shared job root may hold another machine's jobs), a different
 boot id is stale (also the `wsl --shutdown` case), a dead pid is stale, and a live pid with

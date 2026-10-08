@@ -30,7 +30,7 @@ TELEMAC dry runs 2D/3D
 
 A **dry run** is a simulation that starts from a dry riverbed (:ref:`case-initialization`).
 
-**2D.** After preprocessing, click *Submit* on the *Steady 2D* tab of the plugin. The run appears on the *Jobs* tab with its progress. In a terminal, the command is:
+**2D.** After preprocessing, click *Submit* in the box *Steady 2D* on the tab *Hydraulic simulation > Telemac* of the plugin. The run appears in the job list below the tabs with its progress. In a terminal, the command is:
 
 .. code-block:: text
 
@@ -57,7 +57,7 @@ The run is steady when the relative difference between inflow and outflow stays 
 
 *Load results* adds the result (``r2d.slf``) to the QGIS project as water depth and flow velocity layers.
 
-**3D.** A TELEMAC-3D simulation requires the steady 2D result. On the *Steady 3D* tab, *Build* writes the 3D steering files and *Submit* starts the run. aXqua determines the number of vertical layers from the water depth and the cell size. The build provides two variants. The **hydrostatic** variant is faster and is run first, to verify that inflow and outflow balance in 3D as well. The **non-hydrostatic** variant (``hydrodyn``) additionally resolves vertical accelerations, which matter at steep changes of the bed. On the *Steady 3D* tab, the option *Variant* selects which of the two *Submit* starts, and *Load results* adds the depth-averaged result to the map. In a terminal:
+**3D.** A TELEMAC-3D simulation requires the steady 2D result. In the box *Steady 3D* on the same tab, *Build* writes the 3D steering files and *Submit* starts the run. aXqua determines the number of vertical layers from the water depth and the cell size. The build provides two variants. The **hydrostatic** variant is faster and is run first, to verify that inflow and outflow balance in 3D as well. The **non-hydrostatic** variant (``hydrodyn``) additionally resolves vertical accelerations, which matter at steep changes of the bed. The option *Variant* of the box selects which of the two *Submit* starts, and *Load results* adds the depth-averaged result to the map. In a terminal:
 
 .. code-block:: text
 

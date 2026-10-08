@@ -824,3 +824,136 @@ def test_the_plugin_passes_a_security_scan():
     assert results == [], "\n".join(
         f"{r['filename']}:{r['line_number']} [{r['test_id']}] {r['issue_text']}"
         for r in results)
+
+
+def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
+    """Its progress is still empty, and "iter 0" beside STARTING reads as a job that
+    hangs."""
+    from axqua_plugin.core.job_model import Job as JobRow
+
+    waiting = JobRow(job_id="b", root=Path("."), state="STARTING", kind="calibration",
+                     phase="waiting for 2026-10-08-example-isar-steady-8e7bc5",
+                     progress={"kind": "calibration"})
+    assert waiting.progress_text == "waiting for 2026-10-08-example-isar-steady-8e7bc5"
+    running = JobRow(job_id="b", root=Path("."), state="RUNNING", kind="calibration", phase="",
+                     progress={"kind": "calibration", "iteration": 5,
+                               "max_iterations": 12})
+    assert running.progress_text == "iter 5/12"
+    # a phase left over on a job that has ended is not a reason to say it waits
+    ended = JobRow(job_id="b", root=Path("."), state="CANCELLED", kind="calibration",
+                   phase="waiting for x", progress={"kind": "calibration"})
+    assert not ended.progress_text.startswith("waiting")
+
+
+# ------------------------------------------------------------------ the fixed tabs
+
+#: The tabs the user's instructions prescribe, in their order, with their sub-tabs.
+PRESCRIBED = [
+    ("Configuration", []),
+    ("Case Setup", []),
+    ("Preprocessing", []),
+    ("Hydraulic simulation", ["Telemac", "OpenFOAM"]),
+    ("Mesh convergence", []),
+    ("Morphodynamic simulation", ["Telemac", "OpenFOAM"]),
+    ("Calibration & validation", []),
+    ("Postprocessing", ["QGIS", "ParaView", "VisIt"]),
+    ("Batch-processing", []),
+]
+
+DOCS = PLUGIN_ROOT.parent / "docs"
+
+
+def test_the_tabs_are_the_prescribed_ones_in_their_order():
+    from axqua_plugin.gui import sections
+
+    assert [(s.title, [sub.title for sub in s.subsections])
+            for s in sections.SECTIONS] == PRESCRIBED
+
+
+def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
+    """Help opens ``<page>.html#<label>``. A label that moved to another page, or was
+    renamed, would open the right book at the wrong place without any error."""
+    from axqua_plugin.gui import sections
+
+    keys = sections.help_keys()
+    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7
+    for key, page, label in keys:
+        text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
+        assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
+    assert sections.help_target("hydraulics") == ("usage/hydraulic-simulations",
+                                                  "help-hydraulics")
+    assert sections.help_target("hydraulics", "openfoam")[1] == "help-hydraulics-openfoam"
+
+
+def test_a_capability_is_shown_on_the_tab_of_its_section():
+    from axqua_plugin.gui import sections
+
+    assert sections.placement("telemac", "steady2d") == ("hydraulics", "telemac")
+    assert sections.placement("telemac", "gain_lose") == ("hydraulics", "telemac")
+    assert sections.placement("openfoam", "free_surface_3d") == ("hydraulics", "openfoam")
+    assert sections.placement("telemac", "vertical_convergence") == ("mesh", "")
+    assert sections.placement("telemac", "morphodynamics") == ("morphodynamics",
+                                                               "telemac")
+    assert sections.placement("openfoam", "calibration") == ("calibration", "")
+
+
+def test_a_capability_nobody_placed_still_gets_shown():
+    """aXqua may grow a capability this plugin has never heard of. It appears with the
+    simulations of its solver instead of nowhere."""
+    from axqua_plugin.gui import sections
+
+    assert sections.placement("telemac", "ice_cover") == ("hydraulics", "telemac")
+    assert sections.placement("delft3d", "tides") == ("hydraulics", "")
+
+
+def test_help_opens_the_built_documentation_and_the_published_one_without_it(tmp_path):
+    from axqua_plugin.gui import help as help_pages
+
+    published = help_pages.url_for("mesh", local=tmp_path)
+    assert published == ("https://axqua.readthedocs.io/en/latest/"
+                         "usage/mesh-convergence.html#help-mesh-convergence")
+    assert help_pages.url_for("postprocessing", "visit", local=tmp_path).endswith(
+        "usage/postprocessing.html#help-postprocessing-visit")
+
+    (tmp_path / "postprocessing-visit.html").write_text("redirect", encoding="utf-8")
+    local = help_pages.url_for("postprocessing", "visit", local=tmp_path)
+    assert local.startswith("file://") and local.endswith("postprocessing-visit.html")
+    # the redirect page carries the anchor, because a file address may lose it
+    page = help_pages.redirect_page("usage/postprocessing", "help-postprocessing-visit")
+    assert "url=html/usage/postprocessing.html#help-postprocessing-visit" in page
+
+
+def test_a_finding_links_to_its_code_on_the_page_of_its_severity(tmp_path):
+    from axqua_plugin.gui import help as help_pages
+
+    warning = help_pages.url_for_code("axqua.environment.ambient", local=tmp_path)
+    assert warning.endswith("troubleshooting/warnings.html#axqua-environment-ambient")
+    error = help_pages.url_for_code("axqua.config.invalid_value", "error", local=tmp_path)
+    assert error.endswith("troubleshooting/errors.html#axqua-config-invalid-value")
+
+
+# ------------------------------------------------------------------ batch
+
+
+def test_the_steps_of_a_batch_keep_the_order_of_the_workflow():
+    from axqua_plugin.core import batch
+
+    assert batch.ordered(["calibration", "steady", "nonsense", "preprocessing",
+                          "steady"]) == ["preprocessing", "steady", "calibration"]
+    assert [s.kind for s in batch.STEPS if s.default] == ["preprocessing", "steady"]
+
+
+def test_the_batch_script_waits_for_each_job_and_stops_at_a_failed_one(tmp_path):
+    import subprocess
+
+    from axqua_plugin.core import batch
+
+    text = batch.script("/data/my reach/case.axq-case", ["steady", "preprocessing"],
+                        axqua="/opt/my env/bin/axqua")
+    assert "AXQUA='/opt/my env/bin/axqua'" in text          # a space stays one word
+    assert "CASE='/data/my reach/case.axq-case'" in text
+    assert text.index("run_step preprocessing") < text.index("run_step steady")
+    assert '[ "$state" = "COMPLETED" ] || exit 1' in text
+    script = tmp_path / "batch.sh"
+    script.write_text(text, encoding="utf-8")
+    assert subprocess.run(["bash", "-n", str(script)]).returncode == 0

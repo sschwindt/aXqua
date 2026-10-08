@@ -10,7 +10,7 @@ Postprocessing turns simulation results into maps, figures and tables. Depth-ave
 QGIS map generation
 -------------------
 
-**Load results.** On the *Jobs* tab, select a completed job and click *Load results*. The result layers are added to the QGIS project in a group that is named after the job. aXqua does not copy any files. The layers refer to the result files at their location in ``axqua-case/``.
+**Load results.** In the job list below the tabs, select a completed job and click *Load results*. The result layers are added to the QGIS project in a group that is named after the job. aXqua does not copy any files. The layers refer to the result files at their location in ``axqua-case/``.
 
 TELEMAC results are loaded as a mesh layer with two predefined styles:
 
