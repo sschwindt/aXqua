@@ -98,6 +98,51 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 ``this is OpenFOAM ...; aXqua writes input files for v2406``
     The environment script belongs to another OpenFOAM version. aXqua writes its input files for the version v2406, and other versions may reject them. Enter the environment script of OpenFOAM v2406 in the profile.
 
+Installation of the simulation software
+---------------------------------------
+
+The *Check* page of an installation wizard, the last page of a finished installation, and ``axqua install plan`` report the following warnings. An installation can be started with a warning.
+
+.. _axqua-install-packages-missing:
+
+``... of ... system packages are not installed``
+    The installation requires packages of the operating system that are missing. The message lists them and gives the command that installs them, which requires administrator rights. Click *Install the packages...* in the wizard, or copy the command into a terminal, and click *Check again* (:doc:`../installation/simulation-software`). For OpenFOAM with an existing OpenFOAM v2406, most of the listed packages are needed only for compiling OpenFOAM itself, and the installation normally works without them.
+
+.. _axqua-install-packages-unavailable:
+
+``the package sources of this system do not offer: ...``
+    The operating system does not know a package that the installer names, typically because the system is older or newer than the one the installer was written for. The installation may still work if another package provides the same files. Otherwise an administrator has to add a package source.
+
+.. _axqua-install-packages-unknown:
+
+``the list of system packages could not be read from the installer``
+    aXqua reads the list of required packages from the installer script and did not find it in this version of the script. The installation can be started. It stops with a message of its own if a package is missing.
+
+.. _axqua-install-little-space:
+
+``... GiB are free in ...; the installation needs about ... GiB``
+    The drive of the installation folder may be too small. Select a folder on a drive with more free space on the first page of the wizard.
+
+.. _axqua-install-folder-exists:
+
+``... exists already`` or ``... holds an installation of this installer, which is continued``
+    The installation folder contains an earlier installation. The installer continues with it: it keeps what is downloaded and builds the program again. Select another folder to leave the earlier installation untouched.
+
+.. _axqua-install-compiles-openfoam:
+
+``no OpenFOAM v2406 was found on this computer, so it is compiled from its source code``
+    Compiling OpenFOAM takes several hours and about 20 GB. If OpenFOAM v2406 is installed, select its file ``etc/bashrc`` on the first page of the wizard. A packaged OpenFOAM v2406, which an administrator installs in a few minutes, avoids the compilation (:ref:`install-openfoam`).
+
+.. _axqua-install-paraview-missing:
+
+``ParaView is not installed``
+    The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* page, or enter another ParaView in the profile editor (:ref:`install-paraview`).
+
+.. _axqua-install-not-bound:
+
+``the installation could not be entered in the profile``
+    The program is installed, but the profile of the computer could not be written, typically because the existing profile contains an error. The message lists the entries. Open the profile editor on the *Configuration* tab, correct the profile, and enter them there (:ref:`plugin-profile`).
+
 Simulation software
 -------------------
 

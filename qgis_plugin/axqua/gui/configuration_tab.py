@@ -2,7 +2,9 @@
 
 Three things, in the order they have to work: the ``axqua`` program the plugin calls,
 the profile of this computer (``*.axq-profile``: where TELEMAC, OpenFOAM, ParaView and
-VisIt are, and where jobs are kept), and the installation of the simulation programs.
+VisIt are, and where jobs are kept), and the installation of the simulation programs,
+each with a wizard (:mod:`.install_wizard`) that ends by entering the program in the
+profile.
 
 The profile is edited in a window of its own (:mod:`.profile_editor`). This tab shows
 what the profile says and what its check found.
@@ -10,6 +12,7 @@ what the profile says and what its check found.
 
 from __future__ import annotations
 
+from qgis.PyQt.QtCore import QTimer
 from qgis.PyQt.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
                                  QPushButton, QVBoxLayout, QWidget)
 
@@ -17,6 +20,7 @@ from ..compat import exec_dialog
 from ..core.runner_client import RunnerError, user_text
 from ..core.tasks import run_async
 from . import findings as fnd
+from .install_wizard import InstallWizard
 from .profile_editor import ProfileEditor, get
 
 #: What the summary shows: ``(dotted key, label)``.
@@ -33,9 +37,16 @@ NO_PROFILE = ("This computer has no profile yet. A profile tells aXqua where TEL
               "OpenFOAM and the postprocessing programs are installed. Without one, "
               "aXqua uses what it finds by itself.")
 
-WIZARDS = ("The installation wizards for TELEMAC and OpenFOAM are not yet available in "
-           "this version. Install the programs as described in the documentation "
-           "(Help) and enter their environment scripts in the profile.")
+SOFTWARE = ("A wizard installs each program and enters it in the profile. Install "
+            "TELEMAC first: aXqua starts every OpenFOAM simulation from a short "
+            "TELEMAC run.")
+
+#: What the wizards install: ``(target, name on the button)``.
+PROGRAMS = (("telemac", "TELEMAC"), ("openfoam", "OpenFOAM"),
+            ("postprocessors", "ParaView and VisIt"))
+
+#: Milliseconds between two looks at a running installation.
+INSTALL_POLL_MS = 15000
 
 
 class ConfigurationTab(QWidget):
@@ -103,11 +114,35 @@ class ConfigurationTab(QWidget):
 
         software_box = QGroupBox("Simulation software")
         software_layout = QVBoxLayout(software_box)
-        note = QLabel(WIZARDS)
+        note = QLabel(SOFTWARE)
         note.setWordWrap(True)
         software_layout.addWidget(note)
+        self.host_label = QLabel("")
+        self.host_label.setWordWrap(True)
+        software_layout.addWidget(self.host_label)
+        programs = QFormLayout()
+        self._program_labels: dict[str, QLabel] = {}
+        self._program_buttons: dict[str, QPushButton] = {}
+        for target, name in PROGRAMS:
+            state = QLabel("")
+            state.setWordWrap(True)
+            button = QPushButton(f"Install {name}...")
+            button.setEnabled(False)
+            button.clicked.connect(lambda _=False, which=target: self.open_wizard(which))
+            line = QHBoxLayout()
+            line.setContentsMargins(0, 0, 0, 0)
+            line.addWidget(state, 1)
+            line.addWidget(button)
+            programs.addRow(name, _wrap(line))
+            self._program_labels[target] = state
+            self._program_buttons[target] = button
+        software_layout.addLayout(programs)
         layout.addWidget(software_box)
         layout.addStretch(1)
+        self.overview: dict = {}
+        self.install_timer = QTimer(self)
+        self.install_timer.setInterval(INSTALL_POLL_MS)
+        self.install_timer.timeout.connect(self.load_software)
 
     # -- the axqua program --------------------------------------------------------
     def check_runner(self) -> None:
@@ -127,6 +162,7 @@ class ConfigurationTab(QWidget):
         self.ctx.set_runner_ok(True)
         self.load_kinds()
         self.load_profile()
+        self.load_software()
 
     def _runner_failed(self, exc: Exception) -> None:
         text = exc.user_text() if isinstance(exc, RunnerError) else str(exc)
@@ -221,6 +257,70 @@ class ConfigurationTab(QWidget):
         if editor.saved_once:
             self.show_findings(editor.finding_list.findings, checked=True)
             self.load_profile()
+
+
+    # -- the simulation programs ---------------------------------------------------
+    def load_software(self) -> None:
+        """Ask what is installed and whether an installation is running."""
+        run_async("aXqua: looking for the simulation programs",
+                  self.ctx.client.install_overview,
+                  on_success=self.show_software,
+                  on_error=lambda exc: self.host_label.setText(user_text(exc)),
+                  owner=self)
+
+    def show_software(self, overview: dict) -> None:
+        self.overview = overview or {}
+        host = self.overview.get("host") or {}
+        text = "This computer: " + str(host.get("description") or "unknown")
+        if host and not host.get("supported"):
+            text += ". There is no installer for this system; the wizards say what to do."
+        self.host_label.setText(text)
+        running = False
+        for entry in self.overview.get("targets") or []:
+            target = entry.get("target")
+            if target not in self._program_labels:
+                continue
+            self._program_labels[target].setText(describe_program(entry))
+            button = self._program_buttons[target]
+            button.setEnabled(True)
+            name = dict(PROGRAMS)[target]
+            active = bool(entry.get("running"))
+            running = running or active
+            button.setText("Show the installation..." if active
+                           else f"Install {name}...")
+        # an installation outlives the wizard, so the tab keeps looking by itself
+        if running and not self.install_timer.isActive():
+            self.install_timer.start()
+        elif not running and self.install_timer.isActive():
+            self.install_timer.stop()
+
+    def open_wizard(self, target: str) -> None:
+        wizard = InstallWizard(self.ctx.client, target, self.overview, parent=self,
+                               on_done=lambda _status: self._installed())
+        exec_dialog(wizard)
+        self.load_software()
+
+    def _installed(self) -> None:
+        """An installation has ended: the profile may name a new program now."""
+        self.load_profile()
+        self.load_software()
+
+
+def describe_program(entry: dict) -> str:
+    """One line on a program: where it is, or how far its installation is."""
+    running = entry.get("running") or {}
+    if running:
+        steps = running.get("steps") or []
+        minutes = float(running.get("elapsed") or 0.0) / 60.0
+        step = (f", step {running.get('step', 0)} of {len(steps)}" if steps else "")
+        return f"The installation is running{step} ({minutes:.0f} min)."
+    installed = entry.get("installed") or {}
+    last = entry.get("last") or {}
+    if installed:
+        return "; ".join(str(path) for path in installed.values())
+    if last.get("state") == "failed":
+        return "Not found on this computer. The last installation failed."
+    return "Not found on this computer."
 
 
 def _wrap(layout) -> QWidget:

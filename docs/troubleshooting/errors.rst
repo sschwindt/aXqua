@@ -46,6 +46,78 @@ Installation
 ``axqua could not be found`` (plugin)
     The plugin did not find the program ``axqua``. The message lists the three places that were searched. Enter the full path of the program in *aXqua > Settings* and click *Test* (:doc:`../installation/qgis-plugin`).
 
+Installation of the simulation software
+---------------------------------------
+
+The *Check* page of an installation wizard, the last page of a failed installation, and ``axqua install`` report the following errors. An installation cannot be started with an error of the *Check* page.
+
+.. _axqua-install-unsupported-system:
+
+``there is no installer for this system``
+    The installer scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, and the TELEMAC installer does not cover Ubuntu 22.04. The OpenFOAM installer and the VisIt installer additionally require an x86-64 processor. On a system that is built on one of the supported systems, select the base system under *Further settings* on the first page of the wizard. Otherwise install the program by hand and enter it in the profile editor (:doc:`../installation/simulation-software`).
+
+.. _axqua-install-windows-needs-wsl:
+
+``TELEMAC and OpenFOAM are installed in the Windows Subsystem for Linux``
+    The simulation programs do not run in Windows itself. Install a Linux distribution in the Windows Subsystem for Linux and start the installation there (:doc:`../installation/simulation-software`).
+
+.. _axqua-install-as-root:
+
+``the installers refuse to run as the user root``
+    Start QGIS or the terminal as an ordinary user. Administrator rights are needed for the system packages only.
+
+.. _axqua-install-windows-folder:
+
+``... is a folder of Windows``
+    In the Windows Subsystem for Linux, a folder below ``/mnt/`` belongs to Windows. Select a folder in the Linux file system, for example in the home folder.
+
+.. _axqua-install-folder-with-space:
+
+``the folder ... has a space in its name``
+    Neither TELEMAC nor OpenFOAM can be built in a folder whose path contains a space. Select another folder.
+
+.. _axqua-install-folder-in-use:
+
+``... exists and was not made by this installer``
+    The OpenFOAM installer installs into a new folder or continues an installation of its own. Select a folder that does not exist yet.
+
+.. _axqua-install-file-missing:
+
+``the SALOME archive ... does not exist`` or ``the OpenFOAM environment script ... does not exist``
+    A file that was selected on the first page of the wizard is not on this computer. Select it again, or clear the field.
+
+.. _axqua-install-wrong-openfoam:
+
+``... belongs to OpenFOAM release ...``
+    The sediment transport solvers are built for OpenFOAM v2406 and the selected installation is another version. Select the file ``etc/bashrc`` of OpenFOAM v2406, or let the wizard compile OpenFOAM.
+
+.. _axqua-install-no-installer:
+
+``the installer scripts could not be downloaded``
+    aXqua downloads the installer scripts before it checks the computer and did not reach the repository. Verify the internet connection. For a computer without a connection, copy the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_ onto it and select its folder under *Further settings* (in a terminal: the environment variable ``AXQUA_INSTALLERS``).
+
+.. _axqua-install-python-too-old:
+
+``the OpenFOAM installer does not run with any Python on this computer``
+    The OpenFOAM installer requires a newer Python than the one that runs aXqua, and aXqua found no newer one. Install Python 3.12 or newer, for example with Miniforge, and install aXqua with it.
+
+.. _axqua-install-failed:
+
+``'...' ended with an error``
+    A step of the installation failed. The message quotes the last lines of the installation log, which normally name the cause, and gives the location of the complete log. Typical causes are a missing system package, an interrupted download and a full drive. Correct the cause and start the installation again with the same folder: the installer continues with what is already downloaded and built.
+
+    The lines ``remote: Retry later`` and ``error: 429`` mean that the download server of TELEMAC temporarily refuses further requests, which occurs after many downloads from one network in a short time. Wait a few minutes and start the installation again.
+
+.. _axqua-install-output-missing:
+
+``the installer finished, but did not produce ...``
+    The installer reported success, but a program that it should have built is missing, so the build failed in part. Search the installation log for the first line that contains ``Error``.
+
+.. _axqua-install-interrupted:
+
+``the installation ended without a result``
+    The process of the installation disappeared, typically because the computer was restarted or the user was logged out. Start the installation again with the same folder.
+
 Check of a case
 ---------------
 

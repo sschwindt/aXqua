@@ -594,6 +594,12 @@ def _case_cli(name: str, argv: list[str]) -> int:
     return getattr(casecli, name)(argv)
 
 
+def _run_install(argv: list[str]) -> int:
+    """``axqua install`` - the simulation programs (:mod:`axqua.installcli`)."""
+    from axqua import installcli
+    return installcli.run_install(argv)
+
+
 def _run_profile(argv: list[str]) -> int:
     """``axqua profile`` - late-bound like the job verbs, and for the same reason."""
     from axqua import profilecli
@@ -694,6 +700,7 @@ _DISPATCH = {
     "list": _job("run_list"),
     "profiles": _job("run_profiles"),
     "profile": lambda argv: _run_profile(argv),
+    "install": lambda argv: _run_install(argv),
     "schema": lambda argv: _case_cli("run_schema", argv),
     "case": lambda argv: _case_cli("run_case", argv),
     "check": lambda argv: _case_cli("run_check", argv),

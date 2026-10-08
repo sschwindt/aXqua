@@ -21,6 +21,12 @@ Profile commands
 .. automodule:: axqua.profilecli
    :members:
 
+Installation commands
+---------------------
+
+.. automodule:: axqua.installcli
+   :members:
+
 Case file commands
 ------------------
 

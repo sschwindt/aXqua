@@ -13,6 +13,7 @@ This section addresses developers and users who call aXqua from their own Python
    openfoam
    workflow
    jobs
+   install
    postprocessing
    cli
    plugin

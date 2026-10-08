@@ -876,7 +876,7 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7
+    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7 + 3   # 3 wizards
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
@@ -957,3 +957,23 @@ def test_the_batch_script_waits_for_each_job_and_stops_at_a_failed_one(tmp_path)
     script = tmp_path / "batch.sh"
     script.write_text(text, encoding="utf-8")
     assert subprocess.run(["bash", "-n", str(script)]).returncode == 0
+
+
+def test_the_choices_of_a_wizard_become_the_flags_of_the_install_command():
+    """An empty field sends nothing, so that aXqua applies its own default."""
+    from axqua_plugin.core.runner_client import install_flags
+
+    assert install_flags(None) == []
+    assert install_flags({"folder": "", "tag": "", "jobs": 0, "visualization": True,
+                          "smoke_test": True, "bind": True, "examples": False}) == []
+    assert install_flags({"folder": "/home/x/opt", "tag": "v9.1.1",
+                          "salome": "/home/x/SALOME 9.15.tar.gz"}) == [
+        "--folder", "/home/x/opt", "--tag", "v9.1.1",
+        "--salome", "/home/x/SALOME 9.15.tar.gz"]          # one argument, with its space
+    assert install_flags({"reuse_openfoam": "no", "jobs": 4, "visualization": False,
+                          "examples": True, "smoke_test": False, "bind": False,
+                          "base": "ubuntu24", "telemac_examples": False}) == [
+        "--reuse-openfoam", "no", "--jobs", "4", "--base", "ubuntu24",
+        "--no-telemac-examples", "--no-visualization", "--examples",
+        "--no-smoke-test", "--no-bind"]
+    assert install_flags({"telemac_examples": True}) == []

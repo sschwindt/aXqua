@@ -18,6 +18,8 @@ All settings of a computer are stored in one file, the **profile**. Its name end
 * *Cancel* discards the changes since the last save and closes the window.
 * *Exit* closes the window and asks first if there are changes that were not saved.
 
+A program that is installed with one of the installation wizards is entered in the profile by the wizard (:doc:`simulation-software`). The editor is needed for a program that was installed by other means, and for the remaining settings.
+
 The check never prevents saving. It marks each entry that is not in order with a triangle, orange for a warning and dark red for an error. A click on a triangle opens the message with its remedy and a button that opens this documentation at the explanation of the message (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). The button *Check* on the *Configuration* tab repeats the check at any time.
 
 **In a terminal.** To create the profile, let aXqua detect what is installed on the computer:
@@ -77,10 +79,6 @@ The profile is a text file in YAML format and can be completed with a text edito
      - Two values for maps in QGIS. ``min_depth`` is the minimum water depth in meters. Shallower water is drawn transparent, because a water film of a few millimeters stands between the roughness elements of the bed and does not flow. ``velocity_cap`` is the upper limit of the velocity color scale in m/s. Higher depth-averaged velocities typically occur in almost dry cells at the edge of the water and would otherwise flatten the color scale of the entire map.
 
 To use another profile than the default one, for example on a computing cluster, set the environment variable ``AXQUA_PROFILE`` to its path, or pass ``--profile <file>`` when a job is submitted.
-
-.. note::
-
-   Editing the profile in a window of the plugin is not yet available in this version. Until then, the plugin stores the path of the ``axqua`` program and the two display values in *aXqua > Settings*.
 
 .. _solver-bindings:
 

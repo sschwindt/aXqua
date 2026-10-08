@@ -38,6 +38,16 @@ def url_for(section_key: str, sub_key: str = "", *, local: Path | None = None) -
     return f"{PUBLISHED}{page}.html#{label}"
 
 
+def url_for_window(key: str, *, local: Path | None = None) -> str:
+    """The address Help opens from a window that belongs to no tab (a wizard)."""
+    local = LOCAL if local is None else local
+    redirect = local / f"{key}.html"
+    if redirect.is_file():
+        return redirect.as_uri()
+    page, label = sections.WINDOWS[key]
+    return f"{PUBLISHED}{page}.html#{label}"
+
+
 def url_for_code(code: str, severity: str = "warning", *,
                  local: Path | None = None) -> str:
     """Where the documentation explains a warning or an error with this code."""
@@ -64,5 +74,12 @@ def open_url(url: str) -> bool:
 def open_help(section_key: str, sub_key: str = "") -> str:
     """Open the documentation for a tab and return the address that was opened."""
     url = url_for(section_key, sub_key)
+    open_url(url)
+    return url
+
+
+def open_window_help(key: str) -> str:
+    """Open the documentation for a window and return the address that was opened."""
+    url = url_for_window(key)
     open_url(url)
     return url

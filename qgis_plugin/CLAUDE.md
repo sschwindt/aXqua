@@ -69,6 +69,18 @@ bottom list; a finding for a setting without a row adds the row. Both editors sh
 `axqua case write` keeps `<name>.bak` once, because writing goes through the data and
 loses hand-written comments - the editor's header says so.
 
+**The installation wizards** (`gui/install_wizard.py`) are one window with three pages -
+Settings, Check, Installation - and decide nothing themselves: the form is a small table
+(`FIELDS`), the Check page shows what `axqua install plan` answers, and the Installation
+page polls `axqua install status --tail` every 2 s. An installation is a detached process
+of the library (see `axqua/install/` in the root notes), so closing the wizard or QGIS
+does not stop it; the Configuration tab keeps a 15 s timer while one runs and its button
+then reads *Show the installation...*, which reopens the wizard on page 3. **The plugin
+never sees a password**: missing system packages are shown with their command (*Copy the
+command*), and *Install the packages...* calls `axqua install packages --elevate`, which
+lets the desktop's own dialog ask. A wizard is not a tab, so its Help target lives in
+`sections.WINDOWS` and gets a redirect page like every tab key.
+
 **Batch** (`core/batch.py`, pure): the steps are job kinds in workflow order; *Submit the
 ticked steps* hands them over in ONE background call so their queue tickets are written in
 that order (see the workspace queue in `src/axqua/jobs/CLAUDE.md`), and *Generate

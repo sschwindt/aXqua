@@ -24,14 +24,26 @@ def _reset_axqua_logging():
 
 
 @pytest.fixture(autouse=True)
-def _isolate_axqua_dirs(tmp_path_factory, monkeypatch):
+def _isolate_axqua_dirs(tmp_path_factory):
     """Point every axqua user directory at a temporary one.
 
     Without this the suite writes jobs, a SQLite index and solver profiles into the
     developer's real ``~/.config`` and ``~/.local/share`` - and, worse, a test could
     read or cancel one of their actual jobs. Autouse rather than opt-in, because the
     failure mode is silent and only shows up on someone's own machine.
+
+    **It patches through a ``MonkeyPatch`` of its own, not through the ``monkeypatch``
+    fixture a test receives.** They used to be the same object, so a test that called
+    ``monkeypatch.undo()`` to get one real function back also undid every line below,
+    and then worked on the developer's computer: one such test wrote a profile naming
+    a pytest folder as the OpenFOAM installation into ``~/.config/axqua``, which the
+    next real job of that computer then failed on.
     """
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        yield from _isolated(tmp_path_factory, monkeypatch)
+
+
+def _isolated(tmp_path_factory, monkeypatch):
     root = tmp_path_factory.mktemp("axqua-home")
     for var, name in (("AXQUA_CONFIG_DIR", "config"),
                       ("AXQUA_DATA_DIR", "data"),

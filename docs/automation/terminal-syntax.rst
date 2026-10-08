@@ -43,6 +43,25 @@ Setting up the computer (:doc:`../installation/plugin-setup`):
    * - ``axqua profile show``
      - Print the profile in use.
 
+Installing the simulation software (:doc:`../installation/simulation-software`):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua install``
+     - Show the detected operating system and, for TELEMAC, OpenFOAM and the postprocessors, where each is installed.
+   * - ``axqua install plan telemac``
+     - Show what the installation would do, which system packages are missing, and the command that installs them. Nothing is changed. The other programs are ``openfoam`` and ``postprocessors``.
+   * - ``axqua install start telemac``
+     - Start the installation as a process of its own and enter the result in the profile. Add ``--foreground`` to follow the installation in the terminal. ``--folder`` selects the installation folder.
+   * - ``axqua install status telemac --tail 20``
+     - Show the state of the installation and the last lines of its log.
+   * - ``axqua install cancel telemac``
+     - Stop the installation. What is already downloaded and built is kept.
+
 Preparing and checking a case:
 
 .. list-table::

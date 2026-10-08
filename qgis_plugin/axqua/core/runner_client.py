@@ -444,8 +444,73 @@ class RunnerClient:
         return self.call(["profile", "write"], input_text=json.dumps(profile),
                          timeout=60).data or {}
 
+    # -- installing the simulation programs ---------------------------------------
+    def install_overview(self) -> dict:
+        """``{host, targets: [{target, title, installed, running, last}], ...}``."""
+        return self.call(["install", "overview"], timeout=60).data or {}
+
+    def install_plan(self, target: str, options: dict | None = None) -> dict:
+        """What installing *target* would do, and what is missing. Changes nothing.
+
+        The first call downloads the installer scripts (2 MB), hence the long limit.
+        """
+        return self.call(["install", "plan", target, *install_flags(options)],
+                         timeout=300).data or {}
+
+    def install_packages(self, target: str, options: dict | None = None, *,
+                         elevate: bool = False) -> dict:
+        """The system packages *target* needs. With *elevate*, the missing ones are
+        installed, and the desktop asks for the administrator password."""
+        args = ["install", "packages", target, *install_flags(options)]
+        return self.call(args + (["--elevate"] if elevate else []),
+                         timeout=3600 if elevate else 300).data or {}
+
+    def install_start(self, target: str, options: dict | None = None) -> dict:
+        """Start the installation as a process of its own; returns its status."""
+        return self.call(["install", "start", target, *install_flags(options)],
+                         timeout=300).data or {}
+
+    def install_status(self, ident: str, *, tail: int = 0) -> dict:
+        """The state of one installation, with the last *tail* lines of its log."""
+        args = ["install", "status", ident] + (["--tail", str(tail)] if tail else [])
+        return self.call(args, timeout=60).data or {}
+
+    def install_cancel(self, ident: str) -> dict:
+        return self.call(["install", "cancel", ident], timeout=120).data or {}
+
     def kinds(self) -> list[dict]:
         return list(self.call(["submit", "x", "--help-kinds"]).data or [])
+
+
+#: ``option -> flag`` of ``axqua install``, for the options that carry a value.
+_INSTALL_VALUES = (("folder", "--folder"), ("tag", "--tag"), ("salome", "--salome"),
+                   ("reuse_openfoam", "--reuse-openfoam"), ("jobs", "--jobs"),
+                   ("installers", "--installers"), ("ref", "--ref"), ("base", "--base"))
+
+
+def install_flags(options: dict | None) -> list[str]:
+    """The command-line form of the choices made in an installation wizard.
+
+    An empty value sends no flag, so that aXqua applies its own default. The switches
+    are sent only where they differ from the default, for the same reason.
+    """
+    options = options or {}
+    flags: list[str] = []
+    for key, flag in _INSTALL_VALUES:
+        value = options.get(key)
+        if value not in (None, "", 0):
+            flags += [flag, str(value)]
+    if options.get("telemac_examples") is False:
+        flags.append("--no-telemac-examples")
+    if options.get("visualization") is False:
+        flags.append("--no-visualization")
+    if options.get("examples"):
+        flags.append("--examples")
+    if options.get("smoke_test") is False:
+        flags.append("--no-smoke-test")
+    if options.get("bind") is False:
+        flags.append("--no-bind")
+    return flags
 
 
 def _tail(text: str, lines: int = 6) -> str:

@@ -81,6 +81,13 @@ SECTIONS: tuple[Section, ...] = (
     Section("batch", "Batch-processing", "usage/batch-processing", "help-batch"),
 )
 
+#: What Help opens from a window that belongs to no tab: ``key -> (page, label)``.
+WINDOWS: dict[str, tuple[str, str]] = {
+    "install-telemac": ("installation/simulation-software", "install-telemac"),
+    "install-openfoam": ("installation/simulation-software", "install-openfoam"),
+    "install-postprocessors": ("installation/postprocessors", "help-postprocessors"),
+}
+
 #: Where a capability nobody has placed is shown: with the simulations of its solver.
 FALLBACK = "hydraulics"
 
@@ -128,11 +135,13 @@ def redirect_page(page: str, label: str) -> str:
 
 
 def help_keys() -> list[tuple[str, str, str]]:
-    """Every ``(key, page, label)`` Help can open: ``hydraulics`` and
-    ``hydraulics-telemac``. The archive build writes one redirect page per key."""
+    """Every ``(key, page, label)`` Help can open: ``hydraulics``,
+    ``hydraulics-telemac``, and the windows of :data:`WINDOWS`. The archive build
+    writes one redirect page per key."""
     out = []
     for item in SECTIONS:
         out.append((item.key, item.page, item.label))
         for sub in item.subsections:
             out.append((f"{item.key}-{sub.key}", item.page, sub.label))
+    out += [(key, page, label) for key, (page, label) in WINDOWS.items()]
     return out

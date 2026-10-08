@@ -1019,3 +1019,270 @@ def test_the_case_tab_opens_the_editor_and_takes_over_what_it_found(dock, tmp_pa
     # the editor opens with what the check had found
     assert not editor.rows["boundaries.prescribed_flowrate"].triangle.isHidden()
     editor.deleteLater()
+
+
+# ---------------------------------------------------------- the installation wizards
+
+
+def _overview(running=None):
+    return {
+        "host": {"description": "Debian GNU/Linux 12 (bookworm), x86_64",
+                 "supported": True, "base": "debian12"},
+        "default_jobs": 8,
+        "openfoam_found": "/usr/lib/openfoam/openfoam2406/etc/bashrc",
+        "targets": [
+            {"target": "telemac", "title": "TELEMAC", "installed": {},
+             "running": running, "last": running, "default_folder": "/home/x/opt"},
+            {"target": "openfoam", "title": "OpenFOAM v2406 with the sediment solvers",
+             "installed": {"openfoam": "/usr/lib/openfoam/openfoam2406/etc/bashrc"},
+             "running": None, "last": None,
+             "default_folder": "/home/x/.local/openfoam-sediment-v2406"},
+            {"target": "postprocessors", "title": "ParaView and VisIt",
+             "installed": {}, "running": None, "last": {"state": "failed"},
+             "default_folder": "/home/x/.local/axqua-postprocessors"},
+        ],
+    }
+
+
+def _plan(*, missing=(), ready=True, findings=(), elevation="pkexec"):
+    command = "sudo apt-get update && sudo apt-get install -y " + " ".join(missing)
+    return {
+        "target": "telemac", "title": "TELEMAC", "folder": "/home/x/opt", "ready": ready,
+        "host": {"description": "Debian GNU/Linux 12 (bookworm), x86_64"},
+        "notes": ["TELEMAC is installed in /home/x/opt/telemac-mascaret."],
+        "estimate": "30 to 60 minutes",
+        "steps": [{"name": "Download and build TELEMAC",
+                   "command": "/bin/bash telemac_debian12_installer.sh --skip-apt"}],
+        "packages": {"needed": ["git", "gfortran", "cmake"], "missing": list(missing),
+                     "unavailable": [], "command": command if missing else "",
+                     "elevation": elevation if missing else ""},
+        "findings": list(findings),
+    }
+
+
+class _InstallClient:
+    def __init__(self, plan=None, statuses=()):
+        self.plan = plan or _plan()
+        self.statuses = list(statuses)
+        self.calls: list[tuple] = []
+
+    def install_overview(self):
+        return _overview()
+
+    def install_plan(self, target, options):
+        self.calls.append(("plan", target, dict(options)))
+        return self.plan
+
+    def install_packages(self, target, options, *, elevate=False):
+        self.calls.append(("packages", target, elevate))
+        self.plan = _plan()                        # they are installed now
+        return {"installation": {"message": "the packages were installed"}}
+
+    def install_start(self, target, options):
+        self.calls.append(("start", target, dict(options)))
+        return {"id": "20261008-120000-telemac", "state": "queued", "steps": ["Build"]}
+
+    def install_status(self, ident, *, tail=0):
+        self.calls.append(("status", ident, tail))
+        return self.statuses.pop(0)
+
+    def install_cancel(self, ident):
+        self.calls.append(("cancel", ident))
+        return {"id": ident, "state": "cancelled", "message": "cancelled"}
+
+
+def _wizard_now(monkeypatch):
+    from axqua_plugin.gui import install_wizard
+
+    def now(title, call, on_success=None, on_error=None, owner=None):
+        try:
+            answer = call()
+        except Exception as exc:                 # noqa: BLE001 - as the task would
+            on_error(exc)
+        else:
+            on_success(answer)
+
+    monkeypatch.setattr(install_wizard, "run_async", now)
+    return install_wizard
+
+
+def test_the_wizard_starts_from_what_aXqua_found_and_sends_what_was_chosen(
+        qgis_app, monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    telemac = install_wizard.InstallWizard(_InstallClient(), "telemac", _overview())
+    assert telemac.options() == {"folder": "/home/x/opt", "tag": "", "salome": "",
+                                 "telemac_examples": True, "bind": True, "base": "",
+                                 "installers": ""}
+    assert telemac.pages.currentIndex() == 0 and telemac.next_button.text() == "Next"
+    telemac.deleteLater()
+
+    openfoam = install_wizard.InstallWizard(_InstallClient(), "openfoam", _overview())
+    chosen = openfoam.options()
+    # an OpenFOAM v2406 is on this computer, so the sediment solvers build on it
+    assert chosen["reuse_openfoam"] == "/usr/lib/openfoam/openfoam2406/etc/bashrc"
+    assert (chosen["jobs"], chosen["visualization"], chosen["examples"],
+            chosen["smoke_test"]) == (8, True, False, True)
+    openfoam._widgets["reuse_openfoam"].setCurrentIndex(1)       # compile it instead
+    assert openfoam.options()["reuse_openfoam"] == "no"
+    assert not openfoam._widgets["openfoam_path"].isEnabled()
+    openfoam.deleteLater()
+
+    nothing_found = dict(_overview(), openfoam_found="")
+    fresh = install_wizard.InstallWizard(_InstallClient(), "openfoam", nothing_found)
+    assert fresh.options()["reuse_openfoam"] == "no"             # nothing to build on
+    fresh.deleteLater()
+
+
+def test_missing_packages_are_shown_with_their_command_and_do_not_block(
+        qgis_app, monkeypatch):
+    """The plugin never asks for a password: it shows the command, and on a desktop
+    lets the system ask."""
+    from qgis.PyQt.QtWidgets import QApplication
+
+    install_wizard = _wizard_now(monkeypatch)
+    warning = {"severity": "warning", "code": "axqua.install.packages_missing",
+               "subject": "install.telemac.packages", "message": "1 package is missing"}
+    exists = {"severity": "warning", "code": "axqua.install.folder_exists",
+              "subject": "install.telemac.folder", "message": "the folder exists"}
+    client = _InstallClient(_plan(missing=["gfortran"], findings=[warning, exists]))
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    wizard.go_next()
+    assert wizard.pages.currentIndex() == 1 and wizard.next_button.text() == "Install"
+    assert client.calls[0][:2] == ("plan", "telemac")
+    assert "1 of 3 system packages" in wizard.package_label.text()
+    assert wizard.package_command.toPlainText().endswith("install -y gfortran")
+    assert not wizard.copy_button.isHidden() and wizard.elevate_button.isEnabled()
+    assert wizard.next_button.isEnabled()                        # a warning only
+    assert len(wizard.finding_list.findings) == 2
+    assert not wizard._triangles["folder"].isHidden()            # at the row concerned
+    assert wizard._triangles["tag"].isHidden()
+
+    wizard.copy_command()
+    assert QApplication.clipboard().text().endswith("install -y gfortran")
+
+    wizard.install_packages()                                    # the desktop asks
+    assert ("packages", "telemac", True) in client.calls
+    assert "All 3 system packages" in wizard.package_label.text()
+    assert wizard.copy_button.isHidden()
+    assert "The packages were installed" in wizard.plan_label.text()
+    wizard.deleteLater()
+
+    terminal = _InstallClient(_plan(missing=["gfortran"], elevation=""))
+    plain = install_wizard.InstallWizard(terminal, "telemac", _overview())
+    plain.go_next()
+    assert not plain.elevate_button.isEnabled()                  # no desktop dialog
+    assert "terminal" in plain.elevate_button.toolTip()
+    plain.deleteLater()
+
+
+def test_an_installation_that_cannot_work_cannot_be_started(qgis_app, monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    error = {"severity": "error", "code": "axqua.install.unsupported_system",
+             "subject": "install.telemac", "message": "there is no installer"}
+    client = _InstallClient(_plan(ready=False, findings=[error]))
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    wizard.go_next()
+    assert not wizard.next_button.isEnabled()
+    assert "cannot be started" in wizard.next_button.toolTip()
+    wizard.go_back()
+    assert wizard.pages.currentIndex() == 0 and wizard.next_button.isEnabled()
+    wizard.deleteLater()
+
+
+def test_an_installation_is_followed_until_it_ends_and_reported_once(
+        qgis_app, monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    running = {"id": "20261008-120000-telemac", "state": "running", "step": 1,
+               "steps": ["Download and build TELEMAC"], "elapsed": 190.0,
+               "step_name": "Download and build TELEMAC", "log": "/x/install.log",
+               "log_tail": "[ 42%] Building Fortran object"}
+    done = dict(running, state="succeeded", elapsed=2400.0, findings=[],
+                bound="/home/x/.config/axqua/default.axq-profile",
+                outputs={"solvers.telemac.setup_script": "/home/x/opt/pysource.sh"},
+                log_tail="[*] Installation finished.")
+    client = _InstallClient(statuses=[running, done, done])
+    reported = []
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview(),
+                                          on_done=reported.append)
+    wizard.go_next()
+    wizard.go_next()                                             # Install
+    assert client.calls[-1][0] == "start"
+    assert wizard.pages.currentIndex() == 2 and wizard.timer.isActive()
+    assert wizard.next_button.isHidden() and wizard.back_button.isHidden()
+
+    wizard.poll()
+    assert "step 1 of 1" in wizard.state_label.text()
+    assert "3 min" in wizard.state_label.text()
+    assert wizard.log_view.toPlainText() == "[ 42%] Building Fortran object"
+    assert wizard.cancel_button.isEnabled() and not reported
+
+    wizard.poll()
+    assert "finished" in wizard.state_label.text()
+    assert "default.axq-profile" in wizard.state_label.text()
+    assert not wizard.timer.isActive() and not wizard.cancel_button.isEnabled()
+    assert len(reported) == 1 and reported[0]["state"] == "succeeded"
+    wizard.show_status(done)                                     # shown again
+    assert len(reported) == 1
+    wizard.deleteLater()
+
+
+def test_a_running_installation_is_shown_when_the_wizard_is_opened_again(
+        qgis_app, monkeypatch):
+    """QGIS was closed in between: the installation went on by itself."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    install_wizard = _wizard_now(monkeypatch)
+    running = {"id": "20261008-120000-telemac", "state": "running", "step": 2,
+               "steps": ["Prepare Git", "Download and build TELEMAC"],
+               "step_name": "Download and build TELEMAC", "elapsed": 600.0}
+    client = _InstallClient()
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview(running))
+    assert wizard.pages.currentIndex() == 2 and wizard.timer.isActive()
+    assert wizard.install_id == "20261008-120000-telemac"
+    assert "step 2 of 2" in wizard.state_label.text()
+
+    yes = install_wizard.enum_value(QMessageBox, "StandardButton.Yes", "Yes")
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: yes)
+    wizard.cancel_installation()
+    assert ("cancel", "20261008-120000-telemac") in client.calls
+    assert "cancelled" in wizard.state_label.text() and not wizard.timer.isActive()
+    wizard.deleteLater()
+
+
+def test_the_help_of_a_wizard_opens_the_section_on_its_program(qgis_app, monkeypatch):
+    from axqua_plugin.gui import help as help_pages
+
+    install_wizard = _wizard_now(monkeypatch)
+    opened = []
+    monkeypatch.setattr(help_pages, "open_url", lambda url: opened.append(url) or True)
+    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
+    for target in ("telemac", "openfoam", "postprocessors"):
+        wizard = install_wizard.InstallWizard(_InstallClient(), target, _overview())
+        wizard.open_help()
+        wizard.deleteLater()
+    assert [url.split("/latest/")[1] for url in opened] == [
+        "installation/simulation-software.html#install-telemac",
+        "installation/simulation-software.html#install-openfoam",
+        "installation/postprocessors.html#help-postprocessors"]
+
+
+def test_the_configuration_tab_says_what_is_installed_and_what_is_running(dock):
+    from axqua_plugin.gui.configuration_tab import describe_program
+
+    tab = dock.configuration_tab
+    assert not tab._program_buttons["telemac"].isEnabled()      # nothing is known yet
+    running = {"id": "20261008-120000-telemac", "state": "running", "step": 2,
+               "steps": ["a", "b"], "elapsed": 720.0}
+    tab.show_software(_overview(running))
+    assert "Debian GNU/Linux 12" in tab.host_label.text()
+    assert tab._program_labels["telemac"].text() == \
+        "The installation is running, step 2 of 2 (12 min)."
+    assert tab._program_buttons["telemac"].text() == "Show the installation..."
+    assert tab._program_labels["openfoam"].text().endswith("openfoam2406/etc/bashrc")
+    assert tab._program_buttons["openfoam"].text() == "Install OpenFOAM..."
+    assert "failed" in tab._program_labels["postprocessors"].text()
+    assert tab.install_timer.isActive()                          # it keeps looking
+    tab.show_software(_overview())
+    assert not tab.install_timer.isActive()
+    assert tab._program_buttons["telemac"].text() == "Install TELEMAC..."
+    assert describe_program({}) == "Not found on this computer."
