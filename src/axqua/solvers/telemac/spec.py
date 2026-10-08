@@ -53,6 +53,39 @@ def _exists(cfg, name: str) -> bool:
     return _model(cfg, name).is_file()
 
 
+def result_files(cfg) -> list[tuple[str, str, Path]]:
+    """Every result file a TELEMAC case can have: ``(name, what it is, path)``.
+
+    All of them, whether they exist or not; the caller looks. The names are the ones
+    the steering files are written with, so a case that renames a result in its case
+    file is followed. The hydrostatic 3D run keeps names of its own.
+    """
+    steady = Path(str(getattr(cfg, "results_slf", "r2d.slf")))
+    rows = [
+        (steady.name, "steady simulation, 2D"),
+        # the name steering.write_hotstart_cas gives the continued run
+        (f"{steady.stem}-hotstart{steady.suffix}", "continued steady simulation, 2D"),
+        (getattr(cfg, "results_unsteady_slf", "r2d-unsteady.slf"),
+         "unsteady simulation, 2D"),
+        (getattr(cfg, "results3d_slf", "r3d.slf"), "3D simulation"),
+        (getattr(cfg, "results2d_from_3d_slf", "r3d-2d.slf"),
+         "3D simulation, depth-averaged"),
+        (HYDROSTATIC_RESULT, "3D simulation, hydrostatic"),
+        ("r3d-2d-hydrostatic.slf", "3D simulation, hydrostatic, depth-averaged"),
+        (getattr(cfg, "results3d_unsteady_slf", "r3d-unsteady.slf"),
+         "unsteady simulation, 3D"),
+        (getattr(cfg, "results2d_from_3d_unsteady_slf", "r3d-2d-unsteady.slf"),
+         "unsteady simulation, 3D, depth-averaged"),
+    ]
+    seen: set[str] = set()
+    out = []
+    for name, label in rows:
+        if name and name not in seen:
+            seen.add(name)
+            out.append((name, label, _model(cfg, name)))
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # "configured": what this case asks for, from the config alone
 # --------------------------------------------------------------------------- #

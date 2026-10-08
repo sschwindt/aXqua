@@ -594,6 +594,12 @@ def _case_cli(name: str, argv: list[str]) -> int:
     return getattr(casecli, name)(argv)
 
 
+def _run_export(argv: list[str]) -> int:
+    """``axqua export`` - results for ParaView and VisIt (:mod:`axqua.exportcli`)."""
+    from axqua import exportcli
+    return exportcli.run_export(argv)
+
+
 def _run_install(argv: list[str]) -> int:
     """``axqua install`` - the simulation programs (:mod:`axqua.installcli`)."""
     from axqua import installcli
@@ -701,6 +707,7 @@ _DISPATCH = {
     "profiles": _job("run_profiles"),
     "profile": lambda argv: _run_profile(argv),
     "install": lambda argv: _run_install(argv),
+    "export": lambda argv: _run_export(argv),
     "schema": lambda argv: _case_cli("run_schema", argv),
     "case": lambda argv: _case_cli("run_case", argv),
     "check": lambda argv: _case_cli("run_check", argv),

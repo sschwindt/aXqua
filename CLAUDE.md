@@ -66,7 +66,7 @@ A build needs a **ROI boundary polygon** (`geodata.boundary`, a closed polygon/p
 
 ## Post-processing with VisIt (`axqua/postproc/`)
 
-Documented in `src/axqua/postproc/CLAUDE.md`.
+Documented in `src/axqua/postproc/CLAUDE.md`, which also covers `axqua export`: TELEMAC results as VTK for ParaView and VisIt (neither reads SERAFIN). Two things there concern more than the export. **A TELEMAC result stores its coordinates in single precision**, which at a UTM northing is a spacing of 0.5 m: 14 % of the cells of the isar-2025 baseline mesh have no area in the coordinates of its own `r2d.slf`. Fields are right, the mesh in the file is not, so anything spatial takes x and y from `geometry.slf` (the export and `axqua.validation` do; `convergence.extract_at_points`, `_geom_stats`, the wetting report and QGIS drawing the result still read the stored ones). And `core.selafin.SelafinFile` reads one frame at a time where `read_slf` loads all of them.
 
 ## Structures: dams, weirs, walls and buildings (`axqua/core/structures.py`)
 

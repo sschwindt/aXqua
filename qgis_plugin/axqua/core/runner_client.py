@@ -444,6 +444,20 @@ class RunnerClient:
         return self.call(["profile", "write"], input_text=json.dumps(profile),
                          timeout=60).data or {}
 
+    # -- results for ParaView and VisIt -------------------------------------------
+    def export_list(self, case: str | os.PathLike) -> dict:
+        """``{folder, results: [...]}``: the TELEMAC results of a case, and which of
+        them are exported already."""
+        return self.call(["export", str(case), "--list"], timeout=120).data or {}
+
+    def export_results(self, case: str | os.PathLike, names: Sequence[str] = (), *,
+                       frames: str = "all") -> dict:
+        """Convert results of a case into files ParaView and VisIt open."""
+        args = ["export", str(case), "--frames", str(frames)]
+        for name in names:
+            args += ["--result", str(name)]
+        return self.call(args, timeout=3600).data or {}
+
     # -- installing the simulation programs ---------------------------------------
     def install_overview(self) -> dict:
         """``{host, targets: [{target, title, installed, running, last}], ...}``."""

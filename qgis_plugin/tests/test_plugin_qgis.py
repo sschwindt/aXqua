@@ -1286,3 +1286,106 @@ def test_the_configuration_tab_says_what_is_installed_and_what_is_running(dock):
     assert not tab.install_timer.isActive()
     assert tab._program_buttons["telemac"].text() == "Install TELEMAC..."
     assert describe_program({}) == "Not found on this computer."
+
+
+# ------------------------------------------------- results for ParaView and VisIt
+
+
+def _export_list(exported=False, newer=False):
+    done = {"pvd": "/c/vtk/r2d.pvd", "visit": "/c/vtk/r2d.visit",
+            "up_to_date": not newer} if exported else \
+        {"pvd": "", "visit": "", "up_to_date": False}
+    return {"folder": "/c/vtk", "results": [
+        {"name": "r2d.slf", "label": "steady simulation, 2D", "frames": 26,
+         "kind": "2d", "exported": done},
+        {"name": "r3d.slf", "label": "3D simulation", "frames": 6, "kind": "3d",
+         "exported": {"pvd": "", "visit": "", "up_to_date": False}}]}
+
+
+class _ExportClient:
+    def __init__(self):
+        self.calls, self.exported = [], False
+
+    def export_list(self, case):
+        return _export_list(self.exported)
+
+    def export_results(self, case, names, *, frames="all"):
+        self.calls.append((list(names), frames))
+        self.exported = True
+        return {"folder": "/c/vtk", "exports": [
+            {"files": ["a.vtu"] * 26, "megabytes": 31.0} for _ in names]}
+
+
+@pytest.fixture
+def program_pages(dock, tmp_path, monkeypatch):
+    """The ParaView and the VisIt page of a panel with one case, answered at once."""
+    from axqua_plugin.gui import section_pages
+
+    case = tmp_path / "reach.axq-case"
+    case.write_text("project: {name: reach}\n", encoding="utf-8")
+    dock.ctx.project.add_case(case)
+    dock.ctx.set_runner_ok(True)
+    dock.ctx.client = _ExportClient()
+    now = lambda title, call, on_success=None, on_error=None, owner=None: on_success(call())  # noqa: E731
+    monkeypatch.setattr(section_pages, "run_async", now)
+    started = []
+    monkeypatch.setattr(section_pages, "launch",
+                        lambda program, arguments: started.append((program, arguments))
+                        or True)
+    return dock, dock.page("postprocessing", "paraview"), \
+        dock.page("postprocessing", "visit"), started
+
+
+def test_the_results_of_a_case_are_listed_exported_and_opened(program_pages):
+    dock, paraview, visit, started = program_pages
+    paraview.refresh()
+    assert paraview.table.rowCount() == 2
+    assert [paraview.table.item(0, column).text() for column in range(4)] == \
+        ["r2d.slf", "steady simulation, 2D", "26", "no"]
+    assert paraview.export_button.isEnabled()
+    assert not paraview.open_button.isEnabled()              # nothing exported yet
+    assert "Export the result first" in paraview.open_button.toolTip() or \
+        "profile" in paraview.open_button.toolTip()
+
+    paraview.table.selectRow(0)
+    paraview.frames.setCurrentIndex(1)                       # only the last time step
+    paraview.export()
+    assert dock.ctx.client.calls == [(["r2d.slf"], "last")]
+    assert "Exported 1 result(s) with 26 time step(s)" in paraview.status.text()
+    assert paraview.table.item(0, 3).text() == "yes"
+
+    # without a program in the profile there is nothing to start, and the page says so
+    paraview.table.selectRow(0)
+    assert not paraview.open_button.isEnabled()
+    assert "No ParaView program" in paraview.program.text()
+
+    profile = {"postprocessors": {"paraview": "/usr/bin/paraview",
+                                  "visit": "/opt/visit/bin/visit"}}
+    dock.profile_changed(profile)
+    paraview.table.selectRow(0)
+    assert paraview.open_button.isEnabled()
+    paraview.open_program()
+    # one export serves both programs; each opens its own index file, in its own way
+    visit.refresh()
+    visit.table.selectRow(0)
+    visit.open_program()
+    assert started == [("/usr/bin/paraview", ["/c/vtk/r2d.pvd"]),
+                       ("/opt/visit/bin/visit", ["-o", "/c/vtk/r2d.visit"])]
+    assert "was started" in visit.status.text()
+
+
+def test_everything_is_exported_when_no_result_is_selected(program_pages):
+    dock, paraview, _visit, _started = program_pages
+    paraview.refresh()
+    paraview.table.clearSelection()
+    paraview.export()
+    assert dock.ctx.client.calls == [(["r2d.slf", "r3d.slf"], "all")]
+
+
+def test_an_export_older_than_its_result_is_named(program_pages):
+    _dock, paraview, _visit, _started = program_pages
+    paraview.show_results(_export_list(exported=True, newer=True))
+    assert "newer than the export" in paraview.table.item(0, 3).text()
+    paraview.show_results({}, note="Add a case on the tab Case Setup first.")
+    assert paraview.table.rowCount() == 0 and not paraview.export_button.isEnabled()
+    assert "Add a case" in paraview.status.text()

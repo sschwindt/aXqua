@@ -81,6 +81,12 @@ command*), and *Install the packages...* calls `axqua install packages --elevate
 lets the desktop's own dialog ask. A wizard is not a tab, so its Help target lives in
 `sections.WINDOWS` and gets a redirect page like every tab key.
 
+**The ParaView and VisIt sub-tabs** (`section_pages.ProgramPage`) list the TELEMAC results
+of the active case (`axqua export <case> --list`), export the selected ones in a background
+task and start the program of the profile with the exported index file (`.pvd`; VisIt takes
+`-o file.visit`) through `QProcess.startDetached`, wrapped in `launch()` so that a test can
+replace it. One export serves both programs, so a page asks again whenever it is shown.
+
 **Batch** (`core/batch.py`, pure): the steps are job kinds in workflow order; *Submit the
 ticked steps* hands them over in ONE background call so their queue tickets are written in
 that order (see the workspace queue in `src/axqua/jobs/CLAUDE.md`), and *Generate

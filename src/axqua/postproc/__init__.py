@@ -23,6 +23,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "dataset": ("Dataset",),
     "scenes": ("Scene", "available_names", "check", "plan", "resolve"),
     "render": ("case_extras", "datasets", "plan_lines", "render"),
+    "selafin_vtk": ("export_selafin",),
     "visit": ("VisitRuntime", "render_script", "write_script"),
 }
 _SUBMODULES = ("dataset", "profiles", "render", "scenes", "selafin_vtk", "visit")
@@ -32,13 +33,14 @@ _NAME_TO_MODULE = {name: module
                    for name in names}
 
 __all__ = ["Dataset", "Scene", "VisitRuntime", "available_names", "case_extras",
-           "check", "datasets", "plan", "plan_lines", "render", "render_script",
-           "resolve", "write_script", *_SUBMODULES]
+           "check", "datasets", "export_selafin", "plan", "plan_lines", "render",
+           "render_script", "resolve", "write_script", *_SUBMODULES]
 
 if TYPE_CHECKING:  # pragma: no cover
     from axqua.postproc.dataset import Dataset
     from axqua.postproc.render import case_extras, datasets, plan_lines, render
     from axqua.postproc.scenes import Scene, available_names, check, plan, resolve
+    from axqua.postproc.selafin_vtk import export_selafin
     from axqua.postproc.visit import VisitRuntime, render_script, write_script
 
 

@@ -10,13 +10,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from qgis.PyQt.QtWidgets import (QFileDialog, QGroupBox, QHBoxLayout, QLabel,
-                                 QListWidget, QListWidgetItem, QPushButton,
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtWidgets import (QComboBox, QFileDialog, QGroupBox, QHBoxLayout,
+                                 QLabel, QListWidget, QListWidgetItem, QPushButton,
                                  QScrollArea, QTableWidget, QTableWidgetItem,
                                  QVBoxLayout, QWidget)
 
 from ..compat import CHECKED, UNCHECKED, enum_value
 from ..core import batch
+from ..core.runner_client import user_text
+from ..core.tasks import run_async
 from . import sections
 from .capability_tab_widget import CapabilityTab
 from .profile_editor import get
@@ -232,27 +235,212 @@ class QgisPage(QWidget):
         layout.addStretch(1)
 
 
+#: The index file each program opens, and how the program is started with it.
+PROGRAMS = {
+    "paraview": ("pvd", lambda path: [path]),
+    "visit": ("visit", lambda path: ["-o", path]),
+}
+
+FRAMES = (("all", "All time steps"), ("last", "Only the last time step"))
+
+
+def launch(program: str, arguments: list[str]) -> bool:
+    """Start a program of its own, which stays open when QGIS is closed."""
+    from qgis.PyQt.QtCore import QProcess
+
+    started = QProcess.startDetached(program, arguments)
+    return bool(started[0] if isinstance(started, tuple) else started)
+
+
 class ProgramPage(QWidget):
-    """ParaView or VisIt: the program of the profile, and what can be done with it."""
+    """ParaView or VisIt: export the TELEMAC results of the case and open them.
+
+    Neither program reads the result format of TELEMAC, so ``axqua export`` converts a
+    result once into files that both read. The page lists the results the case has,
+    exports the selected ones in the background, and starts the program of the profile
+    with the exported file.
+    """
+
+    COLUMNS = ("Result", "Simulation", "Time steps", "Exported")
 
     def __init__(self, context, key: str, title: str, parent=None) -> None:
         super().__init__(parent)
         self.ctx, self.key, self.title = context, key, title
+        self.results: list[dict] = []
+        self.folder = ""
+        self.program_path = ""
         layout = QVBoxLayout(self)
         self.program = _label("")
         layout.addWidget(self.program)
-        layout.addWidget(_label(
-            f"The export of results to {title} is not yet available in this version. "
-            f"OpenFOAM results can be opened in {title} directly from the case folder."))
-        layout.addStretch(1)
-        self.show_profile(getattr(context, "profile", None))
 
+        box = QGroupBox("TELEMAC results of the selected case")
+        inner = QVBoxLayout(box)
+        inner.addWidget(_label(
+            f"{title} does not read the result files of TELEMAC. Export converts the "
+            f"selected results once into files that ParaView and VisIt both open."))
+        self.table = QTableWidget(0, len(self.COLUMNS))
+        self.table.setHorizontalHeaderLabels(list(self.COLUMNS))
+        self.table.setSelectionBehavior(enum_value(
+            QTableWidget, "SelectionBehavior.SelectRows", "SelectRows"))
+        self.table.setEditTriggers(enum_value(
+            QTableWidget, "EditTrigger.NoEditTriggers", "NoEditTriggers"))
+        self.table.verticalHeader().setVisible(False)
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.itemSelectionChanged.connect(self._update_buttons)
+        inner.addWidget(self.table)
+        row = QHBoxLayout()
+        self.frames = QComboBox()
+        for value, text in FRAMES:
+            self.frames.addItem(text, value)
+        row.addWidget(self.frames)
+        self.export_button = QPushButton("Export")
+        self.export_button.setToolTip("Convert the selected results; all of them when "
+                                      "none is selected")
+        self.export_button.clicked.connect(self.export)
+        row.addWidget(self.export_button)
+        self.open_button = QPushButton(f"Open in {title}")
+        self.open_button.clicked.connect(self.open_program)
+        row.addWidget(self.open_button)
+        row.addStretch(1)
+        refresh = QPushButton("Refresh")
+        refresh.clicked.connect(self.refresh)
+        row.addWidget(refresh)
+        inner.addLayout(row)
+        self.status = _label("")
+        self.status.setTextInteractionFlags(enum_value(
+            Qt, "TextInteractionFlag.TextSelectableByMouse", "TextSelectableByMouse"))
+        inner.addWidget(self.status)
+        layout.addWidget(box, 1)
+
+        layout.addWidget(_label(
+            f"OpenFOAM results need no export. {title} opens the case folder of an "
+            "OpenFOAM simulation directly."))
+        self.show_profile(getattr(context, "profile", None))
+        self._update_buttons()
+
+    # -- the program ---------------------------------------------------------------
     def show_profile(self, profile) -> None:
         path = get(profile or {}, f"postprocessors.{self.key}")
+        self.program_path = str(path or "")
         self.program.setText(
             f"{self.title} program: {path}" if path else
-            f"No {self.title} program is entered in the profile of this computer "
-            "(tab Configuration).")
+            f"No {self.title} program is entered in the profile of this computer. "
+            "Install it, or enter it in the profile, on the tab Configuration.")
+        self._update_buttons()
+
+    # -- the results ---------------------------------------------------------------
+    def apply(self, case_view) -> None:
+        """The active case changed, or its state did."""
+        self.refresh()
+
+    def showEvent(self, event) -> None:          # noqa: N802 - Qt's name
+        """One export serves both programs: what was exported on the tab of the other
+        one is known here as soon as this tab is looked at."""
+        super().showEvent(event)
+        self.refresh()
+
+    def refresh(self) -> None:
+        case = self.ctx.project.active_case_path()
+        if case is None or not Path(case).exists():
+            self.show_results({}, note=NO_CASE)
+            return
+        client = self.ctx.client
+        run_async("aXqua: reading the results of the case",
+                  lambda: client.export_list(case),
+                  on_success=self.show_results,
+                  on_error=lambda exc: self.show_results({}, note=user_text(exc)),
+                  owner=self)
+
+    def show_results(self, payload: dict, *, note: str = "") -> None:
+        self.results = list((payload or {}).get("results") or [])
+        self.folder = str((payload or {}).get("folder") or "")
+        self.table.setRowCount(len(self.results))
+        for row, result in enumerate(self.results):
+            exported = result.get("exported") or {}
+            if exported.get("up_to_date"):
+                state = "yes"
+            elif exported.get("pvd"):
+                state = "yes, but the result is newer than the export"
+            else:
+                state = "no"
+            cells = (str(result.get("name", "")), str(result.get("label", "")),
+                     str(result.get("frames", "")), state)
+            for column, text in enumerate(cells):
+                self.table.setItem(row, column, QTableWidgetItem(text))
+        self.table.resizeColumnsToContents()
+        if note:
+            self.status.setText(note)
+        elif not self.results:
+            self.status.setText("This case has no TELEMAC results yet. Run a "
+                                "simulation first.")
+        else:
+            self.status.setText(f"Exported files are written to {self.folder}.")
+        self._update_buttons()
+
+    def selected(self) -> list[dict]:
+        """The results of the selected rows; all results when no row is selected."""
+        rows = sorted({index.row() for index in self.table.selectedIndexes()})
+        return [self.results[row] for row in rows] if rows else list(self.results)
+
+    def _exported_file(self) -> str:
+        """The file the program opens: of the selected result, if it is exported."""
+        suffix = PROGRAMS[self.key][0]
+        for result in self.selected():
+            path = (result.get("exported") or {}).get(suffix)
+            if path:
+                return str(path)
+        return ""
+
+    def _update_buttons(self) -> None:
+        self.export_button.setEnabled(bool(self.results))
+        ready = bool(self.program_path and self._exported_file())
+        self.open_button.setEnabled(ready)
+        if not self.program_path:
+            self.open_button.setToolTip(f"No {self.title} program is entered in the "
+                                        "profile of this computer.")
+        elif not self._exported_file():
+            self.open_button.setToolTip("Export the result first.")
+        else:
+            self.open_button.setToolTip(self._exported_file())
+
+    # -- export and open -----------------------------------------------------------
+    def export(self) -> None:
+        case = self.ctx.active_case_or_warn()
+        if case is None or not self.results:
+            return
+        names = [str(result.get("name")) for result in self.selected()]
+        frames = self.frames.currentData()
+        self.export_button.setEnabled(False)
+        self.status.setText("Exporting " + ", ".join(names) + " ...")
+        client = self.ctx.client
+        run_async("aXqua: exporting results for ParaView and VisIt",
+                  lambda: client.export_results(case, names, frames=frames),
+                  on_success=self._exported, on_error=self._export_failed, owner=self)
+
+    def _exported(self, payload: dict) -> None:
+        done = (payload or {}).get("exports") or []
+        size = sum(float(item.get("megabytes") or 0.0) for item in done)
+        steps = sum(len(item.get("files") or []) for item in done)
+        self.refresh()
+        self.status.setText(f"Exported {len(done)} result(s) with {steps} time step(s) "
+                            f"({size:.0f} MB) to {(payload or {}).get('folder', '')}.")
+
+    def _export_failed(self, exc: Exception) -> None:
+        self.export_button.setEnabled(bool(self.results))
+        self.status.setText(user_text(exc))
+        self.ctx.error(user_text(exc))
+
+    def open_program(self) -> None:
+        path = self._exported_file()
+        if not (path and self.program_path):
+            return
+        arguments = PROGRAMS[self.key][1](path)
+        if launch(self.program_path, arguments):
+            self.status.setText(f"{self.title} was started with {path}.")
+        else:
+            self.status.setText(f"{self.title} could not be started: "
+                                f"{self.program_path}")
+            self.ctx.warn(self.status.text())
 
 
 class BatchPage(QWidget):

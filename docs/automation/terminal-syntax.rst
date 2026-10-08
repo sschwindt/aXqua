@@ -93,6 +93,21 @@ Preparing and checking a case:
    * - ``axqua postproc <case-file>``
      - Render the predefined figures with VisIt.
 
+Results for ParaView and VisIt (:doc:`../usage/postprocessing`):
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua export <case-file> --list``
+     - List the TELEMAC results of the case with their time steps, and state which of them are exported.
+   * - ``axqua export <case-file>``
+     - Convert the TELEMAC results of the case into files that ParaView (``.pvd``) and VisIt (``.visit``) open. ``--result r2d.slf`` selects one result, and ``--frames last`` only its last time step.
+   * - ``axqua export <result.slf> --geometry <geometry.slf>``
+     - Convert one result file without a case. The geometry file of the model provides the exact node coordinates.
+
 Tools for input data:
 
 .. list-table::

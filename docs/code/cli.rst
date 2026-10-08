@@ -27,6 +27,12 @@ Installation commands
 .. automodule:: axqua.installcli
    :members:
 
+Export commands
+---------------
+
+.. automodule:: axqua.exportcli
+   :members:
+
 Case file commands
 ------------------
 

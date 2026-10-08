@@ -34,4 +34,6 @@ ParaView
 
 The wizards use the ParaView package of the operating system, which is one of the system packages listed on the *Check* page. Installing it requires administrator rights (:doc:`simulation-software`). Once the package is installed, the wizard enters the program ``/usr/bin/paraview`` in the profile under ``postprocessors.paraview``. A newer ParaView from the ParaView website can be used instead: unpack it and enter its program ``bin/paraview`` in the profile editor.
 
-ParaView opens an OpenFOAM case directly. It does not read the result format of TELEMAC (SELAFIN). TELEMAC results are therefore viewed in QGIS, until the export to a ParaView format becomes available (:ref:`help-postprocessing-paraview`).
+ParaView opens an OpenFOAM case directly. It does not read the result format of TELEMAC (SELAFIN), and neither does VisIt. aXqua therefore exports TELEMAC results into a format that both programs read (:ref:`help-postprocessing-paraview`).
+
+TELEMAC itself is distributed with the source code of a ParaView plugin that reads SELAFIN files (``optionals/addons/Paraview_Plugins/SerafinReader`` in the TELEMAC folder). This plugin has to be compiled for the version of ParaView in use and does not exist for VisIt. The export of aXqua requires neither.

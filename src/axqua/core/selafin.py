@@ -280,6 +280,99 @@ def write_initial_state(
                           title=title, date=date, double_precision=double_precision)
 
 
+class SelafinFile:
+    """One frame at a time out of a SERAFIN file, however long the simulation was.
+
+    :func:`read_slf` reads every frame to return one, which is right for the last frame
+    of a steady run and wrong for walking through an unsteady one: a result of a few
+    hundred printouts on a fine mesh is gigabytes. A SERAFIN file has frames of one
+    fixed size after its header, so a frame is found by arithmetic and read alone.
+
+    ``x``, ``y``, ``ikle`` (0-based) and ``ipobo`` are read once. ``var_names`` and
+    ``var_units`` are the two halves of the 32 characters each variable is named with.
+    Arrays come back **flat**, in the numbering of the file: for a 3D result that is
+    plane after plane over the same plan mesh (``npoin2`` nodes each), which is also
+    how the prisms of ``ikle`` index them.
+    """
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+        with open(self.path, "rb") as f:
+            title = _read_record(f)
+            if title is None or len(title) < 72:
+                raise ValueError(f"{self.path.name} is not a SERAFIN file")
+            self.title = title[:72].decode("ascii", "replace").strip()
+            self.double = title[72:80].strip() == b"SERAFIND"
+            self.dtype = _F8 if self.double else _F4
+            nbv = np.frombuffer(_read_record(f), dtype=_I4)
+            count = int(nbv[0]) + int(nbv[1])
+            names = [_read_record(f) for _ in range(count)]
+            self.var_names = [n[:16].decode("ascii", "replace").strip() for n in names]
+            self.var_units = [n[16:32].decode("ascii", "replace").strip() for n in names]
+            iparam = np.frombuffer(_read_record(f), dtype=_I4)
+            self.date: tuple[int, ...] | None = None
+            if iparam.size >= 10 and iparam[9] == 1:
+                self.date = tuple(int(v) for v in
+                                  np.frombuffer(_read_record(f), dtype=_I4))
+            dims = np.frombuffer(_read_record(f), dtype=_I4)
+            self.nelem, self.npoin, self.ndp = int(dims[0]), int(dims[1]), int(dims[2])
+            # NPLAN is IPARAM(7); see read_slf for why not the dimensions record.
+            nplan = int(iparam[6]) if iparam.size > 6 and iparam[6] > 1 else 1
+            if nplan == 1 and dims.size > 3 and dims[3] > 1:
+                nplan = int(dims[3])
+            if nplan > 1 and self.npoin % nplan:
+                nplan = 1
+            self.nplan = nplan
+            self.ikle = np.frombuffer(_read_record(f), dtype=_I4).reshape(
+                self.nelem, self.ndp) - 1
+            self.ipobo = np.frombuffer(_read_record(f), dtype=_I4).copy()
+            self.x = np.frombuffer(_read_record(f), dtype=self.dtype).astype(float)
+            self.y = np.frombuffer(_read_record(f), dtype=self.dtype).astype(float)
+            self._start = f.tell()
+        item = self.dtype.itemsize
+        self._time_size = 4 + item + 4
+        self._var_size = 4 + self.npoin * item + 4
+        self._frame_size = self._time_size + len(self.var_names) * self._var_size
+        self.n_frames = max(0, (self.path.stat().st_size - self._start)
+                            // self._frame_size)
+        self.times = [self._time(i) for i in range(self.n_frames)]
+
+    @property
+    def npoin2(self) -> int:
+        """Nodes of the plan mesh; all of them in a 2D file."""
+        return self.npoin // self.nplan
+
+    def __len__(self) -> int:
+        return self.n_frames
+
+    def _time(self, index: int) -> float:
+        with open(self.path, "rb") as f:
+            f.seek(self._start + index * self._frame_size + 4)
+            return float(np.frombuffer(f.read(self.dtype.itemsize), dtype=self.dtype)[0])
+
+    def frame(self, index: int, names: Sequence[str] | None = None
+              ) -> dict[str, np.ndarray]:
+        """The variables of one printout, as flat arrays in the file's precision.
+
+        *names* limits what is read. A negative *index* counts from the end.
+        """
+        if index < 0:
+            index += self.n_frames
+        if not 0 <= index < self.n_frames:
+            raise IndexError(f"{self.path.name} has {self.n_frames} frames, "
+                             f"not one with index {index}")
+        wanted = list(self.var_names) if names is None else list(names)
+        out: dict[str, np.ndarray] = {}
+        base = self._start + index * self._frame_size + self._time_size
+        with open(self.path, "rb") as f:
+            for position, name in enumerate(self.var_names):
+                if name not in wanted:
+                    continue
+                f.seek(base + position * self._var_size + 4)
+                out[name] = np.fromfile(f, dtype=self.dtype, count=self.npoin)
+        return out
+
+
 def extract_hotstart(results: str | Path, out: str | Path, *, frame: int = -1,
                      title: str = "axqua hotstart") -> Path:
     """Write a one-frame ``PREVIOUS COMPUTATION FILE`` from a multi-frame result.

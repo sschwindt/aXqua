@@ -36,18 +36,49 @@ All other properties of the layers are changed in the QGIS layer properties as u
 ParaView
 --------
 
-An OpenFOAM model of aXqua can be opened in ParaView without conversion. In ParaView, select *File > Open* and choose the file ``case.foam`` in the folder ``axqua-case/openfoam/``. The mesh regions and the result fields can then be selected in the properties panel. To display the water only, apply the filter *Threshold* or *Clip* to the field ``alpha.water``, which is 1 in water and 0 in air.
+ParaView is suited for the interactive inspection of results in three dimensions. It opens an OpenFOAM model directly and a TELEMAC result after an export.
 
-.. note::
+.. _export-telemac-results:
 
-   ParaView does not read the result format of TELEMAC. The export of TELEMAC results to a ParaView format from the plugin is not yet available in this version.
+**Export of TELEMAC results.** ParaView and VisIt do not read the result format of TELEMAC (SELAFIN). aXqua therefore converts a result once into the VTK format, which both programs read. On the tab *Postprocessing > ParaView*, the table lists the TELEMAC results of the selected case with their number of time steps. Select one or several results, choose between all time steps and the last time step only, and click *Export*. Without a selection, all results are exported. The conversion of one time step takes about one second for a mesh of 230,000 nodes. The same export serves ParaView and VisIt, and is repeated after a simulation was run again: the column *Exported* states whether the exported files are older than the result.
+
+The exported files are written to the folder ``axqua-case/postprocessing/vtk/``. Each result has a file ``<result>.pvd`` for ParaView, a file ``<result>.visit`` for VisIt, and a folder with one file per time step. In a terminal, the export is:
+
+.. code-block:: text
+
+   axqua export <case-file>                              # all results of the case
+   axqua export <case-file> --result r2d.slf --frames last
+   axqua export <case-file> --list                       # what the case has, and what is exported
+
+What the exported files contain:
+
+* **A 2D result** is a surface of triangles in the horizontal plane, at elevation zero. The fields carry their TELEMAC names, for example ``WATER DEPTH``, ``FREE SURFACE``, ``BOTTOM`` and ``SCALAR VELOCITY``. The velocity is additionally available as the vector ``VELOCITY``, which arrows and streamlines require.
+* **A 3D result** is a volume of prisms between the bed and the water surface, with the node elevations of each time step. The vector ``VELOCITY`` has three components.
+* **The time** of each time step is the simulated time in seconds.
+
+The node coordinates are taken from the geometry file of the model and not from the result file. TELEMAC stores a result in single precision, including its coordinates, and a coordinate of several million meters has a resolution of 0.5 m in that precision. The computation is not affected, because TELEMAC computes with the exact geometry. The mesh that is stored in a result file, however, is distorted: in a model with channel cells of 0.5 m, 14 % of the cells of the stored mesh had no area left. aXqua places the fields on the exact nodes.
+
+**Open a TELEMAC result.** Click *Open in ParaView*, or start ParaView and open the file ``<result>.pvd``. Click *Apply*. The following steps are typical:
+
+#. Select the field to display in the toolbar, for example ``WATER DEPTH``. The time step is selected with the animation controls.
+#. To display the water only, apply the filter *Threshold* to ``WATER DEPTH`` with a lower limit of 0.01 m. This is the minimum water depth that aXqua uses in its own evaluations (:ref:`hydraulics-dry-runs`).
+#. To display the relief of a 2D result, apply the filter *Warp By Scalar* with ``BOTTOM`` for the terrain or with ``FREE SURFACE`` for the water surface. The mesh is flat by default for a reason: an area or a volume that the filter *Integrate Variables* computes over the flat mesh is the area or the volume of the model, whereas the same integral over a mesh on the sloping bed is larger.
+#. For streamlines, apply the filter *Stream Tracer* with the vector ``VELOCITY`` and a line across the channel as seed.
+
+**Open an OpenFOAM model.** An OpenFOAM model of aXqua needs no export. In ParaView, select *File > Open* and choose the file ``case.foam`` in the folder ``axqua-case/openfoam/``. The mesh regions and the result fields can then be selected in the properties panel. To display the water only, apply the filter *Threshold* or *Clip* to the field ``alpha.water``, which is 1 in water and 0 in air.
 
 .. _help-postprocessing-visit:
 
 VisIt
 -----
 
-aXqua renders predefined figures of three-dimensional results with VisIt. No interaction with VisIt is required: aXqua writes a script for each figure and lets VisIt execute it without opening a window.
+VisIt serves two purposes: the interactive inspection of results, as with ParaView, and the predefined figures that aXqua renders without interaction.
+
+**Open a TELEMAC result.** Export the result as described for ParaView (:ref:`export of TELEMAC results <export-telemac-results>`). The tab *Postprocessing > VisIt* has the same table and the same *Export* button, and one export serves both programs. Click *Open in VisIt*, or start VisIt and open the file ``<result>.visit``. Add a plot with *Add > Pseudocolor* and select a field, for example ``WATER DEPTH``, then click *Draw*. The time slider moves through the time steps. The operator *Elevate* displays the relief of a 2D result, and the operator *Threshold* restricts the plot to the water.
+
+**Open an OpenFOAM model.** VisIt opens an OpenFOAM model through the file ``system/controlDict`` in the folder ``axqua-case/openfoam/``. Unlike ParaView, it does not accept the file ``case.foam``.
+
+**Predefined figures.** aXqua renders predefined figures of three-dimensional OpenFOAM results with VisIt. No interaction with VisIt is required: aXqua writes a script for each figure and lets VisIt execute it without opening a window.
 
 .. list-table::
    :header-rows: 1
@@ -74,4 +105,4 @@ The figures are written to ``axqua-case/postprocessing/figures/``. The scripts a
 
 .. note::
 
-   Starting these figures from the plugin, and the export of TELEMAC results to a VisIt format, are not yet available in this version.
+   Starting the predefined figures from the plugin is not yet available in this version. Use the commands above.

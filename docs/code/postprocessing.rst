@@ -26,3 +26,9 @@ VisIt
 
 .. automodule:: axqua.postproc.visit
    :members:
+
+Export of TELEMAC results
+-------------------------
+
+.. automodule:: axqua.postproc.selafin_vtk
+   :members:
