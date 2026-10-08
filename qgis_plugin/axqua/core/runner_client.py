@@ -397,6 +397,29 @@ class RunnerClient:
     def profiles(self) -> dict:
         return self.call(["profiles", "list"]).data or {}
 
+    # -- a case file --------------------------------------------------------------
+    def schema(self) -> dict:
+        """``{sections: [...]}``: every setting of a case file, for the editor."""
+        return self.call(["schema"], timeout=60).data or {}
+
+    def case_read(self, case: str | os.PathLike) -> dict:
+        """``{path, folder, data}``: the case file as it is written."""
+        return self.call(["case", "read", str(case)]).data or {}
+
+    def case_write(self, case: str | os.PathLike, data: dict) -> dict:
+        """Write the case and check it. Returns ``{path, backup, findings}``."""
+        return self.call(["case", "write", str(case)], timeout=120,
+                         input_text=json.dumps({"data": data})).data or {}
+
+    def case_new(self, case: str | os.PathLike, name: str = "") -> dict:
+        """Create a case file with the entries every case has."""
+        args = ["case", "new", str(case)] + (["--name", name] if name else [])
+        return self.call(args, timeout=60).data or {}
+
+    def case_check(self, case: str | os.PathLike) -> dict:
+        """``{path, findings}``: everything that is wrong with the case."""
+        return self.call(["check", str(case)], timeout=120).data or {}
+
     # -- the profile of this computer ---------------------------------------------
     def profile_path(self) -> dict:
         """``{path, exists}`` of the active profile."""

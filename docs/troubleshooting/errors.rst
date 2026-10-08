@@ -46,6 +46,41 @@ Installation
 ``axqua could not be found`` (plugin)
     The plugin did not find the program ``axqua``. The message lists the three places that were searched. Enter the full path of the program in *aXqua > Settings* and click *Test* (:doc:`../installation/qgis-plugin`).
 
+Check of a case
+---------------
+
+The check of a case (*Check* on the *Case Setup* tab, *Save* in the case editor, or ``axqua check <case-file>``) reports the following errors. The plugin shows each of them as a dark red triangle next to the setting concerned. An error does not prevent saving the case, but the model cannot be built until it is corrected.
+
+.. _axqua-config-missing-value:
+
+``... is required`` or ``... is not set``
+    A setting that every case needs is empty, for example the terrain model, the model outline, or the inflow and outflow lines. Select the file in the case editor.
+
+.. _axqua-config-missing-file:
+
+``the file of ... does not exist``
+    The case file names a file that is not at the stated location. A path that does not start at the root of the drive is read relative to the folder of the case file. Select the file again in the case editor.
+
+.. _axqua-config-unknown-key:
+
+``... is not a setting of a case`` or ``... is not a block of a case file``
+    The case file contains a name that aXqua does not know, in most cases because of a typing error. The message proposes the name that was probably meant. Correct the name in the case file with a text editor.
+
+.. _axqua-config-yaml-syntax:
+
+``the case file is not valid YAML``
+    The structure of the file is damaged, for example by a missing colon or a wrong indentation. The message names the line. Correct it with a text editor. The case editor keeps the original of a case file as ``<name>.bak`` the first time it saves.
+
+.. _axqua-config-not-a-case:
+
+``the file does not contain the blocks of a case``
+    The file is valid YAML but not a case file, for example a list. Select the correct file.
+
+.. _axqua-config-unreadable:
+
+``the case file cannot be read``
+    The file does not exist or may not be read. Verify the path and the access rights.
+
 Profile of this computer
 ------------------------
 

@@ -51,8 +51,12 @@ Preparing and checking a case:
 
    * - Command
      - Function
+   * - ``axqua check <case-file>``
+     - Report everything in the case file that is not in order: missing files, unknown or impossible settings, and settings that are still empty. The command lists all problems at once.
    * - ``axqua <case-file> --check``
-     - Check the case file, the input files and the simulation software.
+     - Check the case file, the input files and the simulation software, and stop at the first problem.
+   * - ``axqua case new <case-file>``
+     - Create a case file with the entries that every case has.
    * - ``axqua <case-file>``
      - Run the preprocessing and write the TELEMAC model.
    * - ``axqua <case-file> --dry-run``

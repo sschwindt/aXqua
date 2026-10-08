@@ -140,6 +140,16 @@ class TelemacEnv:
     solver_python: str | None = None
 
     def validate(self) -> None:
+        self.validate_installation()
+        self.validate_choice()
+
+    def validate_choice(self) -> None:
+        """What the case chooses. Separate from the installation, which is a fact about
+        the computer: an editor of the case checks this and not that."""
+        if self.solver not in ("telemac2d", "telemac3d"):
+            raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
+
+    def validate_installation(self) -> None:
         if self.pysource is None:
             # Unset is its own mistake and deserves its own sentence: Path(None) raises
             # a TypeError from pathlib that says nothing about the configuration.
@@ -154,8 +164,6 @@ class TelemacEnv:
                 "Set telemac.pysource to e.g. "
                 "/opt/telemac/configs/pysource.sh"
             )
-        if self.solver not in ("telemac2d", "telemac3d"):
-            raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
 
 
 #: Valid ``GroundTruthSource.profile`` rules. Must stay in step with
@@ -1899,18 +1907,55 @@ class Config:
         return self.preprocessing_path(self.ground_truth_xlsx)
 
     def validate(self) -> None:
-        self.telemac.validate()
-        self.surfaces.validate()
-        # What the surface stage will write does not have to exist yet; its own inputs
-        # (the STL parts) were just validated instead.
-        produced = self.surfaces_produce() if self.surfaces.active else frozenset()
-        self.geodata.validate(produced=produced)
-        self.boundaries.validate(produced=produced)
+        """Refuse a case that cannot be built, at the first thing that is wrong."""
+        for _about, step in self.checks():
+            step()
+
+    def checks(self) -> list[tuple[str, Any]]:
+        """What :meth:`validate` verifies, as separate steps: ``(what about, step)``.
+
+        ``validate`` runs them in this order and stops at the first that raises, which
+        is right before a build. An editor of the case runs every one of them
+        (:mod:`axqua.core.casecheck`) so that it can show all problems at once. A step
+        marked ``machine`` is about this computer and not about the reach - where
+        TELEMAC is installed - and belongs to the check of the profile.
+        """
+        def produced() -> frozenset[str]:
+            # What the surface stage will write does not have to exist yet; its own
+            # inputs (the STL parts) are validated instead.
+            return self.surfaces_produce() if self.surfaces.active else frozenset()
+
+        return [
+            ("machine", self.telemac.validate_installation),
+            ("telemac", self.telemac.validate_choice),
+            ("surfaces", self.surfaces.validate),
+            ("geodata", lambda: self.geodata.validate(produced=produced())),
+            ("boundaries", lambda: self.boundaries.validate(produced=produced())),
+            ("ground_truth", self._note_ground_truth),
+            ("boundaries", self._check_outflow),
+            ("initialization", self._check_prewet),
+            ("morphodynamics", self._check_bed_change_data),
+            ("gain_lose", self.percolation.validate),
+            ("machine", self.telemac.environment.validate),
+            ("machine", self.openfoam.environment.validate),
+            ("structures", self.structures.validate),
+            ("openfoam", self.openfoam.validate),
+            ("machine", self.postproc.environment.validate),
+            ("postproc", self.postproc.validate),
+            ("initialization", self.initialization.validate),
+            ("drying", lambda: self.drying.validate(self.percolation)),
+            ("dem_of_difference", self.dem_of_difference.validate),
+            ("dem_of_difference", self._check_difference_data),
+        ]
+
+    def _note_ground_truth(self) -> None:
         # ground truth is non-fatal: it feeds only the calibration/HydroBayesCal
         # setup, so a missing/mismatched source warns and skips that setup rather
         # than aborting the model build (see GroundTruth.problems / pipeline stage 5).
         for problem in self.ground_truth.problems():
             log.warning("%s; HydroBayesCal setup will be skipped", problem)
+
+    def _check_outflow(self) -> None:
         cond = self.boundaries.outflow_condition
         if cond == "stage_discharge" and self.boundaries.stage_discharge is None:
             # A MISSING rating is a supported state, not an error: `rating_method`
@@ -1929,27 +1974,23 @@ class Config:
             raise ValueError(
                 "outflow_condition: elevation requires boundaries.prescribed_elevation"
             )
+
+    def _check_prewet(self) -> None:
         if self.initialization.prewet_depth is not None and self.geodata.mesh_zones is None:
             raise ValueError(
                 "initialization.prewet_depth needs geodata.mesh_zones (with a "
                 "'*channel*' Zone Name) to define the region to pre-wet."
             )
+
+    def _check_bed_change_data(self) -> None:
         if self.morphodynamics.enabled and self.geodata.dem_target is None \
                 and self.geodata.dem_of_difference is None:
             raise ValueError(
                 "morphodynamics.enabled but no geodata.dem_target / dem_of_difference "
                 "provided for topographic-change calibration data."
             )
-        self.percolation.validate()
-        self.telemac.environment.validate()
-        self.openfoam.environment.validate()
-        self.structures.validate()
-        self.openfoam.validate()
-        self.postproc.environment.validate()
-        self.postproc.validate()
-        self.initialization.validate()
-        self.drying.validate(self.percolation)
-        self.dem_of_difference.validate()
+
+    def _check_difference_data(self) -> None:
         if self.dem_of_difference.enabled and self.geodata.dem_target is None \
                 and self.geodata.dem_of_difference is None:
             raise ValueError(

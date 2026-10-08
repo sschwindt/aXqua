@@ -450,9 +450,11 @@ def test_every_code_of_the_profile_check_is_explained_in_the_documentation():
     import re
 
     root = Path(__file__).resolve().parent.parent
-    source = (root / "src" / "axqua" / "core" / "profile.py").read_text(encoding="utf-8")
+    # the check of the profile and the check of a case: both end as triangles
+    source = "".join((root / "src" / "axqua" / "core" / name).read_text(encoding="utf-8")
+                     for name in ("profile.py", "casecheck.py"))
     codes = set(re.findall(r'"(axqua\.(?:environment|config)\.[a-z_]+)"', source))
-    assert len(codes) >= 9
+    assert len(codes) >= 17
     pages = "".join((root / "docs" / "troubleshooting" / name).read_text(encoding="utf-8")
                     for name in ("warnings.rst", "errors.rst"))
     missing = sorted(code for code in codes

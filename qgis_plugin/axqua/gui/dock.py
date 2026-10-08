@@ -223,6 +223,7 @@ class AxquaDock(QDockWidget):
         self.configuration_tab.on_findings = lambda level: self.mark("configuration",
                                                                      level)
         self.case_tab = CaseTab(self.ctx)
+        self.case_tab.on_findings = lambda level: self.mark("case", level)
         special = {
             "configuration": self.configuration_tab,
             "case": self.case_tab,

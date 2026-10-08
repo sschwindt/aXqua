@@ -763,12 +763,12 @@ def test_saving_is_never_refused_because_of_a_finding(qgis_app, monkeypatch):
 
 
 def test_cancel_discards_and_exit_asks_only_when_something_changed(qgis_app, monkeypatch):
-    from axqua_plugin.gui import profile_editor
+    from axqua_plugin.gui import editor_base
     from axqua_plugin.gui.profile_editor import ProfileEditor
 
     _run_now(monkeypatch)
     asked = []
-    monkeypatch.setattr(profile_editor, "exec_dialog",
+    monkeypatch.setattr(editor_base, "exec_dialog",
                         lambda box: asked.append(box.text()))
     client = _ProfileClient()
 
@@ -796,3 +796,226 @@ def test_a_value_is_read_and_written_by_its_dotted_key(qgis_app):
     assert data["jobs"] == {"root": "/scratch"}
     put(data, "solvers.telemac.setup_script", "")    # emptied: removed with its parents
     assert "solvers" not in data
+
+
+# --------------------------------------------------------------- the case editor
+
+
+def _field(key, kind, label="", essential=False, **extra):
+    block, name = key.split(".", 1)
+    return {"key": key, "block": block, "name": name, "kind": kind,
+            "label": label or name, "essential": essential, "unit": extra.get("unit", ""),
+            "help": extra.get("help", ""), "choices": extra.get("choices", []),
+            "default": extra.get("default")}
+
+
+SCHEMA = {"sections": [
+    {"block": "geodata", "title": "Geodata", "label": "case-geodata", "fields": [
+        _field("geodata.dem_initial", "raster", "Terrain model", True),
+        _field("geodata.boundary", "vector", "Model outline", True),
+        _field("geodata.breaklines", "vector", "Breaklines")]},
+    {"block": "boundaries", "title": "Boundaries", "label": "case-boundaries", "fields": [
+        _field("boundaries.prescribed_flowrate", "number", "Discharge", True,
+               unit="m3/s"),
+        _field("boundaries.outflow_condition", "choice", "Outflow", True,
+               choices=["elevation", "stage_discharge", "free"]),
+        _field("boundaries.internal_sources", "bool", "Internal sources")]},
+    {"block": "hydrodynamics", "title": "Hydraulic simulation", "label": "", "fields": [
+        _field("hydrodynamics.turbulence_model", "text", "Turbulence model", True),
+        _field("hydrodynamics.duration", "number", "Simulated time", True, unit="s"),
+        _field("hydrodynamics.graphic_printout_period", "int", "Printout period")]},
+    {"block": "calibration", "title": "Calibration", "label": "", "fields": [
+        _field("calibration.parameters", "yaml", "Parameters", True),
+        _field("calibration.init_runs", "int", "Initial runs", True)]},
+]}
+
+CASE = {
+    "project": {"name": "reach", "crs_epsg": 25832},          # a block without a form
+    "geodata": {"dem_initial": "data/dem.tif", "boundary": "data/outline.gpkg"},
+    "boundaries": {"prescribed_flowrate": 2.4, "outflow_condition": "stage_discharge"},
+    "hydrodynamics": {"turbulence_model": 3, "duration": 3000.0,
+                      "graphic_printout_period": 500},
+    "calibration": {"parameters": [{"name": "zone4", "min": 0.02, "max": 0.3}],
+                    "init_runs": 8},
+}
+
+
+class _CaseClient:
+    def __init__(self, findings=()):
+        self.written, self.findings = [], list(findings)
+
+    def case_write(self, path, data):
+        self.written.append(data)
+        return {"path": str(path), "backup": str(path) + ".bak",
+                "findings": self.findings}
+
+
+def _editor(tmp_path, monkeypatch, findings=()):
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _CaseClient(findings)
+    return case_editor.CaseEditor(client, tmp_path / "reach.axq-case", CASE, SCHEMA), client
+
+
+def test_the_form_shows_the_essential_settings_and_what_the_case_already_has(
+        qgis_app, tmp_path, monkeypatch):
+    editor, _client = _editor(tmp_path, monkeypatch)
+    assert "geodata.breaklines" not in editor.rows             # not essential, not set
+    assert "hydrodynamics.graphic_printout_period" in editor.rows    # set in the case
+    assert editor._adders["geodata"].count() == 2              # "Add setting..." + one
+    assert [editor.section_list.item(i).text() for i in range(4)] == [
+        "Geodata", "Boundaries", "Hydraulic simulation", "Calibration"]
+    editor.deleteLater()
+
+
+def test_a_case_that_was_only_opened_is_written_back_as_it_was(qgis_app, tmp_path,
+                                                                monkeypatch):
+    """Opening and saving must not turn 3 into "3", 3000.0 into 3000 or reorder a
+    list: only a row whose text changed is converted from text."""
+    editor, client = _editor(tmp_path, monkeypatch)
+    assert editor.values() == CASE and not editor.dirty
+    editor.save()
+    (written,) = client.written
+    assert written == CASE
+    assert type(written["hydrodynamics"]["turbulence_model"]) is int
+    assert type(written["hydrodynamics"]["duration"]) is float
+    assert written["project"] == CASE["project"]              # a block without a form
+    editor.deleteLater()
+
+
+def test_a_changed_row_is_read_by_its_kind_and_an_emptied_one_is_removed(
+        qgis_app, tmp_path, monkeypatch):
+    editor, _client = _editor(tmp_path, monkeypatch)
+    editor.rows["boundaries.prescribed_flowrate"].widget.setText("5.3")
+    editor.rows["hydrodynamics.turbulence_model"].widget.setText("auto")
+    editor.rows["hydrodynamics.graphic_printout_period"].widget.setText("")
+    editor.rows["calibration.init_runs"].widget.setText("12")
+    outflow = editor.rows["boundaries.outflow_condition"].widget
+    outflow.setCurrentIndex(outflow.findText("free"))
+    data = editor.values()
+    assert data["boundaries"] == {"prescribed_flowrate": 5.3, "outflow_condition": "free"}
+    assert data["hydrodynamics"] == {"turbulence_model": "auto", "duration": 3000.0}
+    assert data["calibration"]["init_runs"] == 12
+    assert editor.dirty
+    editor.deleteLater()
+
+
+def test_a_setting_is_added_from_the_list_and_a_yes_no_setting_has_three_states(
+        qgis_app, tmp_path, monkeypatch):
+    editor, _client = _editor(tmp_path, monkeypatch)
+    adder = editor._adders["boundaries"]
+    adder.setCurrentIndex(1)                                   # "Internal sources"
+    editor._add_chosen("boundaries")
+    row = editor.rows["boundaries.internal_sources"]
+    assert row.widget.currentText() == "(not set)"
+    assert "internal_sources" not in editor.values()["boundaries"]     # still not set
+    row.widget.setCurrentIndex(row.widget.findText("yes"))
+    assert editor.values()["boundaries"]["internal_sources"] is True
+    assert not adder.isVisible() or adder.count() == 1         # nothing left to add
+    editor.deleteLater()
+
+
+def test_a_list_that_cannot_be_read_keeps_its_previous_content_and_says_so(
+        qgis_app, tmp_path, monkeypatch):
+    """The rest of the case is still saved: a typing error in one entry must not cost
+    the work in all the others."""
+    editor, client = _editor(tmp_path, monkeypatch)
+    editor.rows["calibration.parameters"].widget.setPlainText("- {name: zone4, min: [")
+    editor.rows["boundaries.prescribed_flowrate"].widget.setText("5.3")
+    editor.save()
+    (written,) = client.written
+    assert written["calibration"]["parameters"] == CASE["calibration"]["parameters"]
+    assert written["boundaries"]["prescribed_flowrate"] == 5.3
+    assert not editor.rows["calibration.parameters"].triangle.isHidden()
+    assert "cannot be read" in editor.findings[0].message
+
+    editor.rows["calibration.parameters"].widget.setPlainText(
+        "- {name: zone6, min: 0.1, max: 0.8}")
+    assert editor.values()["calibration"]["parameters"] == [
+        {"name": "zone6", "min": 0.1, "max": 0.8}]
+    editor.deleteLater()
+
+
+def test_findings_appear_at_their_setting_at_their_block_and_in_the_list(
+        qgis_app, tmp_path, monkeypatch):
+    findings = [
+        {"severity": "error", "code": "axqua.config.missing_file",
+         "subject": "geodata.dem_initial", "message": "the file does not exist"},
+        {"severity": "warning", "code": "axqua.config.incomplete",
+         "subject": "geodata.breaklines", "message": "about a setting without a row"},
+        {"severity": "error", "code": "axqua.config.invalid_value",
+         "subject": "boundaries", "message": "about the block as a whole"}]
+    editor, client = _editor(tmp_path, monkeypatch, findings)
+    editor.save()                                    # saved in spite of two errors
+    assert len(client.written) == 1 and "Saved" in editor.status.text()
+    assert not editor.rows["geodata.dem_initial"].triangle.isHidden()
+    assert editor.rows["geodata.boundary"].triangle.isHidden()
+    assert not editor.rows["geodata.breaklines"].triangle.isHidden()   # row was added
+    assert not editor._problems["boundaries"].isHidden()
+    assert editor._problems["geodata"].isHidden()    # its findings have rows
+    icons = [editor.section_list.item(i).icon().isNull() for i in range(4)]
+    assert icons == [False, False, True, True]
+    assert len(editor.finding_list.findings) == 3
+    editor.deleteLater()
+
+
+def test_a_selected_file_is_written_relative_to_the_case_where_it_is_near(tmp_path):
+    from axqua_plugin.gui.case_editor import stored_path
+
+    folder = tmp_path / "cases" / "reach"
+    assert stored_path(str(folder / "data" / "dem.tif"), folder) == "data/dem.tif"
+    assert stored_path(str(tmp_path / "cases" / "other" / "dem.tif"), folder) == \
+        "../other/dem.tif"
+    far = "/srv/geodata/survey/2025/dem.tif"
+    assert stored_path(far, folder) == far           # somewhere else entirely
+
+
+def test_text_is_converted_by_the_kind_of_its_setting():
+    from axqua_plugin.gui.case_editor import parse
+
+    assert parse("int", "12") == 12 and parse("int", "2.5") == 2.5
+    assert parse("number", " 0.35 ") == 0.35
+    assert parse("text", "auto") == "auto" and parse("text", "3") == 3
+    assert parse("vector", "data/lines.gpkg") == "data/lines.gpkg"
+    assert parse("number", "") is None
+    assert parse("number", "fast") == "fast"         # kept; the check says what is wrong
+
+
+def test_the_case_tab_opens_the_editor_and_takes_over_what_it_found(dock, tmp_path,
+                                                                    monkeypatch):
+    from axqua_plugin.gui import case_editor, case_tab
+
+    case = tmp_path / "reach.axq-case"
+    case.write_text("project: {name: reach}\n", encoding="utf-8")
+    dock.ctx.project.add_case(case)
+    dock.ctx.set_runner_ok(True)
+
+    class Client:
+        def case_read(self, path):
+            return {"path": str(path), "folder": str(tmp_path), "data": CASE}
+
+        def schema(self):
+            return SCHEMA
+
+        def case_check(self, path):
+            return {"findings": [{"severity": "warning", "code": "axqua.config.incomplete",
+                                  "subject": "boundaries.prescribed_flowrate",
+                                  "message": "no discharge is set"}]}
+
+    dock.ctx.client = Client()
+    now = lambda title, call, on_success=None, on_error=None, owner=None: on_success(call())  # noqa: E731
+    monkeypatch.setattr(case_tab, "run_async", now)
+    opened = []
+    monkeypatch.setattr(case_tab, "exec_dialog", lambda editor: opened.append(editor))
+    dock.case_tab.check_case()
+    index = dock.index_of("case")
+    assert not dock.tabs.tabIcon(index).isNull()               # the tab carries it
+    dock.case_tab.edit_case()
+    (editor,) = opened
+    assert isinstance(editor, case_editor.CaseEditor)
+    # the editor opens with what the check had found
+    assert not editor.rows["boundaries.prescribed_flowrate"].triangle.isHidden()
+    editor.deleteLater()

@@ -21,6 +21,18 @@ Classification of settings
 .. automodule:: axqua.core.schema
    :members:
 
+Table of settings for forms
+---------------------------
+
+.. automodule:: axqua.core.schema_meta
+   :members:
+
+Check of a case
+---------------
+
+.. automodule:: axqua.core.casecheck
+   :members:
+
 Profile of the computer
 -----------------------
 

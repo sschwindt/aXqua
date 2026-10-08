@@ -58,6 +58,21 @@ Simulations
 ``checkMesh flagged marginal faces (the mesh is still runnable)``
     The mesh check of OpenFOAM found a small number of cells of low quality, typically at steps in the terrain. The simulation can be run. If it becomes unstable, increase the cell size or smooth the terrain at the reported locations.
 
+Check of a case
+---------------
+
+The check of a case (*Check* on the *Case Setup* tab, *Save* in the case editor, or ``axqua check <case-file>``) reports the following warnings. The plugin shows each of them as an orange triangle next to the setting concerned.
+
+.. _axqua-config-no-solver:
+
+``the case names no simulation program, so nothing can be built or run``
+    The case file contains neither a ``telemac`` nor an ``openfoam`` block. Add the block of the program to use, for example by selecting the solver in the section *TELEMAC* of the case editor.
+
+.. _axqua-config-incomplete:
+
+``no discharge is set, so the steady simulation has no inflow``
+    The case can be saved, but the next step of the workflow needs this setting. Enter the discharge in the section *Boundaries* of the case editor (:ref:`case-boundaries`).
+
 Profile of this computer
 ------------------------
 

@@ -52,6 +52,23 @@ unsaved) - and `values()` starts from the loaded dictionary, so an entry without
 (`solvers.telemac.overrides`) survives a save. The editor talks to `axqua profile
 show|detect|write|check --json`; the plugin still never imports `axqua`.
 
+**The case editor** (`gui/case_editor.py`) builds its forms from `axqua schema --json`
+(`src/axqua/core/schema_meta.py`: derived from a fully dumped default case, the dataclass
+annotations and the comments beside the fields, so it cannot miss a setting; `CURATED`
+gives the ~47 settings a modeler meets first a plain label and unit). A block's page shows
+the essential settings plus whatever the file already has; the rest is one *Add setting...*
+away. **A row that was not touched is written back exactly as it was read** - only a row
+whose text changed is converted (`Row.value`), so opening and saving cannot turn `3` into
+`"3"`; the headless run asserts `values() == data` on the real example. A list that does not
+parse keeps its previous content and gets a finding, so one typing error does not cost the
+rest of the form. Findings from `axqua check` (`core/casecheck.py`, which runs **every**
+step of `Config.checks()` instead of stopping at the first, and skips the steps about the
+computer) land on the row whose key is the `subject`, on the block in the list, and in the
+bottom list; a finding for a setting without a row adds the row. Both editors share
+`editor_base.EditorDialog` (Save / Cancel / Exit, the unsaved-changes question).
+`axqua case write` keeps `<name>.bak` once, because writing goes through the data and
+loses hand-written comments - the editor's header says so.
+
 **Batch** (`core/batch.py`, pure): the steps are job kinds in workflow order; *Submit the
 ticked steps* hands them over in ONE background call so their queue tickets are written in
 that order (see the workspace queue in `src/axqua/jobs/CLAUDE.md`), and *Generate

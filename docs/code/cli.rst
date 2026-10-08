@@ -20,3 +20,9 @@ Profile commands
 
 .. automodule:: axqua.profilecli
    :members:
+
+Case file commands
+------------------
+
+.. automodule:: axqua.casecli
+   :members:

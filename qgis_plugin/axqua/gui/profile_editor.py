@@ -20,15 +20,14 @@ from __future__ import annotations
 
 import copy
 
-from qgis.PyQt.QtWidgets import (QComboBox, QDialog, QDoubleSpinBox, QFileDialog,
-                                 QFormLayout, QGroupBox, QHBoxLayout, QLabel, QLineEdit,
-                                 QMessageBox, QPushButton, QScrollArea, QSpinBox,
-                                 QVBoxLayout, QWidget)
+from qgis.PyQt.QtWidgets import (QComboBox, QDoubleSpinBox, QFileDialog, QFormLayout,
+                                 QGroupBox, QHBoxLayout, QLineEdit, QPushButton,
+                                 QScrollArea, QSpinBox, QVBoxLayout, QWidget)
 
-from ..compat import enum_value, exec_dialog
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from . import findings as fnd
+from .editor_base import EditorDialog
 
 #: ``(dotted key, label, kind, group)``. *kind* is file | folder | text | int | choice |
 #: number. The dotted key is also the subject a finding names, which is how a triangle
@@ -85,8 +84,10 @@ def put(data: dict, dotted: str, value) -> None:
         trail[-1][parts[-1]] = value
 
 
-class ProfileEditor(QDialog):
+class ProfileEditor(EditorDialog):
     """Edit the profile of this computer."""
+
+    what = "profile"
 
     def __init__(self, client, profile: dict, *, title: str = "", parent=None) -> None:
         super().__init__(parent)
@@ -98,18 +99,12 @@ class ProfileEditor(QDialog):
         self._base = copy.deepcopy(profile)        # carries the entries without a row
         self._widgets: dict[str, QWidget] = {}
         self._triangles: dict[str, fnd.TriangleButton] = {}
-        self.saved_once = False
         self._build(title)
         self._fill(profile)
 
     # -- construction -------------------------------------------------------------
     def _build(self, title: str) -> None:
-        outer = QVBoxLayout(self)
-        self.header = QLabel(title)
-        self.header.setWordWrap(True)
-        self.header.setVisible(bool(title))
-        outer.addWidget(self.header)
-
+        self.set_header(title)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         body = QWidget()
@@ -123,28 +118,8 @@ class ProfileEditor(QDialog):
             forms[group].addRow(label, self._row(key, kind))
         layout.addStretch(1)
         scroll.setWidget(body)
-        outer.addWidget(scroll, 1)
-
-        self.status = QLabel("")
-        self.status.setWordWrap(True)
-        outer.addWidget(self.status)
-        self.finding_list = fnd.FindingList("The profile is checked when it is saved.")
-        outer.addWidget(self.finding_list)
-
-        buttons = QHBoxLayout()
-        buttons.addStretch(1)
-        self.save_button = QPushButton("Save")
-        self.save_button.clicked.connect(self.save)
-        buttons.addWidget(self.save_button)
-        self.cancel_button = QPushButton("Cancel")
-        self.cancel_button.setToolTip("Discard the changes since the last save and close")
-        self.cancel_button.clicked.connect(self.reject)
-        buttons.addWidget(self.cancel_button)
-        self.exit_button = QPushButton("Exit")
-        self.exit_button.setToolTip("Close; asks first when changes are not saved")
-        self.exit_button.clicked.connect(self.exit)
-        buttons.addWidget(self.exit_button)
-        outer.addLayout(buttons)
+        self.outer.addWidget(scroll, 1)
+        self.finish_layout("The profile is checked when it is saved.")
 
     def _row(self, key: str, kind: str) -> QWidget:
         row = QWidget()
@@ -258,27 +233,6 @@ class ProfileEditor(QDialog):
         self.finding_list.set_findings(findings, checked=True)
         for key, triangle in self._triangles.items():
             triangle.set_findings(fnd.for_subject(findings, key))
-
-    def exit(self) -> None:
-        """Close. Changes that were not saved are offered for saving first."""
-        if not self.dirty:
-            self.accept()
-            return
-        box = QMessageBox(self)
-        box.setWindowTitle("aXqua profile")
-        box.setText("The profile has changes that are not saved.")
-        save = box.addButton("Save", enum_value(QMessageBox, "ButtonRole.AcceptRole",
-                                                "AcceptRole"))
-        discard = box.addButton("Close without saving",
-                                enum_value(QMessageBox, "ButtonRole.DestructiveRole",
-                                           "DestructiveRole"))
-        box.addButton("Keep editing", enum_value(QMessageBox, "ButtonRole.RejectRole",
-                                                 "RejectRole"))
-        exec_dialog(box)
-        if box.clickedButton() is save:
-            self.save()                    # stays open, so that the check can be read
-        elif box.clickedButton() is discard:
-            self.accept()
 
 
 def _normal(profile: dict) -> dict:

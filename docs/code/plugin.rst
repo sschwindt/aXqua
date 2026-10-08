@@ -33,6 +33,8 @@ The plugin lives in ``qgis_plugin/axqua/`` and is compatible with QGIS 3.44 and 
      - The panel: the fixed tabs, the job list below them, and *Help*.
    * - ``gui/configuration_tab.py``, ``gui/profile_editor.py``
      - The *Configuration* tab and the editor of the profile of this computer.
+   * - ``gui/case_editor.py``, ``gui/editor_base.py``
+     - The editor of a case file, with forms that are generated from ``axqua schema``, and what both editors share: *Save*, *Cancel* and *Exit*.
    * - ``gui/case_tab.py``, ``gui/section_pages.py``
      - The *Case Setup* tab and the pages of the workflow tabs.
    * - ``gui/findings.py``, ``gui/help.py``
