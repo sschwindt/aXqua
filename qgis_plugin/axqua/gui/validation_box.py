@@ -181,6 +181,8 @@ class ValidationBox(QGroupBox):
                       if b.get("kind") == "inflow"]
         situations = self.info.get("situations") or []
         situation = situations[0] if situations else {}
+        #: what the case file holds; the form changes only what it shows
+        self.stored = dict(situation)
         for spin in self._inflows.values():
             self.form.removeRow(spin)
         self._inflows = {}
@@ -197,8 +199,11 @@ class ValidationBox(QGroupBox):
             position += 1
             self.form.insertRow(position, label, spin)
             self._inflows[index] = spin
-        # one inflow, or a model that is not built yet: the total is all there is
-        self._show_row(self.total, not self._inflows)
+        # one inflow, or a model that is not built yet: the total is all there is.
+        # Discharges per inflow that the case file holds for a model that is not built
+        # cannot be shown yet; they are kept, and the total is not asked for.
+        self.kept_inflows = bool(given) and not self._inflows
+        self._show_row(self.total, not self._inflows and not self.kept_inflows)
         self.total.setValue(float(situation.get("prescribed_flowrate") or 0.0))
         needs_level = self.info.get("outflow_condition") == "elevation"
         self._show_row(self.level, needs_level)
@@ -213,6 +218,12 @@ class ValidationBox(QGroupBox):
             hints.append(note)
         elif self.case is not None and not self.info.get("boundaries"):
             hints.append(NOT_BUILT)
+            if self.kept_inflows:
+                hints.append("The case file gives a discharge for each inflow ("
+                             + ", ".join(f"inflow {index}: {value:g} m³/s"
+                                         for index, value in sorted(given.items()))
+                             + "). These are kept and can be changed here once the "
+                               "model is built.")
         if self.case is not None and self.info and not self.info.get("calibrated"):
             hints.append("The case has no finished calibration yet. The validation "
                          "uses the parameter values the calibration ends with.")
@@ -251,17 +262,35 @@ class ValidationBox(QGroupBox):
         """What the form says, as an entry of ``calibration.validation``."""
         folder = self.case.parent if self.case else Path(".")
         chosen = self.layer.text().strip()
-        out: dict = {"name": self.name.text().strip() or "validation"}
+        # Start from what the case file holds: an entry the form has no field for (a
+        # duration, the discharges per inflow of a model that is not built yet) must
+        # survive a save.
+        out: dict = {key: value for key, value in getattr(self, "stored", {}).items()
+                     if value not in (None, "", [], {})}
+        out["name"] = self.name.text().strip() or "validation"
         if self._inflows:
             out["inflows"] = {index: spin.value()
                               for index, spin in self._inflows.items()}
-        elif self.total.value() > 0:
-            out["prescribed_flowrate"] = self.total.value()
-        if self.info.get("outflow_condition") == "elevation" and self.level.value() > 0:
-            out["prescribed_elevation"] = self.level.value()
+            out.pop("prescribed_flowrate", None)
+        elif not getattr(self, "kept_inflows", False):
+            out.pop("inflows", None)
+            out.pop("prescribed_flowrate", None)
+            if self.total.value() > 0:
+                out["prescribed_flowrate"] = self.total.value()
+        if self.info.get("outflow_condition") == "elevation":
+            out.pop("prescribed_elevation", None)
+            if self.level.value() > 0:
+                out["prescribed_elevation"] = self.level.value()
+        sources = [dict(source) for source in out.get("sources") or []]
         if chosen:
-            out["sources"] = [{"category": "hydraulics", "kind": "points",
-                               "positions": stored_path(chosen, folder)}]
+            first = sources[0] if sources else {"category": "hydraulics",
+                                                "kind": "points"}
+            # the layer as the case file names it, unless another one was chosen
+            if chosen != str(first.get("positions") or ""):
+                first["positions"] = stored_path(chosen, folder)
+            out["sources"] = [first] + sources[1:]
+        else:
+            out.pop("sources", None)
         return out
 
     def save(self, then=None) -> None:

@@ -1509,6 +1509,7 @@ def test_saving_writes_the_situation_and_keeps_the_rest_of_the_case(validation_b
     assert written["calibration"]["init_runs"] == 8
     first, *others = written["calibration"]["validation"]
     assert first == {"name": "September 2025", "inflows": {1: 0.25, 3: 5.1},
+                     "prescribed_elevation": 815.5,      # no field here: kept
                      "sources": [{"category": "hydraulics", "kind": "points",
                                   "positions": "data/september.gpkg"}]}
     assert others == [{"name": "flood", "prescribed_flowrate": 40}]   # a second one stays
@@ -1520,6 +1521,27 @@ def test_saving_writes_the_situation_and_keeps_the_rest_of_the_case(validation_b
     # saved again under the same name: it is still one situation, and the other stays
     names = [s["name"] for s in client.written[-1]["calibration"]["validation"]]
     assert names == ["September 2025", "flood"]
+
+
+def test_saving_before_the_model_is_built_keeps_what_the_form_cannot_show(
+        validation_box):
+    """The example case names a discharge per inflow. Before the build the form does
+    not know the inflows, so it cannot show these discharges; it must not drop them."""
+    box, use, _submitted, _case = validation_box
+    info = _validation_info(built=False, calibrated=False, reports=False)
+    info["situations"][0]["duration"] = 4000.0
+    client = use(info)
+    assert not box._inflows and box.total.isHidden()
+    assert "inflow 1: 0.2 m³/s, inflow 3: 5.1 m³/s" in box.hint.text()
+    box.save()
+    first = client.written[0]["calibration"]["validation"][0]
+    assert first["inflows"] == {"1": 0.2, "3": 5.1}
+    assert first["duration"] == 4000.0                   # no field for it either
+    assert "prescribed_flowrate" not in first
+    # the layer is named as the case file names it, not rewritten in passing
+    assert first["sources"] == [{"category": "hydraulics", "kind": "points",
+                                 "positions": "data/september.gpkg"}]
+    assert first["prescribed_elevation"] == 815.5         # not shown, not touched
 
 
 def test_validation_is_a_step_of_a_batch_after_the_calibration():
