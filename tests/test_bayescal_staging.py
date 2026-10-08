@@ -141,3 +141,102 @@ def test_launch_reports_an_ignored_env_argument(tmp_path, monkeypatch, capsys):
     bayescal.launch(cfg, driver, tmp_path / "cfg.py", env="wrr-proj")
 
     assert "ignored" in capsys.readouterr().out
+
+
+# --------------------------------------------------------------------------- #
+# the built case comes back as the calibration found it
+# --------------------------------------------------------------------------- #
+def _built_case(tmp_path, *, fortran=False):
+    from types import SimpleNamespace
+
+    model = tmp_path / "simulation"
+    (model / "user_fortran").mkdir(parents=True)
+    (model / "steady2d.cas").write_text("RESULTS FILE : r2d.slf\n")
+    (model / "friction.tbl").write_text("4\tNIKU\t0.0500\tNULL\n")
+    (model / "user_fortran" / "user_rain.f").write_text("      HMP_KF = 1.D-3\n")
+    calibration = tmp_path / "calibration-validation"
+    calibration.mkdir()
+    cfg = SimpleNamespace(
+        model_dir=model, cas_file="steady2d.cas", friction_tbl="friction.tbl",
+        gaia_cas="gaia.cas", calibration=SimpleNamespace(control_file=None),
+        gain_lose=SimpleNamespace(active=fortran, implementation="fortran"),
+        morphodynamics=SimpleNamespace(enabled=False),
+        calibration_path=lambda name: calibration / name)
+    return cfg, model, calibration
+
+
+def _as_the_driver_leaves_it(model):
+    (model / "steady2d.cas").write_text("RESULTS FILE : r2d_12.slf\n")
+    (model / "friction.tbl").write_text("4\tNIKU\t0.195\tNULL\n")
+    (model / "user_fortran" / "user_rain.f").write_text("      HMP_KF = 7.D-3\n")
+
+
+def test_a_calibration_gives_the_built_case_back(tmp_path):
+    """HydroBayesCal leaves the last parameter set it tried in the case's own files,
+    and the next steady run would use it without a word."""
+    from axqua.bayescal import AS_BUILT, case_as_built
+
+    cfg, model, calibration = _built_case(tmp_path, fortran=True)
+    with case_as_built(cfg):
+        _as_the_driver_leaves_it(model)
+        assert (calibration / AS_BUILT / "friction.tbl").is_file()
+    assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
+    assert (model / "steady2d.cas").read_text() == "RESULTS FILE : r2d.slf\n"
+    assert "1.D-3" in (model / "user_fortran" / "user_rain.f").read_text()
+    assert not (calibration / AS_BUILT).exists()
+
+
+def test_the_case_comes_back_when_the_driver_fails(tmp_path):
+    import pytest
+
+    from axqua.bayescal import case_as_built
+
+    cfg, model, _ = _built_case(tmp_path)
+    with pytest.raises(RuntimeError):
+        with case_as_built(cfg):
+            _as_the_driver_leaves_it(model)
+            raise RuntimeError("the driver crashed")
+    assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
+
+
+def test_a_file_the_driver_does_not_rewrite_is_left_alone(tmp_path):
+    """Without a gain-lose routine the Fortran file is not the driver's to change."""
+    from axqua.bayescal import case_as_built
+
+    cfg, model, _ = _built_case(tmp_path, fortran=False)
+    with case_as_built(cfg):
+        _as_the_driver_leaves_it(model)
+    assert "7.D-3" in (model / "user_fortran" / "user_rain.f").read_text()
+
+
+def test_a_killed_calibration_does_not_leak_into_the_next_simulation(tmp_path):
+    """Cancelled from the plugin, then *Submit* on the steady tab: the run must be of
+    the case as built."""
+    from axqua.bayescal import AS_BUILT, restore_as_built
+
+    cfg, model, calibration = _built_case(tmp_path)
+    assert restore_as_built(cfg) is False            # nothing was set aside
+    keep = calibration / AS_BUILT
+    keep.mkdir()
+    (keep / "friction.tbl").write_text((model / "friction.tbl").read_text())
+    _as_the_driver_leaves_it(model)
+    assert restore_as_built(cfg) is True
+    assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
+    assert not keep.exists() and restore_as_built(cfg) is False
+
+
+def test_a_calibration_that_was_killed_is_undone_by_the_next_one(tmp_path):
+    """A killed process restores nothing. Its copy is still the case as built."""
+    from axqua.bayescal import AS_BUILT, case_as_built
+
+    cfg, model, calibration = _built_case(tmp_path)
+    keep = calibration / AS_BUILT
+    keep.mkdir()
+    (keep / "friction.tbl").write_text((model / "friction.tbl").read_text())
+    (keep / "steady2d.cas").write_text((model / "steady2d.cas").read_text())
+    _as_the_driver_leaves_it(model)                 # what the killed run left behind
+    with case_as_built(cfg):
+        # the second calibration starts from the built case, not from the leftovers
+        assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
+        _as_the_driver_leaves_it(model)
+    assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"

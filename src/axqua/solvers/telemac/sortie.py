@@ -369,6 +369,86 @@ def processor_sorties(model_dir: str | Path, cas_name: str) -> list[Path]:
 
 
 # --------------------------------------------------------------------------- #
+# a run that TELEMAC-2D stopped itself
+# --------------------------------------------------------------------------- #
+
+#: What TELEMAC-2D prints when ``CONTROL OF LIMITS`` ends a run.
+#:
+#: ``telemac2d.F`` calls this a "neat (programmed) stop": the solver returns from its
+#: time loop, prints ``CORRECT END OF RUN`` and exits with code 0. The exit code can
+#: therefore not tell a run that blew up at the first time step from one that finished,
+#: and a job that trusted it reported the first as completed.
+LIMIT_STOP = "LIMIT VALUES TRESPASSED"
+
+#: The three lines ``isitok.f`` writes per offending node (its FORMAT 101).
+_LIMIT_REPORT = re.compile(
+    r"(LOWER|UPPER) LIMIT ON (\w) REACHED AT POINT\s+(\S+)\s+"
+    r"WITH COORDINATES\s*(\S+)\s+AND\s+(\S+)\s+"
+    r"THE VALUE OF \w IS\s*(\S+)\s+THE LIMIT IS:\s*(\S+)")
+
+_LIMIT_NAMES = {"H": "water depth", "U": "velocity U", "V": "velocity V", "T": "tracer"}
+_LIMIT_UNITS = {"H": "m", "U": "m/s", "V": "m/s", "T": ""}
+
+
+@dataclass(frozen=True)
+class LimitStop:
+    """One node at which a value left the range ``LIMIT VALUES`` allows."""
+
+    bound: str          # LOWER | UPPER
+    variable: str       # H | U | V | T
+    x: float
+    y: float
+    value: float
+    limit: float
+
+    def describe(self) -> str:
+        name = _LIMIT_NAMES.get(self.variable, self.variable)
+        unit = _LIMIT_UNITS.get(self.variable, "")
+        return (f"{name} = {self.value:g} {unit}".rstrip()
+                + f" at x = {self.x:.1f}, y = {self.y:.1f}"
+                + f" (the {self.bound.lower()} limit is {self.limit:g})")
+
+
+def _fortran_float(text: str) -> float:
+    """A number as Fortran's G format prints it; ``nan`` for a field of asterisks."""
+    try:
+        return float(text)
+    except ValueError:
+        return float("nan")
+
+
+def read_limit_stops(text: str) -> list[LimitStop]:
+    """The nodes a listing names as having left their limits, in listing order.
+
+    The node number is not kept: in a parallel run it counts within one subdomain and
+    means nothing on the mesh the user sees. The coordinates do.
+    """
+    return [LimitStop(bound, variable, _fortran_float(x), _fortran_float(y),
+                      _fortran_float(value), _fortran_float(limit))
+            for bound, variable, _point, x, y, value, limit
+            in _LIMIT_REPORT.findall(text)]
+
+
+def find_limit_stops(model_dir: str | Path, cas_name: str) -> list[LimitStop]:
+    """Where the newest run of *cas_name* left its limits; empty when it did not.
+
+    In a parallel run only the subdomain that owns the node reports it, into its own
+    ``_p0000N`` listing, so those are read as well as the main one.
+    """
+    main = latest_sortie(model_dir, cas_name)
+    if main is None:
+        return []
+    stem = main.name[: -len(".sortie")]
+    found: list[LimitStop] = []
+    for path in [main, *sorted(Path(model_dir).glob(f"{stem}_p*.sortie"))]:
+        try:
+            found += read_limit_stops(path.read_text(errors="replace"))
+        except OSError:
+            continue
+    return found
+
+
+# --------------------------------------------------------------------------- #
 # GAIA / tracer mass balances
 #
 # Adopted from the `pythomac` package (Sebastian Schwindt, hydro-informatics.com),

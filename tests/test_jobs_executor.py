@@ -19,7 +19,7 @@ from axqua.core import registry
 from axqua.core.capabilities import Capability, Support
 from axqua.core.errors import SolverError
 from axqua.core.registry import BackendSpec, BaseBackend, CapabilitySpec
-from axqua.jobs import executor, submit as submit_mod
+from axqua.jobs import executor, results as results_mod, submit as submit_mod
 from axqua.jobs.model import JobKind, JobState
 from axqua.jobs.store import read_status
 
@@ -96,6 +96,11 @@ def fake_backend():
                       for cap in Capability},
         enabled=lambda cfg: True,
     )
+    # Discovery is lazy. Asked before anything else has listed the backends, the real
+    # one is not registered yet, "previous" is None, and the cleanup below then removes
+    # TELEMAC for every test that follows - which is what happened whenever this file
+    # ran before one that had populated the registry.
+    registry.backends()
     previous = registry._REGISTRY.get("telemac")
     registry.register(spec, replace=True)
     yield backend
@@ -147,6 +152,23 @@ def test_progress_reaches_status_json(fake_case, fake_backend):
     assert progress.as_dict()["iteration"] == 7
 
 
+def test_a_job_without_progress_events_still_shows_as_running(fake_case, fake_backend):
+    """The state on disk is what the dashboard reads, and a calibration reports no
+    progress for minutes: it stood there as STARTING until it had finished."""
+    seen = {}
+    jd = _create(fake_case, JobKind.CALIBRATION)
+
+    def study(cfg, capability=None, *, ctx=None, **kw):
+        seen["while_running"] = read_status(jd).state
+
+    fake_backend.study = study
+    fake_backend.postprocess = lambda cfg, ctx=None: seen.setdefault(
+        "while_postprocessing", read_status(jd).state)
+    executor.execute(jd)
+    assert seen == {"while_running": JobState.RUNNING,
+                    "while_postprocessing": JobState.POSTPROCESSING}
+
+
 def test_the_result_manifest_is_written_with_the_objective(fake_case, fake_backend):
     jd = _create(fake_case, JobKind.STEADY_RUN)
     executor.execute(jd)
@@ -154,6 +176,21 @@ def test_the_result_manifest_is_written_with_the_objective(fake_case, fake_backe
     assert payload["objective"] == pytest.approx(0.0472)
     assert payload["job_id"] == jd.job_id
     assert fake_backend.exported == ["called"]
+
+
+def test_the_result_manifest_names_the_crs_of_the_case(fake_case, fake_backend):
+    """A SELAFIN file carries no CRS, so whoever opens the result needs the case's."""
+    jd = _create(fake_case, JobKind.STEADY_RUN)
+    executor.execute(jd)
+    payload = json.loads(jd.results_json.read_text(encoding="utf-8"))
+    assert payload["crs_epsg"] == fake_case.crs_epsg == 25832
+    assert results_mod.ResultManifest.from_dict(payload).crs_epsg == 25832
+
+
+@pytest.mark.parametrize("stored", [None, "", "none", 0, -1])
+def test_a_manifest_without_a_usable_crs_reads_as_none(stored):
+    """Older jobs have no entry, and a broken one must not stop a result from opening."""
+    assert results_mod.ResultManifest.from_dict({"crs_epsg": stored}).crs_epsg is None
 
 
 def test_the_options_reach_the_backend(fake_case, fake_backend):
@@ -251,15 +288,30 @@ def test_a_cancel_noticed_mid_run_ends_as_cancelled(fake_case, fake_backend,
 # ------------------------------------------------------------------------ workspace
 
 
-def test_a_build_kind_rebases_into_the_job_directory(fake_case, fake_backend):
-    """A build produces its own inputs, so a self-contained directory is right."""
+def test_a_build_lands_in_the_case_folders_where_the_run_looks_for_it(
+        fake_case, fake_backend):
+    """Build, then run, with no options, has to work: the run reads the case folder."""
     captured = {}
+    original = Path(fake_case.model_dir)
 
     def capture(cfg, capability=None, *, ctx=None, **kw):
         captured["model_dir"] = Path(cfg.model_dir)
     fake_backend.build = capture
 
     jd = _create(fake_case, JobKind.PREPROCESSING)
+    executor.execute(jd)
+    assert captured["model_dir"] == original
+
+
+def test_a_build_can_still_be_kept_in_its_own_job_directory(fake_case, fake_backend):
+    """``--workspace job``: a self-contained build, for a run that names it."""
+    captured = {}
+
+    def capture(cfg, capability=None, *, ctx=None, **kw):
+        captured["model_dir"] = Path(cfg.model_dir)
+    fake_backend.build = capture
+
+    jd = _create(fake_case, JobKind.PREPROCESSING, workspace="job")
     executor.execute(jd)
     assert captured["model_dir"] == jd.simulation
 

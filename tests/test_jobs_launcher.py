@@ -110,13 +110,18 @@ def test_a_handle_tolerates_unknown_keys_from_a_newer_axqua():
 # --------------------------------------------------------------------------- argv
 
 
-def test_the_runner_argv_falls_back_to_module_form(monkeypatch):
+def test_a_job_runs_in_the_interpreter_that_submitted_it(monkeypatch):
+    """Not in whichever ``axqua`` the PATH offers first: with two environments that
+    carry aXqua, that one has another Python and other package versions."""
+    monkeypatch.setattr("shutil.which", lambda name: "/another/environment/bin/axqua")
+    assert runner_argv("/jobs/x") == [sys.executable, "-m", "axqua", "execute", "/jobs/x"]
+
+
+def test_the_runner_needs_no_console_script_on_the_path(monkeypatch):
     """Inside a systemd unit the PATH is the solver's, not the user's shell's, so the
     console script is routinely absent."""
     monkeypatch.setattr("shutil.which", lambda name: None)
-    argv = runner_argv("/jobs/x")
-    assert argv[:3] == [sys.executable, "-m", "axqua"]
-    assert argv[3:] == ["execute", "/jobs/x"]
+    assert runner_argv("/jobs/x")[:3] == [sys.executable, "-m", "axqua"]
 
 
 def test_the_env_file_drops_multiline_values_rather_than_mangling_them(tmp_path, caplog):

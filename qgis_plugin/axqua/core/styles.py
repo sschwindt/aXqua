@@ -10,8 +10,11 @@ roughness of 0.05-0.5 m, water 5 mm deep stands *inside* the grain roughness rat
 flowing over it, and rendering it as river makes a wetted extent look far larger than it
 is. axqua's own reporting uses the same filter, so the map and the report agree.
 
-**Velocity** - arrows over an inverted *plasma* ramp, bright yellow at zero to dark purple
-at the maximum. Capped at 5 m/s by default and **warned about** above it: a depth-averaged
+**Velocity** - arrows over an inverted *plasma* ramp, bright yellow where the flow is slow
+to dark purple at the maximum, and **transparent where nothing moves**. Dry ground has a
+velocity of exactly zero, so without that step the whole floodplain was painted in the
+brightest color of the ramp and the river was the dark thread in it. Capped at 5 m/s by
+default and **warned about** above it: a depth-averaged
 river result above that is nearly always a wetting/drying artefact in a nearly-dry cell
 rather than real flow, and letting one such node set the scale flattens the whole map into
 a single colour.
@@ -30,6 +33,9 @@ from ..compat import SHADER_INTERPOLATED, VECTOR_COLOR_RAMP, color
 VELOCITY_WARN_ABOVE = 5.0
 DEFAULT_VELOCITY_MAX = 5.0
 DEFAULT_MIN_DEPTH = 0.01
+#: Below this speed the velocity fill is transparent. Dry cells are exactly zero; a wet
+#: cell this slow is standing water, which the depth layer underneath already shows.
+VELOCITY_TRANSPARENT_BELOW = 0.01
 
 DEPTH_STOPS = ("#ffffff", "#cfe8ff", "#6bb6ff", "#1f78d1", "#08306b")
 #: *plasma*, reversed - bright where the flow is slow, dark where it is fast, so the
@@ -112,7 +118,8 @@ def depth_settings(style: DepthStyle) -> QgsMeshRendererScalarSettings:
 def velocity_scalar_settings(style: VelocityStyle) -> QgsMeshRendererScalarSettings:
     settings = QgsMeshRendererScalarSettings()
     settings.setClassificationMinimumMaximum(0.0, style.maximum)
-    settings.setColorRampShader(_shader(0.0, style.maximum, style.stops))
+    settings.setColorRampShader(_shader(0.0, style.maximum, style.stops,
+                                        transparent_below=VELOCITY_TRANSPARENT_BELOW))
     return settings
 
 

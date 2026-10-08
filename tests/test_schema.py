@@ -54,6 +54,38 @@ def test_every_case_config_round_trips(path, tmp_path):
     assert _diff(original, reloaded) == []
 
 
+@pytest.mark.parametrize("path", CASES, ids=lambda p: f"{p.parent.name}/{p.name}")
+def test_a_round_trip_does_not_enable_a_solver_the_case_never_asked_for(path):
+    """A written block is a declared block, so a dump must not write them all.
+
+    It did: every TELEMAC case came back from ``dump_config`` asking for OpenFOAM as
+    well, which is what a job's copy of the case and ``axqua migrate`` both load.
+    """
+    from axqua.config import dump_config, load_config
+
+    original = load_config(path)
+    out = path.parent / "._declared-test.yml"
+    try:
+        dump_config(original, out)
+        reloaded = load_config(out)
+    finally:
+        out.unlink(missing_ok=True)
+    for solver in ("telemac", "openfoam"):
+        assert (solver in reloaded.declared_blocks) == (solver in original.declared_blocks)
+
+
+def test_a_block_changed_after_loading_is_written_although_it_was_not_declared(tmp_path):
+    import yaml
+
+    from axqua.config import config_to_dict, load_config
+
+    path = next(p for p in CASES if "openfoam" not in load_config(p).declared_blocks)
+    cfg = load_config(path)
+    assert "openfoam" not in config_to_dict(cfg)
+    cfg.openfoam.cell_size = 1.25           # a script that prepares an OpenFOAM variant
+    assert yaml.safe_load(yaml.safe_dump(config_to_dict(cfg)))["openfoam"]["cell_size"] == 1.25
+
+
 def test_dump_writes_paths_relative_to_where_the_config_will_live(tmp_path):
     """A dumped config must stay portable: a case ships its data under its own
     directory, so those paths are written relative and an install path is not."""

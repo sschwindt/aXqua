@@ -252,20 +252,22 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
 
             cfg = load_config(jd.frozen_config)
             apply_workspace(cfg, spec, jd)
+            # a result file carries no CRS of its own; whoever opens it needs the case's
+            manifest.crs_epsg = results._epsg(getattr(cfg, "crs_epsg", None))
             logs.require_free_space(jd.root, spec.resources.min_free_bytes)
 
             ctx = ExecutionContext(job_dir=jd, spec=spec, cfg=cfg, sink=combined,
                                    cancel=cancel, manifest=manifest, log=log)
 
             status.transition(JobState.STARTING)
-            status_sink.flush()
+            status_sink.state_changed()
 
             backend = _load_backend(spec)
             if meta.needs_environment:
                 _check_environment(backend, cfg, spec)
 
             status.transition(JobState.RUNNING)
-            status_sink.flush()
+            status_sink.state_changed()
 
             verb = getattr(backend, meta.verb, None)
             if verb is None:
@@ -282,7 +284,7 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
             cancel.check()
 
             status.transition(JobState.POSTPROCESSING)
-            status_sink.flush()
+            status_sink.state_changed()
             _postprocess(backend, cfg, ctx, manifest, artifacts)
 
             results.write_manifest(jd, manifest)

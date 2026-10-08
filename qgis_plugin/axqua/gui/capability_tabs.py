@@ -79,6 +79,17 @@ NO_JOB_KIND_REASON = (
     "folder for now.")
 
 
+#: Capabilities that are not simulations of their own. They are switched on in the case
+#: file and are then built and run with another capability's jobs, so "there is no job
+#: kind, run it from a Python driver" is the wrong thing to tell the user: with the block
+#: in the case file it has already run, as part of the steady simulation.
+PART_OF = {"gain_lose": "Steady 2D"}
+PART_OF_REASON = (
+    "The {title} is part of the hydraulic model and not a simulation of its own. With "
+    "its block in the case file, it is built and run together with the {host} "
+    "simulation. There is nothing to submit on this tab.")
+
+
 @dataclass
 class CapabilityView:
     """One capability, as the UI needs to see it."""
@@ -131,6 +142,8 @@ class CapabilityView:
         """Why an action is unavailable - shown, never left to be guessed."""
         if self.implemented == "no":
             return NOT_IMPLEMENTED_REASON.format(solver=self.solver)
+        if self.name in PART_OF:
+            return PART_OF_REASON.format(title=self.title, host=PART_OF[self.name])
         if not self.submittable:
             # Before "not configured": configuring it would not help.
             return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
@@ -142,7 +155,7 @@ class CapabilityView:
     def state_text(self) -> str:
         if self.implemented != "yes":
             return "not available"
-        if not self.submittable:
+        if not self.submittable and self.name not in PART_OF:
             return "no job kind"
         marks = [name for name, flag in (("configured", self.configured),
                                          ("built", self.built), ("run", self.run))

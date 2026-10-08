@@ -168,6 +168,26 @@ def test_a_mesh_result_loads_into_its_own_job_group(project, tmp_path):
     assert group is not None and group.findGroup("JOB-1") is not None
 
 
+def test_a_result_without_a_crs_gets_the_one_of_its_case(project, tmp_path):
+    """A mesh file names no CRS. Without one the reach does not line up with a base map
+    unless the project happens to use the same system."""
+    mesh = _write_mesh(tmp_path)
+    results = result_loader.JobResults(
+        job_id="JOB-1", root=tmp_path, crs_epsg=25832,
+        items=[result_loader.ResultItem(name="reach", path=mesh, kind="mesh")])
+    (layer,) = result_loader.ResultLoader(project).load(results)
+    assert layer.crs().authid() == "EPSG:25832"
+
+
+def test_a_result_of_a_job_without_a_crs_loads_as_before(project, tmp_path):
+    mesh = _write_mesh(tmp_path)
+    results = result_loader.JobResults(
+        job_id="JOB-1", root=tmp_path,
+        items=[result_loader.ResultItem(name="reach", path=mesh, kind="mesh")])
+    (layer,) = result_loader.ResultLoader(project).load(results)
+    assert not layer.crs().isValid()
+
+
 def test_loading_the_same_result_twice_does_not_duplicate_it(project, tmp_path):
     """Pressing *Load results* again is the natural thing to do when a run has moved on,
     and it used to leave the user deleting duplicate layers by hand."""
@@ -201,6 +221,20 @@ def test_a_mesh_variable_really_is_styled(project, tmp_path):
     added = loader.load(results)
     assert loader.warnings == []
     assert added[0].rendererSettings().activeScalarDatasetGroup() == 0
+
+
+def test_the_velocity_fill_is_transparent_where_nothing_moves(qgis_app):
+    """Dry ground has a velocity of exactly zero. Filled, it painted the floodplain in
+    the brightest color of the ramp."""
+    from axqua_plugin.core import styles
+
+    shader = styles.velocity_scalar_settings(styles.VelocityStyle(maximum=2.0)).colorRampShader()
+    items = shader.colorRampItemList()
+    assert items[0].value == styles.VELOCITY_TRANSPARENT_BELOW and items[0].color.alpha() == 0
+    assert items[1].color.alpha() == 255 and abs(items[-1].value - 2.0) < 1e-9
+    hit, _red, _green, _blue, alpha = shader.shade(0.0)
+    assert hit and alpha == 0                       # dry
+    assert shader.shade(0.5)[4] == 255              # flowing
 
 
 def test_the_dataset_maximum_comes_from_the_file(project, tmp_path):

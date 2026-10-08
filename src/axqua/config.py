@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-from dataclasses import dataclass, field, fields
+from dataclasses import MISSING, dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -2280,6 +2280,8 @@ def config_to_dict(cfg: "Config", *, base: Path | None = None,
             continue
         value = getattr(cfg, f.name)
         if hasattr(value, "__dataclass_fields__"):
+            if _never_asked_for(cfg, f, value, base):
+                continue
             out[f.name] = _dump_value(value, base)
 
     # output filename overrides, only where they differ from the defaults - a dump
@@ -2293,6 +2295,31 @@ def config_to_dict(cfg: "Config", *, base: Path | None = None,
     if portable:
         schema.strip_machine_fields(out)
     return out
+
+
+def _never_asked_for(cfg: "Config", f, value, base: Path) -> bool:
+    """Whether a top-level block is absent from the case and still at its defaults.
+
+    Every optional block has a dataclass with defaults, so ``cfg.openfoam`` exists
+    whether or not the case mentions OpenFOAM - and a block that is *written* is a
+    block that is *declared* on the next load. A dump that wrote them all therefore
+    turned every TELEMAC case into one that also asks for OpenFOAM: the job copy of a
+    case grew an OpenFOAM marker, and a migrated case grew OpenFOAM tabs in the plugin.
+
+    The comparison leaves the machine settings out, because the loader fills those in
+    from the profile of the computer for every block, declared or not. A block that a
+    script changed after loading no longer equals its defaults and is written.
+    """
+    if not cfg.declared_blocks or f.name in cfg.declared_blocks:
+        return False
+    if f.default_factory is MISSING:
+        return False
+    current = _dump_value(value, base)
+    default = _dump_value(f.default_factory(), base)
+    for name in schema.MACHINE_FIELDS.get(f.name, ()):
+        current.pop(name, None)
+        default.pop(name, None)
+    return current == default
 
 
 def dump_config(cfg: "Config", path: str | os.PathLike | None = None, *,

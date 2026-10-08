@@ -474,15 +474,20 @@ class KindMeta:
     needs_environment: bool
 
 
-#: Build kinds default to ``workspace: job`` (they produce their own inputs, so a
-#: self-contained directory is right). Run kinds default to ``workspace: case``, because
-#: they hotstart from a result that already sits in the case's ``model_dir`` and copying
-#: it would violate the large-data rule (plan §26).
+#: Every kind defaults to ``workspace: case``. Run kinds must: they hotstart from a
+#: result that already sits in the case's ``model_dir``, and copying it would violate
+#: the large-data rule (plan §26). The build did not use to - it defaulted to
+#: ``job``, a self-contained directory - and that made the default chain unusable:
+#: ``submit --kind preprocessing`` followed by ``submit --kind steady`` failed with "no
+#: built case", because the build sat in a job folder the run never looked in, and the
+#: case status kept reporting the case as unbuilt. That is the two buttons of the
+#: plugin's first tab. ``--workspace job`` still gives the self-contained build, and
+#: ``--from-job`` is how a run is pointed at it.
 KIND_META: dict[JobKind, KindMeta] = {
     JobKind.PREPROCESSING: KindMeta(
         JobKind.PREPROCESSING, "preproc", "telemac", "Build the TELEMAC case",
         Capability.STEADY2D, "build", PreprocessingOptions, PreprocessingProgress,
-        "job", False),
+        "case", False),
     JobKind.STEADY_RUN: KindMeta(
         JobKind.STEADY_RUN, "steady", "telemac", "Steady 2D run",
         Capability.STEADY2D, "run", SteadyRunOptions, SolverRunProgress, "case", True),

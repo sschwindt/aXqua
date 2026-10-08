@@ -57,6 +57,30 @@ def read_metadata(path: Path) -> dict[str, str]:
     return fields
 
 
+def qgis_cannot_read(path: Path) -> str:
+    """Why QGIS could not read *path*; empty when it can.
+
+    QGIS finds plugins with ``configparser`` (``findPlugins`` in ``qgis/utils.py``) and
+    **skips a plugin whose metadata does not parse, without a message**: the plugin is
+    then missing from the Plugin Manager, and nothing says why. :func:`read_metadata`
+    above is more forgiving than that, so a file it accepts can still be one QGIS
+    drops. A changelog line that starts in the first column did exactly this - it is
+    not a continuation line, so it is a syntax error - and the plugin could not be
+    enabled in any QGIS for a month.
+    """
+    import configparser
+
+    parser = configparser.ConfigParser()
+    try:
+        with path.open(encoding="utf-8") as handle:
+            parser.read_file(handle)
+    except configparser.Error as exc:
+        return " ".join(str(exc).split())
+    if not parser.has_section("general"):
+        return "there is no [general] section"
+    return ""
+
+
 def validate(plugin_dir: Path) -> tuple[dict[str, str], list[str]]:
     """Check the plugin folder. Returns ``(metadata, problems)``."""
     problems: list[str] = []
@@ -65,6 +89,10 @@ def validate(plugin_dir: Path) -> tuple[dict[str, str], list[str]]:
         return {}, [f"no metadata.txt in {plugin_dir}"]
 
     fields = read_metadata(metadata_path)
+    unreadable = qgis_cannot_read(metadata_path)
+    if unreadable:
+        problems.append("QGIS cannot read metadata.txt and would not list the plugin at "
+                        f"all: {unreadable}")
     for key in REQUIRED_FIELDS:
         if not fields.get(key):
             problems.append(f"metadata.txt is missing '{key}'")

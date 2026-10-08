@@ -21,11 +21,13 @@ axqua needs, and running that driver inside the right solver environment.
 
 from __future__ import annotations
 
+import re
 import shlex
 import shutil
 import subprocess
 import sys
-from collections.abc import Mapping, Sequence
+import threading
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 
 from axqua.core.environment import SolverEnvironment
@@ -218,6 +220,86 @@ def launch_driver(environment: SolverEnvironment, driver: Path, config_path: Pat
         import os
         merged = {**os.environ, **{k: str(v) for k, v in env.items()}}
     return subprocess.run(argv, env=merged).returncode
+
+
+#: The name of the log a HydroBayesCal driver keeps in its results folder, and the line
+#: it writes there each time it starts a run of the full model. The driver announces a
+#: run twice. ``Running  full complexity model # 3`` counts within the initial design and
+#: ``... model after BAL # 1`` within the active learning, so both start again at 1;
+#: ``Running full complexity model 9`` counts through both, and is the one read here.
+DRIVER_LOG = "logfile.log"
+_MODEL_RUN = re.compile(r"Running\s+full\s+complexity\s+model\s+(\d+)\b")
+
+
+class RunCounter:
+    """Report which model run a HydroBayesCal driver has reached, from its own log.
+
+    A calibration is the longest job aXqua starts and was the only one that said
+    nothing while it ran: the driver is a separate process whose output is not parsed,
+    so the job stood at "iteration 0" from the first minute to the last. The driver
+    does write one line per model run to ``logfile.log`` in its results folder, and
+    that is enough to say "run 7 of 12".
+
+    Used as a context manager around the launch. A thread reads what the log has
+    gained every *interval* seconds and calls *report* with the highest run number
+    seen, once per change. Only lines written after entry count, so the log of an
+    earlier calibration in the same folder is not replayed. Nothing here can fail a
+    calibration: an unreadable log and a failing *report* are both ignored, and a
+    driver that words the line differently simply reports no progress.
+    """
+
+    def __init__(self, logfile: Path | str, report: Callable[[int], None], *,
+                 interval: float = 5.0) -> None:
+        self.logfile = Path(logfile)
+        self.report = report
+        self.interval = interval
+        self.run = 0
+        self._offset = 0
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    def __enter__(self) -> "RunCounter":
+        try:
+            self._offset = self.logfile.stat().st_size
+        except OSError:
+            self._offset = 0
+        self._thread = threading.Thread(target=self._follow, name="hbc-run-counter",
+                                        daemon=True)
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc_info) -> None:
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=self.interval + 5.0)
+        self.poll()                      # the lines written since the last look
+
+    def _follow(self) -> None:
+        while not self._stop.wait(self.interval):
+            self.poll()
+
+    def poll(self) -> None:
+        """Read what the log has gained and report a new run number, if there is one."""
+        try:
+            size = self.logfile.stat().st_size
+            if size < self._offset:      # the driver started the file afresh
+                self._offset = 0
+            if size == self._offset:
+                return
+            with self.logfile.open("rb") as handle:
+                handle.seek(self._offset)
+                text = handle.read().decode("utf-8", errors="replace")
+            self._offset = size
+        except OSError:
+            return
+        runs = [int(number) for number in _MODEL_RUN.findall(text)]
+        if not runs or max(runs) <= self.run:
+            return
+        self.run = max(runs)
+        try:
+            self.report(self.run)
+        except Exception:                # noqa: BLE001 - reporting must not stop a run
+            pass
 
 
 def solver_environment(block, legacy_script) -> SolverEnvironment:

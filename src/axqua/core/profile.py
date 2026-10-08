@@ -14,11 +14,11 @@ hand on a machine without QGIS::
     schema_version: 1
     name: workstation
     python:
-      executable: /home/user/miniforge3/envs/axqua-env/bin/python
-      axqua: /home/user/miniforge3/envs/axqua-env/bin/axqua
+      executable: /opt/miniforge3/envs/axqua-env/bin/python
+      axqua: /opt/miniforge3/envs/axqua-env/bin/axqua
     solvers:
       telemac:
-        setup_script: /home/user/opt/telemac-mascaret/configs/pysource.debian12.sh
+        setup_script: /opt/telemac-mascaret/configs/pysource.debian12.sh
         mpi_processes: 12
       openfoam:
         setup_script: /usr/lib/openfoam/openfoam2406/etc/bashrc

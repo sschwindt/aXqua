@@ -21,6 +21,9 @@ from axqua.core.registry import BackendSpec, CapabilitySpec
 
 # the three 3D steering files add3d.py writes (axqua.threed)
 HYDROSTATIC_CAS = "hotstart3d_hydrostatic.cas"
+#: What the hydrostatic run writes. It keeps a name of its own so that it does not
+#: overwrite the non-hydrostatic result (``Config.results3d_slf``).
+HYDROSTATIC_RESULT = "r3d-hydrostatic.slf"
 HYDRODYN_CAS = "hotstart3d_hydrodyn.cas"
 UNSTEADY3D_CAS = "unsteady3d.cas"
 
@@ -103,7 +106,10 @@ SPEC = BackendSpec(
             support=Support.SUPPORTED,
             configured=_three_d_configured,
             built=lambda cfg: _exists(cfg, HYDRODYN_CAS) or _exists(cfg, HYDROSTATIC_CAS),
-            run=lambda cfg: _exists(cfg, cfg.results3d_slf),
+            # Either variant is a steady 3D run. Only the non-hydrostatic result was
+            # looked for, so the variant the plugin runs never showed as run.
+            run=lambda cfg: (_exists(cfg, cfg.results3d_slf)
+                             or _exists(cfg, HYDROSTATIC_RESULT)),
         ),
         Capability.UNSTEADY3D: CapabilitySpec(
             support=Support.SUPPORTED,

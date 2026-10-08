@@ -184,3 +184,89 @@ def test_the_plugin_and_the_package_versions_agree():
     metadata = (SRC.parent / "qgis_plugin" / "axqua" / "metadata.txt").read_text("utf-8")
     plugin_version = re.search(r"^version=(.+)$", metadata, re.M).group(1).strip()
     assert plugin_version == axqua.__version__
+
+
+# --------------------------------------------------------------------------- #
+# a convergence job leaves its report behind, as the case script does
+# --------------------------------------------------------------------------- #
+class _StudyReport:
+    """Stands in for a ConvergenceReport: it can be written as a workbook and as text."""
+
+    def __init__(self, broken: bool = False) -> None:
+        self.broken = broken
+
+    def to_xlsx(self, path):
+        if self.broken:
+            raise OSError("the disk is full")
+        path.write_bytes(b"workbook")
+        return path
+
+    def save(self, path):
+        path.write_text("NOT converged at 5.0% tolerance; recommended cell size 0.533 m\n")
+
+
+def test_a_convergence_job_writes_the_report_and_records_it(tmp_path):
+    """The job ran the study and left the verdict in its log only, so the plugin had
+    nothing to show and the report the documentation points at did not exist."""
+    from axqua.solvers.telemac.backend import _write_study_report
+
+    recorded = []
+    ctx = type("Ctx", (), {"record": lambda self, name, path, **kw: recorded.append(
+        (name, path.name, kw["kind"]))})()
+    folder = tmp_path / "postprocessing" / "vertical-convergence"
+    _write_study_report(_StudyReport(), folder, "vertical-convergence", ctx)
+    assert (folder / "vertical-convergence.xlsx").read_bytes() == b"workbook"
+    assert "recommended" in (folder / "vertical-convergence.txt").read_text()
+    # the workbook itself is listed by export_qgis_results, once it exists
+    assert recorded == [("Vertical convergence summary", "vertical-convergence.txt", "file")]
+
+
+def test_a_report_that_cannot_be_written_does_not_fail_the_study(tmp_path, caplog):
+    from axqua.solvers.telemac.backend import _write_study_report
+
+    with caplog.at_level("WARNING", logger="axqua"):
+        _write_study_report(_StudyReport(broken=True), tmp_path / "mesh-convergence",
+                            "mesh-convergence", None)
+    assert "could not write the mesh-convergence report" in caplog.text
+
+
+# --------------------------------------------------------------------------- #
+# the hydrostatic 3D run: the variant the plugin runs, and its result
+# --------------------------------------------------------------------------- #
+def test_the_hydrostatic_run_counts_as_a_steady_3d_run(tmp_path):
+    """Only the non-hydrostatic result was looked for, so the Steady 3D tab stayed at
+    "configured, built" after its own Submit had finished."""
+    from types import SimpleNamespace
+
+    from axqua.core.capabilities import Capability
+    from axqua.solvers.telemac.spec import HYDROSTATIC_RESULT, SPEC
+    from axqua.solvers.telemac.threed import HYDROSTATIC_RESULT_3D
+
+    assert HYDROSTATIC_RESULT == HYDROSTATIC_RESULT_3D        # two files, one name
+    cfg = SimpleNamespace(model_dir=tmp_path, results3d_slf="r3d.slf")
+    run = SPEC.capabilities[Capability.STEADY3D].run
+    assert not run(cfg)
+    (tmp_path / HYDROSTATIC_RESULT).write_bytes(b"")
+    assert run(cfg)
+
+
+def test_the_result_of_the_hydrostatic_run_is_offered_to_qgis(tmp_path):
+    from types import SimpleNamespace
+
+    from axqua.solvers.telemac.backend import TelemacBackend
+    from axqua.solvers.telemac.threed import HYDROSTATIC_RESULT_2D
+
+    (tmp_path / "geometry.slf").write_bytes(b"")
+    (tmp_path / HYDROSTATIC_RESULT_2D).write_bytes(b"")
+    cfg = SimpleNamespace(
+        results_slf="r2d.slf", results_unsteady_slf="r2d-unsteady.slf",
+        results3d_slf="r3d.slf", results2d_from_3d_slf="r3d-2d.slf",
+        geometry_slf="geometry.slf", model_path=lambda name: tmp_path / name,
+        postprocessing_dir=tmp_path / "postprocessing", calibration_dir=tmp_path,
+        calibration_csv="measurements-calibration.csv")
+    recorded = []
+    ctx = SimpleNamespace(record=lambda name, path, **kw: recorded.append(
+        (name, path.name, kw.get("style"), kw.get("variable"))))
+    TelemacBackend().export_qgis_results(cfg, ctx)
+    assert ("TELEMAC-3D result, hydrostatic (depth-averaged)", HYDROSTATIC_RESULT_2D,
+            "water-depth", "WATER DEPTH") in recorded

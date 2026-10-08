@@ -149,6 +149,13 @@ def check_ground_truth_elevations(cfg, *, tables=None) -> list[ElevationFinding]
     if df is None or "z" not in df or len(df) < MIN_GROUP:
         return []
     df = df.reset_index(drop=True)
+    # A column of zeros is the placeholder a point layer WITHOUT elevations gets
+    # (ground_truth.read_points), not a survey. Judging it reported "a constant -816 m
+    # remains ... an un-subtracted instrument height" for every reach that is not at
+    # sea level - an error message about a measurement nobody made.
+    if not np.any(np.nan_to_num(df["z"].to_numpy(float)) != 0.0):
+        log.debug("the ground truth carries no elevations; nothing to check")
+        return []
 
     bed, source = reference_bed(cfg, df["x"].to_numpy(float), df["y"].to_numpy(float))
     if bed is None:

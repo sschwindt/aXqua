@@ -121,7 +121,7 @@ def test_an_unknown_quality_is_refused():
 # --------------------------------------------------------------------------- #
 def test_csv_is_unchanged_when_no_quality_is_declared(tmp_path):
     """The load-bearing backwards-compatibility check."""
-    from tests.test_openfoam_calibration import _cfg, _tidy, _write_tidy
+    from test_openfoam_calibration import _cfg, _tidy, _write_tidy
     from axqua.calibration import build_calibration_csv
 
     cfg = _cfg(tmp_path, quantities=("WATER DEPTH",))
@@ -142,7 +142,7 @@ def test_errors_combine_in_quadrature():
 
 def test_a_missing_result_warns_rather_than_failing(tmp_path, caplog):
     """A better error budget must not cost the calibration its inputs."""
-    from tests.test_openfoam_calibration import _cfg, _tidy, _write_tidy
+    from test_openfoam_calibration import _cfg, _tidy, _write_tidy
     from axqua.calibration import build_calibration_csv
 
     cfg = _cfg(tmp_path, quantities=("WATER DEPTH",))

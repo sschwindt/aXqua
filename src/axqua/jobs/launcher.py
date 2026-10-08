@@ -195,17 +195,21 @@ def launcher_for(handle: LaunchHandle) -> JobLauncher:
 
 
 def runner_argv(job_dir: Path | str) -> list[str]:
-    """The command a launcher starts: ``axqua execute <job dir>``.
+    """The command a launcher starts: ``python -m axqua execute <job dir>``, with the
+    interpreter that is submitting the job.
 
-    Falls back to ``-m axqua`` when the console script is not on ``PATH``, which is
-    the normal situation inside a systemd unit whose environment came from a solver
-    setup script rather than from the user's shell.
+    A job has to run in the environment it was submitted from. This used to start
+    whichever ``axqua`` came first on ``PATH``, and that is another program as soon as
+    two environments carry aXqua: the QGIS plugin calls one by its full path while
+    ``PATH`` offers the other. The job then ran with a different Python and different
+    package versions than the user had chosen, and nothing said so. A calibration
+    submitted from the environment that holds the required HydroBayesCal ran in the
+    base environment against an older checkout of it.
+
+    The module form also needs no console script on ``PATH``, which a systemd unit
+    whose environment came from a solver setup script does not have.
     """
-    import shutil
     import sys
-    exe = shutil.which("axqua")
-    if exe:
-        return [exe, "execute", str(job_dir)]
     return [sys.executable, "-m", "axqua", "execute", str(job_dir)]
 
 

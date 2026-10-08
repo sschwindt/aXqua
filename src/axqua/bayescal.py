@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import shutil
 import sys
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -202,7 +203,75 @@ def run_single_flow_calibration(
         print(f"  cd {driver.parent} && {sys.executable} {driver.name} "
               f"--config {config_path}")
         return 0
-    return launch(cfg, driver, config_path, env=env, note="HydroBayesCal calibration")
+    with case_as_built(cfg):
+        return launch(cfg, driver, config_path, env=env,
+                      note="HydroBayesCal calibration")
+
+
+#: Folder in the calibration directory that holds the files of the built case while a
+#: calibration rewrites them.
+AS_BUILT = "case-as-built"
+
+
+def _rewritten_by_the_driver(cfg: Config) -> list[str]:
+    """The files of the built case a HydroBayesCal run writes into, relative to it."""
+    names = [cfg.calibration.control_file or cfg.cas_file, cfg.friction_tbl]
+    if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
+        names.append("user_fortran/user_rain.f")
+    if cfg.morphodynamics.enabled:
+        names.append(cfg.gaia_cas)
+    return [str(name) for name in names if name]
+
+
+@contextmanager
+def case_as_built(cfg: Config):
+    """Hand the built case back the way the calibration found it.
+
+    HydroBayesCal runs TELEMAC in the folder of the built case and writes every
+    parameter set it tests into the files there: the roughness values into the
+    friction table, the name of the results file into the steering file. When it has
+    finished, the case holds the **last set it tried**, which is neither the case
+    that was built nor the calibrated one, and the next steady run uses it without a
+    word. On the Isar example the friction table read ks = 0.195 m in zone 4 after a
+    calibration of a case built with 0.05 m.
+
+    The files are copied into the calibration folder before the driver starts and
+    copied back when it returns, whether it succeeded or not. A calibration that is
+    killed restores nothing; see :func:`restore_as_built` for that case.
+    """
+    model = Path(cfg.model_dir)
+    keep = cfg.calibration_path(AS_BUILT)
+    restore_as_built(cfg)
+    for name in _rewritten_by_the_driver(cfg):
+        if (model / name).is_file():
+            (keep / name).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(model / name, keep / name)
+    try:
+        yield
+    finally:
+        restore_as_built(cfg)
+
+
+def restore_as_built(cfg: Config) -> bool:
+    """Copy the files a calibration set aside back into the built case.
+
+    Returns whether there was anything to restore. A copy is only ever found here
+    outside a running calibration when that calibration was killed, by a cancelled job
+    or a power cut, before it could restore the case itself. The copy is then the case
+    as built, and what is in the model folder is the last parameter set the driver had
+    reached. Every TELEMAC run of the case calls this first, so a cancelled calibration
+    cannot leak into the next simulation.
+    """
+    keep = cfg.calibration_path(AS_BUILT)
+    if not keep.is_dir():
+        return False
+    model = Path(cfg.model_dir)
+    for source in sorted(path for path in keep.rglob("*") if path.is_file()):
+        target = model / source.relative_to(keep)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+    shutil.rmtree(keep, ignore_errors=True)
+    return True
 
 
 # --------------------------------------------------------------------------- #

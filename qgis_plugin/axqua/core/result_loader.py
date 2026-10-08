@@ -74,6 +74,8 @@ class JobResults:
     objective: float | None = None
     summary: dict = field(default_factory=dict)
     from_manifest: bool = True
+    #: EPSG code of the case, from the manifest. ``None`` for a job that predates it.
+    crs_epsg: int | None = None
 
     @property
     def layers(self) -> list[ResultItem]:
@@ -117,7 +119,17 @@ def _from_manifest(root: Path, payload: dict) -> JobResults:
         ))
     return JobResults(job_id=str(payload.get("job_id") or root.name), root=root,
                       items=items, objective=payload.get("objective"),
-                      summary=dict(payload.get("summary") or {}))
+                      summary=dict(payload.get("summary") or {}),
+                      crs_epsg=_epsg(payload.get("crs_epsg")))
+
+
+def _epsg(value) -> int | None:
+    """An EPSG code out of a manifest; ``None`` for anything that is not one."""
+    try:
+        code = int(value)
+    except (TypeError, ValueError):
+        return None
+    return code if code > 0 else None
 
 
 def _by_globbing(root: Path) -> JobResults:
@@ -221,6 +233,25 @@ class ResultLoader:
         #: Layers that were already in the group and so were not added again.
         self.reused: list = []
 
+    @staticmethod
+    def _georeference(layer, epsg: int | None) -> None:
+        """Give *layer* the CRS of its case where the file itself names none.
+
+        A SELAFIN mesh has no CRS. Without one QGIS draws the coordinates as they are,
+        which only lands in the right place when the project uses the same system: over
+        a web base map the reach sits thousands of kilometers away, and the user is
+        left to find out which EPSG code the case was built in. The case knows it. A
+        layer that already carries a CRS keeps it, and the project's own is never
+        touched.
+        """
+        if not epsg or layer.crs().isValid():
+            return
+        from qgis.core import QgsCoordinateReferenceSystem
+
+        crs = QgsCoordinateReferenceSystem.fromEpsgId(int(epsg))
+        if crs.isValid():
+            layer.setCrs(crs)
+
     def load(self, results: JobResults, *, items=None) -> list:
         """Add *results* to the layer tree. Returns the layers actually added.
 
@@ -256,6 +287,7 @@ class ResultLoader:
                     f"{item.name}: {item.path.name} did not load "
                     f"({layer.error().summary() if hasattr(layer, 'error') else 'invalid'})")
                 continue
+            self._georeference(layer, results.crs_epsg)
             self._style(layer, item)
             self.project.addMapLayer(layer, False)
             group.addLayer(layer)

@@ -36,6 +36,26 @@ from axqua_plugin.gui.capability_tabs import CaseView  # noqa: E402
 # ------------------------------------------------------------------ metadata
 
 
+def test_qgis_can_read_the_metadata():
+    """Read the file the way QGIS does when it looks for plugins.
+
+    ``findPlugins`` in ``qgis/utils.py`` parses ``metadata.txt`` with ``configparser``
+    and drops a plugin whose file does not parse, silently. The plugin is then absent
+    from the Plugin Manager. A changelog line in the first column was enough: every
+    test passed, because the tests import the plugin directly, and no QGIS could
+    enable it.
+    """
+    import configparser
+
+    parser = configparser.ConfigParser()
+    with (PLUGIN_ROOT / "axqua" / "metadata.txt").open(encoding="utf-8") as handle:
+        parser.read_file(handle)
+    assert parser.get("general", "name") == "aXqua"
+    assert parser.get("general", "qgisMinimumVersion") == "3.44"
+    # every release of the changelog is a continuation line of the one key
+    assert "0.2.0" in parser.get("general", "changelog", raw=True)
+
+
 def test_metadata_declares_both_qgis_generations():
     """QGIS 4 is Qt6-only and decides compatibility from ``qgisMaximumVersion``; the old
     ``supportsQt6`` flag was removed from core and is ignored."""
@@ -464,6 +484,23 @@ def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
     assert "Python driver" in capability.reason
 
 
+def test_a_capability_that_is_part_of_another_run_says_so():
+    """The gain-lose reach is a block of the case file. With it, the exchange is built
+    and simulated with the steady model, so "run it from a Python driver" was wrong and
+    "no job kind" hid that it had already run."""
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    capability = CapabilityView(name="gain_lose", solver="telemac", implemented="yes",
+                                configured=True, built=True, run=True)
+    assert capability.can_submit is False              # still nothing to submit here
+    assert capability.state_text == "configured, built, run"
+    assert "together with the Steady 2D simulation" in capability.reason
+    assert "Python driver" not in capability.reason
+    unused = CapabilityView(name="gain_lose", solver="telemac", implemented="yes",
+                            configured=False)
+    assert unused.state_text == "not set up"
+
+
 def test_actions_follow_configured_built_and_run():
     view = CaseView.from_payload(MATRIX)
     steady = view.solver("telemac").capability("steady2d")
@@ -617,6 +654,24 @@ def test_the_manifest_wins_over_the_glob(tmp_path):
     found = result_loader.discover(tmp_path)
     assert found.from_manifest is True and found.job_id == "JOB-7"
     assert found.layers[0].variable == "WATER DEPTH"
+
+
+def test_the_crs_of_the_case_is_read_from_the_manifest(tmp_path):
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "r2d.slf").write_text("mesh", encoding="utf-8")
+    entry = {"name": "depth", "path": "results/r2d.slf", "kind": "mesh"}
+    manifest = results / "results.json"
+
+    manifest.write_text(json.dumps({"crs_epsg": 25832, "results": [entry]}), "utf-8")
+    assert result_loader.discover(tmp_path).crs_epsg == 25832
+    # a job that predates the entry, and one whose entry is unusable
+    manifest.write_text(json.dumps({"results": [entry]}), "utf-8")
+    assert result_loader.discover(tmp_path).crs_epsg is None
+    manifest.write_text(json.dumps({"crs_epsg": "utm", "results": [entry]}), "utf-8")
+    assert result_loader.discover(tmp_path).crs_epsg is None
 
 
 def test_a_corrupt_manifest_falls_back_to_the_glob(tmp_path):

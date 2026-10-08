@@ -105,7 +105,15 @@ def test_run_kinds_default_to_the_case_workspace():
     """A run hotstarts from a result in the case's own model_dir; copying it would
     violate the large-data rule."""
     assert KIND_META[JobKind.STEADY_RUN].workspace_default == "case"
-    assert KIND_META[JobKind.PREPROCESSING].workspace_default == "job"
+
+
+def test_the_build_lands_where_the_run_after_it_looks():
+    """Build, then run, with no options: the two buttons of the plugin's first tab.
+
+    With the build in a job folder of its own, the run failed with "no built case" and
+    the case status never showed the case as built.
+    """
+    assert {meta.workspace_default for meta in KIND_META.values()} == {"case"}
 
 
 @pytest.mark.parametrize("text,expected", [

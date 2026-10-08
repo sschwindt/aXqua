@@ -294,15 +294,20 @@ log = logging.getLogger("axqua")
 COORD_COLUMNS = ("x", "y", "z")
 
 _COLUMN_ALIASES = {
-    "x": "x", "easting": "x", "ostwert": "x", "e": "x",
-    "y": "y", "northing": "y", "nordwert": "y", "n": "y",
-    "z": "z", "elevation": "z", "bed": "z", "bed_level": "z",
-    "u": "u", "vx": "u", "velx": "u", "u_x": "u", "ux": "u",
-    "v": "v", "vy": "v", "vely": "v", "u_y": "v", "uy": "v",
-    "w": "w", "vz": "w", "velz": "w", "u_z": "w", "uz": "w",
+    "x": "x", "easting": "x", "ostwert": "x", "e": "x", "east": "x", "east.": "x",
+    "y": "y", "northing": "y", "nordwert": "y", "n": "y", "north": "y", "north.": "y",
+    "z": "z", "elevation": "z", "bed": "z", "bed_level": "z", "alt": "z", "alt.": "z",
+    # "v(x)" is how the FlowTracker summary workbooks and the point layers exported
+    # from them head the velocity components.
+    "u": "u", "vx": "u", "velx": "u", "u_x": "u", "ux": "u", "v(x)": "u",
+    "v": "v", "vy": "v", "vely": "v", "u_y": "v", "uy": "v", "v(y)": "v",
+    "w": "w", "vz": "w", "velz": "w", "u_z": "w", "uz": "w", "v(z)": "w",
     "u_err": "u_err", "u'": "u_err", "uerr": "u_err", "vxerr": "u_err",
+    "v_err(x)": "u_err",
     "v_err": "v_err", "v'": "v_err", "verr": "v_err", "vyerr": "v_err",
+    "v_err(y)": "v_err",
     "w_err": "w_err", "w'": "w_err", "werr": "w_err", "vzerr": "w_err",
+    "v_err(z)": "w_err",
     # TOTAL water depth of the vertical.
     "h": "h", "depth": "h", "water_depth": "h", "waterdepth": "h",
     "finald": "h", "total depth": "h", "totald": "h",
@@ -318,10 +323,24 @@ _COLUMN_ALIASES = {
 }
 
 
+#: A unit in square brackets at the end of a header ("v(x) [m/s]", "Total Depth [m]").
+#: A layer drawn up in a GIS usually says what its numbers are, and the name in front
+#: of the unit is the name. Without this, such a layer loaded without complaint and
+#: none of its columns was recognised.
+_UNIT_SUFFIX = re.compile(r"\s*\[[^\]]*\]\s*$")
+
+
+def _canonical_name(name: object) -> str:
+    key = _UNIT_SUFFIX.sub("", str(name).strip().lower()).strip()
+    return _COLUMN_ALIASES.get(key, key)
+
+
 def _canonical_columns(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.rename(columns={c: _COLUMN_ALIASES.get(str(c).strip().lower(),
-                                                    str(c).strip().lower())
-                            for c in df.columns})
+    df = df.rename(columns={c: _canonical_name(c) for c in df.columns})
+    # Two headers may resolve to one name ("East." beside an "x"); the first one wins,
+    # because selecting a duplicated label would return a table where a column is
+    # expected.
+    df = df.loc[:, ~df.columns.duplicated()]
     lead = [c for c in COORD_COLUMNS if c in df.columns]
     rest = [c for c in df.columns if c not in COORD_COLUMNS]
     return df[[*lead, *rest]]
@@ -363,8 +382,46 @@ def _compile_source(src, crs_epsg: int) -> pd.DataFrame:
                                 group_key=getattr(src, "group_key", None))
     if src.kind == "points":
         layer = src.positions or src.values
-        return read_points(layer, crs_epsg)
+        return select_point_profiles(read_points(layer, crs_epsg),
+                                     getattr(src, "profile", "single"),
+                                     group_key=getattr(src, "group_key", None))
     raise ValueError(f"unknown ground_truth source kind: {src.kind!r}")
+
+
+#: Readings closer together than this in plan belong to one vertical [m]. A FlowTracker
+#: profile is taken with the rod standing in one place, so its readings share a
+#: position exactly; the tolerance only absorbs coordinate rounding.
+VERTICAL_TOLERANCE = 0.01
+
+
+def select_point_profiles(df: pd.DataFrame, rule: str = "single", *,
+                          group_key: str | None = None) -> pd.DataFrame:
+    """Apply a profile rule to a point layer that holds several readings per vertical.
+
+    A layer exported from a FlowTracker campaign has one point per *reading*: three
+    points on top of each other where a vertical was sampled at 0.2, 0.6 and 0.8 of
+    the depth. A depth-averaged model has one value there, so the readings of a
+    vertical are reduced by the same rules as a FlowTracker workbook
+    (:func:`select_profile_rows`) - by default the reading nearest 0.6 of the depth.
+
+    The vertical is named by *group_key* where the layer has such a column, and
+    otherwise by the position itself. A layer with one reading per position comes
+    back unchanged, which is every layer this function did not exist for.
+    """
+    if df.empty:
+        return df
+    key = (group_key or "").strip().lower()
+    work = df.copy()
+    if key and key in work.columns:
+        work["_vertical"] = work[key].astype(str)
+    else:
+        step = VERTICAL_TOLERANCE
+        work["_vertical"] = ((work["x"].astype(float) / step).round().astype("int64").astype(str)
+                             + "/" + (work["y"].astype(float) / step).round().astype("int64").astype(str))
+    if not work["_vertical"].duplicated().any():
+        return df
+    out = select_profile_rows(work, rule, group_key="_vertical")
+    return out.drop(columns="_vertical", errors="ignore").reset_index(drop=True)
 
 
 def compile_ground_truth(cfg) -> Path | None:
