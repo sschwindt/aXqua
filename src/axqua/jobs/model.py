@@ -149,6 +149,7 @@ class JobKind(str, Enum):
     OPENFOAM_RUN = "openfoam-run"
     CALIBRATION = "calibration"
     CALIBRATION_MULTIFLOW = "calibration-multiflow"
+    VALIDATION = "validation"
 
     def __str__(self) -> str:
         return self.value
@@ -165,6 +166,7 @@ def parse_kind(value: str) -> JobKind:
                "meshconv": JobKind.MESH_CONVERGENCE, "3d": JobKind.BUILD_3D,
                "steady3d": JobKind.STEADY_RUN_3D, "vertconv": JobKind.VERTICAL_CONVERGENCE,
                "bal": JobKind.CALIBRATION, "balmf": JobKind.CALIBRATION_MULTIFLOW,
+               "val": JobKind.VALIDATION,
                "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN}
     if text in aliases:
         return aliases[text]
@@ -326,6 +328,22 @@ class CalibrationOptions(Options):
     vel_err_floor: float | None = None
     depth_err_floor: float | None = None
 
+
+
+@dataclass
+class ValidationOptions(Options):
+    """The calibrated model, run for a validation situation and compared with it.
+
+    *situation* names an entry of ``calibration.validation`` in the case file and may
+    stay empty when the case has only one. *compare_only* repeats the comparison for a
+    run that exists, after the measurements were corrected for example.
+    """
+
+    situation: str = ""
+    compare_only: bool = False
+    ncsize: int | None = None
+    #: What tells the study of the calibration capability that this is a validation.
+    validate: bool = True
 
 @dataclass
 class MultiflowCalibrationOptions(Options):
@@ -525,6 +543,10 @@ KIND_META: dict[JobKind, KindMeta] = {
         JobKind.CALIBRATION_MULTIFLOW, "balmf", "telemac",
         "HydroBayesCal multi-flow calibration", Capability.CALIBRATION, "study",
         MultiflowCalibrationOptions, CalibrationProgress, "case", True),
+    JobKind.VALIDATION: KindMeta(
+        JobKind.VALIDATION, "val", "telemac",
+        "Validation with data of another flow situation", Capability.CALIBRATION,
+        "study", ValidationOptions, SolverRunProgress, "case", True),
 }
 
 

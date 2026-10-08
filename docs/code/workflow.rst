@@ -84,6 +84,15 @@ Calibration
 .. automodule:: axqua.model_column
    :members:
 
+Validation
+----------
+
+.. automodule:: axqua.validation
+   :members:
+
+.. automodule:: axqua.validationcli
+   :members:
+
 Progress display and logging
 ----------------------------
 

@@ -8,7 +8,7 @@ A complete study consists of several steps that depend on each other, for exampl
 A sequence of steps
 -------------------
 
-The *Batch-processing* tab lists the steps of the workflow for the active case: the build of the TELEMAC model, the steady 2D simulation, the mesh convergence study, the build and the run of the 3D model, and the Bayesian calibration. Tick the steps to run and click *Submit the ticked steps*. aXqua submits one job per step in the order of the list. TELEMAC jobs of one case run one after the other, so that each step starts when the step before it has ended. The job list below the tabs shows ``waiting for`` with the ID of the job that a step waits for.
+The *Batch-processing* tab lists the steps of the workflow for the active case: the build of the TELEMAC model, the steady 2D simulation, the mesh convergence study, the build and the run of the 3D model, the Bayesian calibration, and the validation. Tick the steps to run and click *Submit the ticked steps*. aXqua submits one job per step in the order of the list. TELEMAC jobs of one case run one after the other, so that each step starts when the step before it has ended. The job list below the tabs shows ``waiting for`` with the ID of the job that a step waits for.
 
 A waiting step does not check whether the step before it succeeded. If the build fails, the simulation that follows starts nevertheless and fails with a message that states what is missing. Use the script described below for a sequence that has to stop at the first failed step.
 

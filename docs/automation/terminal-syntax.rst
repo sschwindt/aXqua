@@ -133,6 +133,8 @@ Running simulations as jobs (:doc:`batch-headless`):
      - Function
    * - ``axqua submit <case-file> --kind <kind>``
      - Start a simulation as a job and print its ID.
+   * - ``axqua submit <case-file> --kind validation``
+     - Run the calibrated model for the validation situation of the case and compare it with the validation data (:ref:`validation run <validation-run>`). ``axqua validation <case-file>`` lists the validation situations, the inflows of the model and the results of earlier validations.
    * - ``axqua list``
      - List all jobs.
    * - ``axqua status <job-id>``

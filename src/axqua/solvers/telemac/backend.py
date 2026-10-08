@@ -294,9 +294,15 @@ class TelemacBackend(BaseBackend):
                      calibration_quantities: list | None = None,
                      extraction_quantities: list | None = None,
                      vel_err_floor: float | None = None,
-                     depth_err_floor: float | None = None, **_ignored):
+                     depth_err_floor: float | None = None,
+                     validate: bool = False, situation: str = "",
+                     compare_only: bool = False, ncsize: int | None = None,
+                     **_ignored):
         from axqua import bayescal
 
+        if validate:
+            return self._validation(cfg, ctx=ctx, situation=situation,
+                                    compare_only=compare_only, ncsize=ncsize)
         if flows:
             specs = [bayescal.FlowSpec(**f) for f in flows]
             code = bayescal.run_multiflow_calibration(cfg, specs,
@@ -323,6 +329,61 @@ class TelemacBackend(BaseBackend):
                 return_code=code,
             )
         return code
+
+    def _validation(self, cfg, *, ctx: Any = None, situation: str = "",
+                    compare_only: bool = False, ncsize: int | None = None):
+        """The calibrated model at another discharge, against what was measured then.
+
+        Runs in the model folder under names of its own, so neither the built case nor
+        the result of the steady run is touched.
+        """
+        import numpy as np
+
+        from axqua import validation
+        from axqua.solvers.telemac import sortie
+        from axqua.solvers.telemac.flux_convergence import relative_imbalance
+
+        chosen = validation.situation_named(cfg, situation or None)
+        setup = None
+        balance = None
+        if not compare_only:
+            calibrated = validation.calibrated_parameters(cfg)
+            log.info("validation %s with the %s of %s", chosen.name,
+                     calibrated.estimate, calibrated.source.parent.parent.parent.name)
+            setup = validation.build(cfg, chosen, calibrated.as_dict())
+            self._launch(cfg, ctx=ctx, cas_file=setup.cas.name, ncsize=ncsize,
+                         solver=None, name="telemac2d",
+                         duration=chosen.duration or None)
+            listing = sortie.latest_sortie(cfg.model_dir, setup.cas.name)
+            if listing is not None:
+                history = sortie.read_sortie(listing)
+                tail = relative_imbalance(history.gross_in, history.gross_out)[-10:]
+                if tail.size:
+                    balance = float(np.nanmean(tail))
+                    setup.notes.append(
+                        "Discharge balance at the end of the validation run: inflow "
+                        f"and outflow differ by {100 * balance:.2f} %.")
+        report = validation.evaluate(cfg, chosen, setup)
+        if balance is not None and balance > float(cfg.hydrodynamics.flux_tolerance):
+            report.notes.append(
+                "The validation run had not reached a steady state: inflow and outflow "
+                f"still differed by {100 * balance:.2f} %. Increase the duration of "
+                "the validation situation.")
+        if ctx is not None:
+            folder = Path(cfg.calibration_dir) / validation.FOLDER
+            tag = validation.slug(chosen.name)
+            ctx.record(f"Validation {chosen.name}: model against measurement",
+                       folder / f"validation-{tag}.csv", kind="table")
+            ctx.record(f"Validation {chosen.name}: summary",
+                       folder / f"validation-{tag}.json", kind="file")
+            ctx.record(f"Validation {chosen.name}: figure",
+                       folder / f"validation-{tag}.png", kind="figure")
+            if setup is not None:
+                ctx.record(f"Validation {chosen.name} (TELEMAC result)", setup.results,
+                           kind="mesh", style=STYLE_DEPTH, variable="WATER DEPTH")
+        for note in report.notes + (setup.notes if setup else []):
+            log.info("validation %s: %s", chosen.name, note)
+        return report
 
     # -- after the run ------------------------------------------------------------
     def postprocess(self, cfg, ctx: Any = None):

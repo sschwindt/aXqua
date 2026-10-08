@@ -87,6 +87,18 @@ task and start the program of the profile with the exported index file (`.pvd`; 
 `-o file.visit`) through `QProcess.startDetached`, wrapped in `launch()` so that a test can
 replace it. One export serves both programs, so a page asks again whenever it is shown.
 
+**Validation** (`gui/validation_box.py`): the *Calibration & validation* tab is a
+`CalibrationPage` - the capability boxes of a `SectionPage`, and below them a box for **one
+validation situation**: a point layer (file dialog, or *From QGIS...* over the point layers
+that are open), the discharge of every inflow of the built model (each labelled with the
+discharge it carries in the calibrated case, from `axqua validation <case>`), and the
+outflow level where the case prescribes one. *Save* merges the entry into
+`calibration.validation` through `case read` / `case write`; *Validate* saves and submits
+the `validation` kind. **There is no control that holds back calibration data, by the
+user's rule** (measurements of one survey are not independent samples), and a test reads
+every label of the box to keep it that way. `QFormLayout.setRowVisible` is Qt 6 only, so a
+row is hidden through its field and `labelForField`.
+
 **Batch** (`core/batch.py`, pure): the steps are job kinds in workflow order; *Submit the
 ticked steps* hands them over in ONE background call so their queue tickets are written in
 that order (see the workspace queue in `src/axqua/jobs/CLAUDE.md`), and *Generate

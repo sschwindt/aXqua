@@ -31,6 +31,7 @@ STEPS: tuple[Step, ...] = (
     Step("build-3d", "Build the 3D model", "steady3d"),
     Step("steady-3d", "Steady 3D simulation (hydrostatic)", "steady3d"),
     Step("calibration", "Bayesian calibration", "calibration"),
+    Step("validation", "Validation with data of another flow situation", "calibration"),
 )
 
 

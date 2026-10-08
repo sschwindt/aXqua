@@ -444,6 +444,12 @@ class RunnerClient:
         return self.call(["profile", "write"], input_text=json.dumps(profile),
                          timeout=60).data or {}
 
+    # -- validation ---------------------------------------------------------------
+    def validation_info(self, case: str | os.PathLike) -> dict:
+        """``{situations, boundaries, outflow_condition, calibrated, reports}``: what
+        the validation form of a case shows."""
+        return self.call(["validation", str(case)], timeout=120).data or {}
+
     # -- results for ParaView and VisIt -------------------------------------------
     def export_list(self, case: str | os.PathLike) -> dict:
         """``{folder, results: [...]}``: the TELEMAC results of a case, and which of

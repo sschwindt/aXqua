@@ -94,11 +94,45 @@ The ``calibration`` block of the case file defines what is calibrated against wh
 
 Select wide but physically plausible limits. If the posterior of a parameter accumulates at one of its limits, the true value probably lies outside the range, and the calibration has to be repeated with a wider range.
 
-**Validation.** A validation is only meaningful with measurements that are statistically independent of the calibration data. Two approaches are common: a **data split**, in which a part of the measurement points is withheld from the calibration, and a **second dataset**, for example measurements at another discharge. ``extraction_quantities`` are read from the model results at all measurement points in addition to the calibration targets. A quantity that is extracted but not calibrated, such as the flow velocity in a calibration against water depths, already provides an independent check.
+.. _validation-setup:
 
-.. note::
+**Validation.** A validation examines whether the calibrated parameters describe the reach, or only the day on which the calibration data were measured. It therefore requires measurements that the calibration has not used and that stem from **another flow situation**: another discharge, measured in another survey.
 
-   The definition of a data split or of a separate validation dataset in the case file is not yet available in this version.
+All measurements of the ``ground_truth`` block are calibration data. aXqua does not withhold a part of them for a validation. The measurements of one survey are taken within a few hours in one flow field, and neighboring points are therefore not independent of each other. A model that predicts some of these points from the others (leave-one-out cross-validation, k-fold cross-validation or a random share) demonstrates that it interpolates within that flow field. It does not demonstrate that its roughness values hold at another discharge, at which other parts of the bed are wetted and other roughness elements are submerged.
+
+The validation data are defined in the case file as a **situation**, with its measurements and its boundary values:
+
+.. code-block:: yaml
+
+   calibration:
+     validation:
+       - name: September 2025
+         inflows: {1: 0.2, 3: 5.1}    # discharge [m3/s] per inflow of the model
+         sources:
+           - category: hydraulics
+             kind: points
+             positions: user-sources/ground-truth/september.gpkg
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Entry
+     - Meaning
+   * - ``name``
+     - A short name of the situation. It names the files of the validation.
+   * - ``sources``
+     - The measurements, in the form of the sources of the ``ground_truth`` block.
+   * - ``prescribed_flowrate``
+     - The total discharge of the situation in m³/s. For a model with several inflows, the discharge is distributed among them in the proportions of the calibrated case.
+   * - ``inflows``
+     - The discharge of each inflow in m³/s, for a reach whose branches carried another share of the flow. The inflows are identified by the number of their liquid boundary. ``axqua validation <case-file>`` lists the inflows of the model with the discharge that each carries in the calibrated case.
+   * - ``prescribed_elevation``
+     - The water level at the outflow in m, for a case with ``outflow_condition: elevation``. With a rating curve, aXqua derives the water level from the discharge of the situation.
+   * - ``duration``
+     - The simulated time in seconds, if it differs from that of the case.
+
+**In the plugin.** The tab *Calibration & validation* has the box *Validation with data of another flow situation*. Select the point layer with the validation data with *Browse...*, or with *From QGIS...* from the point layers that are open in QGIS. Enter the discharge of each inflow: the box lists the inflows of the model with the discharge of the calibrated case. *Save* writes the situation into the case file.
 
 .. _calibration-run:
 
@@ -118,6 +152,18 @@ The computing time is approximately the number of runs (``max_runs``) times the 
 
 HydroBayesCal performs its runs in the folder of the built case (``axqua-case/simulation/``) and writes each tested set of parameter values into the friction table and the steering file there. aXqua restores both files when the calibration ends, so that a later simulation uses the case as it was built. For the same reason, jobs of one case run one after the other: a job that is submitted during a calibration waits until the calibration has ended. The folder ``cases/example-isar/`` of the repository contains a complete example with a run time of about half an hour, including a step-by-step guide for the plugin.
 
+.. _validation-run:
+
+**Validation run.** After the calibration, click *Validate* in the box *Validation with data of another flow situation*, or submit the job in a terminal:
+
+.. code-block:: text
+
+   axqua submit <case-file> --kind validation
+
+The validation runs the calibrated model with the boundary values of the validation situation. Its steering file is derived from that of the built case and differs only in the prescribed discharges and water levels, in the names of its own result files, and in the calibrated parameter values. The mesh and all other settings are those of the calibrated model, so that a difference between model and measurement cannot stem from a model that was built differently. The calibrated values are the most probable combination of the posterior (the joint posterior maximum) of the last calibration. The files of the built case and the result of the steady simulation are not changed.
+
+aXqua then reads the model at the validation points and writes three files into ``axqua-case/calibration-validation/validation/``: a table with the measured and the modeled value at each point (``validation-<name>.csv``), a summary (``validation-<name>.json``), and a figure of the modeled against the measured values (``validation-<name>.png``). Measurement points outside the model are counted and excluded.
+
 **Several discharges.** Roughness values that were calibrated at one discharge are not necessarily valid at another one. The script ``run_Bayes_cal_multiflow.py`` in the case folder calibrates one common set of parameters against measurements at several discharges. Run it with ``--smoke`` first. This short test with three runs verifies the complete chain before days of computing time are spent.
 
 **OpenFOAM.** An OpenFOAM model can be calibrated against measured velocity components with the script ``run_Bayes_cal_openfoam.py``. Because a calibration requires dozens of runs, they are performed with a coarse mesh in the mode ``rigid-lid``. The script ``openfoam_verify_posterior.py`` then repeats the calibrated case at full resolution in the mode ``vof``. The roughness of an OpenFOAM model is calibrated as one value for the entire bed. It is therefore not comparable with the roughness values per zone of a TELEMAC calibration.
@@ -132,7 +178,30 @@ HydroBayesCal writes its results into the folder ``auto-saved-results-HydroBayes
 #. **Did the active learning converge?** HydroBayesCal records two indicators after every iteration. The Bayesian model evidence (BME) expresses how well the model reproduces the measurements on average over the parameter ranges. The relative entropy (RE) expresses how much information the measurements added to the prior. Both should level off toward the end of the calibration. If they still change strongly, increase ``max_runs``.
 #. **Is the posterior narrower than the prior?** Compare the two distributions of each parameter. A posterior that is clearly narrower than the prior and lies inside the range identifies the parameter. A posterior at a limit of the range calls for a wider range. A posterior that resembles the prior means that the measurements do not constrain this parameter.
 #. **Does the calibrated model reproduce the calibration targets?** The calibrated parameter set is the most probable combination of the posterior. HydroBayesCal compares the model results for this set with the measurements. Check whether the remaining differences are of the size of the measurement errors, and whether they are distributed randomly or concentrated in one part of the reach. A systematic deviation indicates an error in the model, for example in the terrain data or the boundary conditions, that no parameter value can compensate.
-#. **Does the calibrated model reproduce independent data?** Compare the results with the validation measurements. The differences are typically somewhat larger than for the calibration targets. Much larger differences indicate that the calibration has compensated errors of the model structure through the parameters.
+#. **Does the calibrated model reproduce independent data?** Run the validation (:ref:`validation run <validation-run>`). The differences are typically somewhat larger than for the calibration targets. Much larger differences indicate that the calibration has compensated errors of the model structure through the parameters.
+
+The validation reports the following statistics for each quantity, for example the flow velocity and the water depth:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 26 74
+
+   * - Statistic
+     - Meaning
+   * - Number of points
+     - The validation points on the mesh of the model. Points outside the model, and points that are dry in the model although water was measured, are reported separately.
+   * - Bias
+     - The mean of the modeled minus the measured values. A negative bias of the velocity means that the model is too slow on average. The relative bias refers to the mean measured value.
+   * - Root mean square error (RMSE)
+     - The typical difference between model and measurement at one point. It contains the bias and the scatter.
+   * - Mean absolute error
+     - The mean magnitude of the differences, which is less sensitive to single large differences than the RMSE.
+   * - Correlation
+     - The correlation coefficient between modeled and measured values. A high correlation with a large bias indicates a correct spatial pattern at a wrong level.
+   * - Share within the measurement error
+     - The share of points at which model and measurement differ by no more than the error of the measurement. The error is that of the instrument combined with the relative ``measurement_error`` of the calibration. About 68 % are expected for a model without systematic deviation, and about 95 % within twice the error.
+
+The validation also states the remaining difference between inflow and outflow at the end of its run. If this difference exceeds the tolerance of the case, the run had not reached a steady state, and the ``duration`` of the validation situation has to be increased.
 
 The `HydroBayesCal documentation <https://hydrobayescal.readthedocs.io>`_ describes the result files and figures in detail.
 

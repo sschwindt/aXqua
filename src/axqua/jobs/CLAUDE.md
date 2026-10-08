@@ -33,7 +33,10 @@ payoff is the dashboard's single Progress column, which reads correctly for ever
 `OPENFOAM_BUILD`, `OPENFOAM_RUN`, `CALIBRATION`, `CALIBRATION_MULTIFLOW`). `KIND_META`
 carries slug, solver, `Capability`, the backend verb, the **options dataclass** (which is
 where each script's module-level constants moved - that is the answer to "don't copy-paste
-the scripts") and the default workspace mode. `gain_lose`/`morphodynamics` are **not**
+the scripts") and the default workspace mode. `VALIDATION` came later and has no script: it runs the calibrated model for a
+validation situation (see `axqua/validation.py` in the root notes) and shares the
+calibration capability and its `study` verb, told apart by its option record.
+`gain_lose`/`morphodynamics` are **not**
 kinds - they are config switches folded into the steady/unsteady kinds. Options refuse an
 unknown key (plan §5: never silently ignore a field, or a job that *looks* submitted
 quietly runs something else).

@@ -45,6 +45,7 @@ Lessons baked in (see the module functions):
 
 from __future__ import annotations
 
+import logging
 import shutil
 import sys
 from contextlib import contextmanager
@@ -58,6 +59,8 @@ from axqua import campaigns, hbc
 from axqua.config import Config
 from axqua.ground_truth import compile_ground_truth, read_tidy
 from axqua.rating import synthesize_outflow_rating
+
+log = logging.getLogger("axqua")
 
 
 # --------------------------------------------------------------------------- #
@@ -158,10 +161,53 @@ def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY
         df["v_err"] if "v_err" in df.columns else 0.0,
         df["h"], [f"pt-{i + 1}" for i in range(len(df))],
         vel_err_floor, depth_err_floor).drop(columns="label")
+    out = _inside_the_model(cfg, out)
     path = cfg.calibration_path(cfg.calibration_csv)
     path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(path, index=False)
     return path, out
+
+
+def _inside_the_model(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
+    """Leave out the measurement points that lie outside the model.
+
+    A campaign often includes the cross sections at which the inflow was gauged,
+    upstream of where the model begins. HydroBayesCal reads the model at the node
+    nearest to a point with no limit on the distance, so such a point is compared with
+    a node on the model boundary: a velocity measured in mid-channel against one at a
+    wall. Of the 56 verticals of the Isar campaign of November 2025, 23 lie upstream of
+    the model.
+    """
+    from shapely.geometry import Point
+
+    outline = cfg.geodata.boundary
+    if outline is None or not Path(outline).exists() or points.empty:
+        return points
+    try:
+        import geopandas as gpd
+
+        layer = gpd.read_file(outline)
+        if layer.crs is not None and layer.crs.to_epsg() != cfg.crs_epsg:
+            layer = layer.to_crs(epsg=cfg.crs_epsg)
+        shape = layer.geometry.union_all() if hasattr(layer.geometry, "union_all") \
+            else layer.geometry.unary_union
+        if shape.geom_type in ("LineString", "MultiLineString"):
+            from shapely.ops import polygonize, unary_union
+            shape = unary_union(list(polygonize(shape)))
+        inside = [shape.covers(Point(float(x), float(y)))
+                  for x, y in zip(points["x"], points["y"])]
+    except Exception as exc:                     # noqa: BLE001 - never lose the data
+        log.warning("could not tell which measurement points lie inside the model "
+                    "(%s); all of them are used", exc)
+        return points
+    outside = len(inside) - sum(inside)
+    if outside:
+        log.warning("%d of %d measurement points lie outside the model outline and "
+                    "are left out", outside, len(inside))
+        points = points.loc[inside].reset_index(drop=True)
+        if "id" in points.columns:
+            points["id"] = range(1, len(points) + 1)
+    return points
 
 
 def run_single_flow_calibration(

@@ -1,6 +1,6 @@
-# Example: Isar River in QGIS, from preprocessing to Bayesian calibration
+# Example: Isar River in QGIS, from preprocessing to Bayesian calibration and validation
 
-This example runs the complete TELEMAC workflow of aXqua from the QGIS plugin: build a two-dimensional (2D) model from geodata, run it to a steady state, load the result into QGIS, and calibrate two roughness values against measured flow velocities with HydroBayesCal. Every step is a button in the plugin. The same steps are listed as terminal commands at the end.
+This example runs the complete TELEMAC workflow of aXqua from the QGIS plugin: build a two-dimensional (2D) model from geodata, run it to a steady state, load the result into QGIS, calibrate two roughness values against measured flow velocities with HydroBayesCal, and validate the calibrated model against measurements of another discharge. Every step is a button in the plugin. The same steps are listed as terminal commands at the end.
 
 The example uses the input data of the research case in `../isar-2025` and a mesh that is three times coarser, so that the whole workflow takes about half an hour instead of more than a day.
 
@@ -15,11 +15,14 @@ The model covers a braided reach of the Isar River of about 6.6 ha. The terrain 
 | Bed roughness | equivalent sand roughness k_s in six zones, from 0.004 m (sand) to 0.5 m (vegetation) |
 | Turbulence model | Spalart-Allmaras, selected by aXqua for this cell size |
 | Simulated time | 3000 s; inflow and outflow balance to within 0.1 % after about 2200 s |
-| Measurements | 84 verticals of a SonTek FlowTracker2, measured on September 30, 2025; the reading closest to 0.6 of the water depth is used |
-| Calibration parameters | k_s of roughness zone 4 (coarse gravel, 50 verticals) and of zone 6 (vegetation, 21 verticals) |
+| Calibration data | 33 verticals of a SonTek FlowTracker2, measured on November 24 and 25, 2025 at 2.6 m³/s; the reading closest to 0.6 of the water depth is used |
+| Calibration parameters | k_s of roughness zone 4 (coarse gravel, 17 verticals) and of zone 5 (coarse gravel with cobbles, 11 verticals) |
 | Calibration runs | 8 initial simulations and 4 simulations selected by Bayesian active learning |
+| Validation data | 84 verticals, measured on September 30, 2025 at 5.3 m³/s |
 
-**The measurements and the model describe two different flows.** The velocities were measured on September 30, 2025, when the transects of the FlowTracker2 recorded about 5.3 m³/s in the main channel. The model simulates the 2.4 m³/s of the survey in March 2025, because the terrain model and the boundary conditions of the research case belong to that survey. The calibration of this example therefore demonstrates the workflow and the diagnostics of HydroBayesCal, and it does not yield roughness values for the reach. Step 6 shows how the calibration result itself reveals the mismatch.
+**Two measurement campaigns, two flow situations.** The case has velocity measurements of two days. On November 24 and 25, 2025, the FlowTracker2 recorded 2.6 m³/s in the main channel, which is the discharge of the model. These measurements are the calibration data. The campaign comprises 56 verticals, of which 23 lie upstream of the model, in the cross sections at which the two inflows were gauged. aXqua leaves measurement points outside the model out and reports their number. On September 30, 2025, the main channel carried 5.3 m³/s and the side channel 0.2 m³/s. These measurements are the validation data: the calibration does not use them, and they describe another flow situation.
+
+All measurements of one campaign are calibration data. aXqua does not hold a part of them back for a validation, because the points of one survey in one flow field are not independent of each other (documentation, section *Bayesian calibration & validation setup*).
 
 Measured run times with 8 processor cores on a workstation with 16 cores:
 
@@ -27,7 +30,8 @@ Measured run times with 8 processor cores on a workstation with 16 cores:
 | --- | --- | --- |
 | Build the model | *Preprocessing* > *Build* | 1 min |
 | Steady simulation | *Hydraulic simulation* > *Telemac* > *Steady 2D* > *Submit* | 1.5 min |
-| Bayesian calibration | *Calibration & validation* > *Submit* | 18 min |
+| Bayesian calibration | *Calibration & validation* > *Submit* | 17 min |
+| Validation | *Calibration & validation* > *Validate* | 1.5 min |
 | Mesh convergence study (optional) | *Mesh convergence* > *Submit* | 20 min |
 | Three-dimensional model (optional) | *Hydraulic simulation* > *Telemac* > *Steady 3D* > *Build*, then *Submit* | 19 min |
 
@@ -115,7 +119,7 @@ In this example, the difference between inflow and outflow falls below 0.1 % aft
 1. Go to the tab *Calibration & validation* and click *Submit*. Leave the option *Prepare only* as it is.
 2. The list of jobs shows the number of the current simulation in the column *Progress*, for example `iter 5/12`. The calibration takes about 18 min.
 
-The calibration first writes the measurements into the table `axqua-case/calibration-validation/measurements-calibration.csv`, with one row per vertical. HydroBayesCal then proceeds in two stages. It runs the model for eight combinations of the two roughness values that cover the ranges given in the case file (0.02 to 0.30 m for zone 4 and 0.10 to 0.80 m for zone 6), and trains a surrogate model on the results. A surrogate model is a fast statistical approximation of the simulation, here a Gaussian process. In the second stage, Bayesian active learning selects four additional combinations, one after the other, at which a simulation improves the estimate of the roughness values the most.
+The calibration first writes the measurements into the table `axqua-case/calibration-validation/measurements-calibration.csv`, with one row per vertical inside the model. HydroBayesCal then proceeds in two stages. It runs the model for eight combinations of the two roughness values that cover the ranges given in the case file (0.02 to 0.30 m for zone 4 and 0.05 to 0.60 m for zone 5), and trains a surrogate model on the results. A surrogate model is a fast statistical approximation of the simulation, here a Gaussian process. In the second stage, Bayesian active learning selects four additional combinations, one after the other, at which a simulation improves the estimate of the roughness values the most.
 
 With *Prepare only* ticked, the job writes the table of measurements and the configuration of HydroBayesCal and stops. This is a quick way to inspect the calibration inputs before spending the computing time.
 
@@ -127,7 +131,7 @@ HydroBayesCal writes its results into `axqua-case/calibration-validation/auto-sa
 
 | File | Content |
 | --- | --- |
-| `plots/SCALAR VELOCITY/calibration-target-agreement.png` | modeled against measured flow velocity at the 84 verticals, before and after the calibration |
+| `plots/SCALAR VELOCITY/calibration-target-agreement.png` | modeled against measured flow velocity at the 33 verticals, before and after the calibration |
 | `calibration-data/SCALAR VELOCITY/collocation-points-SCALAR VELOCITY.csv` | the 12 tested combinations of the two roughness values |
 | `calibration-data/SCALAR VELOCITY/model-results-calibration-SCALAR VELOCITY.csv` | the modeled velocity at each vertical, one row per simulation |
 | `calibration-data/SCALAR VELOCITY/model-results-extraction.csv` | the same with the water depth in addition |
@@ -137,12 +141,32 @@ The file `logfile.log` in `axqua-case/calibration-validation/` reports the most 
 
 Read the result in the order of the section *Quality analysis* of the documentation. In this example, it reads as follows:
 
-1. **The calibrated model does not reproduce the measurements.** The modeled velocities are lower than the measured ones at more than 80 % of the verticals. The mean difference is about 0.40 m/s (48 %) before the calibration and still about 0.35 m/s (42 %) after it. The root-mean-square error decreases only from 0.51 to 0.47 m/s.
-2. **The most probable roughness values lie at the lower limits of their ranges**, at about 0.03 m in zone 4 and 0.11 m in zone 6. The calibration reduces the roughness as far as the ranges allow in order to accelerate the flow, and the modeled flow remains too slow.
+1. **The calibrated model remains too slow.** The modeled water depths agree with the measured ones on average (0.29 m against 0.28 m before the calibration). The modeled velocities, however, are lower than the measured ones at about 80 % of the verticals. The mean difference is 0.20 m/s (36 %) before the calibration and 0.18 m/s (33 %) after it, and the root mean square error decreases only from 0.34 to 0.31 m/s.
+2. **Both roughness values end at a limit of their range, in opposite directions**: about 0.30 m in zone 4, which is the upper limit, and about 0.055 m in zone 5, which is close to the lower limit.
 
-A systematic difference together with parameter values at a limit indicates an error that no roughness value can compensate. Here, the cause is known: the model simulates 2.4 m³/s, and the velocities were measured at about 5.3 m³/s. Wider roughness ranges would not solve this. The mesh is not the cause either, because the research model with its mesh of 230,000 nodes yields the same mean velocity at these verticals (0.46 m/s, against 0.85 m/s measured).
+A systematic difference together with parameter values at the limits indicates a deviation that the roughness cannot compensate. The discharge is not the cause here, because the calibration data were measured at the discharge of the model, and the water depths agree. Candidates to examine in the research case are the terrain model, which stems from a survey earlier in 2025 and may not represent the channels of November in this braided reach, the distribution of the discharge among the channels, and the comparison of a velocity measured at one point of the vertical with a depth-averaged velocity. Wider roughness ranges would not solve this. The example therefore demonstrates the workflow and its diagnostics, and it does not yield roughness values for the reach.
 
-A calibration that determines the roughness of this reach requires velocity measurements and boundary conditions of the same day. The numbers of a repeated run differ slightly from those above, because the mesh generator does not reproduce a mesh node by node.
+## Step 7: Validate the calibrated model
+
+A validation examines whether the calibrated roughness values also hold in another flow situation. The case file names the measurements of September 30, 2025 as validation data, with the discharges of that day: 5.1 m³/s in the main channel and 0.2 m³/s in the side channel (block `calibration.validation`).
+
+1. On the tab *Calibration & validation*, the box *Validation with data of another flow situation* shows the validation layer and the two inflows of the model, each with the discharge that it carries in the calibrated case (0.8 and 1.6 m³/s) and the discharge of the validation situation (0.2 and 5.1 m³/s).
+2. Click *Validate*. The job takes about 1.5 min.
+3. When the job has ended, the box summarizes the result. *Open the figure* shows the modeled against the measured values.
+
+The validation runs the calibrated model with the discharges of the validation situation. aXqua derives the water level at the outflow for 5.3 m³/s in the same way as for the discharge of the case. The steering file `validation-september-2025.cas` in `axqua-case/simulation/` differs from that of the built case only in the discharges, the water level at the outflow, the names of its own result and friction files, and the two calibrated roughness values. The results are written to `axqua-case/calibration-validation/validation/`:
+
+| File | Content |
+| --- | --- |
+| `validation-september-2025.csv` | measured and modeled flow velocity and water depth at each of the 84 verticals |
+| `validation-september-2025.json` | the statistics, and the boundary values and roughness values of the run |
+| `validation-september-2025.png` | modeled against measured values with the errors of the measurements |
+
+In this example, the calibrated model underestimates the flow velocity of the validation situation by 0.17 m/s on average (20 %) and overestimates the water depth by 0.07 m (18 %). The root mean square errors are 0.45 m/s and 0.25 m. Four verticals are dry in the model although water was measured there. Inflow and outflow differ by less than 0.1 % at the end of the run.
+
+The validation confirms what the calibration result indicated. With the roughness values of the case before the calibration, the model deviates slightly less from the validation data (flow velocity -19 %, water depth +13 %, root mean square errors 0.42 m/s and 0.24 m) than with the calibrated values. The calibration has thus not improved the prediction of another flow situation: it has adjusted the roughness to a deviation of another origin, and this adjustment does not carry over to another discharge. Showing this is the purpose of a validation with independent data. A validation with a part of the calibration data would not have shown it.
+
+The numbers of a repeated run differ slightly from those above, because the mesh generator does not reproduce a mesh node by node.
 
 ## Optional steps
 
@@ -161,7 +185,8 @@ A calibration that determines the roughness of this reach requires velocity meas
 | *Hydraulic simulation* > *OpenFOAM* | states that this case does not use OpenFOAM |
 | *Morphodynamic simulation* | nothing to submit. Sediment transport is switched on with the block `morphodynamics` of the case file and is then computed together with the flow. This example has no such block |
 | *Postprocessing* > *QGIS* | loads the result of the selected job, adds an A3 print layout, and exports a movie of an unsteady result |
-| *Postprocessing* > *ParaView*, *VisIt* | name the program of the profile. The export of TELEMAC results to these programs is not yet available |
+| *Postprocessing* > *ParaView*, *VisIt* | list the TELEMAC results of the case. *Export* converts the selected results into files that both programs read, and *Open in ParaView* or *Open in VisIt* starts the program of the profile with them |
+| *Configuration* > *Simulation software* | states where TELEMAC, OpenFOAM, ParaView and VisIt are installed. *Install ...* opens the installation wizard of a program that is missing |
 
 The list of jobs below the tabs shows all jobs with their state. *Cancel* stops a running or waiting job, *View logs* shows its log, and *Open job directory* opens its folder. The algorithms *Submit a simulation job*, *Check job status*, and *Import job results* in the Processing Toolbox do the same from a model or a script.
 
@@ -172,11 +197,12 @@ axqua profile check
 axqua submit cases/example-isar/example-isar.axq-case --kind preprocessing
 axqua submit cases/example-isar/example-isar.axq-case --kind steady
 axqua submit cases/example-isar/example-isar.axq-case --kind calibration
+axqua submit cases/example-isar/example-isar.axq-case --kind validation
 axqua list
 axqua status <job id> --watch
 ```
 
-`axqua submit` prints the identifier of the job and returns at once. The three jobs can be submitted in direct succession, because a job waits for the previous job of the same case. `axqua status <job id> --watch` follows a job until it ends.
+`axqua submit` prints the identifier of the job and returns at once. The four jobs can be submitted in direct succession, because a job waits for the previous job of the same case. `axqua status <job id> --watch` follows a job until it ends.
 
 ## Run the resolution of the research case
 

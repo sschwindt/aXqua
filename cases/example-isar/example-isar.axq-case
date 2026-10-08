@@ -1,7 +1,7 @@
 # =============================================================================
-# aXqua example case: Isar River, losing and gaining reach, September 2025
+# aXqua example case: Isar River, losing and gaining reach
 # =============================================================================
-# A fast version of the research case in ../isar-2025, made for trying out aXqua and its QGIS plugin from preprocessing to Bayesian calibration. README.md in this folder walks through every step.
+# A fast version of the research case in ../isar-2025, made for trying out aXqua and its QGIS plugin from preprocessing to Bayesian calibration and validation. README.md in this folder walks through every step.
 #
 # The input data are those of the research case and are read from its folder (../isar-2025/user-sources). Nothing is written there: all results of this example go to the folder axqua-case/ next to this file.
 #
@@ -71,15 +71,14 @@ hydrodynamics:
   graphic_printout_period: 500 # time steps between two saved results
   listing_printout_period: 500
 
-# Velocity measurements of September 30, 2025 with a SonTek FlowTracker2. The layer holds one point per reading. aXqua uses the reading closest to 0.6 of the water depth at each of the 84 verticals, which approximates the depth-averaged velocity.
-# Note: the discharge on that day was about 5.3 m3/s in the main channel, more than twice the discharge of this model. The calibration below demonstrates the workflow and cannot yield roughness values for the reach (see README.md, step 6).
+# Calibration data: velocity measurements of November 24 and 25, 2025 with a SonTek FlowTracker2. The discharge on those days was 2.6 m3/s in the main channel, which is the discharge of this model. The layer holds one point per reading. aXqua uses the reading closest to 0.6 of the water depth at each vertical, which approximates the depth-averaged velocity. Of the 56 verticals, 23 lie upstream of the model, where the inflows were gauged, and are left out automatically.
 ground_truth:
   sources:
     - category: hydraulics
       kind: points
-      positions: ../isar-2025/user-sources/ground-truth/flowtracker/Sep25/TKE_Isar_Sep25.gpkg
+      positions: ../isar-2025/user-sources/ground-truth/flowtracker/Nov25/TKE_Isar_Nov26.gpkg
 
-# Two roughness values are calibrated against the measured velocities: 50 verticals lie in roughness zone 4 and 21 in zone 6. The number of runs is small on purpose, so that the example finishes in about 20 minutes.
+# Two roughness values are calibrated against the measured velocities: 17 verticals lie in roughness zone 4 and 11 in zone 5. The number of runs is small on purpose, so that the example finishes in about 20 minutes.
 calibration:
   calibration_quantities: ["SCALAR VELOCITY"]
   extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]
@@ -87,4 +86,12 @@ calibration:
   max_runs: 12                 # simulations in total
   parameters:
     - {name: zone4, min: 0.02, max: 0.30, comment: "ks of coarse gravel [m]"}
-    - {name: zone6, min: 0.10, max: 0.80, comment: "ks of the vegetated zone [m]"}
+    - {name: zone5, min: 0.05, max: 0.60, comment: "ks of coarse gravel with cobbles [m]"}
+  # Validation data: measurements of another flow situation, which the calibration has not seen. On September 30, 2025 the main channel carried 5.3 m3/s, about twice the discharge of the calibration, and the side channel 0.2 m3/s. The validation runs the calibrated model with these discharges and compares it with the 84 verticals of that day.
+  validation:
+    - name: September 2025
+      inflows: {1: 0.2, 3: 5.1}  # discharge [m3/s] per inflow: liquid boundary 1 is the side channel, 3 the main channel
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: ../isar-2025/user-sources/ground-truth/flowtracker/Sep25/TKE_Isar_Sep25.gpkg

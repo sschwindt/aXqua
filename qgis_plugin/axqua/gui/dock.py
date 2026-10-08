@@ -251,6 +251,10 @@ class AxquaDock(QDockWidget):
         if key == "postprocessing":
             return (QgisPage(self.ctx) if sub == "qgis"
                     else ProgramPage(self.ctx, sub, title))
+        if key == "calibration":
+            from .validation_box import CalibrationPage
+            return CalibrationPage(self.ctx, key, sub,
+                                   empty_text=EMPTY.get((key, sub), ""))
         # the build of the 2D model has a tab of its own
         hide = (sections.PREPROCESSING_CAPABILITY,) if key == "hydraulics" else ()
         return SectionPage(self.ctx, key, sub, empty_text=EMPTY.get((key, sub), ""),

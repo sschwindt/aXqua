@@ -17,6 +17,7 @@ depends on a specific QGIS version asks the object rather than assuming, exactly
 
 from __future__ import annotations
 
+import json
 import os
 import threading
 from pathlib import Path
@@ -1389,3 +1390,140 @@ def test_an_export_older_than_its_result_is_named(program_pages):
     paraview.show_results({}, note="Add a case on the tab Case Setup first.")
     assert paraview.table.rowCount() == 0 and not paraview.export_button.isEnabled()
     assert "Add a case" in paraview.status.text()
+
+
+# ------------------------------------------------------------------- validation
+
+
+def _validation_info(*, built=True, calibrated=True, reports=True, situation=True,
+                     condition="stage_discharge"):
+    return {
+        "situations": [{"name": "September 2025", "inflows": {"1": 0.2, "3": 5.1},
+                        "prescribed_elevation": 815.5,
+                        "sources": [{"category": "hydraulics", "kind": "points",
+                                     "positions": "data/september.gpkg"}]}]
+        if situation else [],
+        "boundaries": [{"index": 1, "kind": "inflow", "discharge": 0.8},
+                       {"index": 2, "kind": "outflow", "discharge": None},
+                       {"index": 3, "kind": "inflow", "discharge": 1.6}]
+        if built else [],
+        "outflow_condition": condition,
+        "calibrated": {"values": {"zone4": 0.04}} if calibrated else None,
+        "reports": [{"name": "September 2025", "figure": "/c/validation.png",
+                     "notes": ["3 of the 84 points on the mesh are dry in the model."],
+                     "summary": {"SCALAR VELOCITY": {
+                         "n": 84, "bias": -0.12, "relative_bias": -0.142, "rmse": 0.4,
+                         "within_error": 0.18}}}] if reports else [],
+    }
+
+
+class _ValidationClient:
+    def __init__(self, info):
+        self.info, self.written = info, []
+
+    def validation_info(self, case):
+        return self.info
+
+    def case_read(self, case):
+        if self.written:                        # what the last save left in the file
+            return {"data": json.loads(json.dumps(self.written[-1]))}
+        return {"data": {"project": {"name": "reach"},
+                         "calibration": {"init_runs": 8, "validation": [
+                             {"name": "old"}, {"name": "flood", "prescribed_flowrate": 40}]}}}
+
+    def case_write(self, case, data):
+        self.written.append(data)
+        return {"path": str(case), "findings": []}
+
+
+@pytest.fixture
+def validation_box(dock, tmp_path, monkeypatch):
+    from axqua_plugin.gui import validation_box
+
+    case = tmp_path / "reach.axq-case"
+    case.write_text("project: {name: reach}\n", encoding="utf-8")
+    dock.ctx.project.add_case(case)
+    dock.ctx.set_runner_ok(True)
+    now = lambda title, call, on_success=None, on_error=None, owner=None: on_success(call())  # noqa: E731
+    monkeypatch.setattr(validation_box, "run_async", now)
+    submitted = []
+    monkeypatch.setattr(type(dock.ctx), "submit",
+                        lambda self, kind, options=None: submitted.append((kind, options)))
+    box = dock.page("calibration").validation
+
+    def use(info):
+        dock.ctx.client = _ValidationClient(info)
+        box.refresh()
+        return dock.ctx.client
+
+    return box, use, submitted, case
+
+
+def test_the_validation_form_asks_for_another_situation_and_offers_no_split(
+        validation_box):
+    """Every inflow of the model with the discharge of the calibrated case, so that
+    it is clear which is which; and no control that holds calibration data back."""
+    from qgis.PyQt.QtWidgets import QAbstractButton, QLabel
+
+    box, use, _submitted, _case = validation_box
+    use(_validation_info())
+    assert sorted(box._inflows) == [1, 3]
+    assert (box._inflows[1].value(), box._inflows[3].value()) == (0.2, 5.1)
+    labels = [label.text() for label in box.findChildren(QLabel)]
+    assert "Discharge of inflow 1 (0.8 m³/s in the calibrated case)" in labels
+    assert box.total.isHidden()                       # the inflows say it all
+    assert box.level.isHidden()                       # the case computes the level
+    assert box.name.text() == "September 2025"
+    assert box.layer.text() == "data/september.gpkg"
+    texts = " ".join(labels + [b.text() for b in box.findChildren(QAbstractButton)])
+    for word in ("split", "leave-one-out", "cross-validation", "fraction", "%  of"):
+        assert word not in texts.lower()
+    # the result of the last run, in words
+    assert "Flow velocity at 84 points" in box.result.text()
+    assert "-0.12 m/s on average (-14 %)" in box.result.text()
+    assert "dry in the model" in box.result.text()
+    assert box.figure_button.isEnabled() and box.run_button.isEnabled()
+
+
+def test_the_form_follows_what_the_case_needs(validation_box):
+    box, use, _submitted, _case = validation_box
+    use(_validation_info(built=False, calibrated=False, reports=False, situation=False,
+                         condition="elevation"))
+    assert not box._inflows and not box.total.isHidden()   # one total discharge
+    assert not box.level.isHidden()                        # the case prescribes a level
+    assert "not built yet" in box.hint.text()
+    assert "no finished calibration" in box.hint.text()
+    assert not box.run_button.isEnabled() and box.save_button.isEnabled()
+    assert not box.figure_button.isEnabled() and box.result.text() == ""
+
+
+def test_saving_writes_the_situation_and_keeps_the_rest_of_the_case(validation_box):
+    box, use, submitted, case = validation_box
+    client = use(_validation_info())
+    box.name.setText("September 2025")
+    box.layer.setText(str(case.parent / "data" / "september.gpkg"))
+    box._inflows[1].setValue(0.25)
+    box.save()
+    (written,) = client.written
+    assert written["project"] == {"name": "reach"}             # untouched
+    assert written["calibration"]["init_runs"] == 8
+    first, *others = written["calibration"]["validation"]
+    assert first == {"name": "September 2025", "inflows": {1: 0.25, 3: 5.1},
+                     "sources": [{"category": "hydraulics", "kind": "points",
+                                  "positions": "data/september.gpkg"}]}
+    assert others == [{"name": "flood", "prescribed_flowrate": 40}]   # a second one stays
+    assert "saved" in box.result.text() and not submitted
+
+    box.validate()                                             # save, then the job
+    assert len(client.written) == 2
+    assert submitted == [("validation", {"situation": "September 2025"})]
+    # saved again under the same name: it is still one situation, and the other stays
+    names = [s["name"] for s in client.written[-1]["calibration"]["validation"]]
+    assert names == ["September 2025", "flood"]
+
+
+def test_validation_is_a_step_of_a_batch_after_the_calibration():
+    from axqua_plugin.core import batch
+
+    assert batch.ordered(["validation", "calibration", "steady"]) == \
+        ["steady", "calibration", "validation"]

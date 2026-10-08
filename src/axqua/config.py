@@ -1351,6 +1351,59 @@ class CalibrationParameter:
 
 
 @dataclass
+class ValidationSituation:
+    """Measurements from ANOTHER flow situation, to validate a calibrated model.
+
+    Every dataset under ``ground_truth`` is calibration data. A validation needs data
+    the calibration has not seen, and in a river that means another situation: another
+    discharge, another survey. Measurements of one survey are taken in one flow field
+    within hours of each other; holding some of them back tests how well the model
+    interpolates within that flow field, not whether its parameters hold when the
+    discharge changes. Splitting one dataset (leave-one-out, k-fold, a random share)
+    is therefore not offered.
+
+    The situation is described by what differs from the calibrated case: its
+    measurements (``sources``, as under ``ground_truth``) and its boundary values.
+    Mesh, bed and every other setting are those of the calibrated model.
+    """
+
+    name: str = "validation"
+    sources: list[GroundTruthSource] = field(default_factory=list)
+    #: Total inflow of the situation [m3/s]. Without ``inflows`` it is distributed
+    #: over the inflow boundaries like the discharge of the calibrated case.
+    prescribed_flowrate: float | None = None
+    #: Discharge per inflow boundary [m3/s], by the number of the liquid boundary
+    #: (as TELEMAC numbers them; ``axqua validation`` lists them). For a reach
+    #: whose branches carry another share of the flow in this situation.
+    inflows: dict[int, float] = field(default_factory=dict)
+    #: Outflow water level [m], where the case prescribes one
+    #: (``boundaries.outflow_condition: elevation``). With a rating curve the level
+    #: follows from the discharge.
+    prescribed_elevation: float | None = None
+    duration: float | None = None       # simulated time [s]; default: the case's
+
+    @property
+    def total_flowrate(self) -> float | None:
+        if self.inflows:
+            return float(sum(self.inflows.values()))
+        return None if self.prescribed_flowrate is None else float(self.prescribed_flowrate)
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None
+                  ) -> "ValidationSituation":
+        d = _only_known(cls, dict(d or {}))
+        sources = []
+        for src in d.pop("sources", None) or []:
+            src = _only_known(GroundTruthSource, dict(src))
+            if cfg_dir is not None:
+                src["values"] = _resolve(cfg_dir, src.get("values"))
+                src["positions"] = _resolve(cfg_dir, src.get("positions"))
+            sources.append(GroundTruthSource(**src))
+        inflows = {int(k): float(v) for k, v in (d.pop("inflows", None) or {}).items()}
+        return cls(sources=sources, inflows=inflows, **d)
+
+
+@dataclass
 class Calibration:
     parameters: list[CalibrationParameter] = field(default_factory=list)
     calibration_quantities: list[str] = field(default_factory=lambda: ["WATER DEPTH"])
@@ -1388,13 +1441,20 @@ class Calibration:
     solver_name: str = "Telemac2d"        # 'Telemac2d' | 'Telemac3d'
     control_file: str | None = None       # .cas to calibrate (default: cfg.cas_file)
     results_base: str | None = None       # results basename (default: from the .cas)
+    #: Independent datasets from other flow situations (see ValidationSituation).
+    validation: list[ValidationSituation] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Calibration":
+    def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None) -> "Calibration":
         params = [CalibrationParameter(**_only_known(CalibrationParameter, p))
                   for p in d.get("parameters", [])]
-        rest = {k: v for k, v in d.items() if k != "parameters"}
-        return cls(parameters=params, **_only_known(cls, rest))
+        given = d.get("validation") or []
+        if isinstance(given, dict):               # one situation, written without a list
+            given = [given]
+        situations = [ValidationSituation.from_dict(item, cfg_dir) for item in given]
+        rest = {k: v for k, v in d.items() if k not in ("parameters", "validation")}
+        return cls(parameters=params, validation=situations,
+                   **_only_known(cls, rest))
 
 
 @dataclass
@@ -2194,7 +2254,7 @@ def load_config(path: str | os.PathLike) -> Config:
     gain_lose = _load_gain_lose(raw, cfg_dir)
     drying = Drying(**_only_known(Drying, raw.get("drying", {}) or {}))
     structures = Structures(**_only_known(Structures, raw.get("structures", {}) or {}))
-    calib = Calibration.from_dict(raw.get("calibration", {}) or {})
+    calib = Calibration.from_dict(raw.get("calibration", {}) or {}, cfg_dir)
 
     # OpenFOAM extension: absent block -> defaults, and nothing consults them
     ofdict = dict(raw.get("openfoam") or {})
