@@ -61,6 +61,16 @@ and enables it; with `QT_QPA_PLATFORM=offscreen` and `--code <script>` the same 
 drives the real plugin headless (add a case, grab each tab with `widget.grab()`, load a
 result, `os._exit`), which is how the metadata defect and the missing layer CRS were found.
 
+**No tab claims "no job kind" any more, and three small tables say why**
+(`gui/capability_tabs.py`). `PART_OF`: gain-lose and morphodynamics are blocks of the case
+file that run *with* the steady and unsteady simulations, so their tabs show the state from
+the capability matrix and say there is nothing to submit. `FIXED_OPTIONS`: the Unsteady 3D
+tab is the `unsteady` kind with `mode_3d` set (the check box that did this used to sit on
+the Unsteady 2D tab, next to a tab that said it could not be done). `OPTION_FIELDS` has a
+`choice` type for the 3D `variant`; like the other two types it has a "not set" state that
+is not sent. Loading a 3D job: the depth-averaged companion is the layer, styled by the
+vector group `VELOCITY` because it has no `SCALAR VELOCITY`; the volume file is not offered.
+
 The plugin folder and the library are both called `axqua`, which is right in both
 places but means they cannot share a pytest process - `qgis_plugin/tests/conftest.py` loads
 the plugin under the alias `axqua_plugin` so one `pytest` at the repo root runs both

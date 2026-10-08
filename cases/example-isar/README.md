@@ -75,6 +75,8 @@ The build clips the terrain model to the model outline, generates the mesh, inte
 
 A job runs independently of QGIS. QGIS can be closed while a job runs, and the *Jobs* tab shows the job with its current state when QGIS is opened again.
 
+Jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits for it, and the column *Progress* shows `waiting for` with the name of that job. *Build* and *Submit* can therefore be clicked in direct succession.
+
 ## Step 3: Run the steady simulation and load the result
 
 1. Go back to the tab *Steady 2D*, which now states `configured, built`, and click *Submit*.
@@ -115,7 +117,7 @@ The calibration first writes the measurements into the table `axqua-case/calibra
 
 With *Prepare only* checked, the job writes the table of measurements and the configuration of HydroBayesCal and stops. This is a quick way to inspect the calibration inputs before spending the computing time.
 
-Run one job of a case at a time. HydroBayesCal runs its simulations in the folder of the built case, and a second job in that folder would overwrite its files. When the calibration has finished, aXqua restores the friction table and the steering file of the built case.
+HydroBayesCal runs its simulations in the folder of the built case and writes each tested roughness value into the friction table there. A job that is submitted during the calibration therefore waits until the calibration has ended. aXqua then restores the friction table and the steering file of the built case.
 
 ## Step 6: Read the calibration result
 
@@ -142,16 +144,16 @@ A calibration that determines the roughness of this reach requires velocity meas
 
 ## Optional steps
 
-**Mesh convergence.** The tab *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 84 measurement verticals. The study takes about 20 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 6 % and the flow velocity by 7 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the tab *Jobs* shows the number of meshes only when the study has ended. Until then, *View logs* shows which mesh is running.
+**Mesh convergence.** The tab *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 84 measurement verticals. The study takes about 20 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 6 % and the flow velocity by 7 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the tab *Jobs* shows the number of completed meshes, for example `level 2/4`.
 
-**Three-dimensional model.** The tab *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the hydrostatic 3D simulation, which takes about 19 min, and *Load results* then adds its depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The non-hydrostatic variant is started in a terminal (section *Hydraulic simulations* of the documentation). The tab *Vertical convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
+**Three-dimensional model.** The tab *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the variant that is selected under *Variant*: the hydrostatic simulation, which verifies the discharge balance in 3D and takes about 19 min, or the non-hydrostatic simulation, which takes about 10 min. *Load results* then adds the depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The tab *Vertical convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
 
 ## The other tabs
 
 | Tab | State in this example |
 | --- | --- |
-| *Unsteady 2D* | inactive, because the case file prescribes a constant discharge and no hydrograph |
-| *Unsteady 3D*, *Morphodynamics* | inactive, because this version of the plugin cannot submit these simulations as jobs |
+| *Unsteady 2D*, *Unsteady 3D* | inactive, because the case file prescribes a constant discharge and no hydrograph (`boundaries.inflow`) |
+| *Morphodynamics* | nothing to submit. Sediment transport is switched on with the block `morphodynamics` of the case file and is then computed together with the flow. This example has no such block |
 | *Gain-lose reach* | nothing to submit. The exchange with the gravel bar is a block of the case file, and it is built and simulated together with the steady 2D model. The tab states `configured, built, run` after step 3 |
 | *Jobs* | all jobs with their state. *Cancel* stops a running job, *View logs* shows its log, *Open job directory* opens its folder |
 
@@ -168,7 +170,7 @@ axqua list
 axqua status <job id> --watch
 ```
 
-`axqua submit` prints the identifier of the job and returns at once. Each command needs the previous job to be completed. `axqua status <job id> --watch` follows a job until it ends.
+`axqua submit` prints the identifier of the job and returns at once. The three jobs can be submitted in direct succession, because a job waits for the previous job of the same case. `axqua status <job id> --watch` follows a job until it ends.
 
 ## Run the resolution of the research case
 

@@ -99,6 +99,13 @@ boundaries:
   #   free            -> Neumann / free outflow (cli 4 4 4); nothing prescribed.
   outflow_condition: elevation
   prescribed_elevation: 0.0    # downstream water level [m a.s.l.] (outflow_condition: elevation)
+  # Internal exchange lines (Type 'int-outflow-lose' / 'int-inflow-gain' in the
+  # liquid-boundary layer) are only applied when the case asks for an exchange: with
+  # the gain_lose block below (recommended, the withdrawal is limited by the water
+  # depth), or with internal_sources: true for source regions with a fixed rate,
+  # which diverge where the strip runs dry. Without either, no exchange is modelled.
+  # internal_sources: true
+  # internal_source_region_width: 3.0   # [m] width of the strip around each line
   # outlet rating curve (only for outflow_condition: stage_discharge): a CSV with
   # Q [m3/s] and WSE [m] columns. One Q-h pair at the steady discharge is enough.
   # Generate one from a Manning/Strickler value and the channel geometry with:

@@ -470,18 +470,46 @@ def test_a_capability_the_case_does_not_ask_for_says_so():
 
 
 def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
-    """Morphodynamics, the gain-lose reach and unsteady 3D are implemented in axqua but
-    are not submittable jobs. Their tabs used to render *enabled*, with a Build and a
-    Submit button that could not do anything, because there is no ``--kind`` to send.
+    """A capability axqua implements without a job kind used to render *enabled*, with
+    a Build and a Submit button that could not do anything, because there is no
+    ``--kind`` to send. None of today's capabilities is in that position, so this uses
+    one the plugin has never heard of.
     """
-    view = CaseView.from_payload(MATRIX)
-    capability = view.solver("telemac").capability("morphodynamics")
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    capability = CapabilityView(name="ice_cover", solver="telemac", implemented="yes",
+                                configured=True)
     assert capability.visible is True                  # the gap is worth seeing
     assert capability.submittable is False
     assert capability.enabled is False
     assert capability.can_submit is False
     assert capability.state_text == "no job kind"
     assert "Python driver" in capability.reason
+
+
+def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
+    """GAIA is coupled to the steady and unsteady runs by a block of the case file.
+    The tab said "no job kind - run it from a Python driver", which was wrong twice."""
+    view = CaseView.from_payload(MATRIX)
+    capability = view.solver("telemac").capability("morphodynamics")
+    assert capability.visible is True and capability.can_submit is False
+    assert capability.state_text != "no job kind"
+    assert "coupled with GAIA" in capability.reason
+    assert "Python driver" not in capability.reason
+
+
+def test_the_unsteady_3d_tab_is_the_unsteady_job_with_the_3d_switch_set():
+    """It said "no job kind" while a check box on the Unsteady 2D tab did its job."""
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    capability = CapabilityView(name="unsteady3d", solver="telemac", implemented="yes",
+                                configured=True, built=False)
+    assert capability.submit_kind == "unsteady" and capability.build_kind == "build-3d"
+    assert capability.fixed_options == {"mode_3d": True}
+    assert capability.can_submit is True and capability.needs_build is True
+    plain = CapabilityView(name="unsteady2d", solver="telemac", implemented="yes",
+                           configured=True)
+    assert plain.submit_kind == "unsteady" and plain.fixed_options == {}
 
 
 def test_a_capability_that_is_part_of_another_run_says_so():

@@ -245,7 +245,7 @@ def build_unsteady_case(cfg: Config, *, control_sections: bool = True) -> Unstea
     # the exchange would be dropped) rather than aborting the unsteady build.
     regions: list = []
     try:
-        regions = boundary.load_internal_source_regions(cfg)
+        regions = boundary.exchange_regions(cfg)
     except Exception as exc:  # noqa: BLE001 - degrade, but say so
         log.warning("could not re-read %s for internal source regions (%s); the "
                     "unsteady case will carry NO internal losing/gaining exchange",

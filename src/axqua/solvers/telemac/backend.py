@@ -264,6 +264,7 @@ class TelemacBackend(BaseBackend):
             # Never the study's own stdin prompt: a detached job must answer from its
             # own record, and every answer is logged (see jobs.interaction).
             ask=(ctx.ask if ctx is not None else None),
+            on_level=_level_progress(ctx),
         )
         if ctx is not None:
             ctx.progress(levels_done=len(report.levels), levels_total=len(report.levels),
@@ -282,7 +283,8 @@ class TelemacBackend(BaseBackend):
         if ncsize:
             kwargs["n_processors"] = ncsize
         base = Path(cfg.postprocessing_dir) / "vertical-convergence"
-        report = run_vertical_convergence(cfg, base_dir=base, **kwargs)
+        report = run_vertical_convergence(cfg, base_dir=base,
+                                          on_level=_level_progress(ctx), **kwargs)
         _write_study_report(report, base, "vertical-convergence", ctx)
         return report
 
@@ -394,38 +396,45 @@ class TelemacBackend(BaseBackend):
         if ctx is None:
             return []
         written: list[Path] = []
+        from axqua.solvers.telemac import threed
+
         # Results, in the order a user wants them: the thing that was computed first.
-        for attr, label, style, variable in (
-            ("results_slf", "TELEMAC result (steady)", STYLE_DEPTH, "WATER DEPTH"),
-            ("results_unsteady_slf", "TELEMAC result (unsteady)", STYLE_DEPTH,
-             "WATER DEPTH"),
-            ("results3d_slf", "TELEMAC-3D result", "", ""),
-            ("results2d_from_3d_slf", "TELEMAC-3D result (depth-averaged)", STYLE_DEPTH,
-             "WATER DEPTH"),
+        # The last column is the dataset the velocity is styled by. A 2D result prints
+        # the scalar velocity; the depth-averaged companion of a 3D run carries the
+        # two components only, which QGIS reads as one vector group named VELOCITY.
+        # The hydrostatic 3D run keeps its results under names of its own.
+        for name, label, velocity in (
+            (getattr(cfg, "results_slf", None), "TELEMAC result (steady)",
+             "SCALAR VELOCITY"),
+            (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
+             "SCALAR VELOCITY"),
+            (getattr(cfg, "results2d_from_3d_slf", None),
+             "TELEMAC-3D result (depth-averaged)", "VELOCITY"),
+            (threed.HYDROSTATIC_RESULT_2D,
+             "TELEMAC-3D result, hydrostatic (depth-averaged)", "VELOCITY"),
         ):
-            name = getattr(cfg, attr, None)
             if not name:
                 continue
             path = cfg.model_path(name)
             if not path.exists():
                 continue
-            ctx.record(label, path, kind="mesh", style=style, variable=variable)
+            ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
+                       variable="WATER DEPTH")
             # The same file carries velocity; a second entry lets the plugin add two
             # differently-styled layers over one dataset without reading it twice.
             ctx.record(f"{label} - velocity", path, kind="mesh", style=STYLE_VELOCITY,
-                       variable="SCALAR VELOCITY")
+                       variable=velocity)
             written.append(path)
 
-        # The hydrostatic 3D run keeps its results under names of its own. Its
-        # depth-averaged companion is the one QGIS can show; it carries the velocity
-        # as components only, so there is no second, velocity-styled entry.
-        from axqua.solvers.telemac import threed
-
-        hydrostatic = cfg.model_path(threed.HYDROSTATIC_RESULT_2D)
-        if hydrostatic.exists():
-            ctx.record("TELEMAC-3D result, hydrostatic (depth-averaged)", hydrostatic,
-                       kind="mesh", style=STYLE_DEPTH, variable="WATER DEPTH")
-            written.append(hydrostatic)
+        # The 3D results themselves are volumes. QGIS reads SELAFIN in 2D only, so they
+        # are listed as files and not as layers: offered as layers, each *Load results*
+        # ended with "r3d.slf did not load".
+        for name, label in ((getattr(cfg, "results3d_slf", None), "TELEMAC-3D result"),
+                            (threed.HYDROSTATIC_RESULT_3D,
+                             "TELEMAC-3D result, hydrostatic")):
+            if name:
+                ctx.record(f"{label} (3D file, not a map layer)", cfg.model_path(name),
+                           kind="file")
 
         ctx.record("Mesh geometry", cfg.model_path(cfg.geometry_slf), kind="mesh")
         for name, kind in (("mesh-convergence.xlsx", "table"),
@@ -438,6 +447,14 @@ class TelemacBackend(BaseBackend):
 
 
 BACKEND = TelemacBackend()
+
+
+def _level_progress(ctx: Any):
+    """What a convergence study calls after each of its runs; ``None`` without a job."""
+    if ctx is None:
+        return None
+    return lambda done, total, label: ctx.progress(
+        levels_done=done, levels_total=total, current_label=label)
 
 
 def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,

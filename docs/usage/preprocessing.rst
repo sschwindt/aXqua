@@ -99,7 +99,7 @@ Two choices of the ``hydrodynamics`` block affect how TELEMAC solves the flow eq
 
 **Turbulence model.** With ``turbulence_model: auto``, aXqua compares the cell size in the channel with the water depth and selects the model that suits the mesh: a large eddy simulation model (Smagorinsky) on fine meshes, the k-epsilon model on meshes of intermediate resolution, and the Spalart-Allmaras model on coarse meshes. A number selects a particular TELEMAC model instead.
 
-**Exchange with a porous body.** Some river reaches lose water into a gravel bar and regain it further downstream. A depth-averaged model has no subsurface flow, so that aXqua represents this exchange by withdrawing water where it infiltrates and adding the same amount where it returns. The ``gain_lose`` block activates this function. ``zone`` names a polygon layer of the porous body, and ``conductivity`` is its hydraulic conductivity in m/s:
+**Exchange with a porous body.** Some river reaches lose water into a gravel bar and regain it further downstream. A depth-averaged model has no subsurface flow, so that aXqua represents this exchange by withdrawing water where it infiltrates and adding the same amount where it returns. The ``gain_lose`` block activates this function. ``zone`` names a polygon layer of the porous body, and ``conductivity`` is its hydraulic conductivity in m/s. Without this block, aXqua models no exchange, also if the liquid boundary layer contains internal exchange lines (``int-...``). The build log then names these lines.
 
 .. code-block:: yaml
 

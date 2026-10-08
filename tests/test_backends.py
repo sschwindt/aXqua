@@ -257,7 +257,8 @@ def test_the_result_of_the_hydrostatic_run_is_offered_to_qgis(tmp_path):
     from axqua.solvers.telemac.threed import HYDROSTATIC_RESULT_2D
 
     (tmp_path / "geometry.slf").write_bytes(b"")
-    (tmp_path / HYDROSTATIC_RESULT_2D).write_bytes(b"")
+    for name in (HYDROSTATIC_RESULT_2D, "r3d.slf", "r3d-2d.slf", "r2d.slf"):
+        (tmp_path / name).write_bytes(b"")
     cfg = SimpleNamespace(
         results_slf="r2d.slf", results_unsteady_slf="r2d-unsteady.slf",
         results3d_slf="r3d.slf", results2d_from_3d_slf="r3d-2d.slf",
@@ -267,6 +268,20 @@ def test_the_result_of_the_hydrostatic_run_is_offered_to_qgis(tmp_path):
     recorded = []
     ctx = SimpleNamespace(record=lambda name, path, **kw: recorded.append(
         (name, path.name, kw.get("style"), kw.get("variable"))))
+    kinds = {}
+    ctx.record = lambda name, path, **kw: (recorded.append(
+        (name, path.name, kw.get("style"), kw.get("variable"))),
+        kinds.setdefault(path.name, set()).add(kw.get("kind")))
     TelemacBackend().export_qgis_results(cfg, ctx)
     assert ("TELEMAC-3D result, hydrostatic (depth-averaged)", HYDROSTATIC_RESULT_2D,
             "water-depth", "WATER DEPTH") in recorded
+    # a 2D result prints the scalar velocity; the companion of a 3D run carries the
+    # two components only, which QGIS reads as the vector group VELOCITY
+    assert ("TELEMAC result (steady) - velocity", "r2d.slf", "velocity",
+            "SCALAR VELOCITY") in recorded
+    assert ("TELEMAC-3D result (depth-averaged) - velocity", "r3d-2d.slf", "velocity",
+            "VELOCITY") in recorded
+    assert ("TELEMAC-3D result, hydrostatic (depth-averaged) - velocity",
+            HYDROSTATIC_RESULT_2D, "velocity", "VELOCITY") in recorded
+    # QGIS cannot open the volume itself: a file, never a layer
+    assert kinds["r3d.slf"] == {"file"}

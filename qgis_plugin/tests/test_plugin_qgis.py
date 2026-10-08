@@ -301,6 +301,57 @@ def test_an_untouched_option_form_sends_nothing(qgis_app):
     tab.deleteLater()
 
 
+def test_the_3d_variant_is_a_choice_and_the_default_is_not_sent(qgis_app):
+    """The non-hydrostatic run could only be started in a terminal: the option table
+    knew numbers and check boxes, and the variant is neither."""
+    from axqua_plugin.gui.capability_tab_widget import CapabilityTab
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    view = CapabilityView(name="steady3d", solver="telemac", implemented="yes",
+                          configured=True, built=True, run=False)
+    tab = CapabilityTab(view, _Context())
+    combo = tab._fields["variant"]
+    assert [combo.itemData(i) for i in range(combo.count())] == ["", "hydrodyn"]
+    assert tab.options() == {}                        # hydrostatic is the kind's default
+    combo.setCurrentIndex(1)
+    assert tab.options() == {"variant": "hydrodyn"}
+    tab.deleteLater()
+
+
+def test_the_unsteady_3d_tab_sends_the_3d_switch_with_its_run(qgis_app, monkeypatch):
+    from axqua_plugin.gui import capability_tab_widget
+    from axqua_plugin.gui.capability_tab_widget import CapabilityTab
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    sent = []
+
+    class _Client:
+        def submit(self, config, kind, **kwargs):
+            sent.append((kind, kwargs["options"]))
+            return {"job_id": "JOB"}
+
+    class _Ctx(_Context):
+        project = type("P", (), {"profile": "", "job_root": "", "launcher": "auto"})()
+
+        def client_or_warn(self):
+            return _Client()
+
+        def active_case_or_warn(self):
+            return "case.axq-case"
+
+    # run the "background" call at once: the test is about what is sent
+    monkeypatch.setattr(capability_tab_widget, "run_async",
+                        lambda title, call, **kwargs: call())
+    view = CapabilityView(name="unsteady3d", solver="telemac", implemented="yes",
+                          configured=True, built=True)
+    tab = CapabilityTab(view, _Ctx())
+    assert "mode_3d" not in tab._fields              # decided by the tab, not by a box
+    tab._submit(view.submit_kind)
+    tab._submit(view.build_kind)
+    assert sent == [("unsteady", {"mode_3d": True}), ("build-3d", {})]
+    tab.deleteLater()
+
+
 def test_the_dashboard_repaints_only_the_row_that_changed(qgis_app, tmp_path):
     """``poll()`` already returns exactly which jobs moved; the widget used to throw
     that away and rebuild every cell of every row on every tick."""

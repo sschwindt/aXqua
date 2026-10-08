@@ -57,7 +57,7 @@ The run is steady when the relative difference between inflow and outflow stays 
 
 *Load results* adds the result (``r2d.slf``) to the QGIS project as water depth and flow velocity layers.
 
-**3D.** A TELEMAC-3D simulation requires the steady 2D result. On the *Steady 3D* tab, *Build* writes the 3D steering files and *Submit* starts the run. aXqua determines the number of vertical layers from the water depth and the cell size. The build provides two variants. The **hydrostatic** variant is faster and is run first, to verify that inflow and outflow balance in 3D as well. The **non-hydrostatic** variant (``hydrodyn``) additionally resolves vertical accelerations, which matter at steep changes of the bed. *Submit* on the *Steady 3D* tab starts the hydrostatic variant, and *Load results* adds its depth-averaged result to the map. The non-hydrostatic variant is started in a terminal in this version:
+**3D.** A TELEMAC-3D simulation requires the steady 2D result. On the *Steady 3D* tab, *Build* writes the 3D steering files and *Submit* starts the run. aXqua determines the number of vertical layers from the water depth and the cell size. The build provides two variants. The **hydrostatic** variant is faster and is run first, to verify that inflow and outflow balance in 3D as well. The **non-hydrostatic** variant (``hydrodyn``) additionally resolves vertical accelerations, which matter at steep changes of the bed. On the *Steady 3D* tab, the option *Variant* selects which of the two *Submit* starts, and *Load results* adds the depth-averaged result to the map. In a terminal:
 
 .. code-block:: text
 

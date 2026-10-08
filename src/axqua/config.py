@@ -522,6 +522,14 @@ class Boundaries:
     # velocities and collapses the CFL-adaptive time step (TELEMAC has no depth
     # guard on negative sources).
     internal_source_region_width: float = 3.0
+    # Whether the internal lines exchange water although the case has no gain_lose
+    # block. Off: without that block there is no exchange, whatever the layer holds.
+    # On: each line is applied as a fixed-rate source region, as before October 2026,
+    # when a layer that carried the lines switched the exchange on by itself. A fixed
+    # rate keeps withdrawing from a cell that is running dry, and velocities diverge
+    # (the isar-2025 reach: U = -1002 m/s at the first time step). Prefer gain_lose,
+    # which limits the withdrawal by the water depth.
+    internal_sources: bool = False
 
     def validate(self, *, produced: frozenset[str] = frozenset()) -> None:
         if "liquid_boundaries" not in produced and (

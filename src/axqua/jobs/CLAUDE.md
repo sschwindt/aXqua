@@ -70,6 +70,19 @@ had none and only lined up with a base map when the project happened to use the 
 The executor records the case's code and the plugin's loader sets it on a layer that has no
 valid CRS of its own; the project CRS is never touched.
 
+**TELEMAC jobs of one case run one after the other** (`jobs/workspace.py`). A job holds a
+lock in `cfg.model_dir` (`.axqua-job.lock`, the job lock's record on another file, so the
+same staleness rules free a case whose runner died) from before STARTING until its final
+state is written, and a second job of the same case **waits** instead of failing: its phase
+reads `waiting for <job id>`, which `axqua status` and the plugin's Progress column show,
+and it can be cancelled while it waits. Waiting is what the user means - *Build* then
+*Submit* can be clicked in succession - and it is what makes a calibration safe, since
+HydroBayesCal rewrites `friction.tbl` in that folder before each of its runs. Two things to
+know: a detached job is already STARTING while it waits (the launcher sets that before the
+executor runs), and **a waiting job does not check that its predecessor succeeded**.
+**OpenFOAM jobs take no part**: their legs work in case folders of their own that may share
+one TELEMAC `model_dir` and run side by side on purpose.
+
 **Staleness** is `(host, boot_id, pid, process start time)`, in that order: a different
 host is **never** judged (a shared job root may hold another machine's jobs), a different
 boot id is stale (also the `wsl --shutdown` case), a dead pid is stale, and a live pid with

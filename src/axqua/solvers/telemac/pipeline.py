@@ -150,7 +150,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
             prev_comp = art.initial_conditions.name if art.initial_conditions else None
         # internal source/sink REGIONS for a losing-gaining reach (empty unless the
         # liquid-boundary layer carries internal 'int-*' lines); shared by every .cas
-        source_regions = boundary.load_internal_source_regions(cfg, the_mesh)
+        source_regions = boundary.exchange_regions(cfg, the_mesh)
         for r in source_regions:
             log.info("  internal source region %s: %+.4f m3/s over %d node(s), "
                      "%.0f m2", r.name, r.discharge, r.n_nodes, r.area)

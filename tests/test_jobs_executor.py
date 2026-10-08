@@ -169,6 +169,48 @@ def test_a_job_without_progress_events_still_shows_as_running(fake_case, fake_ba
                     "while_postprocessing": JobState.POSTPROCESSING}
 
 
+def test_a_second_job_of_the_case_waits_for_the_first(fake_case, fake_backend,
+                                                      monkeypatch):
+    """*Build*, then *Submit*, clicked one after the other: the run starts when the
+    build is done, and says so while it waits."""
+    import threading
+
+    from axqua.jobs import workspace
+
+    monkeypatch.setattr(workspace, "WAIT_POLL", 0.02)
+    building, finish_build = threading.Event(), threading.Event()
+    order = []
+
+    def build(cfg, capability=None, *, ctx=None, **kw):
+        order.append("build")
+        building.set()
+        finish_build.wait(10)
+
+    fake_backend.build = build
+    fake_backend.run = lambda cfg, capability=None, *, ctx=None, **kw: order.append("run")
+    first = _create(fake_case, JobKind.PREPROCESSING)
+    second = _create(fake_case, JobKind.STEADY_RUN)
+    a = threading.Thread(target=executor.execute, args=(first,))
+    a.start()
+    building.wait(10)
+    b = threading.Thread(target=executor.execute, args=(second,))
+    b.start()
+    waiting = None
+    for _ in range(1000):
+        waiting = read_status(second)
+        if waiting is not None and waiting.phase.startswith("waiting for"):
+            break
+        finish_build.wait(0.01)
+    finish_build.set()
+    a.join(10)
+    b.join(10)
+    assert waiting.state is JobState.QUEUED
+    assert waiting.phase == f"waiting for {first.job_id}"
+    assert order == ["build", "run"]
+    done = read_status(second)
+    assert done.state is JobState.COMPLETED and done.phase == ""
+
+
 def test_the_result_manifest_is_written_with_the_objective(fake_case, fake_backend):
     jd = _create(fake_case, JobKind.STEADY_RUN)
     executor.execute(jd)

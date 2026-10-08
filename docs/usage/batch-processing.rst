@@ -32,4 +32,4 @@ aXqua adds three algorithms to the QGIS *Processing Toolbox*, which can be combi
    * - *Import job results*
      - Loads the results of a completed job with the predefined map styles.
 
-With these algorithms, the same case can for example be submitted for a series of discharges. Sequences in which one step has to wait for the previous one are currently run from a terminal (:doc:`../automation/batch-headless`).
+With these algorithms, the same case can for example be submitted for a series of discharges. TELEMAC jobs of one case run one after the other: a job that is submitted while another job of the same case is running waits for it, and the *Jobs* tab shows ``waiting for`` with the ID of that job. *Build* and *Submit* can therefore be clicked in direct succession. A sequence that has to stop when one of its steps fails is run from a terminal (:doc:`../automation/batch-headless`).

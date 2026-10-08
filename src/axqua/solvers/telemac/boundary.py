@@ -204,6 +204,38 @@ def _percolation_patches(cfg: Config) -> list[dict]:
     return patches
 
 
+def exchange_regions(cfg: Config, mesh: "Mesh | None" = None
+                     ) -> list["InternalSourceRegion"]:
+    """The internal exchange a build applies: the ``int-*`` lines, if the case asks.
+
+    The lines are a property of the boundary layer, and a layer is shared between
+    cases. They used to be applied whenever the layer held them, so a case that said
+    nothing about an exchange got one anyway, in its least stable form: a fixed-rate
+    source region on a thin strip. On the isar-2025 reach that ends a run at its first
+    time step. An exchange now needs the case to ask for it, with a ``gain_lose`` block
+    or with ``boundaries.internal_sources: true`` for the fixed-rate regions. Without
+    either, the lines are reported and left out.
+    """
+    if cfg.gain_lose.active or cfg.boundaries.internal_sources:
+        return load_internal_source_regions(cfg, mesh)
+    try:
+        # without the mesh: nothing is checked that only matters when they are applied
+        ignored = load_internal_source_regions(cfg)
+    except Exception as exc:                        # noqa: BLE001 - they are unused
+        log.debug("internal lines not read (%s); they are not applied anyway", exc)
+        return []
+    if ignored:
+        names = ", ".join(f"{region.name} ({region.discharge:+g} m3/s)"
+                          for region in ignored)
+        log.warning(
+            "the liquid-boundary layer holds %d internal exchange line(s): %s. This "
+            "case has no gain_lose block, so NO exchange is modelled. Add "
+            "'gain_lose: {enabled: true, zone: <porous body>}' to model it, or "
+            "'boundaries.internal_sources: true' for fixed-rate source regions.",
+            len(ignored), names)
+    return []
+
+
 def load_internal_source_regions(cfg: Config,
                                  mesh: "Mesh | None" = None
                                  ) -> list["InternalSourceRegion"]:

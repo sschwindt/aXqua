@@ -8,8 +8,9 @@ be six near-identical files that drift.
 
 from __future__ import annotations
 
-from qgis.PyQt.QtWidgets import (QCheckBox, QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                                 QPushButton, QSpinBox, QVBoxLayout, QWidget)
+from qgis.PyQt.QtWidgets import (QCheckBox, QComboBox, QFormLayout, QGroupBox,
+                                 QHBoxLayout, QLabel, QPushButton, QSpinBox,
+                                 QVBoxLayout, QWidget)
 
 from ..compat import PARTIALLY_CHECKED, UNCHECKED
 from ..core.runner_client import user_text
@@ -20,9 +21,13 @@ from ..core.tasks import run_async
 #: copy of it.
 OPTION_FIELDS = {
     "steady": [("ncsize", "MPI processes", "int", 0)],
-    "steady-3d": [("ncsize", "MPI processes", "int", 0)],
-    "unsteady": [("ncsize", "MPI processes", "int", 0),
-                 ("mode_3d", "Run in 3D", "bool", False)],
+    # The first choice carries no value and is not sent: it is the default of the kind.
+    "steady-3d": [("ncsize", "MPI processes", "int", 0),
+                  ("variant", "Variant", "choice",
+                   (("", "hydrostatic (checks the discharge balance)"),
+                    ("hydrodyn", "non-hydrostatic")))],
+    # 2D or 3D is decided by the tab (capability_tabs.FIXED_OPTIONS), not by a box.
+    "unsteady": [("ncsize", "MPI processes", "int", 0)],
     "mesh-convergence": [("ncsize", "MPI processes", "int", 0),
                          ("auto_extend", "Refine automatically until converged", "bool",
                           False)],
@@ -112,6 +117,10 @@ class CapabilityTab(QWidget):
                 widget.setRange(0, 4096)
                 widget.setSpecialValueText("from the case config")
                 widget.setValue(int(default))
+            elif dtype == "choice":
+                widget = QComboBox()
+                for value, text in default:
+                    widget.addItem(text, value)
             else:
                 # Tri-state, and starting *partial*, so that a form the user never
                 # touched sends nothing. A plain two-state box has no way to say "leave
@@ -141,6 +150,9 @@ class CapabilityTab(QWidget):
             if isinstance(widget, QSpinBox):
                 if widget.value() > 0:      # 0 means "leave it to the config"
                     out[key] = widget.value()
+            elif isinstance(widget, QComboBox):
+                if widget.currentData():    # the first entry is the default: not sent
+                    out[key] = widget.currentData()
             elif isinstance(widget, QCheckBox):
                 state = widget.checkState()
                 if state != PARTIALLY_CHECKED:
@@ -155,7 +167,10 @@ class CapabilityTab(QWidget):
         config = self.ctx.active_case_or_warn()
         if client is None or config is None:
             return
-        options = self.options() if kind == self.view.submit_kind else {}
+        # The options belong to the run. A build with the same kind (unsteady 2D) gets
+        # them too, a build of another kind does not.
+        options = ({**self.options(), **self.view.fixed_options}
+                   if kind == self.view.submit_kind else {})
         project = self.ctx.project
         run_async(
             f"aXqua: submitting {kind}",

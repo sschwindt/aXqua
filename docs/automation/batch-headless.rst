@@ -75,7 +75,7 @@ To examine a failed job, read ``runner.log`` first. It contains the error with a
 Sequences of jobs
 -----------------
 
-A sequence in which each step uses the result of the previous one has to wait for each job. The following script for Linux runs the preprocessing, the dry run and the mesh convergence study of a case in sequence and stops when a step fails:
+TELEMAC jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits until that job has ended, so that the steps of a sequence can be submitted in direct succession. A waiting job does not check whether the previous job succeeded. The following script for Linux therefore runs the preprocessing, the dry run and the mesh convergence study of a case in sequence and stops when a step fails:
 
 .. code-block:: bash
 

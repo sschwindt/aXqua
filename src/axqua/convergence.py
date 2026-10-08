@@ -1113,8 +1113,12 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                          extend_ratio: float | None = None,
                          max_extra_levels: int = 3,
                          auto_extend: bool = False,
-                         ask=None) -> ConvergenceReport:
+                         ask=None, on_level=None) -> ConvergenceReport:
     """Run the convergence study and return the :class:`ConvergenceReport`.
+
+    *on_level(done, total, label)* is called before the first mesh and after every
+    mesh that has been run or reused, so that a job can say "mesh 2 of 4" while the
+    study runs. A study took twenty minutes and reported nothing until it had ended.
 
     *levels* is a list of ``(label, channel_size, floodplain_size)`` coarse->fine
     (default: one doubling around the config sizes; prefer :func:`ratio_levels`).
@@ -1186,7 +1190,16 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                    default=True):
                 reuse = done
 
+    def _report_level(label: str, *, planned: int = 0) -> None:
+        if on_level is None:
+            return
+        try:
+            on_level(len(results), len(levels) + planned, label)
+        except Exception:                # noqa: BLE001 - reporting must not stop a study
+            log.debug("the level listener failed", exc_info=True)
+
     results: list[LevelResult] = []
+    _report_level(levels[0][0] if levels else "")
     for label, ch, fp in levels:
         res = None
         if label in reuse:
@@ -1202,6 +1215,7 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
             log.info("  '%s': %d elements, shortest edge %.4f m, dt~%.4f s",
                      label, res.n_elem, res.min_edge, res.dt if res.dt else float("nan"))
         results.append(res)
+        _report_level(label)
 
     report = build_report(results, quantities, tolerance, probes)
 
@@ -1261,6 +1275,7 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
             log.info("mesh convergence: stopping without further refinement "
                      "(user choice / non-interactive default); writing the report")
             break
+        _report_level(label, planned=1)      # one more mesh than the ladder had
         try:
             res = simulate(label, ch, fp, probes, quantities)
         except Exception as exc:
@@ -1278,6 +1293,7 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
         results.append(res)
         levels.append((label, ch, fp))
         extras += 1
+        _report_level(label)
         report = build_report(results, quantities, tolerance, probes)
 
     report.case = getattr(cfg, "name", "")

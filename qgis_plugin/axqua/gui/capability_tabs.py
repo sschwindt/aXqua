@@ -49,6 +49,7 @@ PRIMARY_KIND = {
     "steady2d": "steady",
     "unsteady2d": "unsteady",
     "steady3d": "steady-3d",
+    "unsteady3d": "unsteady",
     "free_surface_3d": "openfoam-run",
     "mesh_convergence": "mesh-convergence",
     "vertical_convergence": "vertical-convergence",
@@ -60,8 +61,15 @@ BUILD_KIND = {
     "steady2d": "preprocessing",
     "unsteady2d": "unsteady",
     "steady3d": "build-3d",
+    "unsteady3d": "build-3d",
     "free_surface_3d": "openfoam-build",
 }
+
+#: Options a tab always sends with its run, because they are what makes the kind run
+#: this capability and not its sibling. The unsteady kind runs in 2D unless told
+#: otherwise, so the Unsteady 3D tab is that kind with the switch set. It used to be a
+#: tab that said "no job kind" while the check box that did its job sat on another tab.
+FIXED_OPTIONS = {"unsteady3d": {"mode_3d": True}}
 
 NOT_IMPLEMENTED_REASON = (
     "axqua does not implement this for {solver} yet. It is a gap in axqua, not "
@@ -69,10 +77,11 @@ NOT_IMPLEMENTED_REASON = (
 NOT_CONFIGURED_REASON = (
     "This case does not ask for {title} yet. Add the relevant block to the case file "
     "(see the annotated template) and refresh.")
-#: Some capabilities are implemented in axqua's library but have no job kind, so there
-#: is no ``--kind`` the runner could be given. Morphodynamics, the gain-lose reach and
-#: unsteady 3D are the three today. Saying so is the honest answer; the alternative -
-#: which this used to do - is an enabled tab with two buttons that cannot do anything.
+#: A capability axqua implements without a job kind has no ``--kind`` the runner could
+#: be given. Saying so is the honest answer; the alternative - which this used to do -
+#: is an enabled tab with two buttons that cannot do anything. None of today's
+#: capabilities is in that position any more (see :data:`PART_OF` and
+#: :data:`FIXED_OPTIONS`), and a future one still gets this text rather than dead buttons.
 NO_JOB_KIND_REASON = (
     "axqua implements {title} for {solver}, but not yet as a job the runner can "
     "submit - there is no job kind for it. Run it from a Python driver in the case "
@@ -83,11 +92,18 @@ NO_JOB_KIND_REASON = (
 #: file and are then built and run with another capability's jobs, so "there is no job
 #: kind, run it from a Python driver" is the wrong thing to tell the user: with the block
 #: in the case file it has already run, as part of the steady simulation.
-PART_OF = {"gain_lose": "Steady 2D"}
-PART_OF_REASON = (
-    "The {title} is part of the hydraulic model and not a simulation of its own. With "
-    "its block in the case file, it is built and run together with the {host} "
-    "simulation. There is nothing to submit on this tab.")
+PART_OF = {
+    "gain_lose": (
+        "The exchange with a porous body is part of the hydraulic model and not a "
+        "simulation of its own. With the block gain_lose in the case file, it is built "
+        "and run together with the Steady 2D simulation. There is nothing to submit on "
+        "this tab."),
+    "morphodynamics": (
+        "Sediment transport and bed change are computed together with the flow and "
+        "not in a simulation of their own. With the block morphodynamics in the case "
+        "file, the steady and the unsteady simulations run coupled with GAIA. There "
+        "is nothing to submit on this tab."),
+}
 
 
 @dataclass
@@ -143,7 +159,7 @@ class CapabilityView:
         if self.implemented == "no":
             return NOT_IMPLEMENTED_REASON.format(solver=self.solver)
         if self.name in PART_OF:
-            return PART_OF_REASON.format(title=self.title, host=PART_OF[self.name])
+            return PART_OF[self.name]
         if not self.submittable:
             # Before "not configured": configuring it would not help.
             return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
@@ -169,6 +185,11 @@ class CapabilityView:
     @property
     def build_kind(self) -> str | None:
         return BUILD_KIND.get(self.name)
+
+    @property
+    def fixed_options(self) -> dict:
+        """What this tab adds to every run it submits (see :data:`FIXED_OPTIONS`)."""
+        return dict(FIXED_OPTIONS.get(self.name, {}))
 
 
 @dataclass

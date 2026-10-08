@@ -474,3 +474,33 @@ def test_write_readme_scan_mode(tmp_path):
 if __name__ == "__main__":
     test_relative_change_and_verdict()
     print("CONVERGENCE TESTS PASSED")
+
+
+# --------------------------------------------------------------------------- #
+# a study says which mesh it is on
+# --------------------------------------------------------------------------- #
+def test_the_study_reports_each_mesh_as_it_finishes(tmp_path):
+    """A study ran for twenty minutes and its job showed "level 0" until the end."""
+    seen = []
+    convergence.run_mesh_convergence(
+        _DummyCfg(), discharge=47.0, probes=probes_lin(), tolerance=1e-12,
+        simulate=_fake_simulate, base_dir=tmp_path,
+        levels=[("coarse", 2.0, 6.0), ("medium", 1.4, 4.2), ("fine", 1.0, 3.0)],
+        extend_ratio=1.3, max_extra_levels=1, auto_extend=True,
+        on_level=lambda done, total, label: seen.append((done, total, label)))
+    assert seen[:4] == [(0, 3, "coarse"), (1, 3, "coarse"), (2, 3, "medium"),
+                        (3, 3, "fine")]
+    # the extension is announced as one more mesh before it runs, then counted
+    assert seen[4][:2] == (3, 4) and seen[5][:2] == (4, 4)
+
+
+def test_a_failing_listener_does_not_stop_the_study(tmp_path):
+    def broken(done, total, label):
+        raise RuntimeError("the dashboard is gone")
+
+    rep = convergence.run_mesh_convergence(
+        _DummyCfg(), discharge=47.0, probes=probes_lin(), tolerance=0.5,
+        simulate=_fake_simulate, base_dir=tmp_path,
+        levels=[("coarse", 2.0, 6.0), ("medium", 1.4, 4.2), ("fine", 1.0, 3.0)],
+        extend_ratio=None, on_level=broken)
+    assert len(rep.levels) == 3

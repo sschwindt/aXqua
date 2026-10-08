@@ -28,6 +28,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from contextlib import ExitStack
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -35,7 +36,7 @@ from typing import Any, Callable
 from axqua.core import errors, registry
 from axqua.core.capabilities import Capability
 from axqua.core.errors import ErrorRecord
-from axqua.jobs import events, logs, results
+from axqua.jobs import events, logs, results, workspace
 from axqua.jobs.interaction import PolicyAsk
 from axqua.jobs.lock import JobLock
 from axqua.jobs.model import (KIND_META, JobKind, JobSpec, JobState, JobStatus,
@@ -243,7 +244,9 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
     ctx: ExecutionContext | None = None
 
     log.info("job %s: %s (%s)", spec.job_id, meta.title, spec.solver)
-    with events.using_sink(combined):
+    # Entered inside the block below and left after it, so that the simulation folder
+    # of the case stays held until the final state of the job has been written.
+    with events.using_sink(combined), ExitStack() as held:
         try:
             if cancel.requested:
                 # Cancelled before it ever really started: there is nothing to tear down.
@@ -258,6 +261,11 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
 
             ctx = ExecutionContext(job_dir=jd, spec=spec, cfg=cfg, sink=combined,
                                    cancel=cancel, manifest=manifest, log=log)
+
+            # Another job of this case may be working in the same folder. This one
+            # waits for it, still QUEUED, and says whom it waits for.
+            held.enter_context(workspace.held_for(cfg.model_dir, spec, cancel=cancel,
+                                                  sink=combined))
 
             status.transition(JobState.STARTING)
             status_sink.state_changed()
