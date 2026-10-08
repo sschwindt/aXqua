@@ -41,11 +41,34 @@ quietly runs something else).
 **Workspace modes** resolve the spec's conflict with the repo. §5's tree gives every job an
 `input/`, but steady/3D/unsteady/calibration all run *inside an existing `model_dir`* and
 hotstart from an `r2d.slf` there; copying it violates §26. So `workspace.mode` is
-`job` (rebase the four phase dirs into the job - the default for **build** kinds) |
-`case` (leave them alone - the default for **run** kinds, and the only mode under which the
-standalone scripts and the job system touch the same files) | `link:<job_id>` (point at a
-previous job's build, copying nothing). The rebase is four assignments, because everything
-already resolves through `cfg.model_path()` and friends.
+`case` (leave the four phase dirs alone - **the default for every kind**, and the only mode
+under which the standalone scripts and the job system touch the same files) | `job` (rebase
+them into the job, for a self-contained build: `--workspace job`) | `link:<job_id>` (point
+at a previous job's build, copying nothing). The rebase is four assignments, because
+everything already resolves through `cfg.model_path()` and friends. **The build used to
+default to `job`, and that broke the default chain**: `submit --kind preprocessing` then
+`submit --kind steady` failed with "no built case", because the build sat in a job folder
+the run never looked in and `case-status` kept reporting the case as unbuilt. Those are the
+two buttons of the plugin's first tab, so nobody who tried the plugin got past them.
+
+**A job runs in the interpreter that submitted it** (`launcher.runner_argv` is
+`[sys.executable, "-m", "axqua", "execute", job_dir]`). It used to start whichever `axqua`
+came first on `PATH`, which is another program as soon as two environments carry aXqua - the
+plugin calls one by its full path, `PATH` offers the other - and the job then ran with a
+different Python and different package versions, silently. On lww-134 a calibration submitted
+from `axqua-env` (HydroBayesCal 1.9) ran in the miniforge base environment against a 1.7
+checkout.
+
+**A state change is written at once** (`StatusFileSink.state_changed`). The executor assigns
+a transition on the status object, so the sink considered itself clean and `flush()` skipped
+the write; the new state reached `status.json` only when a progress event happened to follow.
+A steady run reports within seconds, a calibration never did, and it stood in the dashboard as
+STARTING for as long as it ran. `_finish` documents the same trap for the terminal state.
+
+**The result manifest carries `crs_epsg`.** A SELAFIN file names no CRS, so a loaded result
+had none and only lined up with a base map when the project happened to use the same system.
+The executor records the case's code and the plugin's loader sets it on a layer that has no
+valid CRS of its own; the project CRS is never touched.
 
 **Staleness** is `(host, boot_id, pid, process start time)`, in that order: a different
 host is **never** judged (a shared job root may hold another machine's jobs), a different

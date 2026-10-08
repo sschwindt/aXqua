@@ -105,7 +105,7 @@ Select wide but physically plausible limits. If the posterior of a parameter acc
 Run HydroBayesCal
 -----------------
 
-The calibration requires the additional package HydroBayesCal (``pip install ".[calibration]"``) and a steady hotstart of the case (:ref:`hydraulics-hotstarts`), from which each of its runs starts.
+The calibration requires the additional package HydroBayesCal (:doc:`../installation/qgis-plugin`) and a built case with a completed steady simulation. Each run of the calibration repeats this steady simulation with another set of parameter values.
 
 In the plugin, click *Submit* on the *Calibration (BAL)* tab. The option *Prepare only* writes all input files without starting the runs, so that they can be inspected first. In a terminal:
 
@@ -114,7 +114,9 @@ In the plugin, click *Submit* on the *Calibration (BAL)* tab. The option *Prepar
    axqua submit <case-file> --kind calibration --option prepare_only=true
    axqua submit <case-file> --kind calibration
 
-The computing time is approximately the number of runs times the duration of one hotstart run. The *Jobs* tab shows the current iteration.
+The computing time is approximately the number of runs (``max_runs``) times the duration of one steady simulation. The *Jobs* tab shows the number of the current run, for example ``iter 5/12``.
+
+HydroBayesCal performs its runs in the folder of the built case (``axqua-case/simulation/``) and writes each tested set of parameter values into the friction table and the steering file there. aXqua restores both files when the calibration ends, so that a later simulation uses the case as it was built. For the same reason, run only one job of a case at a time. The folder ``cases/example-isar/`` of the repository contains a complete example with a run time of about half an hour, including a step-by-step guide for the plugin.
 
 **Several discharges.** Roughness values that were calibrated at one discharge are not necessarily valid at another one. The script ``run_Bayes_cal_multiflow.py`` in the case folder calibrates one common set of parameters against measurements at several discharges. Run it with ``--smoke`` first. This short test with three runs verifies the complete chain before days of computing time are spent.
 

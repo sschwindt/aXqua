@@ -73,6 +73,9 @@ Preprocessing and simulations
 TELEMAC stops at the first time step with a message of the subroutine ``DEBIMP``
     The inflow cross section is dry, so that TELEMAC cannot distribute the discharge over it. Verify that the inflow line lies in the channel and that the water depth of the filled stretch at the inflow (``initialization.dry_start_depth``) covers the bed along the entire line.
 
+``TELEMAC-2D stopped the run ... because a value left its limits``
+    The water depth or a velocity component left the range that the keyword ``LIMIT VALUES`` of the steering file allows, which is 1000 m/s for the velocity. Such a value is a numerical instability and not a flow. TELEMAC-2D itself ends such a run without an error code, so aXqua reads the stop from the listing and marks the job as ``FAILED``. The message states the quantity, its value, the coordinates of the mesh node, and the simulated time. Inspect the mesh, the bed elevation, and the initial water depth at these coordinates in QGIS. Common causes are a sink or an open boundary on cells that are almost dry, an initial water surface that is far from the steady one, and a time step that is too large (``hydrodynamics.desired_courant``). Internal exchange lines (``int-*`` in the liquid boundary layer) without the block ``gain_lose`` cause this stop at the first time step, because the discharge is then withdrawn at a fixed rate from a narrow strip regardless of the water depth (:ref:`preprocessing-telemac-choices`).
+
 ``RIGID LID DOES NOT APPLY HERE``
     The water surface of the TELEMAC result drops in steps that exceed the local water depth, for example at the slots of a fish pass. A fixed lid cannot represent such a water surface. Use ``openfoam.mode: vof`` for this case (:ref:`preprocessing-openfoam-choices`).
 
@@ -90,6 +93,9 @@ A job remains in the state ``RUNNING`` although nothing is computed
 
 Plugin
 ------
+
+aXqua is missing from the list of installed plugins
+    QGIS lists a plugin only if it can read the file ``metadata.txt`` in the plugin folder, and it skips a plugin with an unreadable file without a message. Run ``python scripts/build_plugin_zip.py --check`` in the repository, which reads the file in the same way as QGIS and reports the line that cannot be read.
 
 The panel shows only the tabs *Setup* and *Jobs*
     No case is selected, or the case file could not be read. Add a case on the *Setup* tab. If the tabs remain missing, run ``axqua case-status <case-file> --no-write`` in a terminal to obtain the error message.

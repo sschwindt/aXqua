@@ -217,6 +217,15 @@ Then enable *aXqua* in **Plugins > Manage and Install Plugins**. See
 [`docs/installation/qgis-plugin.rst`](docs/installation/qgis-plugin.rst) and
 [`qgis_plugin/axqua/README.md`](qgis_plugin/axqua/README.md).
 
+Where the system QGIS is older than 3.44, `scripts/qgis_dev.sh` does all of this with the QGIS of a conda environment and a QGIS user profile of its own, so that no existing profile is changed:
+
+```bash
+conda create -n qgis-dev -c conda-forge "qgis>=3.44"   # once
+scripts/qgis_dev.sh
+```
+
+**To try the plugin from preprocessing to Bayesian calibration in about half an hour**, follow [`cases/example-isar/README.md`](cases/example-isar/README.md). It is a fast version of the Isar research case with a step-by-step guide for every tab.
+
 The plugin is GPL-2.0-or-later, because it links PyQGIS; `axqua` itself stays
 BSD-3-Clause and remains usable on its own.
 

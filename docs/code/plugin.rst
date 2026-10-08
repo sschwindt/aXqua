@@ -36,4 +36,13 @@ For development, link the plugin folder into the plugin folder of a QGIS user pr
 
    ln -s /path/to/aXqua/qgis_plugin/axqua ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/axqua
 
+Where the installed QGIS is older than version 3.44, the script ``scripts/qgis_dev.sh`` starts the QGIS of a conda environment with a user profile of its own, in which it links and enables the plugin. Existing profiles are not changed:
+
+.. code-block:: bash
+
+   conda create -n qgis-dev -c conda-forge "qgis>=3.44"
+   scripts/qgis_dev.sh
+
+QGIS lists a plugin only if it can read ``metadata.txt``. The command ``python scripts/build_plugin_zip.py --check`` reads the file in the same way as QGIS.
+
 The tests of the plugin are in ``qgis_plugin/tests/``. The tests that require QGIS are skipped when the Python module ``qgis`` is not available. The script ``scripts/build_plugin_zip.py`` builds the plugin archive and verifies the requirements of the QGIS plugin repository.

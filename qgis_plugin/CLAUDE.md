@@ -48,6 +48,19 @@ only reference was a local was garbage collected before it ran - no tabs, an emp
 dashboard, no error anywhere (`core/tasks._IN_FLIGHT` now holds them); and
 `QListWidget.findItems` needs a real `Qt.MatchFlag` where Qt5 accepted a bare int.
 
+**QGIS skips a plugin whose `metadata.txt` does not parse, without a message.** `findPlugins`
+in `qgis/utils.py` reads it with `configparser` and drops the plugin on any error, so it is
+simply absent from the Plugin Manager. A changelog line in the first column (`0.2.0`, not a
+continuation line) did this for a month while every test passed, because the tests import
+the plugin directly and `scripts/build_plugin_zip.py` read the file with a more forgiving
+parser of its own. Both now read it the way QGIS does (`qgis_cannot_read`,
+`test_qgis_can_read_the_metadata`). **The suite cannot tell whether QGIS loads the plugin;
+only QGIS can.** `scripts/qgis_dev.sh` starts the QGIS of a conda environment (`qgis-dev`,
+3.44) with a user profile of its own (`axqua-dev`) that links this checkout's plugin folder
+and enables it; with `QT_QPA_PLATFORM=offscreen` and `--code <script>` the same command
+drives the real plugin headless (add a case, grab each tab with `widget.grab()`, load a
+result, `os._exit`), which is how the metadata defect and the missing layer CRS were found.
+
 The plugin folder and the library are both called `axqua`, which is right in both
 places but means they cannot share a pytest process - `qgis_plugin/tests/conftest.py` loads
 the plugin under the alias `axqua_plugin` so one `pytest` at the repo root runs both

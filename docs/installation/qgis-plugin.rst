@@ -22,7 +22,11 @@ aXqua requires Python 3.10 or newer and a set of geospatial packages (``numpy``,
    pip install .
    axqua --version
 
-The last command prints the installed version and confirms that the program can be started. The Bayesian calibration requires one additional package, which is installed with ``pip install ".[calibration]"``.
+The last command prints the installed version and confirms that the program can be started. The Bayesian calibration requires one additional package, HydroBayesCal, which is installed with ``pip install ".[calibration]"``. If pip reports that it finds no matching version of ``hydrobayescal``, the required version has not been published on the Python Package Index yet. Install it from its source repository in that case:
+
+.. code-block:: bash
+
+   pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git@v1.9.0"
 
 aXqua can also be installed into the Python that ships with QGIS, provided that the packages listed above can be installed there. The separate environment is the tested route, and it keeps QGIS updates and aXqua updates independent of each other.
 

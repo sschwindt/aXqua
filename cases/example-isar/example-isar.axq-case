@@ -1,0 +1,90 @@
+# =============================================================================
+# aXqua example case: Isar River, losing and gaining reach, September 2025
+# =============================================================================
+# A fast version of the research case in ../isar-2025, made for trying out aXqua and its QGIS plugin from preprocessing to Bayesian calibration. README.md in this folder walks through every step.
+#
+# The input data are those of the research case and are read from its folder (../isar-2025/user-sources). Nothing is written there: all results of this example go to the folder axqua-case/ next to this file.
+#
+# The only difference from the research case is the mesh, which is three times coarser (mesh.size_scale). A steady run then takes about one minute instead of more than one hour.
+# -----------------------------------------------------------------------------
+
+project:
+  name: example-isar
+  crs_epsg: 25832              # ETRS89 / UTM zone 32N, coordinates in meters
+  sim_dir: axqua-case          # folder for everything aXqua produces
+
+telemac:
+  solver: telemac2d            # depth-averaged (2D) simulation
+  n_processors: 8              # processor cores per simulation
+
+geodata:
+  dem_initial: ../isar-2025/user-sources/geodata/merged-DEM-bathy-corr.tif      # terrain with the surveyed river bed
+  boundary: ../isar-2025/user-sources/geodata/roi.gpkg                          # outline of the model
+  mesh_zones: ../isar-2025/user-sources/geodata/mesh-zones.gpkg                 # channel and floodplain polygons with their edge lengths
+  channel_centerline: ../isar-2025/user-sources/geodata/channel-centerline.gpkg # channel cells are stretched along this line
+  roughness_zones: ../isar-2025/user-sources/geodata/roughness-zones.gpkg       # polygons with a Zone ID from 1 (sand) to 6 (vegetation)
+  roughness_table: ../isar-2025/user-sources/geodata/roughness-table.csv        # equivalent sand roughness ks [m] per Zone ID
+  control_sections: ../isar-2025/user-sources/geodata/baffles.gpkg              # lines across which the discharge is reported
+  control_section_name_field: Baffle Name
+
+boundaries:
+  liquid_boundaries: ../isar-2025/user-sources/geodata/liquid-boundaries.gpkg   # two inflow lines, one outflow line, and the two exchange lines of the gravel bar
+  prescribed_flowrate: 2.4            # [m3/s] total discharge of the survey in March 2025; the layer holds the discharge of each inflow line
+  outflow_condition: stage_discharge  # water level at the outflow from a rating curve
+  rating_method: section              # rating curve computed from the terrain cross section at the outflow line
+  internal_source_region_width: 12.0  # [m] width of the strip around each exchange line
+
+# The reach loses about 65 L/s into a gravel bar and gains it back farther downstream. A 2D model has no groundwater, so aXqua takes this discharge out of the surface flow at the losing line and returns it at the gaining line.
+gain_lose:
+  enabled: true
+  zone: ../isar-2025/user-sources/geodata/percolation-zone.gpkg   # outline of the gravel bar
+  faces: lines                 # exchange at the lines drawn in the liquid-boundary layer
+  patch_drain: true            # water standing on the gravel bar seeps away
+  water_table: phreatic        # the water table inside the bar slopes from the losing to the gaining line
+  water_table_levels:
+    losing: 817.318            # [m a.s.l.] measured water level at the losing line
+    gaining: 816.807           # [m a.s.l.] measured water level at the gaining line
+
+drying:
+  film_infiltration: true      # thin films of stagnant water on dry ground seep away
+
+initialization:
+  prewet_depth: 0.3            # start with water in the channel, so that the run does not have to fill a dry bed
+
+mesh:
+  size_scale: 3.0              # multiplies all edge lengths; 1.0 is the research case (about 20 times more elements)
+  channel_size: 0.3            # [m] edge length across the channel at size_scale 1.0
+  floodplain_size: 0.75        # [m]
+  refinement_size: 0.3         # [m]
+  channel_anisotropy: 4.0      # channel cells are up to four times longer than wide
+  growth_ratio: 1.2
+
+friction:
+  roughness_law: 5             # Nikuradse: ks [m] from the roughness table
+  boundary_law: 3              # Strickler at the closed boundaries
+  boundary_coefficient: 30
+
+hydrodynamics:
+  duration: 3000.0             # [s] simulated time; the discharge balances after about 2200 s
+  desired_courant: 0.6
+  turbulence_model: auto       # chosen from the cell size; Spalart-Allmaras on this mesh
+  graphic_printout_period: 500 # time steps between two saved results
+  listing_printout_period: 500
+
+# Velocity measurements of September 30, 2025 with a SonTek FlowTracker2. The layer holds one point per reading. aXqua uses the reading closest to 0.6 of the water depth at each of the 84 verticals, which approximates the depth-averaged velocity.
+# Note: the discharge on that day was about 5.3 m3/s in the main channel, more than twice the discharge of this model. The calibration below demonstrates the workflow and cannot yield roughness values for the reach (see README.md, step 6).
+ground_truth:
+  sources:
+    - category: hydraulics
+      kind: points
+      positions: ../isar-2025/user-sources/ground-truth/flowtracker/Sep25/TKE_Isar_Sep25.gpkg
+
+# Two roughness values are calibrated against the measured velocities: 50 verticals lie in roughness zone 4 and 21 in zone 6. The number of runs is small on purpose, so that the example finishes in about 20 minutes.
+calibration:
+  calibration_quantities: ["SCALAR VELOCITY"]
+  extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]
+  init_runs: 8                 # simulations before the surrogate model is trained
+  max_runs: 12                 # simulations in total
+  parameters:
+    - {name: zone4, min: 0.02, max: 0.30, comment: "ks of coarse gravel [m]"}
+    - {name: zone6, min: 0.10, max: 0.80, comment: "ks of the vegetated zone [m]"}

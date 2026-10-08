@@ -89,7 +89,7 @@ The study can be interrupted. When it is started again, the meshes that are alre
 Study report
 ------------
 
-The study writes its results into the folder ``mesh-convergence`` within ``axqua-case/``. The central file is the workbook ``mesh-convergence.xlsx``. The file ``README.md`` in the same folder explains all other files.
+The study writes its results into the folder ``axqua-case/postprocessing/mesh-convergence/``. The central file is the workbook ``mesh-convergence.xlsx``, and ``mesh-convergence.txt`` contains the same report as text. The script ``mesh_convergence_study.py`` of a case folder runs the same study and writes into ``axqua-case/mesh-convergence/`` instead. The file ``README.md`` in the same folder explains all other files.
 
 The workbook lists for each mesh the number of cells, the computing time and the following quantities:
 
