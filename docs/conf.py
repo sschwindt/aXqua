@@ -55,6 +55,9 @@ napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_use_param = True
 napoleon_use_rtype = True
+# "name : str, optional" names no object called optional. Read as a type, the word
+# became a link to whatever attribute of that name the reference documents.
+napoleon_preprocess_types = True
 
 # Docstrings write absolute values the way hydraulics does, |Q_in| - |Q_out|, which
 # reStructuredText reads as a substitution reference and reports as an error. They are
