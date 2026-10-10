@@ -1345,8 +1345,7 @@ def test_the_results_of_a_case_are_listed_exported_and_opened(program_pages):
         ["r2d.slf", "steady simulation, 2D", "26", "no"]
     assert paraview.export_button.isEnabled()
     assert not paraview.open_button.isEnabled()              # nothing exported yet
-    assert "Export the result first" in paraview.open_button.toolTip() or \
-        "profile" in paraview.open_button.toolTip()
+    assert "No ParaView program was found" in paraview.open_button.toolTip()
 
     paraview.table.selectRow(0)
     paraview.frames.setCurrentIndex(1)                       # only the last time step
@@ -1355,10 +1354,18 @@ def test_the_results_of_a_case_are_listed_exported_and_opened(program_pages):
     assert "Exported 1 result(s) with 26 time step(s)" in paraview.status.text()
     assert paraview.table.item(0, 3).text() == "yes"
 
-    # without a program in the profile there is nothing to start, and the page says so
+    # without a program there is nothing to start, and the page says so
     paraview.table.selectRow(0)
     assert not paraview.open_button.isEnabled()
-    assert "No ParaView program" in paraview.program.text()
+    assert "No ParaView program was found" in paraview.program.text()
+
+    # a program aXqua found by itself serves until a profile names one
+    dock.configuration_tab.show_software({"targets": [
+        {"target": "postprocessors", "installed": {"paraview": "/usr/bin/paraview"}}]})
+    paraview.table.selectRow(0)
+    assert paraview.open_button.isEnabled()
+    assert "found on this computer" in paraview.program.text()
+    assert not visit.program_path                            # no VisIt was found
 
     profile = {"postprocessors": {"paraview": "/usr/bin/paraview",
                                   "visit": "/opt/visit/bin/visit"}}

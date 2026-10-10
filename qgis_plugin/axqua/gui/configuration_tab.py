@@ -270,6 +270,8 @@ class ConfigurationTab(QWidget):
 
     def show_software(self, overview: dict) -> None:
         self.overview = overview or {}
+        if getattr(self.ctx, "software_found", None):
+            self.ctx.software_found(self.overview)
         host = self.overview.get("host") or {}
         text = "This computer: " + str(host.get("description") or "unknown")
         if host and not host.get("supported"):

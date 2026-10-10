@@ -166,6 +166,9 @@ class PluginContext:
     def profile_changed(self, profile) -> None:
         self.dock.profile_changed(profile)
 
+    def software_found(self, overview) -> None:
+        self.dock.software_found(overview)
+
     def run_action(self, name: str) -> None:
         action = self.actions.get(name)
         if action is None:
@@ -384,6 +387,16 @@ class AxquaDock(QDockWidget):
         for page in self.pages.values():
             if hasattr(page, "show_profile"):
                 page.show_profile(profile)
+
+    def software_found(self, overview) -> None:
+        """Tell the pages which programs aXqua found on this computer by itself, so
+        that they work before a profile names them."""
+        found: dict = {}
+        for entry in (overview or {}).get("targets") or []:
+            found.update(entry.get("installed") or {})
+        for page in self.pages.values():
+            if hasattr(page, "show_detected"):
+                page.show_detected(found)
 
     # -- actions ------------------------------------------------------------------
     def open_settings(self) -> None:

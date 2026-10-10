@@ -269,6 +269,8 @@ class ProgramPage(QWidget):
         self.results: list[dict] = []
         self.folder = ""
         self.program_path = ""
+        self.profile_path = ""              # the program the profile names
+        self.detected_path = ""             # the one aXqua found by itself
         layout = QVBoxLayout(self)
         self.program = _label("")
         layout.addWidget(self.program)
@@ -320,12 +322,26 @@ class ProgramPage(QWidget):
 
     # -- the program ---------------------------------------------------------------
     def show_profile(self, profile) -> None:
-        path = get(profile or {}, f"postprocessors.{self.key}")
-        self.program_path = str(path or "")
-        self.program.setText(
-            f"{self.title} program: {path}" if path else
-            f"No {self.title} program is entered in the profile of this computer. "
-            "Install it, or enter it in the profile, on the tab Configuration.")
+        self.profile_path = str(get(profile or {}, f"postprocessors.{self.key}") or "")
+        self._show_program()
+
+    def show_detected(self, found: dict) -> None:
+        """A program aXqua found on this computer serves until a profile names one."""
+        self.detected_path = str((found or {}).get(self.key) or "")
+        self._show_program()
+
+    def _show_program(self) -> None:
+        self.program_path = self.profile_path or self.detected_path
+        if self.profile_path:
+            self.program.setText(f"{self.title} program: {self.profile_path}")
+        elif self.detected_path:
+            self.program.setText(
+                f"{self.title} program: {self.detected_path} (found on this computer; "
+                "the profile does not name one yet)")
+        else:
+            self.program.setText(
+                f"No {self.title} program was found on this computer. Install it, or "
+                "enter it in the profile, on the tab Configuration.")
         self._update_buttons()
 
     # -- the results ---------------------------------------------------------------
@@ -396,8 +412,8 @@ class ProgramPage(QWidget):
         ready = bool(self.program_path and self._exported_file())
         self.open_button.setEnabled(ready)
         if not self.program_path:
-            self.open_button.setToolTip(f"No {self.title} program is entered in the "
-                                        "profile of this computer.")
+            self.open_button.setToolTip(f"No {self.title} program was found on this "
+                                        "computer.")
         elif not self._exported_file():
             self.open_button.setToolTip("Export the result first.")
         else:
