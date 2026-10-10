@@ -60,6 +60,9 @@ TITLES = {
     "postprocessors": "ParaView and VisIt",
 }
 
+#: What can be downloaded of the example cases of TELEMAC (Options.telemac_examples).
+TELEMAC_EXAMPLES = ("inputs", "all", "none")
+
 #: ``base -> (installer script, environment script it writes)``.
 TELEMAC_SCRIPTS = {
     "debian12": ("debian12/telemac_debian12_installer.sh", "pysource.debian12.sh"),
@@ -74,8 +77,9 @@ DISK_GB = {"telemac": 10, "openfoam": 4, "openfoam-source": 20, "postprocessors"
 
 #: What a person can expect, per target.
 ESTIMATES = {
-    "telemac": "one to two hours; most of it downloads the example cases of TELEMAC",
-    "telemac-lean": "5 to 20 minutes",
+    "telemac": "10 to 30 minutes",
+    "telemac-all": "one to two hours; most of it downloads the example cases of TELEMAC",
+    "telemac-none": "5 to 20 minutes",
     "openfoam": "a few minutes with an existing OpenFOAM v2406",
     "openfoam-source": "several hours; OpenFOAM v2406 is compiled from its source code",
     "postprocessors": "a few minutes; VisIt is a download of 600 MB",
@@ -135,7 +139,10 @@ class Options:
     folder: Path | None = None          # where to install
     tag: str = ""                       # TELEMAC: version tag; empty = the script's own
     salome: Path | None = None          # TELEMAC: a SALOME archive, optional
-    telemac_examples: bool = True       # TELEMAC: its example cases and manuals
+    #: TELEMAC: how much of its example cases to download. ``inputs``: the files a
+    #: run of an example reads; ``all``: reference results and manuals as well;
+    #: ``none``: the steering files only, which come with the source code.
+    telemac_examples: str = "inputs"
     reuse_openfoam: str = "auto"        # auto | no | the etc/bashrc of an OpenFOAM v2406
     jobs: int | None = None             # processes for compiling
     visualization: bool = True          # OpenFOAM: also ParaView and VisIt
@@ -162,9 +169,17 @@ class Options:
                 value = Path(value).expanduser() if value not in (None, "") else None
             elif key == "jobs":
                 value = int(value) if value not in (None, "") else None
-            elif key in ("visualization", "examples", "smoke_test", "bind",
-                         "telemac_examples"):
+            elif key in ("visualization", "examples", "smoke_test", "bind"):
                 value = bool(value)
+            elif key == "telemac_examples":
+                if isinstance(value, bool):         # the switch this setting once was
+                    value = "inputs" if value else "none"
+                value = str(value or "inputs").strip().lower()
+                if value not in TELEMAC_EXAMPLES:
+                    from axqua.core.errors import ConfigError
+                    raise ConfigError(
+                        f"telemac_examples must be one of {', '.join(TELEMAC_EXAMPLES)}, "
+                        f"got {value!r}", subject="telemac_examples")
             else:
                 value = str(value or "")
             setattr(out, key, value)
@@ -642,11 +657,14 @@ class Step:
     argv: list[str]
     cwd: str = ""
     env: dict[str, str] = field(default_factory=dict)
+    #: An optional command may fail without failing the installation: what it adds is
+    #: reported as missing, and the program itself is installed.
+    optional: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         settings = " ".join(f"{key}={_quote(value)}" for key, value in self.env.items())
         return {"name": self.name, "argv": list(self.argv), "cwd": self.cwd,
-                "env": dict(self.env),
+                "env": dict(self.env), "optional": self.optional,
                 "command": (settings + " " if settings else "")
                 + " ".join(_quote(a) for a in self.argv)}
 
@@ -655,7 +673,8 @@ class Step:
         return cls(name=str(data.get("name", "")),
                    argv=[str(a) for a in data.get("argv") or []],
                    cwd=str(data.get("cwd") or ""),
-                   env={str(k): str(v) for k, v in (data.get("env") or {}).items()})
+                   env={str(k): str(v) for k, v in (data.get("env") or {}).items()},
+                   optional=bool(data.get("optional")))
 
 
 def _quote(text: str) -> str:
@@ -886,20 +905,36 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
         argv += ["--tag", out.options.tag]
     if out.options.salome:
         argv += ["--salome-tar", str(out.options.salome)]
-    # The example cases and the manuals of TELEMAC are 1,500 files in Git LFS, 1.6 GB,
-    # which Git fetches one by one: on the development computer that was most of the
-    # time of the installation. Nothing in the source code is stored that way, so the
-    # build does not need them.
-    lean = not out.options.telemac_examples
+    # The binary files of the example cases and the manuals are 1,500 files in Git LFS,
+    # 1.65 GB, which Git fetches one by one at the checkout: on the development
+    # computer more than an hour of an installation whose build takes minutes. Nothing
+    # in the source code is stored that way. So the checkout leaves them out unless
+    # everything is asked for, and what a run of an example reads is fetched afterwards
+    # as one list (see axqua.install.examples).
+    choice = out.options.telemac_examples
     out.steps.append(Step("Download and build TELEMAC", argv,
-                          env={"GIT_LFS_SKIP_SMUDGE": "1"} if lean else {}))
+                          env={} if choice == "all" else {"GIT_LFS_SKIP_SMUDGE": "1"}))
     out.outputs["solvers.telemac.setup_script"] = str(home / "configs" / script[1])
     out.expects.append(str(home / "builds" / "*" / "bin" / "telemac2d"))
     out.notes.append(f"TELEMAC is installed in {home}.")
-    if lean:
-        out.estimate = ESTIMATES["telemac-lean"]
-        out.notes.append("The example cases and the manuals of TELEMAC are not "
-                         f"downloaded. To get them later, run 'git lfs pull' in {home}.")
+    if choice == "inputs":
+        out.steps.append(Step(
+            "Download the input files of the example cases",
+            [sys.executable, "-B", "-m", "axqua", "install", "examples", str(home)],
+            optional=True))
+        out.notes.append("Of the example cases of TELEMAC, the files that a run reads "
+                         "are downloaded (about 360 files, 460 MB), without the "
+                         "reference results and the manuals. To get those later, run "
+                         f"'git lfs pull' in {home}.")
+    elif choice == "none":
+        out.estimate = ESTIMATES["telemac-none"]
+        out.notes.append("The example cases of TELEMAC come with their steering files "
+                         "only. To get their geometry files later, run 'axqua install "
+                         f"examples {home}'.")
+    else:
+        out.estimate = ESTIMATES["telemac-all"]
+        out.notes.append("All files of the example cases and the manuals of TELEMAC "
+                         "are downloaded (1,500 files, 1.65 GB).")
     if not out.options.salome:
         out.notes.append("SALOME is not installed. aXqua does not need it.")
 

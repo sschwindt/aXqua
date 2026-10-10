@@ -520,8 +520,8 @@ def install_flags(options: dict | None) -> list[str]:
         value = options.get(key)
         if value not in (None, "", 0):
             flags += [flag, str(value)]
-    if options.get("telemac_examples") is False:
-        flags.append("--no-telemac-examples")
+    if options.get("telemac_examples") in ("all", "none"):      # "inputs" is the default
+        flags += ["--telemac-examples", str(options["telemac_examples"])]
     if options.get("visualization") is False:
         flags.append("--no-visualization")
     if options.get("examples"):

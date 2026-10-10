@@ -7,6 +7,7 @@
 ``status``     how far an installation is, with the end of its log (``--tail``)
 ``cancel``     stop an installation; what is already built stays
 ``list``       every installation on record
+``examples``   download the files that the example cases of an installed TELEMAC read
 
 The installation wizards of the QGIS plugin are these commands with a window around
 them. ``run`` is what a detached installation executes and is not meant to be typed.
@@ -17,13 +18,15 @@ from __future__ import annotations
 import argparse
 import logging
 import shutil
+import sys
 from pathlib import Path
 
 from axqua.jobcli import _common, _setup_logging, emit, fail, parse_args
 
 log = logging.getLogger("axqua")
 
-ACTIONS = ("overview", "plan", "packages", "start", "run", "status", "cancel", "list")
+ACTIONS = ("overview", "plan", "packages", "start", "run", "status", "cancel", "list",
+           "examples")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -43,9 +46,14 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--tag", default="", help="TELEMAC: the version to build")
     p.add_argument("--salome", type=Path,
                    help="TELEMAC: a downloaded SALOME archive to install with it")
+    p.add_argument("--telemac-examples", choices=recipes.TELEMAC_EXAMPLES,
+                   default="inputs",
+                   help="TELEMAC: what to download of its example cases. inputs "
+                        "(default): the files a run reads, about 460 MB; all: "
+                        "reference results and manuals as well, 1.65 GB in 1,500 "
+                        "files, which takes about an hour; none: steering files only")
     p.add_argument("--no-telemac-examples", action="store_true",
-                   help="TELEMAC: do not download its example cases and manuals "
-                        "(1.6 GB in 1,500 files, most of the installation time)")
+                   help="the same as --telemac-examples none")
     p.add_argument("--reuse-openfoam", default="auto", metavar="BASHRC",
                    help="OpenFOAM: the etc/bashrc of an installed v2406, 'auto' to "
                         "look for one (default), or 'no' to compile OpenFOAM")
@@ -78,7 +86,7 @@ def _options(args):
     from axqua.install import recipes
     return recipes.Options(
         folder=args.folder, tag=args.tag or "", salome=args.salome,
-        telemac_examples=not args.no_telemac_examples,
+        telemac_examples="none" if args.no_telemac_examples else args.telemac_examples,
         reuse_openfoam=args.reuse_openfoam or "auto", jobs=args.jobs,
         visualization=not args.no_visualization, examples=args.examples,
         smoke_test=not args.no_smoke_test, installers=args.installers,
@@ -105,6 +113,23 @@ def run_install(argv: list[str]) -> int:
 
         if args.action == "run":
             return runner.execute(Path(args.target or "."))
+
+        if args.action == "examples":
+            from axqua.core.errors import ConfigError
+            from axqua.install import examples
+
+            home = Path(args.target or "").expanduser()
+            if not (home / "sources").is_dir() or not (home / "examples").is_dir():
+                raise ConfigError(
+                    f"{home} is not the folder of a TELEMAC installation",
+                    subject="target",
+                    remedy="Name the folder telemac-mascaret of the installation.")
+            # progress belongs on stderr when stdout carries the JSON document
+            stream = sys.stderr if args.as_json else sys.stdout
+            done = examples.fetch_inputs(
+                home, say=lambda text: print(text, file=stream, flush=True))
+            emit(command, done, as_json=args.as_json, lines=[])
+            return 0 if not done["missing"] else 1
 
         if args.action == "overview":
             data = _overview()

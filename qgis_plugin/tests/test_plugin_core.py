@@ -972,8 +972,9 @@ def test_the_choices_of_a_wizard_become_the_flags_of_the_install_command():
         "--salome", "/home/x/SALOME 9.15.tar.gz"]          # one argument, with its space
     assert install_flags({"reuse_openfoam": "no", "jobs": 4, "visualization": False,
                           "examples": True, "smoke_test": False, "bind": False,
-                          "base": "ubuntu24", "telemac_examples": False}) == [
+                          "base": "ubuntu24", "telemac_examples": "none"}) == [
         "--reuse-openfoam", "no", "--jobs", "4", "--base", "ubuntu24",
-        "--no-telemac-examples", "--no-visualization", "--examples",
+        "--telemac-examples", "none", "--no-visualization", "--examples",
         "--no-smoke-test", "--no-bind"]
-    assert install_flags({"telemac_examples": True}) == []
+    assert install_flags({"telemac_examples": "inputs"}) == []       # the default
+    assert install_flags({"telemac_examples": "all"}) == ["--telemac-examples", "all"]

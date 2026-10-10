@@ -138,6 +138,11 @@ The *Check* page of an installation wizard, the last page of a finished installa
 ``ParaView is not installed``
     The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* page, or enter another ParaView in the profile editor (:ref:`install-paraview`).
 
+.. _axqua-install-step-incomplete:
+
+``'Download the input files of the example cases' did not complete``
+    TELEMAC is installed and works, but the input files of its example cases were not downloaded completely. The message quotes the last lines of the installation log. The usual cause is the download server of TELEMAC, which refuses further requests for a while after many downloads from one network (``Rate limit exceeded``, ``error: 429``). Repeat the download later with the command that the message names, ``axqua install examples <folder>``. It fetches only the files that are still missing.
+
 .. _axqua-install-not-bound:
 
 ``the installation could not be entered in the profile``

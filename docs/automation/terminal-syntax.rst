@@ -61,6 +61,8 @@ Installing the simulation software (:doc:`../installation/simulation-software`):
      - Show the state of the installation and the last lines of its log.
    * - ``axqua install cancel telemac``
      - Stop the installation. What is already downloaded and built is kept.
+   * - ``axqua install examples <folder>``
+     - Download the input files of the example cases of an installed TELEMAC that are still missing. ``<folder>`` is the folder ``telemac-mascaret`` of the installation.
 
 Preparing and checking a case:
 

@@ -299,6 +299,15 @@ def execute(folder: str | os.PathLike, *, echo: bool = False) -> int:
                     print(header, end="", flush=True)
                 code = _run_step(step, folder, out, status, stop, echo=echo,
                                  log_path=log_path)
+                if code and step.optional:
+                    # the program is installed; what this step adds is not complete
+                    add(Finding(
+                        WARNING, "axqua.install.step_incomplete",
+                        f"'{step.name}' did not complete: " + _last_words(log_path),
+                        subject=subject,
+                        remedy="The program itself is installed. Repeat this step "
+                               "later with: " + step.as_dict()["command"]))
+                    continue
                 if code:
                     add(Finding(
                         ERROR, "axqua.install.failed",

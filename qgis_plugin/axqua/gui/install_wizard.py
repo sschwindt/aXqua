@@ -34,17 +34,18 @@ from . import findings as fnd
 from . import help as help_pages
 
 #: ``(option, label, kind, hint)`` per program. Kinds: folder, file, text, int, bool,
-#: openfoam (the choice between an installed OpenFOAM and compiling one).
+#: choice (one of CHOICES), openfoam (an installed OpenFOAM, or compiling one).
 FIELDS = {
     "telemac": (
         ("folder", "Installation folder", "folder",
          "TELEMAC is installed in the sub-folder telemac-mascaret of this folder."),
         ("tag", "TELEMAC version", "text",
          "Leave empty for the version the installer was written for."),
-        ("telemac_examples", "Download the example cases and manuals of TELEMAC",
-         "bool",
-         "1.6 GB in 1,500 files, which takes most of the time of the installation. "
-         "aXqua does not need them, and they can be downloaded later."),
+        ("telemac_examples", "Example cases of TELEMAC", "choice",
+         "TELEMAC comes with about 830 example cases. Their steering files are always "
+         "installed. The input files are what a run of an example reads, mainly its "
+         "mesh. The reference results serve the validation system of TELEMAC and "
+         "take most of an hour to download. aXqua needs none of these files."),
         ("salome", "SALOME archive", "file",
          "Optional: a downloaded SALOME archive. aXqua does not need SALOME."),
     ),
@@ -66,7 +67,17 @@ FIELDS = {
 }
 
 #: The switches that are on unless the user turns them off.
-ON_BY_DEFAULT = ("visualization", "smoke_test", "bind", "telemac_examples")
+ON_BY_DEFAULT = ("visualization", "smoke_test", "bind")
+
+#: ``option -> ((value, text), ...)`` of the settings with a fixed set of answers. The
+#: first entry is the default.
+CHOICES = {
+    "telemac_examples": (
+        ("inputs", "Input files only (about 360 files, 460 MB)"),
+        ("all", "Everything, with reference results and manuals (1,500 files, 1.65 GB)"),
+        ("none", "Steering files only"),
+    ),
+}
 
 BASES = (("", "as detected"), ("debian12", "Debian 12"), ("ubuntu22", "Ubuntu 22.04"),
          ("ubuntu24", "Ubuntu 24.04"))
@@ -206,6 +217,11 @@ class InstallWizard(QDialog):
             widget.setRange(1, 512)
             line.addWidget(widget)
             line.addStretch(1)
+        elif kind == "choice":
+            widget = QComboBox()
+            for value, text in CHOICES[key]:
+                widget.addItem(text, value)
+            line.addWidget(widget, 1)
         elif kind == "openfoam":
             widget = QComboBox()
             widget.addItem(USE_INSTALLED, "installed")

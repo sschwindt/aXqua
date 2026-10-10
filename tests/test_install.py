@@ -73,6 +73,7 @@ echo "[*] Installation finished."
 
 BUILDS = r'''
 mkdir -p "$ROOT_DIR/telemac-mascaret/configs" "$ROOT_DIR/telemac-mascaret/builds/fake/bin"
+mkdir -p "$ROOT_DIR/telemac-mascaret/sources" "$ROOT_DIR/telemac-mascaret/examples"
 printf 'source "%s"\n' "@PYSOURCE@" > "$ROOT_DIR/telemac-mascaret/configs/@NAME@"
 touch "$ROOT_DIR/telemac-mascaret/builds/fake/bin/telemac2d"
 '''
@@ -325,6 +326,9 @@ def _no_local_compilers(monkeypatch):
 
 def _plan(target, installers, host, tmp_path, **options):
     options.setdefault("folder", tmp_path / "target")
+    # Most tests here are not about the example cases of TELEMAC; the step that
+    # downloads them starts aXqua once more, which costs a second or two each time.
+    options.setdefault("telemac_examples", "none")
     return recipes.plan(target, recipes.Options(installers=installers, **options),
                         host=host, check_packages=False)
 
@@ -341,29 +345,72 @@ def test_a_telemac_plan_never_asks_for_a_password(installers, debian, tmp_path):
         tmp_path / "target" / "telemac-mascaret" / "configs" / "pysource.debian12.sh")}
 
 
-def test_the_examples_of_telemac_are_most_of_the_download_and_can_be_left_out(
+def test_of_the_examples_of_telemac_only_what_a_run_reads_is_downloaded(
         installers, debian, tmp_path):
-    """1,500 files in Git LFS, fetched one by one: on the development computer they
-    were more than an hour of an installation whose build takes a quarter of one."""
-    full = _plan("telemac", installers, debian, tmp_path)
-    assert full.steps[-1].env == {} and "hours" in full.estimate
-
-    lean = _plan("telemac", installers, debian, tmp_path, telemac_examples=False)
-    build = lean.steps[-1]
-    assert build.env == {"GIT_LFS_SKIP_SMUDGE": "1"}
-    assert build.argv == full.steps[-1].argv              # the installer is the same
+    """1,500 files in Git LFS, fetched one by one at the checkout: on the development
+    computer more than an hour of an installation whose build takes minutes. A third
+    of the files is what a run reads; the rest are reference results and manuals."""
+    home = tmp_path / "target" / "telemac-mascaret"
+    default = recipes.plan("telemac", recipes.Options(
+        installers=installers, folder=tmp_path / "target"), host=debian,
+        check_packages=False)                             # no choice made: the default
+    assert default.options.telemac_examples == "inputs"
+    build, examples = default.steps[-2], default.steps[-1]
+    assert build.env == {"GIT_LFS_SKIP_SMUDGE": "1"}      # the checkout fetches nothing
     assert build.as_dict()["command"].startswith("GIT_LFS_SKIP_SMUDGE=1 /bin/bash ")
-    assert "minutes" in lean.estimate
-    assert any("git lfs pull" in note for note in lean.notes)
+    assert examples.argv[1:] == ["-B", "-m", "axqua", "install", "examples", str(home)]
+    assert examples.optional and not build.optional
+    assert "minutes" in default.estimate
+    assert any("files that a run reads" in note for note in default.notes)
 
-    # the setting reaches the installer, which is where Git reads it
+    everything = _plan("telemac", installers, debian, tmp_path, telemac_examples="all")
+    assert everything.steps[-1].env == {} and "hours" in everything.estimate
+    assert everything.steps[-1].argv == build.argv        # the installer is the same
+    assert len(everything.steps) == len(default.steps) - 1
+
+    nothing = _plan("telemac", installers, debian, tmp_path, telemac_examples="none")
+    assert nothing.steps[-1].env == {"GIT_LFS_SKIP_SMUDGE": "1"}
+    assert len(nothing.steps) == len(default.steps) - 1
+    assert any("axqua install examples" in note for note in nothing.notes)
+
+    # the switch this setting once was is still understood
+    assert recipes.Options.from_dict({"telemac_examples": False}).telemac_examples == "none"
+    assert recipes.Options.from_dict({"telemac_examples": True}).telemac_examples == \
+        "inputs"
+    from axqua.core.errors import ConfigError
+    with pytest.raises(ConfigError, match="inputs, all, none"):
+        recipes.Options.from_dict({"telemac_examples": "some"})
+
+
+def test_the_setting_reaches_the_installer_where_git_reads_it(installers, debian,
+                                                             tmp_path):
     _script(installers, 'echo "skip=${GIT_LFS_SKIP_SMUDGE:-unset}"\n' + BUILDS.replace(
         "@PYSOURCE@", str(FAKES / "fake_pysource.sh")).replace(
             "@NAME@", "pysource.debian12.sh"))
-    lean = _plan("telemac", installers, debian, tmp_path, telemac_examples=False)
+    lean = _plan("telemac", installers, debian, tmp_path, telemac_examples="none")
     status = runner.start(lean, detach=False)
     assert status["state"] == "succeeded", status
     assert "skip=1" in Path(status["log"]).read_text()
+
+
+def test_examples_that_could_not_be_downloaded_do_not_fail_the_installation(
+        installers, debian, tmp_path):
+    """TELEMAC is built by then. Its download server limits requests, and an
+    installation must not be lost to that."""
+    # an installation without an examples folder: the step has nothing to work on and
+    # ends with an error, as a refused download would
+    _script(installers, BUILDS.replace("@PYSOURCE@", str(FAKES / "fake_pysource.sh"))
+            .replace("@NAME@", "pysource.debian12.sh")
+            .replace('mkdir -p "$ROOT_DIR/telemac-mascaret/sources" '
+                     '"$ROOT_DIR/telemac-mascaret/examples"\n', ""))
+    plan = _plan("telemac", installers, debian, tmp_path, telemac_examples="inputs")
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "succeeded", status
+    (finding,) = status["findings"]
+    assert finding["code"] == "axqua.install.step_incomplete"
+    assert finding["severity"] == "warning"
+    assert "axqua install examples" in finding["remedy"]
+    assert status["bound"]                                # and it is in the profile
 
 
 def test_linux_mint_gets_the_ubuntu_installer_and_its_environment_script(
@@ -586,7 +633,9 @@ def test_a_plan_is_a_document_a_window_can_show(installers, debian, tmp_path):
     data = _plan("telemac", installers, debian, tmp_path).as_dict()
     assert json.loads(json.dumps(data)) == data
     assert data["ready"] is True and data["title"] == "TELEMAC"
-    assert data["steps"][-1]["command"].startswith("/bin/bash ")
+    # the command as a person would type it, with the one variable it is run with
+    assert data["steps"][-1]["command"].startswith("GIT_LFS_SKIP_SMUDGE=1 /bin/bash ")
+    assert data["steps"][-1]["optional"] is False
     assert data["installers"]["repository"] == recipes.REPOSITORY
     assert set(data["packages"]) == {"needed", "missing", "unavailable", "command",
                                      "elevation", "note"}
@@ -839,3 +888,129 @@ def test_every_code_of_an_installation_is_explained_in_the_documentation():
     missing = sorted(code for code in codes
                      if f".. _{code.replace('.', '-').replace('_', '-')}:" not in pages)
     assert missing == []
+
+
+# --------------------------------------------------- the example cases of TELEMAC
+
+
+DICO = """/ a dictionary in the form of TELEMAC's
+NOM = 'FICHIER DE GEOMETRIE'
+NOM1 = 'GEOMETRY FILE'
+TYPE = CARACTERE
+SUBMIT = 'T2DGEO-READ;T2DGEO;OBLIG;BIN;LIT;SELAFIN-GEOM'
+/
+NOM = 'FICHIER DES RESULTATS'
+NOM1 = 'RESULTS FILE'
+SUBMIT = 'T2DRES-READWRITE;T2DRES;OBLIG;BIN;ECR;SELAFIN'
+/
+NOM = 'FICHIER DU CALCUL PRECEDENT'
+NOM1 = 'PREVIOUS COMPUTATION FILE'
+SUBMIT = 'T2DPRE-READ;T2DPRE;FACUL;BIN;LIT;
+SELAFIN'
+/
+NOM = 'TITRE'
+NOM1 = 'TITLE'
+"""
+
+
+def _pointer(path: Path, size: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("version https://git-lfs.github.com/spec/v1\n"
+                    f"oid sha256:{'0' * 64}\nsize {size}\n")
+
+
+@pytest.fixture
+def telemac_tree(tmp_path) -> Path:
+    """A TELEMAC folder after a checkout without LFS: every binary file is a pointer."""
+    home = tmp_path / "telemac-mascaret"
+    (home / "sources" / "telemac2d").mkdir(parents=True)
+    (home / "sources" / "telemac2d" / "telemac2d.dico").write_text(DICO)
+    case = home / "examples" / "telemac2d" / "gouttedo"
+    for name, size in (("geo_gouttedo.slf", 4_000_000), ("ini_gouttedo.slf", 2_000_000),
+                       ("f2d_gouttedo.slf", 30_000_000), ("r2d_gouttedo.slf", 9_000_000)):
+        _pointer(case / name, size)
+    (case / "t2d_gouttedo.cas").write_text(
+        "/ a comment : GEOMETRY FILE = f2d_gouttedo.slf\n"
+        "TITLE = 'gouttedo'\n"
+        "GEOMETRY FILE = geo_gouttedo.slf\n"
+        "RESULTS FILE = r2d_gouttedo.slf\n")
+    (case / "t2d_gouttedo_suite.cas").write_text(
+        "FICHIER DE GEOMETRIE : 'geo_gouttedo.slf'\n"
+        "PREVIOUS COMPUTATION FILE : ini_gouttedo.slf\n"
+        "RESULTS FILE : r2d_suite.slf\n")
+    other = home / "examples" / "telemac2d" / "small"
+    other.mkdir(parents=True)
+    (other / "geo_small.slf").write_bytes(b"\x00" * 1000)        # a real file already
+    (other / "t2d_small.cas").write_text("GEOMETRY FILE = geo_small.slf\n")
+    _pointer(home / "documentation" / "manual.pdf", 5_000_000)
+    return home
+
+
+def test_telemac_itself_says_which_files_a_run_reads(telemac_tree):
+    from axqua.install import examples
+
+    assert examples.read_keywords(telemac_tree) == {
+        "GEOMETRY FILE", "FICHIER DE GEOMETRIE", "PREVIOUS COMPUTATION FILE",
+        "FICHIER DU CALCUL PRECEDENT"}                    # not the results file
+    needed = [str(path) for path in examples.needed_inputs(telemac_tree)]
+    # the mesh and the state a run continues from; not the reference result, not the
+    # result a run writes, not a file that is there already, not the manual
+    assert needed == ["examples/telemac2d/gouttedo/geo_gouttedo.slf",
+                      "examples/telemac2d/gouttedo/ini_gouttedo.slf"]
+    assert examples.is_pointer(telemac_tree / needed[0])
+    assert examples.pointer_size(telemac_tree / needed[0]) == 4_000_000
+    assert not examples.is_pointer(telemac_tree / "examples/telemac2d/small/geo_small.slf")
+
+
+def test_the_input_files_are_asked_for_as_lists_and_what_is_missing_is_named(
+        telemac_tree):
+    from axqua.install import examples
+
+    said, asked = [], []
+
+    def deliver(home, paths):
+        asked.append([str(path) for path in paths])
+        for path in paths:
+            (home / path).write_bytes(b"\x01" * 500)             # the file itself
+        return None
+
+    done = examples.fetch_inputs(telemac_tree, pull=deliver, say=said.append)
+    assert done == {"wanted": 2, "fetched": 2, "megabytes": 6.0, "missing": []}
+    assert len(asked) == 1 and len(asked[0]) == 2          # one request for both
+    assert "2 input files of the example cases are to be downloaded (6 MB)" in said[0]
+    # nothing is left to do, and the reference result is still a pointer
+    assert examples.fetch_inputs(telemac_tree, pull=deliver, say=said.append)["wanted"] == 0
+    assert examples.is_pointer(
+        telemac_tree / "examples/telemac2d/gouttedo/f2d_gouttedo.slf")
+
+
+def test_a_refused_download_is_repeated_and_then_reported(telemac_tree, monkeypatch):
+    from axqua.install import examples
+
+    monkeypatch.setattr(examples.time, "sleep", lambda seconds: None)
+    calls = []
+
+    class Refused:
+        stderr = "batch response: Rate limit exceeded\nerror: failed to fetch some objects"
+        stdout = ""
+
+    def refuse(home, paths):
+        calls.append(len(paths))
+        if len(calls) == 2:                                # the second try delivers one
+            (home / paths[0]).write_bytes(b"\x01" * 500)
+        return Refused()
+
+    said = []
+    done = examples.fetch_inputs(telemac_tree, pull=refuse, say=said.append, retries=2)
+    assert calls == [2, 2, 1]                              # only what is still missing
+    assert done["fetched"] == 1 and len(done["missing"]) == 1
+    assert any("failed to fetch some objects" in line and "trying again" in line
+               for line in said)
+
+
+def test_the_command_tells_a_telemac_folder_from_another_one(tmp_path, capsys):
+    from axqua.installcli import run_install
+
+    assert run_install(["examples", str(tmp_path), "--json"]) != 0
+    answer = json.loads(capsys.readouterr().out)
+    assert "not the folder of a TELEMAC installation" in answer["error"]["message"]

@@ -43,12 +43,14 @@ Click *Install TELEMAC...* on the *Configuration* tab. The wizard is available o
      - TELEMAC is installed in the subfolder ``telemac-mascaret`` of this folder. The default is the folder ``opt`` in the home folder. If the subfolder exists already, the installer keeps its source code and builds TELEMAC in it again.
    * - TELEMAC version
      - Leave the field empty for v9.1.1.
-   * - Download the example cases and manuals of TELEMAC
-     - TELEMAC is distributed with about 1,400 example cases and its manuals, which amount to 1.6 GB in 1,500 files. aXqua does not require them. Clear the box to leave them out, which shortens the installation considerably. They can be downloaded later with the command ``git lfs pull`` in the folder ``telemac-mascaret``.
+   * - Example cases of TELEMAC
+     - TELEMAC is distributed with about 830 example cases. Their steering files are always installed with the source code. The setting selects how many of their large files are downloaded in addition. *Input files only* (the default) downloads what a run of an example reads, which is mainly its mesh: about 360 files and 460 MB. *Everything* also downloads the reference results, with which TELEMAC validates itself, and the manuals: 1,500 files and 1.65 GB, which takes about one hour. *Steering files only* downloads none of the large files. aXqua itself requires none of these files.
    * - SALOME archive
      - Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua does not require SALOME, because it generates the mesh and the input files itself.
 
-The installation downloads the source code of TELEMAC and compiles it for parallel computation with the system libraries MPI, MUMPS, METIS and MED. It requires about 5 GB of free space with the example cases and about 2 GB without them. The download of the example cases takes most of the time, because each of the 1,500 files is transferred individually. On a workstation with 32 processor cores, the installation without the example cases took 5 minutes, and the download of the example cases took more than one hour in addition.
+The installation downloads the source code of TELEMAC and compiles it for parallel computation with the system libraries MPI, MUMPS, METIS and MED. It requires about 2.5 GB of free space with the input files of the example cases and about 5 GB with everything. On a workstation with 32 processor cores, the installation with the default setting took 11 minutes, of which the input files of the example cases took 7 minutes.
+
+The large files of the example cases are stored separately from the source code, and the download server delivers them one at a time when all of them are requested. For this reason, the default setting requests only the files that a run reads. aXqua determines these files from TELEMAC itself: the keyword dictionaries of TELEMAC state for every file whether a run reads or writes it. The missing files can be downloaded at any time afterwards: ``axqua install examples <folder>`` downloads the input files that are still missing, and ``git lfs pull`` in the folder ``telemac-mascaret`` downloads everything.
 
 The result is the file ``telemac-mascaret/configs/pysource.<system>.sh`` in the installation folder. This file is the **environment script** of TELEMAC: it sets all variables that TELEMAC requires. The wizard enters it in the profile as the solver binding of TELEMAC (:ref:`solver-bindings`).
 

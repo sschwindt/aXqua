@@ -1112,8 +1112,14 @@ def test_the_wizard_starts_from_what_aXqua_found_and_sends_what_was_chosen(
     install_wizard = _wizard_now(monkeypatch)
     telemac = install_wizard.InstallWizard(_InstallClient(), "telemac", _overview())
     assert telemac.options() == {"folder": "/home/x/opt", "tag": "", "salome": "",
-                                 "telemac_examples": True, "bind": True, "base": "",
-                                 "installers": ""}
+                                 "telemac_examples": "inputs", "bind": True,
+                                 "base": "", "installers": ""}
+    # of the example cases, only what a run reads is downloaded unless asked otherwise
+    examples = telemac._widgets["telemac_examples"]
+    assert [examples.itemData(i) for i in range(examples.count())] == \
+        ["inputs", "all", "none"]
+    examples.setCurrentIndex(2)
+    assert telemac.options()["telemac_examples"] == "none"
     assert telemac.pages.currentIndex() == 0 and telemac.next_button.text() == "Next"
     telemac.deleteLater()
 
