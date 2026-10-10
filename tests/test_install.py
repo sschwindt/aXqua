@@ -496,7 +496,7 @@ def test_a_compiler_in_usr_local_does_not_decide_what_openfoam_is_built_with(
     monkeypatch.setattr(recipes, "shadowed_tools", lambda: [])
     plain = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
                   visualization=False)
-    assert plain.steps[0].argv[1].endswith("install.py")     # the installer as it is
+    assert plain.steps[0].argv[2].endswith("install.py")     # the installer as it is
     status = runner.start(plain, detach=False)
     assert status["state"] == "succeeded", status
     receipt = json.loads((tmp_path / "target" / "receipt.json").read_text())
@@ -505,7 +505,7 @@ def test_a_compiler_in_usr_local_does_not_decide_what_openfoam_is_built_with(
     monkeypatch.setattr(recipes, "shadowed_tools", lambda: ["gcc", "g++"])
     guarded = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
                     visualization=False, folder=tmp_path / "guarded")
-    assert guarded.steps[0].argv[1:3] == ["-I", "-c"]
+    assert guarded.steps[0].argv[1:4] == ["-I", "-B", "-c"]
     assert any("gcc, g++" in note for note in guarded.notes)
     # handled, and therefore a note and not a warning the user would have to act on
     assert guarded.ready
@@ -536,6 +536,21 @@ def test_an_installer_no_python_here_can_read_is_reported_not_started(
     plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no")
     assert _codes(plan.findings) >= {"axqua.install.python_too_old"}
     assert not plan.ready
+
+
+def test_running_the_installers_leaves_no_files_in_their_folder(installers, debian,
+                                                               tmp_path, monkeypatch):
+    """A local copy of the scripts is somebody's working folder."""
+    monkeypatch.setattr(recipes, "PARAVIEW", tmp_path / "none")
+    before = sorted(str(path.relative_to(installers))
+                    for path in installers.rglob("*"))
+    for target in ("openfoam", "postprocessors"):
+        plan = _plan(target, installers, debian, tmp_path, reuse_openfoam="no",
+                     visualization=False, folder=tmp_path / target)
+        assert runner.start(plan, detach=False)["state"] == "succeeded"
+    after = sorted(str(path.relative_to(installers)) for path in installers.rglob("*"))
+    assert after == before                       # no __pycache__, nothing else
+    assert recipes.clean_environment()["PYTHONDONTWRITEBYTECODE"] == "1"
 
 
 def test_the_installers_are_not_downloaded_twice(tmp_path, monkeypatch):

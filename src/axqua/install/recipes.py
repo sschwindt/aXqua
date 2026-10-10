@@ -257,6 +257,12 @@ def clean_environment() -> dict[str, str]:
     env = {key: value for key, value in os.environ.items() if key in keep}
     env["PATH"] = SYSTEM_PATH
     env.setdefault("LANG", "C.UTF-8")
+    # The OpenFOAM installer is Python. Without this, running it leaves compiled
+    # files beside its sources, which for a local copy of the scripts
+    # (AXQUA_INSTALLERS) is somebody's working folder: the first real runs left 17
+    # such files in the clone they were given. The commands also carry -B, because
+    # an isolated interpreter (-I) does not read this variable.
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
     return env
 
 
@@ -925,13 +931,13 @@ def _plan_openfoam(out: Plan, checkout: Path, add) -> None:
     jobs = out.options.jobs or default_jobs()
     shadowed = shadowed_tools()
     if shadowed:
-        argv = [python, "-I", "-c", OPENFOAM_DRIVER, str(checkout / OPENFOAM_DIR)]
+        argv = [python, "-I", "-B", "-c", OPENFOAM_DRIVER, str(checkout / OPENFOAM_DIR)]
         out.notes.append(
             "The build uses the compilers of the operating system. The folder "
             "/usr/local/bin holds other versions of " + ", ".join(shadowed)
             + ", with which the solvers cannot be linked to a packaged OpenFOAM.")
     else:
-        argv = [python, str(checkout / OPENFOAM_DIR / "install.py")]
+        argv = [python, "-B", str(checkout / OPENFOAM_DIR / "install.py")]
     argv += ["--prefix", str(prefix), "--jobs", str(jobs)]
     reuse = _reuse(out.options)
     if reuse is not None:
@@ -986,7 +992,7 @@ def _plan_postprocessors(out: Plan, checkout: Path, add) -> None:
             "this version of the installer scripts has no installer for VisIt")
         return
     python = sys.executable
-    argv = [python, "-I", "-c", VISIT_DRIVER, str(checkout / OPENFOAM_DIR),
+    argv = [python, "-I", "-B", "-c", VISIT_DRIVER, str(checkout / OPENFOAM_DIR),
             str(prefix), out.host.base]
     out.steps.append(Step("Download and install VisIt", argv))
     out.outputs["postprocessors.visit"] = str(
