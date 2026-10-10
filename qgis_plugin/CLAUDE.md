@@ -99,6 +99,13 @@ user's rule** (measurements of one survey are not independent samples), and a te
 every label of the box to keep it that way. `QFormLayout.setRowVisible` is Qt 6 only, so a
 row is hidden through its field and `labelForField`.
 
+**The example case** (`gui/example_dialog.py`): *Example case...* on the Case Setup tab
+opens a window that shows what `axqua example list` answers, asks for a folder, and has
+`axqua example get` put the example there; the case is then added to the list. The
+window decides nothing (which examples exist and where they come from is the library's
+answer) and says the path only in the folder field: a long path in the status line was
+cut off in the first headless run. Its Help target is in `sections.WINDOWS`.
+
 **Batch** (`core/batch.py`, pure): the steps are job kinds in workflow order; *Submit the
 ticked steps* hands them over in ONE background call so their queue tickets are written in
 that order (see the workspace queue in `src/axqua/jobs/CLAUDE.md`), and *Generate

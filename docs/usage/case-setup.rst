@@ -7,6 +7,18 @@ An **aXqua case** is the complete description of one river reach for one modelin
 
 A case file contains nothing that is specific to a computer. Where the simulation software is installed is stored in the profile of the computer (:ref:`plugin-profile`). A case folder can therefore be copied to another computer, or published together with a study, and used there without changes.
 
+.. _help-example-case:
+
+**Example case.** A complete case is available for trying out every step before a case of one's own is set up. It describes a braided reach of the Isar River of 6.6 ha at a discharge of 2.4 m³/s, with a coarse mesh, so that the model is built in one minute and a steady simulation takes about two minutes. The example is a folder that contains the case file, the input data in the subfolder ``user-sources/``, and a guide (``README.md``) that explains every step from the build to the loading of the result in QGIS. The folder has a size of about 6 MB. Its terrain model is cut to the outline of the model, which is all that aXqua reads of a terrain model. The velocity measurements of the reach are not part of the example yet, so that the example does not include a calibration.
+
+On the *Case Setup* tab, *Example case...* opens a window that lists the available examples. Select the folder in which the folder of the example is to be created and click *Download*. The example is then added to the list of cases, and the next step is *Build* on the *Preprocessing* tab. In a terminal, the following command does the same:
+
+.. code-block:: text
+
+   axqua example get --folder <folder>
+
+The example is not part of the installed program. It is downloaded from the aXqua repository on GitHub. Its input data may be reused and adapted for any purpose, provided that aXqua is cited (Creative Commons Attribution 4.0 International License). The file ``LICENSE.md`` in the folder of the example states the terms and the citation. A folder with the name of the example that already exists is never overwritten, because it may contain results. Delete the folder, or select another one, to download the example again.
+
 **In the plugin.** The *Case Setup* tab lists the cases of the project. *New case...* creates a case file and opens it in the case editor, *Add case...* adds an existing case file, and *Edit case...* opens the active case in the editor. The editor shows one block of the case at a time. The blocks are listed on the left in the order of the subsections below. In each block, the editor shows the settings that every case needs and all settings that the case file already contains. Every other setting of the block is added with *Add setting...*. A tooltip explains each setting.
 
 Nothing has to be typed that can be selected. Every file has a button that opens a file dialog, and the button *Layers* offers the layers that are open in QGIS. A file in or near the case folder is entered with a path relative to the case file, so that the case can be moved together with its data.

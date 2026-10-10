@@ -224,7 +224,7 @@ conda create -n qgis-dev -c conda-forge "qgis>=3.44"   # once
 scripts/qgis_dev.sh
 ```
 
-**To try the plugin from preprocessing to Bayesian calibration in about half an hour**, follow [`cases/example-isar/README.md`](cases/example-isar/README.md). It is a fast version of the Isar research case with a step-by-step guide for every tab.
+**To try the plugin with a ready-made case**, get the example case with *Example case...* on the *Case Setup* tab or with `axqua example get --folder <folder>`, and follow its guide, [`cases/example-isar/README.md`](cases/example-isar/README.md). It is a fast version of a research case of the Isar River: the model is built in one minute and a steady simulation takes about two minutes. The folder contains its input data (6 MB), which may be reused on citing aXqua (`cases/example-isar/LICENSE.md`).
 
 The plugin is GPL-2.0-or-later, because it links PyQGIS; `axqua` itself stays
 BSD-3-Clause and remains usable on its own.

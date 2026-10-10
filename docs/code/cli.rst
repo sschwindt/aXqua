@@ -38,3 +38,9 @@ Case file commands
 
 .. automodule:: axqua.casecli
    :members:
+
+Example case commands
+---------------------
+
+.. automodule:: axqua.examplecli
+   :members:

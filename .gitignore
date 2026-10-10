@@ -115,3 +115,10 @@ solvers.local.yml
 
 # the documentation built into the plugin folder (scripts/build_plugin_zip.py)
 qgis_plugin/axqua/help/
+
+# --- The example cases ARE tracked with their input data ---------------------
+# An example is a folder that works on its own (axqua.core.examples): its data are
+# reduced to a few megabytes by scripts/build_example_data.py and are downloaded from
+# this repository by "axqua example get". These lines come last on purpose: they have
+# to win over the rule for user-sources above and over the file types (*.tif, *.gpkg).
+!/cases/example-isar/user-sources/**

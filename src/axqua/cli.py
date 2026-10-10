@@ -600,6 +600,12 @@ def _run_validation(argv: list[str]) -> int:
     return validationcli.run_validation(argv)
 
 
+def _run_example(argv: list[str]) -> int:
+    """``axqua example`` - the example cases (:mod:`axqua.examplecli`)."""
+    from axqua import examplecli
+    return examplecli.run_example(argv)
+
+
 def _run_export(argv: list[str]) -> int:
     """``axqua export`` - results for ParaView and VisIt (:mod:`axqua.exportcli`)."""
     from axqua import exportcli
@@ -715,6 +721,7 @@ _DISPATCH = {
     "install": lambda argv: _run_install(argv),
     "export": lambda argv: _run_export(argv),
     "validation": lambda argv: _run_validation(argv),
+    "example": lambda argv: _run_example(argv),
     "schema": lambda argv: _case_cli("run_schema", argv),
     "case": lambda argv: _case_cli("run_case", argv),
     "check": lambda argv: _case_cli("run_check", argv),

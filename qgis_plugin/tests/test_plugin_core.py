@@ -876,7 +876,8 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7 + 3   # 3 wizards
+    # 9 tabs, 7 sub-tabs, 3 installation wizards and the window of the example case
+    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7 + 3 + 1
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
@@ -978,3 +979,20 @@ def test_the_choices_of_a_wizard_become_the_flags_of_the_install_command():
         "--no-smoke-test", "--no-bind"]
     assert install_flags({"telemac_examples": "inputs"}) == []       # the default
     assert install_flags({"telemac_examples": "all"}) == ["--telemac-examples", "all"]
+
+
+def test_the_client_asks_for_an_example_with_its_name_and_folder(monkeypatch):
+    from axqua_plugin.core import runner_client
+
+    sent = []
+
+    class Answer:
+        data = {"folder": "/work/example-isar"}
+
+    client = runner_client.RunnerClient.__new__(runner_client.RunnerClient)
+    monkeypatch.setattr(runner_client.RunnerClient, "call",
+                        lambda self, args, **kwargs: sent.append(list(args)) or Answer())
+    assert client.example_get("example-isar", "/work") == {"folder": "/work/example-isar"}
+    client.example_list()
+    assert sent == [["example", "get", "example-isar", "--folder", "/work"],
+                    ["example", "list"]]

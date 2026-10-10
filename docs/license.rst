@@ -9,6 +9,8 @@ The aXqua library is distributed under the **BSD 3-Clause License**. The QGIS pl
 .. literalinclude:: ../LICENSE
    :language: text
 
+The input data of the example case (:ref:`Example case <help-example-case>`) are distributed under the Creative Commons Attribution 4.0 International License. They may be reused and adapted for any purpose, provided that aXqua is cited, and they are provided without warranty and without liability. The file ``LICENSE.md`` in the folder of the example states the terms and the citation.
+
 Disclaimer
 ----------
 

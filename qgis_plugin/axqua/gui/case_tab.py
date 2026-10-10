@@ -3,7 +3,8 @@
 A case is one file (``*.axq-case``) that describes a reach: its geodata, its boundary
 conditions, its mesh and what is to be simulated. The tab lists the cases of the
 project, selects the active one, and shows what aXqua reports this case can do. Every
-other tab works on the active case.
+other tab works on the active case. *Example case...* downloads a ready-made case with
+its data (``gui/example_dialog.py``).
 """
 
 from __future__ import annotations
@@ -41,6 +42,8 @@ class CaseTab(QWidget):
         for text, slot, tip in (
                 ("New case...", self.new_case, "Create a case file and open the editor"),
                 ("Add case...", self.add_case, "Add an existing case file to the list"),
+                ("Example case...", self.get_example,
+                 "Download a complete case with its data and a guide"),
                 ("Edit case...", self.edit_case, "Open the active case in the editor"),
                 ("Check", self.check_case, "Report what is wrong with the active case"),
                 ("Open folder", self.open_folder, "Open the folder of the active case"),
@@ -99,6 +102,17 @@ class CaseTab(QWidget):
         run_async("aXqua: creating the case", lambda: client.case_new(path),
                   on_success=lambda _answer: self._created(path),
                   on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
+
+    def get_example(self) -> None:
+        """Open the window that downloads an example case and adds it to the list."""
+        from .example_dialog import ExampleDialog
+
+        client = self.ctx.client_or_warn()
+        if client is None:
+            return
+        start = str(self.ctx.project.base()) if self.ctx.project.path else ""
+        exec_dialog(ExampleDialog(client, folder=start, parent=self,
+                                  on_done=self.ctx.add_case))
 
     def _created(self, path: Path) -> None:
         self.ctx.add_case(path)

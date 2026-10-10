@@ -86,6 +86,7 @@ WINDOWS: dict[str, tuple[str, str]] = {
     "install-telemac": ("installation/simulation-software", "install-telemac"),
     "install-openfoam": ("installation/simulation-software", "install-openfoam"),
     "install-postprocessors": ("installation/postprocessors", "help-postprocessors"),
+    "example-case": ("usage/case-setup", "help-example-case"),
 }
 
 #: Where a capability nobody has placed is shown: with the simulations of its solver.

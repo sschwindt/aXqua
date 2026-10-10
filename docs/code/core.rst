@@ -39,6 +39,12 @@ SELAFIN file format
 .. automodule:: axqua.core.selafin
    :members:
 
+Example cases
+-------------
+
+.. automodule:: axqua.core.examples
+   :members:
+
 Capabilities and backend registry
 ---------------------------------
 

@@ -1022,6 +1022,112 @@ def test_the_case_tab_opens_the_editor_and_takes_over_what_it_found(dock, tmp_pa
     editor.deleteLater()
 
 
+# ------------------------------------------------------------------ the example case
+
+
+EXAMPLES = {"source": "https://example.org/cases", "examples": [
+    {"name": "example-isar", "title": "Isar River, losing and gaining reach",
+     "summary": "A braided gravel-bed reach.", "case": "example-isar.axq-case",
+     "files": 13, "bytes": 6200000, "megabytes": 6.2}]}
+
+
+def test_an_example_case_is_downloaded_and_added_to_the_cases(dock, tmp_path,
+                                                              monkeypatch):
+    """One button on the Case Setup tab: which examples there are and where they come
+    from is the answer of aXqua, the window only asks for the folder."""
+    from qgis.PyQt.QtWidgets import QPushButton
+
+    from axqua_plugin.core.runner_client import RunnerError
+    from axqua_plugin.gui import case_tab, example_dialog
+    from axqua_plugin.gui import help as help_pages
+
+    asked = []
+
+    class Client:
+        fail = False
+
+        def example_list(self):
+            return EXAMPLES
+
+        def example_get(self, name, folder):
+            asked.append((name, folder))
+            if self.fail:
+                raise RunnerError(f"{folder}/{name} is there already",
+                                  code="axqua.config", remedy="Choose another folder.")
+            case = Path(folder) / name / f"{name}.axq-case"
+            case.parent.mkdir(parents=True)
+            case.write_text("project: {name: example-isar}\n", encoding="utf-8")
+            return {"name": name, "folder": str(case.parent), "case": str(case),
+                    "guide": str(case.parent / "README.md"), "files": 13,
+                    "megabytes": 6.2}
+
+    dock.ctx.client = Client()
+    dock.ctx.set_runner_ok(True)
+    now = lambda title, call, on_success=None, on_error=None, owner=None: _now(  # noqa: E731
+        call, on_success, on_error)
+    monkeypatch.setattr(example_dialog, "run_async", now)
+    opened = []
+    monkeypatch.setattr(case_tab, "exec_dialog", lambda window: opened.append(window))
+
+    labels = [button.text() for button in dock.case_tab.findChildren(QPushButton)]
+    assert "Example case..." in labels
+    dock.case_tab.get_example()
+    (window,) = opened
+    assert isinstance(window, example_dialog.ExampleDialog)
+    assert window.choice.count() == 1
+    assert window.choice.currentText() == "Isar River, losing and gaining reach"
+    assert "6.2 MB in 13 files" in window.description.text()
+    assert window.get_button.isEnabled() and not window.folder_button.isEnabled()
+
+    window.folder.setText(str(tmp_path / "work"))
+    window.get()
+    case = tmp_path / "work" / "example-isar" / "example-isar.axq-case"
+    assert asked == [("example-isar", str(tmp_path / "work"))]
+    assert any(Path(item).name == case.name for item in dock.ctx.project.cases)
+    assert "README.md" in window.status.text() and "Preprocessing" in window.status.text()
+    assert window.folder_button.isEnabled()
+
+    # a refusal is shown with its remedy, and the window stays usable
+    Client.fail = True
+    window.get()
+    assert "is there already" in window.status.text()
+    assert "Choose another folder" in window.status.text()
+    assert window.get_button.isEnabled()
+
+    # Help opens the paragraph on the example case
+    urls = []
+    monkeypatch.setattr(help_pages, "open_url", lambda url: urls.append(url) or True)
+    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
+    help_pages.open_window_help(example_dialog.HELP_KEY)
+    assert urls[-1].endswith("usage/case-setup.html#help-example-case")
+    window.deleteLater()
+
+
+def _now(call, on_success, on_error):
+    try:
+        answer = call()
+    except Exception as exc:                                    # noqa: BLE001
+        on_error(exc)
+    else:
+        on_success(answer)
+
+
+def test_no_example_is_said_so(qgis_app, monkeypatch):
+    from axqua_plugin.gui import example_dialog
+
+    class Client:
+        def example_list(self):
+            return {"source": "", "examples": []}
+
+    monkeypatch.setattr(example_dialog, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        _now(call, on_success, on_error))
+    window = example_dialog.ExampleDialog(Client())
+    assert window.status.text() == "No example case was found."
+    assert not window.get_button.isEnabled()
+    window.deleteLater()
+
+
 # ---------------------------------------------------------- the installation wizards
 
 

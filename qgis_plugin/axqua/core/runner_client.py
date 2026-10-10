@@ -416,6 +416,17 @@ class RunnerClient:
         args = ["case", "new", str(case)] + (["--name", name] if name else [])
         return self.call(args, timeout=60).data or {}
 
+    # -- the example cases --------------------------------------------------------
+    def example_list(self) -> dict:
+        """``{source, examples: [{name, title, summary, megabytes, files}]}``."""
+        return self.call(["example", "list"], timeout=120).data or {}
+
+    def example_get(self, name: str, folder: str | os.PathLike) -> dict:
+        """Put the example *name* into ``<folder>/<name>``. Returns ``{folder, case,
+        guide, files, megabytes, source}``. An example is a few megabytes."""
+        return self.call(["example", "get", str(name), "--folder", str(folder)],
+                         timeout=900).data or {}
+
     def case_check(self, case: str | os.PathLike) -> dict:
         """``{path, findings}``: everything that is wrong with the case."""
         return self.call(["check", str(case)], timeout=120).data or {}
