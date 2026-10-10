@@ -62,8 +62,9 @@ __all__ = ["LOCK_NAME", "QUEUE_NAME", "FolderLock", "applies", "enqueue", "held_
 class FolderLock(JobLock):
     """The job lock, on a file in a folder that is not a job directory."""
 
-    def __init__(self, folder: str | os.PathLike, label: str) -> None:
-        self.path = Path(folder) / LOCK_NAME
+    def __init__(self, folder: str | os.PathLike, label: str, *,
+                 name: str = LOCK_NAME) -> None:
+        self.path = Path(folder) / name
         self._held = False
         # what JobLock names in the message of a refused lock
         self.job = SimpleNamespace(job_id=label)

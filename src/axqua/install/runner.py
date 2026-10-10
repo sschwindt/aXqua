@@ -34,8 +34,9 @@ import signal
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from axqua.core.diagnostics import ERROR, WARNING, Finding
 from axqua.install import recipes
@@ -48,11 +49,16 @@ __all__ = ["ACTIVE", "bind", "cancel", "execute", "installs_root", "latest", "li
 ACTIVE = ("queued", "running")
 TERMINAL = ("succeeded", "failed", "cancelled")
 
-#: Keys of ``outputs`` whose file may be missing without failing the installation.
+#: Keys of ``outputs`` whose file may be missing without failing the installation, for a
+#: plan that does not name them itself (``optional_outputs``): one that an earlier
+#: version wrote.
 OPTIONAL = ("postprocessors.paraview",)
 
 #: Seconds a queued installation may take to start before it counts as lost.
 START_GRACE = 60.0
+
+#: Seconds :func:`bind` waits for another installation that is writing the profile.
+BIND_WAIT = 30.0
 
 
 def installs_root() -> Path:
@@ -327,12 +333,15 @@ def execute(folder: str | os.PathLike, *, echo: bool = False) -> int:
         return finish("failed", str(exc), 1)
 
     # ---- what the installer promised -------------------------------------------
-    outputs, absent = _resolve(plan.get("outputs") or {})
-    for pattern in plan.get("expects") or []:
-        if not glob.glob(pattern):
-            absent.append(pattern)
-    required = [item for item in absent if item not in
-                [plan["outputs"].get(key) for key in OPTIONAL]]
+    promised = plan.get("outputs") or {}
+    outputs, absent = _resolve(promised)
+    additions = plan.get("optional_outputs")
+    if additions is None:
+        additions = list(OPTIONAL)
+    spared = {promised.get(key) for key in additions}
+    required = [pattern for pattern in absent if pattern not in spared]
+    required += [pattern for pattern in plan.get("expects") or []
+                 if not glob.glob(pattern)]
     status["outputs"] = outputs
     if required:
         add(Finding(
@@ -356,15 +365,28 @@ def execute(folder: str | os.PathLike, *, echo: bool = False) -> int:
                 subject=subject,
                 remedy="Enter it in the profile editor: "
                        + ", ".join(f"{key} = {value}" for key, value in outputs.items())))
-    if "postprocessors.paraview" in (plan.get("outputs") or {}) \
-            and "postprocessors.paraview" not in outputs \
-            and "postprocessors.paraview" not in known:
-        add(Finding(WARNING, "axqua.install.paraview_missing",
-                    "ParaView is not installed, so it was not entered in the profile",
-                    subject="postprocessors.paraview",
-                    remedy="Install the system package paraview and enter "
-                           "/usr/bin/paraview in the profile."))
+    for key in additions:
+        # an addition that did not arrive, and that the profile does not name either
+        if key in promised and key not in outputs and key not in known \
+                and key in _MISSING_ADDITION:
+            code, message, remedy = _MISSING_ADDITION[key]
+            add(Finding(WARNING, code, message, subject=key, remedy=remedy))
     return finish("succeeded", "installed")
+
+
+#: ``key of outputs -> (code, message, remedy)`` for an addition that did not arrive.
+_MISSING_ADDITION = {
+    "postprocessors.paraview": (
+        "axqua.install.paraview_missing",
+        "ParaView is not installed, so it was not entered in the profile",
+        "Install the system package paraview and enter /usr/bin/paraview in the "
+        "profile."),
+    "postprocessors.visit": (
+        "axqua.install.visit_missing",
+        "VisIt was not installed, so it was not entered in the profile. The simulation "
+        "software itself is installed",
+        "Install VisIt alone with 'axqua install start postprocessors'."),
+}
 
 
 def _run_step(step: recipes.Step, folder: Path, out, status: dict[str, Any],
@@ -441,6 +463,40 @@ def _resolve(outputs: dict[str, str]) -> tuple[dict[str, str], list[str]]:
 # --------------------------------------------------------------------------- profile
 
 
+@contextmanager
+def _writing_profile(path: Path, *, wait: float | None = None) -> Iterator[None]:
+    """One process at a time reads, changes and writes the profile at *path*.
+
+    TELEMAC and OpenFOAM may be installed at once to save time. Each installation
+    ends by reading the profile, adding its entry and writing the profile back, so of
+    two that end in the same moment the one that writes last would discard the entry
+    of the other. The lock is the job lock on a file beside the profile: a holder that
+    crashed does not block the next installation.
+    """
+    from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+    from axqua.jobs.lock import LockedError
+    from axqua.jobs.workspace import FolderLock
+
+    lock = FolderLock(path.parent, path.name, name=f".{path.name}.lock")
+    deadline = time.monotonic() + (BIND_WAIT if wait is None else wait)
+    while True:
+        try:
+            lock.acquire(purpose="install.bind")
+            break
+        except LockedError as exc:
+            if time.monotonic() >= deadline:
+                raise AxquaEnvironmentError(
+                    f"another process is writing the profile {path} and did not finish",
+                    subject=str(path),
+                    remedy=f"If no installation is running, delete {lock.path}."
+                ) from exc
+            time.sleep(0.1)
+    try:
+        yield
+    finally:
+        lock.release()
+
+
 def bind(outputs: dict[str, str], *, probe: bool = True
          ) -> tuple[Path, list[Finding], set[str]]:
     """Enter an installation into the profile of this computer and check it.
@@ -451,27 +507,30 @@ def bind(outputs: dict[str, str], *, probe: bool = True
     A computer without a profile gets one, filled with what aXqua finds on it, exactly
     as *Create profile* does. A profile that exists but cannot be read is left alone,
     because writing over it would discard whatever its owner was in the middle of.
+
+    Reading, changing and writing happen under a lock (:func:`_writing_profile`): two
+    installations may end in the same moment, and each adds an entry of its own.
     """
     from axqua.core import profile as profiles
 
-    path = profiles.active_path()
-    if path is not None and path.is_file():
-        current = profiles.load(path)           # raises for a profile with an error
-    else:
-        current = profiles.detect()
-        path = path or profiles.default_path()
+    path = profiles.active_path() or profiles.default_path()
     subjects = []
-    for key, value in outputs.items():
-        section, name = key.split(".")[:2]
-        if section == "solvers":
-            binding = current.solvers.get(name) or profiles.SolverBinding()
-            binding.setup_script = Path(value)
-            current.solvers[name] = binding
-            subjects.append(f"solvers.{name}")
-        elif section == "postprocessors":
-            current.postprocessors[name] = Path(value)
-            subjects.append(f"postprocessors.{name}")
-    written = profiles.save(current, path)
+    with _writing_profile(path):
+        if path.is_file():
+            current = profiles.load(path)       # raises for a profile with an error
+        else:
+            current = profiles.detect()
+        for key, value in outputs.items():
+            section, name = key.split(".")[:2]
+            if section == "solvers":
+                binding = current.solvers.get(name) or profiles.SolverBinding()
+                binding.setup_script = Path(value)
+                current.solvers[name] = binding
+                subjects.append(f"solvers.{name}")
+            elif section == "postprocessors":
+                current.postprocessors[name] = Path(value)
+                subjects.append(f"postprocessors.{name}")
+        written = profiles.save(current, path)
     found = [f for f in profiles.check(current, probe=probe)
              if any(f.subject.startswith(subject) for subject in subjects)
              and f.code != "axqua.environment.ambient"]

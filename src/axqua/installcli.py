@@ -258,8 +258,6 @@ def _overview_lines(data: dict) -> list[str]:
 
 
 def _plan_lines(plan) -> list[str]:
-    from axqua.install import recipes
-
     data = plan.as_dict()
     lines = [f"{data['title']} on {data['host']['description']}",
              f"folder: {data['folder']}"]
@@ -274,7 +272,6 @@ def _plan_lines(plan) -> list[str]:
     lines += [f.line() for f in plan.findings]
     lines.append("ready to start: axqua install start " + plan.target if plan.ready
                  else "this installation cannot be started as it is")
-    del recipes
     return lines
 
 

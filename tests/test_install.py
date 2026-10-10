@@ -773,6 +773,116 @@ def test_visit_is_installed_alone_for_a_computer_that_only_runs_telemac(
     assert "VisIt launcher:" in Path(status["log"]).read_text()
 
 
+def test_a_missing_visit_does_not_cost_the_build_of_openfoam(installers, debian, tmp_path,
+                                                             monkeypatch):
+    """VisIt is an addition to the solvers. When it did not arrive where it was
+    expected, the build of hours before it counted as failed and was not entered in
+    the profile."""
+    from axqua.core import machine
+    from axqua.core import profile as profiles
+
+    monkeypatch.setattr(recipes, "PARAVIEW", tmp_path / "no-paraview-here")
+    script = installers / "OpenFOAM-installer" / "sediment_installer" / "installer.py"
+    renamed = script.read_text().replace('"visit-9.9.9-"', '"VisIt_9.9.9-"')
+    assert renamed != script.read_text()
+    script.write_text(renamed)              # VisIt lands in a folder of another name
+
+    plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no")
+    assert plan.optional_outputs == ["postprocessors.paraview", "postprocessors.visit"]
+    # the computer of a test may have a ParaView or a VisIt of its own, which the new
+    # profile would name
+    monkeypatch.setattr(machine, "DISCOVERY", {})
+    monkeypatch.setattr(profiles.shutil, "which", lambda _name, **_how: None)
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "succeeded", status
+    # (the stand-in environment script is no OpenFOAM v2406, which the check also says)
+    assert _codes(status["findings"]) >= {"axqua.install.paraview_missing",
+                                          "axqua.install.visit_missing"}
+    assert "axqua.install.output_missing" not in _codes(status["findings"])
+    profile = profiles.load_active(strict=True)
+    assert profile.solvers["openfoam"].setup_script == tmp_path / "target" / "shell-rc.sh"
+    assert profile.postprocessors == {}
+
+
+def test_for_the_postprocessors_alone_visit_is_what_has_to_arrive(installers, debian,
+                                                                  tmp_path):
+    package = installers / "OpenFOAM-installer" / "sediment_installer"
+    (package / "visualization.py").write_text(
+        "def install_visit(prefix, platform_tag, download, run):\n    return None\n")
+    plan = _plan("postprocessors", installers, debian, tmp_path)
+    assert plan.optional_outputs == ["postprocessors.paraview"]
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "failed"
+    assert _codes(status["findings"]) == {"axqua.install.output_missing"}
+    assert "visit" in status["findings"][0]["message"]
+
+
+def test_a_plan_of_an_earlier_version_keeps_its_one_addition(tmp_path):
+    """A plan that does not name its additions was written before plans did, and may
+    be running while aXqua is updated under it."""
+    folder = tmp_path / "install"
+    folder.mkdir()
+    (folder / "plan.json").write_text(json.dumps({
+        "target": "postprocessors", "steps": [], "options": {"bind": False},
+        "outputs": {"postprocessors.paraview": str(tmp_path / "no-paraview-here")}}))
+    (folder / "status.json").write_text(json.dumps({"id": "earlier", "state": "queued"}))
+    assert runner.execute(folder) == 0
+    status = json.loads((folder / "status.json").read_text())
+    assert status["state"] == "succeeded"
+    assert _codes(status["findings"]) == {"axqua.install.paraview_missing"}
+
+
+def test_two_installations_that_end_together_both_reach_the_profile(
+        tmp_path, fake_pysource, fake_bashrc, monkeypatch):
+    """TELEMAC and OpenFOAM may be installed at once. Each ends by reading the profile,
+    adding its entry and writing the profile back, and the one that wrote last
+    discarded the entry of the other."""
+    import threading
+
+    from axqua.core import profile as profiles
+
+    profiles.save(profiles.AxquaProfile(name="bench"), profiles.default_path())
+    has_read, may_write = threading.Event(), threading.Event()
+    load = profiles.load
+
+    def load_and_linger(path):
+        profile = load(path)
+        if threading.current_thread().name == "first":
+            has_read.set()
+            may_write.wait(10)
+        return profile
+
+    monkeypatch.setattr(profiles, "load", load_and_linger)
+    first = threading.Thread(name="first", target=runner.bind, kwargs={"probe": False},
+                             args=({"solvers.telemac.setup_script": str(fake_pysource)},))
+    second = threading.Thread(name="second", target=runner.bind, kwargs={"probe": False},
+                              args=({"solvers.openfoam.setup_script": str(fake_bashrc)},))
+    first.start()
+    assert has_read.wait(10)                # the first has read the profile ...
+    second.start()
+    second.join(0.5)
+    assert second.is_alive()                # ... so the second waits for it to write
+    may_write.set()
+    first.join(10)
+    second.join(10)
+    assert not first.is_alive() and not second.is_alive()
+    profile = profiles.load_active(strict=True)
+    assert profile.solvers["telemac"].setup_script == fake_pysource
+    assert profile.solvers["openfoam"].setup_script == fake_bashrc
+
+
+def test_a_profile_that_stays_locked_is_reported_and_not_waited_for_forever(tmp_path):
+    from axqua.core import profile as profiles
+    from axqua.core.errors import EnvironmentError as AxquaEnvironmentError
+
+    path = profiles.default_path()
+    with runner._writing_profile(path):
+        with pytest.raises(AxquaEnvironmentError, match="another process is writing"):
+            with runner._writing_profile(path, wait=0.3):
+                pass
+    assert list(path.parent.glob(".*.lock")) == []      # released, nothing left behind
+
+
 def _wait(condition, seconds=20.0):
     deadline = time.time() + seconds
     while time.time() < deadline:

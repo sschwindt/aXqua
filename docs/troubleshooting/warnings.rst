@@ -138,6 +138,11 @@ The *Check* page of an installation wizard, the last page of a finished installa
 ``ParaView is not installed``
     The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* page, or enter another ParaView in the profile editor (:ref:`install-paraview`).
 
+.. _axqua-install-visit-missing:
+
+``VisIt was not installed, so it was not entered in the profile``
+    OpenFOAM and the sediment solvers are installed and entered in the profile, but the installer did not leave VisIt where aXqua expects it. The simulation software works without VisIt. Install VisIt alone with the wizard for ParaView and VisIt on the *Configuration* tab, or with ``axqua install start postprocessors`` (:ref:`install-visit`).
+
 .. _axqua-install-step-incomplete:
 
 ``'Download the input files of the example cases' did not complete``
@@ -146,7 +151,7 @@ The *Check* page of an installation wizard, the last page of a finished installa
 .. _axqua-install-not-bound:
 
 ``the installation could not be entered in the profile``
-    The program is installed, but the profile of the computer could not be written, typically because the existing profile contains an error. The message lists the entries. Open the profile editor on the *Configuration* tab, correct the profile, and enter them there (:ref:`plugin-profile`).
+    The program is installed, but the profile of the computer could not be written, typically because the existing profile contains an error, or because another installation was writing the profile at the same moment and did not finish. The message lists the entries. Open the profile editor on the *Configuration* tab, correct the profile, and enter them there (:ref:`plugin-profile`).
 
 Simulation software
 -------------------

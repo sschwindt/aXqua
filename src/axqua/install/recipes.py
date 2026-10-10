@@ -38,6 +38,8 @@ from pathlib import Path
 from typing import Any
 
 from axqua.core.diagnostics import ERROR, WARNING, Finding
+# One constant for the release the profile check accepts and the release that is installed.
+from axqua.core.profile import OPENFOAM_RELEASE
 from axqua.install import host as hosts
 
 __all__ = ["ENV_INSTALLERS", "PINNED", "REPOSITORY", "SYSTEM_PATH", "TARGETS", "TITLES",
@@ -69,7 +71,6 @@ TELEMAC_SCRIPTS = {
     "ubuntu24": ("ubuntu24-mint22/telemac_ubuntu24_installer.sh", "pysource.mint22.sh"),
 }
 OPENFOAM_DIR = "OpenFOAM-installer"
-OPENFOAM_RELEASE = "2406"
 PARAVIEW = Path("/usr/bin/paraview")
 
 #: Free space below which a plan warns, in GiB.
@@ -697,6 +698,9 @@ class Plan:
     unavailable: list[str] = field(default_factory=list)
     package_note: str = ""              # why missing packages may not matter here
     outputs: dict[str, str] = field(default_factory=dict)
+    #: Keys of ``outputs`` that are an addition to what this target installs. A missing
+    #: one is reported and does not fail the installation.
+    optional_outputs: list[str] = field(default_factory=list)
     expects: list[str] = field(default_factory=list)
     estimate: str = ""
     notes: list[str] = field(default_factory=list)
@@ -724,6 +728,7 @@ class Plan:
                          "elevation": elevation() if self.missing else "",
                          "note": self.package_note},
             "outputs": dict(self.outputs),
+            "optional_outputs": list(self.optional_outputs),
             "expects": list(self.expects),
             "estimate": self.estimate,
             "notes": list(self.notes),
@@ -1015,6 +1020,8 @@ def _plan_openfoam(out: Plan, checkout: Path, add) -> None:
         out.outputs["postprocessors.paraview"] = str(PARAVIEW)
         out.outputs["postprocessors.visit"] = str(
             prefix / "apps" / f"visit-*-{out.host.base}" / "bin" / "visit")
+        # Additions to the solvers: a build of hours is not lost to a missing viewer.
+        out.optional_outputs += ["postprocessors.paraview", "postprocessors.visit"]
     out.notes.append("Installed are sediDriftFoam, sediDriftFoam2, the stage-discharge "
                      "outflow boundary of the BAW"
                      + (", ParaView and VisIt." if out.options.visualization else "."))
@@ -1034,6 +1041,8 @@ def _plan_postprocessors(out: Plan, checkout: Path, add) -> None:
     out.outputs["postprocessors.visit"] = str(
         prefix / "apps" / f"visit-*-{out.host.base}" / "bin" / "visit")
     out.outputs["postprocessors.paraview"] = str(PARAVIEW)
+    # VisIt is what this target installs, so only ParaView may be missing.
+    out.optional_outputs.append("postprocessors.paraview")
     out.notes.append("ParaView is the package of the operating system. VisIt is "
                      f"downloaded from its publisher and installed in {prefix}.")
     if not PARAVIEW.is_file():
