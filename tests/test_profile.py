@@ -330,6 +330,66 @@ def test_submit_accepts_a_profile_file_and_picks_the_code_from_the_kind(
                              solver="telemac", cfg=cfg)
 
 
+def test_a_job_computes_with_the_script_its_case_was_loaded_with(tmp_path, fake_pysource,
+                                                                 monkeypatch):
+    """The environment variable and a ``solvers.local.yml`` outrank the profile when a
+    case is loaded. A job took the script of the profile all the same, and so computed
+    with another installation than the one its case named."""
+    of_the_profile = tmp_path / "of-the-profile.sh"
+    of_the_profile.touch()
+    profiles.save(profiles.AxquaProfile(name="bench", launcher="posix", solvers={
+        "telemac": profiles.SolverBinding(
+            setup_script=of_the_profile, mpi_processes=6, config_name="gnu.dynamic",
+            overrides={"TELEMAC_TMP": "/scratch"})}), profiles.default_path())
+    case = _case(tmp_path)
+    plain = job_profiles.implicit(load_config(case), "telemac")
+    assert (plain.name, plain.setup_script) == ("bench:telemac", of_the_profile)
+    assert (plain.config_name, plain.overrides) == ("gnu.dynamic",
+                                                    {"TELEMAC_TMP": "/scratch"})
+
+    (tmp_path / "solvers.local.yml").write_text(f"telemac: {fake_pysource}\n")
+    cfg = load_config(case)
+    local = job_profiles.implicit(cfg, "telemac")
+    assert local.setup_script == cfg.telemac.pysource == fake_pysource
+    assert "solvers.local.yml" in local.name            # the job record says which one
+    # what the profile says about the computer stays ...
+    assert (local.mpi_processes, local.launcher) == (6, "posix")
+    # ... and what it holds for its own installation is not applied to another one
+    assert (local.config_name, local.overrides) == (None, {})
+
+    other = tmp_path / "from-the-environment.sh"
+    other.touch()
+    monkeypatch.setenv("AXQUA_TELEMAC_PYSOURCE", str(other))
+    cfg = load_config(case)
+    assert job_profiles.implicit(cfg, "telemac").setup_script == cfg.telemac.pysource \
+        == other
+
+    # A variable that names the installation of the profile changes nothing.
+    (tmp_path / "solvers.local.yml").unlink()
+    monkeypatch.setenv("AXQUA_TELEMAC_PYSOURCE", str(of_the_profile))
+    same = job_profiles.implicit(load_config(case), "telemac")
+    assert (same.name, same.config_name) == ("bench:telemac", "gnu.dynamic")
+
+
+def test_a_named_profile_is_not_taken_for_a_file_of_the_same_name(tmp_path, fake_pysource,
+                                                                  fake_bashrc, monkeypatch):
+    """``--profile cluster`` in a folder that happens to hold a file ``cluster``."""
+    job_profiles.save_profiles({"cluster": job_profiles.Profile(
+        name="cluster", setup_script=fake_pysource)})
+    (tmp_path / "cluster").write_text("some notes, not a profile\n")
+    monkeypatch.chdir(tmp_path)
+    assert job_profiles.resolve("cluster", solver="telemac").setup_script == fake_pysource
+
+    # A profile file without the suffix is still accepted, after the names ...
+    plain = tmp_path / "office"
+    plain.write_text(yaml.safe_dump(profiles.AxquaProfile(name="office", solvers={
+        "openfoam": profiles.SolverBinding(setup_script=fake_bashrc)}).as_dict()))
+    assert job_profiles.resolve("office", solver="openfoam").setup_script == fake_bashrc
+    # ... and a name that is neither is named as what it was asked for.
+    with pytest.raises(ConfigError, match="no solver profile named 'nowhere'"):
+        job_profiles.resolve("nowhere", solver="telemac")
+
+
 # ------------------------------------------------------------------ the case file
 
 
@@ -376,6 +436,37 @@ def test_a_variant_keeps_the_name_that_tells_it_apart(tmp_path, fake_pysource):
                    name="case-config-vof.yml")
     assert cli.main(["migrate", str(source), "--to-case"]) == 0
     assert (tmp_path / "case-config-vof.axq-case").is_file()
+
+
+def test_migrate_does_not_replace_a_case_file_that_nobody_named(tmp_path, fake_pysource,
+                                                                caplog):
+    """The name of the new file is derived, so running the command a second time used
+    to write over a case file that had been edited since the first."""
+    source = _case(tmp_path, telemac=f"  pysource: {fake_pysource}")
+    assert cli.main(["migrate", str(source), "--to-case"]) == 0
+    written = tmp_path / f"{tmp_path.name}.axq-case"
+    written.write_text(written.read_text() + "# a note written by hand\n")
+
+    with caplog.at_level(logging.ERROR, logger="axqua"):
+        assert cli.main(["migrate", str(source), "--to-case"]) == 1
+    assert "a note written by hand" in written.read_text()
+    assert f"-o {written}" in caplog.text               # and it says how to replace it
+    assert cli.main(["migrate", str(source), "--to-case", "-o", str(written)]) == 0
+    assert "a note written by hand" not in written.read_text()
+
+
+def test_migrate_brings_a_case_file_up_to_date_where_it_is(tmp_path, fake_pysource):
+    """For a file that is a case file already, the derived name is the file itself."""
+    _profile(tmp_path, telemac=str(fake_pysource))
+    source = _case(tmp_path, name="reach.axq-case")
+    before = source.read_text()
+    assert cli.main(["migrate", str(source), "--to-case"]) == 0
+    assert (tmp_path / "reach.axq-case.bak").read_text() == before
+    assert yaml.safe_load(source.read_text())["project"]["name"] == "profile-demo"
+    assert "pysource" not in yaml.safe_load(source.read_text()).get("telemac", {})
+    # --in-place does not write where TELEMAC is on this computer into a case file either
+    assert cli.main(["migrate", str(source), "--in-place"]) == 0
+    assert "pysource" not in yaml.safe_load(source.read_text()).get("telemac", {})
 
 
 def test_the_case_file_of_a_folder_is_found_without_being_named(tmp_path):
@@ -425,6 +516,44 @@ def test_the_command_creates_shows_and_checks_a_profile(tmp_path, capsys, fake_p
     assert checked["ok"] and checked["exit"] == 0             # findings are a result
     assert {f["subject"] for f in checked["data"]["findings"]} >= \
         {"solvers.openfoam.setup_script"}
+
+
+def test_init_asks_about_the_file_it_is_going_to_write(tmp_path, capsys, monkeypatch):
+    """``init office`` writes ``office.axq-profile``. It looked for a file ``office``,
+    found none, and replaced the profile without being asked to."""
+    monkeypatch.setattr(machine, "DISCOVERY", {})
+    monkeypatch.setattr(profiles.shutil, "which", lambda name: None)
+    kept = profiles.save(profiles.AxquaProfile(name="kept"), tmp_path / "office")
+    assert kept == tmp_path / "office.axq-profile"
+
+    refused = _run(capsys, "init", str(tmp_path / "office"))
+    assert not refused["ok"] and "--force" in refused["error"]["remedy"]
+    assert profiles.load(kept).name == "kept"
+    assert _run(capsys, "init", str(tmp_path / "office"), "--force")["ok"]
+    assert profiles.load(kept).name != "kept"
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["office.axq-profile"]
+
+
+def test_a_profile_is_written_back_to_the_file_it_was_read_from(tmp_path, capsys,
+                                                                monkeypatch):
+    """A profile may be kept in a file of any name. Saving it wrote a second file with
+    the suffix beside it, which nothing read, so the change never took effect."""
+    import io
+    named = tmp_path / "this-computer.yml"
+    named.write_text(yaml.safe_dump(profiles.AxquaProfile(name="first").as_dict()))
+    monkeypatch.setenv(profiles.ENV_VAR, str(named))
+    assert profiles.load_active(strict=True).name == "first"
+
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"name": "second"})))
+    assert Path(_run(capsys, "write")["data"]["path"]) == named
+    assert profiles.load_active(strict=True).name == "second"
+    assert sorted(path.name for path in tmp_path.iterdir()) == ["this-computer.yml"]
+
+    # A name without a file gets the suffix, and is found under it again.
+    monkeypatch.setenv(profiles.ENV_VAR, str(tmp_path / "office"))
+    assert profiles.active_path() == tmp_path / "office.axq-profile"
+    profiles.save(profiles.AxquaProfile(name="third"), profiles.active_path())
+    assert profiles.load_active(strict=True).name == "third"
 
 
 def test_the_command_replaces_a_profile_from_json_and_reports_findings(

@@ -78,7 +78,7 @@ LAUNCHERS = ("auto", "systemd", "posix", "windows", "wsl")
 OPENFOAM_RELEASE = "2406"
 
 __all__ = ["AxquaProfile", "SolverBinding", "active_path", "check", "default_path",
-           "detect", "load", "load_active", "save"]
+           "detect", "file_path", "load", "load_active", "save"]
 
 
 def _path(value: Any, base: Path | None, *, verbatim: bool = False) -> Path | None:
@@ -266,13 +266,27 @@ def default_path() -> Path:
     return machine.settings_path().parent / DEFAULT_NAME
 
 
+def file_path(path: str | os.PathLike) -> Path:
+    """The file that a profile named *path* is kept in, whether or not it exists yet.
+
+    A file that exists is taken as it is named, so that a profile is written back to
+    the file it was read from. A name without a file gets the suffix. Reading, writing
+    and the question "is there one already?" all ask here, so that they cannot mean
+    two different files.
+    """
+    target = Path(path).expanduser()
+    if target.suffix == SUFFIX or target.is_file():
+        return target
+    return target.with_name(target.name + SUFFIX)
+
+
 def active_path(explicit: str | os.PathLike | None = None) -> Path | None:
     """The profile in force, or ``None`` when this computer has none."""
     if explicit:
-        return Path(explicit).expanduser()
+        return file_path(explicit)
     named = os.environ.get(ENV_VAR)
     if named:
-        return Path(named).expanduser()
+        return file_path(named)
     default = default_path()
     return default if default.is_file() else None
 
@@ -284,7 +298,7 @@ def load(path: str | os.PathLike) -> AxquaProfile:
     """Read a profile. Raises :class:`ConfigError` for anything that is not one."""
     import yaml
 
-    target = Path(path).expanduser()
+    target = file_path(path)
     if not target.is_file():
         raise ConfigError(f"profile not found: {target}", subject=str(target),
                           remedy="Create one with 'axqua profile init'.")
@@ -347,9 +361,7 @@ def save(profile: AxquaProfile, path: str | os.PathLike | None = None) -> Path:
     """Write the profile, atomically, and return where it went."""
     import yaml
 
-    target = Path(path).expanduser() if path else (profile.path or default_path())
-    if target.suffix != SUFFIX:
-        target = target.with_name(target.name + SUFFIX)
+    target = file_path(path or profile.path or default_path())
     target.parent.mkdir(parents=True, exist_ok=True)
     text = yaml.safe_dump(profile.as_dict(), sort_keys=False, default_flow_style=False,
                           allow_unicode=True)

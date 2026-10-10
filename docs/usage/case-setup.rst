@@ -35,6 +35,8 @@ Case files of earlier aXqua versions are named ``case-config.yml`` and may conta
 
    axqua migrate case-config.yml --to-case
 
+The new file is named after the folder of the case. The command does not replace a case file of that name that exists already, because it may have been edited since it was written. To replace it, name it with ``-o <file>``. Applied to a file that is a case file of the current type already, the command rewrites that file and keeps the previous version as ``<name>.bak``.
+
 A minimal case file looks as follows:
 
 .. code-block:: yaml

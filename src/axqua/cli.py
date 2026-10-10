@@ -512,7 +512,9 @@ def _migrate_parser() -> argparse.ArgumentParser:
                    help="write an .axq-case file beside the config (or to --out): the "
                         "same case without the settings that describe this computer, "
                         "which belong to its profile ('axqua profile'). The original "
-                        "file is left as it is.")
+                        "file is left as it is. An .axq-case file of that name that "
+                        "exists already is not replaced unless --out names it. For a "
+                        "config that is an .axq-case file itself, this is --in-place.")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
@@ -534,14 +536,26 @@ def _run_migrate(argv: list[str]) -> int:
         # becomes case-config-vof.axq-case), since that is what tells variants apart.
         stem = (args.config.resolve().parent.name
                 if args.config.name in casefile.LEGACY_NAMES else args.config.stem)
-        args.out = args.config.with_name(stem + casefile.SUFFIX)
+        derived = args.config.with_name(stem + casefile.SUFFIX)
+        if derived.resolve() == args.config.resolve():
+            # The config is a case file already, so there is no second file to write:
+            # it is brought up to date where it is, with the copy --in-place keeps.
+            args.in_place = True
+        elif derived.exists():
+            # A name nobody typed must not cost a file that may have been edited since
+            # it was written. Naming it is the way to say that it may be replaced.
+            log.error("%s exists already and was left as it is. To replace it, name "
+                      "it: -o %s. To keep both, name another file.", derived, derived)
+            return 1
+        else:
+            args.out = derived
+    target = args.config if args.in_place else args.out
     # A file of the case type never carries machine settings, however it was asked for.
-    portable = bool(args.to_case or (args.out and casefile.is_case_file(args.out)))
+    portable = bool(args.to_case or (target and casefile.is_case_file(target)))
     try:
         cfg = load_config(args.config)
         # Written relative to where the file will LIVE, not where it came from, so
         # `-o elsewhere/case.yml` does not silently break every relative data path.
-        target = args.config if args.in_place else args.out
         base = Path(target).resolve().parent if target else Path(cfg.config_dir)
         text = dump_config(cfg, base=base, portable=portable)
         moved = schema.strip_machine_fields(_raw_config(args.config)) if portable else []
@@ -560,12 +574,13 @@ def _run_migrate(argv: list[str]) -> int:
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(text)
         log.info("wrote %s", args.out)
-        if moved:
-            log.info("left out, because they describe this computer and belong to its "
-                     "profile: %s. Run 'axqua profile init' if it has none yet.",
-                     ", ".join(moved))
     else:
         print(text, end="")
+        return 0
+    if moved:
+        log.info("left out, because they describe this computer and belong to its "
+                 "profile: %s. Run 'axqua profile init' if it has none yet.",
+                 ", ".join(moved))
     return 0
 
 

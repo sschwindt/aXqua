@@ -65,7 +65,10 @@ def run_profile(argv: list[str]) -> int:
                         lines=_yaml_lines(found))
 
         if args.action == "init":
-            target = Path(args.file) if args.file else profiles.default_path()
+            # The file that will be written, which is not always the name as typed:
+            # 'init office' writes office.axq-profile.
+            target = profiles.file_path(args.file) if args.file \
+                else profiles.default_path()
             if target.is_file() and not args.force:
                 raise ConfigError(
                     f"{target} already exists", subject=str(target),
