@@ -1,4 +1,7 @@
-"""The example cases of TELEMAC, reduced to what a run reads.
+"""The example cases that TELEMAC is distributed with, reduced to what a run reads.
+
+These are TELEMAC's own examples, in the folder ``examples`` of a TELEMAC installation.
+They are not the example cases of aXqua.
 
 TELEMAC is distributed with about 830 example cases. Their steering files, boundary
 files and Fortran files are ordinary files of the repository and come with the clone.
@@ -28,7 +31,7 @@ The installation runs the installer script with ``GIT_LFS_SKIP_SMUDGE=1`` first,
 that the checkout leaves every LFS file as a pointer of a few lines, and this module
 afterwards. A failure here (the download server of TELEMAC limits requests) leaves a
 working TELEMAC and examples without their geometry; it is reported and can be
-repeated with ``axqua install examples <folder>``.
+repeated with ``axqua install telemac-examples <folder>``.
 """
 
 from __future__ import annotations

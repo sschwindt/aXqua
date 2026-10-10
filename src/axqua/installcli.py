@@ -7,7 +7,7 @@
 ``status``     how far an installation is, with the end of its log (``--tail``)
 ``cancel``     stop an installation; what is already built stays
 ``list``       every installation on record
-``examples``   download the files that the example cases of an installed TELEMAC read
+``telemac-examples``  download the files that TELEMAC's own example cases read
 
 The installation wizards of the QGIS plugin are these commands with a window around
 them. ``run`` is what a detached installation executes and is not meant to be typed.
@@ -26,7 +26,7 @@ from axqua.jobcli import _common, _setup_logging, emit, fail, parse_args
 log = logging.getLogger("axqua")
 
 ACTIONS = ("overview", "plan", "packages", "start", "run", "status", "cancel", "list",
-           "examples")
+           "telemac-examples")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -114,9 +114,9 @@ def run_install(argv: list[str]) -> int:
         if args.action == "run":
             return runner.execute(Path(args.target or "."))
 
-        if args.action == "examples":
+        if args.action == "telemac-examples":
             from axqua.core.errors import ConfigError
-            from axqua.install import examples
+            from axqua.install import telemac_examples
 
             home = Path(args.target or "").expanduser()
             if not (home / "sources").is_dir() or not (home / "examples").is_dir():
@@ -126,7 +126,7 @@ def run_install(argv: list[str]) -> int:
                     remedy="Name the folder telemac-mascaret of the installation.")
             # progress belongs on stderr when stdout carries the JSON document
             stream = sys.stderr if args.as_json else sys.stdout
-            done = examples.fetch_inputs(
+            done = telemac_examples.fetch_inputs(
                 home, say=lambda text: print(text, file=stream, flush=True))
             emit(command, done, as_json=args.as_json, lines=[])
             return 0 if not done["missing"] else 1

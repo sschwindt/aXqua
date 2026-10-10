@@ -141,7 +141,7 @@ The *Check* page of an installation wizard, the last page of a finished installa
 .. _axqua-install-step-incomplete:
 
 ``'Download the input files of the example cases' did not complete``
-    TELEMAC is installed and works, but the input files of its example cases were not downloaded completely. The message quotes the last lines of the installation log. The usual cause is the download server of TELEMAC, which refuses further requests for a while after many downloads from one network (``Rate limit exceeded``, ``error: 429``). Repeat the download later with the command that the message names, ``axqua install examples <folder>``. It fetches only the files that are still missing.
+    TELEMAC is installed and works, but the input files of its example cases were not downloaded completely. The message quotes the last lines of the installation log. The usual cause is the download server of TELEMAC, which refuses further requests for a while after many downloads from one network (``Rate limit exceeded``, ``error: 429``). Repeat the download later with the command that the message names, ``axqua install telemac-examples <folder>``. It fetches only the files that are still missing.
 
 .. _axqua-install-not-bound:
 

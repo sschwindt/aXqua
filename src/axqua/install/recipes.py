@@ -910,7 +910,7 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
     # computer more than an hour of an installation whose build takes minutes. Nothing
     # in the source code is stored that way. So the checkout leaves them out unless
     # everything is asked for, and what a run of an example reads is fetched afterwards
-    # as one list (see axqua.install.examples).
+    # as one list (see axqua.install.telemac_examples).
     choice = out.options.telemac_examples
     out.steps.append(Step("Download and build TELEMAC", argv,
                           env={} if choice == "all" else {"GIT_LFS_SKIP_SMUDGE": "1"}))
@@ -920,7 +920,8 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
     if choice == "inputs":
         out.steps.append(Step(
             "Download the input files of the example cases",
-            [sys.executable, "-B", "-m", "axqua", "install", "examples", str(home)],
+            [sys.executable, "-B", "-m", "axqua", "install", "telemac-examples",
+             str(home)],
             optional=True))
         out.notes.append("Of the example cases of TELEMAC, the files that a run reads "
                          "are downloaded (about 360 files, 460 MB), without the "
@@ -930,7 +931,7 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
         out.estimate = ESTIMATES["telemac-none"]
         out.notes.append("The example cases of TELEMAC come with their steering files "
                          "only. To get their geometry files later, run 'axqua install "
-                         f"examples {home}'.")
+                         f"telemac-examples {home}'.")
     else:
         out.estimate = ESTIMATES["telemac-all"]
         out.notes.append("All files of the example cases and the manuals of TELEMAC "

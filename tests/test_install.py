@@ -358,7 +358,8 @@ def test_of_the_examples_of_telemac_only_what_a_run_reads_is_downloaded(
     build, examples = default.steps[-2], default.steps[-1]
     assert build.env == {"GIT_LFS_SKIP_SMUDGE": "1"}      # the checkout fetches nothing
     assert build.as_dict()["command"].startswith("GIT_LFS_SKIP_SMUDGE=1 /bin/bash ")
-    assert examples.argv[1:] == ["-B", "-m", "axqua", "install", "examples", str(home)]
+    assert examples.argv[1:] == ["-B", "-m", "axqua", "install", "telemac-examples",
+                                str(home)]
     assert examples.optional and not build.optional
     assert "minutes" in default.estimate
     assert any("files that a run reads" in note for note in default.notes)
@@ -371,7 +372,7 @@ def test_of_the_examples_of_telemac_only_what_a_run_reads_is_downloaded(
     nothing = _plan("telemac", installers, debian, tmp_path, telemac_examples="none")
     assert nothing.steps[-1].env == {"GIT_LFS_SKIP_SMUDGE": "1"}
     assert len(nothing.steps) == len(default.steps) - 1
-    assert any("axqua install examples" in note for note in nothing.notes)
+    assert any("axqua install telemac-examples" in note for note in nothing.notes)
 
     # the switch this setting once was is still understood
     assert recipes.Options.from_dict({"telemac_examples": False}).telemac_examples == "none"
@@ -409,7 +410,7 @@ def test_examples_that_could_not_be_downloaded_do_not_fail_the_installation(
     (finding,) = status["findings"]
     assert finding["code"] == "axqua.install.step_incomplete"
     assert finding["severity"] == "warning"
-    assert "axqua install examples" in finding["remedy"]
+    assert "axqua install telemac-examples" in finding["remedy"]
     assert status["bound"]                                # and it is in the profile
 
 
@@ -947,7 +948,7 @@ def telemac_tree(tmp_path) -> Path:
 
 
 def test_telemac_itself_says_which_files_a_run_reads(telemac_tree):
-    from axqua.install import examples
+    from axqua.install import telemac_examples as examples
 
     assert examples.read_keywords(telemac_tree) == {
         "GEOMETRY FILE", "FICHIER DE GEOMETRIE", "PREVIOUS COMPUTATION FILE",
@@ -964,7 +965,7 @@ def test_telemac_itself_says_which_files_a_run_reads(telemac_tree):
 
 def test_the_input_files_are_asked_for_as_lists_and_what_is_missing_is_named(
         telemac_tree):
-    from axqua.install import examples
+    from axqua.install import telemac_examples as examples
 
     said, asked = [], []
 
@@ -985,7 +986,7 @@ def test_the_input_files_are_asked_for_as_lists_and_what_is_missing_is_named(
 
 
 def test_a_refused_download_is_repeated_and_then_reported(telemac_tree, monkeypatch):
-    from axqua.install import examples
+    from axqua.install import telemac_examples as examples
 
     monkeypatch.setattr(examples.time, "sleep", lambda seconds: None)
     calls = []
@@ -1011,6 +1012,6 @@ def test_a_refused_download_is_repeated_and_then_reported(telemac_tree, monkeypa
 def test_the_command_tells_a_telemac_folder_from_another_one(tmp_path, capsys):
     from axqua.installcli import run_install
 
-    assert run_install(["examples", str(tmp_path), "--json"]) != 0
+    assert run_install(["telemac-examples", str(tmp_path), "--json"]) != 0
     answer = json.loads(capsys.readouterr().out)
     assert "not the folder of a TELEMAC installation" in answer["error"]["message"]

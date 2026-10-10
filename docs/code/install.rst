@@ -18,7 +18,7 @@ Installation plans
 Example cases of TELEMAC
 ------------------------
 
-.. automodule:: axqua.install.examples
+.. automodule:: axqua.install.telemac_examples
    :members:
 
 Running an installation
