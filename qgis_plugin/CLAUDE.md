@@ -154,8 +154,15 @@ included, because an arrow has a smallest length. Now: on a grid of the map
 (`ARROW_SPACING` pixels), none below `VECTOR_MINIMUM` (0.05 m/s), colored by magnitude in
 warm colors over the blue depth and dark over the velocity fill (a vector in the color of
 its background cannot be seen). To look at a style without a display, render the layer
-with `QgsMapRendererParallelJob` and a temporal range at the last time step
-(`setStaticScalarDatasetIndex` is not in the Python interface of 3.44). Processing algorithms **validate, submit and return**;
+with `QgsMapRendererParallelJob` and a temporal range at the last time step.
+**`setStaticScalarDatasetIndex` is not in the Python interface of QGIS 3.44** (only the
+getter is), which had two consequences nobody had seen, because no test rendered a frame:
+the movie export called it and stopped at its first frame, and **a loaded result showed
+its first time step**, which of a steady run is the initial state with standing water and
+no velocity. A time step is selected through the time the map is drawn for
+(`result_loader.time_range_of`): the movie sets it on its map settings per frame, and
+*Load results* sets the canvas and the Temporal Controller to the last step
+(`show_last_time_step`) and says so in its message. Processing algorithms **validate, submit and return**;
 they never execute.
 
 **Two bugs found only by running it under real PyQGIS**, both of which present as silence
