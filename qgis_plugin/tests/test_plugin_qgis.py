@@ -922,6 +922,13 @@ def test_selecting_the_folder_of_a_program_fills_the_row_below(qgis_app, monkeyp
                                         programs={"visit": "/opt/visit/bin/visit"}))
     assert editor._widgets["installations.visit"].text() == "/opt/visit"
     assert not editor.dirty
+    # PROFILE names the launcher of VisIt itself; a row left empty says what is run
+    folders_only = ProfileEditor(client, {"installations": {"visit": "/opt/visit"},
+                                          "programs": {"visit": "/opt/visit/bin/visit"}})
+    row = folders_only._widgets["postprocessors.visit"]
+    assert row.text() == "" and row.placeholderText() == \
+        "found in the installation folder: /opt/visit/bin/visit"
+    folders_only.deleteLater()
 
     # a row that was not changed asks nothing, so the row below keeps what it says
     editor.locate("installations.visit")

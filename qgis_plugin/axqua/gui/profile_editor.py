@@ -123,6 +123,8 @@ class ProfileEditor(EditorDialog):
         self.client = client
         self.setWindowTitle("aXqua profile of this computer")
         self.resize(720, 640)
+        #: program -> the file aXqua found in its installation folder
+        self._found = dict((profile or {}).get("programs") or {})
         profile = {k: v for k, v in (profile or {}).items() if k not in NOT_IN_THE_FILE}
         self._saved = copy.deepcopy(profile)       # what is on disk, as far as we know
         self._base = copy.deepcopy(profile)        # carries the entries without a row
@@ -260,6 +262,12 @@ class ProfileEditor(EditorDialog):
                 if key in LOCATED:
                     # what the profile says already is not looked into again
                     self._asked[key] = widget.text().strip()
+        # A profile may name the folder only. The row below is then empty, and says
+        # which file aXqua runs instead of looking like a missing entry.
+        for program, target, _what in LOCATED.values():
+            if self._found.get(program) and not self._widgets[target].text():
+                self._widgets[target].setPlaceholderText(
+                    f"found in the installation folder: {self._found[program]}")
 
     def values(self) -> dict:
         """The profile as the rows state it, with every entry that has no row kept."""

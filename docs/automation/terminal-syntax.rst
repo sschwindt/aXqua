@@ -42,6 +42,8 @@ Setting up the computer (:doc:`../installation/plugin-setup`):
      - Verify the profile, including whether TELEMAC and OpenFOAM can be started.
    * - ``axqua profile show``
      - Print the profile in use.
+   * - ``axqua profile locate telemac <folder>``
+     - Print the environment script that aXqua finds in the installation folder of TELEMAC. The other programs are ``openfoam``, ``paraview`` and ``visit``. Enter the folder in the block ``installations`` of the profile.
 
 Installing the simulation software (:doc:`../installation/simulation-software`):
 
@@ -56,7 +58,7 @@ Installing the simulation software (:doc:`../installation/simulation-software`):
    * - ``axqua install plan telemac``
      - Show what the installation would do, which system packages are missing, and the command that installs them. Nothing is changed. The other programs are ``openfoam`` and ``postprocessors``.
    * - ``axqua install start telemac``
-     - Start the installation as a process of its own and enter the result in the profile. Add ``--foreground`` to follow the installation in the terminal. ``--folder`` selects the installation folder.
+     - Start the installation as a process of its own and enter the result in the profile. Add ``--foreground`` to follow the installation in the terminal. ``--folder`` selects the installation folder. For ``openfoam`` and ``postprocessors``, ``--no-visit`` leaves VisIt out.
    * - ``axqua install status telemac --tail 20``
      - Show the state of the installation and the last lines of its log.
    * - ``axqua install cancel telemac``
