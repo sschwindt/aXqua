@@ -438,6 +438,65 @@ def apply_map_style(layer, key: str, *, min_depth: float | None = None,
     return notes
 
 
+def time_range_of(layer, group: int, step: int):
+    """The moment of one time step of a mesh layer, as the range a map is drawn for.
+
+    This is how a time step is selected from Python: the mesh layer of QGIS 3.44 can
+    be asked which time step it shows when the map has no time
+    (``staticScalarDatasetIndex``) and cannot be told. Found by drawing a result; the
+    movie export called the missing function and stopped at its first frame.
+    """
+    from qgis.core import QgsDateTimeRange, QgsMeshDatasetIndex
+
+    when = layer.temporalProperties().referenceTime().addMSecs(
+        int(layer.datasetRelativeTimeInMilliseconds(QgsMeshDatasetIndex(group, step))))
+    return QgsDateTimeRange(when, when.addMSecs(1))
+
+
+def show_last_time_step(canvas, layers) -> str:
+    """Make the map show the end of the results in *layers*. Returns a sentence for
+    the user, or ``""`` where no layer has more than one time step.
+
+    Without this a loaded result shows its **first** time step: of a steady
+    simulation that is the initial state, with standing water and no velocity, which
+    looks like a result and is none. The map is set to the time of the last step; the
+    Temporal Controller of QGIS selects another one.
+    """
+    from qgis.core import QgsMeshDatasetIndex, QgsMeshLayer
+
+    latest = None
+    for layer in layers:
+        if not isinstance(layer, QgsMeshLayer):
+            continue
+        group = layer.rendererSettings().activeScalarDatasetGroup()
+        if group < 0 or not layer.temporalProperties().referenceTime().isValid():
+            continue
+        count = layer.datasetCount(QgsMeshDatasetIndex(group, 0))
+        if count < 2:
+            continue
+        span = time_range_of(layer, group, count - 1)
+        if latest is None or span.begin() > latest.begin():
+            latest = span
+    if latest is None:
+        return ""
+    controller = getattr(canvas, "temporalController", lambda: None)()
+    try:
+        # the Temporal Controller panel then says what the map shows
+        from qgis.core import QgsTemporalNavigationObject as Navigation
+
+        from ..compat import enum_value
+        if isinstance(controller, Navigation):
+            controller.setNavigationMode(enum_value(
+                Navigation, "NavigationMode.FixedRange", "FixedRange"))
+            controller.setTemporalExtents(latest)
+    except (ImportError, AttributeError):          # an interface without the panel
+        pass
+    canvas.setTemporalRange(latest)
+    canvas.refresh()
+    return ("The map shows the last time step of the result. The Temporal Controller "
+            "of QGIS selects another one.")
+
+
 def group_metadata(layer, index: int):
     """Dataset-group metadata for group *index*, whichever spelling QGIS accepts.
 

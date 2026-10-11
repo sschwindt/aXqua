@@ -227,8 +227,9 @@ def test_a_mesh_variable_really_is_styled(project, tmp_path):
     assert added[0].rendererSettings().activeScalarDatasetGroup() == 0
 
 
-def _result_layer(folder: Path):
-    """The fixture mesh with a water depth and a velocity, as a result carries them."""
+def _result_layer(folder: Path, steps: int = 1):
+    """The fixture mesh with a water depth and a velocity, as a result carries them,
+    at *steps* time steps."""
     from qgis.core import QgsMeshLayer
 
     layer = QgsMeshLayer(str(_write_mesh(folder)), "steady result", "mdal")
@@ -237,11 +238,50 @@ def _result_layer(folder: Path):
             ("SCALAR VELOCITY", "SCL", ("0.5", "1.0", "1.5", "2.0")),
             ("VELOCITY", "VEC", ("0.5 0.0", "1.0 0.0", "0.0 1.5", "1.2 1.6"))):
         path = folder / f"{name.lower().replace(' ', '-')}.dat"
+        frames = "".join(f"TS 0 {float(step)}\n" + "\n".join(rows) + "\n"
+                         for step in range(steps))
         path.write_text("DATASET\nOBJTYPE \"mesh2d\"\nBEG" + kind + "\nND 4\nNC 2\n"
-                        f"NAME \"{name}\"\nTS 0 0.0\n" + "\n".join(rows) + "\nENDDS\n",
-                        encoding="utf-8")
+                        f"NAME \"{name}\"\n" + frames + "ENDDS\n", encoding="utf-8")
         assert layer.addDatasets(str(path)), name
     return layer
+
+
+def test_a_loaded_result_is_shown_at_its_last_time_step(project, tmp_path, qgis_app):
+    """QGIS shows the first time step of a mesh layer. Of a steady simulation that is
+    the initial state, with standing water and no velocity: it looks like a result."""
+    from qgis.core import QgsMeshDatasetIndex
+    from qgis.gui import QgsMapCanvas
+
+    layer = _result_layer(tmp_path, steps=3)
+    result_loader.apply_map_style(layer, "depth-arrows")
+    group = layer.rendererSettings().activeScalarDatasetGroup()
+    assert layer.datasetCount(QgsMeshDatasetIndex(group, 0)) == 3
+    last = layer.datasetRelativeTimeInMilliseconds(QgsMeshDatasetIndex(group, 2))
+    assert last > 0
+
+    canvas = QgsMapCanvas()
+    note = result_loader.show_last_time_step(canvas, [layer])
+    assert "last time step" in note and "Temporal Controller" in note
+    reference = layer.temporalProperties().referenceTime()
+    assert canvas.temporalRange().begin() == reference.addMSecs(int(last))
+    # each time step has a range of its own, which is how a movie selects its frames
+    first, second = (result_loader.time_range_of(layer, group, step) for step in (0, 1))
+    assert first.begin() == reference and second.begin() > first.begin()
+
+    # a result with one time step has nothing to select, and the map is left alone
+    single = QgsMapCanvas()
+    assert result_loader.show_last_time_step(single, [_result_layer(tmp_path)]) == ""
+    assert single.temporalRange().isInfinite()
+
+
+def test_no_module_calls_a_function_the_mesh_layer_does_not_have():
+    """``setStaticScalarDatasetIndex`` is in the C++ interface of QGIS and not in the
+    Python one of 3.44. The movie export called it and stopped at its first frame; the
+    tests did not see it, because none of them rendered a frame."""
+    plugin = Path(result_loader.__file__).resolve().parents[1]
+    calls = [str(path.relative_to(plugin)) for path in plugin.rglob("*.py")
+             if ".setStatic" in path.read_text(encoding="utf-8")]
+    assert calls == []
 
 
 def test_a_map_style_draws_arrows_or_streamlines_over_the_water_depth(project, tmp_path):

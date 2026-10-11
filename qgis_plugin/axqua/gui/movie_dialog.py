@@ -236,9 +236,13 @@ class MovieDialog(QDialog):
         if self._cancelled or layer is None or self._step >= self._count:
             self._finish()
             return
-        from qgis.core import QgsMeshDatasetIndex
-        layer.setStaticScalarDatasetIndex(
-            QgsMeshDatasetIndex(self._dataset_index, self._step))
+        # The frame is selected through the time the map is drawn for. The layer has
+        # no function for it in the Python interface of QGIS 3.44; the call that stood
+        # here failed at the first frame.
+        from ..core.result_loader import time_range_of
+        self._settings.setIsTemporal(True)
+        self._settings.setTemporalRange(
+            time_range_of(layer, self._dataset_index, self._step))
         job = QgsMapRendererParallelJob(self._settings)
         job.finished.connect(self._frame_rendered)
         self._job = job
