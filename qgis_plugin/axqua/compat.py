@@ -110,11 +110,25 @@ LEGEND_STYLES = {
     for name in ("Title", "Group", "Subgroup", "SymbolLabel")
 }
 
-#: Colouring a vector (arrow) layer by a ramp. **Optional**: the member does not exist
-#: before QGIS 3.4x, and resolving it eagerly without a default would stop the whole
-#: plugin from importing on an older build rather than costing one styling nicety.
+#: Colouring a vector (arrow) layer by a ramp. **Optional**: resolving it eagerly
+#: without a default would stop the whole plugin from importing on a build that lacks
+#: it, rather than costing one styling nicety. The member belongs to
+#: ``QgsInterpolatedLineColor``. It was looked for on the vector settings, where it
+#: does not exist, so it was always "missing" and the vectors were never colored by
+#: their magnitude: found by drawing a real result, which no test did.
+try:
+    from qgis.core import QgsInterpolatedLineColor as _LineColor
+except ImportError:                              # pragma: no cover - an older QGIS
+    _LineColor = None
 VECTOR_COLOR_RAMP = enum_value(
-    QgsMeshRendererVectorSettings, "ColoringMethod.ColorRamp", "ColorRamp", default=None)
+    _LineColor, "ColoringMethod.ColorRamp", "ColorRamp", default=None)
+
+#: How the vectors of a mesh layer are drawn. Optional for the same reason: without
+#: them a predefined map style falls back to what the layer shows already.
+VECTOR_ARROWS = enum_value(
+    QgsMeshRendererVectorSettings, "Symbology.Arrows", "Arrows", default=None)
+VECTOR_STREAMLINES = enum_value(
+    QgsMeshRendererVectorSettings, "Symbology.Streamlines", "Streamlines", default=None)
 
 
 def exec_(obj):

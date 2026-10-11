@@ -10,7 +10,7 @@ The plugin setup contains everything that describes the **computer** and not the
 Plugin profile
 --------------
 
-All settings of a computer are stored in one file, the **profile**. Its name ends with ``.axq-profile``. The default profile is the file ``default.axq-profile`` in the aXqua configuration folder of the user (``~/.config/axqua/`` on Linux).
+All settings of a computer are stored in one file, the **profile**. Its name ends with ``.axq-profile``. The default profile is the file ``default.axq-profile`` in the aXqua configuration folder of the user (``~/.config/axqua/`` on Linux). Each user account of a computer has its own profile.
 
 **In the plugin.** The *Configuration* tab shows the profile of this computer. On a computer without a profile, click *Create profile...*: aXqua searches for Python, TELEMAC, OpenFOAM, ParaView and VisIt and opens the profile editor with what it found. With a profile, the button reads *Edit profile...*. Every path in the editor has a button that opens a file dialog, so that nothing has to be typed. The editor has three buttons at the bottom right:
 
@@ -18,7 +18,9 @@ All settings of a computer are stored in one file, the **profile**. Its name end
 * *Cancel* discards the changes since the last save and closes the window.
 * *Exit* closes the window and asks first if there are changes that were not saved.
 
-A program that is installed with one of the installation wizards is entered in the profile by the wizard (:doc:`simulation-software`). The editor is needed for a program that was installed by other means, and for the remaining settings.
+Each program has two rows in the editor: its **installation folder**, and below it the file that aXqua runs. For TELEMAC and OpenFOAM this file is the environment script (:ref:`solver-bindings`), and for ParaView and VisIt it is the program file. Selecting the installation folder is sufficient: aXqua searches the folder and enters the file in the row below, where it can still be changed. If a folder contains several environment scripts, the editor lists them, and one of them has to be selected in the row below.
+
+A program that is installed with one of the installation wizards is entered in the profile by the wizard, together with its installation folder (:doc:`simulation-software`). The editor is needed for a program that was installed by other means, and for the remaining settings.
 
 The check never prevents saving. It marks each entry that is not in order with a triangle, orange for a warning and dark red for an error. A click on a triangle opens the message with its remedy and a button that opens this documentation at the explanation of the message (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). The button *Check* on the *Configuration* tab repeats the check at any time.
 
@@ -45,6 +47,10 @@ The profile is a text file in YAML format and can be completed with a text edito
    python:
      executable: /home/user/miniforge3/envs/axqua-env/bin/python
      axqua: /home/user/miniforge3/envs/axqua-env/bin/axqua
+   installations:
+     telemac: /home/user/opt/telemac-mascaret
+     openfoam: /usr/lib/openfoam/openfoam2406
+     visit: /home/user/opt/visit
    solvers:
      telemac:
        setup_script: /home/user/opt/telemac-mascaret/configs/pysource.debian12.sh
@@ -69,6 +75,8 @@ The profile is a text file in YAML format and can be completed with a text edito
      - Content
    * - ``python``
      - The Python interpreter in which aXqua is installed, and the ``axqua`` program that the plugin calls.
+   * - ``installations``
+     - The folder in which each program is installed on this computer, with one entry each for ``telemac``, ``openfoam``, ``paraview`` and ``visit``. If a folder is given and the entry of the program under ``solvers`` or ``postprocessors`` is missing, aXqua uses the environment script or the program file that it finds in the folder. A profile that names the four folders is therefore complete. An entry under ``solvers`` or ``postprocessors`` takes precedence over the folder. A program that is a package of the operating system, such as ``/usr/bin/paraview``, needs no folder.
    * - ``solvers``
      - One binding per simulation code (:ref:`solver-bindings`).
    * - ``postprocessors``
@@ -80,12 +88,14 @@ The profile is a text file in YAML format and can be completed with a text edito
 
 To use another profile than the default one, for example on a computing cluster, set the environment variable ``AXQUA_PROFILE`` to its path, or pass ``--profile <file>`` when a job is submitted.
 
+**Updates.** The profile is stored in the configuration folder of the user account, outside of the plugin and outside of the aXqua program. An update or a new installation of the plugin, of aXqua or of QGIS therefore neither changes nor removes it, and the new version reads the existing profile. The plugin itself stores only the path of the ``axqua`` program, in the settings of QGIS, which an update of the plugin also keeps. An entry of the profile that the installed version of aXqua does not know, for example because a newer version wrote it, stays in the file and is reported as a warning. A profile that cannot be read at all is never overwritten: if a new profile is saved in its place, aXqua keeps the previous file in the same folder under a name that ends with ``.bak``.
+
 .. _solver-bindings:
 
 Define solver bindings
 ----------------------
 
-A solver binding tells aXqua how to reach one simulation code. Its central entry is ``setup_script``, the environment script of the installation (:doc:`simulation-software`):
+A solver binding tells aXqua how to reach one simulation code. Its central entry is ``setup_script``, the environment script of the installation (:doc:`simulation-software`). The folder of the installation is stored separately, under ``installations`` (:ref:`plugin-profile`). If a profile names the installation folder of a code and no ``setup_script``, aXqua uses the environment script that it finds in the folder, and the remaining entries of the binding are optional as before.
 
 .. list-table::
    :header-rows: 1

@@ -5,6 +5,11 @@ OpenFOAM are installed, the postprocessing programs and where jobs are kept. The
 fills it in by clicking: every path has a button that opens a file dialog, and typing
 stays possible.
 
+A program has two rows: the folder it is installed in, and below it the file aXqua
+runs (the environment script of a simulation code, the launcher of a postprocessor).
+Selecting the folder is enough: aXqua looks for the file in it (``axqua profile
+locate``) and enters it in the row below, where it can still be changed.
+
 Three buttons, at the bottom right:
 
 * **Save** writes the profile and checks it. The window stays open and shows what the
@@ -36,11 +41,16 @@ FIELDS = (
     ("name", "Name of this computer", "text", "Profile"),
     ("python.executable", "Python interpreter", "file", "Python"),
     ("python.axqua", "aXqua program", "file", "Python"),
+    ("installations.telemac", "TELEMAC installation folder", "folder", "TELEMAC"),
     ("solvers.telemac.setup_script", "TELEMAC environment script", "file", "TELEMAC"),
     ("solvers.telemac.mpi_processes", "Processor cores", "int", "TELEMAC"),
+    ("installations.openfoam", "OpenFOAM installation folder", "folder", "OpenFOAM"),
     ("solvers.openfoam.setup_script", "OpenFOAM environment script", "file", "OpenFOAM"),
     ("solvers.openfoam.mpi_processes", "Processor cores", "int", "OpenFOAM"),
+    ("installations.paraview", "ParaView installation folder", "folder",
+     "Postprocessors"),
     ("postprocessors.paraview", "ParaView program", "file", "Postprocessors"),
+    ("installations.visit", "VisIt installation folder", "folder", "Postprocessors"),
     ("postprocessors.visit", "VisIt program", "file", "Postprocessors"),
     ("jobs.root", "Folder for jobs", "folder", "Jobs"),
     ("jobs.launcher", "How jobs are detached", "choice", "Jobs"),
@@ -51,7 +61,26 @@ FIELDS = (
 
 LAUNCHERS = ("auto", "systemd", "posix", "windows", "wsl")
 
+#: ``folder row -> (program, the row its file is entered in, what that file is)``.
+LOCATED = {
+    "installations.telemac": ("telemac", "solvers.telemac.setup_script",
+                              "environment script"),
+    "installations.openfoam": ("openfoam", "solvers.openfoam.setup_script",
+                               "environment script"),
+    "installations.paraview": ("paraview", "postprocessors.paraview", "program"),
+    "installations.visit": ("visit", "postprocessors.visit", "program"),
+}
+
+#: What ``axqua profile show`` adds to the profile and the file does not hold.
+NOT_IN_THE_FILE = ("path", "programs")
+
 HINTS = {
+    "installations.telemac": "the folder telemac-mascaret; the script below is found "
+                             "in it",
+    "installations.openfoam": "the folder of OpenFOAM v2406, or of the installation "
+                              "made by aXqua",
+    "installations.paraview": "leave empty for the ParaView of the operating system",
+    "installations.visit": "the folder that holds bin/visit",
     "solvers.telemac.setup_script": "for example .../telemac-mascaret/configs/pysource.sh",
     "solvers.openfoam.setup_script": "for example .../openfoam2406/etc/bashrc",
     "jobs.root": "leave empty for the default folder of aXqua",
@@ -94,11 +123,13 @@ class ProfileEditor(EditorDialog):
         self.client = client
         self.setWindowTitle("aXqua profile of this computer")
         self.resize(720, 640)
-        profile = {k: v for k, v in (profile or {}).items() if k != "path"}
+        profile = {k: v for k, v in (profile or {}).items() if k not in NOT_IN_THE_FILE}
         self._saved = copy.deepcopy(profile)       # what is on disk, as far as we know
         self._base = copy.deepcopy(profile)        # carries the entries without a row
         self._widgets: dict[str, QWidget] = {}
         self._triangles: dict[str, fnd.TriangleButton] = {}
+        self._asked: dict[str, str] = {}           # folder row -> the folder looked into
+        self._browse_from: dict[str, str] = {}     # row -> where its file dialog opens
         self._build(title)
         self._fill(profile)
 
@@ -140,6 +171,9 @@ class ProfileEditor(EditorDialog):
         else:
             widget = QLineEdit()
             widget.setPlaceholderText(HINTS.get(key, ""))
+            if key in LOCATED:
+                # typed instead of selected: looked into when the row is left
+                widget.editingFinished.connect(lambda k=key: self.locate(k))
         line.addWidget(widget, 1)
         if kind in ("file", "folder"):
             browse = QPushButton("...")
@@ -156,13 +190,57 @@ class ProfileEditor(EditorDialog):
 
     def _browse(self, key: str, folder: bool) -> None:
         edit = self._widgets[key]
-        start = edit.text() or ""
+        start = edit.text() or self._browse_from.get(key, "")
         if folder:
             chosen = QFileDialog.getExistingDirectory(self, "Select a folder", start)
         else:
             chosen, _ = QFileDialog.getOpenFileName(self, "Select a file", start)
         if chosen:
             edit.setText(chosen)
+            if key in LOCATED:
+                self.locate(key)
+
+    # -- a folder fills the row below it ------------------------------------------
+    def locate(self, key: str) -> None:
+        """Ask aXqua what the folder of a program holds and enter it in the row below.
+
+        Asked once per folder: leaving the row without a change asks nothing, so that
+        an entry the user made in the row below is not replaced behind their back.
+        """
+        program, _target, _what = LOCATED[key]
+        folder = self._widgets[key].text().strip()
+        if not folder or folder == self._asked.get(key):
+            return
+        self._asked[key] = folder
+        client = self.client
+        run_async(f"aXqua: looking for {program} in its folder",
+                  lambda: client.profile_locate(program, folder),
+                  on_success=lambda found: self._located(key, folder, found or {}),
+                  on_error=lambda exc: self.status.setText(user_text(exc)), owner=self)
+
+    def _located(self, key: str, asked: str, found: dict) -> None:
+        program, target, what = LOCATED[key]
+        row, below = self._widgets[key], self._widgets[target]
+        if row.text().strip() != asked:
+            return                               # edited again while aXqua looked
+        script = str(found.get("script") or "")
+        candidates = [str(path) for path in found.get("candidates") or []]
+        if script:
+            # the folder of the program itself, which may lie below the one selected
+            home = str(found.get("folder") or asked)
+            self._asked[key] = home
+            row.setText(home)
+            below.setText(script)
+            self.status.setText(f"Found in the folder and entered: {script}")
+        elif candidates:
+            self._browse_from[target] = candidates[0].rsplit("/", 1)[0]
+            self.status.setText(
+                f"The folder holds {len(candidates)} files that can be the {what}: "
+                + ", ".join(path.rsplit("/", 1)[-1] for path in candidates)
+                + ". Select one of them in the row below.")
+        else:
+            self.status.setText(f"No {what} of {program} was found in {asked}. "
+                                f"Select the {what} itself in the row below.")
 
     # -- values -------------------------------------------------------------------
     def _fill(self, profile: dict) -> None:
@@ -179,6 +257,9 @@ class ProfileEditor(EditorDialog):
                 widget.setCurrentIndex(max(index, 0))
             else:
                 widget.setText("" if value is None else str(value))
+                if key in LOCATED:
+                    # what the profile says already is not looked into again
+                    self._asked[key] = widget.text().strip()
 
     def values(self) -> dict:
         """The profile as the rows state it, with every entry that has no row kept."""
@@ -221,7 +302,11 @@ class ProfileEditor(EditorDialog):
         self._saved = copy.deepcopy(data)
         self.saved_once = True
         self.save_button.setEnabled(True)
-        self.status.setText(f"Saved {written.get('path', '')}.")
+        text = f"Saved {written.get('path', '')}."
+        if written.get("backup"):
+            text += (" The file that was there before could not be read. It is kept "
+                     f"as {written['backup']}.")
+        self.status.setText(text)
         self.show_findings(fnd.from_payload(checked))
 
     def _save_failed(self, exc: Exception) -> None:

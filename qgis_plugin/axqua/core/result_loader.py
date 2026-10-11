@@ -369,6 +369,75 @@ class ResultLoader:
         layer.triggerRepaint()
 
 
+#: The names under which a result carries the water depth and the velocity. A
+#: depth-averaged companion of a 3D run has the velocity vector and no scalar velocity.
+DEPTH_NAMES = ("WATER DEPTH",)
+VELOCITY_SCALARS = ("SCALAR VELOCITY",)
+VELOCITY_VECTORS = ("VELOCITY",)
+
+
+def apply_map_style(layer, key: str, *, min_depth: float | None = None,
+                    velocity_cap: float | None = None) -> list[str]:
+    """Give a result layer one of the predefined map styles (``styles.MAP_STYLES``).
+
+    The fill is the water depth or the velocity magnitude, and the velocity is drawn on
+    top of it as arrows or as streamlines, colored by its magnitude. Returns what the
+    user has to know about the result (a capped color scale). Raises ``ValueError``
+    with a sentence for the user where the layer is no result that can be drawn so.
+    """
+    from qgis.core import QgsMeshLayer
+
+    from . import styles
+
+    if key not in styles.MAP_STYLES:
+        raise ValueError(f"there is no map style {key!r}")
+    if not isinstance(layer, QgsMeshLayer):
+        raise ValueError("Select a result layer of a simulation in the layer panel. "
+                         "The map styles apply to mesh layers.")
+    _title, fill, drawn = styles.MAP_STYLES[key]
+    depth = next((index for name in DEPTH_NAMES
+                  if (index := _dataset_index(layer, name)) is not None), None)
+    vector = next((index for name in VELOCITY_VECTORS
+                   if (index := _vector_index(layer, name)) is not None), None)
+    if vector is None:
+        raise ValueError(f"The layer {layer.name()} has no velocity. Select a result "
+                         "of a hydraulic simulation.")
+    if fill == "depth" and depth is None:
+        raise ValueError(f"The layer {layer.name()} has no water depth.")
+
+    notes: list[str] = []
+    scalar = next((index for name in VELOCITY_SCALARS
+                   if (index := _dataset_index(layer, name)) is not None
+                   and not group_metadata(layer, index).isVector()), vector)
+    observed, _why = _dataset_maximum(layer, scalar)
+    speed = styles.clamp_velocity(
+        observed, styles.DEFAULT_VELOCITY_MAX if velocity_cap is None else velocity_cap)
+    if speed.warning:
+        notes.append(speed.warning)
+
+    renderer = layer.rendererSettings()
+    if fill == "depth":
+        maximum, why = _dataset_maximum(layer, depth)
+        if maximum is None:
+            notes.append(f"The depth range could not be read from the file ({why}), so "
+                         "the color scale ends at 1 m.")
+            maximum = 1.0
+        renderer.setActiveScalarDatasetGroup(depth)
+        renderer.setScalarSettings(depth, styles.depth_settings(styles.DepthStyle(
+            minimum=styles.DEFAULT_MIN_DEPTH if min_depth is None else min_depth,
+            maximum=maximum)))
+    else:
+        renderer.setActiveScalarDatasetGroup(scalar)
+        renderer.setScalarSettings(scalar, styles.velocity_scalar_settings(speed))
+    renderer.setActiveVectorDatasetGroup(vector)
+    renderer.setVectorSettings(vector, (
+        styles.streamline_vector_settings if drawn == "streamlines"
+        else styles.velocity_vector_settings)(speed, by_magnitude=fill == "depth"))
+    layer.setRendererSettings(renderer)
+    layer.triggerRepaint()
+    return notes
+
+
 def group_metadata(layer, index: int):
     """Dataset-group metadata for group *index*, whichever spelling QGIS accepts.
 

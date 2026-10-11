@@ -37,7 +37,8 @@ OPTION_FIELDS = {
     "openfoam-run": [("n_processors", "MPI ranks", "int", 0),
                      ("reconstruct", "Reconstruct afterwards", "bool", True),
                      ("to_vtk", "Convert to VTK for QGIS", "bool", False)],
-    "openfoam-build": [("pre_run", "Seed from a coarse TELEMAC pre-run", "bool", True)],
+    # The name the documentation prescribes for it; the setting is openfoam.pre_run.
+    "openfoam-build": [("pre_run", "Use TELEMAC warm-up", "bool", True)],
 }
 
 
@@ -50,7 +51,8 @@ class CapabilityTab(QWidget):
         self.titled = titled
         self.view = view
         self.ctx = context
-        self._fields: dict[str, QWidget] = {}
+        self._fields: dict[str, QWidget] = {}          # options of the run
+        self._build_fields: dict[str, QWidget] = {}    # options of a build of its own
         self._build()
         self.apply(view)
 
@@ -96,8 +98,8 @@ class CapabilityTab(QWidget):
         self.reason_label.setText(view.reason)
         self.reason_label.setVisible(bool(view.reason))
 
-        self._rebuild_options(view.submit_kind)
-        self.options_box.setVisible(bool(self._fields))
+        self._rebuild_options(view.submit_kind, view.build_kind)
+        self.options_box.setVisible(bool(self._fields or self._build_fields))
 
         self.build_button.setVisible(bool(view.build_kind))
         self.build_button.setEnabled(view.can_submit)
@@ -110,10 +112,23 @@ class CapabilityTab(QWidget):
             self.submit_button.setToolTip("")
         self.results_button.setEnabled(view.has_results)
 
-    def _rebuild_options(self, kind: str | None) -> None:
+    def _rebuild_options(self, kind: str | None, build_kind: str | None = None) -> None:
+        """The options of the run and, where the build is a job kind of its own, the
+        options of the build before them.
+
+        The build of the OpenFOAM model has one, *Use TELEMAC warm-up*. Only the options
+        of the run were shown, so that check box did not exist in the plugin.
+        """
         while self.options_form.rowCount():
             self.options_form.removeRow(0)
-        self._fields = {}
+        self._fields, self._build_fields = {}, {}
+        groups = [(kind, self._fields)]
+        if build_kind and build_kind != kind:
+            groups.insert(0, (build_kind, self._build_fields))
+        for which, fields in groups:
+            self._add_options(which, fields)
+
+    def _add_options(self, kind: str | None, fields: dict) -> None:
         for key, label, dtype, default in OPTION_FIELDS.get(kind or "", []):
             if dtype == "int":
                 widget = QSpinBox()
@@ -139,17 +154,17 @@ class CapabilityTab(QWidget):
                     "Partly checked: leave this to the case file"
                     f" (its default here is {'on' if default else 'off'}).")
             self.options_form.addRow(label, widget)
-            self._fields[key] = widget
+            fields[key] = widget
 
-    def options(self) -> dict:
-        """Only what the user actually asked for.
+    def options(self, *, build: bool = False) -> dict:
+        """Only what the user actually asked for, for the run or for the *build*.
 
         Both widget types have an explicit "not set" state - 0 for the spin box, the
         partial state for the check box - and neither is sent. An option the plugin does
         not send is one the case file still decides.
         """
         out = {}
-        for key, widget in self._fields.items():
+        for key, widget in (self._build_fields if build else self._fields).items():
             if isinstance(widget, QSpinBox):
                 if widget.value() > 0:      # 0 means "leave it to the config"
                     out[key] = widget.value()
@@ -170,10 +185,12 @@ class CapabilityTab(QWidget):
         config = self.ctx.active_case_or_warn()
         if client is None or config is None:
             return
-        # The options belong to the run. A build with the same kind (unsteady 2D) gets
-        # them too, a build of another kind does not.
-        options = ({**self.options(), **self.view.fixed_options}
-                   if kind == self.view.submit_kind else {})
+        # The options of the run belong to the run, and a build with the same kind
+        # (unsteady 2D) gets them too. A build of another kind gets its own.
+        if kind == self.view.submit_kind:
+            options = {**self.options(), **self.view.fixed_options}
+        else:
+            options = self.options(build=True)
         project = self.ctx.project
         run_async(
             f"aXqua: submitting {kind}",

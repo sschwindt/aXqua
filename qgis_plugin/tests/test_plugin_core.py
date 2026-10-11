@@ -979,6 +979,11 @@ def test_the_choices_of_a_wizard_become_the_flags_of_the_install_command():
         "--no-smoke-test", "--no-bind"]
     assert install_flags({"telemac_examples": "inputs"}) == []       # the default
     assert install_flags({"telemac_examples": "all"}) == ["--telemac-examples", "all"]
+    # the one question of the wizards about the postprocessors; VisIt is the default
+    assert install_flags({"viewers": "both"}) == []
+    assert install_flags({"viewers": "paraview"}) == ["--no-visit"]
+    assert install_flags({"viewers": "none"}) == ["--no-visualization"]
+    assert install_flags({"visit": False}) == ["--no-visit"]          # what a script sends
 
 
 def test_the_client_asks_for_an_example_with_its_name_and_folder(monkeypatch):

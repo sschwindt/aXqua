@@ -60,6 +60,10 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--jobs", type=int, help="processes for compiling")
     p.add_argument("--no-visualization", action="store_true",
                    help="OpenFOAM: do not install ParaView and VisIt with it")
+    p.add_argument("--no-visit", action="store_true",
+                   help="OpenFOAM and postprocessors: do not install VisIt. aXqua "
+                        "recommends VisIt, because its predefined figures of "
+                        "three-dimensional results are rendered with it")
     p.add_argument("--examples", action="store_true",
                    help="OpenFOAM: also download the example case of the solver")
     p.add_argument("--no-smoke-test", action="store_true",
@@ -88,7 +92,8 @@ def _options(args):
         folder=args.folder, tag=args.tag or "", salome=args.salome,
         telemac_examples="none" if args.no_telemac_examples else args.telemac_examples,
         reuse_openfoam=args.reuse_openfoam or "auto", jobs=args.jobs,
-        visualization=not args.no_visualization, examples=args.examples,
+        visualization=not args.no_visualization, visit=not args.no_visit,
+        examples=args.examples,
         smoke_test=not args.no_smoke_test, installers=args.installers,
         ref=args.ref or "", base=args.base or "", bind=not args.no_bind)
 

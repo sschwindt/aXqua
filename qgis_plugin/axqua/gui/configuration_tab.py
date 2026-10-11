@@ -33,6 +33,19 @@ SUMMARY = (
     ("jobs.root", "Folder for jobs"),
 )
 
+#: ``row of the summary -> program``: the rows that show a program of the profile.
+PROGRAM_OF = {
+    "solvers.telemac.setup_script": "telemac",
+    "solvers.openfoam.setup_script": "openfoam",
+    "postprocessors.paraview": "paraview",
+    "postprocessors.visit": "visit",
+}
+
+UNREADABLE = ("The profile of this computer could not be read: {error}\n\naXqua has "
+              "entered what it found on this computer. Saving writes a new profile. "
+              "The file that cannot be read is not deleted: aXqua keeps it beside the "
+              "new one under a name that ends in .bak.")
+
 NO_PROFILE = ("This computer has no profile yet. A profile tells aXqua where TELEMAC, "
               "OpenFOAM and the postprocessing programs are installed. Without one, "
               "aXqua uses what it finds by itself.")
@@ -55,6 +68,7 @@ class ConfigurationTab(QWidget):
         self.ctx = context
         self.profile: dict | None = None
         self.findings: list[fnd.Finding] = []
+        self.unreadable = ""               # why the profile could not be read, if so
         self.on_findings = None            # the dock marks the tab with a triangle
         self._build()
 
@@ -198,6 +212,7 @@ class ConfigurationTab(QWidget):
     def show_profile(self, where: dict, profile: dict | None, *, error: str = "") -> None:
         self.profile = profile
         self.ctx.profile = profile
+        self.unreadable = error
         path = str((where or {}).get("path") or "")
         if error:
             self.profile_path.setText("The profile could not be read: " + error)
@@ -207,8 +222,7 @@ class ConfigurationTab(QWidget):
         else:
             self.profile_path.setText(path)
         for key, label in self._summary.items():
-            value = get(profile or {}, key)
-            label.setText("not set" if value in (None, "") else str(value))
+            label.setText(describe_entry(profile or {}, key))
         self.summary_box.setVisible(profile is not None)    # nothing to show without one
         self.edit_button.setText("Edit profile..." if profile is not None
                                  else "Create profile...")
@@ -242,11 +256,12 @@ class ConfigurationTab(QWidget):
         if self.profile is not None:
             self._open_editor(self.profile, "")
             return
+        title = (UNREADABLE.format(error=self.unreadable) if self.unreadable else
+                 "aXqua has entered what it found on this computer. Check the entries "
+                 "and click Save.")
         run_async("aXqua: looking for the simulation programs",
                   self.ctx.client.profile_detect,
-                  on_success=lambda found: self._open_editor(
-                      found, "aXqua has entered what it found on this computer. "
-                             "Check the entries and click Save."),
+                  on_success=lambda found: self._open_editor(found, title),
                   on_error=lambda exc: self._open_editor({}, user_text(exc)), owner=self)
 
     def _open_editor(self, profile: dict, title: str) -> None:
@@ -306,6 +321,27 @@ class ConfigurationTab(QWidget):
         """An installation has ended: the profile may name a new program now."""
         self.load_profile()
         self.load_software()
+
+
+def describe_entry(profile: dict, key: str) -> str:
+    """What the summary says about one entry of the profile.
+
+    For a program: the file aXqua runs, which is the entry of the profile or the file
+    found in the installation folder (``programs`` of ``axqua profile show``), and the
+    folder the program is installed in where the profile names it.
+    """
+    program = PROGRAM_OF.get(key)
+    if program is None:
+        value = get(profile, key)
+        return "not set" if value in (None, "") else str(value)
+    used = get(profile, f"programs.{program}") or get(profile, key)
+    folder = get(profile, f"installations.{program}")
+    if used in (None, "") and folder in (None, ""):
+        return "not set"
+    lines = [str(used)] if used not in (None, "") else ["no program found in the folder"]
+    if folder not in (None, ""):
+        lines.append(f"installed in {folder}")
+    return "\n".join(lines)
 
 
 def describe_program(entry: dict) -> str:

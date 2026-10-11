@@ -343,6 +343,15 @@ def execute(folder: str | os.PathLike, *, echo: bool = False) -> int:
     required += [pattern for pattern in plan.get("expects") or []
                  if not glob.glob(pattern)]
     status["outputs"] = outputs
+    if required and not steps:
+        # Nothing was run: what is entered in the profile comes with a system package.
+        add(Finding(
+            ERROR, "axqua.install.output_missing",
+            "the program this installation enters in the profile is not on this "
+            "computer: " + ", ".join(required), subject=subject,
+            remedy="Install the system packages of this installation, then start it "
+                   "again."))
+        return finish("failed", "the installation is incomplete", 1)
     if required:
         add(Finding(
             ERROR, "axqua.install.output_missing",
@@ -530,13 +539,24 @@ def bind(outputs: dict[str, str], *, probe: bool = True
             elif section == "postprocessors":
                 current.postprocessors[name] = Path(value)
                 subjects.append(f"postprocessors.{name}")
+            else:
+                continue
+            # Where the program is installed, told from the file just entered. A
+            # folder of an earlier installation must not stay beside the new entry.
+            folder = profiles.installation_of(name, value)
+            if folder is not None:
+                current.installations[name] = folder
+            else:
+                current.installations.pop(name, None)
+            subjects.append(f"installations.{name}")
         written = profiles.save(current, path)
     found = [f for f in profiles.check(current, probe=probe)
              if any(f.subject.startswith(subject) for subject in subjects)
              and f.code != "axqua.environment.ambient"]
-    known = {f"solvers.{name}" + ".setup_script" for name, entry in
-             current.solvers.items() if entry.setup_script}
-    known |= {f"postprocessors.{name}" for name in current.postprocessors}
+    known = {f"solvers.{name}" + ".setup_script" for name in profiles.SOLVERS
+             if current.script(name) is not None}
+    known |= {f"postprocessors.{name}" for name in profiles.POSTPROCESSORS
+              if current.script(name) is not None}
     return written, found, known
 
 

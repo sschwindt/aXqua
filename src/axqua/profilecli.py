@@ -11,6 +11,7 @@ profile all go through here and come back as one JSON document.
 ``init``     ``detect``, written to the default location (refuses to overwrite)
 ``check``    everything that is wrong with it, as findings; never fails on a finding
 ``write``    replace it with a JSON document read from standard input
+``locate``   ``locate <program> <folder>``: what aXqua runs of a program in that folder
 """
 
 from __future__ import annotations
@@ -25,7 +26,7 @@ from axqua.jobcli import _common, _setup_logging, emit, fail, parse_args
 
 log = logging.getLogger("axqua")
 
-ACTIONS = ("show", "path", "detect", "init", "check", "write")
+ACTIONS = ("show", "path", "detect", "init", "check", "write", "locate")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -37,7 +38,10 @@ def _parser() -> argparse.ArgumentParser:
                     "when the profile is written, not when a long job is submitted.")
     p.add_argument("action", nargs="?", default="show", choices=ACTIONS)
     p.add_argument("file", nargs="?", type=Path,
-                   help="a profile file (default: the active profile)")
+                   help="a profile file (default: the active profile); for locate: "
+                        "the program, one of telemac, openfoam, paraview, visit")
+    p.add_argument("folder", nargs="?", type=Path,
+                   help="locate: the folder the program is installed in")
     p.add_argument("--force", action="store_true",
                    help="init: overwrite an existing profile")
     p.add_argument("--no-probe", action="store_true",
@@ -58,6 +62,29 @@ def run_profile(argv: list[str]) -> int:
             target = profiles.active_path(args.file) or profiles.default_path()
             return emit(command, {"path": str(target), "exists": target.is_file()},
                         as_json=args.as_json, lines=[str(target)])
+
+        if args.action == "locate":
+            program = str(args.file or "")
+            if program not in profiles.PROGRAMS or args.folder is None:
+                raise ConfigError(
+                    "'locate' needs a program and the folder it is installed in",
+                    subject="program",
+                    remedy="For example: axqua profile locate telemac "
+                           "/opt/telemac-mascaret. Programs: "
+                           + ", ".join(profiles.PROGRAMS))
+            folder = args.folder.expanduser()
+            found = profiles.candidates(program, folder)
+            chosen = found[0] if len(found) == 1 else None
+            # The folder of the program itself, which may lie below the one given.
+            home = profiles.installation_of(program, chosen) if chosen else None
+            lines = [str(chosen)] if chosen else (
+                [f"{len(found)} files in {folder} could be meant:"]
+                + [f"  {path}" for path in found] if found
+                else [f"no {program} was found in {folder}"])
+            return emit(command, {"program": program, "folder": str(home or folder),
+                                  "script": str(chosen or ""),
+                                  "candidates": [str(path) for path in found]},
+                        as_json=args.as_json, lines=lines)
 
         if args.action == "detect":
             found = profiles.detect()
@@ -87,10 +114,13 @@ def run_profile(argv: list[str]) -> int:
             profile = profiles.AxquaProfile.from_dict(payload, path=target)
             written = profiles.save(profile, target)
             findings = profiles.check(profile, probe=False)
+            kept = [f"the file that was there could not be read and was kept as "
+                    f"{profile.backup}"] if profile.backup else []
             return emit(command, {"path": str(written),
+                                  "backup": str(profile.backup or ""),
                                   "findings": [f.as_dict() for f in findings]},
                         as_json=args.as_json,
-                        lines=[f"wrote {written}"] + [f.line() for f in findings])
+                        lines=[f"wrote {written}"] + kept + [f.line() for f in findings])
 
         profile = profiles.load_active(args.file, strict=True)
         if profile is None:
@@ -99,7 +129,10 @@ def run_profile(argv: list[str]) -> int:
                 remedy="Create one with 'axqua profile init'.")
 
         if args.action == "show":
-            return emit(command, {"path": str(profile.path), **profile.as_dict()},
+            # "programs" is what aXqua runs for each program: the entry of the profile,
+            # or the file found in its installation folder. It is not part of the file.
+            return emit(command, {"path": str(profile.path),
+                                  "programs": profile.programs(), **profile.as_dict()},
                         as_json=args.as_json,
                         lines=[f"# {profile.path}"] + _yaml_lines(profile))
 

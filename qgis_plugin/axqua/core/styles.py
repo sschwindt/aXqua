@@ -10,10 +10,12 @@ roughness of 0.05-0.5 m, water 5 mm deep stands *inside* the grain roughness rat
 flowing over it, and rendering it as river makes a wetted extent look far larger than it
 is. axqua's own reporting uses the same filter, so the map and the report agree.
 
-**Velocity** - arrows over an inverted *plasma* ramp, bright yellow where the flow is slow
-to dark purple at the maximum, and **transparent where nothing moves**. Dry ground has a
-velocity of exactly zero, so without that step the whole floodplain was painted in the
-brightest color of the ramp and the river was the dark thread in it. Capped at 5 m/s by
+**Velocity** - dark arrows over an inverted *plasma* ramp, bright yellow where the flow
+is slow to dark purple at the maximum, and **transparent where nothing moves**. Dry ground
+has a velocity of exactly zero, so without that step the whole floodplain was painted in
+the brightest color of the ramp and the river was the dark thread in it. The arrows stand
+on a grid of the map and not on the mesh nodes, so that their number does not depend on
+the mesh, and none is drawn for standing water. Capped at 5 m/s by
 default and **warned about** above it: a depth-averaged
 river result above that is nearly always a wetting/drying artefact in a nearly-dry cell
 rather than real flow, and letting one such node set the scale flattens the whole map into
@@ -27,7 +29,8 @@ from dataclasses import dataclass
 from qgis.core import (QgsColorRampShader, QgsGradientColorRamp, QgsGradientStop,
                        QgsMeshRendererScalarSettings, QgsMeshRendererVectorSettings)
 
-from ..compat import SHADER_INTERPOLATED, VECTOR_COLOR_RAMP, color
+from ..compat import (SHADER_INTERPOLATED, VECTOR_ARROWS, VECTOR_COLOR_RAMP,
+                      VECTOR_STREAMLINES, color)
 
 #: Above this, a depth-averaged velocity is almost certainly a wetting/drying artefact.
 VELOCITY_WARN_ABOVE = 5.0
@@ -41,6 +44,32 @@ DEPTH_STOPS = ("#ffffff", "#cfe8ff", "#6bb6ff", "#1f78d1", "#08306b")
 #: *plasma*, reversed - bright where the flow is slow, dark where it is fast, so the
 #: arrows that matter read as dense marks rather than as glare.
 PLASMA_REVERSED = ("#f0f921", "#fca636", "#e16462", "#b12a90", "#6a00a8", "#0d0887")
+
+#: The predefined map styles of a result: ``key -> (title, what is filled, how the
+#: velocity is drawn)``. The fill is the water depth or the velocity magnitude; the
+#: velocity is drawn on top of it as arrows or as streamlines, colored by its magnitude.
+MAP_STYLES = {
+    "depth-streamlines": ("Water depth with streamlines", "depth", "streamlines"),
+    "depth-arrows": ("Water depth with velocity arrows", "depth", "arrows"),
+    "velocity-streamlines": ("Velocity magnitude with streamlines", "velocity",
+                             "streamlines"),
+    "velocity-arrows": ("Velocity magnitude with arrows", "velocity", "arrows"),
+}
+
+#: Vectors on top of the water depth are colored by the velocity magnitude, in warm
+#: colors that stand out against the blues from the slowest to the fastest.
+VECTORS_OVER_DEPTH = ("#fdbb63", "#f1692d", "#d7301f", "#990000", "#4a0010")
+#: Vectors on top of the velocity magnitude show the direction only: the fill already
+#: is the magnitude, and a vector in the color of its background cannot be seen.
+VECTOR_COLOR = "#1a1a1a"
+
+#: Below this speed no vector is drawn [m/s]. Dry nodes carry small velocities of no
+#: meaning, and an arrow has a smallest length, so each of them would get one.
+VECTOR_MINIMUM = 0.05
+#: Distance between two arrows on the map [pixels].
+ARROW_SPACING = 22
+#: Density of the starting points of streamlines; QGIS draws 0.15 by default.
+STREAMLINE_DENSITY = 0.02
 
 
 @dataclass
@@ -123,8 +152,12 @@ def velocity_scalar_settings(style: VelocityStyle) -> QgsMeshRendererScalarSetti
     return settings
 
 
-def velocity_vector_settings(style: VelocityStyle) -> QgsMeshRendererVectorSettings:
-    """Arrows, coloured by magnitude.
+def velocity_vector_settings(style: VelocityStyle, *, by_magnitude: bool = False
+                             ) -> QgsMeshRendererVectorSettings:
+    """Arrows on a grid of the map, none where the water stands.
+
+    *by_magnitude* colors them by the velocity magnitude, for arrows on top of the water
+    depth. On top of the velocity magnitude they are dark: the fill is the magnitude.
 
     The magnitude is the Euclidean norm of whatever components the dataset carries -
     which for a 2D result is (u, v) and for a depth-averaged 3D result is still the
@@ -132,9 +165,31 @@ def velocity_vector_settings(style: VelocityStyle) -> QgsMeshRendererVectorSetti
     computes it from the vector dataset itself, so nothing here has to read the file.
     """
     settings = QgsMeshRendererVectorSettings()
-    if VECTOR_COLOR_RAMP is not None:
+    if by_magnitude and VECTOR_COLOR_RAMP is not None:
         settings.setColoringMethod(VECTOR_COLOR_RAMP)
-    shader = _shader(0.0, style.maximum, style.stops)
-    settings.setColorRampShader(shader)
-    settings.setLineWidth(0.6)
+        settings.setColorRampShader(_shader(0.0, style.maximum, VECTORS_OVER_DEPTH))
+    else:
+        settings.setColor(color(VECTOR_COLOR))
+    settings.setLineWidth(0.5)
+    settings.setFilterMin(VECTOR_MINIMUM)
+    settings.setOnUserDefinedGrid(True)
+    settings.setUserGridCellWidth(ARROW_SPACING)
+    settings.setUserGridCellHeight(ARROW_SPACING)
+    if VECTOR_ARROWS is not None:
+        settings.setSymbology(VECTOR_ARROWS)
+    return settings
+
+
+def streamline_vector_settings(style: VelocityStyle, *, by_magnitude: bool = False
+                               ) -> QgsMeshRendererVectorSettings:
+    """Streamlines, which follow the direction of the velocity and so show the flow
+    path that arrows only suggest. Colored as the arrows are."""
+    settings = velocity_vector_settings(style, by_magnitude=by_magnitude)
+    if VECTOR_STREAMLINES is None:
+        return settings                           # an older QGIS: arrows remain
+    settings.setSymbology(VECTOR_STREAMLINES)
+    settings.setLineWidth(0.4)
+    lines = settings.streamLinesSettings()
+    lines.setSeedingDensity(STREAMLINE_DENSITY)
+    settings.setStreamLinesSettings(lines)
     return settings

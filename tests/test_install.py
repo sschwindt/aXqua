@@ -573,6 +573,41 @@ def test_without_visualization_no_postprocessor_is_promised(installers, debian,
     assert set(plan.outputs) == {"solvers.openfoam.setup_script"}
 
 
+def test_visit_is_a_choice_and_the_plan_says_why_it_is_recommended(installers, debian,
+                                                                   tmp_path):
+    """Users may leave VisIt out; aXqua installs it unless told otherwise and says
+    what it is for where somebody decides against it."""
+    assert recipes.Options().visit is True
+    plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
+                 visit=False)
+    argv = plan.steps[0].argv
+    # the installer has one switch for both programs; ParaView is a system package
+    assert "--skip-visualization" in argv and "--visit-platform" not in argv
+    assert set(plan.outputs) == {"solvers.openfoam.setup_script",
+                                 "postprocessors.paraview"}
+    assert plan.optional_outputs == ["postprocessors.paraview"]
+    assert sum("recommends VisIt" in note for note in plan.notes) == 1
+    assert plan.as_dict()["options"]["visit"] is False
+    assert recipes.Options.from_dict(plan.as_dict()["options"]).visit is False
+    # of the system packages of the postprocessors, only ParaView itself is left
+    names = recipes.packages_needed("openfoam", installers, debian,
+                                    recipes.Options(visit=False))
+    assert names == ["build-essential", "cmake", "flex", "bison", "libopenmpi-dev",
+                     "paraview"]
+    # with VisIt, nothing recommends what is being installed anyway
+    both = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no")
+    assert not any("recommends VisIt" in note for note in both.notes)
+
+
+def test_the_command_can_leave_visit_out():
+    from axqua import installcli
+
+    parser = installcli._parser()
+    assert installcli._options(parser.parse_args(["plan", "openfoam"])).visit is True
+    assert installcli._options(
+        parser.parse_args(["plan", "openfoam", "--no-visit"])).visit is False
+
+
 def test_an_installer_no_python_here_can_read_is_reported_not_started(
         installers, debian, tmp_path):
     """One version of the OpenFOAM installer needs Python 3.12; a plan finds out by
@@ -679,6 +714,8 @@ def test_an_installation_ends_in_the_profile_of_this_computer(installers, debian
     profile = profiles.load_active(strict=True)
     assert str(profile.path) == status["bound"]
     assert profile.solvers["telemac"].setup_script == script
+    # the folder TELEMAC is installed in is entered with it
+    assert profile.installations["telemac"] == tmp_path / "target" / "telemac-mascaret"
     # the environment was entered once: a path that merely exists would have a finding
     assert status["findings"] == []
     log = Path(status["log"]).read_text()
@@ -748,8 +785,83 @@ def test_openfoam_enters_its_own_environment_script_and_both_postprocessors(
     assert profile.postprocessors["paraview"] == paraview
     assert profile.postprocessors["visit"] == \
         target / "apps" / "visit-9.9.9-debian12" / "bin" / "visit"
+    assert profile.installations["openfoam"] == target
+    assert profile.installations["visit"] == target / "apps" / "visit-9.9.9-debian12"
+    assert "paraview" not in profile.installations      # a program of the system
     receipt = json.loads((target / "receipt.json").read_text())
     assert "--install-system-packages" not in receipt["argv"]
+
+
+def test_openfoam_without_visit_enters_paraview_alone(installers, debian, tmp_path,
+                                                      monkeypatch):
+    from axqua.core import machine
+    from axqua.core import profile as profiles
+
+    paraview = tmp_path / "paraview"
+    paraview.write_text("#!/bin/sh\n")
+    paraview.chmod(0o755)
+    monkeypatch.setattr(recipes, "PARAVIEW", paraview)
+    plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
+                 visit=False)
+    # the computer of a test may have a VisIt of its own, which a new profile would name
+    monkeypatch.setattr(machine, "DISCOVERY", {})
+    monkeypatch.setattr(profiles.shutil, "which", lambda _name, **_how: None)
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "succeeded", status
+    assert "axqua.install.visit_missing" not in _codes(status["findings"])
+    profile = profiles.load_active(strict=True)
+    assert profile.postprocessors == {"paraview": paraview}
+    assert not (tmp_path / "target" / "apps").exists()
+
+
+def test_the_postprocessors_without_visit_are_paraview_alone(installers, debian, tmp_path,
+                                                             monkeypatch):
+    """ParaView is a package of the operating system. Without VisIt nothing is
+    downloaded, and the installation consists of entering ParaView in the profile."""
+    from axqua.core import machine
+    from axqua.core import profile as profiles
+
+    monkeypatch.setattr(recipes, "PARAVIEW", tmp_path / "no-paraview-here")
+    plan = _plan("postprocessors", installers, debian, tmp_path, visit=False)
+    assert plan.steps == [] and not plan.ready
+    assert _codes(plan.findings) == {"axqua.install.packages_required"}
+    with pytest.raises(Exception, match="system package of ParaView"):
+        runner.start(plan, detach=False)
+
+    paraview = tmp_path / "paraview"
+    paraview.write_text("#!/bin/sh\n")
+    paraview.chmod(0o755)
+    monkeypatch.setattr(recipes, "PARAVIEW", paraview)
+    plan = _plan("postprocessors", installers, debian, tmp_path, visit=False)
+    assert plan.steps == [] and plan.ready and plan.findings == []
+    assert plan.outputs == {"postprocessors.paraview": str(paraview)}
+    assert plan.optional_outputs == []
+    assert sum("recommends VisIt" in note for note in plan.notes) == 1
+    assert recipes.packages_needed("postprocessors", installers, debian,
+                                   recipes.Options(visit=False)) == ["paraview"]
+
+    monkeypatch.setattr(machine, "DISCOVERY", {})
+    monkeypatch.setattr(profiles.shutil, "which", lambda _name, **_how: None)
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "succeeded", status
+    assert status["steps"] == [] and status["findings"] == []
+    assert profiles.load_active(strict=True).postprocessors == {"paraview": paraview}
+    assert not (tmp_path / "target").exists()            # nothing was installed
+
+
+def test_a_program_of_a_system_package_that_is_gone_is_not_blamed_on_a_build(tmp_path):
+    folder = tmp_path / "install"
+    folder.mkdir()
+    (folder / "plan.json").write_text(json.dumps({
+        "target": "postprocessors", "steps": [], "options": {"bind": False},
+        "optional_outputs": [],
+        "outputs": {"postprocessors.paraview": str(tmp_path / "no-paraview-here")}}))
+    (folder / "status.json").write_text(json.dumps({"id": "later", "state": "queued"}))
+    assert runner.execute(folder) == 1
+    status = json.loads((folder / "status.json").read_text())
+    assert status["state"] == "failed"
+    assert _codes(status["findings"]) == {"axqua.install.output_missing"}
+    assert "system packages" in status["findings"][0]["remedy"]
 
 
 def test_visit_is_installed_alone_for_a_computer_that_only_runs_telemac(

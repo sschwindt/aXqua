@@ -74,6 +74,9 @@ class FakeIface:
     def mainWindow(self):                        # noqa: N802 - QGIS naming
         return None
 
+    def activeLayer(self):                       # noqa: N802 - QGIS naming
+        return None                              # nothing is selected in the layer panel
+
     def mapCanvas(self):                         # noqa: N802 - QGIS naming
         from qgis.gui import QgsMapCanvas
         if self._window is None:
@@ -224,6 +227,109 @@ def test_a_mesh_variable_really_is_styled(project, tmp_path):
     assert added[0].rendererSettings().activeScalarDatasetGroup() == 0
 
 
+def _result_layer(folder: Path):
+    """The fixture mesh with a water depth and a velocity, as a result carries them."""
+    from qgis.core import QgsMeshLayer
+
+    layer = QgsMeshLayer(str(_write_mesh(folder)), "steady result", "mdal")
+    for name, kind, rows in (
+            ("WATER DEPTH", "SCL", ("0.2", "0.6", "0.9", "1.4")),
+            ("SCALAR VELOCITY", "SCL", ("0.5", "1.0", "1.5", "2.0")),
+            ("VELOCITY", "VEC", ("0.5 0.0", "1.0 0.0", "0.0 1.5", "1.2 1.6"))):
+        path = folder / f"{name.lower().replace(' ', '-')}.dat"
+        path.write_text("DATASET\nOBJTYPE \"mesh2d\"\nBEG" + kind + "\nND 4\nNC 2\n"
+                        f"NAME \"{name}\"\nTS 0 0.0\n" + "\n".join(rows) + "\nENDDS\n",
+                        encoding="utf-8")
+        assert layer.addDatasets(str(path)), name
+    return layer
+
+
+def test_a_map_style_draws_arrows_or_streamlines_over_the_water_depth(project, tmp_path):
+    """The predefined map styles: the velocity as arrows or streamlines, colored by its
+    magnitude, on top of the water depth or of the velocity magnitude."""
+    from qgis.core import QgsMeshRendererVectorSettings as Vectors
+
+    from axqua_plugin.compat import enum_value
+    from axqua_plugin.core import styles
+
+    layer = _result_layer(tmp_path)
+    index = {result_loader.group_metadata(layer, i).name(): i
+             for i in layer.datasetGroupsIndexes()}
+    streamlines = enum_value(Vectors, "Symbology.Streamlines", "Streamlines")
+    arrows = enum_value(Vectors, "Symbology.Arrows", "Arrows")
+    assert list(styles.MAP_STYLES)[0] == "depth-streamlines"   # what the tab offers first
+
+    assert result_loader.apply_map_style(layer, "depth-streamlines", min_depth=0.05) == []
+    drawn = layer.rendererSettings()
+    assert drawn.activeScalarDatasetGroup() == index["WATER DEPTH"]
+    assert drawn.activeVectorDatasetGroup() == index["VELOCITY"]
+    vectors = drawn.vectorSettings(index["VELOCITY"])
+    assert vectors.symbology() == streamlines
+    assert vectors.streamLinesSettings().seedingDensity() == styles.STREAMLINE_DENSITY
+    # the lines are colored by the velocity magnitude, up to the fastest value. This
+    # never happened before a real result was drawn: the member that switches it on
+    # was looked for on the wrong class, and every vector was black.
+    from qgis.core import QgsInterpolatedLineColor as LineColor
+    by_ramp = enum_value(LineColor, "ColoringMethod.ColorRamp", "ColorRamp")
+    assert vectors.coloringMethod() == by_ramp
+    assert vectors.colorRampShader().maximumValue() == pytest.approx(2.0)
+    # no vector where the water stands: a dry node would get an arrow otherwise
+    assert vectors.filterMin() == styles.VECTOR_MINIMUM
+    depth = drawn.scalarSettings(index["WATER DEPTH"]).colorRampShader()
+    assert depth.shade(0.02)[4] == 0 and depth.shade(0.5)[4] == 255   # shallow: clear
+
+    result_loader.apply_map_style(layer, "depth-arrows")
+    vectors = layer.rendererSettings().vectorSettings(index["VELOCITY"])
+    assert vectors.symbology() == arrows and vectors.coloringMethod() == by_ramp
+    # on a grid of the map, so that the number of arrows does not follow the mesh
+    assert vectors.isOnUserDefinedGrid()
+    assert vectors.userGridCellWidth() == styles.ARROW_SPACING
+
+    result_loader.apply_map_style(layer, "velocity-streamlines")
+    drawn = layer.rendererSettings()
+    assert drawn.activeScalarDatasetGroup() == index["SCALAR VELOCITY"]
+    vectors = drawn.vectorSettings(index["VELOCITY"])
+    assert vectors.symbology() == streamlines
+    # over the velocity magnitude the lines are dark: the fill is the magnitude
+    assert vectors.coloringMethod() != by_ramp
+    assert vectors.color().name() == styles.VECTOR_COLOR
+
+    # a velocity above the cap is drawn up to the cap, and the user is told
+    (note,) = result_loader.apply_map_style(layer, "velocity-arrows", velocity_cap=1.0)
+    assert "capped at 1.0 m/s" in note
+
+
+def test_a_layer_that_is_no_result_gets_a_sentence_and_no_style(project, tmp_path):
+    from qgis.core import QgsMeshLayer, QgsVectorLayer
+
+    bare = QgsMeshLayer(str(_write_mesh(tmp_path)), "geometry", "mdal")
+    with pytest.raises(ValueError, match="has no velocity"):
+        result_loader.apply_map_style(bare, "depth-arrows")
+    points = QgsVectorLayer("Point?crs=EPSG:25832", "points", "memory")
+    for other in (points, None):
+        with pytest.raises(ValueError, match="mesh layers"):
+            result_loader.apply_map_style(other, "depth-arrows")
+    with pytest.raises(ValueError, match="no map style"):
+        result_loader.apply_map_style(bare, "rainbow")
+
+
+def test_the_map_styles_are_one_choice_and_one_button_on_the_qgis_page(dock, tmp_path):
+    page = dock.page("postprocessing", "qgis")
+    choice = page.style_choice
+    assert [choice.itemText(i) for i in range(choice.count())] == [
+        "Water depth with streamlines", "Water depth with velocity arrows",
+        "Velocity magnitude with streamlines", "Velocity magnitude with arrows"]
+    page.apply_style()                              # no layer is selected in QGIS
+    assert "Select a result layer" in page.style_status.text()
+
+    layer = _result_layer(tmp_path)
+    dock.ctx.iface.activeLayer = lambda: layer
+    page.apply_style()
+    assert page.style_status.text().startswith(
+        "Water depth with streamlines: applied to the layer steady result.")
+    assert layer.rendererSettings().activeVectorDatasetGroup() >= 0
+
+
 def test_the_velocity_fill_is_transparent_where_nothing_moves(qgis_app):
     """Dry ground has a velocity of exactly zero. Filled, it painted the floodplain in
     the brightest color of the ramp."""
@@ -299,6 +405,58 @@ def test_an_untouched_option_form_sends_nothing(qgis_app):
     tab._fields["reconstruct"].setCheckState(UNCHECKED)
     tab._fields["to_vtk"].setCheckState(CHECKED)
     assert tab.options() == {"reconstruct": False, "to_vtk": True}
+    tab.deleteLater()
+
+
+def test_the_openfoam_box_has_the_warm_up_check_box_and_sends_it_with_the_build(
+        qgis_app, monkeypatch):
+    """The documentation outline prescribes a check box *Use TELEMAC warm-up* that is
+    on unless the user turns it off. Only the options of the run were shown, so the
+    option of the build was in the table and nowhere in the plugin."""
+    from axqua_plugin.compat import PARTIALLY_CHECKED, UNCHECKED
+    from axqua_plugin.gui import capability_tab_widget
+    from axqua_plugin.gui.capability_tab_widget import CapabilityTab
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    sent = []
+
+    class _Client:
+        def submit(self, config, kind, **kwargs):
+            sent.append((kind, kwargs["options"]))
+            return {"job_id": "JOB"}
+
+    class _Ctx(_Context):
+        project = type("P", (), {"profile": "", "job_root": "", "launcher": "auto"})()
+
+        def client_or_warn(self):
+            return _Client()
+
+        def active_case_or_warn(self):
+            return "/c/reach.axq-case"
+
+        def job_submitted(self, job_id):
+            pass
+
+    monkeypatch.setattr(capability_tab_widget, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    view = CapabilityView(name="free_surface_3d", solver="openfoam",
+                          implemented="yes", configured=True, built=False, run=False)
+    assert (view.build_kind, view.submit_kind) == ("openfoam-build", "openfoam-run")
+    tab = CapabilityTab(view, _Ctx())
+    labels = [tab.options_form.itemAt(row, tab.options_form.ItemRole.LabelRole)
+              .widget().text() for row in range(tab.options_form.rowCount())]
+    assert labels[0] == "Use TELEMAC warm-up"            # the build comes first
+    box = tab._build_fields["pre_run"]
+    # untouched, the case file decides, where the warm-up is on by default
+    assert box.checkState() == PARTIALLY_CHECKED and "on" in box.toolTip()
+
+    tab._submit(view.build_kind)
+    box.setCheckState(UNCHECKED)                         # a build without the warm-up
+    tab._submit(view.build_kind)
+    tab._submit(view.submit_kind)                        # the run does not carry it
+    assert sent == [("openfoam-build", {}), ("openfoam-build", {"pre_run": False}),
+                    ("openfoam-run", {})]
     tab.deleteLater()
 
 
@@ -695,12 +853,19 @@ PROFILE = {
 
 
 class _ProfileClient:
-    def __init__(self, findings=()):
+    def __init__(self, findings=(), located=None, backup=""):
         self.written, self.findings = [], list(findings)
+        self.located, self.asked, self.backup = dict(located or {}), [], backup
 
     def profile_write(self, data):
         self.written.append(data)
-        return {"path": "/home/x/default.axq-profile", "findings": []}
+        return {"path": "/home/x/default.axq-profile", "backup": self.backup,
+                "findings": []}
+
+    def profile_locate(self, program, folder):
+        self.asked.append((program, folder))
+        return dict({"program": program, "folder": folder, "script": "",
+                     "candidates": []}, **self.located.get(program, {}))
 
     def profile_check(self, *, probe=True):
         return {"path": "/home/x/default.axq-profile", "findings": self.findings}
@@ -740,6 +905,109 @@ def test_the_editor_writes_what_its_rows_say_and_keeps_the_rest(qgis_app, monkey
     assert "path" not in written                               # where, not what
     assert editor.saved_once and not editor.dirty
     editor.deleteLater()
+
+
+def test_selecting_the_folder_of_a_program_fills_the_row_below(qgis_app, monkeypatch):
+    """The folder is what a person knows about an installation. Which file in it
+    aXqua runs is found by aXqua."""
+    from axqua_plugin.gui.profile_editor import ProfileEditor, get
+
+    _run_now(monkeypatch)
+    script = "/data/opt/telemac-mascaret/configs/pysource.debian12.sh"
+    client = _ProfileClient(located={
+        "telemac": {"folder": "/data/opt/telemac-mascaret", "script": script,
+                    "candidates": [script]},
+        "openfoam": {"candidates": ["/of/etc/bashrc", "/of/other/etc/bashrc"]}})
+    editor = ProfileEditor(client, dict(PROFILE, installations={"visit": "/opt/visit"},
+                                        programs={"visit": "/opt/visit/bin/visit"}))
+    assert editor._widgets["installations.visit"].text() == "/opt/visit"
+    assert not editor.dirty
+
+    # a row that was not changed asks nothing, so the row below keeps what it says
+    editor.locate("installations.visit")
+    assert client.asked == []
+
+    editor._widgets["installations.telemac"].setText("/data/opt")   # the folder above
+    editor.locate("installations.telemac")
+    assert client.asked == [("telemac", "/data/opt")]
+    assert editor._widgets["installations.telemac"].text() == "/data/opt/telemac-mascaret"
+    assert editor._widgets["solvers.telemac.setup_script"].text() == script
+    assert script in editor.status.text()
+    editor.locate("installations.telemac")                          # asked once
+    assert len(client.asked) == 1
+
+    editor._widgets["installations.openfoam"].setText("/of")
+    editor.locate("installations.openfoam")
+    assert editor._widgets["solvers.openfoam.setup_script"].text() == ""
+    assert "holds 2 files" in editor.status.text()
+    editor._widgets["installations.paraview"].setText("/empty")
+    editor.locate("installations.paraview")
+    assert "No program of paraview was found in /empty" in editor.status.text()
+
+    editor.save()
+    (written,) = client.written
+    assert get(written, "installations.telemac") == "/data/opt/telemac-mascaret"
+    assert get(written, "solvers.telemac.setup_script") == script
+    assert get(written, "installations.visit") == "/opt/visit"
+    # what the command adds for display is not part of the file
+    assert "programs" not in written and "path" not in written
+    editor.deleteLater()
+
+
+def test_the_editor_says_where_a_profile_it_could_not_read_was_kept(qgis_app,
+                                                                    monkeypatch):
+    from axqua_plugin.gui.profile_editor import ProfileEditor
+
+    _run_now(monkeypatch)
+    kept = "/home/x/default.axq-profile.20261011-101500.bak"
+    editor = ProfileEditor(_ProfileClient(backup=kept), {"name": "new"})
+    editor.save()
+    assert kept in editor.status.text() and "could not be read" in editor.status.text()
+    editor.deleteLater()
+
+
+def test_the_summary_shows_the_program_that_is_run_and_its_folder(dock):
+    """A profile may name the installation folder only. The file found in it is what
+    aXqua runs, and the tab shows that file."""
+    from axqua_plugin.gui.configuration_tab import describe_entry
+
+    tab = dock.configuration_tab
+    profile = {"name": "bench",
+               "installations": {"telemac": "/opt/telemac-mascaret", "visit": "/opt/v"},
+               "solvers": {"openfoam": {"setup_script": "/of/etc/bashrc"}},
+               "programs": {"telemac": "/opt/telemac-mascaret/configs/pysource.sh",
+                            "openfoam": "/of/etc/bashrc"}}
+    tab.show_profile({"path": "/home/x/default.axq-profile", "exists": True}, profile)
+    assert tab._summary["solvers.telemac.setup_script"].text() == \
+        "/opt/telemac-mascaret/configs/pysource.sh\ninstalled in /opt/telemac-mascaret"
+    assert tab._summary["solvers.openfoam.setup_script"].text() == "/of/etc/bashrc"
+    assert tab._summary["postprocessors.paraview"].text() == "not set"
+    assert describe_entry(profile, "postprocessors.visit") == \
+        "no program found in the folder\ninstalled in /opt/v"
+
+
+def test_a_profile_that_cannot_be_read_is_not_silently_replaced(dock, monkeypatch):
+    """*Create profile...* on such a computer opens the editor with what aXqua finds.
+    The window says that the file is kept, before anything is saved."""
+    from axqua_plugin.gui import configuration_tab
+
+    tab = dock.configuration_tab
+    opened = []
+    monkeypatch.setattr(configuration_tab, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success({"name": "found"}))
+    monkeypatch.setattr(tab, "_open_editor",
+                        lambda profile, title: opened.append((profile, title)))
+    tab.show_profile({}, None, error="this profile was written by a newer aXqua")
+    assert "could not be read" in tab.profile_path.text()
+    tab.edit_profile()
+    (profile, title), = opened
+    assert profile == {"name": "found"}
+    assert "newer aXqua" in title and ".bak" in title and "not deleted" in title
+    # a computer that simply has no profile gets the ordinary sentence
+    tab.show_profile({"path": "/home/x/default.axq-profile", "exists": False}, None)
+    tab.edit_profile()
+    assert ".bak" not in opened[-1][1]
 
 
 def test_saving_is_never_refused_because_of_a_finding(qgis_app, monkeypatch):
@@ -1233,8 +1501,15 @@ def test_the_wizard_starts_from_what_aXqua_found_and_sends_what_was_chosen(
     chosen = openfoam.options()
     # an OpenFOAM v2406 is on this computer, so the sediment solvers build on it
     assert chosen["reuse_openfoam"] == "/usr/lib/openfoam/openfoam2406/etc/bashrc"
-    assert (chosen["jobs"], chosen["visualization"], chosen["examples"],
-            chosen["smoke_test"]) == (8, True, False, True)
+    assert (chosen["jobs"], chosen["viewers"], chosen["examples"],
+            chosen["smoke_test"]) == (8, "both", False, True)
+    # VisIt is recommended and can be left out; the recommended answer comes first
+    viewers = openfoam._widgets["viewers"]
+    assert [viewers.itemData(i) for i in range(viewers.count())] == \
+        ["both", "paraview", "none"]
+    assert viewers.itemText(0) == "ParaView and VisIt (recommended)"
+    viewers.setCurrentIndex(1)
+    assert openfoam.options()["viewers"] == "paraview"
     openfoam._widgets["reuse_openfoam"].setCurrentIndex(1)       # compile it instead
     assert openfoam.options()["reuse_openfoam"] == "no"
     assert not openfoam._widgets["openfoam_path"].isEnabled()
@@ -1244,6 +1519,14 @@ def test_the_wizard_starts_from_what_aXqua_found_and_sends_what_was_chosen(
     fresh = install_wizard.InstallWizard(_InstallClient(), "openfoam", nothing_found)
     assert fresh.options()["reuse_openfoam"] == "no"             # nothing to build on
     fresh.deleteLater()
+
+    # the installation of the postprocessors installs at least one of them
+    programs = install_wizard.InstallWizard(_InstallClient(), "postprocessors",
+                                            _overview())
+    viewers = programs._widgets["viewers"]
+    assert [viewers.itemData(i) for i in range(viewers.count())] == ["both", "paraview"]
+    assert programs.options()["viewers"] == "both"
+    programs.deleteLater()
 
 
 def test_missing_packages_are_shown_with_their_command_and_do_not_block(
@@ -1492,6 +1775,11 @@ def test_the_results_of_a_case_are_listed_exported_and_opened(program_pages):
     assert started == [("/usr/bin/paraview", ["/c/vtk/r2d.pvd"]),
                        ("/opt/visit/bin/visit", ["-o", "/c/vtk/r2d.visit"])]
     assert "was started" in visit.status.text()
+
+    # a profile that names the installation folder only: the launcher found in it
+    dock.profile_changed({"installations": {"visit": "/data/visit"},
+                          "programs": {"visit": "/data/visit/bin/visit"}})
+    assert visit.program_path == "/data/visit/bin/visit"
 
 
 def test_everything_is_exported_when_no_result_is_selected(program_pages):

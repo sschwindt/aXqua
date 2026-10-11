@@ -81,7 +81,25 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 .. _axqua-environment-solver-unbound:
 
 ``no environment script is set for ..., so simulations with it cannot be started``
-    The profile does not state where TELEMAC or OpenFOAM is installed. Enter the environment script of the installation in the profile (:ref:`solver-bindings`). Leave the entry empty if the program is not used on this computer.
+    The profile does not state where TELEMAC or OpenFOAM is installed. Select the installation folder or the environment script of the installation in the profile editor (:ref:`solver-bindings`). Leave both entries empty if the program is not used on this computer.
+
+``the installation folder of ... holds several environment scripts`` or ``no environment script of ... was found in the installation folder``
+    The profile names the installation folder of a simulation code and no environment script, and aXqua cannot determine the script from the folder. A TELEMAC installation can contain one environment script per compiler configuration. Select the environment script itself in the profile editor.
+
+.. _axqua-environment-installation-missing:
+
+``the installation folder of ... does not exist``
+    The profile names a folder that is not on this computer, for example because the program was moved or removed. Select the folder again in the profile editor, or clear the entry. A program whose environment script or program file is entered in the profile keeps working.
+
+.. _axqua-environment-installation-mismatch:
+
+``the environment script of ... is not in the installation folder entered for it`` or ``the program of ... is not in the installation folder entered for it``
+    The two entries of a program point to different installations. aXqua uses the environment script or the program file, and the folder has no effect. Select the folder to which the file belongs, or clear the folder.
+
+.. _axqua-config-unknown-entry:
+
+``this version of aXqua does not know the entry ...; it is kept as it is and not used``
+    The profile contains an entry that the installed version of aXqua does not know. If a newer version of aXqua or of the plugin wrote the entry, update aXqua, and the entry takes effect. If the entry is a typing error in a profile that was edited by hand, the message names the entry that is probably meant. Correct the name in the profile file. The remaining entries of the profile are used in either case, and saving the profile keeps the entry.
 
 .. _axqua-environment-ambient:
 

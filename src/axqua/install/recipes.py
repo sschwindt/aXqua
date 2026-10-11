@@ -84,7 +84,12 @@ ESTIMATES = {
     "openfoam": "a few minutes with an existing OpenFOAM v2406",
     "openfoam-source": "several hours; OpenFOAM v2406 is compiled from its source code",
     "postprocessors": "a few minutes; VisIt is a download of 600 MB",
+    "postprocessors-paraview": "a moment",
 }
+
+#: Why VisIt is the recommended choice, said wherever a user decides against it.
+VISIT_RECOMMENDED = ("aXqua recommends VisIt: its predefined figures of "
+                     "three-dimensional results are rendered with it.")
 
 _PACKAGE = re.compile(r"^[a-z0-9][a-z0-9+.\-]*$")
 
@@ -146,7 +151,10 @@ class Options:
     telemac_examples: str = "inputs"
     reuse_openfoam: str = "auto"        # auto | no | the etc/bashrc of an OpenFOAM v2406
     jobs: int | None = None             # processes for compiling
-    visualization: bool = True          # OpenFOAM: also ParaView and VisIt
+    visualization: bool = True          # OpenFOAM: also the postprocessors
+    #: Whether VisIt is installed with the postprocessors. Recommended, and a choice:
+    #: without it, ParaView alone is entered in the profile.
+    visit: bool = True
     examples: bool = False
     smoke_test: bool = True
     installers: Path | None = None      # a local copy of the installer scripts
@@ -170,7 +178,7 @@ class Options:
                 value = Path(value).expanduser() if value not in (None, "") else None
             elif key == "jobs":
                 value = int(value) if value not in (None, "") else None
-            elif key in ("visualization", "examples", "smoke_test", "bind"):
+            elif key in ("visualization", "visit", "examples", "smoke_test", "bind"):
                 value = bool(value)
             elif key == "telemac_examples":
                 if isinstance(value, bool):         # the switch this setting once was
@@ -197,6 +205,7 @@ class Options:
             "reuse_openfoam": self.reuse_openfoam,
             "jobs": self.jobs,
             "visualization": self.visualization,
+            "visit": self.visit,
             "examples": self.examples,
             "smoke_test": self.smoke_test,
             "installers": str(self.installers) if self.installers else "",
@@ -475,6 +484,9 @@ def packages_needed(target: str, checkout: Path, host: hosts.Host,
         return []
     text = source.read_text(encoding="utf-8", errors="replace")
     gui = _python_list(text, "GUI_PACKAGES")
+    if not options.visit:
+        # The list is ParaView and the system libraries the VisIt download needs.
+        gui = [name for name in gui if name == "paraview"]
     if target == "postprocessors":
         return gui
     return _python_list(text, "BUILD_PACKAGES") + (gui if options.visualization else [])
@@ -708,8 +720,13 @@ class Plan:
 
     @property
     def ready(self) -> bool:
-        """Whether the installation can be started at all."""
-        return bool(self.steps) and not any(f.severity == ERROR for f in self.findings)
+        """Whether the installation can be started at all.
+
+        A plan without a command can still be one: ParaView alone is a package of the
+        operating system, and what is left to do is to enter it in the profile.
+        """
+        return bool(self.steps or self.outputs) \
+            and not any(f.severity == ERROR for f in self.findings)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -858,8 +875,17 @@ def plan(target: str, options: Options | None = None, *,
     # ---- space -------------------------------------------------------------------
     key = "openfoam-source" if target == "openfoam" and not _reuse(options) else target
     out.estimate = out.estimate or ESTIMATES[key]
+    if target == "postprocessors" and not options.visit and out.outputs \
+            and not PARAVIEW.is_file():
+        # Nothing but the system package is installed here, so without it there is
+        # nothing to enter in the profile.
+        add(ERROR, "axqua.install.packages_required",
+            "without VisIt, this installation is the system package of ParaView "
+            "alone, which is not installed yet",
+            "Install the system packages listed here, then check again.",
+            where=f"{subject}.packages")
     free = _free_gb(folder)
-    if free is not None and free < DISK_GB[key]:
+    if out.steps and free is not None and free < DISK_GB[key]:
         add(WARNING, "axqua.install.little_space",
             f"{free:.0f} GiB are free in {folder}; the installation needs about "
             f"{DISK_GB[key]} GiB", "Select a folder on a drive with more free space.",
@@ -1004,9 +1030,13 @@ def _plan_openfoam(out: Plan, checkout: Path, add) -> None:
             "20 GiB",
             "If v2406 is installed, select its etc/bashrc.",
             where=f"{subject}.reuse_openfoam")
-    if out.options.visualization:
+    viewers = out.options.visualization
+    visit = viewers and out.options.visit
+    if visit:
         argv += ["--visit-platform", out.host.base]
     else:
+        # The installer has one switch for both programs. ParaView is the package of
+        # the operating system either way, and aXqua enters it in the profile itself.
         argv.append("--skip-visualization")
     if out.options.examples:
         argv.append("--examples")
@@ -1016,15 +1046,22 @@ def _plan_openfoam(out: Plan, checkout: Path, add) -> None:
     out.outputs["solvers.openfoam.setup_script"] = str(prefix / "shell-rc.sh")
     out.expects.append(str(prefix / "receipt.json"))
     out.expects.append(str(prefix / "user" / "platforms" / "*" / "bin" / "sediDriftFoam2"))
-    if out.options.visualization:
+    # Additions to the solvers: a build of hours is not lost to a missing viewer.
+    if viewers:
         out.outputs["postprocessors.paraview"] = str(PARAVIEW)
+        out.optional_outputs.append("postprocessors.paraview")
+    if visit:
         out.outputs["postprocessors.visit"] = str(
             prefix / "apps" / f"visit-*-{out.host.base}" / "bin" / "visit")
-        # Additions to the solvers: a build of hours is not lost to a missing viewer.
-        out.optional_outputs += ["postprocessors.paraview", "postprocessors.visit"]
+        out.optional_outputs.append("postprocessors.visit")
     out.notes.append("Installed are sediDriftFoam, sediDriftFoam2, the stage-discharge "
                      "outflow boundary of the BAW"
-                     + (", ParaView and VisIt." if out.options.visualization else "."))
+                     + (", ParaView and VisIt." if visit else
+                        " and ParaView." if viewers else "."))
+    if viewers and not visit:
+        out.notes.append("VisIt is not installed, as selected. " + VISIT_RECOMMENDED
+                         + " It can be added at any time with the installation of "
+                         "ParaView and VisIt.")
 
 
 def _plan_postprocessors(out: Plan, checkout: Path, add) -> None:
@@ -1034,13 +1071,21 @@ def _plan_postprocessors(out: Plan, checkout: Path, add) -> None:
         add(ERROR, "axqua.install.no_installer",
             "this version of the installer scripts has no installer for VisIt")
         return
+    out.outputs["postprocessors.paraview"] = str(PARAVIEW)
+    if not out.options.visit:
+        # ParaView is all that is left, so it has to be there: nothing runs, and the
+        # installation consists of entering it in the profile.
+        out.estimate = ESTIMATES["postprocessors-paraview"]
+        out.notes.append("ParaView is the package of the operating system and is "
+                         "entered in the profile. VisIt is not installed, as selected. "
+                         + VISIT_RECOMMENDED)
+        return
     python = sys.executable
     argv = [python, "-I", "-B", "-c", VISIT_DRIVER, str(checkout / OPENFOAM_DIR),
             str(prefix), out.host.base]
     out.steps.append(Step("Download and install VisIt", argv))
     out.outputs["postprocessors.visit"] = str(
         prefix / "apps" / f"visit-*-{out.host.base}" / "bin" / "visit")
-    out.outputs["postprocessors.paraview"] = str(PARAVIEW)
     # VisIt is what this target installs, so only ParaView may be missing.
     out.optional_outputs.append("postprocessors.paraview")
     out.notes.append("ParaView is the package of the operating system. VisIt is "

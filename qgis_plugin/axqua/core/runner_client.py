@@ -451,8 +451,16 @@ class RunnerClient:
         return self.call(args, timeout=180).data or {}
 
     def profile_write(self, profile: dict) -> dict:
-        """Save *profile* as the active profile. Returns ``{path, findings}``."""
+        """Save *profile* as the active profile. Returns ``{path, backup, findings}``;
+        *backup* is where a file that could not be read was kept."""
         return self.call(["profile", "write"], input_text=json.dumps(profile),
+                         timeout=60).data or {}
+
+    def profile_locate(self, program: str, folder: str | os.PathLike) -> dict:
+        """``{program, folder, script, candidates}``: the environment script or the
+        launcher of *program* in the folder it is installed in. *script* is empty
+        where the folder holds none, or several."""
+        return self.call(["profile", "locate", str(program), str(folder)],
                          timeout=60).data or {}
 
     # -- validation ---------------------------------------------------------------
@@ -533,8 +541,13 @@ def install_flags(options: dict | None) -> list[str]:
             flags += [flag, str(value)]
     if options.get("telemac_examples") in ("all", "none"):      # "inputs" is the default
         flags += ["--telemac-examples", str(options["telemac_examples"])]
-    if options.get("visualization") is False:
+    # "viewers" is the one question of the wizards: both programs, ParaView alone, or
+    # none. The two switches are what a script sends.
+    viewers = options.get("viewers")
+    if options.get("visualization") is False or viewers == "none":
         flags.append("--no-visualization")
+    elif options.get("visit") is False or viewers == "paraview":
+        flags.append("--no-visit")
     if options.get("examples"):
         flags.append("--examples")
     if options.get("smoke_test") is False:

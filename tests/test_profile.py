@@ -87,14 +87,21 @@ def test_the_suffix_is_added_rather_than_guessed_at(tmp_path):
         "office.axq-profile"
 
 
-def test_a_misspelled_key_is_named_with_its_place(tmp_path):
-    """A silently ignored key is a setting the user believes is in force."""
+def test_a_misspelled_key_is_named_with_its_place(tmp_path, caplog):
+    """A silently ignored key is a setting the user believes is in force. The rest of
+    the profile stays in use, and the key is named wherever the profile is looked at."""
     target = tmp_path / "typo.axq-profile"
-    target.write_text("solvers:\n  telemac:\n    setup_scirpt: /x.sh\n")
-    with pytest.raises(ConfigError) as caught:
-        profiles.load(target)
-    assert caught.value.subject == "solvers.telemac.setup_scirpt"
-    assert "setup_script" in caught.value.remedy
+    target.write_text("solvers:\n  telemac:\n    setup_scirpt: /x.sh\n"
+                      "  openfoam:\n    setup_script: /o/etc/bashrc\n")
+    profile = profiles.load(target)
+    assert profile.solvers["openfoam"].setup_script == Path("/o/etc/bashrc")
+    found = [f for f in profiles.check(profile, probe=False)
+             if f.code == "axqua.config.unknown_entry"]
+    assert [f.subject for f in found] == ["solvers.telemac.setup_scirpt"]
+    assert found[0].severity == WARNING and "setup_script" in found[0].remedy
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        profiles.load_active(target)
+    assert "solvers.telemac.setup_scirpt" in caplog.text
 
 
 def test_a_profile_of_a_newer_axqua_is_refused_clearly(tmp_path):
@@ -102,6 +109,131 @@ def test_a_profile_of_a_newer_axqua_is_refused_clearly(tmp_path):
     target.write_text("schema_version: 99\n")
     with pytest.raises(ConfigError, match="newer aXqua"):
         profiles.load(target)
+
+
+# ------------------------------------- a profile outlives the version that wrote it
+
+#: A profile exactly as aXqua 0.4.2 wrote it, before installation folders existed.
+#: This text is never edited: every later version has to read it.
+WRITTEN_BY_0_4_2 = """\
+schema_version: 1
+name: workstation
+python:
+  executable: /opt/miniforge3/envs/axqua-env/bin/python
+  axqua: /opt/miniforge3/envs/axqua-env/bin/axqua
+solvers:
+  telemac:
+    setup_script: /opt/telemac-mascaret/configs/pysource.debian12.sh
+    config_name: debgfopenmpi
+    mpi_processes: 12
+    overrides:
+      USETELCFG: debgfopenmpi
+  openfoam:
+    setup_script: /usr/lib/openfoam/openfoam2406/etc/bashrc
+    environment: posix
+    mpi_processes: 16
+postprocessors:
+  paraview: /usr/bin/paraview
+  visit: /opt/visit/bin/visit
+jobs:
+  root: /scratch/axqua-jobs
+  launcher: systemd
+display:
+  min_depth: 0.02
+  velocity_cap: 4.0
+"""
+
+
+def test_a_profile_of_an_earlier_version_still_loads_and_loses_nothing(tmp_path):
+    target = tmp_path / "old.axq-profile"
+    target.write_text(WRITTEN_BY_0_4_2)
+    profile = profiles.load(target)
+    assert profile.script("telemac") == \
+        Path("/opt/telemac-mascaret/configs/pysource.debian12.sh")
+    assert profile.solvers["telemac"].config_name == "debgfopenmpi"
+    assert profile.job_root == Path("/scratch/axqua-jobs") and profile.min_depth == 0.02
+    assert profile.unknown_entries() == []
+    profiles.save(profile, target)
+    assert yaml.safe_load(target.read_text()) == yaml.safe_load(WRITTEN_BY_0_4_2)
+    assert profile.backup is None
+
+
+def test_an_entry_of_a_newer_version_survives_a_save(tmp_path):
+    """The plugin and aXqua are updated separately, so each may meet a profile the
+    other wrote. What one of them does not know, it must not delete."""
+    later = yaml.safe_load(WRITTEN_BY_0_4_2)
+    later["cluster"] = {"queue": "long", "nodes": 4}
+    later["jobs"]["keep_days"] = 30
+    later["solvers"]["telemac"]["modules"] = ["gcc/13", "openmpi/5"]
+    later["solvers"]["delft3d"] = {"setup_script": "/opt/delft3d/env.sh"}
+    later["postprocessors"]["tecplot"] = "/opt/tecplot/bin/tec360"
+    target = tmp_path / "later.axq-profile"
+    target.write_text(yaml.safe_dump(later))
+
+    profile = profiles.load(target)
+    assert sorted(profile.unknown_entries()) == [
+        "cluster", "jobs.keep_days", "postprocessors.tecplot", "solvers.delft3d",
+        "solvers.telemac.modules"]
+    assert profile.script("telemac") is not None             # the rest is in use
+    profile.solvers["telemac"].mpi_processes = 8             # an edit by this version
+    profiles.save(profile, target)
+    stored = yaml.safe_load(target.read_text())
+    later["solvers"]["telemac"]["mpi_processes"] = 8
+    assert stored == later
+
+
+def test_text_where_a_number_belongs_is_a_message_and_not_a_crash(tmp_path, caplog):
+    """The profile is read on every case load."""
+    profiles.default_path().parent.mkdir(parents=True, exist_ok=True)
+    for text, subject in (
+            ("solvers:\n  telemac:\n    mpi_processes: many\n",
+             "solvers.telemac.mpi_processes"),
+            ("display:\n  min_depth: shallow\n", "display.min_depth"),
+            ("solvers: 3\n", "solvers"),
+            ("schema_version: one\n", "schema_version")):
+        profiles.default_path().write_text(text)
+        with pytest.raises(ConfigError) as caught:
+            profiles.load(profiles.default_path())
+        assert caught.value.subject == subject
+        assert machine.resolve("telemac", configured="/fallback.sh").path == \
+            Path("/fallback.sh")
+
+
+def test_a_file_that_could_not_be_read_is_kept_when_a_profile_is_saved_over_it(tmp_path):
+    """Creating a profile where one of a newer aXqua lies must not cost that one."""
+    target = tmp_path / "default.axq-profile"
+    newer = "schema_version: 99\nfleet:\n  - a\n  - b\n"
+    target.write_text(newer)
+    profile = profiles.AxquaProfile(name="made here")
+    profiles.save(profile, target)
+    assert profiles.load(target).name == "made here"
+    assert profile.backup is not None and profile.backup.parent == tmp_path
+    assert profile.backup.name.startswith("default.axq-profile.") \
+        and profile.backup.suffix == ".bak"
+    assert profile.backup.read_text() == newer
+    # ... and a profile that can be read is simply replaced: the editor carried it.
+    profiles.save(profiles.AxquaProfile(name="again"), target)
+    assert sorted(path.name for path in tmp_path.iterdir()) == \
+        sorted(["default.axq-profile", profile.backup.name])
+
+
+def test_the_profile_is_kept_outside_of_axqua_and_of_the_plugin(monkeypatch, tmp_path):
+    """Updating aXqua or the plugin replaces their folders. The profile is in neither,
+    so an update finds it where it was."""
+    import axqua
+
+    for var in ("AXQUA_HOME", "XDG_CONFIG_HOME"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    where = profiles.default_path()
+    assert where == tmp_path / ".config" / "axqua" / "default.axq-profile"
+    package = Path(axqua.__file__).resolve().parent
+    repository = Path(__file__).resolve().parent.parent
+    for folder in (package, repository / "qgis_plugin"):
+        assert folder not in where.resolve().parents
+    # QGIS keeps a plugin in the folder python/plugins of its own user profile.
+    assert "plugins" not in where.parts and "QGIS" not in where.parts
 
 
 def test_a_relative_path_is_relative_to_the_profile(tmp_path):
@@ -205,6 +337,131 @@ def test_detection_sees_the_settings_the_profile_will_replace(tmp_path):
     machine.write_settings({"telemac": "/from/solvers-yml.sh"})
     _profile(tmp_path, telemac="/stale/profile.sh")
     assert profiles.detect().solvers["telemac"].setup_script == Path("/from/solvers-yml.sh")
+
+
+# ------------------------------------------------------------ installation folders
+
+
+def _installed(root: Path, *files: str) -> Path:
+    """A folder laid out like an installation, with the named files in it."""
+    for name in files:
+        target = root / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("#!/bin/sh\n")
+        target.chmod(0o755)
+    return root
+
+
+def test_a_profile_of_installation_folders_is_a_complete_one(tmp_path):
+    """The folder is what a person knows about an installation. The environment script
+    and the launcher are found in it."""
+    telemac = _installed(tmp_path / "telemac-mascaret", "configs/pysource.debian12.sh",
+                         "configs/pysource.template.sh")
+    visit = _installed(tmp_path / "visit", "bin/visit")
+    profile = profiles.AxquaProfile(name="folders",
+                                    installations={"telemac": telemac, "visit": visit})
+    profiles.save(profile, profiles.default_path())
+    stored = yaml.safe_load(profiles.default_path().read_text())
+    assert stored["installations"] == {"telemac": str(telemac), "visit": str(visit)}
+    assert "solvers" not in stored and "postprocessors" not in stored
+
+    script, launcher = telemac / "configs" / "pysource.debian12.sh", visit / "bin" / "visit"
+    assert profiles.load_active().programs() == {"telemac": str(script),
+                                                 "visit": str(launcher)}
+    assert machine.resolve("telemac").path == script
+    assert machine.resolve("visit").path == launcher
+    found = job_profiles.implicit(load_config(_case(tmp_path)), "telemac")
+    assert (found.name, found.setup_script) == ("folders:telemac", script)
+    assert not [f for f in profiles.check(profiles.load_active(), probe=False)
+                if f.subject.startswith(("installations", "solvers.telemac",
+                                         "postprocessors"))]
+
+
+def test_an_entry_of_the_profile_outranks_what_its_folder_holds(tmp_path):
+    telemac = _installed(tmp_path / "telemac", "configs/pysource.a.sh")
+    other = _installed(tmp_path / "elsewhere", "pysource.mine.sh") / "pysource.mine.sh"
+    profile = profiles.AxquaProfile(
+        installations={"telemac": telemac},
+        solvers={"telemac": profiles.SolverBinding(setup_script=other)})
+    assert profile.script("telemac") == other
+    found = [f for f in profiles.check(profile, probe=False)
+             if f.subject == "installations.telemac"]
+    assert [f.code for f in found] == ["axqua.environment.installation_mismatch"]
+    assert found[0].severity == WARNING and "aXqua uses the environment script" \
+        in found[0].message
+
+
+def test_which_of_several_environment_scripts_is_meant_is_not_guessed(tmp_path):
+    telemac = _installed(tmp_path / "telemac", "configs/pysource.gnu.sh",
+                         "configs/pysource.intel.sh", "configs/pysource.template.sh")
+    assert [path.name for path in profiles.candidates("telemac", telemac)] == \
+        ["pysource.gnu.sh", "pysource.intel.sh"]
+    assert profiles.locate("telemac", telemac) is None
+    profile = profiles.AxquaProfile(installations={"telemac": telemac})
+    assert profile.script("telemac") is None
+    found = {f.subject: f for f in profiles.check(profile, probe=False)}
+    unbound = found["solvers.telemac.setup_script"]
+    assert unbound.code == "axqua.environment.solver_unbound"
+    assert "pysource.gnu.sh" in unbound.message and "pysource.intel.sh" in unbound.message
+
+
+def test_the_folder_an_installation_was_put_in_is_accepted_too(tmp_path):
+    """A wizard is given the folder above: TELEMAC lies in telemac-mascaret below it,
+    VisIt in apps/visit-<version> below it."""
+    root = _installed(tmp_path / "opt", "telemac-mascaret/configs/pysource.mint22.sh",
+                      "apps/visit-3.5.0-ubuntu24/bin/visit")
+    script = profiles.locate("telemac", root)
+    launcher = profiles.locate("visit", root)
+    assert script == root / "telemac-mascaret" / "configs" / "pysource.mint22.sh"
+    assert launcher == root / "apps" / "visit-3.5.0-ubuntu24" / "bin" / "visit"
+    assert profiles.installation_of("telemac", script) == root / "telemac-mascaret"
+    assert profiles.installation_of("visit", launcher) == \
+        root / "apps" / "visit-3.5.0-ubuntu24"
+    assert profiles.locate("openfoam", root) is None
+
+
+def test_the_installation_folder_is_told_from_the_script(tmp_path):
+    stack = _installed(tmp_path / "stack", "shell-rc.sh", "etc/bashrc")
+    assert profiles.locate("openfoam", stack) == stack / "shell-rc.sh"   # with the solvers
+    assert profiles.installation_of("openfoam", stack / "shell-rc.sh") == stack
+    assert profiles.installation_of(
+        "openfoam", "/usr/lib/openfoam/openfoam2406/etc/bashrc") == \
+        Path("/usr/lib/openfoam/openfoam2406")
+    assert profiles.installation_of("paraview", "/opt/ParaView-6.1.1/bin/paraview") == \
+        Path("/opt/ParaView-6.1.1")
+    # A program of the operating system is installed "in /usr", which says nothing ...
+    assert profiles.installation_of("paraview", "/usr/bin/paraview") is None
+    assert profiles.installation_of("telemac", "/somewhere/pysource.sh") is None
+    # ... and a link in a system folder is followed to the installation it starts.
+    visit = _installed(tmp_path / "visit", "bin/visit")
+    link = tmp_path / "bin" / "visit"
+    link.parent.mkdir()
+    link.symlink_to(visit / "bin" / "visit")
+    assert profiles.installation_of("visit", link) == visit
+
+
+def test_detection_enters_the_folders_of_what_it_finds(tmp_path, monkeypatch):
+    telemac = _installed(tmp_path / "telemac-mascaret", "configs/pysource.debian12.sh")
+    monkeypatch.setattr(machine, "DISCOVERY", {})
+    monkeypatch.setattr(profiles.shutil, "which",
+                        lambda name: "/usr/bin/paraview" if name == "paraview" else None)
+    machine.write_settings({"telemac": str(telemac / "configs" / "pysource.debian12.sh")})
+    found = profiles.detect()
+    assert found.installations == {"telemac": telemac}
+    assert found.postprocessors == {"paraview": Path("/usr/bin/paraview")}
+
+
+def test_a_folder_that_is_gone_or_holds_no_program_is_reported(tmp_path):
+    empty = tmp_path / "empty"
+    empty.mkdir()
+    profile = profiles.AxquaProfile(installations={
+        "telemac": tmp_path / "gone", "openfoam": empty, "paraview": empty})
+    found = {f.subject: f for f in profiles.check(profile, probe=False)}
+    assert found["installations.telemac"].code == "axqua.environment.installation_missing"
+    assert "no environment script of openfoam was found" in \
+        found["solvers.openfoam.setup_script"].message
+    assert found["postprocessors.paraview"].code == "axqua.environment.program_missing"
+    assert "installations.openfoam" not in found                 # the folder is there
 
 
 # ---------------------------------------------------------------------- the checks
@@ -518,6 +775,29 @@ def test_the_command_creates_shows_and_checks_a_profile(tmp_path, capsys, fake_p
         {"solvers.openfoam.setup_script"}
 
 
+def test_the_command_finds_a_program_in_its_folder_and_says_what_is_run(
+        tmp_path, capsys):
+    """What the profile editor asks when a folder is selected, and what the
+    Configuration tab shows."""
+    root = _installed(tmp_path / "opt", "telemac-mascaret/configs/pysource.debian12.sh")
+    home = root / "telemac-mascaret"
+    script = home / "configs" / "pysource.debian12.sh"
+    found = _run(capsys, "locate", "telemac", str(root))["data"]
+    assert found == {"program": "telemac", "folder": str(home), "script": str(script),
+                     "candidates": [str(script)]}
+    nothing = _run(capsys, "locate", "visit", str(root))["data"]
+    assert (nothing["script"], nothing["candidates"], nothing["folder"]) == \
+        ("", [], str(root))
+    assert not _run(capsys, "locate", "fluent", str(root))["ok"]
+    assert not _run(capsys, "locate", "telemac")["ok"]
+
+    profiles.save(profiles.AxquaProfile(installations={"telemac": home}),
+                  profiles.default_path())
+    shown = _run(capsys, "show")["data"]
+    assert shown["programs"] == {"telemac": str(script)}
+    assert shown["installations"] == {"telemac": str(home)} and "solvers" not in shown
+
+
 def test_init_asks_about_the_file_it_is_going_to_write(tmp_path, capsys, monkeypatch):
     """``init office`` writes ``office.axq-profile``. It looked for a file ``office``,
     found none, and replaced the profile without being asked to."""
@@ -568,9 +848,32 @@ def test_the_command_replaces_a_profile_from_json_and_reports_findings(
     assert any(f["code"] == "axqua.environment.script_missing"
                for f in written["data"]["findings"])
     # ... but something that is not a profile does not replace one that is.
-    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"solvres": {}})))
-    assert not _run(capsys, "write")["ok"]
-    assert profiles.load_active(strict=True).name == "from-plugin"
+    for document in ({"solvers": ["telemac"]}, {"schema_version": 99},
+                     {"display": {"min_depth": "shallow"}}):
+        monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(document)))
+        assert not _run(capsys, "write")["ok"]
+        assert profiles.load_active(strict=True).name == "from-plugin"
+    # An entry that is not known is no reason to refuse: it is kept and reported.
+    document = {"name": "from-plugin", "solvres": {}}
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(document)))
+    written = _run(capsys, "write")
+    assert written["ok"] and written["data"]["backup"] == ""
+    assert [f["subject"] for f in written["data"]["findings"]
+            if f["code"] == "axqua.config.unknown_entry"] == ["solvres"]
+
+
+def test_the_command_says_where_an_unreadable_profile_was_kept(tmp_path, capsys,
+                                                               monkeypatch):
+    """What *Create profile* does on a computer whose profile cannot be read."""
+    import io
+    profiles.default_path().parent.mkdir(parents=True, exist_ok=True)
+    profiles.default_path().write_text("schema_version: 99\n")
+    assert not _run(capsys, "show")["ok"]
+    monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps({"name": "new"})))
+    written = _run(capsys, "write")
+    kept = Path(written["data"]["backup"])
+    assert written["ok"] and kept.read_text() == "schema_version: 99\n"
+    assert profiles.load_active(strict=True).name == "new"
 
 
 def test_every_code_of_the_profile_check_is_explained_in_the_documentation():

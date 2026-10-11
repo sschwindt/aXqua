@@ -113,6 +113,14 @@ The *Check* page of an installation wizard, the last page of a failed installati
 ``the installer finished, but did not produce ...``
     The installer reported success, but a program that it should have built is missing, so the build failed in part. Search the installation log for the first line that contains ``Error``.
 
+``the program this installation enters in the profile is not on this computer``
+    The installation consists of a package of the operating system, and the package is not installed. Install the system packages that the *Check* page of the wizard lists, then start the installation again.
+
+.. _axqua-install-packages-required:
+
+``without VisIt, this installation is the system package of ParaView alone, which is not installed yet``
+    With the selection *ParaView only*, the installation of the postprocessors downloads nothing: ParaView is a package of the operating system, and the wizard only enters it in the profile. Install the system packages that the *Check* page lists, which requires administrator rights, and click *Check again* (:ref:`install-paraview`).
+
 .. _axqua-install-interrupted:
 
 ``the installation ended without a result``
@@ -160,8 +168,8 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 
 .. _axqua-environment-program-missing:
 
-``the ... does not exist`` or ``the ... launcher ... is not executable``
-    The profile names a program file that is not on this computer, or that may not be started. Select the file again in the profile editor.
+``the ... does not exist``, ``the ... launcher ... is not executable`` or ``the ... program was not found in the installation folder ...``
+    The profile names a program file that is not on this computer, or that may not be started, or it names an installation folder that does not contain the program. Select the file again in the profile editor.
 
 .. _axqua-environment-script-missing:
 

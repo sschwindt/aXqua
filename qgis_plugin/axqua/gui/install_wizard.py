@@ -33,6 +33,11 @@ from ..core.tasks import run_async
 from . import findings as fnd
 from . import help as help_pages
 
+VIEWERS_HINT = ("aXqua recommends VisIt: its predefined figures of three-dimensional "
+                "results are rendered with it. VisIt is a download of 600 MB from its "
+                "publisher. ParaView is a package of the operating system. Both can "
+                "be installed later.")
+
 #: ``(option, label, kind, hint)`` per program. Kinds: folder, file, text, int, bool,
 #: choice (one of CHOICES), openfoam (an installed OpenFOAM, or compiling one).
 FIELDS = {
@@ -55,7 +60,7 @@ FIELDS = {
          "boundary and VisIt are installed in it."),
         ("reuse_openfoam", "OpenFOAM v2406", "openfoam", ""),
         ("jobs", "Processes for compiling", "int", ""),
-        ("visualization", "Install ParaView and VisIt", "bool", ""),
+        ("viewers", "Postprocessors", "choice", VIEWERS_HINT),
         ("examples", "Download the example case of the sediment solver", "bool", ""),
         ("smoke_test", "Run a short test at the end", "bool", ""),
     ),
@@ -63,11 +68,12 @@ FIELDS = {
         ("folder", "Installation folder", "folder",
          "VisIt is installed in this folder. ParaView is a package of the operating "
          "system."),
+        ("viewers", "Postprocessors", "choice", VIEWERS_HINT),
     ),
 }
 
 #: The switches that are on unless the user turns them off.
-ON_BY_DEFAULT = ("visualization", "smoke_test", "bind")
+ON_BY_DEFAULT = ("smoke_test", "bind")
 
 #: ``option -> ((value, text), ...)`` of the settings with a fixed set of answers. The
 #: first entry is the default.
@@ -77,7 +83,16 @@ CHOICES = {
         ("all", "Everything, with reference results and manuals (1,500 files, 1.65 GB)"),
         ("none", "Steering files only"),
     ),
+    "viewers": (
+        ("both", "ParaView and VisIt (recommended)"),
+        ("paraview", "ParaView only"),
+        ("none", "None"),
+    ),
 }
+
+#: ``(program, option) -> answers that are not offered there``. The installation of the
+#: postprocessors installs at least one of them.
+NOT_OFFERED = {("postprocessors", "viewers"): ("none",)}
 
 BASES = (("", "as detected"), ("debian12", "Debian 12"), ("ubuntu22", "Ubuntu 22.04"),
          ("ubuntu24", "Ubuntu 24.04"))
@@ -220,7 +235,8 @@ class InstallWizard(QDialog):
         elif kind == "choice":
             widget = QComboBox()
             for value, text in CHOICES[key]:
-                widget.addItem(text, value)
+                if value not in NOT_OFFERED.get((self.target, key), ()):
+                    widget.addItem(text, value)
             line.addWidget(widget, 1)
         elif kind == "openfoam":
             widget = QComboBox()

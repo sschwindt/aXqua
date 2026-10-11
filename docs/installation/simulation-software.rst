@@ -9,7 +9,7 @@ The wizards are opened on the *Configuration* tab, in the box *Simulation softwa
 #. **Check.** aXqua examines the computer and lists the commands that it is about to run, the expected duration, and everything that is not in order. Nothing has been changed at this point. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error, with which it cannot.
 #. **Installation.** The wizard shows the current step and the end of the installation log. The installation is a process of its own: the wizard and QGIS can be closed while it runs. The *Configuration* tab reports that an installation is running, and the wizard shows it again when it is reopened.
 
-At the end, aXqua verifies that the installer produced the program, enters the program in the profile of the computer (:ref:`plugin-profile`), and starts it once. No further configuration is required.
+At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the profile of the computer (:ref:`plugin-profile`), and starts it once. No further configuration is required.
 
 The wizards run the installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the first page.
 
@@ -74,7 +74,7 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
 * **OpenFOAM v2406**, unless an installation of this version exists already (see the settings below).
 * The sediment transport solvers **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_), and a variant of the latter with a stage-discharge outflow, ``sediDriftFoam2Rating``, which the installer marks as not validated.
 * The **stage-discharge outflow boundary** of the Federal Waterways Engineering and Research Institute (BAW) for the solver ``interFoam`` (`Thorenz 2024 <https://doi.org/10.3929/ethz-b-000675949>`_).
-* The postprocessors **ParaView** and **VisIt** (:ref:`help-postprocessors`).
+* The postprocessors **ParaView** and **VisIt** (:ref:`help-postprocessors`), unless they are deselected.
 
 .. list-table::
    :header-rows: 1
@@ -88,8 +88,8 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
      - *Use the OpenFOAM v2406 that is installed on this computer* builds the solvers on an existing installation, which takes a few minutes. aXqua enters the installation that it found. Select the file ``etc/bashrc`` of another one with *Browse...*. *Compile OpenFOAM v2406 from its source code* is the choice for a computer without OpenFOAM. It takes several hours and requires about 20 GB of free space.
    * - Processes for compiling
      - The number of processor cores used for compiling. Each process requires about 2 GB of memory.
-   * - Install ParaView and VisIt
-     - Clear the box if the postprocessors are installed already.
+   * - Postprocessors
+     - *ParaView and VisIt* is the default and the recommended choice, because aXqua renders its predefined three-dimensional figures with VisIt. *ParaView only* leaves VisIt out, which saves a download of 600 MB. *None* installs neither program, for a computer on which both are installed already. A program that was left out can be installed at any time afterwards (:ref:`help-postprocessors`).
    * - Download the example case of the sediment solver
      - Adds the example case that is published with sediDriftFoam.
    * - Run a short test at the end
@@ -97,7 +97,7 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
 
 A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the `installation instructions of OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, which creates the file ``/usr/lib/openfoam/openfoam2406/etc/bashrc``. The wizard finds this installation by itself.
 
-The result is the file ``shell-rc.sh`` in the installation folder. It is the **environment script** of this installation: it loads OpenFOAM v2406 and adds the compiled solvers and the boundary library. The wizard enters it in the profile as the solver binding of OpenFOAM, and enters ParaView and VisIt as postprocessors. No existing OpenFOAM installation and no startup file of the user account is changed.
+The result is the file ``shell-rc.sh`` in the installation folder. It is the **environment script** of this installation: it loads OpenFOAM v2406 and adds the compiled solvers and the boundary library. The wizard enters it in the profile as the solver binding of OpenFOAM, and enters the selected postprocessors. No existing OpenFOAM installation and no startup file of the user account is changed.
 
 .. note::
 

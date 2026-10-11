@@ -20,7 +20,7 @@ aXqua therefore lets the cheapest model do this work. The sequence is:
 
 The TELEMAC run that precedes an OpenFOAM simulation is called the **warm-up**. It has three effects on the OpenFOAM model: the cells below the water surface start filled with moving water, the top of the mesh is placed shortly above the water surface so that few cells contain only air, and the mesh is limited to the wetted part of the reach. If the case has no steady 2D result yet, aXqua runs a coarse TELEMAC simulation on its own for this purpose, which takes about one minute for a small reach.
 
-The warm-up is active by default and should not be disabled. Without it, OpenFOAM starts with a flat lid high above the terrain, the mesh contains many times more air cells, and the filling of the reach has to be computed by the most expensive model. The warm-up is controlled by ``openfoam.pre_run.enabled`` in the case file.
+The warm-up is active by default and should not be disabled. Without it, OpenFOAM starts with a flat lid high above the terrain, the mesh contains many times more air cells, and the filling of the reach has to be computed by the most expensive model. In the plugin, the warm-up is the check box *Use TELEMAC warm-up* on the sub-tab *OpenFOAM* of the tab *Hydraulic simulation* (:ref:`help-hydraulics-openfoam`). In the case file, it is the setting ``openfoam.pre_run.enabled``, which is enabled by default.
 
 .. _hydraulics-dry-runs:
 .. _help-hydraulics-telemac:
@@ -92,7 +92,7 @@ OpenFOAM
 
 An OpenFOAM simulation resolves the flow in three dimensions together with the water surface. It is required where the vertical structure of the flow matters, for example at structures or in a fish pass. The settings are described in :ref:`preprocessing-openfoam-choices`.
 
-#. **Build.** On the *Free surface (VOF)* tab, click *Build*. aXqua runs the warm-up if required, creates the mesh and writes the OpenFOAM case into ``axqua-case/openfoam/``.
+#. **Build.** Go to the tab *Hydraulic simulation*, sub-tab *OpenFOAM*. The box *Free surface (VOF)* contains the check box *Use TELEMAC warm-up*. As long as the check box is not changed, the case file decides, in which the warm-up is enabled by default. Leave it unchanged or ticked (:ref:`warm-up-concept`) and click *Build*. aXqua runs the warm-up if the case has no steady 2D result yet, creates the mesh and writes the OpenFOAM case into ``axqua-case/openfoam/``. With the box cleared, the model is built without a TELEMAC result, and OpenFOAM has to fill the dry riverbed itself.
 #. **Run.** Click *Submit*. The run has two stages: a short first stage with a small time step, in which the water surface settles, and the main stage. The progress display shows the Courant number (``Co``) and the time step (``dt``). In a healthy run, the time step stays near a constant value. A time step that falls by orders of magnitude indicates a problem, typically air that is accelerated to unrealistic velocities.
 #. **Evaluate.** After the run, aXqua reports the discharge of water at the inflow and the outflow and compares their relative difference with ``hydrodynamics.flux_tolerance``, which is the same criterion as for TELEMAC. It also reports whether water reached the lid or the lateral limits of the mesh. In that case, the mesh has constrained the flow, and ``openfoam.freeboard`` or ``openfoam.wet_margin`` has to be increased.
 

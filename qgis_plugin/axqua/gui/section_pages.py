@@ -17,7 +17,7 @@ from qgis.PyQt.QtWidgets import (QComboBox, QFileDialog, QGroupBox, QHBoxLayout,
                                  QVBoxLayout, QWidget)
 
 from ..compat import CHECKED, UNCHECKED, enum_value
-from ..core import batch
+from ..core import batch, result_loader, styles
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from . import sections
@@ -213,6 +213,26 @@ class QgisPage(QWidget):
         inner.addLayout(row)
         layout.addWidget(box)
 
+        style_box = QGroupBox("Predefined map styles")
+        style_layout = QVBoxLayout(style_box)
+        style_layout.addWidget(_label(
+            "A map style draws the flow velocity as arrows or as streamlines, colored "
+            "by the velocity magnitude, on top of the water depth or of the velocity "
+            "magnitude. Select a result layer in the layer panel of QGIS, select a "
+            "style and click Apply."))
+        row = QHBoxLayout()
+        self.style_choice = QComboBox()
+        for key, (title, _fill, _drawn) in styles.MAP_STYLES.items():
+            self.style_choice.addItem(title, key)
+        row.addWidget(self.style_choice, 1)
+        self.style_button = QPushButton("Apply to the selected layer")
+        self.style_button.clicked.connect(self.apply_style)
+        row.addWidget(self.style_button)
+        style_layout.addLayout(row)
+        self.style_status = _label("")
+        style_layout.addWidget(self.style_status)
+        layout.addWidget(style_box)
+
         print_box = QGroupBox("Map for a report and movie")
         print_layout = QVBoxLayout(print_box)
         row = QHBoxLayout()
@@ -233,6 +253,22 @@ class QgisPage(QWidget):
         print_layout.addLayout(row2)
         layout.addWidget(print_box)
         layout.addStretch(1)
+
+    def apply_style(self) -> None:
+        """Draw the layer that is selected in QGIS in the chosen map style."""
+        layer = self.ctx.iface.activeLayer() if self.ctx.iface is not None else None
+        profile = getattr(self.ctx, "profile", None) or {}
+        try:
+            notes = result_loader.apply_map_style(
+                layer, self.style_choice.currentData(),
+                min_depth=get(profile, "display.min_depth"),
+                velocity_cap=get(profile, "display.velocity_cap"))
+        except ValueError as exc:
+            self.style_status.setText(str(exc))
+            return
+        self.style_status.setText(
+            f"{self.style_choice.currentText()}: applied to the layer {layer.name()}."
+            + (" " + " ".join(notes) if notes else ""))
 
 
 #: The index file each program opens, and how the program is started with it.
@@ -322,7 +358,10 @@ class ProgramPage(QWidget):
 
     # -- the program ---------------------------------------------------------------
     def show_profile(self, profile) -> None:
-        self.profile_path = str(get(profile or {}, f"postprocessors.{self.key}") or "")
+        # "programs" is what aXqua runs: the entry of the profile, or the launcher
+        # found in the installation folder that the profile names.
+        self.profile_path = str(get(profile or {}, f"programs.{self.key}")
+                                or get(profile or {}, f"postprocessors.{self.key}") or "")
         self._show_program()
 
     def show_detected(self, found: dict) -> None:

@@ -15,13 +15,26 @@ QGIS map generation
 TELEMAC results are loaded as a mesh layer with two predefined styles:
 
 * **Water depth** is drawn from white over light blue to dark blue. Water that is shallower than the minimum water depth is transparent, so that the map shows the area in which water actually flows (:ref:`plugin-profile`).
-* **Flow velocity** is drawn as arrows that are colored by the velocity magnitude. The color scale ends at the upper limit of the plugin settings, and aXqua reports when a result exceeds it.
+* **Flow velocity** is drawn as a color fill of the velocity magnitude, from yellow (slow) to purple (fast), with dark arrows in the flow direction. The color scale ends at the upper limit of the profile, and aXqua reports when a result exceeds it. The arrows stand on a regular grid of the map, so that their number does not depend on the mesh, and no arrow is drawn where the water stands.
 
-All other properties of the layers are changed in the QGIS layer properties as usual. There, the display of the velocity can also be switched from arrows to **streamlines** (*Layer Properties > Symbology > Vectors*).
+**Predefined map styles.** The tab *Postprocessing*, sub-tab *QGIS*, offers four map styles that combine the flow direction with a second quantity in one layer. Select a result layer in the layer panel of QGIS, select a style and click *Apply to the selected layer*:
 
-.. note::
+.. list-table::
+   :header-rows: 1
+   :widths: 36 64
 
-   Predefined map styles that combine streamlines or vectors with the water depth are not yet available in this version.
+   * - Map style
+     - Content
+   * - Water depth with streamlines
+     - The water depth in blue. On top of it, streamlines that follow the flow direction and are colored by the velocity magnitude, from light orange (slow) to dark red (fast).
+   * - Water depth with velocity arrows
+     - The water depth in blue with arrows in the flow direction, colored by the velocity magnitude in the same way.
+   * - Velocity magnitude with streamlines
+     - The velocity magnitude from yellow to purple with dark streamlines.
+   * - Velocity magnitude with arrows
+     - The velocity magnitude from yellow to purple with dark arrows. This is the style in which the velocity layer is loaded.
+
+A streamline is a line that is tangent to the velocity at each of its points. Streamlines therefore show flow paths, recirculation zones and the division of the discharge among several channels more clearly than arrows. Neither arrows nor streamlines are drawn where the velocity is below 0.05 m/s. All other properties of the layers are changed in the QGIS layer properties as usual (*Layer Properties > Symbology*).
 
 **Print layout.** *aXqua > Add the default A3 print layout* creates a map layout for the current map extent. It contains the map, a north arrow, an arrow in the flow direction, a scale bar and a legend. Complete the legend and export the layout as PDF or image from the QGIS layout manager.
 

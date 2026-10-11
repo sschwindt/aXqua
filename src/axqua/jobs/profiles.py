@@ -266,16 +266,20 @@ def from_plugin_profile(plugin: Any, solver: str = "telemac", cfg: Any = None
     case's own process count fills in where the binding names none: the profile says
     what the computer has, and a binding without a number has no opinion.
     """
-    binding = plugin.solvers.get(solver) if plugin is not None else None
-    if binding is None or binding.setup_script is None:
+    script = plugin.script(solver) if plugin is not None else None
+    if script is None:
         return None
-    configured = getattr(getattr(cfg, solver, None), "n_processors", None)
     from axqua.core.environment import default_kind
+    from axqua.core.profile import SolverBinding
+
+    # A profile that names the installation folder only has no entry for the code.
+    binding = plugin.solvers.get(solver) or SolverBinding()
+    configured = getattr(getattr(cfg, solver, None), "n_processors", None)
     return Profile(
         name=f"{plugin.name or 'profile'}:{solver}",
         solver=solver,
         environment=str(binding.environment or default_kind()),
-        setup_script=Path(binding.setup_script),
+        setup_script=Path(script),
         shell=binding.shell,
         distro=binding.distro,
         config_name=binding.config_name,
