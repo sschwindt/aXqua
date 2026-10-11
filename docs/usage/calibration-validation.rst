@@ -67,6 +67,35 @@ Then repeat the preprocessing, which compiles the measurements into the tables t
 
 Two alternatives to the workbook exist. ``ground_truth.measurements`` names a table that the user compiled, with the coordinates x, y and z in the first three columns and one column per measured quantity. ``ground_truth.sources`` lists original instrument files together with the point layer of their positions, which aXqua compiles into such a table.
 
+**Measurements in one layer or table.** If the measured values and their positions already exist in one file, this file is sufficient. Enter it as a source of the kind ``points``:
+
+.. code-block:: yaml
+
+   ground_truth:
+     sources:
+       - category: hydraulics
+         kind: points
+         positions: user-sources/ground-truth/velocity-measurements.gpkg
+
+The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate reference system, or a table (CSV file or Excel workbook) with the columns ``x`` and ``y`` in the coordinate reference system of the case. aXqua recognizes the following column names, in upper or lower case and with or without a unit in square brackets, for example ``v(x) [m/s]``:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Quantity
+     - Column names
+   * - Coordinates of a table
+     - ``x`` and ``y``, or ``easting`` and ``northing``
+   * - Velocity components in m/s
+     - ``u``, ``v``, ``w``, or ``v(x)``, ``v(y)``, ``v(z)``, or ``VelX``, ``VelY``, ``VelZ``
+   * - Total water depth in m
+     - ``h``, ``depth``, ``water_depth`` or ``Total Depth``
+   * - Depth of a reading below the water surface in m
+     - ``MeasD`` or ``Meas. Depth``
+
+The velocity magnitude that is compared with the model is computed from the horizontal components. If a layer contains several readings at one position, aXqua uses the reading that is closest to 0.6 of the water depth below the surface, which approximates the depth-averaged velocity. Points outside the model outline are left out of the calibration. In the plugin, the source is entered in the case editor (*Edit case...* on the *Case Setup* tab, block ``ground_truth``).
+
 Velocity measurements with a SonTek FlowTracker2 are transferred into the ``hydraulics`` sheet with the script ``extract_flowtracker.py``, which aXqua places next to the workbook. Note that the velocity fluctuation is the standard deviation of the velocity samples. It is not the column ``VxErr`` of the instrument export, which is the standard error of the mean velocity.
 
 .. _calibration-setup:

@@ -122,3 +122,19 @@ def test_absent_elevations_are_not_judged_as_a_survey(tmp_path, caplog):
     with caplog.at_level(logging.DEBUG, logger="axqua"):
         assert check_ground_truth_elevations(Cfg(), tables={"hydraulics": table}) == []
     assert "no elevations" in caplog.text
+
+
+def test_a_plain_table_with_coordinates_is_a_source_like_a_layer(tmp_path):
+    """What the documentation promises for measurements handed over as one table:
+    coordinates under their usual names, and a unit in brackets does not hide a column."""
+    from axqua.ground_truth import read_points, scalar_velocity
+
+    table = tmp_path / "measurements.csv"
+    table.write_text("Easting,Northing,VelX [m/s],VelY [m/s],Total Depth [m]\n"
+                     "676985.0,5267915.5,0.3,0.4,0.25\n"
+                     "676990.0,5267920.0,0.0,0.2,0.40\n", encoding="utf-8")
+    df = read_points(table, 25832)
+    assert list(df.columns[:3]) == ["x", "y", "z"]
+    assert df[["x", "y", "u", "v", "h"]].iloc[0].tolist() == \
+        [676985.0, 5267915.5, 0.3, 0.4, 0.25]
+    assert scalar_velocity(df).round(6).tolist() == [0.5, 0.2]
