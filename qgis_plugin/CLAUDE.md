@@ -50,7 +50,17 @@ rows say and *then* shows the check. Its buttons are the three the instructions 
 Save (write, check, stay open), Cancel (discard since the last save), Exit (ask if
 unsaved) - and `values()` starts from the loaded dictionary, so an entry without a row
 (`solvers.telemac.overrides`) survives a save. The editor talks to `axqua profile
-show|detect|write|check --json`; the plugin still never imports `axqua`.
+show|detect|write|check|locate --json`; the plugin still never imports `axqua`.
+**A program has two rows: its installation folder and, below it, the file aXqua runs.**
+Selecting the folder is enough: the editor asks `profile locate` and fills the row below
+(`LOCATED`), once per folder, so that a row nobody changed never replaces what the row
+below says. What `profile show` adds for display (`path`, `programs`) is stripped before
+the editor keeps the profile (`NOT_IN_THE_FILE`); written back, it would end up in the
+file as an entry nobody knows. The Configuration tab and the ParaView/VisIt pages read
+the program from `programs`, which is the entry of the profile or the file found in its
+folder. On a computer whose profile cannot be read, *Create profile...* says before
+anything is saved that the file is kept (`UNREADABLE`), and the editor names the `.bak`
+file afterwards.
 
 **The case editor** (`gui/case_editor.py`) builds its forms from `axqua schema --json`
 (`src/axqua/core/schema_meta.py`: derived from a fully dumped default case, the dataclass
@@ -79,7 +89,10 @@ then reads *Show the installation...*, which reopens the wizard on page 3. **The
 never sees a password**: missing system packages are shown with their command (*Copy the
 command*), and *Install the packages...* calls `axqua install packages --elevate`, which
 lets the desktop's own dialog ask. A wizard is not a tab, so its Help target lives in
-`sections.WINDOWS` and gets a redirect page like every tab key.
+`sections.WINDOWS` and gets a redirect page like every tab key. **The postprocessors are
+one question** (`viewers`: *ParaView and VisIt (recommended)*, *ParaView only*, and for
+OpenFOAM *None*), which `install_flags` turns into `--no-visit` / `--no-visualization`;
+the recommended answer is the first and the default.
 
 **The ParaView and VisIt sub-tabs** (`section_pages.ProgramPage`) list the TELEMAC results
 of the active case (`axqua export <case> --list`), export the selected ones in a background
@@ -129,7 +142,20 @@ reports use the same filter, so the map and the report agree); velocity is cappe
 **with a warning**, because a depth-averaged result above that is nearly always a
 wetting/drying artefact in a nearly-dry cell and one such node would flatten the map.
 Everything else points at Layer Symbology - a plausible-looking wrong scale is harder to
-notice than an obviously default one. Processing algorithms **validate, submit and return**;
+notice than an obviously default one. **Four predefined map styles** (`styles.MAP_STYLES`,
+`result_loader.apply_map_style`, one choice and one button on *Postprocessing > QGIS*,
+applied to the layer selected in QGIS) draw the velocity as arrows or streamlines on top
+of the water depth or of the velocity magnitude. **Drawing a real result for them found
+what no test had**: the member that colors vectors by their magnitude was looked for on
+`QgsMeshRendererVectorSettings`, where it does not exist (it is
+`QgsInterpolatedLineColor.ColoringMethod`), so `compat.VECTOR_COLOR_RAMP` was always
+`None` and every arrow ever drawn was black; an arrow stood on every mesh node, dry ones
+included, because an arrow has a smallest length. Now: on a grid of the map
+(`ARROW_SPACING` pixels), none below `VECTOR_MINIMUM` (0.05 m/s), colored by magnitude in
+warm colors over the blue depth and dark over the velocity fill (a vector in the color of
+its background cannot be seen). To look at a style without a display, render the layer
+with `QgsMapRendererParallelJob` and a temporal range at the last time step
+(`setStaticScalarDatasetIndex` is not in the Python interface of 3.44). Processing algorithms **validate, submit and return**;
 they never execute.
 
 **Two bugs found only by running it under real PyQGIS**, both of which present as silence
@@ -156,7 +182,11 @@ result, `os._exit`), which is how the metadata defect and the missing layer CRS 
 file that run *with* the steady and unsteady simulations, so their tabs show the state from
 the capability matrix and say there is nothing to submit. `FIXED_OPTIONS`: the Unsteady 3D
 tab is the `unsteady` kind with `mode_3d` set (the check box that did this used to sit on
-the Unsteady 2D tab, next to a tab that said it could not be done). `OPTION_FIELDS` has a
+the Unsteady 2D tab, next to a tab that said it could not be done). **A box shows the
+options of its build too, where the build is a job kind of its own** (`_build_fields`):
+only the options of the run were shown, so *Use TELEMAC warm-up*, which the documentation
+outline prescribes for the OpenFOAM sub-tab and which is an option of `openfoam-build`,
+was in the table and nowhere on the screen. `OPTION_FIELDS` has a
 `choice` type for the 3D `variant`; like the other two types it has a "not set" state that
 is not sent. Loading a 3D job: the depth-averaged companion is the layer, styled by the
 vector group `VELOCITY` because it has no `SCALAR VELOCITY`; the volume file is not offered.
