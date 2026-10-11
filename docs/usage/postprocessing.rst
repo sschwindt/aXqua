@@ -10,7 +10,13 @@ Postprocessing turns simulation results into maps, figures and tables. Depth-ave
 QGIS map generation
 -------------------
 
-**Load results.** In the job list below the tabs, select a completed job and click *Load results*. The result layers are added to the QGIS project in a group that is named after the job. aXqua does not copy any files. The layers refer to the result files at their location in ``axqua-case/``.
+**Load results.** In the job list below the tabs, select a completed job and click *Load results*. The result layers are added to the QGIS project in a group that is named after the job. aXqua does not copy any files. The layers refer to the result files at their location in ``axqua-case/``. The map shows the last time step of the result, which for a steady simulation is the steady state. The *Temporal Controller* panel of QGIS selects another time step, for example of a simulation with a varying discharge.
+
+.. figure:: ../img/gui-postprocessing-qgis.png
+   :alt: The sub-tab QGIS of the tab Postprocessing
+   :width: 70%
+
+   The tab *Postprocessing*, sub-tab *QGIS*. (1) Loading the results of the selected job. (2) The predefined map styles. (3) The print layout, the movie export and the display settings.
 
 TELEMAC results are loaded as a mesh layer with two predefined styles:
 
@@ -35,6 +41,12 @@ TELEMAC results are loaded as a mesh layer with two predefined styles:
      - The velocity magnitude from yellow to purple with dark arrows. This is the style in which the velocity layer is loaded.
 
 A streamline is a line that is tangent to the velocity at each of its points. Streamlines therefore show flow paths, recirculation zones and the division of the discharge among several channels more clearly than arrows. Neither arrows nor streamlines are drawn where the velocity is below 0.05 m/s. All other properties of the layers are changed in the QGIS layer properties as usual (*Layer Properties > Symbology*).
+
+.. figure:: ../img/gui-map-streamlines.png
+   :alt: A result in the map style Water depth with streamlines
+   :width: 60%
+
+   A steady result in the map style *Water depth with streamlines*: the water depth in blue and the streamlines colored by the velocity magnitude.
 
 **Print layout.** *aXqua > Add the default A3 print layout* creates a map layout for the current map extent. It contains the map, a north arrow, an arrow in the flow direction, a scale bar and a legend. Complete the legend and export the layout as PDF or image from the QGIS layout manager.
 
@@ -62,6 +74,12 @@ The exported files are written to the folder ``axqua-case/postprocessing/vtk/``.
    axqua export <case-file>                              # all results of the case
    axqua export <case-file> --result r2d.slf --frames last
    axqua export <case-file> --list                       # what the case has, and what is exported
+
+.. figure:: ../img/gui-postprocessing-paraview.png
+   :alt: The sub-tab ParaView of the tab Postprocessing
+   :width: 70%
+
+   The tab *Postprocessing*, sub-tab *ParaView*. (1) The sub-tabs of the three programs. (2) The TELEMAC results of the active case. (3) *Export* converts the selected results. (4) *Open in ParaView* starts the program with the exported result. The sub-tab *VisIt* has the same structure.
 
 What the exported files contain:
 

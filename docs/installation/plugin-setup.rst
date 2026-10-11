@@ -18,7 +18,19 @@ All settings of a computer are stored in one file, the **profile**. Its name end
 * *Cancel* discards the changes since the last save and closes the window.
 * *Exit* closes the window and asks first if there are changes that were not saved.
 
+.. figure:: ../img/gui-configuration.png
+   :alt: The Configuration tab of the plugin
+   :width: 70%
+
+   The *Configuration* tab. (1) The ``axqua`` program that the plugin calls, with *Settings...* to select it. (2) The profile of the computer with what it names for each program, *Edit profile...* and *Check*. (3) The installation wizards of the simulation software. (4) *Help* opens this documentation at the section of the tab that is showing.
+
 Each program has two rows in the editor: its **installation folder**, and below it the file that aXqua runs. For TELEMAC and OpenFOAM this file is the environment script (:ref:`solver-bindings`), and for ParaView and VisIt it is the program file. Selecting the installation folder is sufficient: aXqua searches the folder and enters the file in the row below, where it can still be changed. If a folder contains several environment scripts, the editor lists them, and one of them has to be selected in the row below.
+
+.. figure:: ../img/gui-profile-editor.png
+   :alt: The profile editor
+   :width: 70%
+
+   The profile editor. (1) The installation folder of a program, selected with the button next to it. (2) The environment script, here found by aXqua in the installation folder. (3) The number of processor cores for a simulation. (4) *Save*, *Cancel* and *Exit*.
 
 A program that is installed with one of the installation wizards is entered in the profile by the wizard, together with its installation folder (:doc:`simulation-software`). The editor is needed for a program that was installed by other means, and for the remaining settings.
 

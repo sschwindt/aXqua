@@ -21,7 +21,19 @@ The example is not part of the installed program. It is downloaded from the aXqu
 
 **In the plugin.** The *Case Setup* tab lists the cases of the project. *New case...* creates a case file and opens it in the case editor, *Add case...* adds an existing case file, and *Edit case...* opens the active case in the editor. The editor shows one block of the case at a time. The blocks are listed on the left in the order of the subsections below. In each block, the editor shows the settings that every case needs and all settings that the case file already contains. Every other setting of the block is added with *Add setting...*. A tooltip explains each setting.
 
+.. figure:: ../img/gui-case-setup.png
+   :alt: The Case Setup tab of the plugin
+   :width: 70%
+
+   The *Case Setup* tab. (1) *Add case...* and *Example case...*. (2) The cases of the project. The selected case is the active one, to which all other tabs refer. (3) *Edit case...* opens the case editor, and *Check* examines the case. (4) What the active case can do with the simulation software of this computer.
+
 Nothing has to be typed that can be selected. Every file has a button that opens a file dialog, and the button *Layers* offers the layers that are open in QGIS. A file in or near the case folder is entered with a path relative to the case file, so that the case can be moved together with its data.
+
+.. figure:: ../img/gui-case-editor.png
+   :alt: The case editor with the block Geodata
+   :width: 85%
+
+   The case editor with the block *Geodata*. (1) The blocks of the case file. (2) A file is selected with the button ``...`` or, with *Layers*, from the layers that are open in QGIS. (3) *Add setting...* adds a setting of the block that is not shown yet. (4) *Save*, *Cancel* and *Exit*.
 
 The editor has three buttons at the bottom right. *Save* writes the case file and checks it, and the window stays open. *Cancel* discards the changes since the last save and closes the window. *Exit* closes the window and asks first if there are changes that were not saved. The check never prevents saving, because a case is incomplete while it is being set up. It marks each setting that is not in order with a triangle, orange for a warning and dark red for an error, and marks the block in the list on the left. A click on a triangle opens the message with its remedy (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). The button *Check* on the *Case Setup* tab runs the same check without opening the editor.
 

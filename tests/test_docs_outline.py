@@ -170,6 +170,56 @@ def test_the_uml_diagrams_show_the_code_as_it_is():
             path.read_text(encoding="utf-8") for path in (DOCS / "code").glob("*.rst"))
 
 
+#: The pages of the workflow, each with the pictures of the plugin it shows. A page
+#: says where in the plugin its subject is set up, and the picture shows the place.
+SCREENSHOTS = {
+    "installation/qgis-plugin": ["gui-qgis-window"],
+    "installation/simulation-software": ["gui-install-wizard"],
+    "installation/plugin-setup": ["gui-configuration", "gui-profile-editor"],
+    "usage/case-setup": ["gui-case-setup", "gui-case-editor"],
+    "usage/preprocessing": ["gui-preprocessing"],
+    "usage/hydraulic-simulations": ["gui-hydraulics-telemac", "gui-hydraulics-openfoam"],
+    "usage/mesh-convergence": ["gui-mesh-convergence"],
+    "usage/morphodynamic-simulations": ["gui-case-editor-morphodynamics"],
+    "usage/calibration-validation": ["gui-calibration"],
+    "usage/postprocessing": ["gui-postprocessing-qgis", "gui-map-streamlines",
+                             "gui-postprocessing-paraview"],
+    "usage/batch-processing": ["gui-batch"],
+}
+
+
+def test_every_step_of_the_workflow_shows_where_it_is_set_up_in_the_plugin():
+    """The pictures are taken by ``scripts/build_screenshots.py`` and numbered; the
+    caption of each explains its numbers. A picture nobody shows, or a page that lost
+    its picture, is noticed here."""
+    shown = []
+    for document, names in SCREENSHOTS.items():
+        text = (DOCS / f"{document}.rst").read_text(encoding="utf-8")
+        found = re.findall(r"^\.\. figure:: \.\./img/(gui-[a-z0-9-]+)\.png$", text,
+                           flags=re.MULTILINE)
+        assert found == names, document
+        for name in names:
+            assert (DOCS / "img" / f"{name}.png").is_file(), name
+            block = text.split(f".. figure:: ../img/{name}.png", 1)[1].split("\n\n", 2)
+            options, caption = block[0], block[1]
+            assert ":alt:" in options and caption.startswith("   "), name
+            numbers = re.findall(r"\((\d)\)", caption)
+            # a caption counts its marks from 1 without a gap
+            assert numbers == [str(n) for n in range(1, len(numbers) + 1)], name
+        shown += names
+    on_disk = sorted(path.stem for path in (DOCS / "img").glob("gui-*.png"))
+    assert on_disk == sorted(shown)
+
+
+def test_the_sections_stand_out_in_the_menu():
+    """The sections of the outline (Purpose, Installation & Configuration, ...) are set
+    in bold capital letters in the navigation menu."""
+    css = (DOCS / "_static" / "axqua.css").read_text(encoding="utf-8")
+    rule = css.split(".wy-menu-vertical li.toctree-l1 > a,", 1)[1].split("}", 1)[0]
+    assert "font-weight: 700" in rule and "text-transform: uppercase" in rule
+    assert "li.toctree-l1.current > a" in rule
+
+
 def test_no_page_contains_an_em_dash():
     """One of the writing rules of this documentation, and the one a machine can check."""
     for path in DOCS.rglob("*.rst"):

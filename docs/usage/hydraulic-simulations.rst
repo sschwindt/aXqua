@@ -36,6 +36,12 @@ A **dry run** is a simulation that starts from a dry riverbed (:ref:`case-initia
 
    axqua submit <case-file> --kind steady
 
+.. figure:: ../img/gui-hydraulics-telemac.png
+   :alt: The sub-tab Telemac of the tab Hydraulic simulation
+   :width: 70%
+
+   The tab *Hydraulic simulation*, sub-tab *Telemac*. (1) The sub-tabs of the two simulation codes. (2) The box *Steady 2D* with its state. (3) *Submit* starts the simulation. (4) *Load results* adds the result to the map. (5) The job list with the state and the progress of every job.
+
 When the run has finished, aXqua evaluates whether the flow is steady. It reads the discharge through every open boundary from the output of TELEMAC and writes the following files into ``axqua-case/simulation/``:
 
 .. list-table::
@@ -95,6 +101,12 @@ An OpenFOAM simulation resolves the flow in three dimensions together with the w
 #. **Build.** Go to the tab *Hydraulic simulation*, sub-tab *OpenFOAM*. The box *Free surface (VOF)* contains the check box *Use TELEMAC warm-up*. As long as the check box is not changed, the case file decides, in which the warm-up is enabled by default. Leave it unchanged or ticked (:ref:`warm-up-concept`) and click *Build*. aXqua runs the warm-up if the case has no steady 2D result yet, creates the mesh and writes the OpenFOAM case into ``axqua-case/openfoam/``. With the box cleared, the model is built without a TELEMAC result, and OpenFOAM has to fill the dry riverbed itself.
 #. **Run.** Click *Submit*. The run has two stages: a short first stage with a small time step, in which the water surface settles, and the main stage. The progress display shows the Courant number (``Co``) and the time step (``dt``). In a healthy run, the time step stays near a constant value. A time step that falls by orders of magnitude indicates a problem, typically air that is accelerated to unrealistic velocities.
 #. **Evaluate.** After the run, aXqua reports the discharge of water at the inflow and the outflow and compares their relative difference with ``hydrodynamics.flux_tolerance``, which is the same criterion as for TELEMAC. It also reports whether water reached the lid or the lateral limits of the mesh. In that case, the mesh has constrained the flow, and ``openfoam.freeboard`` or ``openfoam.wet_margin`` has to be increased.
+
+.. figure:: ../img/gui-hydraulics-openfoam.png
+   :alt: The sub-tab OpenFOAM of the tab Hydraulic simulation
+   :width: 70%
+
+   The tab *Hydraulic simulation*, sub-tab *OpenFOAM*. (1) The check box *Use TELEMAC warm-up*. In the state shown, the case file decides, in which the warm-up is enabled by default. (2) *Build* creates the OpenFOAM model. (3) *Submit* starts the simulation.
 
 In a terminal, the commands are:
 

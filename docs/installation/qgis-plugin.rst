@@ -45,3 +45,10 @@ Open the aXqua panel from the toolbar and click *Check* on the *Configuration* t
 The test reports the version that was found. A wrong path is therefore detected at this point and not later, when a simulation is started.
 
 **The panel.** The tabs of the panel follow the sections of this documentation in the order of the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing* and *Batch-processing*. The button *Help* at the top right of the panel opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
+
+.. figure:: ../img/gui-qgis-window.png
+   :alt: The aXqua panel in the QGIS window
+   :width: 100%
+
+   The aXqua panel in QGIS. (1) The panel with its tabs, the button *Help* and the job list. (2) The map of QGIS, here with the result of a steady simulation in the map style *Water depth with streamlines* (:ref:`help-postprocessing-qgis`). (3) Every function of aXqua is a button on one of the tabs.
+

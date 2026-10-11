@@ -26,6 +26,12 @@ To start preprocessing in the plugin, select the case on the *Case Setup* tab an
 
    axqua <case-file>
 
+.. figure:: ../img/gui-preprocessing.png
+   :alt: The Preprocessing tab of the plugin
+   :width: 70%
+
+   The *Preprocessing* tab. (1) *Build* starts the preprocessing as a job. (2) The table *Preprocessing checkup* of the active case. (3) The job list, which is visible below every tab.
+
 The model is written to the folder ``axqua-case/simulation/``. It consists of the mesh with bed elevations (``geometry.slf``), the boundary conditions (``boundaries.cli``), the roughness table (``friction.tbl``) and the steering file (``steady2d.cas``). The log file ``axqua.log`` in the same folder records every step with its duration.
 
 .. _preprocessing-meshing:

@@ -4,6 +4,15 @@
    for more: sections and their subsections are always listed, and only the
    subsubsection level opens on demand. */
 
+/* Level 1 (sections: Purpose, Installation & Configuration, ...) stands out in bold
+   capital letters, on every page and whether or not the section is the current one. */
+.wy-menu-vertical li.toctree-l1 > a,
+.wy-menu-vertical li.toctree-l1.current > a {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
 /* Level 2 (subsections) is always visible. */
 .wy-menu-vertical li.toctree-l1 > ul {
     display: block;

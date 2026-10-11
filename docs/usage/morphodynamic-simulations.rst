@@ -38,6 +38,12 @@ TELEMAC-GAIA Setup
 
 `GAIA <http://www.opentelemac.org/>`_ is the sediment transport module of TELEMAC. When ``morphodynamics.enabled`` is set in the case file, the preprocessing writes a GAIA steering file (``gaia.cas``) next to the TELEMAC model and couples it to the hydraulic simulations.
 
+.. figure:: ../img/gui-case-editor-morphodynamics.png
+   :alt: The block Morphodynamic simulation in the case editor
+   :width: 85%
+
+   Sediment transport is switched on in the case editor (*Edit case...* on the *Case Setup* tab). (1) The block *Morphodynamic simulation*. (2) Its settings, of which further ones are added with *Add setting...*.
+
 .. list-table::
    :header-rows: 1
    :widths: 34 66

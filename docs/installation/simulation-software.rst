@@ -95,6 +95,12 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
    * - Run a short test at the end
      - Runs ``interFoam`` for a few time steps with the outflow boundary of the BAW, which verifies that the compiled library can be loaded.
 
+.. figure:: ../img/gui-install-wizard.png
+   :alt: The first page of the OpenFOAM installation wizard
+   :width: 70%
+
+   The first page of the OpenFOAM wizard. (1) The installation folder. (2) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (3) The selection of the postprocessors. (4) *Next* leads to the page *Check*.
+
 A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the `installation instructions of OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, which creates the file ``/usr/lib/openfoam/openfoam2406/etc/bashrc``. The wizard finds this installation by itself.
 
 The result is the file ``shell-rc.sh`` in the installation folder. It is the **environment script** of this installation: it loads OpenFOAM v2406 and adds the compiled solvers and the boundary library. The wizard enters it in the profile as the solver binding of OpenFOAM, and enters the selected postprocessors. No existing OpenFOAM installation and no startup file of the user account is changed.

@@ -77,6 +77,12 @@ In the plugin, set the options on the *Mesh convergence* tab and click *Submit*.
    axqua submit <case-file> --kind mesh-convergence
    axqua submit <case-file> --kind mesh-convergence --option tolerance=0.05 --option auto_extend=true
 
+.. figure:: ../img/gui-mesh-convergence.png
+   :alt: The Mesh convergence tab of the plugin
+   :width: 70%
+
+   The *Mesh convergence* tab. (1) The options of the study. (2) *Submit* starts the study as a job. (3) *Load results* adds the results to the map.
+
 Plan sufficient time and disk space:
 
 * **Time.** Each mesh requires its own preprocessing and its own simulation. With every refinement step, the number of cells grows and the time step shrinks, so that the computing time roughly doubles from one mesh to the next finer one. The finest mesh dominates the total time. A study typically takes several times as long as the dry run of the case.
