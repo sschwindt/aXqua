@@ -48,6 +48,14 @@ Example cases
 Capabilities and backend registry
 ---------------------------------
 
+.. _uml-backends:
+
+.. figure:: ../img/uml-backends.svg
+   :alt: UML class diagram of the backends and capabilities
+   :width: 80%
+
+   The simulation codes behind one interface. Both backends are derived from ``BaseBackend``, which fulfills the interface ``SolverBackend``. ``BackendSpec`` describes a backend and its capabilities without loading it.
+
 .. automodule:: axqua.core.capabilities
    :members:
 

@@ -1,0 +1,46 @@
+digraph uml_computer {
+  graph [rankdir=LR, nodesep=0.18, ranksep=1.0, fontname="Helvetica,Arial,sans-serif", fontsize=11, labeljust=l];
+  node [shape=box, style=filled, fillcolor="#f5f5f5", fontname="Helvetica,Arial,sans-serif", fontsize=10, margin="0.12,0.06"];
+  edge [color="#555555"];
+  subgraph cluster_0 {
+    label="axqua.core.profile"; color="#aaaaaa";
+    SolverBinding [label="&#171;dataclass&#187;\nSolverBinding"];
+    AxquaProfile [label="&#171;dataclass&#187;\nAxquaProfile"];
+  }
+  subgraph cluster_1 {
+    label="axqua.core.environment"; color="#aaaaaa";
+    EnvironmentKind [label="&#171;enumeration&#187;\nEnvironmentKind"];
+    EnvStatus [label="&#171;dataclass&#187;\nEnvStatus"];
+    SolverEnvironment [label="&#171;dataclass&#187;\nSolverEnvironment"];
+    EnvironmentCaptureError [label="&#171;exception&#187;\nEnvironmentCaptureError"];
+  }
+  subgraph cluster_2 {
+    label="axqua.jobs.profiles"; color="#aaaaaa";
+    Profile [label="&#171;dataclass&#187;\nProfile"];
+  }
+  subgraph cluster_3 {
+    label="axqua.core.machine"; color="#aaaaaa";
+    Resolved [label="&#171;dataclass&#187;\nResolved"];
+  }
+  subgraph cluster_4 {
+    label="axqua.core.diagnostics"; color="#aaaaaa";
+    Finding [label="&#171;dataclass&#187;\nFinding"];
+  }
+  subgraph cluster_5 {
+    label="axqua.core.errors"; color="#aaaaaa";
+    AxquaError [label="&#171;exception&#187;\nAxquaError"];
+    ConfigError [label="ConfigError"];
+    GeodataError [label="GeodataError"];
+    EnvironmentError [label="EnvironmentError"];
+    SolverError [label="SolverError"];
+    MeshError [label="MeshError"];
+    ErrorRecord [label="&#171;dataclass&#187;\nErrorRecord"];
+  }
+  AxquaProfile -> SolverBinding [arrowtail=diamond, dir=back];
+  SolverEnvironment -> EnvironmentKind [arrowtail=diamond, dir=back];
+  ConfigError -> AxquaError [arrowhead=empty];
+  GeodataError -> AxquaError [arrowhead=empty];
+  EnvironmentError -> AxquaError [arrowhead=empty];
+  SolverError -> AxquaError [arrowhead=empty];
+  MeshError -> AxquaError [arrowhead=empty];
+}

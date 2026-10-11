@@ -3,6 +3,14 @@ Job system
 
 ``axqua.jobs`` gives a simulation a lifetime of its own. A job is a folder on disk that one process creates and another process executes. The modules ``model``, ``ids`` and ``paths`` use the Python standard library only.
 
+.. _uml-jobs:
+
+.. figure:: ../img/uml-jobs.svg
+   :alt: UML class diagram of the job system
+   :width: 70%
+
+   Classes of a job. ``JobSpec`` is the description that is submitted, with one class of options per type of job. ``JobStatus`` is the state that the running job reports, with one class of progress per type of job. The four launchers fulfill the interface ``JobLauncher`` and detach a job on Linux, on Windows and in the Windows Subsystem for Linux.
+
 Job description and storage
 ---------------------------
 

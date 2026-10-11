@@ -154,6 +154,22 @@ def test_the_help_targets_of_the_plugin_exist():
     assert not [label for label in HELP_LABELS if label not in labels]
 
 
+def test_the_uml_diagrams_show_the_code_as_it_is():
+    """The diagrams of the code documentation are generated from the sources. One that
+    was not generated again after a class or a dependency changed describes a program
+    that no longer exists. Graphviz is not needed for this comparison."""
+    import subprocess
+    import sys
+
+    script = DOCS.parent / "scripts" / "build_uml.py"
+    done = subprocess.run([sys.executable, str(script), "--check"],
+                          capture_output=True, text=True, check=False)
+    assert done.returncode == 0, done.stderr
+    for name in ("uml-packages", "uml-case", "uml-backends", "uml-jobs", "uml-computer"):
+        assert f"img/{name}.svg" in "".join(
+            path.read_text(encoding="utf-8") for path in (DOCS / "code").glob("*.rst"))
+
+
 def test_no_page_contains_an_em_dash():
     """One of the writing rules of this documentation, and the one a machine can check."""
     for path in DOCS.rglob("*.rst"):

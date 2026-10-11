@@ -3,27 +3,22 @@ General structure & UML
 
 aXqua consists of three parts that can be used independently of each other: a **library** that builds and evaluates models, a **job system** that runs simulations as independent processes, and the **QGIS plugin** as the user interface.
 
-.. code-block:: text
+.. figure:: ../img/uml-packages.svg
+   :alt: UML package diagram of aXqua
+   :width: 100%
 
-   QGIS plugin  (qgis_plugin/axqua)
-        |   calls the program "axqua" and reads the files it writes
-        v
-   Command line  (axqua.cli, axqua.jobcli)
-        |
-        +--> Job system  (axqua.jobs)            submit, run detached, monitor, cancel
-        |         |
-        |         v
-        +--> Solver backends  (axqua.solvers)
-        |         telemac:   mesh, boundaries, steering files, runs, evaluation
-        |         openfoam:  mesh, fields, dictionaries, runs, evaluation
-        |         |
-        |         v
-        +--> Core  (axqua.core)                  case description, geodata, structures,
-                                                 file formats, capabilities, errors
+   Packages of aXqua in the notation of the Unified Modeling Language (UML). A dashed arrow points from a package to a package that it uses. The plugin is connected by a solid arrow, because it does not use the library as program code: it starts the program ``axqua`` and reads the files that the program writes.
 
-.. note::
+The diagram shows the three design rules that are stated below: no arrow leads from the core to a backend, none connects the two backends, and the plugin reaches the library through the command line only. The diagrams of this section are generated from the source code with the script ``scripts/build_uml.py`` and therefore show the code as it is.
 
-   Class diagrams in UML notation are not yet part of this page.
+Class diagrams of the central data structures are part of the pages that document them:
+
+* the case description, with one class per block of a case file (:ref:`uml-case`);
+* the profile of the computer and the messages of the checks (:ref:`uml-computer`);
+* the simulation codes behind one interface, and their capabilities (:ref:`uml-backends`);
+* a job, from its submission to its result (:ref:`uml-jobs`).
+
+The class diagrams use three types of connections. An arrow with a hollow triangle points from a specialized class to the general class from which it is derived. A line with a filled diamond connects a class with its components, with the diamond at the class that contains them. A dashed arrow with a hollow triangle points from a class to an interface that the class fulfills. The label above a class name, for example ``«dataclass»`` or ``«enumeration»``, states the type of the class.
 
 Design rules
 ------------
