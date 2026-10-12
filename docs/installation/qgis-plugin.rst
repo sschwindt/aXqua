@@ -51,4 +51,3 @@ The test reports the version that was found. A wrong path is therefore detected 
    :width: 100%
 
    The aXqua panel in QGIS. (1) The panel with its tabs, the button *Help* and the job list. (2) The map of QGIS, here with the result of a steady simulation in the map style *Water depth with streamlines* (:ref:`help-postprocessing-qgis`). (3) Every function of aXqua is a button on one of the tabs.
-
