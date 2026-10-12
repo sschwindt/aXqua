@@ -154,15 +154,8 @@ included, because an arrow has a smallest length. Now: on a grid of the map
 (`ARROW_SPACING` pixels), none below `VECTOR_MINIMUM` (0.05 m/s), colored by magnitude in
 warm colors over the blue depth and dark over the velocity fill (a vector in the color of
 its background cannot be seen). To look at a style without a display, render the layer
-with `QgsMapRendererParallelJob` and a temporal range at the last time step.
-**`setStaticScalarDatasetIndex` is not in the Python interface of QGIS 3.44** (only the
-getter is), which had two consequences nobody had seen, because no test rendered a frame:
-the movie export called it and stopped at its first frame, and **a loaded result showed
-its first time step**, which of a steady run is the initial state with standing water and
-no velocity. A time step is selected through the time the map is drawn for
-(`result_loader.time_range_of`): the movie sets it on its map settings per frame, and
-*Load results* sets the canvas and the Temporal Controller to the last step
-(`show_last_time_step`) and says so in its message. Processing algorithms **validate, submit and return**;
+with `QgsMapRendererParallelJob`.
+**`setStaticScalarDatasetIndex` is not in the Python interface of QGIS 3.44** (only the getter is; the setter is left out of the bindings), which had two consequences nobody had seen, because no test rendered a frame: the movie export called it and stopped at its first frame, and **a loaded result showed its first time step**, which of a steady run is the initial state with standing water and no velocity. Two different remedies, and the first attempt at the second was wrong. *A movie frame* is selected through the time its map is drawn for (`result_loader.time_range_of`; a layer whose file names no date gets a reference time first, `ensure_reference_time`, as QGIS gives one to layers added through its own dialogs and not to one a plugin adds). *A loaded result* gets its last step as the step it draws on a map without a time (`show_last_time_step(layer)`): that is a property of the layer, and since Python cannot set it, the description of the layer that a project file stores is written out (`writeLayerXml`), its element `static-active-dataset` changed, and read back (`readLayerXml`; id, style, CRS and extra datasets survive, checked by pictures). The loader does it for every mesh layer it adds or reuses, so the job list and the Processing algorithm both get it. **Do not set the time of the map canvas for this**, which the first version did: a print layout, a reopened project and the map after temporal navigation is switched off still showed the first step, the Temporal Controller was left with a range of 1 ms and one frame, and loading a job that ends earlier moved the other results to an intermediate step (all measured by the review of 2026-10-12). Tests of anything a map shows compare rendered pictures (`_picture` in `tests/test_plugin_qgis.py`), not what a layer says it is set to. Processing algorithms **validate, submit and return**;
 they never execute.
 
 **Two bugs found only by running it under real PyQGIS**, both of which present as silence
