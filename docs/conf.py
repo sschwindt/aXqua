@@ -88,10 +88,7 @@ intersphinx_mapping = {
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_title = "aXqua"
-# The menu lists sections and their subsections at all times; a subsubsection level opens
-# with its parent. The full tree has to be in the page for that (collapse_navigation), and
-# _static/axqua.css is what keeps the second level unfolded for sections other than the
-# current one.
+# The menu lists the sections. The subsections of a section are folded until the section is opened with its fold button or one of its pages is shown, and the subsubsections of a subsection open in the same way. The full tree has to be in the page for a section to have a fold button (collapse_navigation). _static/axqua.css sets the sections in bold capital letters.
 html_theme_options = {
     "collapse_navigation": False,
     "navigation_depth": 3,

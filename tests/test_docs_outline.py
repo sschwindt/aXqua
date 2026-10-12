@@ -2,7 +2,7 @@
 
 The outline of sections, subsections and subsubsections was prescribed
 (``docs/restructuring-instructions.md``), and two other things are built on it: the
-navigation menu, which lists sections and subsections at all times, and the QGIS plugin,
+navigation menu, which lists the sections and opens their subsections on demand, and the QGIS plugin,
 whose tabs open the documentation at the ``help-`` labels. A heading that is renamed or
 moved in passing would break both without any build error, so the structure is read back
 from the sources here - plain text only, no Sphinx, so the test runs wherever the suite
@@ -218,6 +218,21 @@ def test_the_sections_stand_out_in_the_menu():
     rule = css.split(".wy-menu-vertical li.toctree-l1 > a,", 1)[1].split("}", 1)[0]
     assert "font-weight: 700" in rule and "text-transform: uppercase" in rule
     assert "li.toctree-l1.current > a" in rule
+
+
+def test_the_subsections_are_folded_until_their_section_is_opened():
+    """The menu shows the sections, and a section opens with its fold button or when one of its pages is shown.
+
+    The theme folds the menu in this way by itself. The stylesheet therefore must not set the display of any menu level, which is how the second level was once forced open and the fold button of a section hidden, and the whole tree has to be in every page, because a section without its subsections in the page gets no fold button.
+    """
+    css = (DOCS / "_static" / "axqua.css").read_text(encoding="utf-8")
+    rules = re.findall(r"([^{}]+)\{([^{}]*)\}", re.sub(r"/\*.*?\*/", "", css, flags=re.DOTALL))
+    assert any("toctree-l1" in selector for selector, _ in rules)
+    for selector, body in rules:
+        if "toctree-l" in selector:
+            assert "display" not in body, " ".join(selector.split())
+    conf = (DOCS / "conf.py").read_text(encoding="utf-8")
+    assert '"collapse_navigation": False' in conf
 
 
 def test_no_page_contains_an_em_dash():
