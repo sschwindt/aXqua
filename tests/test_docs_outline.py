@@ -190,8 +190,12 @@ SCREENSHOTS = {
 
 def test_every_step_of_the_workflow_shows_where_it_is_set_up_in_the_plugin():
     """The pictures are taken by ``scripts/build_screenshots.py`` and numbered; the
-    caption of each explains its numbers. A picture nobody shows, or a page that lost
-    its picture, is noticed here."""
+    caption of each explains its numbers. A picture nobody shows, a page that lost its
+    picture, and a caption that explains another number of marks than its picture has
+    (the script records them in ``gui-screenshots.json``) are noticed here."""
+    import json
+
+    marks = json.loads((DOCS / "img" / "gui-screenshots.json").read_text(encoding="utf-8"))
     shown = []
     for document, names in SCREENSHOTS.items():
         text = (DOCS / f"{document}.rst").read_text(encoding="utf-8")
@@ -204,11 +208,12 @@ def test_every_step_of_the_workflow_shows_where_it_is_set_up_in_the_plugin():
             options, caption = block[0], block[1]
             assert ":alt:" in options and caption.startswith("   "), name
             numbers = re.findall(r"\((\d)\)", caption)
-            # a caption counts its marks from 1 without a gap
+            # a caption counts its marks from 1 without a gap, as many as the picture has
             assert numbers == [str(n) for n in range(1, len(numbers) + 1)], name
+            assert len(numbers) == marks[name], name
         shown += names
     on_disk = sorted(path.stem for path in (DOCS / "img").glob("gui-*.png"))
-    assert on_disk == sorted(shown)
+    assert on_disk == sorted(shown) == sorted(marks)
 
 
 def test_the_sections_stand_out_in_the_menu():

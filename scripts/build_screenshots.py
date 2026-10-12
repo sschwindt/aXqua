@@ -9,9 +9,13 @@ command when the plugin changes::
 
     python scripts/build_screenshots.py --case <folder>/<name>.axq-case
 
-The case has to be built and to have a steady result, so that the tabs show what a
-user sees while working: the job list with its jobs, the checkup table, the results.
-A case with the blocks ``calibration`` and ``openfoam`` shows those boxes filled.
+The case has to be built and to have a completed steady job, so that the tabs show
+what a user sees while working: the job list with its jobs, the checkup table, the
+results. A case with the blocks ``calibration`` and ``openfoam`` shows those boxes
+filled. The script fails, and says which figure, when a widget that a caption explains
+is not on the screen: a figure whose numbers no longer match its caption is worse than
+none. How many marks each figure has is recorded in ``gui-screenshots.json`` beside
+the figures, which a test compares with the captions.
 
 QGIS is started through ``scripts/qgis_dev.sh`` (the QGIS of the conda environment
 ``qgis-dev``) with a QGIS profile of its own in a temporary folder, so no profile of
@@ -56,11 +60,11 @@ def take_screenshots() -> None:
     out = Path(os.environ["AXQUA_SHOTS_OUT"])
     case = Path(os.environ["AXQUA_SHOTS_CASE"])
     out.mkdir(parents=True, exist_ok=True)
-    report: dict = {"figures": {}, "notes": []}
+    report: dict = {"figures": {}, "failed": {}}
 
     def save_report() -> None:
-        (out / "gui-screenshots.json").write_text(json.dumps(report, indent=1),
-                                                  encoding="utf-8")
+        (out / ".gui-screenshots-run.json").write_text(json.dumps(report, indent=1),
+                                                       encoding="utf-8")
 
     def wait(ms: int) -> None:
         loop = QEventLoop()
@@ -120,6 +124,9 @@ def take_screenshots() -> None:
                 child.setText(said(child.text()))
                 if isinstance(child, QLineEdit):
                     child.setCursorPosition(0)
+        for child in root.findChildren(QLineEdit):       # the gray text of an empty row
+            if said(child.placeholderText()) != child.placeholderText():
+                child.setPlaceholderText(said(child.placeholderText()))
         for child in root.findChildren(QPlainTextEdit):
             if said(child.toPlainText()) != child.toPlainText():
                 child.setPlainText(said(child.toPlainText()))
@@ -137,8 +144,11 @@ def take_screenshots() -> None:
         """Save a picture of *root* with the *marks* framed and numbered."""
         neutralize(root)
         wait(500)
-        marks = [mark for mark in marks if isinstance(mark, (QRect, list, tuple))
-                 or not mark.visibleRegion().isEmpty()]
+        for number, mark in enumerate(marks, start=1):
+            for widget in (mark if isinstance(mark, (list, tuple)) else [mark]):
+                if not isinstance(widget, QRect) and widget.visibleRegion().isEmpty():
+                    # the caption would explain a number the picture does not have
+                    raise LookupError(f"mark {number} of {name} is not on the screen")
         pixmap = root.grab()
         painter = QPainter(pixmap)
         painter.setRenderHint(enum_value(QPainter, "RenderHint.Antialiasing",
@@ -148,11 +158,13 @@ def take_screenshots() -> None:
         font.setPixelSize(15)
         painter.setFont(font)
         limits = pixmap.rect().adjusted(2, 2, -2, -2)
-        for number, target in enumerate(marks, start=1):
-            rect = box_of(root, target).adjusted(-4, -4, 4, 4).intersected(limits)
+        frames = [box_of(root, target).adjusted(-4, -4, 4, 4).intersected(limits)
+                  for target in marks]
+        for rect in frames:                               # all frames first ...
             painter.setPen(QPen(QColor(MARK), 3))
             painter.setBrush(QColor(0, 0, 0, 0))
             painter.drawRoundedRect(rect, 6, 6)
+        for number, rect in enumerate(frames, start=1):   # ... so no number is covered
             badge = QRect(max(rect.left() - 12, 2), max(rect.top() - 12, 2), 24, 24)
             painter.setPen(QPen(QColor("white"), 1))
             painter.setBrush(QColor(MARK))
@@ -169,7 +181,7 @@ def take_screenshots() -> None:
         try:
             action()
         except Exception:                                # noqa: BLE001
-            report["notes"].append(f"{name}: {traceback.format_exc(limit=3)}")
+            report["failed"][name] = traceback.format_exc(limit=3)
             save_report()
 
     def buttons(root, *texts):
@@ -181,12 +193,13 @@ def take_screenshots() -> None:
     dock.resize(*PANEL)
     dock.show()
     tab = dock.configuration_tab
-    until(lambda: "axqua 0." in tab.runner_label.text(), 90)
+    until(lambda: "axqua " in tab.runner_label.text(), 90)
     until(lambda: tab.profile is not None, 60)
     until(lambda: bool(tab.overview.get("targets")), 90)
-    dock.ctx.project.add_case(case)
+    dock.add_case(case)                    # as *Add case...* does: the list is filled
     dock.set_active_case(str(case))
     until(lambda: dock.ctx.case_view is not None, 90)
+    until(lambda: "checking" not in dock.case_tab.capability_label.text(), 120)
     dock.jobs_tab.refresh()
     until(lambda: dock.jobs_tab.table.rowCount() > 0, 30)
     wait(1500)
@@ -347,15 +360,16 @@ def take_screenshots() -> None:
 
     # ---- the panel in QGIS, with a result on the map -----------------------------
     def window() -> None:
-        from axqua.core import result_loader
+        from qgis.core import QgsMeshLayer, QgsProject
 
-        rows = dock.jobs_tab.table
-        root = None
-        for folder in sorted(Path(os.environ["AXQUA_JOB_ROOT"]).iterdir()):
-            if "steady" in folder.name:
-                root = folder
-        results = result_loader.discover(root)
-        layers = result_loader.ResultLoader(min_depth=0.01, velocity_cap=5.0).load(results)
+        def loaded() -> list:
+            return [layer for layer in QgsProject.instance().mapLayers().values()
+                    if isinstance(layer, QgsMeshLayer)]
+
+        dock.load_latest_results("steady")        # what *Load results* does
+        if not until(lambda: len(loaded()) >= 2, 120):
+            raise LookupError("the steady result of the case did not load")
+        layers = loaded()
         depth = next(layer for layer in layers if "velocity" not in layer.name().lower()
                      and "geometry" not in layer.name().lower())
         for layer in layers:                              # the depth alone, with lines
@@ -366,8 +380,6 @@ def take_screenshots() -> None:
         dock.show_section("postprocessing", "qgis")
         page = dock.page("postprocessing", "qgis")
         page.apply_style()
-        # what "Load results" does in the plugin: the end of the run, not its start
-        result_loader.show_last_time_step(iface.mapCanvas(), layers)
         iface.messageBar().clearWidgets()
         main = iface.mainWindow()
         dock.setFloating(False)
@@ -383,7 +395,6 @@ def take_screenshots() -> None:
         shot(main, "gui-qgis-window", [dock, canvas, page.style_button])
         canvas.grab().save(str(out / "gui-map-streamlines.png"))
         report["figures"]["gui-map-streamlines"] = 0
-        report["notes"].append(f"job rows: {rows.rowCount()}")
         save_report()
 
     for name, action in (("configuration", configuration),
@@ -440,7 +451,7 @@ def main(argv: list[str] | None = None) -> int:
         env = dict(os.environ, QGIS_CUSTOM_CONFIG_PATH=scratch, QGIS_PROFILE="shots",
                    QT_QPA_PLATFORM="offscreen", AXQUA_SHOTS_CASE=str(args.case.resolve()),
                    AXQUA_SHOTS_OUT=str(args.out.resolve()))
-        report = args.out / "gui-screenshots.json"
+        report = args.out / ".gui-screenshots-run.json"
         report.unlink(missing_ok=True)
         try:
             subprocess.run([str(repo / "scripts" / "qgis_dev.sh"), "--nologo",
@@ -453,20 +464,27 @@ def main(argv: list[str] | None = None) -> int:
         print("QGIS wrote no report; the plugin may not have loaded.", file=sys.stderr)
         return 1
     done = json.loads(report.read_text(encoding="utf-8"))
-    report.unlink()                                     # a record of the run, not a figure
-    for note in done.get("notes", []):
-        print("note:", note.strip().splitlines()[-1] if "\n" in note else note)
+    report.unlink()
+    for name, why in done.get("failed", {}).items():
+        print(f"FAILED {name}: {why.strip().splitlines()[-1]}", file=sys.stderr)
     reduce_colors(args.out, sorted(done.get("figures", {})))
+    # the marks of each figure, for the test that compares them with the captions
+    marks = args.out / "gui-screenshots.json"
+    known = json.loads(marks.read_text(encoding="utf-8")) if marks.is_file() else {}
+    known.update(done.get("figures", {}))
+    marks.write_text(json.dumps(dict(sorted(known.items())), indent=1) + "\n",
+                     encoding="utf-8")
     print(f"{len(done.get('figures', {}))} figures in {args.out}")
-    return 0 if done.get("done") else 1
+    return 0 if done.get("done") and not done.get("failed") else 1
 
 
 if inside_qgis():
     try:
         take_screenshots()
     except Exception:                                    # noqa: BLE001 - never hang QGIS
-        Path(os.environ.get("AXQUA_SHOTS_OUT", "."), "gui-screenshots.json").write_text(
-            json.dumps({"figures": {}, "notes": [traceback.format_exc()]}),
+        Path(os.environ.get("AXQUA_SHOTS_OUT", "."),
+             ".gui-screenshots-run.json").write_text(
+            json.dumps({"figures": {}, "failed": {"start": traceback.format_exc()}}),
             encoding="utf-8")
         os._exit(1)
 elif __name__ == "__main__":
