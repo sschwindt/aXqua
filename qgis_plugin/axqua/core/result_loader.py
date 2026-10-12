@@ -232,6 +232,7 @@ class ResultLoader:
         self.warnings: list[str] = []
         #: Layers that were already in the group and so were not added again.
         self.reused: list = []
+        self.at_last_step = 0
 
     @staticmethod
     def _georeference(layer, epsg: int | None) -> None:
@@ -261,6 +262,7 @@ class ResultLoader:
         """
         self.warnings = []
         self.reused = []
+        self.at_last_step = 0      # layers with several time steps, shown at the last
         targets = list(items if items is not None else results.layers)
         if not targets:
             return []
@@ -271,8 +273,12 @@ class ResultLoader:
             existing = present.get(str(item.path))
             if existing is not None:
                 # Already on the map from an earlier load. Re-styling it is still worth
-                # doing: the run has moved on, so the data range may have.
+                # doing: the run has moved on, so the data range may have, and the file
+                # may hold more time steps than when the layer was opened.
+                if hasattr(existing, "reload"):
+                    existing.reload()
                 self._style(existing, item)
+                self._last_step(existing, item)
                 existing.triggerRepaint()
                 self.reused.append(existing)
                 continue
@@ -289,10 +295,30 @@ class ResultLoader:
                 continue
             self._georeference(layer, results.crs_epsg)
             self._style(layer, item)
+            self._last_step(layer, item)
             self.project.addMapLayer(layer, False)
             group.addLayer(layer)
             added.append(layer)
         return added
+
+    def _last_step(self, layer, item: ResultItem) -> None:
+        """Show a result at its end, and say so where QGIS did not take it."""
+        from qgis.core import QgsMeshDatasetIndex, QgsMeshLayer
+        if not isinstance(layer, QgsMeshLayer):
+            return
+        try:
+            if show_last_time_step(layer):
+                self.at_last_step += 1
+                return
+            group = layer.rendererSettings().activeScalarDatasetGroup()
+            several = group >= 0 and layer.datasetCount(QgsMeshDatasetIndex(group, 0)) > 1
+        except Exception as exc:  # noqa: BLE001 - the layer is loaded either way
+            several, group = True, f"{type(exc).__name__}: {exc}"
+        if several:
+            # Not silent: the map then shows the start of the run, not its result.
+            self.warnings.append(
+                f"{item.name}: QGIS shows the first time step of this layer, which is "
+                "the initial state. Select the last one with the Temporal Controller.")
 
     def _group(self, job_id: str):
         root = self.project.layerTreeRoot()
@@ -438,63 +464,86 @@ def apply_map_style(layer, key: str, *, min_depth: float | None = None,
     return notes
 
 
+def ensure_reference_time(layer) -> None:
+    """Give a mesh layer a reference time where its file names none.
+
+    The times of the steps are counted from it. QGIS sets a default for a layer that is
+    added through its own dialogs and not for one a plugin adds, and a result without a
+    date in its header then has no moment for any of its steps: every frame of a movie
+    was the first one.
+    """
+    from qgis.PyQt.QtCore import QDate, QDateTime, Qt, QTime
+
+    from ..compat import enum_value
+
+    properties = layer.temporalProperties()
+    if properties.referenceTime().isValid():
+        return
+    start = QDateTime(QDate(2000, 1, 1), QTime(0, 0, 0),
+                      enum_value(Qt, "TimeSpec.UTC", "UTC"))
+    properties.setReferenceTime(start, layer.dataProvider().temporalCapabilities())
+
+
 def time_range_of(layer, group: int, step: int):
     """The moment of one time step of a mesh layer, as the range a map is drawn for.
 
-    This is how a time step is selected from Python: the mesh layer of QGIS 3.44 can
-    be asked which time step it shows when the map has no time
-    (``staticScalarDatasetIndex``) and cannot be told. Found by drawing a result; the
-    movie export called the missing function and stopped at its first frame.
+    This is how a map that has a time selects a step, and how the movie export selects
+    its frames: the layer has no function for it in the Python interface of QGIS 3.44.
     """
     from qgis.core import QgsDateTimeRange, QgsMeshDatasetIndex
 
+    ensure_reference_time(layer)
     when = layer.temporalProperties().referenceTime().addMSecs(
         int(layer.datasetRelativeTimeInMilliseconds(QgsMeshDatasetIndex(group, step))))
     return QgsDateTimeRange(when, when.addMSecs(1))
 
 
-def show_last_time_step(canvas, layers) -> str:
-    """Make the map show the end of the results in *layers*. Returns a sentence for
-    the user, or ``""`` where no layer has more than one time step.
+def show_last_time_step(layer) -> bool:
+    """Make *layer* show its last time step wherever a map has no time. ``True`` when
+    the layer has several steps and now stands at the last one.
 
-    Without this a loaded result shows its **first** time step: of a steady
+    QGIS draws the **first** step of a mesh layer on a map without a time: of a steady
     simulation that is the initial state, with standing water and no velocity, which
-    looks like a result and is none. The map is set to the time of the last step; the
-    Temporal Controller of QGIS selects another one.
+    looks like a result and is none. Which step that is, is a property of the layer
+    (``staticScalarDatasetIndex``). It can be read from Python and not set, so it is
+    set where QGIS itself keeps it: in the description of the layer that a project
+    file stores, written out, changed and read back.
+
+    Being a property of the layer, it holds for the map, for a print layout and after
+    the project is opened again, and it does not touch the Temporal Controller, whose
+    range stays the whole run for whoever wants another step. An earlier version set
+    the time of the map canvas instead, which did none of that.
     """
-    from qgis.core import QgsMeshDatasetIndex, QgsMeshLayer
+    from qgis.core import QgsMeshDatasetIndex, QgsMeshLayer, QgsReadWriteContext
+    from qgis.PyQt.QtXml import QDomDocument
 
-    latest = None
-    for layer in layers:
-        if not isinstance(layer, QgsMeshLayer):
-            continue
-        group = layer.rendererSettings().activeScalarDatasetGroup()
-        if group < 0 or not layer.temporalProperties().referenceTime().isValid():
-            continue
-        count = layer.datasetCount(QgsMeshDatasetIndex(group, 0))
-        if count < 2:
-            continue
-        span = time_range_of(layer, group, count - 1)
-        if latest is None or span.begin() > latest.begin():
-            latest = span
-    if latest is None:
-        return ""
-    controller = getattr(canvas, "temporalController", lambda: None)()
-    try:
-        # the Temporal Controller panel then says what the map shows
-        from qgis.core import QgsTemporalNavigationObject as Navigation
-
-        from ..compat import enum_value
-        if isinstance(controller, Navigation):
-            controller.setNavigationMode(enum_value(
-                Navigation, "NavigationMode.FixedRange", "FixedRange"))
-            controller.setTemporalExtents(latest)
-    except (ImportError, AttributeError):          # an interface without the panel
-        pass
-    canvas.setTemporalRange(latest)
-    canvas.refresh()
-    return ("The map shows the last time step of the result. The Temporal Controller "
-            "of QGIS selects another one.")
+    if not isinstance(layer, QgsMeshLayer):
+        return False
+    settings = layer.rendererSettings()
+    scalar, vector = settings.activeScalarDatasetGroup(), settings.activeVectorDatasetGroup()
+    if scalar < 0:
+        return False
+    last_scalar = layer.datasetCount(QgsMeshDatasetIndex(scalar, 0)) - 1
+    last_vector = (layer.datasetCount(QgsMeshDatasetIndex(vector, 0)) - 1
+                   if vector >= 0 else last_scalar)
+    if last_scalar < 1:
+        return False                               # one step: nothing to select
+    ensure_reference_time(layer)
+    document = QDomDocument("axqua")
+    element = document.createElement("maplayer")
+    context = QgsReadWriteContext()
+    if not layer.writeLayerXml(element, document, context):
+        return False
+    static = element.firstChildElement("static-active-dataset")
+    if static.isNull():
+        static = document.createElement("static-active-dataset")
+        element.appendChild(static)
+    static.setAttribute("scalar", str(last_scalar))
+    static.setAttribute("vector", str(max(last_vector, 0)))
+    if not layer.readLayerXml(element, context):
+        return False
+    layer.triggerRepaint()
+    return layer.staticScalarDatasetIndex().dataset() == last_scalar
 
 
 def group_metadata(layer, index: int):

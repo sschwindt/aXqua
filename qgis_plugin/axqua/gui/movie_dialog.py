@@ -238,7 +238,7 @@ class MovieDialog(QDialog):
             return
         # The frame is selected through the time the map is drawn for. The layer has
         # no function for it in the Python interface of QGIS 3.44; the call that stood
-        # here failed at the first frame.
+        # here failed at the first frame. A layer without a date gets one first.
         from ..core.result_loader import time_range_of
         self._settings.setIsTemporal(True)
         self._settings.setTemporalRange(

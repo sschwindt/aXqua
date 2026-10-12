@@ -229,49 +229,117 @@ def test_a_mesh_variable_really_is_styled(project, tmp_path):
 
 def _result_layer(folder: Path, steps: int = 1):
     """The fixture mesh with a water depth and a velocity, as a result carries them,
-    at *steps* time steps."""
+    at *steps* time steps. The values grow from step to step, so that the picture of
+    each step is another one."""
     from qgis.core import QgsMeshLayer
 
+    folder.mkdir(parents=True, exist_ok=True)
     layer = QgsMeshLayer(str(_write_mesh(folder)), "steady result", "mdal")
-    for name, kind, rows in (
-            ("WATER DEPTH", "SCL", ("0.2", "0.6", "0.9", "1.4")),
-            ("SCALAR VELOCITY", "SCL", ("0.5", "1.0", "1.5", "2.0")),
-            ("VELOCITY", "VEC", ("0.5 0.0", "1.0 0.0", "0.0 1.5", "1.2 1.6"))):
+    for name, rows in (("WATER DEPTH", ((0.2,), (0.6,), (0.9,), (1.4,))),
+                       ("SCALAR VELOCITY", ((0.5,), (1.0,), (1.5,), (2.0,))),
+                       ("VELOCITY", ((0.5, 0.0), (1.0, 0.0), (0.0, 1.5), (1.2, 1.6)))):
+        kind = "VEC" if len(rows[0]) == 2 else "SCL"
         path = folder / f"{name.lower().replace(' ', '-')}.dat"
-        frames = "".join(f"TS 0 {float(step)}\n" + "\n".join(rows) + "\n"
-                         for step in range(steps))
+        frames = "".join(
+            f"TS 0 {float(step)}\n" + "".join(
+                " ".join(f"{value * (step + 1) / steps:.4f}" for value in row) + "\n"
+                for row in rows)
+            for step in range(steps))
         path.write_text("DATASET\nOBJTYPE \"mesh2d\"\nBEG" + kind + "\nND 4\nNC 2\n"
                         f"NAME \"{name}\"\n" + frames + "ENDDS\n", encoding="utf-8")
         assert layer.addDatasets(str(path)), name
     return layer
 
 
-def test_a_loaded_result_is_shown_at_its_last_time_step(project, tmp_path, qgis_app):
-    """QGIS shows the first time step of a mesh layer. Of a steady simulation that is
-    the initial state, with standing water and no velocity: it looks like a result."""
-    from qgis.core import QgsMeshDatasetIndex
-    from qgis.gui import QgsMapCanvas
+def _picture(layer, when=None) -> bytes:
+    """What a map draws of *layer*: without a time, or for the time of one step."""
+    from qgis.core import QgsMapRendererParallelJob, QgsMapSettings
+    from qgis.PyQt.QtCore import QSize
 
-    layer = _result_layer(tmp_path, steps=3)
+    settings = QgsMapSettings()
+    settings.setLayers([layer])
+    settings.setExtent(layer.extent())
+    settings.setOutputSize(QSize(160, 160))
+    if when is not None:
+        settings.setIsTemporal(True)
+        settings.setTemporalRange(when)
+    job = QgsMapRendererParallelJob(settings)
+    job.start()
+    job.waitForFinished()
+    image = job.renderedImage()
+    return bytes(image.constBits().asarray(image.sizeInBytes()))
+
+
+def test_a_loaded_result_is_shown_at_its_last_time_step(project, tmp_path, qgis_app):
+    """QGIS draws the first time step of a mesh layer. Of a steady simulation that is
+    the initial state, with standing water and no velocity: it looks like a result.
+    Pictures are compared here, because the defect was invisible to every test that
+    only asked the layer what it was set to."""
+    from qgis.core import QgsMeshRendererVectorSettings as Vectors
+
+    from axqua_plugin.compat import enum_value
+
+    layer = _result_layer(tmp_path / "three", steps=3)
     result_loader.apply_map_style(layer, "depth-arrows")
     group = layer.rendererSettings().activeScalarDatasetGroup()
-    assert layer.datasetCount(QgsMeshDatasetIndex(group, 0)) == 3
-    last = layer.datasetRelativeTimeInMilliseconds(QgsMeshDatasetIndex(group, 2))
-    assert last > 0
+    # as a result file without a date in its header has it when a plugin adds it
+    from qgis.PyQt.QtCore import QDateTime
+    layer.temporalProperties().setReferenceTime(
+        QDateTime(), layer.dataProvider().temporalCapabilities())
+    assert not layer.temporalProperties().referenceTime().isValid()
 
-    canvas = QgsMapCanvas()
-    note = result_loader.show_last_time_step(canvas, [layer])
-    assert "last time step" in note and "Temporal Controller" in note
-    reference = layer.temporalProperties().referenceTime()
-    assert canvas.temporalRange().begin() == reference.addMSecs(int(last))
-    # each time step has a range of its own, which is how a movie selects its frames
-    first, second = (result_loader.time_range_of(layer, group, step) for step in (0, 1))
-    assert first.begin() == reference and second.begin() > first.begin()
+    # a movie selects each frame by its time, also in a result that names no date
+    frames = [_picture(layer, result_loader.time_range_of(layer, group, step))
+              for step in range(3)]
+    assert len(set(frames)) == 3
+    assert layer.temporalProperties().referenceTime().isValid()
 
-    # a result with one time step has nothing to select, and the map is left alone
-    single = QgsMapCanvas()
-    assert result_loader.show_last_time_step(single, [_result_layer(tmp_path)]) == ""
-    assert single.temporalRange().isInfinite()
+    assert _picture(layer) == frames[0]              # what QGIS shows by itself
+    assert result_loader.show_last_time_step(layer) is True
+    assert _picture(layer) == frames[2]              # the end of the run
+    assert layer.staticScalarDatasetIndex().dataset() == 2
+    assert layer.staticVectorDatasetIndex().dataset() == 2
+    # ... with the style it had, and still selectable by time
+    drawn = layer.rendererSettings()
+    assert drawn.activeScalarDatasetGroup() == group
+    assert drawn.vectorSettings(drawn.activeVectorDatasetGroup()).symbology() == \
+        enum_value(Vectors, "Symbology.Arrows", "Arrows")
+    assert _picture(layer, result_loader.time_range_of(layer, group, 1)) == frames[1]
+
+    # a result with one time step has nothing to select
+    assert result_loader.show_last_time_step(_result_layer(tmp_path / "one")) is False
+
+
+def test_every_way_of_loading_a_result_shows_its_last_time_step(project, tmp_path,
+                                                                monkeypatch):
+    """The loader does it, so that the job list, the Processing algorithm and whatever
+    loads results later cannot forget it. A layer that is loaded again is read anew
+    first: the run may have written more time steps since."""
+    mesh = _write_mesh(tmp_path)
+    results = result_loader.JobResults(
+        job_id="JOB-1", root=tmp_path,
+        items=[result_loader.ResultItem(name="reach", path=mesh, kind="mesh")])
+    asked = []
+    monkeypatch.setattr(result_loader, "show_last_time_step",
+                        lambda layer: asked.append(layer.name()) or True)
+    loader = result_loader.ResultLoader(project)
+    (layer,) = loader.load(results)
+    assert asked == ["reach"] and loader.at_last_step == 1
+    reloaded = []
+    monkeypatch.setattr(type(layer), "reload", lambda self: reloaded.append(self.name()))
+    assert loader.load(results) == [] and loader.reused == [layer]
+    assert reloaded == ["reach"] and asked == ["reach", "reach"]
+
+    # where QGIS does not take the step, the user is told what the map shows
+    monkeypatch.setattr(result_loader, "show_last_time_step", lambda layer: False)
+    several = _result_layer(tmp_path / "several", steps=2)
+    result_loader.apply_map_style(several, "depth-arrows")
+    loader._last_step(several, results.items[0])
+    assert any("first time step" in warning for warning in loader.warnings)
+
+    source = (Path(result_loader.__file__).resolve().parents[1] / "processing" /
+              "algorithms" / "import_results.py").read_text(encoding="utf-8")
+    assert "ResultLoader(" in source and "at_last_step" in source
 
 
 def test_no_module_calls_a_function_the_mesh_layer_does_not_have():

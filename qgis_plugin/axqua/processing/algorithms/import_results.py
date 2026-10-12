@@ -83,5 +83,7 @@ class ImportResultsAlgorithm(QgsProcessingAlgorithm):
             feedback.pushWarning(warning)
         for item in results.documents:
             feedback.pushInfo(f"also produced (open outside QGIS): {item.path}")
-        feedback.pushInfo(f"Added {len(added)} layer(s).")
+        feedback.pushInfo(f"Added {len(added)} layer(s)."
+                          + (" The result is shown at its last time step."
+                             if loader.at_last_step else ""))
         return {self.COUNT: len(added)}

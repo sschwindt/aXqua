@@ -316,12 +316,11 @@ class JobsWidget(QWidget):
         message = f"Loaded {len(added)} layer(s) into axqua/{job.job_id}."
         if reused:
             message += f" {reused} were already loaded and were restyled in place."
-        # a result is its last time step; QGIS would show the first
-        from ..core.result_loader import show_last_time_step
-        iface = getattr(self.ctx, "iface", None)
-        note = show_last_time_step(iface.mapCanvas(), [*added, *loader.reused]) \
-            if iface is not None else ""
-        self.ctx.info(message + (" " + note if note else ""))
+        if loader.at_last_step:
+            # a result is its last time step; QGIS would show the first
+            message += (" The result is shown at its last time step. The Temporal "
+                        "Controller of QGIS selects another one.")
+        self.ctx.info(message)
 
     def _results_failed(self, exc: Exception) -> None:
         self.actions["load"].setEnabled(True)
