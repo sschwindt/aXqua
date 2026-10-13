@@ -140,6 +140,12 @@ The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of 
    * - ``layer_thickness``, ``porosity``, ``initial_fraction``
      - The bed layer for which the share of fines is reported: its thickness [m], the share of pores between its coarse grains, and the share of fines in its dry mass at the beginning of the period.
 
+.. figure:: ../img/gui-case-editor-fine-sediment.png
+   :alt: The block Fine sediment over a fixed bed in the case editor
+   :width: 85%
+
+   The fine sediment simulation is defined in the case editor (*Edit case...* on the *Case Setup* tab). (1) The block *Fine sediment over a fixed bed*. (2) Its settings, of which further ones are added with *Add setting...*.
+
 **Choice of the pick-up.** The formulas of van Rijn describe a bed of sand, from which the flow can remove as many grains as its shear stress allows. A gravel bed holds fine sediment only in its pores, so that these formulas overestimate the removal by orders of magnitude. For fine sediment over a gravel bed, set ``pick_up: off``. The result then shows where fine sediment settles and how much, and the bed shear stress in the result shows where the flow is able to remove it again.
 
 **Simulation.** Go to the tab *Morphodynamic simulation*, sub-tab *OpenFOAM*. Click *Build* in the box *Fine sediment over a fixed bed*, then *Submit*. Both can be clicked one after the other, because the simulation waits for its build, and the build waits for a steady 2D simulation that is still running. The progress display counts iterations. On a mesh of 11,000 cells, the simulation takes less than one minute. In a terminal, the commands are:
@@ -148,6 +154,12 @@ The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of 
 
    axqua submit <case-file> --kind openfoam-sediment-build
    axqua submit <case-file> --kind openfoam-sediment
+
+.. figure:: ../img/gui-morphodynamics-openfoam.png
+   :alt: The sub-tab OpenFOAM of the tab Morphodynamic simulation
+   :width: 70%
+
+   The tab *Morphodynamic simulation*, sub-tab *OpenFOAM*. (1) The sub-tabs of the two simulation programs. (2) The options: the warm-up for the build, and the largest number of iterations for the simulation. (3) *Build* creates the model. (4) *Submit* starts the simulation. (5) *Load results* adds the bed with its fine sediment to the map.
 
 **Results.** *Load results* adds the layer *Fine sediment at the bed* to the map. It holds one polygon for every column of cells, with the attributes listed below, and is colored by the change of the share of fines, or by the net rate if the case defines no period. The file is ``axqua-case/openfoam-sediment/fine-sediment-bed.gpkg``. The three-dimensional fields of velocity and concentration can be opened in ParaView through ``case.foam`` in the same folder.
 

@@ -207,12 +207,29 @@ def take_screenshots() -> None:
 
     # ---- Configuration -----------------------------------------------------------
     def configuration() -> None:
+        from qgis.PyQt.QtWidgets import QScrollArea, QSplitter
+
         dock.show_section("configuration")
-        shot(dock, "gui-configuration", [
-            first(tab, QGroupBox, "aXqua program"),
-            first(tab, QGroupBox, "Profile of this computer"),
-            first(tab, QGroupBox, "Simulation software"),
-            dock.help_button])
+        # The tab scrolls in a panel that is lower than its three boxes. The picture is
+        # taken of a panel high enough to show them, with the added height given to
+        # the tab and not to the job list below it.
+        splitter = dock.findChild(QSplitter)
+        before = splitter.sizes()
+        need = tab.findChild(QScrollArea).widget().sizeHint().height() + 70
+        dock.resize(PANEL[0], need + before[-1] + 40)
+        wait(300)
+        splitter.setSizes([need, before[-1]])
+        wait(400)
+        try:
+            shot(dock, "gui-configuration", [
+                first(tab, QGroupBox, "aXqua program"),
+                first(tab, QGroupBox, "Profile of this computer"),
+                first(tab, QGroupBox, "Simulation software"),
+                dock.help_button])
+        finally:
+            dock.resize(*PANEL)
+            wait(200)
+            splitter.setSizes(before)
 
     def profile_editor() -> None:
         from axqua.gui.profile_editor import ProfileEditor

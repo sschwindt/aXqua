@@ -208,6 +208,19 @@ outlines, because rates of deposition span orders of magnitude and outlines at t
 of a reach cover the fills. Its test counts the colors that cover more than 2 % of a
 rendered picture.
 
+**Two layout defects that only the pictures showed** (2026-10-13, when they were taken
+again for the new sub-tab). The step list of the batch was 150 pixels high, which seven
+steps filled; with nine, the calibration and the validation were below the fold. It is as
+high as its rows now and has no horizontal scroll bar, which in a narrow panel covered a
+step (found by the test, whose dock is 134 pixels wide). And **the Configuration tab did
+not scroll**: in a panel lower than its three boxes need (about 1,040 pixels), Qt squeezed
+the rows, and the second line of an entry of the profile ("installed in ...") was cut off
+at its middle, in the panel and in the published picture. Giving the labels a minimum
+height made it worse, because the squeeze then took the missing pixels from them all the
+same; the tab is in a scroll area now, like the pages of the workflow, and its picture is
+taken of a panel high enough for it, with the added height given to the tab through the
+splitter (the job list would take it otherwise).
+
 The plugin folder and the library are both called `axqua`, which is right in both
 places but means they cannot share a pytest process - `qgis_plugin/tests/conftest.py` loads
 the plugin under the alias `axqua_plugin` so one `pytest` at the repo root runs both

@@ -1010,6 +1010,23 @@ def test_the_fine_sediment_steps_of_a_batch_need_openfoam_to_be_asked(dock):
     assert not box.results_button.isEnabled()              # nothing has run yet
 
 
+def test_every_step_of_a_batch_is_on_the_screen(dock):
+    """The list was 150 pixels high, which seven steps filled. With two more, the last
+    ones could only be reached by scrolling a list that does not look like it scrolls."""
+    from axqua_plugin.core import batch
+
+    from qgis.PyQt.QtCore import QCoreApplication
+
+    dock.show()
+    dock.show_section("batch")
+    QCoreApplication.processEvents()                       # the layout settles
+    steps = dock.page("batch").steps
+    assert steps.count() == len(batch.STEPS)
+    last = steps.visualItemRect(steps.item(steps.count() - 1))
+    assert 0 < last.bottom() <= steps.viewport().height()
+    assert steps.verticalScrollBar().maximum() == 0        # nothing left to scroll to
+
+
 def test_a_batch_is_submitted_in_the_order_of_the_workflow(dock):
     from axqua_plugin.compat import CHECKED
     from axqua_plugin.gui.capability_tabs import CaseView
@@ -1220,6 +1237,37 @@ def test_the_summary_shows_the_program_that_is_run_and_its_folder(dock):
     assert tab._summary["postprocessors.paraview"].text() == "not set"
     assert describe_entry(profile, "postprocessors.visit") == \
         "no program found in the folder\ninstalled in /opt/v"
+
+
+def test_an_entry_of_two_lines_is_shown_with_both(dock):
+    """The folder a program is installed in stands in a second line. In a panel lower
+    than the three boxes of the tab need, the rows were squeezed and that line was cut
+    off at its middle, in the panel and in the picture of it in the documentation. The
+    tab scrolls now, as the pages of the workflow do."""
+    from qgis.PyQt.QtCore import QCoreApplication
+    from qgis.PyQt.QtWidgets import QScrollArea
+
+    tab = dock.configuration_tab
+    profile = {"name": "bench",
+               "installations": {name: f"/opt/{name}" for name in (
+                   "telemac", "openfoam", "paraview", "visit")},
+               "programs": {name: f"/opt/{name}/bin/{name}" for name in (
+                   "telemac", "openfoam", "paraview", "visit")}}
+    tab.show_profile({"path": "/home/x/default.axq-profile", "exists": True}, profile)
+    dock.setFloating(True)
+    dock.resize(800, 520)                                  # far too low for the tab
+    dock.show()
+    dock.show_section("configuration")
+    for _ in range(3):
+        QCoreApplication.processEvents()
+    area = tab.findChild(QScrollArea)
+    assert area is not None and area.verticalScrollBar().maximum() > 0
+    for key in ("solvers.telemac.setup_script", "solvers.openfoam.setup_script",
+                "postprocessors.paraview", "postprocessors.visit"):
+        label = tab._summary[key]
+        assert label.text().count("\n") == 1
+        assert label.height() >= label.heightForWidth(label.width()) > \
+            label.fontMetrics().lineSpacing()
 
 
 def test_a_profile_that_cannot_be_read_is_not_silently_replaced(dock, monkeypatch):

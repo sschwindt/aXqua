@@ -512,13 +512,21 @@ class BatchPage(QWidget):
             "Tick the steps to run. They are submitted in the order of the list, and "
             "each waits until the one before it has ended."))
         self.steps = QListWidget()
-        self.steps.setMaximumHeight(150)
         for item in batch.STEPS:
             entry = QListWidgetItem(item.title)
             entry.setData(enum_value(_qt(), "ItemDataRole.UserRole", "UserRole"),
                           item.kind)
             entry.setCheckState(CHECKED if item.default else UNCHECKED)
             self.steps.addItem(entry)
+        # As high as its steps. The list used to end at 150 pixels, which were seven
+        # steps; with nine, the calibration and the validation were below the fold of a
+        # list that does not look like it scrolls. No bar along its lower edge either,
+        # which would cover a step in a narrow panel: a long title is cut off instead.
+        self.steps.setHorizontalScrollBarPolicy(enum_value(
+            _qt(), "ScrollBarPolicy.ScrollBarAlwaysOff", "ScrollBarAlwaysOff"))
+        row = max(self.steps.sizeHintForRow(0), self.steps.fontMetrics().height())
+        self.steps.setFixedHeight(row * self.steps.count()
+                                  + 2 * self.steps.frameWidth() + 2)
         inner.addWidget(self.steps)
         row = QHBoxLayout()
         self.submit_button = QPushButton("Submit the ticked steps")

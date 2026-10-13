@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from qgis.PyQt.QtCore import QTimer
 from qgis.PyQt.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                                 QPushButton, QVBoxLayout, QWidget)
+                                 QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from ..compat import exec_dialog
 from ..core.runner_client import RunnerError, user_text
@@ -73,7 +73,17 @@ class ConfigurationTab(QWidget):
         self._build()
 
     def _build(self) -> None:
-        layout = QVBoxLayout(self)
+        # In a scroll area, like the pages of the workflow. Without one, a panel lower
+        # than the three boxes need squeezed their rows, and the second line of an
+        # entry of the profile ("installed in ...") was cut off at its middle.
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        body = QWidget()
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setWidget(body)
+        outer.addWidget(area)
+        layout = QVBoxLayout(body)
 
         runner_box = QGroupBox("aXqua program")
         runner_form = QFormLayout(runner_box)
