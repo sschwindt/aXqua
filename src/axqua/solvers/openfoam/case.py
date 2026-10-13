@@ -39,12 +39,15 @@ log = logging.getLogger("axqua")
 # multiple of the water velocity at which the limitVelocity constraint bites
 DEFAULT_VELOCITY_CAP_FACTOR = 5.0
 
-# OpenFOAM's cell Courant number is 0.5 * sum|phi| / V * dt - a sum over *all* the
-# cell's faces, so a cell with flow through more than one pair of faces reports more
-# than the textbook U dt / L. Measured on the isar mesh (dt 1.77e-3 s at Courant 0.3
-# where U dt / L predicted 3.8e-3), the ratio is close to 2; the estimate below
-# carries it so the reported cost is the cost, not an optimistic bound.
-COURANT_FACE_SUM_FACTOR = 2.0
+# The time step of a two-phase run, measured on the Isar example after the corrections
+# of 2026-10-13 (1 m cells with 14 layers, thinnest layer 0.031 m, and 2 m cells with
+# 8 layers, thinnest layer 0.057 m; water speed 0.80 m/s at the 95th percentile). Two
+# limits, and both scale with the thinnest layer: the air next to the water reaches a
+# Courant number of 0.9 at 0.026 s and 0.060 s, the water surface at 0.051 s and
+# 0.100 s. Written as Courant x thinnest layer / (factor x water speed), the factor
+# is 1.3 and 1.1 for the air and 0.68 and 0.64 for the surface.
+AIR_SPEED_FACTOR = 1.2
+SURFACE_SPEED_FACTOR = 0.65
 
 
 def _describe_outflow(stage) -> str:
@@ -270,18 +273,10 @@ def _write_build_record(cfg: Config, of_mesh, case_dir: Path, *,
     return path
 
 
-def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> float:
-    """The velocity that actually sets the Courant number.
-
-    In the two-phase case that is the ``limitVelocity`` cap: the fastest cells in the
-    domain are air, and they sit at the cap by construction. **Under a rigid lid there
-    is no air**, so the limit is the water's own speed - using the cap there would
-    over-state the cost several-fold and make the mode look worse than it is.
-    """
-    if not getattr(of_mesh, "rigid_lid", False):
-        return velocity_cap
+def water_speed(of_mesh, cfg: Config, state=None) -> float:
+    """The reach's own water speed [m/s]: the 95th percentile of the 2D result."""
     if state is not None:
-        return max(state.velocity_scale(), 1e-3)
+        return max(float(state.velocity_scale()), 1e-3)
     if getattr(of_mesh, "column_uv", None) is not None:
         speed = np.hypot(of_mesh.column_uv[:, 0], of_mesh.column_uv[:, 1])
         if speed.size:
@@ -289,23 +284,46 @@ def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> 
     return float(cfg.hydrodynamics.initial_velocity_guess)
 
 
+def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> float:
+    """The velocity that sets the Courant number of the flow.
+
+    Under a rigid lid that is the water's own speed. In the two-phase case it is the
+    air next to the water, which moves a little faster than the water does
+    (:data:`AIR_SPEED_FACTOR`) and never faster than the ``limitVelocity`` cap.
+    **It is not the cap**, although this function said so until October 2026: the
+    runs it was calibrated on had air at the cap because the outflow drove it there
+    (see :func:`axqua.solvers.openfoam.fields.outlet_pressure`), and the estimate
+    built on them was eight times too small once that was corrected.
+    """
+    water = water_speed(of_mesh, cfg, state)
+    if getattr(of_mesh, "rigid_lid", False):
+        return water
+    return min(AIR_SPEED_FACTOR * water, float(velocity_cap))
+
+
+def flow_courant(cfg: Config, courant: float | None = None) -> float:
+    """The Courant limit of the flow in the production stage (``maxCo``)."""
+    of = cfg.openfoam
+    courant = courant if courant is not None else of.max_courant
+    wanted = getattr(of, "max_flow_courant", None)
+    if wanted and of.mode != "rigid-lid":
+        return max(float(wanted), courant)
+    return courant
+
+
 def estimate_time_step(of_mesh, cfg: Config, velocity_cap: float, *,
-                       courant: float | None = None) -> float:
+                       courant: float | None = None, state=None) -> float:
     """Time step [s] the Courant target will settle on.
 
-    Two things about this are not the obvious choices, and both were corrected
-    against a measured run (isar: 2e-3 s at Courant 0.3, where the obvious estimate
-    gave 1e-1 s - fifty times too optimistic):
+    **Two phases.** The limiting **length** is the *thinnest* layer in the mesh, not
+    the bed layer and not ``cell_size``: the bed layer is pinned thick enough to clear
+    the roughness, so the layers above it are thinner wherever a column is shallow,
+    and what crosses a layer is the vertical motion at the waterline. Two limits
+    apply, the Courant number of the flow, which the air next to the water reaches
+    first, and that of the water surface; the smaller step is the estimate. Within
+    12 % of the four measured steps the factors come from.
 
-    * the limiting **length** is the *thinnest* layer in the mesh, not the bed layer
-      and not ``cell_size``. The bed layer is pinned thick enough to clear the
-      roughness, so the layers above it are thinner wherever a column is shallow;
-    * the limiting **velocity** is the ``limitVelocity`` cap, not the reach's own
-      water speed. The Courant number is set by the fastest cells in the domain, and
-      those are air cells sitting at the cap - which is exactly why the cap is worth
-      setting, and why it also sets the cost.
-
-    Neither holds under a **rigid lid**, and taking them across gave an estimate
+    **Rigid lid.** No air, and taking the two-phase model across gave an estimate
     nineteen times too pessimistic (0.019 s against a measured 0.369 s). There the
     water moves horizontally across the full plan spacing, and only its *vertical*
     component - which a terrain-following mesh gets from the bed slope, w ~ u.S -
@@ -316,13 +334,15 @@ def estimate_time_step(of_mesh, cfg: Config, velocity_cap: float, *,
     from axqua.solvers.openfoam.mesh import plan_spacing
 
     dx = plan_spacing(cfg)
-    speed = limiting_velocity(of_mesh, cfg, velocity_cap)
+    speed = limiting_velocity(of_mesh, cfg, velocity_cap, state)
     if getattr(of_mesh, "rigid_lid", False):
         slope = terrain_slope(of_mesh)
         rate = speed / dx + speed * slope / max(of_mesh.min_layer_height, 1e-3)
         return courant / max(rate, 1e-6)
     length = min(of_mesh.min_layer_height, dx)
-    return courant * length / (COURANT_FACE_SUM_FACTOR * max(speed, 1e-3))
+    air = flow_courant(cfg, courant) * length / max(speed, 1e-3)
+    surface = courant * length / (SURFACE_SPEED_FACTOR * water_speed(of_mesh, cfg, state))
+    return min(air, surface)
 
 
 def terrain_slope(of_mesh) -> float:
@@ -369,10 +389,11 @@ def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
     discovering one.
     """
     of = cfg.openfoam
-    dt = estimate_time_step(of_mesh, cfg, velocity_cap)
+    dt = estimate_time_step(of_mesh, cfg, velocity_cap, state=state)
     steps = of.end_time / dt if dt > 0 else float("inf")
     flush = reach_flush_time(of_mesh, state)
-    speed = limiting_velocity(of_mesh, cfg, velocity_cap)
+    speed = limiting_velocity(of_mesh, cfg, velocity_cap, state)
+    courants = f"Courant {of.max_courant:g}"
     from axqua.solvers.openfoam.mesh import plan_spacing
 
     if getattr(of_mesh, "rigid_lid", False):
@@ -381,9 +402,17 @@ def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
                  f"thinnest {of_mesh.min_layer_height:.3f} m layer on a "
                  f"{terrain_slope(of_mesh):.1%} bed slope)")
     else:
-        basis = (f"(set by the thinnest {of_mesh.min_layer_height:.3f} m layer at "
-                 f"{speed:.2f} m/s - the velocity cap, i.e. the air)")
-    out = [f"  time step   : ~{dt:.2e} s at Courant {of.max_courant:g} {basis}",
+        flow = flow_courant(cfg)
+        air = flow * min(of_mesh.min_layer_height, plan_spacing(cfg)) / max(speed, 1e-3)
+        if flow > of.max_courant:
+            courants = (f"Courant {of.max_courant:g} at the water surface and "
+                        f"{flow:g} in the air")
+        what = ("the air next to the water" if air <= dt * (1 + 1e-9)
+                else "the water surface")
+        basis = (f"(set by {what} in the thinnest {of_mesh.min_layer_height:.3f} m "
+                 f"layer; the water moves at {water_speed(of_mesh, cfg, state):.2f} "
+                 "m/s)")
+    out = [f"  time step   : ~{dt:.2e} s at {courants} {basis}",
            f"  run length  : {of.end_time:g} s needs ~{steps:,.0f} time steps "
            f"on {of_mesh.n_cells:,} cells"]
     if flush:

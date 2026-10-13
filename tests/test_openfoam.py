@@ -302,21 +302,46 @@ def test_stage_schemes_differ_in_compression_not_in_kind():
         assert "wallDist" in fv_schemes(cfg, stage)     # kOmegaSST needs it
 
 
-def test_time_step_estimate_is_calibrated_against_a_measured_run():
-    """The estimate must reproduce what interFoam actually settles on.
+def test_time_step_estimate_is_calibrated_against_measured_runs():
+    """The estimate must reproduce what interFoam settles on.
 
-    Measured on the isar mesh at cell_size 2 m / 8 layers: dt 1.77e-3 s at Courant
-    0.3 with the 4.5 m/s cap and a 0.057 m thinnest layer. The naive
-    `Courant * layer / water_speed` gave 1e-1 s - fifty times too optimistic.
-    """
+    Measured on the Isar example after the outflow was corrected, with a water speed
+    of 0.80 m/s (95th percentile): at 1 m cells and 14 layers (thinnest layer 0.031 m)
+    0.026 s at Courant 0.9 and 0.051 s with 3 for the flow; at 2 m cells and 8 layers
+    (0.057 m) 0.060 s and 0.100 s. Until then the estimate assumed air at the velocity
+    limit, which was the defect of the outflow, and gave 0.0034 s for the first."""
     from axqua.solvers.openfoam.case import estimate_time_step
 
     class _M:
-        min_layer_height = 0.057
+        column_uv = np.array([[0.8, 0.0]])
 
-    cfg = _Cfg(cell_size=2.0)
-    dt = estimate_time_step(_M(), cfg, 4.5, courant=0.3)
-    assert dt == pytest.approx(1.9e-3, rel=0.2)      # measured 1.77e-3
+    for dx, layer, one, split in ((1.0, 0.031, 0.026, 0.051), (2.0, 0.057, 0.060, 0.100)):
+        mesh = _M()
+        mesh.min_layer_height = layer
+        dt = estimate_time_step(mesh, _Cfg(cell_size=dx), 4.0, courant=0.9)
+        assert dt == pytest.approx(one, rel=0.15)
+        dt = estimate_time_step(mesh, _Cfg(cell_size=dx, max_flow_courant=3.0), 4.0,
+                                courant=0.9)
+        assert dt == pytest.approx(split, rel=0.15)
+
+
+def test_the_cost_says_which_limit_sets_the_time_step():
+    from axqua.solvers.openfoam.case import cost_lines
+
+    class _Grid:
+        cell_xy = np.array([[0.0, 0.0], [300.0, 400.0]])
+
+    class _M:
+        grid = _Grid()
+        min_layer_height = 0.031
+        n_cells = 1000
+
+    text = " ".join(cost_lines(_M(), _state(speed=0.8), _Cfg(cell_size=1.0), 4.0))
+    assert "the air next to the water" in text and "Courant 0.9 (" in text
+    text = " ".join(cost_lines(_M(), _state(speed=0.8),
+                               _Cfg(cell_size=1.0, max_flow_courant=3.0), 4.0))
+    assert "the water surface" in text
+    assert "Courant 0.9 at the water surface and 3 in the air" in text
 
 
 def test_reach_flush_time_warns_when_the_run_is_too_short():
@@ -379,6 +404,52 @@ def test_the_air_can_have_a_courant_limit_of_its_own_in_the_production_stage():
     cfg = _Cfg(mode="rigid-lid", max_flow_courant=3.0)
     text = control_dict(cfg, stages(cfg)[0], patches=["inlet-1", "outlet-1"])
     assert "maxCo           0.9;" in text
+
+
+def test_the_number_of_pressure_solutions_is_a_setting_of_the_case():
+    """18 pressure solutions per time step with the defaults, which is most of what a
+    step costs. On a mesh without badly skewed faces fewer give the same result."""
+    from axqua.config import OpenFoam
+    from axqua.solvers.openfoam.dicts import fv_solution, stages
+
+    cfg = _Cfg()
+    text = fv_solution(cfg, stages(cfg)[1])
+    assert "nCorrectors     3;" in text and "nNonOrthogonalCorrectors 2;" in text
+    cfg = _Cfg(pressure_correctors=2, non_orthogonal_correctors=1)
+    for stage in stages(cfg):
+        text = fv_solution(cfg, stage)
+        assert "nCorrectors     2;" in text and "nNonOrthogonalCorrectors 1;" in text
+    with pytest.raises(ValueError, match="pressure_correctors"):
+        OpenFoam(pressure_correctors=0).validate()
+    with pytest.raises(ValueError, match="non_orthogonal_correctors"):
+        OpenFoam(non_orthogonal_correctors=-1).validate()
+
+
+def test_every_stage_ends_on_a_saved_result():
+    """The solver saves at multiples of the write interval and not at its end. A first
+    stage that does not end on one hands nothing to the second, which then starts
+    from the beginning without a word; a run that does not end on one loses its last
+    seconds."""
+    from axqua.solvers.openfoam.dicts import control_dict, stage_write_interval, stages
+
+    cfg = _Cfg(spinup_time=2.0, end_time=1500.0, write_interval=50.0)
+    spinup, run = stages(cfg)
+    assert stage_write_interval(cfg.openfoam, spinup) == pytest.approx(2.0)
+    assert stage_write_interval(cfg.openfoam, run) == pytest.approx(50.0)
+    assert "writeInterval   2;" in control_dict(cfg, spinup, patches=["inlet-1"])
+    assert "writeInterval   50;" in control_dict(cfg, run, patches=["inlet-1"])
+    # the defaults were multiples already and stay as they are
+    cfg = _Cfg()
+    for stage in stages(cfg):
+        assert stage_write_interval(cfg.openfoam, stage) == pytest.approx(10.0)
+    # an end between two write times moves the interval, not the end
+    cfg = _Cfg(spinup_time=30.0, end_time=120.0, write_interval=50.0)
+    spinup, run = stages(cfg)
+    assert stage_write_interval(cfg.openfoam, spinup) == pytest.approx(30.0)
+    assert stage_write_interval(cfg.openfoam, run) == pytest.approx(60.0)
+    for stage in (spinup, run):
+        interval = stage_write_interval(cfg.openfoam, stage)
+        assert (stage.end_time / interval) == pytest.approx(round(stage.end_time / interval))
 
 
 def test_a_flow_courant_limit_below_that_of_the_surface_is_refused():

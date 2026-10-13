@@ -20,7 +20,12 @@ settings", and the settings that matter are these four:
    momentum predictor buys nothing when buoyancy dominates and costs an extra solve.
 4. **``nNonOrthogonalCorrectors 2``.** A terrain-following mesh *is* non-orthogonal
    wherever the bed slopes; without the correctors the pressure solution leaks that
-   as spurious velocity near the bed.
+   as spurious velocity near the bed. Together with ``nCorrectors 3`` and the outer
+   correctors this is 18 pressure solutions per time step, which is most of what a
+   step costs. Both counts are settings of the case
+   (``openfoam.pressure_correctors``, ``non_orthogonal_correctors``): on the Isar
+   example, whose worst face is 57 degrees off, 2 and 1 gave the same depths,
+   velocities and discharges to three digits after 40 s at 0.6 of the cost.
 
 The lid clamping that removes most air cells altogether is in
 :mod:`axqua.solvers.openfoam.mesh`, and matters more than all four.
@@ -228,7 +233,7 @@ deltaT          {of.initial_time_step:g};
 
 writeControl    adjustableRunTime;
 
-writeInterval   {of.write_interval:g};
+writeInterval   {stage_write_interval(of, stage):g};
 
 purgeWrite      {of.purge_write:d};
 
@@ -350,6 +355,26 @@ def _boundary_patches(of_mesh) -> tuple[str, str] | None:
     """
     top = getattr(of_mesh, "top_patch", None)
     return (top, BANKS_PATCH) if top else None
+
+
+def stage_write_interval(of, stage: Stage) -> float:
+    """Simulated time between two saved results of *stage* [s].
+
+    ``write_interval``, adjusted so that the end of the stage is a write time. The
+    solver saves at multiples of the interval and at no other time, also not at its
+    end. A first stage of 2 s with results every 50 s therefore ended without a
+    result, the second stage started from the latest one it found, which was the
+    start, and the first stage had been computed for nothing: seen on the Isar
+    example, where nothing but the time in the listing said so. With the defaults
+    (30 s and 10 s) the end happened to be a write time. The same holds for the end
+    of the run: with 120 s and 50 s the last 20 s would not be saved, so the
+    interval becomes 60 s.
+    """
+    wanted = float(of.write_interval)
+    end = float(stage.end_time)
+    if wanted <= 0 or end <= 0:
+        return wanted
+    return end / max(1, round(end / wanted))
 
 
 def _max_flow_courant(of, stage: Stage) -> float:
@@ -584,6 +609,7 @@ def _alpha_block(cfg, stage: Stage) -> str:
 
 
 def fv_solution(cfg, stage: Stage) -> str:
+    of = cfg.openfoam
     body = f"""solvers
 {{
     "alpha.water.*"
@@ -643,11 +669,11 @@ PIMPLE
     momentumPredictor no;
 
     nOuterCorrectors {stage.n_outer_correctors};
-    nCorrectors     3;
+    nCorrectors     {int(getattr(of, "pressure_correctors", 3))};
 
     // the bed-following mesh is non-orthogonal where the bed is steep; without
     // these the pressure solution leaks that as spurious near-bed velocity
-    nNonOrthogonalCorrectors 2;
+    nNonOrthogonalCorrectors {int(getattr(of, "non_orthogonal_correctors", 2))};
 }}
 
 relaxationFactors

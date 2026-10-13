@@ -584,6 +584,11 @@ dem_of_difference:
 #   # The cells that reach it first are air crossing thin layers, so 3 here doubles
 #   # the time step of a shallow reach while the water surface keeps max_courant.
 #   # max_flow_courant: 3.0
+#   # Pressure solutions per time step. The defaults are on the safe side for a
+#   # mesh over a steep bed; 2 and 1 cost 0.6 of them and gave the same result on
+#   # the Isar example.
+#   # pressure_correctors: 3
+#   # non_orthogonal_correctors: 2
 #   write_interval: 10.0
 
 # fine_sediment:               # optional: fine sediment over a bed that stays in place

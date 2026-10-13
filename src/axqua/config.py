@@ -1840,6 +1840,14 @@ class OpenFoam:
     # interest. With 3 here the surface keeps its limit and the step of the Isar
     # example doubles. None keeps one number for both.
     max_flow_courant: float | None = None
+    # Pressure solutions per time step: correctors of the pressure (nCorrectors) and,
+    # within each, corrections for faces that are not at a right angle to the line
+    # between their cells (nNonOrthogonalCorrectors). 3 and 2 are on the safe side
+    # for a mesh that follows a steep bed. Each corrector costs one solution per
+    # non-orthogonal correction plus one, in each of the two outer correctors of the
+    # production stage: 18 with the defaults, 8 with 2 and 1.
+    pressure_correctors: int = 3
+    non_orthogonal_correctors: int = 2
     # Cap on |U| enforced by the limitVelocity fvConstraint. Water never reaches it;
     # an air jet does, and this is the most effective single stop on the air phase
     # collapsing the time step. None -> 5x the expected water velocity.
@@ -1884,6 +1892,10 @@ class OpenFoam:
         if self.freeboard <= 0:
             raise ValueError("openfoam.freeboard must be > 0 (the air layer above "
                              "the free surface)")
+        if self.pressure_correctors < 1:
+            raise ValueError("openfoam.pressure_correctors must be at least 1")
+        if self.non_orthogonal_correctors < 0:
+            raise ValueError("openfoam.non_orthogonal_correctors must not be negative")
         if self.max_flow_courant is not None and self.max_flow_courant < self.max_courant:
             raise ValueError(
                 f"openfoam.max_flow_courant ({self.max_flow_courant:g}) is smaller than "
