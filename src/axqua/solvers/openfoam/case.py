@@ -213,6 +213,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         # (p/p_gh/U/zeta, no alpha) on the same water-only mesh the rigid lid uses.
         field_files = potential.write_potential_fields(of_mesh, cfg, case_dir,
                                                       state=state)
+        fields.write_reference_level(case_dir, None)    # left by a two-phase build
     else:
         field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
                                           outflow_stage=stage, discharges=inlets,
@@ -425,8 +426,10 @@ def summarise(art: OpenFoamArtifacts) -> list[str]:
         # re-deriving it from the seed here would report a water fraction the case
         # does not have - and reporting 96.8% for a domain that is water by
         # construction is exactly the kind of contradiction this line exists to catch.
+        wet_depth = art.cfg.hydrodynamics.wet_depth if art.cfg is not None else 0.01
         water = (1.0 if getattr(art.mesh, "rigid_lid", False)
-                 else float(np.mean(fields.initial_alpha(art.mesh) > 0.5)))
+                 else float(np.mean(fields.initial_alpha(
+                     art.mesh, wet_depth=wet_depth) > 0.5)))
         out.append(f"  water at t=0 : {100 * water:.1f}% of cells "
                    f"({total:,} total)")
     if art.mesh is not None and art.cfg is not None:

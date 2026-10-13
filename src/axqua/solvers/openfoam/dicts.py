@@ -249,8 +249,9 @@ runTimeModifiable yes;
 adjustTimeStep  yes;
 
 // with MULESCorr the alpha equation is no longer explicitly Courant-limited, so
-// maxAlphaCo can match maxCo instead of the tutorials' 0.2
-maxCo           {stage.max_courant:g};
+// maxAlphaCo can match maxCo instead of the tutorials' 0.2. maxCo is the limit of
+// every cell; where it is the larger of the two, it is air that reaches it.
+maxCo           {_max_flow_courant(of, stage):g};
 maxAlphaCo      {_max_alpha_courant(of, stage):g};
 
 maxDeltaT       {of.max_time_step:g};
@@ -349,6 +350,24 @@ def _boundary_patches(of_mesh) -> tuple[str, str] | None:
     """
     top = getattr(of_mesh, "top_patch", None)
     return (top, BANKS_PATCH) if top else None
+
+
+def _max_flow_courant(of, stage: Stage) -> float:
+    """Courant limit of the flow in every cell (``maxCo``).
+
+    In a two-phase run the cells that reach it first are air: next to the water it
+    moves about as fast as the water does, and it crosses layers a few centimeters
+    thick where the water crosses cells a meter long. ``openfoam.max_flow_courant``
+    lets those cells pass more than one cell per step in the production stage, while
+    the water surface keeps ``max_courant``. Measured on the Isar example at 1 m
+    cells: 0.026 s with 0.9 for both, 0.049 s with 3 for the flow, at which the
+    surface is the limit again (0.91) and the largest Courant number of a water cell
+    is 0.13. The stage that settles the surface keeps its own limit for both.
+    """
+    wanted = getattr(of, "max_flow_courant", None)
+    if wanted and of.mode != "rigid-lid" and stage.name == "run":
+        return max(float(wanted), stage.max_courant)
+    return stage.max_courant
 
 
 def _max_alpha_courant(of, stage: Stage) -> float:

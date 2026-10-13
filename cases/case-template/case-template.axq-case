@@ -580,6 +580,10 @@ dem_of_difference:
 #   end_time: 300.0
 #   spinup_courant: 0.3
 #   max_courant: 0.9
+#   # Courant limit of the flow in stage 2 where it may be larger than max_courant.
+#   # The cells that reach it first are air crossing thin layers, so 3 here doubles
+#   # the time step of a shallow reach while the water surface keeps max_courant.
+#   # max_flow_courant: 3.0
 #   write_interval: 10.0
 
 # fine_sediment:               # optional: fine sediment over a bed that stays in place

@@ -1833,6 +1833,13 @@ class OpenFoam:
     max_time_step: float = 0.5
     max_courant: float = 0.9        # stage 2 (stage 1 uses spinup_courant)
     spinup_courant: float = 0.3
+    # Courant limit of the flow in stage 2 where it may be larger than max_courant.
+    # The time step of a two-phase run obeys two limits: one at the water surface
+    # (max_courant) and one in every cell, and the cells that reach the second one
+    # first are air crossing thin layers, where the accuracy of a time step is of no
+    # interest. With 3 here the surface keeps its limit and the step of the Isar
+    # example doubles. None keeps one number for both.
+    max_flow_courant: float | None = None
     # Cap on |U| enforced by the limitVelocity fvConstraint. Water never reaches it;
     # an air jet does, and this is the most effective single stop on the air phase
     # collapsing the time step. None -> 5x the expected water velocity.
@@ -1877,6 +1884,12 @@ class OpenFoam:
         if self.freeboard <= 0:
             raise ValueError("openfoam.freeboard must be > 0 (the air layer above "
                              "the free surface)")
+        if self.max_flow_courant is not None and self.max_flow_courant < self.max_courant:
+            raise ValueError(
+                f"openfoam.max_flow_courant ({self.max_flow_courant:g}) is smaller than "
+                f"max_courant ({self.max_courant:g}). It is the limit of all cells, "
+                "the water surface included, so the smaller number would be the "
+                "limit of both: lower max_courant instead, or remove the entry.")
         if self.end_time <= self.spinup_time:
             raise ValueError(
                 f"openfoam.end_time ({self.end_time}) must exceed spinup_time "

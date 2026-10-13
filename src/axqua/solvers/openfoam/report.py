@@ -31,13 +31,15 @@ log = logging.getLogger("axqua")
 STEADY_WINDOW = 10          # consecutive samples that must hold the tolerance
 
 #: How far the WATER actually entering may fall short of the prescribed discharge
-#: before it is a finding. ``variableHeightFlowRateInletVelocity`` sets the velocity
-#: proportional to alpha, so the MIXTURE flux integrates to the prescription exactly
-#: while the water flux integrates to ``Q * <alpha^2>/<alpha>`` - short by whatever
-#: the interface is smeared by. On munich-vsf that ratio was 0.821, steady from t=10
-#: to t=97: the case believed 0.135 m3/s and delivered 0.111. Nothing in the output
-#: said so, because the balance only ever compared the inflow against the OUTflow,
-#: and both were equally short. 2% is tight on purpose - this is the one number a
+#: before it is a finding. ``variableHeightFlowRateInletVelocity``, which the case
+#: used until October 2026, sets the velocity proportional to alpha, so the MIXTURE
+#: flux integrates to the prescription exactly while the water flux integrates to
+#: ``Q * <alpha^2>/<alpha>`` - short by whatever the interface is smeared by. On
+#: munich-vsf that ratio was 0.821, steady from t=10 to t=97: the case believed
+#: 0.135 m3/s and delivered 0.111. Nothing in the output said so, because the balance
+#: only ever compared the inflow against the OUTflow, and both were equally short.
+#: The inlet prescribes the mass flow now (see :mod:`.fields`) and delivers within
+#: 0.3 %, and the check stays: 2% is tight on purpose - this is the one number a
 #: calibration cannot absorb.
 DELIVERY_TOLERANCE = 0.02   # shortfall of water inflow against the prescription
 
@@ -103,12 +105,12 @@ class DischargeHistory:
             return []
         return [
             f"  ! the inlet DELIVERS ONLY {ratio:.1%} of the prescribed discharge "
-            f"({self.target * ratio:.4f} against {self.target:g} m3/s). The flow-rate "
-            "condition controls the mixture flux, so the water flux falls short by "
-            "<alpha^2>/<alpha> - the smearing of the inlet interface. The balance "
-            "below cannot see this: inflow and outflow are short by the same amount. "
-            "Sharpen the inlet (more layers through the inflow depth) or raise the "
-            "prescription to compensate, and state which in the writeup."]
+            f"({self.target * ratio:.4f} against {self.target:g} m3/s). The inlet "
+            "prescribes the mass that enters, water and air together, so the water "
+            "falls short where little of the inlet patch is wet. The balance below "
+            "cannot see this: inflow and outflow are short by the same amount. Look "
+            "at the water level at the inflow line of the result, and state the "
+            "delivered discharge in the writeup."]
 
     def lines(self) -> list[str]:
         if self.time.size == 0:

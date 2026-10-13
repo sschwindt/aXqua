@@ -357,6 +357,38 @@ def test_control_dict_monitors_water_discharge_not_total_flux():
     assert "maxAlphaCo      0.9;" in text
 
 
+def test_the_air_can_have_a_courant_limit_of_its_own_in_the_production_stage():
+    """maxCo is the limit of every cell, and in a two-phase run the cells that reach it
+    first are air crossing thin layers. With a larger limit for the flow the water
+    surface keeps its own, and the stage that settles it keeps one number for both."""
+    from axqua.solvers.openfoam.dicts import control_dict, stages
+
+    cfg = _Cfg(max_flow_courant=3.0)
+    spinup, run = stages(cfg)
+    text = control_dict(cfg, run, patches=["inlet-1", "outlet-1"])
+    assert "maxCo           3;" in text
+    assert "maxAlphaCo      0.9;" in text
+    text = control_dict(cfg, spinup, patches=["inlet-1", "outlet-1"])
+    assert "maxCo           0.3;" in text
+    assert "maxAlphaCo      0.3;" in text
+    # left out, there is one number for both, as before
+    cfg = _Cfg()
+    text = control_dict(cfg, stages(cfg)[1], patches=["inlet-1", "outlet-1"])
+    assert "maxCo           0.9;" in text
+    # under a rigid lid there is no air whose limit could be raised
+    cfg = _Cfg(mode="rigid-lid", max_flow_courant=3.0)
+    text = control_dict(cfg, stages(cfg)[0], patches=["inlet-1", "outlet-1"])
+    assert "maxCo           0.9;" in text
+
+
+def test_a_flow_courant_limit_below_that_of_the_surface_is_refused():
+    from axqua.config import OpenFoam
+
+    with pytest.raises(ValueError, match="max_flow_courant"):
+        OpenFoam(max_flow_courant=0.5).validate()
+    OpenFoam(max_flow_courant=3.0).validate()
+
+
 def test_stage_activation_swaps_the_system_dicts(tmp_path):
     from axqua.solvers.openfoam.dicts import STAGED_FILES, activate
 
@@ -433,6 +465,171 @@ def test_alpha_is_the_submerged_fraction_of_each_cell():
     m.cell_bounds = ofmesh.OpenFoamMesh.cell_bounds.fget(m)
     alpha = initial_alpha(m)
     np.testing.assert_allclose(alpha, [1.0, 1.0, 0.5, 0.0])
+
+
+def test_a_column_that_is_dry_in_the_2d_result_starts_dry():
+    """The free surface of a dry 2D node is its own bed, and the terrain under the
+    column may lie below it. Without the depth that is water on dry ground: 583 m3 on
+    the Isar example, a sixth of the water of the reach."""
+    from axqua.solvers.openfoam.fields import initial_alpha
+
+    grid = _plan_grid(2, 1)
+    bed = np.zeros(grid.n_vertices)
+    (_, _, _, _, _, z, centres, column, layer) = ofmesh.extrude(grid, bed, bed + 4.0, 4)
+
+    class _M:
+        pass
+
+    m = _M()
+    m.grid, m.z, m.n_cells = grid, z, 8
+    m.cell_column, m.cell_layer = column, layer
+    m.column_wse = np.array([2.5, 2.5])     # the dry node stands 2.5 m above this ground
+    m.column_depth = np.array([2.5, 0.0])
+    m.cell_bounds = ofmesh.OpenFoamMesh.cell_bounds.fget(m)
+    alpha = initial_alpha(m)
+    np.testing.assert_allclose(np.sort(alpha[column == 0]), [0.0, 0.5, 1.0, 1.0])
+    np.testing.assert_allclose(alpha[column == 1], 0.0)
+    # a film thinner than the wet depth is dry here as everywhere else
+    m.column_depth = np.array([2.5, 0.005])
+    assert initial_alpha(m, wet_depth=0.01)[column == 1].max() == 0.0
+    assert initial_alpha(m, wet_depth=0.001)[column == 1].max() == 1.0
+
+
+def test_the_air_on_the_outlet_is_at_rest_like_the_air_under_the_open_top():
+    """prghPressure turns the prescribed p into p_rgh = p + rho g (z - hRef) with the
+    density that is at the face, and totalPressure 0 on the open top says p_rgh = 0 in
+    the air. A profile that is zero above the stage leaves rho_air g (z - hRef)
+    between the two boundaries: 8 kPa at 816 m a.s.l. with hRef at zero, and the air
+    between them moves as fast as the velocity limit lets it."""
+    from axqua.solvers.openfoam.fields import GRAVITY, outlet_pressure
+
+    z = np.linspace(814.0, 817.0, 13)
+    stage, rho_w, rho_a = 815.35, 998.2, 1.0
+    rho = np.where(z <= stage, rho_w, rho_a)
+    for reference in (stage, 0.0, 816.0):
+        p = outlet_pressure(z, stage, water_density=rho_w, air_density=rho_a,
+                            reference=reference)
+        p_rgh = p + rho * GRAVITY * (z - reference)
+        np.testing.assert_allclose(p_rgh[z > stage], 0.0, atol=1e-6)
+        np.testing.assert_allclose(
+            p_rgh[z <= stage], (rho_w - rho_a) * GRAVITY * (stage - reference),
+            rtol=1e-12, atol=1e-6)
+    # counted from the stage, the water below it carries the still-water pressure
+    p = outlet_pressure(z, stage, water_density=rho_w, air_density=rho_a,
+                        reference=stage)
+    np.testing.assert_allclose(p[z <= stage], rho_w * GRAVITY * (stage - z[z <= stage]))
+    # what the profile used to be, zero above the stage, against the open top
+    old = rho_w * GRAVITY * np.maximum(stage - z, 0.0)
+    assert (old + rho * GRAVITY * z)[z > stage].min() > 7900.0
+
+
+def _two_phase_mesh(*, depth=0.5, freeboard=0.5):
+    """A 4 x 2 lattice on a sloping bed with an inlet at x = 0 and an outlet at x = 4."""
+    grid = _plan_grid(4, 2)
+    bed = 100.0 - 0.01 * grid.vert_xy[:, 0]
+    lid = bed + depth + freeboard
+    (points, internal, bed_face, top_face, sides, z, centres, column,
+     layer) = ofmesh.extrude(grid, bed, lid, 4)
+    x = sides["midpoint"][:, 0]
+    inlet, outlet = x < 1e-9, x > 4.0 - 1e-9
+    rest = ~(inlet | outlet)
+    boundary = [("bed", "wall", bed_face[1], bed_face[0])]
+    for name, kind, sel in (("inlet-1", "patch", inlet), ("outlet-1", "patch", outlet),
+                            ("banks", "wall", rest)):
+        boundary.append((name, kind, sides["owner"][sel], sides["quads"][sel]))
+    boundary.append(("atmosphere", "patch", top_face[1], top_face[0]))
+    column_bed = 100.0 - 0.01 * grid.cell_xy[:, 0]
+    return ofmesh.OpenFoamMesh(
+        polymesh=polymesh.assemble(points, internal, boundary, centres), grid=grid,
+        n_layers=4, z=z, bed=bed, lid=lid, cell_centres=centres, cell_column=column,
+        cell_layer=layer, column_bed=column_bed, column_wse=column_bed + depth,
+        column_depth=np.full(grid.n_columns, depth),
+        column_uv=np.zeros((grid.n_columns, 2)),
+        inlet_patches=["inlet-1"], outlet_patches=["outlet-1"])
+
+
+def test_the_two_phase_case_counts_the_elevation_from_the_outlet_stage(tmp_path):
+    """constant/hRef is the lowest outlet stage: p_rgh is then the piezometric head
+    above the tailwater instead of 8 MPa on a mesh in meters above sea level, and the
+    profile the outlet prescribes is p_rgh = 0 in the water and in the air."""
+    from axqua.solvers.openfoam.fields import GRAVITY, write_fields
+
+    m = _two_phase_mesh()
+    stage = 100.42
+    written = write_fields(m, _Cfg(), tmp_path, outflow_stage=stage,
+                           discharges={"inlet-1": 1.0})
+    reference = tmp_path / "constant" / "hRef"
+    assert reference in written
+    text = reference.read_text()
+    assert "uniformDimensionedScalarField" in text
+    assert f"value           {stage:.6f};" in text
+
+    block = (tmp_path / "0" / "p_rgh").read_text()
+    block = block[block.index("outlet-1"):]
+    assert "prghPressure" in block[:120]
+    p = np.array(block[block.index("(") + 1:block.index(")")].split(), dtype=float)
+    z = m.polymesh.face_centres(m.polymesh.patch_face_ids("outlet-1"))[:, 2]
+    assert (z > stage).any() and (z <= stage).any()
+    rho = np.where(z <= stage, 998.2, 1.0)
+    np.testing.assert_allclose(p + rho * GRAVITY * (z - stage), 0.0, atol=0.01)
+    assert p[z > stage].max() < 0.0            # air at rest, not zero
+
+
+def test_the_inlet_prescribes_the_mass_of_the_water(tmp_path):
+    """One velocity for the whole patch, the mass flow over the mass that stands on
+    it, so that the wet part carries the discharge whatever the surface is smeared
+    over. The condition made for a floating level scales the velocity with alpha and
+    lets in Q <alpha^2> / <alpha> of water: 90 % on the Isar example."""
+    from axqua.solvers.openfoam.fields import write_fields
+
+    write_fields(_two_phase_mesh(), _Cfg(), tmp_path, outflow_stage=100.42,
+                 discharges={"inlet-1": 1.6})
+    u = (tmp_path / "0" / "U").read_text()
+    block = u[u.index("inlet-1"):u.index("outlet-1")]
+    assert "type            flowRateInletVelocity;" in block
+    assert f"massFlowRate    constant {1.6 * 998.2:.8g};" in block
+    assert "rho             rho;" in block
+    assert "variableHeightFlowRateInletVelocity" not in u
+    # the level on the patch still floats
+    a = (tmp_path / "0" / "alpha.water").read_text()
+    assert "variableHeightFlowRate" in a[a.index("inlet-1"):a.index("outlet-1")]
+
+
+def test_a_free_outfall_still_gets_a_level_inside_the_reach(tmp_path):
+    """No outlet prescribes a pressure then, so the level only has to be near the
+    water: the lowest point of the lid."""
+    from axqua.solvers.openfoam.fields import write_fields
+
+    m = _two_phase_mesh()
+    write_fields(m, _Cfg(), tmp_path, outflow_stage=None, discharges={"inlet-1": 1.0})
+    text = (tmp_path / "constant" / "hRef").read_text()
+    assert f"value           {float(m.lid.min()):.6f};" in text
+
+
+def test_a_rigid_lid_built_in_the_same_folder_removes_the_level(tmp_path):
+    """The solver reads constant/hRef whenever it is there, and the pressure the rigid
+    lid prescribes at its outlet counts from zero."""
+    from axqua.solvers.openfoam.fields import write_fields, write_reference_level
+
+    assert write_reference_level(tmp_path, 815.3).is_file()
+
+    class _M:
+        rigid_lid = True
+        n_cells = 4
+        top_patch = "lid"
+        inlet_patches = ["inlet-1"]
+        outlet_patches = ["outlet-1"]
+        cell_centres = np.zeros((4, 3))
+        cell_column = np.zeros(4, dtype=int)
+        column_uv = np.zeros((1, 2))
+        bed_ks = None
+
+        class grid:
+            cell_xy = np.zeros((1, 2))
+
+    write_fields(_M(), _Cfg(mode="rigid-lid"), tmp_path, outflow_stage=0.715,
+                 discharges={"inlet-1": 0.135})
+    assert not (tmp_path / "constant" / "hRef").exists()
 
 
 # --------------------------------------------------------------------------- #
