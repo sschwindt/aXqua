@@ -39,7 +39,9 @@ def read_raw(path: str | Path) -> dict[str, Any]:
         return {}
     if not isinstance(data, dict):
         raise ValueError("the file does not contain the blocks of a case")
-    return data
+    from axqua.core import schema
+
+    return schema.restore_words(data)   # `off` as the choice it names, not as "no"
 
 
 def check_case(path: str | Path) -> list[Finding]:

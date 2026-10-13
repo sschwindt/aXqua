@@ -118,6 +118,32 @@ LEGACY_KEYS: dict[str, str] = {
 }
 
 
+# Settings that are a choice among words of which one is `off`. YAML does not take an
+# unquoted `off` for a word: it reads "no". Written the natural way, `pick_up: off` was
+# refused with "got False", and a form showed the choice as False.
+OFF_IS_A_WORD: dict[str, tuple[str, ...]] = {
+    "fine_sediment": ("pick_up",),
+    "gain_lose": ("mode", "water_table"),
+    "percolation": ("mode", "water_table"),      # the older name of gain_lose
+}
+
+
+def restore_words(raw: dict) -> dict:
+    """Put the word ``off`` back where YAML read it as a boolean, in place.
+
+    Applied wherever a case file is parsed, so that the loader, the check and an
+    editor of the case see the same value.
+    """
+    for block, names in OFF_IS_A_WORD.items():
+        section = raw.get(block)
+        if not isinstance(section, dict):
+            continue
+        for name in names:
+            if section.get(name) is False:
+                section[name] = "off"
+    return raw
+
+
 def classify_setting(key: str) -> Layer:
     """Which layer a dotted config key belongs to.
 

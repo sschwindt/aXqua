@@ -2247,6 +2247,8 @@ def load_config(path: str | os.PathLike) -> Config:
     cfg_dir = path.parent
     with open(path) as fh:
         raw = yaml.safe_load(fh) or {}
+    if isinstance(raw, dict):
+        schema.restore_words(raw)       # an unquoted `off` is a choice, not a "no"
 
     # deprecated keys, renamed in place and reported once (axqua.core.schema)
     schema.warn_legacy(schema.apply_legacy(raw), path.name)
@@ -2451,9 +2453,6 @@ def _load_fine_sediment(raw: Any) -> FineSediment:
         per_line = {str(name): value for name, value in per_line.items()}
     if per_line is not None:
         data["inflow_concentration"] = per_line
-    if data.get("pick_up") is False:
-        # YAML reads the unquoted word `off` as "no". It is the name of a choice here.
-        data["pick_up"] = "off"
     return FineSediment(**data)
 
 

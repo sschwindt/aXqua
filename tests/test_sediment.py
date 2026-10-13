@@ -187,12 +187,31 @@ def test_the_word_off_is_a_choice_and_not_a_no(tmp_path):
     cfg = load_config(path)
     assert cfg.fine_sediment.pick_up == "off"
     cfg.fine_sediment.validate()
+    # the editor of the case reads the file itself, and showed the choice as "False"
+    from axqua.core.casecheck import read_raw
+
+    assert read_raw(path)["fine_sediment"]["pick_up"] == "off"
     # `on` is no choice, and is named as it was understood
     path.write_text(path.read_text(encoding="utf-8").replace("pick_up: off",
                                                              "pick_up: on"),
                     encoding="utf-8")
     with pytest.raises(ValueError, match="'suspended', 'bedload' or 'off'"):
         load_config(path).fine_sediment.validate()
+
+
+def test_the_other_choices_called_off_are_read_the_same_way(tmp_path):
+    """The exchange with a porous body has two of them. ``mode: off`` used to load as
+    False there, which is neither of its three modes."""
+    path = tmp_path / "exchange.axq-case"
+    path.write_text("project: {name: exchange, crs_epsg: 25832}\n"
+                    "geodata: {dem_initial: dem.tif, boundary: outline.gpkg}\n"
+                    "gain_lose:\n  mode: off\n  water_table: off\n", encoding="utf-8")
+    cfg = load_config(path)
+    assert cfg.gain_lose.mode == "off" and cfg.gain_lose.water_table == "off"
+    # a setting that IS a yes or no keeps its meaning
+    path.write_text(path.read_text(encoding="utf-8") + "  enabled: off\n",
+                    encoding="utf-8")
+    assert load_config(path).gain_lose.enabled is False
 
 
 def test_a_block_that_is_switched_off_is_not_checked():
