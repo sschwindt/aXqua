@@ -21,6 +21,7 @@ class Step:
     title: str
     needs: str = ""            # the capability that has to be asked for by the case
     default: bool = False      # ticked when the list is first shown
+    solver: str = ""           # where the capability is that of one solver only
 
 
 #: The steps a case can be taken through, in the order they depend on each other.
@@ -30,6 +31,10 @@ STEPS: tuple[Step, ...] = (
     Step("mesh-convergence", "Mesh convergence study", "mesh_convergence"),
     Step("build-3d", "Build the 3D model", "steady3d"),
     Step("steady-3d", "Steady 3D simulation (hydrostatic)", "steady3d"),
+    Step("openfoam-sediment-build", "Build the fine sediment model", "morphodynamics",
+         solver="openfoam"),
+    Step("openfoam-sediment", "Fine sediment simulation", "morphodynamics",
+         solver="openfoam"),
     Step("calibration", "Bayesian calibration", "calibration"),
     Step("validation", "Validation with data of another flow situation", "calibration"),
 )

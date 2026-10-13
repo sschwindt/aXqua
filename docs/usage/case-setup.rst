@@ -93,6 +93,7 @@ A case folder has two parts with different roles. The folder ``user-sources/`` c
        preprocessing/             clipped terrain models, compiled measurements
        simulation/                the TELEMAC model and its results
        openfoam/                  the OpenFOAM model and its results
+       openfoam-sediment/         the fine sediment simulation and its results
        postprocessing/            mesh convergence studies, figures
        calibration-validation/    input and output of the calibration
 
@@ -341,3 +342,15 @@ The measured riverbed change serves as the reference for the calibration of a mo
      confidence_level: 0.95
 
 Elevation changes that are smaller than the combined uncertainty of the two surveys cannot be distinguished from measurement error. aXqua removes them from the DoD. The limit is called the level of detection and results from the two accuracy values and the confidence level. Alternatively, ``min_lod`` sets the limit directly.
+
+Where the riverbed stays in place and only its content of fine sediment changes, the simulation is defined in the ``fine_sediment`` block instead. It names the grain size of the fine sediment and its concentration in the water that enters the model:
+
+.. code-block:: yaml
+
+   fine_sediment:
+     enabled: true
+     grain_size: 0.00003          # [m]
+     inflow_concentration: 0.02   # [kg/m3]
+     pick_up: off
+
+This simulation is computed with OpenFOAM. All entries of the block are explained in :ref:`help-morphodynamics-openfoam`.

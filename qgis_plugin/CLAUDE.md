@@ -191,6 +191,23 @@ was in the table and nowhere on the screen. `OPTION_FIELDS` has a
 is not sent. Loading a 3D job: the depth-averaged companion is the layer, styled by the
 vector group `VELOCITY` because it has no `SCALAR VELOCITY`; the volume file is not offered.
 
+**One name, two things: `BY_SOLVER`** (same file). Morphodynamics is the coupling with GAIA
+for TELEMAC, which `PART_OF` explains as part of the hydraulic runs, and a simulation of its
+own for OpenFOAM, fine sediment over a bed that stays in place, with the kinds
+`openfoam-sediment-build` and `openfoam-sediment`. The tables above are keyed by the
+capability alone, so the entry for (solver, capability) is looked up first: title, build
+kind and run kind, and `PART_OF` does not apply where there is one. The batch has the same
+trap: a `Step` names its `solver` where the capability it needs exists for two, or a case
+that couples GAIA would be offered the fine sediment steps. Two things the new box needed:
+a number type `count` in `OPTION_FIELDS` (the spin box of `int` ends at 4096, which is
+processor cores and not iterations), and **a style for a polygon result**
+(`result_loader.color_by_attribute`, the manifest entry's `style: graduated` with its
+`variable`): the bed is a GeoPackage of one polygon per column, and loaded without a style
+it showed the outline of the model in one color. Seven classes of equal count and no
+outlines, because rates of deposition span orders of magnitude and outlines at the scale
+of a reach cover the fills. Its test counts the colors that cover more than 2 % of a
+rendered picture.
+
 The plugin folder and the library are both called `axqua`, which is right in both
 places but means they cannot share a pytest process - `qgis_plugin/tests/conftest.py` loads
 the plugin under the alias `axqua_plugin` so one `pytest` at the repo root runs both

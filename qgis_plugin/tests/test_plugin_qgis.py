@@ -568,6 +568,84 @@ def test_the_openfoam_box_has_the_warm_up_check_box_and_sends_it_with_the_build(
     tab.deleteLater()
 
 
+def test_the_fine_sediment_box_takes_more_iterations_than_a_computer_has_cores(
+        qgis_app):
+    """The number box of the options was made for processor cores and ends at 4096. A
+    steady simulation of a fine mesh needs more iterations than that."""
+    from axqua_plugin.gui.capability_tab_widget import CapabilityTab
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    view = CapabilityView(name="morphodynamics", solver="openfoam", implemented="yes",
+                          configured=True, built=True, run=False)
+    tab = CapabilityTab(view, _Context())
+    assert list(tab._build_fields) == ["pre_run"] and list(tab._fields) == ["iterations"]
+    box = tab._fields["iterations"]
+    assert tab.options() == {}                             # untouched: the case decides
+    assert box.specialValueText() == "as set for the case"
+    box.setValue(20000)
+    assert box.value() == 20000 and tab.options() == {"iterations": 20000}
+    assert tab.options(build=True) == {}
+    tab.deleteLater()
+
+
+def test_a_polygon_result_is_colored_by_its_attribute(project, tmp_path, qgis_app):
+    """The bed of the fine sediment simulation is a polygon layer whose result is an
+    attribute. Loaded without a style, every polygon has the same color and the layer
+    shows the outline of the model and nothing of the result."""
+    from qgis.core import (QgsFeature, QgsField, QgsGeometry, QgsGraduatedSymbolRenderer,
+                           QgsRectangle, QgsVectorFileWriter, QgsVectorLayer)
+    from qgis.PyQt.QtCore import QVariant
+
+    from axqua_plugin.core.result_loader import (JobResults, ResultItem, ResultLoader,
+                                                 color_by_attribute)
+
+    memory = QgsVectorLayer("Polygon?crs=EPSG:25832", "bed", "memory")
+    memory.dataProvider().addAttributes([QgsField("net", QVariant.Double)])
+    memory.updateFields()
+    features = []
+    for i in range(40):
+        feature = QgsFeature(memory.fields())
+        feature.setGeometry(QgsGeometry.fromRect(QgsRectangle(i, 0, i + 1, 10)))
+        feature.setAttribute("net", 10.0 ** (i / 8.0 - 3.0))   # five orders of magnitude
+        features.append(feature)
+    memory.dataProvider().addFeatures(features)
+    path = tmp_path / "fine-sediment-bed.gpkg"
+    options = QgsVectorFileWriter.SaveVectorOptions()
+    options.driverName = "GPKG"
+    QgsVectorFileWriter.writeAsVectorFormatV3(memory, str(path),
+                                              project.transformContext(), options)
+
+    plain = QgsVectorLayer(str(path), "plain", "ogr")
+    loader = ResultLoader(project)
+    item = ResultItem(name="Fine sediment at the bed", path=path, kind="vector",
+                      style="graduated", variable="net")
+    layer = loader.load(JobResults(job_id="job", root=tmp_path, items=[item]))[0]
+    renderer = layer.renderer()
+    assert isinstance(renderer, QgsGraduatedSymbolRenderer)
+    assert renderer.classAttribute() == "net" and len(renderer.ranges()) >= 5
+    assert loader.warnings == []
+
+    def colors(of) -> int:
+        """Colors that cover more than 2 % of the picture each."""
+        from collections import Counter
+
+        picture = _picture(of)
+        pixels = Counter(picture[i:i + 4] for i in range(0, len(picture), 4))
+        return sum(1 for n in pixels.values() if n > 0.02 * len(picture) / 4)
+
+    # without a style: the background, one fill, and the outlines with their shade
+    assert colors(plain) <= 4
+    # with it: the background and one fill per class, and no outlines
+    assert colors(layer) == 1 + len(renderer.ranges()) > colors(plain)
+
+    missing = ResultItem(name="bed", path=path, kind="vector", style="graduated",
+                         variable="no_such_attribute")
+    assert color_by_attribute(plain, "no_such_attribute") is False
+    other = ResultLoader(project)
+    other._style(plain, missing)
+    assert "no attribute 'no_such_attribute'" in other.warnings[0]
+
+
 def test_the_3d_variant_is_a_choice_and_the_default_is_not_sent(qgis_app):
     """The non-hydrostatic run could only be started in a terminal: the option table
     knew numbers and check boxes, and the variant is neither."""
@@ -889,6 +967,49 @@ def test_the_preprocessing_tab_builds_and_shows_what_is_built(dock):
     assert sent == [["preprocessing"]]
 
 
+def _step(page, kind):
+    """The entry of a job kind in the list of the batch page."""
+    from axqua_plugin.compat import enum_value
+    from qgis.PyQt.QtCore import Qt
+
+    role = enum_value(Qt, "ItemDataRole.UserRole", "UserRole")
+    return next(page.steps.item(i) for i in range(page.steps.count())
+                if page.steps.item(i).data(role) == kind)
+
+
+def test_the_fine_sediment_steps_of_a_batch_need_openfoam_to_be_asked(dock):
+    """TELEMAC has a capability called morphodynamics too. A case that couples GAIA
+    asks for that one, and its batch must not offer the fine sediment simulation."""
+    import copy
+
+    from axqua_plugin.compat import enum_value
+    from axqua_plugin.gui.capability_tabs import CaseView
+    from qgis.PyQt.QtCore import Qt
+
+    enabled = enum_value(Qt, "ItemFlag.ItemIsEnabled", "ItemIsEnabled")
+    page = dock.page("batch")
+
+    def offered(payload):
+        dock._apply_case_view(CaseView.from_payload(payload))
+        return bool(_step(page, "openfoam-sediment").flags() & enabled)
+
+    gaia = copy.deepcopy(EXAMPLE)
+    for capability in gaia["solvers"][0]["capabilities"]:
+        if capability["capability"] == "morphodynamics":
+            capability["configured"] = True
+    assert offered(EXAMPLE) is False and offered(gaia) is False
+
+    fine = copy.deepcopy(EXAMPLE)
+    fine["solvers"][1] = {"solver": "openfoam", "enabled": True, "env_ok": True,
+                          "capabilities": [{"capability": "morphodynamics",
+                                            "implemented": "yes", "configured": True,
+                                            "built": False, "run": False}]}
+    assert offered(fine) is True
+    box = dock.page("morphodynamics", "openfoam").tab("openfoam", "morphodynamics")
+    assert box.build_button.isEnabled() and box.submit_button.isEnabled()
+    assert not box.results_button.isEnabled()              # nothing has run yet
+
+
 def test_a_batch_is_submitted_in_the_order_of_the_workflow(dock):
     from axqua_plugin.compat import CHECKED
     from axqua_plugin.gui.capability_tabs import CaseView
@@ -896,7 +1017,7 @@ def test_a_batch_is_submitted_in_the_order_of_the_workflow(dock):
     dock._apply_case_view(CaseView.from_payload(EXAMPLE))
     page = dock.page("batch")
     assert page.ticked() == ["preprocessing", "steady"]      # what is ticked at first
-    page.steps.item(5).setCheckState(CHECKED)                # calibration, the last
+    _step(page, "calibration").setCheckState(CHECKED)
     sent = []
     dock.submit = lambda kinds, options=None: sent.append(list(kinds))
     page.submit_button.click()

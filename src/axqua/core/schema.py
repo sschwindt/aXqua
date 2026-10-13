@@ -65,6 +65,7 @@ BLOCK_LAYER: dict[str, Layer] = {
     "calibration": Layer.SHARED,
     "morphodynamics": Layer.SHARED,
     "dem_of_difference": Layer.SHARED,
+    "fine_sediment": Layer.SHARED,  # the sediment and the goal; OpenFOAM-only *today*
     "gain_lose": Layer.SHARED,      # a property of the reach; TELEMAC-only *today*
     "structures": Layer.SHARED,     # dams and walls are terrain, and both codes mesh them
     "drying": Layer.TELEMAC,

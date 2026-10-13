@@ -65,6 +65,18 @@ BUILD_KIND = {
     "free_surface_3d": "openfoam-build",
 }
 
+#: Where one solver does something else under the name of a capability than the others.
+#: Morphodynamics is the coupled simulation with GAIA for TELEMAC, which is part of the
+#: hydraulic runs, and a simulation of its own for OpenFOAM: fine sediment over a bed
+#: that stays in place. Looked up before the tables above, by (solver, capability).
+BY_SOLVER = {
+    ("openfoam", "morphodynamics"): {
+        "title": "Fine sediment over a fixed bed",
+        "kind": "openfoam-sediment",
+        "build": "openfoam-sediment-build",
+    },
+}
+
 #: Options a tab always sends with its run, because they are what makes the kind run
 #: this capability and not its sibling. The unsteady kind runs in 2D unless told
 #: otherwise, so the Unsteady 3D tab is that kind with the switch set. It used to be a
@@ -118,8 +130,19 @@ class CapabilityView:
     run: bool | None = None
 
     @property
+    def own(self) -> dict:
+        """What this solver does differently under the name of the capability."""
+        return BY_SOLVER.get((self.solver, self.name), {})
+
+    @property
+    def part_of(self) -> str:
+        """The explanation of a capability that is run with another one's jobs."""
+        return "" if self.own else PART_OF.get(self.name, "")
+
+    @property
     def title(self) -> str:
-        return TITLES.get(self.name, self.name.replace("_", " ").capitalize())
+        return self.own.get("title") or TITLES.get(
+            self.name, self.name.replace("_", " ").capitalize())
 
     @property
     def visible(self) -> bool:
@@ -158,8 +181,8 @@ class CapabilityView:
         """Why an action is unavailable - shown, never left to be guessed."""
         if self.implemented == "no":
             return NOT_IMPLEMENTED_REASON.format(solver=self.solver)
-        if self.name in PART_OF:
-            return PART_OF[self.name]
+        if self.part_of:
+            return self.part_of
         if not self.submittable:
             # Before "not configured": configuring it would not help.
             return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
@@ -171,7 +194,7 @@ class CapabilityView:
     def state_text(self) -> str:
         if self.implemented != "yes":
             return "not available"
-        if not self.submittable and self.name not in PART_OF:
+        if not self.submittable and not self.part_of:
             return "no job kind"
         marks = [name for name, flag in (("configured", self.configured),
                                          ("built", self.built), ("run", self.run))
@@ -180,11 +203,11 @@ class CapabilityView:
 
     @property
     def submit_kind(self) -> str | None:
-        return PRIMARY_KIND.get(self.name)
+        return self.own.get("kind") or PRIMARY_KIND.get(self.name)
 
     @property
     def build_kind(self) -> str | None:
-        return BUILD_KIND.get(self.name)
+        return self.own.get("build") or BUILD_KIND.get(self.name)
 
     @property
     def fixed_options(self) -> dict:

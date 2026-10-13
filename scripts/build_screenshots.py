@@ -11,8 +11,9 @@ command when the plugin changes::
 
 The case has to be built and to have a completed steady job, so that the tabs show
 what a user sees while working: the job list with its jobs, the checkup table, the
-results. A case with the blocks ``calibration`` and ``openfoam`` shows those boxes
-filled. The script fails, and says which figure, when a widget that a caption explains
+results. A case with the blocks ``calibration``, ``openfoam`` and ``fine_sediment``
+shows those boxes filled, and the figure of the fine sediment simulation needs that
+block. The script fails, and says which figure, when a widget that a caption explains
 is not on the screen: a figure whose numbers no longer match its caption is worse than
 none. How many marks each figure has is recorded in ``gui-screenshots.json`` beside
 the figures, which a test compares with the captions.
@@ -276,11 +277,14 @@ def take_screenshots() -> None:
             adder,
             [editor.save_button, editor.cancel_button, editor.exit_button]])
         try:
-            select("morphodynamic")
-            shot(editor, "gui-case-editor-morphodynamics", [
-                editor.section_list.visualItemRect(editor.section_list.currentItem())
-                .translated(editor.section_list.viewport().mapTo(editor, QPoint(0, 0))),
-                editor.pages.currentWidget()])
+            for block, name in (("morphodynamic", "gui-case-editor-morphodynamics"),
+                                ("fine sediment", "gui-case-editor-fine-sediment")):
+                select(block)
+                shot(editor, name, [
+                    editor.section_list.visualItemRect(editor.section_list.currentItem())
+                    .translated(editor.section_list.viewport().mapTo(editor,
+                                                                    QPoint(0, 0))),
+                    editor.pages.currentWidget()])
         finally:
             editor.reject()
 
@@ -313,6 +317,14 @@ def take_screenshots() -> None:
         shot(dock, "gui-hydraulics-openfoam", [
             [inner.options_form.labelForField(warm_up), warm_up],
             inner.build_button, inner.submit_button])
+
+    def fine_sediment() -> None:
+        dock.show_section("morphodynamics", "openfoam")
+        page = dock.page("morphodynamics", "openfoam")
+        inner, box = capability_box(page, "openfoam", "morphodynamics")
+        shot(dock, "gui-morphodynamics-openfoam", [
+            sub_tab_bar("morphodynamics"), inner.options_box, inner.build_button,
+            inner.submit_button, inner.results_button])
 
     def mesh_convergence() -> None:
         dock.show_section("mesh")
@@ -402,6 +414,7 @@ def take_screenshots() -> None:
                          ("case setup", case_setup), ("case editor", case_editor),
                          ("preprocessing", preprocessing), ("hydraulics", hydraulics),
                          ("mesh convergence", mesh_convergence),
+                         ("fine sediment", fine_sediment),
                          ("calibration", calibration), ("postprocessing", postprocessing),
                          ("batch", batch), ("window", window)):
         attempt(name, action)

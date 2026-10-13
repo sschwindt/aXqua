@@ -39,6 +39,9 @@ OPTION_FIELDS = {
                      ("to_vtk", "Convert to VTK for QGIS", "bool", False)],
     # The name the documentation prescribes for it; the setting is openfoam.pre_run.
     "openfoam-build": [("pre_run", "Use TELEMAC warm-up", "bool", True)],
+    "openfoam-sediment-build": [("pre_run", "Use TELEMAC warm-up", "bool", True)],
+    # "count" is a whole number without the limit of the processor cores
+    "openfoam-sediment": [("iterations", "Iterations at most", "count", 0)],
 }
 
 
@@ -130,9 +133,11 @@ class CapabilityTab(QWidget):
 
     def _add_options(self, kind: str | None, fields: dict) -> None:
         for key, label, dtype, default in OPTION_FIELDS.get(kind or "", []):
-            if dtype == "int":
+            if dtype in ("int", "count"):
                 widget = QSpinBox()
-                widget.setRange(0, 4096)
+                widget.setRange(0, 4096 if dtype == "int" else 10_000_000)
+                if dtype == "count":
+                    widget.setSingleStep(500)
                 widget.setSpecialValueText("as set for the case")
                 widget.setValue(int(default))
             elif dtype == "choice":

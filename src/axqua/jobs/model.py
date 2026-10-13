@@ -147,6 +147,8 @@ class JobKind(str, Enum):
     UNSTEADY_RUN = "unsteady"
     OPENFOAM_BUILD = "openfoam-build"
     OPENFOAM_RUN = "openfoam-run"
+    OPENFOAM_SEDIMENT_BUILD = "openfoam-sediment-build"
+    OPENFOAM_SEDIMENT_RUN = "openfoam-sediment"
     CALIBRATION = "calibration"
     CALIBRATION_MULTIFLOW = "calibration-multiflow"
     VALIDATION = "validation"
@@ -167,7 +169,9 @@ def parse_kind(value: str) -> JobKind:
                "steady3d": JobKind.STEADY_RUN_3D, "vertconv": JobKind.VERTICAL_CONVERGENCE,
                "bal": JobKind.CALIBRATION, "balmf": JobKind.CALIBRATION_MULTIFLOW,
                "val": JobKind.VALIDATION,
-               "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN}
+               "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN,
+               "fine-sediment-build": JobKind.OPENFOAM_SEDIMENT_BUILD,
+               "fine-sediment": JobKind.OPENFOAM_SEDIMENT_RUN}
     if text in aliases:
         return aliases[text]
     raise ConfigError(
@@ -315,6 +319,27 @@ class OpenFoamRunOptions(Options):
     n_processors: int | None = None
     reconstruct: bool = True
     to_vtk: bool | None = None
+    check_mesh: bool = True
+
+
+@dataclass
+class OpenFoamSedimentBuildOptions(Options):
+    """The case of the fine sediment simulation.
+
+    *pre_run* and *hotstart* say where the water surface comes from, as for the build
+    of the free-surface case. The cell size is that of the block ``openfoam``.
+    """
+
+    pre_run: bool | None = None
+    hotstart: str | None = None
+
+
+@dataclass
+class OpenFoamSedimentRunOptions(Options):
+    """The fine sediment simulation. *iterations* replaces ``fine_sediment.iterations``
+    for this run."""
+
+    iterations: int | None = None
     check_mesh: bool = True
 
 
@@ -535,6 +560,14 @@ KIND_META: dict[JobKind, KindMeta] = {
         JobKind.OPENFOAM_RUN, "ofrun", "openfoam", "OpenFOAM interFoam run",
         Capability.FREE_SURFACE_3D, "run", OpenFoamRunOptions, SolverRunProgress,
         "case", True),
+    JobKind.OPENFOAM_SEDIMENT_BUILD: KindMeta(
+        JobKind.OPENFOAM_SEDIMENT_BUILD, "ofsedbuild", "openfoam",
+        "Build the fine sediment case", Capability.MORPHODYNAMICS, "build",
+        OpenFoamSedimentBuildOptions, OpenFoamBuildProgress, "case", False),
+    JobKind.OPENFOAM_SEDIMENT_RUN: KindMeta(
+        JobKind.OPENFOAM_SEDIMENT_RUN, "ofsed", "openfoam",
+        "Fine sediment simulation (sediDriftFoam2)", Capability.MORPHODYNAMICS, "run",
+        OpenFoamSedimentRunOptions, SolverRunProgress, "case", True),
     JobKind.CALIBRATION: KindMeta(
         JobKind.CALIBRATION, "bal", "telemac", "HydroBayesCal calibration",
         Capability.CALIBRATION, "study", CalibrationOptions, CalibrationProgress,

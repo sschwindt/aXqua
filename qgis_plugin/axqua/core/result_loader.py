@@ -339,11 +339,17 @@ class ResultLoader:
         return None
 
     def _style(self, layer, item: ResultItem) -> None:
-        from qgis.core import QgsMeshLayer
-        if not isinstance(layer, QgsMeshLayer) or not item.style:
+        from qgis.core import QgsMeshLayer, QgsVectorLayer
+        if not item.style:
             return
         try:
-            self._style_mesh(layer, item)
+            if isinstance(layer, QgsMeshLayer):
+                self._style_mesh(layer, item)
+            elif isinstance(layer, QgsVectorLayer) and item.style == STYLE_GRADUATED:
+                if not color_by_attribute(layer, item.variable):
+                    self.warnings.append(
+                        f"{item.name}: the layer has no attribute '{item.variable}' "
+                        "to color it by")
         except Exception as exc:  # noqa: BLE001
             # Styling is a nicety; an unstyled layer the user can restyle beats no layer.
             self.warnings.append(f"{item.name}: default styling failed ({exc})")
@@ -400,6 +406,33 @@ class ResultLoader:
 DEPTH_NAMES = ("WATER DEPTH",)
 VELOCITY_SCALARS = ("SCALAR VELOCITY",)
 VELOCITY_VECTORS = ("VELOCITY",)
+
+
+#: The style of a polygon layer whose result is one of its attributes.
+STYLE_GRADUATED = "graduated"
+
+#: Classes of that style. Each holds the same number of polygons, so that a result
+#: whose values span several orders of magnitude, as rates of deposition do, still
+#: shows a pattern and not one color with a few outliers.
+GRADUATED_CLASSES = 7
+
+
+def color_by_attribute(layer, attribute: str, *, classes: int = GRADUATED_CLASSES) -> bool:
+    """Color the polygons of *layer* by a numeric attribute. False without it."""
+    from qgis.core import (QgsClassificationQuantile, QgsFillSymbol,
+                           QgsGraduatedSymbolRenderer, QgsStyle)
+    if not attribute or layer.fields().indexOf(attribute) < 0:
+        return False
+    renderer = QgsGraduatedSymbolRenderer(attribute)
+    # no outlines: at the scale of a reach they would cover the colors of the cells
+    renderer.setSourceSymbol(QgsFillSymbol.createSimple({"outline_style": "no"}))
+    renderer.setClassificationMethod(QgsClassificationQuantile())
+    renderer.updateClasses(layer, classes)
+    ramp = QgsStyle.defaultStyle().colorRamp("Viridis")
+    if ramp is not None:
+        renderer.updateColorRamp(ramp)
+    layer.setRenderer(renderer)
+    return True
 
 
 def apply_map_style(layer, key: str, *, min_depth: float | None = None,

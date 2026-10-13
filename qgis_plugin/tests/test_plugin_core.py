@@ -498,6 +498,30 @@ def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
     assert "Python driver" not in capability.reason
 
 
+def test_morphodynamics_of_openfoam_is_a_simulation_of_its_own():
+    """Under the same name TELEMAC couples GAIA to its hydraulic runs, and OpenFOAM
+    computes fine sediment over a bed that stays in place, with a build and a run. The
+    explanation of the first must not stand on the tab of the second."""
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    fine = CapabilityView(name="morphodynamics", solver="openfoam", implemented="yes",
+                          configured=True, built=False, run=False)
+    assert fine.title == "Fine sediment over a fixed bed"
+    assert (fine.build_kind, fine.submit_kind) == (
+        "openfoam-sediment-build", "openfoam-sediment")
+    assert fine.enabled and fine.can_submit and fine.needs_build
+    assert fine.reason == "" and fine.state_text == "configured"
+
+    asked_for_nothing = CapabilityView(name="morphodynamics", solver="openfoam",
+                                       implemented="yes", configured=False)
+    assert "does not ask for Fine sediment over a fixed bed" in asked_for_nothing.reason
+
+    gaia = CapabilityView(name="morphodynamics", solver="telemac", implemented="yes",
+                          configured=True)
+    assert gaia.title == "Morphodynamics" and gaia.submit_kind is None
+    assert "coupled with GAIA" in gaia.reason
+
+
 def test_the_unsteady_3d_tab_is_the_unsteady_job_with_the_3d_switch_set():
     """It said "no job kind" while a check box on the Unsteady 2D tab did its job."""
     from axqua_plugin.gui.capability_tabs import CapabilityView
@@ -942,6 +966,21 @@ def test_the_steps_of_a_batch_keep_the_order_of_the_workflow():
     assert batch.ordered(["calibration", "steady", "nonsense", "preprocessing",
                           "steady"]) == ["preprocessing", "steady", "calibration"]
     assert [s.kind for s in batch.STEPS if s.default] == ["preprocessing", "steady"]
+
+
+def test_the_fine_sediment_steps_follow_the_hydraulic_ones_in_a_batch():
+    """In the order of the tabs: behind the hydraulic simulations, before the
+    calibration. They belong to OpenFOAM, which the step says, because TELEMAC has a
+    capability of the same name."""
+    from axqua_plugin.core import batch
+
+    kinds = [s.kind for s in batch.STEPS]
+    build, run = kinds.index("openfoam-sediment-build"), kinds.index("openfoam-sediment")
+    assert kinds.index("steady-3d") < build < run < kinds.index("calibration")
+    assert batch.step("openfoam-sediment").solver == "openfoam"
+    assert batch.step("openfoam-sediment").needs == "morphodynamics"
+    assert batch.ordered(["openfoam-sediment", "steady", "openfoam-sediment-build"]) == [
+        "steady", "openfoam-sediment-build", "openfoam-sediment"]
 
 
 def test_the_batch_script_waits_for_each_job_and_stops_at_a_failed_one(tmp_path):

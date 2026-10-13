@@ -582,6 +582,37 @@ dem_of_difference:
 #   max_courant: 0.9
 #   write_interval: 10.0
 
+# fine_sediment:               # optional: fine sediment over a bed that stays in place
+#   # The transport of ONE grain size in suspension, its settling onto the bed and its
+#   # pick-up from the bed, in three dimensions with OpenFOAM (Olsen's sediDriftFoam2,
+#   # which the OpenFOAM installation of aXqua builds). The bed elevation does not
+#   # change: the result is how much fine sediment the bed takes up or gives off. For a
+#   # bed that moves, use `morphodynamics` above.
+#   # Needs the steady 2D result of the case; the mesh is that of `openfoam` under a
+#   # rigid lid, with its cell size. Build and run:
+#   #   axqua submit <case> --kind openfoam-sediment-build
+#   #   axqua submit <case> --kind openfoam-sediment
+#   enabled: true
+#   grain_size: 0.00003        # [m] diameter of the grains (here coarse silt)
+#   # fall_velocity: 0.0008    # [m/s] else computed from the grain size
+#   # [kg/m3] in the water that enters the reach (20 mg/l = 0.02). One number for all
+#   # inflow lines, or one per line: {inlet-1: 0.02, inlet-2: 0}
+#   inflow_concentration: 0.02
+#   # What the bed gives back to the flow. suspended | bedload: van Rijn's formulas,
+#   # which assume a bed that CONSISTS of the fine sediment (a sand bed). off: the bed
+#   # only takes sediment up - the choice for fines over a gravel bed.
+#   pick_up: off
+#   # roughness: 0.05          # [m] for the bed shear stress; else the median of the bed
+#   # bottom_layer: 0.05       # [m] cells at the bed; else smallest depth / layers
+#   iterations: 2000           # at most; the run ends earlier when it has converged
+#   # ---- what the rates are booked into (optional) ----------------------------
+#   # With a period, the result also gives the mass the bed takes up in that time and
+#   # the share of fines of a bed layer at its end.
+#   # period: 2592000          # [s] here 30 days
+#   # layer_thickness: 0.1     # [m] the bed layer the share of fines refers to
+#   # porosity: 0.3            # [-] pores between its coarse grains
+#   # initial_fraction: 0.15   # [-] share of fines in its dry mass at the start
+
 ground_truth:
   # How well the survey's HORIZONTAL coordinates are known. A calibration reads the
   # model AT the measurement's coordinates, so a position error is charged to the

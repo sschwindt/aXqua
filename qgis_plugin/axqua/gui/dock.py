@@ -52,8 +52,10 @@ EMPTY = {
                                 "in three dimensions.",
     ("mesh", ""): "This case has no simulation for which a mesh study can be run.",
     ("morphodynamics", "telemac"): "This case does not use TELEMAC.",
-    ("morphodynamics", "openfoam"): "Morphodynamic simulations with OpenFOAM are not "
-                                    "yet available in this version.",
+    ("morphodynamics", "openfoam"): "This case does not use OpenFOAM. Add a "
+                                    "fine_sediment: block to its case file to "
+                                    "simulate fine sediment over a bed that stays in "
+                                    "place.",
     ("calibration", ""): "This case has no simulation that can be calibrated.",
 }
 

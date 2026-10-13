@@ -32,6 +32,8 @@ The command creates a job, starts it in the background, prints the job ID and re
      - Run the study of the number of vertical layers.
    * - ``openfoam-build``, ``openfoam-run``
      - Build and run the OpenFOAM model.
+   * - ``openfoam-sediment-build``, ``openfoam-sediment``
+     - Build and run the simulation of fine sediment over a fixed bed (:ref:`help-morphodynamics-openfoam`).
    * - ``calibration``, ``calibration-multiflow``
      - Run the Bayesian calibration.
 
@@ -75,7 +77,7 @@ To examine a failed job, read ``runner.log`` first. It contains the error with a
 Sequences of jobs
 -----------------
 
-TELEMAC jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits until that job has ended, so that the steps of a sequence can be submitted in direct succession. A waiting job does not check whether the previous job succeeded. The following script for Linux therefore runs the preprocessing, the dry run and the mesh convergence study of a case in sequence and stops when a step fails:
+TELEMAC jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits until that job has ended, so that the steps of a sequence can be submitted in direct succession. The builds of the OpenFOAM models and the fine sediment simulation wait in the same sequence, because they start from the steady 2D result. A run of the OpenFOAM model (``openfoam-run``) does not wait: submit it when its build has ended. A waiting job does not check whether the previous job succeeded. The following script for Linux therefore runs the preprocessing, the dry run and the mesh convergence study of a case in sequence and stops when a step fails:
 
 .. code-block:: bash
 

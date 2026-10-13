@@ -337,9 +337,10 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
     would make one backend reach into its sibling - forbidden by
     ``tests/test_capabilities.py``, and wrong regardless. So it happens here, above both,
     which is exactly where ``prerun.py`` already documents that such orchestration
-    belongs.
+    belongs. The case of the fine sediment simulation takes its water surface from the
+    same result.
     """
-    if spec.kind is not JobKind.OPENFOAM_BUILD:
+    if spec.kind not in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD):
         return {}
     from axqua import prerun
     enabled = getattr(spec.options, "pre_run", None)

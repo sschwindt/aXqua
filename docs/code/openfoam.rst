@@ -54,6 +54,12 @@ Single-phase free surface
 .. automodule:: axqua.solvers.openfoam.potential
    :members:
 
+Fine sediment over a fixed bed
+------------------------------
+
+.. automodule:: axqua.solvers.openfoam.sediment
+   :members:
+
 Backend adapter
 ---------------
 

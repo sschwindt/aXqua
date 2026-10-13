@@ -1291,6 +1291,101 @@ class Morphodynamics:
 
 
 @dataclass
+class FineSediment:
+    """Fine sediment that the flow carries over a bed which stays in place.
+
+    The transport of one grain size in suspension, its settling onto the bed and its
+    pick-up from the bed, computed in three dimensions. The bed elevation does not
+    change: what the simulation returns is how much fine sediment the riverbed takes up
+    or gives off, per bed area. That is the quantity to look at where fines move
+    through a reach whose gravel bed stays where it is.
+
+    A fact about the reach and the goal of the modeling, so it is not a block of one
+    simulation program. Today the OpenFOAM backend computes it, with the solver
+    ``sediDriftFoam2`` of Nils Reidar B. Olsen
+    (:mod:`axqua.solvers.openfoam.sediment`), and ``morphodynamics`` stays the block
+    of the coupled TELEMAC and GAIA simulation, where the bed moves.
+    """
+
+    # Simulate the fine sediment. The other settings of this block have no effect
+    # while this is off.
+    enabled: bool = False
+    # Diameter of the grains [m]. The simulation carries one grain size.
+    grain_size: float = 0.0002
+    # Settling velocity of the grains in still water [m/s]. Leave empty to have it
+    # computed from the grain size after Ferguson and Church (2004).
+    fall_velocity: float | None = None
+    # Sediment concentration of the water that enters the reach [kg/m3]. One number
+    # for all inflow lines, or one per line, such as {inlet-1: 0.02, inlet-2: 0}.
+    inflow_concentration: float | dict[str, float] = 0.0
+    # What the bed gives back to the flow. suspended: the reference concentration of
+    # van Rijn, for a bed that consists of the fine sediment. bedload: his bed load
+    # formula. off: the bed only takes sediment up, as a gravel bed with open pores.
+    pick_up: str = "suspended"
+    # Roughness height with which the shear stress on the grains is computed [m].
+    # Leave empty for the median roughness of the wetted bed.
+    roughness: float | None = None
+    # Thickness of the cells at the bed [m]. Leave empty for the smallest water depth
+    # of the model divided by its number of layers.
+    bottom_layer: float | None = None
+    # Largest number of iterations of the steady simulation.
+    iterations: int = 2000
+    # Time over which the computed rates act [s]. Leave empty to get rates only.
+    period: float | None = None
+    # Thickness of the bed layer whose content of fines is reported [m].
+    layer_thickness: float = 0.1
+    # Share of pores between the coarse grains of that layer, before fines fill
+    # them [-].
+    porosity: float = 0.3
+    # Share of fines in the dry mass of that layer at the start [-].
+    initial_fraction: float = 0.0
+
+    def validate(self) -> None:
+        if not self.enabled:
+            return
+        if self.pick_up not in ("suspended", "bedload", "off"):
+            raise ValueError("fine_sediment.pick_up must be 'suspended', 'bedload' or "
+                             f"'off', got {self.pick_up!r}")
+        positive = {"grain_size": self.grain_size, "layer_thickness": self.layer_thickness}
+        for name in ("fall_velocity", "roughness", "bottom_layer", "period"):
+            if getattr(self, name) is not None:
+                positive[name] = getattr(self, name)
+        for name, value in positive.items():
+            if not float(value) > 0:
+                raise ValueError(f"fine_sediment.{name} must be larger than 0, "
+                                 f"got {value!r}")
+        if self.grain_size > 0.002:
+            # The formulas of the solver are those of van Rijn for sand; a larger grain
+            # is no fine sediment and does not travel in suspension.
+            raise ValueError(
+                f"fine_sediment.grain_size is {self.grain_size:g} m. The grain size is "
+                "given in meters and the simulation is made for sand and silt, up to "
+                "0.002 m")
+        if int(self.iterations) < 1:
+            raise ValueError("fine_sediment.iterations must be at least 1")
+        if not 0 < float(self.porosity) < 1:
+            raise ValueError("fine_sediment.porosity is a share between 0 and 1, "
+                             f"got {self.porosity!r}")
+        if not 0 <= float(self.initial_fraction) < 1:
+            raise ValueError("fine_sediment.initial_fraction is a share from 0 to less "
+                             f"than 1, got {self.initial_fraction!r}")
+        values = (self.inflow_concentration.values()
+                  if isinstance(self.inflow_concentration, dict)
+                  else [self.inflow_concentration])
+        for value in values:
+            if not isinstance(value, (int, float)) or isinstance(value, bool) \
+                    or float(value) < 0:
+                raise ValueError("fine_sediment.inflow_concentration is a mass per "
+                                 f"volume of water in kg/m3 and cannot be {value!r}")
+            if float(value) > 100:
+                # 100 kg/m3 is 4 % of the volume: no river carries that in suspension,
+                # and the usual slip is a value in mg/l
+                raise ValueError(
+                    f"fine_sediment.inflow_concentration is {value:g} kg/m3, which is "
+                    "more than a river carries. The unit is kg/m3: 20 mg/l are 0.02")
+
+
+@dataclass
 class DemOfDifference:
     """DEM-of-Difference (DoD) computation with a minimum level of detection (LoD).
 
@@ -1859,6 +1954,8 @@ class Config:
     surfaces: Surfaces = field(default_factory=Surfaces)
     # OpenFOAM free-surface extension (optional; see axqua.solvers.openfoam)
     openfoam: OpenFoam = field(default_factory=OpenFoam)
+    # fine sediment over a bed that stays in place (optional; off by default)
+    fine_sediment: FineSediment = field(default_factory=FineSediment)
     postproc: PostProcessing = field(default_factory=PostProcessing)
     # where the OpenFOAM case tree is written; defaults to <sim_dir>/openfoam
     openfoam_dir: Path | None = None
@@ -1960,6 +2057,15 @@ class Config:
         return self.openfoam_case_dir / filename
 
     @property
+    def fine_sediment_case_dir(self) -> Path:
+        """The OpenFOAM case of the fine sediment simulation, beside the other one.
+
+        A folder of its own, because the simulation runs another solver on a mesh with
+        other patch names and another vertical spacing than the free-surface case.
+        """
+        return self.openfoam_case_dir.with_name(self.openfoam_case_dir.name + "-sediment")
+
+    @property
     def ground_truth_path(self) -> Path:
         """Where the tidy ground-truth table lives (explicit input, else compiled)."""
         if self.ground_truth.measurements is not None:
@@ -2000,6 +2106,7 @@ class Config:
             ("machine", self.openfoam.environment.validate),
             ("structures", self.structures.validate),
             ("openfoam", self.openfoam.validate),
+            ("fine_sediment", self.fine_sediment.validate),
             ("machine", self.postproc.environment.validate),
             ("postproc", self.postproc.validate),
             ("initialization", self.initialization.validate),
@@ -2254,6 +2361,7 @@ def load_config(path: str | os.PathLike) -> Config:
     gain_lose = _load_gain_lose(raw, cfg_dir)
     drying = Drying(**_only_known(Drying, raw.get("drying", {}) or {}))
     structures = Structures(**_only_known(Structures, raw.get("structures", {}) or {}))
+    fine_sediment = _load_fine_sediment(raw.get("fine_sediment"))
     calib = Calibration.from_dict(raw.get("calibration", {}) or {}, cfg_dir)
 
     # OpenFOAM extension: absent block -> defaults, and nothing consults them
@@ -2316,6 +2424,7 @@ def load_config(path: str | os.PathLike) -> Config:
         structures=structures,
         surfaces=surfaces,
         openfoam=openfoam,
+        fine_sediment=fine_sediment,
         postproc=postproc,
         openfoam_dir=openfoam_dir,
         declared_blocks=frozenset(raw),
@@ -2325,6 +2434,27 @@ def load_config(path: str | os.PathLike) -> Config:
         if hasattr(cfg, key):
             setattr(cfg, key, value)
     return cfg
+
+
+def _load_fine_sediment(raw: Any) -> FineSediment:
+    """The ``fine_sediment`` block. The inflow concentration per line is kept with the
+    names of the lines as text, which is what a case written back by aXqua holds."""
+    data = _only_known(FineSediment, dict(raw or {}))
+    per_line = data.get("inflow_concentration")
+    if isinstance(per_line, str):
+        # a form hands over what was typed: "0.02", or "{inlet-1: 0.02, inlet-2: 0}"
+        try:
+            per_line = yaml.safe_load(per_line)
+        except yaml.YAMLError:
+            pass                                  # the check names the value as it is
+    if isinstance(per_line, dict):
+        per_line = {str(name): value for name, value in per_line.items()}
+    if per_line is not None:
+        data["inflow_concentration"] = per_line
+    if data.get("pick_up") is False:
+        # YAML reads the unquoted word `off` as "no". It is the name of a choice here.
+        data["pick_up"] = "off"
+    return FineSediment(**data)
 
 
 # --------------------------------------------------------------------------- #

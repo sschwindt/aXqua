@@ -36,7 +36,10 @@ where each script's module-level constants moved - that is the answer to "don't 
 the scripts") and the default workspace mode. `VALIDATION` came later and has no script: it runs the calibrated model for a
 validation situation (see `axqua/validation.py` in the root notes) and shares the
 calibration capability and its `study` verb, told apart by its option record.
-`gain_lose`/`morphodynamics` are **not**
+`OPENFOAM_SEDIMENT_BUILD` and `OPENFOAM_SEDIMENT_RUN` have no script either: they are
+the `build` and `run` verbs of the OpenFOAM backend for `Capability.MORPHODYNAMICS`,
+which there is fine sediment over a fixed bed (`solvers/openfoam/sediment.py`).
+`gain_lose` and TELEMAC's `morphodynamics` are **not**
 kinds - they are config switches folded into the steady/unsteady kinds. Options refuse an
 unknown key (plan §5: never silently ignore a field, or a job that *looks* submitted
 quietly runs something else).
@@ -83,8 +86,13 @@ and it can be cancelled while it waits. Waiting is what the user means - *Build*
 HydroBayesCal rewrites `friction.tbl` in that folder before each of its runs. Two things to
 know: a detached job is already STARTING while it waits (the launcher sets that before the
 executor runs), and **a waiting job does not check that its predecessor succeeded**.
-**OpenFOAM jobs take no part**: their legs work in case folders of their own that may share
-one TELEMAC `model_dir` and run side by side on purpose.
+**A run of the OpenFOAM free-surface model takes no part**: its legs work in case folders of
+their own that may share one TELEMAC `model_dir` and run side by side on purpose. Three other
+kinds of that backend do wait in the queue (`workspace.QUEUED_WITH_THE_CASE`):
+`openfoam-build` and `openfoam-sediment-build`, because they read the 2D result in that
+folder - submitted directly behind the steady run they used to start at once and fail with
+"rigid-lid needs a 2D result" - and `openfoam-sediment`, so that it follows its build.
+`openfoam-run` still does not wait for `openfoam-build`.
 
 **The order is the order of submission, and a lock alone does not give that.** Of two
 waiting jobs, whichever polls first when the folder frees would take it, and three jobs

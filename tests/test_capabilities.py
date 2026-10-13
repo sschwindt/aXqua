@@ -46,14 +46,14 @@ def test_unsupported_capability_reports_no_further_axes():
 
 
 def test_not_applicable_is_distinct_from_not_implemented():
-    """OpenFOAM has no depth-averaged mode (n/a); it has no morphodynamics *yet* (no).
-    Reporting both as 'no' would tell a user to wait for something that is never
-    coming."""
+    """OpenFOAM has no depth-averaged mode (n/a); it has no mesh convergence study
+    *yet* (no). Reporting both as 'no' would tell a user to wait for something that is
+    never coming."""
     from axqua.solvers.openfoam.spec import SPEC as openfoam
     from axqua.solvers.telemac.spec import SPEC as telemac
 
     assert openfoam.support(Capability.STEADY2D) is Support.NOT_APPLICABLE
-    assert openfoam.support(Capability.MORPHODYNAMICS) is Support.NOT_IMPLEMENTED
+    assert openfoam.support(Capability.MESH_CONVERGENCE) is Support.NOT_IMPLEMENTED
     assert telemac.support(Capability.FREE_SURFACE_3D) is Support.NOT_APPLICABLE
     assert telemac.support(Capability.MORPHODYNAMICS) is Support.SUPPORTED
 
@@ -173,8 +173,12 @@ def test_both_builtin_backends_are_registered():
 def test_supporting_answers_which_code_can_do_this():
     morph = [s.name for s in registry.supporting(Capability.MORPHODYNAMICS)]
     vof = [s.name for s in registry.supporting(Capability.FREE_SURFACE_3D)]
-    assert morph == ["telemac"]
+    unsteady = [s.name for s in registry.supporting(Capability.UNSTEADY2D)]
+    # both, and not the same thing: a bed that moves with GAIA, and fine sediment
+    # over a bed that stays in place with OpenFOAM
+    assert sorted(morph) == ["openfoam", "telemac"]
     assert vof == ["openfoam"]
+    assert unsteady == ["telemac"]
 
 
 def test_registering_a_third_party_backend():

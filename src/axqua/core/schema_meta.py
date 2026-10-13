@@ -49,6 +49,7 @@ BLOCKS: tuple[tuple[str, str, str], ...] = (
     ("openfoam", "OpenFOAM", "case-hydraulics"),
     ("morphodynamics", "Morphodynamic simulation", "case-morphodynamics"),
     ("dem_of_difference", "DEM of difference", "case-morphodynamics"),
+    ("fine_sediment", "Fine sediment over a fixed bed", "case-morphodynamics"),
     ("ground_truth", "Ground truth data", "help-calibration"),
     ("calibration", "Calibration", "help-calibration"),
     ("postproc", "Figures", "help-postprocessing"),
@@ -145,6 +146,26 @@ CURATED: dict[str, dict[str, Any]] = {
                           choices=("water-table", "lines")),
     "morphodynamics.enabled": _c("Simulate sediment transport", "bool"),
     "dem_of_difference.enabled": _c("Compute the bed change", "bool"),
+    "fine_sediment.enabled": _c("Simulate the fine sediment", "bool"),
+    "fine_sediment.grain_size": _c("Grain size", "number", "m"),
+    "fine_sediment.fall_velocity": _c(
+        "Settling velocity", "number", "m/s",
+        help="Leave empty to have it computed from the grain size."),
+    "fine_sediment.inflow_concentration": _c(
+        "Concentration at the inflow", "text", "kg/m3",
+        help="One number for all inflow lines, or one per line, such as "
+             "{inlet-1: 0.02, inlet-2: 0}. 20 mg/l are 0.02 kg/m3."),
+    "fine_sediment.pick_up": _c(
+        "Pick-up from the bed", "choice", choices=("suspended", "bedload", "off"),
+        help="suspended and bedload assume a bed that consists of the fine sediment. "
+             "off: the bed only takes sediment up."),
+    "fine_sediment.iterations": _c("Iterations at most", "int"),
+    "fine_sediment.period": _c(
+        "Period", "number", "s",
+        help="Time over which the computed rates act. Leave empty to get rates only."),
+    "fine_sediment.layer_thickness": _c("Thickness of the bed layer", "number", "m"),
+    "fine_sediment.porosity": _c("Pore share of the bed layer", "number", "-"),
+    "fine_sediment.initial_fraction": _c("Share of fines at the start", "number", "-"),
     "ground_truth.sources": _c("Measurement files", "yaml",
                                help="One entry per file: category, kind and positions."),
     "ground_truth.targets": _c("Calibration target workbook", "table"),

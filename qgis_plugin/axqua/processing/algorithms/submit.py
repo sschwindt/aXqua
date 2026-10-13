@@ -22,7 +22,7 @@ from ...gui.settings_dialog import read_settings
 #: this module now avoids - it was already missing ``calibration-multiflow``.
 KINDS = ["preprocessing", "steady", "mesh-convergence", "build-3d", "steady-3d",
          "vertical-convergence", "unsteady", "openfoam-build", "openfoam-run",
-         "calibration"]
+         "openfoam-sediment-build", "openfoam-sediment", "calibration"]
 
 #: What ``axqua submit --help-kinds`` reported, once anything has asked it.
 #:

@@ -58,6 +58,8 @@ class OpenFoamBackend(BaseBackend):
             cfg.openfoam.cell_size = cell_size
         if layers is not None:
             cfg.openfoam.n_layers = layers
+        if capability is Capability.MORPHODYNAMICS:
+            return self._build_sediment(cfg, ctx, hotstart or seed)
 
         source = hotstart or seed
         state = None
@@ -82,12 +84,45 @@ class OpenFoamBackend(BaseBackend):
                        description="open in ParaView; threshold alpha.water > 0.5")
         return artifacts
 
+    def _build_sediment(self, cfg, ctx: Any, source):
+        """The case of the fine sediment simulation. Unlike the free-surface case it
+        cannot be built cold: without a 2D result there is no water surface to end
+        the model at, so an unreadable result is an error here and not a warning."""
+        from axqua.solvers.openfoam import sediment
+        from axqua.solvers.openfoam.hotstart import load_hotstart
+
+        state = load_hotstart(cfg, source) if source is not None else None
+        if ctx is not None:
+            ctx.check_cancelled()
+        artifacts = sediment.build_case(cfg, state=state)
+        if ctx is not None:
+            ctx.progress(cells=artifacts.record.get("n_cells"), stage="built",
+                         mesh_usable=True)
+            ctx.record("Fine sediment case", Path(artifacts.case_dir) / "case.foam",
+                       kind="file", description="open in ParaView")
+        return artifacts
+
+    def _run_sediment(self, cfg, ctx: Any, *, iterations=None, check_mesh=True):
+        from axqua.solvers.openfoam import sediment
+
+        sediment.run_case(
+            cfg, iterations=iterations, check_mesh=check_mesh,
+            sink=_sink_for(ctx, sediment.SOLVER), show_progress=ctx is None,
+            should_stop=ctx.should_stop if ctx is not None else None)
+        if ctx is not None:
+            ctx.check_cancelled()
+        return Path(cfg.fine_sediment_case_dir)
+
     # -- run ----------------------------------------------------------------------
     def run(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
             n_processors: int | None = None, reconstruct: bool = True,
-            check_mesh: bool = True, **_ignored):
+            check_mesh: bool = True, iterations: int | None = None, **_ignored):
         from axqua.solvers.openfoam import dicts
         from axqua.solvers.openfoam.runtime import OpenFoamRuntime
+
+        if capability is Capability.MORPHODYNAMICS:
+            return self._run_sediment(cfg, ctx, iterations=iterations,
+                                      check_mesh=check_mesh)
 
         case_dir = Path(cfg.openfoam_case_dir)
         if not (case_dir / "constant" / "polyMesh" / "faces").exists():
@@ -162,6 +197,8 @@ class OpenFoamBackend(BaseBackend):
         from axqua.solvers.openfoam import report
         from axqua.solvers.openfoam.runtime import OpenFoamRuntime
 
+        if _is_sediment(ctx):
+            return self._book_sediment(cfg, ctx)
         case_dir = Path(cfg.openfoam_case_dir)
         out: dict[str, Any] = {}
 
@@ -195,6 +232,24 @@ class OpenFoamBackend(BaseBackend):
                 log.warning("foamToVTK failed: %s: %s", type(exc).__name__, exc)
         return out
 
+    def _book_sediment(self, cfg, ctx: Any):
+        """The bed and the budget of a finished fine sediment run.
+
+        Not guarded like the reports of the free-surface run: this evaluation IS the
+        result of the simulation, and a job that ended without it has not produced
+        what it was started for. After a build there is nothing to book yet.
+        """
+        from axqua.solvers.openfoam import sediment
+
+        if ctx.spec.meta.verb != "run":
+            return {}
+        result = sediment.evaluate(cfg)
+        for line in result.lines():
+            log.info("%s", line)
+        if ctx.manifest is not None:
+            ctx.manifest.summary["fine_sediment"] = result.budget
+        return {"fine_sediment": result.budget}
+
     def study(self, cfg, capability=None, *, ctx: Any = None,
               launch_mode: str = "prepare", checkout=None, rebuild: bool = False,
               seed=None, **kwargs):
@@ -216,6 +271,11 @@ class OpenFoamBackend(BaseBackend):
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
         """The relative inlet/outlet discharge imbalance - what the run is judged on."""
         from axqua.solvers.openfoam import report
+        if _is_sediment(ctx):
+            # how far the sediment budget of the reach is from closing, as a share
+            summary = getattr(getattr(ctx, "manifest", None), "summary", {}) or {}
+            closure = (summary.get("fine_sediment") or {}).get("closure")
+            return float(closure) if closure is not None else None
         try:
             history = report.analyse(cfg, Path(cfg.openfoam_case_dir))
         except Exception as exc:  # noqa: BLE001
@@ -299,6 +359,8 @@ class OpenFoamBackend(BaseBackend):
         """List what QGIS can open. No PyQGIS, no copies of the case."""
         if ctx is None:
             return []
+        if _is_sediment(ctx):
+            return self._export_sediment(cfg, ctx)
         case_dir = Path(cfg.openfoam_case_dir)
         written: list[Path] = []
 
@@ -324,7 +386,30 @@ class OpenFoamBackend(BaseBackend):
         return written
 
 
+    def _export_sediment(self, cfg, ctx: Any):
+        """The bed as a polygon layer, colored by what the bed takes up."""
+        from axqua.solvers.openfoam import sediment
+
+        case_dir = Path(cfg.fine_sediment_case_dir)
+        layer = case_dir / sediment.BED_LAYER_NAME
+        period = cfg.fine_sediment.period is not None
+        ctx.record(
+            "Fine sediment at the bed", layer, kind="vector", style="graduated",
+            variable="change" if period else "net",
+            description=("change of the share of fines in the bed layer over the "
+                         "period [-]" if period else
+                         "mass the bed takes up per area and day [kg/m2/day]"))
+        ctx.record("Sediment budget", case_dir / sediment.BUDGET_NAME, kind="table")
+        ctx.record("Fine sediment case (ParaView)", case_dir / "case.foam", kind="file")
+        return [layer] if layer.exists() else []
+
+
 BACKEND = OpenFoamBackend()
+
+
+def _is_sediment(ctx: Any) -> bool:
+    """Whether the job at hand is one of the fine sediment simulation."""
+    return getattr(ctx, "capability", None) is Capability.MORPHODYNAMICS
 
 
 def _wants_vtk(ctx: Any) -> bool:

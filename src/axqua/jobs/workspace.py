@@ -18,9 +18,15 @@ submitted in a row are started by three processes that reach the lock in any ord
 run before its build. Each job therefore leaves a ticket in the folder when it is
 *submitted*, and only the job with the oldest ticket may take the lock.
 
-Only TELEMAC jobs take part. An OpenFOAM job works in a case folder of its own
+TELEMAC jobs take part, and three job kinds of OpenFOAM (:data:`QUEUED_WITH_THE_CASE`).
+A run of the free-surface model works in a case folder of its own
 (``openfoam.case_dir``), several of which may share one TELEMAC folder and run side by
-side on purpose.
+side on purpose, so it stays out. A build is another matter: it reads the 2D result
+that lies in the simulation folder and may start a TELEMAC run of its own there, so a
+build that was submitted directly behind the 2D run has to wait for it. It did not, and
+failed at once because the result was not there yet. The fine sediment simulation waits
+for its build in the same queue, which is what lets *Build* and *Submit* be clicked one
+after the other.
 
 The lock is the job lock of :mod:`axqua.jobs.lock` on another file, so the same rules
 decide whether its holder is still alive: host, boot, process and process start time. A
@@ -55,8 +61,8 @@ WAIT_POLL = 3.0
 #: the submission was interrupted between writing the ticket and starting the runner.
 TICKET_GRACE = 120.0
 
-__all__ = ["LOCK_NAME", "QUEUE_NAME", "FolderLock", "applies", "enqueue", "held_for",
-           "holder_of", "waiting_in"]
+__all__ = ["LOCK_NAME", "QUEUE_NAME", "QUEUED_WITH_THE_CASE", "FolderLock", "applies",
+           "enqueue", "held_for", "holder_of", "waiting_in"]
 
 
 class FolderLock(JobLock):
@@ -70,9 +76,18 @@ class FolderLock(JobLock):
         self.job = SimpleNamespace(job_id=label)
 
 
+#: Job kinds of another solver that wait in the queue of the case all the same: the
+#: builds read the 2D result, and the fine sediment run follows its build.
+QUEUED_WITH_THE_CASE = frozenset({"openfoam-build", "openfoam-sediment-build",
+                                  "openfoam-sediment"})
+
+
 def applies(spec: Any) -> bool:
     """Whether a job of this kind works in the simulation folder of its case."""
-    return getattr(spec, "solver", "") == "telemac"
+    if getattr(spec, "solver", "") == "telemac":
+        return True
+    kind = getattr(spec, "kind", None)
+    return str(getattr(kind, "value", kind) or "") in QUEUED_WITH_THE_CASE
 
 
 def holder_of(folder: str | os.PathLike) -> str:

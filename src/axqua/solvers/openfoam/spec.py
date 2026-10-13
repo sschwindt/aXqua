@@ -9,9 +9,12 @@ distinction between *not applicable* and *not implemented* carries real informat
 * ``steady2d`` / ``unsteady2d`` are **not applicable**. ``interFoam`` is a two-phase
   VOF solver; there is no depth-averaged mode to run, and reporting "not implemented"
   would suggest axqua is merely missing a feature that could be added.
-* ``morphodynamics`` and the convergence studies are **not implemented**: each is
-  genuinely possible for OpenFOAM and simply is not built yet. A user deciding
-  which code to set up deserves to see that difference.
+* ``morphodynamics`` is supported as **fine sediment over a bed that stays in
+  place** (:mod:`axqua.solvers.openfoam.sediment`, the block ``fine_sediment`` of
+  the case). A bed that moves is the coupled TELEMAC and GAIA simulation.
+* the convergence studies are **not implemented**: each is genuinely possible for
+  OpenFOAM and simply is not built yet. A user deciding which code to set up
+  deserves to see that difference.
 * ``calibration`` **is** supported - see
   :mod:`axqua.solvers.openfoam.calibration`. It calibrates the bed roughness and
   the k-epsilon coefficients against measured velocity components.
@@ -92,6 +95,22 @@ def _mesh_built(cfg) -> bool:
     return (_case(cfg) / "constant" / "polyMesh" / "faces").is_file()
 
 
+def _sediment_case(cfg) -> Path:
+    return Path(cfg.fine_sediment_case_dir)
+
+
+def _sediment_built(cfg) -> bool:
+    """The mesh and the dictionary of the sediment, which only this build writes."""
+    case = _sediment_case(cfg)
+    return ((case / "constant" / "polyMesh" / "faces").is_file()
+            and (case / "constant" / "sedimentProperties").is_file())
+
+
+def _sediment_run(cfg) -> bool:
+    """The evaluation of the bed, which is written after a run that ended well."""
+    return (_sediment_case(cfg) / "fine-sediment-bed.gpkg").is_file()
+
+
 def _has_run(cfg) -> bool:
     """Any written time directory beyond ``0`` - in the case root after a serial run
     or a reconstruct, or inside ``processor0`` while a parallel run is still
@@ -115,7 +134,10 @@ SPEC = BackendSpec(
     implementation="axqua.solvers.openfoam.backend:BACKEND",
     # Declared by the case when the block names an OpenFOAM installation. Whether
     # *this machine* has it is the marker body's `env` line, not the filename.
-    enabled=lambda cfg: "openfoam" in cfg.declared_blocks,
+    # ...or when it asks for the fine sediment simulation, which this backend computes
+    # with the mesh settings of the block, at their defaults where the case has none.
+    enabled=lambda cfg: ("openfoam" in cfg.declared_blocks
+                         or bool(cfg.fine_sediment.enabled)),
     environment=lambda cfg: _describe_environment(cfg),
     capabilities={
         Capability.STEADY2D: CapabilitySpec(support=Support.NOT_APPLICABLE),
@@ -130,8 +152,14 @@ SPEC = BackendSpec(
             built=_mesh_built,
             run=_has_run,
         ),
-        # Possible, not yet built - see the plan's phase list.
-        Capability.MORPHODYNAMICS: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
+        # Fine sediment over a bed that stays in place. A moving bed is TELEMAC's.
+        Capability.MORPHODYNAMICS: CapabilitySpec(
+            support=Support.SUPPORTED,
+            configured=lambda cfg: bool(cfg.fine_sediment.enabled),
+            built=_sediment_built,
+            run=_sediment_run,
+        ),
+        # Possible, not yet built.
         Capability.GAIN_LOSE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
         Capability.MESH_CONVERGENCE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
         Capability.VERTICAL_CONVERGENCE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),

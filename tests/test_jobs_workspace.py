@@ -18,8 +18,8 @@ from axqua.jobs import workspace
 from axqua.jobs.lock import LockRecord
 
 
-def _spec(job_id, solver="telemac"):
-    return SimpleNamespace(job_id=job_id, solver=solver)
+def _spec(job_id, solver="telemac", kind=None):
+    return SimpleNamespace(job_id=job_id, solver=solver, kind=kind)
 
 
 class _Sink:
@@ -142,7 +142,30 @@ def test_the_ticket_of_a_job_that_will_never_run_is_dropped(tmp_path, monkeypatc
     assert workspace.waiting_in(tmp_path) == []
 
 
-def test_an_openfoam_job_does_not_take_part(tmp_path):
+def test_what_reads_the_2d_result_waits_for_the_2d_run(tmp_path):
+    """The build of an OpenFOAM model takes its water surface from the 2D result in the
+    simulation folder. Submitted directly behind the 2D run, it started at once and
+    failed because that result was not written yet. The fine sediment run waits for
+    its build in the same queue, so that both can be clicked one after the other."""
+    from axqua.jobs.model import JobKind
+
+    for kind in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD,
+                 JobKind.OPENFOAM_SEDIMENT_RUN):
+        assert workspace.applies(_spec("job", solver="openfoam", kind=kind)) is True
+    assert workspace.applies(
+        _spec("run", solver="openfoam", kind=JobKind.OPENFOAM_RUN)) is False
+
+    sink = _Sink()
+    with workspace.held_for(tmp_path, _spec("steady")):
+        behind = _spec("build", solver="openfoam", kind=JobKind.OPENFOAM_SEDIMENT_BUILD)
+        with pytest.raises(KeyboardInterrupt):
+            with workspace.held_for(tmp_path, behind, cancel=_Cancel(after=2), sink=sink,
+                                    poll=0.01):
+                raise AssertionError("the build started while the 2D run was working")
+    assert sink.phases == ["waiting for steady"]
+
+
+def test_a_run_of_the_free_surface_model_does_not_take_part(tmp_path):
     """Its legs work in case folders of their own and run side by side on purpose."""
     assert workspace.applies(_spec("leg", solver="openfoam")) is False
     assert workspace.enqueue(tmp_path, _spec("leg", solver="openfoam")) is None
