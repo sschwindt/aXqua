@@ -223,3 +223,61 @@ def test_the_schema_command_prints_the_table(capsys):
     assert casecli.run_schema(["--json"]) == 0
     sections = _json_out(capsys)["data"]["sections"]
     assert sections[0]["block"] == "project" and sections[0]["label"] == "case-project"
+
+
+# --------------------------------------------------------------------------- #
+# the two false positives munich-vsf exposed
+# --------------------------------------------------------------------------- #
+
+def test_the_outputs_block_is_known(tmp_path):
+    """`kinds` is built from the block dataclasses, and `outputs` has none - it is read
+    by the loader onto top-level fields such as results_slf. Reporting it as unknown
+    told the user to remove a block that the OpenFOAM hotstart and the calibration's
+    result naming both depend on."""
+    from axqua.core.casecheck import check_case
+
+    case = tmp_path / "case-config.yml"
+    case.write_text(
+        "project:\n  name: t\n  crs_epsg: 25832\n"
+        "outputs:\n  results_slf: r2d-fill.slf\n")
+    codes = [f.code for f in check_case(case)]
+    assert "axqua.config.unknown_key" not in codes
+
+
+def test_a_path_the_loader_resolves_elsewhere_is_not_called_missing(tmp_path,
+                                                                   monkeypatch):
+    """Not every path is read relative to the case file: openfoam.roi names a layer the
+    ROI helper writes into the preprocessing folder, so the loader resolves it there.
+    Re-deriving it from the raw YAML against the case folder reported two present files
+    as missing and told the user to select them again."""
+    from pathlib import Path
+
+    from axqua.core import casecheck
+
+    # the loader says the file is over here, and it exists
+    elsewhere = tmp_path / "axqua-case" / "preprocessing"
+    elsewhere.mkdir(parents=True)
+    (elsewhere / "roi.gpkg").write_text("")
+
+    raw = {"openfoam": {"roi": "roi.gpkg"}}
+    kinds = {"openfoam.roi": "vector"}
+
+    # without the loader's answer it is reported...
+    bare = casecheck._missing_files(raw, kinds, tmp_path)
+    assert [f.code for f in bare] == ["axqua.config.missing_file"]
+
+    # ...and with it, it is not
+    informed = casecheck._missing_files(
+        raw, kinds, tmp_path, {"openfoam.roi": elsewhere / "roi.gpkg"})
+    assert informed == []
+
+
+def test_a_genuinely_missing_file_is_still_reported(tmp_path):
+    """The relaxation must not swallow the case it exists for."""
+    from axqua.core import casecheck
+
+    raw = {"geodata": {"dem_initial": "nope.tif"}}
+    kinds = {"geodata.dem_initial": "raster"}
+    out = casecheck._missing_files(
+        raw, kinds, tmp_path, {"geodata.dem_initial": tmp_path / "nope.tif"})
+    assert [f.code for f in out] == ["axqua.config.missing_file"]

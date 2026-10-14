@@ -66,7 +66,7 @@ def check_case(path: str | Path) -> list[Finding]:
 
     kinds = schema_meta.field_kinds()
     findings = _unknown_blocks(raw, kinds)
-    findings += _missing_files(raw, kinds, path.parent)
+    findings += _missing_files(raw, kinds, path.parent, _loader_paths(path, kinds))
     # what is reported at its setting is not reported again by its block
     already = {f.subject for f in findings} | {
         Path(f.message.rsplit(": ", 1)[-1]).name for f in findings
@@ -79,7 +79,14 @@ def check_case(path: str | Path) -> list[Finding]:
 def _unknown_blocks(raw: dict, kinds: dict[str, str]) -> list[Finding]:
     """A block the case file has and aXqua does not know. Keys inside a known block are
     settled by the loader, which also accepts the older spellings."""
-    blocks = {key.split(".", 1)[0] for key in kinds} | {"percolation"}
+    # `kinds` is built from the block dataclasses, so blocks the LOADER accepts
+    # without one of its own are missing from it and would be reported as unknown.
+    # `outputs` is read by config.py (raw.get("outputs")) onto top-level fields such
+    # as results_slf, classified in core.schema as a PROJECT-layer block, and written
+    # back by dump_config - so advising "Remove the block" would break the OpenFOAM
+    # hotstart and the naming the calibration reads. Found on munich-vsf, which uses
+    # it.
+    blocks = {key.split(".", 1)[0] for key in kinds} | {"percolation", "outputs"}
     out = []
     for block in raw:
         if block in blocks:
@@ -92,7 +99,41 @@ def _unknown_blocks(raw: dict, kinds: dict[str, str]) -> list[Finding]:
     return out
 
 
-def _missing_files(raw: dict, kinds: dict[str, str], folder: Path) -> list[Finding]:
+def _loader_paths(path: Path, kinds: dict[str, str]) -> dict[str, Path]:
+    """Where the LOADER puts each file setting, for the settings it resolves itself.
+
+    Not every path is read relative to the case file. ``openfoam.roi`` and
+    ``openfoam.liquid_boundaries`` name layers that the case's own ROI helper writes
+    into the preprocessing folder, so the loader resolves them there - and a checker
+    that re-derives them from the raw YAML against the case folder calls two present
+    files missing and tells the user to "Select the file again". Measured on
+    munich-vsf, whose roi resolves to
+    ``axqua-case/preprocessing/roi-fishpass.gpkg`` and exists.
+
+    There is one authority on how a path resolves and it is the loader, so ask it.
+    Returns an empty mapping when the case does not load - tier 3 reports that, and
+    the raw check below is then the best available.
+    """
+    try:
+        from axqua.config import load_config
+
+        cfg = load_config(path)
+    except Exception:                               # noqa: BLE001 - tier 3 reports it
+        return {}
+    out: dict[str, Path] = {}
+    for key, kind in kinds.items():
+        if kind not in _FILE_KINDS:
+            continue
+        block, name = key.split(".", 1)
+        value = getattr(getattr(cfg, block, None), name, None)
+        if isinstance(value, (str, Path)) and str(value):
+            out[key] = Path(str(value)).expanduser()
+    return out
+
+
+def _missing_files(raw: dict, kinds: dict[str, str], folder: Path,
+                   loader: dict[str, Path] | None = None) -> list[Finding]:
+    loader = loader or {}
     out = []
     for key, kind in kinds.items():
         if kind not in _FILE_KINDS:
@@ -102,6 +143,9 @@ def _missing_files(raw: dict, kinds: dict[str, str], folder: Path) -> list[Findi
             else None
         if not value or not isinstance(value, str):
             continue
+        resolved = loader.get(key)
+        if resolved is not None and resolved.exists():
+            continue                                # the loader found it; not missing
         target = Path(value).expanduser()
         target = target if target.is_absolute() else folder / target
         if not target.exists():
