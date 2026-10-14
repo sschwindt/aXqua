@@ -38,6 +38,40 @@ PANEL = (800, 980)
 MARK = "#d7301f"
 
 
+def draw_marks(pixmap, frames) -> None:
+    """Frame each rectangle and number it, in the style every figure here uses.
+
+    Module level rather than inside :func:`take_screenshots` because not every figure
+    needs a case: the settings dialog is the plugin talking about itself, and
+    ``scripts/build_settings_screenshot.py`` takes it without building anything. Two
+    copies of this drawing would drift, and a reader would see it.
+    """
+    from qgis.PyQt.QtCore import QRect, Qt
+    from qgis.PyQt.QtGui import QColor, QFont, QPainter, QPen
+
+    from axqua.compat import enum_value
+
+    painter = QPainter(pixmap)
+    painter.setRenderHint(enum_value(QPainter, "RenderHint.Antialiasing",
+                                     "Antialiasing"))
+    font = QFont(painter.font())
+    font.setBold(True)
+    font.setPixelSize(15)
+    painter.setFont(font)
+    for rect in frames:                               # all frames first ...
+        painter.setPen(QPen(QColor(MARK), 3))
+        painter.setBrush(QColor(0, 0, 0, 0))
+        painter.drawRoundedRect(rect, 6, 6)
+    for number, rect in enumerate(frames, start=1):   # ... so no number is covered
+        badge = QRect(max(rect.left() - 12, 2), max(rect.top() - 12, 2), 24, 24)
+        painter.setPen(QPen(QColor("white"), 1))
+        painter.setBrush(QColor(MARK))
+        painter.drawEllipse(badge)
+        painter.drawText(badge, int(enum_value(Qt, "AlignmentFlag.AlignCenter",
+                                               "AlignCenter")), str(number))
+    painter.end()
+
+
 def inside_qgis() -> bool:
     try:
         from qgis.utils import iface
@@ -151,28 +185,9 @@ def take_screenshots() -> None:
                     # the caption would explain a number the picture does not have
                     raise LookupError(f"mark {number} of {name} is not on the screen")
         pixmap = root.grab()
-        painter = QPainter(pixmap)
-        painter.setRenderHint(enum_value(QPainter, "RenderHint.Antialiasing",
-                                         "Antialiasing"))
-        font = QFont(painter.font())
-        font.setBold(True)
-        font.setPixelSize(15)
-        painter.setFont(font)
         limits = pixmap.rect().adjusted(2, 2, -2, -2)
-        frames = [box_of(root, target).adjusted(-4, -4, 4, 4).intersected(limits)
-                  for target in marks]
-        for rect in frames:                               # all frames first ...
-            painter.setPen(QPen(QColor(MARK), 3))
-            painter.setBrush(QColor(0, 0, 0, 0))
-            painter.drawRoundedRect(rect, 6, 6)
-        for number, rect in enumerate(frames, start=1):   # ... so no number is covered
-            badge = QRect(max(rect.left() - 12, 2), max(rect.top() - 12, 2), 24, 24)
-            painter.setPen(QPen(QColor("white"), 1))
-            painter.setBrush(QColor(MARK))
-            painter.drawEllipse(badge)
-            painter.drawText(badge, int(enum_value(Qt, "AlignmentFlag.AlignCenter",
-                                                   "AlignCenter")), str(number))
-        painter.end()
+        draw_marks(pixmap, [box_of(root, target).adjusted(-4, -4, 4, 4)
+                            .intersected(limits) for target in marks])
         pixmap.save(str(out / f"{name}.png"))
         report["figures"][name] = len(marks)
         save_report()

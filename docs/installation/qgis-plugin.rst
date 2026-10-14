@@ -1,24 +1,30 @@
 QGIS plugin
 ===========
 
-The plugin is the graphical user interface of aXqua. It does not compute anything itself. It passes every task to the aXqua program, which runs as a separate process next to QGIS. Two installations are therefore required: the plugin in QGIS and the aXqua program in a Python environment. The aXqua program is **not optional** - without it the plugin has nothing to pass work to - but it can be installed after the plugin, which is the order of the sections below, because the plugin only looks for it when a task is started.
+The plugin is the user interface. It computes nothing: every task goes to the **aXqua program**, a separate process next to QGIS.
+
+* Both are required. The plugin alone has nothing to pass work to.
+* Install in the order below. The plugin only looks for the program when a task is started, so it may be installed second.
 
 Install QGIS
 ------------
 
-Download QGIS from `qgis.org <https://qgis.org/download/>`_ and install it for the operating system in use. The plugin requires **QGIS 3.44 or newer**, including QGIS 4.
+* Download from `qgis.org <https://qgis.org/download/>`_.
+* **QGIS 3.44 or newer** is required, QGIS 4 included.
 
 Install the plugin
 ------------------
 
-In QGIS, open *Plugins > Manage and Install Plugins*. In the *Settings* tab, tick *Show also experimental plugins*. Search for **aXqua** and click *Install Plugin*.
+* *Plugins > Manage and Install Plugins*.
+* In the *Settings* tab, tick *Show also experimental plugins*.
+* Search for **aXqua**, click *Install Plugin*.
 
-Until the plugin is listed in the QGIS plugin repository, download the plugin archive (``.zip``) from the `releases page <https://github.com/sschwindt/aXqua/releases>`_ and install it with *Plugins > Manage and Install Plugins > Install from ZIP*.
+Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `releases page <https://github.com/sschwindt/aXqua/releases>`_ and use *Install from ZIP*.
 
 Install the aXqua program
 -------------------------
 
-aXqua requires Python 3.10 or newer and a set of geospatial packages (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl`` and ``matplotlib``). The tested way to obtain them is a separate environment created with `Miniforge <https://github.com/conda-forge/miniforge>`_ from the ``environment.yml`` file of the repository:
+Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The tested route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_:
 
 .. code-block:: bash
 
@@ -29,26 +35,57 @@ aXqua requires Python 3.10 or newer and a set of geospatial packages (``numpy``,
    pip install .
    axqua --version
 
-The last command prints the installed version and confirms that the program can be started. The Bayesian calibration requires one additional package, HydroBayesCal, which is installed with ``pip install ".[calibration]"``. If pip reports that it finds no matching version of ``hydrobayescal``, the required version has not been published on the Python Package Index yet. Install it from its source repository in that case:
+``axqua --version`` printing a version confirms the installation.
+
+* **Bayesian calibration** needs one more package: ``pip install ".[calibration]"``.
+* If pip finds no matching ``hydrobayescal``, it is not on PyPI yet. Install it from source, without a version tag, so that the newest is taken:
+
+  .. code-block:: bash
+
+     pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git"
+
+* aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently.
+
+.. _find-the-axqua-path:
+
+Find the path of the installed program
+--------------------------------------
+
+The plugin needs the full path of the ``axqua`` program, not the folder that holds it. Activate the environment and ask the system where the program is:
 
 .. code-block:: bash
 
-   pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git"
+   mamba activate axqua-env
+   which axqua          # Linux, macOS
+   where axqua          # Windows
 
-.. note::
+What it prints is the path to enter in the plugin:
 
-   **Always install the newest HydroBayesCal, and do not pin a version.** The command above deliberately names no tag, so it takes the current state of the repository. HydroBayesCal is developed alongside aXqua by the same group, and its releases are bugfixes plus *additive* features - existing behaviour is extended, never removed - so the newest is always the one to want, and a pinned tag only goes stale and withholds fixes. aXqua declares a minimum version and no maximum for the same reason, and checks for the *capabilities* it uses rather than comparing version numbers.
+=========  ====================================================================
+Linux      ``/home/<user>/miniforge3/envs/axqua-env/bin/axqua``
+macOS      ``/Users/<user>/miniforge3/envs/axqua-env/bin/axqua``
+Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
+=========  ====================================================================
 
-aXqua can also be installed into the Python that ships with QGIS, provided that the packages listed above can be installed there. The separate environment is the tested route, and it keeps QGIS updates and aXqua updates independent of each other.
+* Nothing printed: the environment is not active, or ``pip install .`` did not run in it.
+* To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\Scripts\axqua.exe`` (Windows).
 
 Connect the plugin to the aXqua program
 ---------------------------------------
 
-Open the aXqua panel from the toolbar and click *Check* on the *Configuration* tab. The plugin searches for the ``axqua`` program in three places, in this order: the path entered in *aXqua > Settings*, the environment variable ``AXQUA_EXE``, and the system search path. If the program is not found, enter its full path in *Settings* and click *Test*. With the environment from above, the path ends with ``envs/axqua-env/bin/axqua`` (Linux) or ``envs\axqua-env\Scripts\axqua.exe`` (Windows).
+* Open the aXqua panel from the toolbar and click *Check* on the *Configuration* tab.
+* The plugin looks in three places, in this order: the path in *aXqua > Settings*, the variable ``AXQUA_EXE``, the system search path.
+* **Found**: the panel reports the version and where it came from. Nothing else to do.
+* **Not found**: enter the path from :ref:`find-the-axqua-path` in *Settings*, then click *Test*.
 
-The test reports the version that was found. A wrong path is therefore detected at this point and not later, when a simulation is started.
+*Test* reports the version that the path answers with, so a wrong path is caught here and not when a simulation is started.
 
-**The panel.** The tabs of the panel follow the sections of this documentation in the order of the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing* and *Batch-processing*. The button *Help* at the top right of the panel opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
+.. figure:: ../img/gui-settings.png
+   :alt: The settings of the plugin with the path of the aXqua program
+
+   The dialog *aXqua > Settings* with a correctly entered path. (1) The full path of the program, ending in ``envs/axqua-env/bin/axqua``; the button *...* opens a file dialog instead. (2) *Test* reports the version that this path answers with. (3) Two defaults of the map styles, which have nothing to do with the installation.
+
+**The panel.** The tabs follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
 
 .. figure:: ../img/gui-qgis-window.png
    :alt: The aXqua panel in the QGIS window

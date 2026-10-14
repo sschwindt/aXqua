@@ -173,7 +173,7 @@ def test_the_uml_diagrams_show_the_code_as_it_is():
 #: The pages of the workflow, each with the pictures of the plugin it shows. A page
 #: says where in the plugin its subject is set up, and the picture shows the place.
 SCREENSHOTS = {
-    "installation/qgis-plugin": ["gui-qgis-window"],
+    "installation/qgis-plugin": ["gui-settings", "gui-qgis-window"],
     "installation/simulation-software": ["gui-install-wizard"],
     "installation/plugin-setup": ["gui-configuration", "gui-profile-editor"],
     "usage/case-setup": ["gui-case-setup", "gui-case-editor"],
