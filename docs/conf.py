@@ -88,6 +88,16 @@ intersphinx_mapping = {
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 html_title = "aXqua"
+# The mark in the top-left of the sidebar, above the search box, and the icon a
+# browser shows in the tab and in a bookmark. Both paths are relative to this file;
+# Sphinx copies them into the built _static itself, so they do not belong in
+# html_static_path.
+html_logo = "img/aXqua-icon-reduced.png"
+# A .ico rather than the .png: it carries 16, 24, 32, 48, 64, 128 and 256 px in one
+# file, so a browser takes the size it needs instead of downsampling 500 px artwork
+# into a 16 px tab. The mark is thin white curves on a dark drop, which is exactly
+# what a bad downsample destroys.
+html_favicon = "img/favicon.ico"
 # The menu lists the sections. The subsections of a section are folded until the section is opened with its fold button or one of its pages is shown, and the subsubsections of a subsection open in the same way. The full tree has to be in the page for a section to have a fold button (collapse_navigation). _static/axqua.css sets the sections in bold capital letters.
 html_theme_options = {
     "collapse_navigation": False,

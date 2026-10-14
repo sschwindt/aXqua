@@ -43,7 +43,11 @@ class AxquaPlugin:
         # what the Postprocessing tab can start, by name
         self.dock.ctx.actions.update(layout=self._add_layout, movie=self._export_movie)
 
-        show = QAction(icon("axqua.svg"), "aXqua panel",
+        # favicon.ico, not the .png: it carries 16, 24, 32, 48, 64, 128 and 256 px
+        # in one file, so Qt takes the size the toolbar asks for rather than
+        # downsampling one large bitmap into a 16 px button. The mark is thin white
+        # curves on a dark drop, which is what a bad downsample destroys.
+        show = QAction(icon("favicon.ico"), "aXqua panel",
                        self.iface.mainWindow())
         show.setCheckable(True)
         show.triggered.connect(self._toggle)

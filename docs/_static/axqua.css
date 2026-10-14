@@ -31,3 +31,22 @@
 .wy-table-responsive {
     overflow: visible;
 }
+
+/* The mark above the project name, not beside it. The theme writes the name and then
+   the image inside one link, so the two sit on a line reading "aXqua [mark]";
+   column-reverse puts the mark on top without touching the HTML, which the theme owns.
+   The width cap matters: the file is 500 px square and the sidebar is about 300 px, so
+   uncapped it fills the whole header. */
+.wy-side-nav-search > a {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+.wy-side-nav-search > a img.logo {
+    width: 110px;
+    max-width: 60%;
+    margin: 0 0 0.4em;
+    /* the theme gives the logo a white backing, which the drop shape does not need */
+    background: transparent;
+}
