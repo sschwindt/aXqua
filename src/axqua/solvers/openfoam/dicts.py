@@ -233,7 +233,7 @@ deltaT          {of.initial_time_step:g};
 
 writeControl    adjustableRunTime;
 
-writeInterval   {stage_write_interval(of, stage):g};
+writeInterval   {stage_write_interval(of, stage):.10g};
 
 purgeWrite      {of.purge_write:d};
 
@@ -361,20 +361,23 @@ def stage_write_interval(of, stage: Stage) -> float:
     """Simulated time between two saved results of *stage* [s].
 
     ``write_interval``, adjusted so that the end of the stage is a write time. The
-    solver saves at multiples of the interval and at no other time, also not at its
-    end. A first stage of 2 s with results every 50 s therefore ended without a
-    result, the second stage started from the latest one it found, which was the
-    start, and the first stage had been computed for nothing: seen on the Isar
-    example, where nothing but the time in the listing said so. With the defaults
-    (30 s and 10 s) the end happened to be a write time. The same holds for the end
-    of the run: with 120 s and 50 s the last 20 s would not be saved, so the
-    interval becomes 60 s.
+    solver saves at whole intervals **counted from the start of its run** and at no
+    other time, also not at its end. A first stage of 2 s with results every 50 s
+    therefore ended without a result, the second stage started from the latest one
+    it found, which was the start, and the first stage had been computed for
+    nothing: seen on the Isar example, where nothing but the time in the listing
+    said so. With the defaults (30 s and 10 s) the end happened to be a write time.
+    The same holds for the end of the run. The second stage starts at
+    ``spinup_time``, so its results come at ``spinup_time`` plus whole intervals:
+    with 2 s, 3000 s and 100 s the last one would be at 2902 s and the rest of the
+    run would not be saved. The interval becomes 99.93 s.
     """
     wanted = float(of.write_interval)
-    end = float(stage.end_time)
-    if wanted <= 0 or end <= 0:
+    start = 0.0 if stage.start_from == "startTime" else float(of.spinup_time)
+    span = float(stage.end_time) - start
+    if wanted <= 0 or span <= 0:
         return wanted
-    return end / max(1, round(end / wanted))
+    return span / max(1, round(span / wanted))
 
 
 def _max_flow_courant(of, stage: Stage) -> float:

@@ -224,6 +224,21 @@ class OpenFoamBackend(BaseBackend):
         except Exception as exc:  # noqa: BLE001
             log.debug("surface-freedom report skipped: %s: %s", type(exc).__name__, exc)
 
+        try:
+            # The result seen from above, as a file QGIS draws like a 2D result and
+            # a finer model can be started from.
+            from axqua.solvers.openfoam import planview
+
+            # after a build there is no result yet, which is nothing to report
+            if planview.latest_time(case_dir) is not None:
+                _, summary = planview.write(cfg, case_dir)
+                out["plan_view"] = summary
+                if ctx is not None and ctx.manifest is not None:
+                    ctx.manifest.summary["depth_averaged"] = summary
+        except Exception as exc:  # noqa: BLE001
+            log.warning("depth-averaged result skipped: %s: %s",
+                        type(exc).__name__, exc)
+
         if _wants_vtk(ctx):
             try:
                 OpenFoamRuntime(cfg.openfoam).to_vtk(case_dir, latest=False)
@@ -363,6 +378,20 @@ class OpenFoamBackend(BaseBackend):
             return self._export_sediment(cfg, ctx)
         case_dir = Path(cfg.openfoam_case_dir)
         written: list[Path] = []
+
+        # First what QGIS draws without a conversion: depth and velocity of each
+        # column of the lattice, written after the run (planview).
+        from axqua.jobs.results import STYLE_DEPTH, STYLE_VELOCITY
+        from axqua.solvers.openfoam.planview import RESULT_NAME
+
+        plan = case_dir / RESULT_NAME
+        if plan.exists():
+            label = "OpenFOAM result (depth-averaged)"
+            ctx.record(label, plan, kind="mesh", style=STYLE_DEPTH,
+                       variable="WATER DEPTH")
+            ctx.record(f"{label} - velocity", plan, kind="mesh", style=STYLE_VELOCITY,
+                       variable="SCALAR VELOCITY")
+            written.append(plan)
 
         foam = case_dir / "case.foam"
         if foam.exists():

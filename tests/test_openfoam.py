@@ -21,6 +21,8 @@ Run via: mamba run -n axqua-env pytest tests/test_openfoam.py
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -426,30 +428,43 @@ def test_the_number_of_pressure_solutions_is_a_setting_of_the_case():
 
 
 def test_every_stage_ends_on_a_saved_result():
-    """The solver saves at multiples of the write interval and not at its end. A first
-    stage that does not end on one hands nothing to the second, which then starts
-    from the beginning without a word; a run that does not end on one loses its last
-    seconds."""
+    """The solver saves at whole write intervals counted from the start of its run,
+    and not at its end. A first stage that does not end on one hands nothing to the
+    second, which then starts from the beginning without a word; a second stage,
+    which starts where the first one ended, loses its last seconds."""
     from axqua.solvers.openfoam.dicts import control_dict, stage_write_interval, stages
+
+    def ends_on_a_result(cfg):
+        of = cfg.openfoam
+        start = 0.0
+        for stage in stages(cfg):
+            interval = stage_write_interval(of, stage)
+            steps = (stage.end_time - start) / interval
+            assert steps == pytest.approx(round(steps), abs=1e-9) and round(steps) >= 1
+            if stage.end_time - start >= 2 * of.write_interval:
+                # a stage of several intervals keeps about the configured one
+                assert interval == pytest.approx(of.write_interval, rel=0.25)
+            start = stage.end_time
 
     cfg = _Cfg(spinup_time=2.0, end_time=1500.0, write_interval=50.0)
     spinup, run = stages(cfg)
     assert stage_write_interval(cfg.openfoam, spinup) == pytest.approx(2.0)
-    assert stage_write_interval(cfg.openfoam, run) == pytest.approx(50.0)
+    assert stage_write_interval(cfg.openfoam, run) == pytest.approx(1498.0 / 30)
     assert "writeInterval   2;" in control_dict(cfg, spinup, patches=["inlet-1"])
-    assert "writeInterval   50;" in control_dict(cfg, run, patches=["inlet-1"])
-    # the defaults were multiples already and stay as they are
+    assert "writeInterval   49.93333333;" in control_dict(cfg, run, patches=["inlet-1"])
+    # the defaults ended on a write time already and stay as they are
     cfg = _Cfg()
     for stage in stages(cfg):
         assert stage_write_interval(cfg.openfoam, stage) == pytest.approx(10.0)
+    ends_on_a_result(cfg)
     # an end between two write times moves the interval, not the end
-    cfg = _Cfg(spinup_time=30.0, end_time=120.0, write_interval=50.0)
-    spinup, run = stages(cfg)
-    assert stage_write_interval(cfg.openfoam, spinup) == pytest.approx(30.0)
-    assert stage_write_interval(cfg.openfoam, run) == pytest.approx(60.0)
-    for stage in (spinup, run):
-        interval = stage_write_interval(cfg.openfoam, stage)
-        assert (stage.end_time / interval) == pytest.approx(round(stage.end_time / interval))
+    for kwargs in ({"spinup_time": 30.0, "end_time": 120.0, "write_interval": 50.0},
+                   {"spinup_time": 2.0, "end_time": 3000.0, "write_interval": 100.0},
+                   {"spinup_time": 7.0, "end_time": 300.0, "write_interval": 10.0}):
+        ends_on_a_result(_Cfg(**kwargs))
+    # one stage only, under a rigid lid, counts from zero
+    cfg = _Cfg(mode="rigid-lid", end_time=120.0, write_interval=50.0)
+    assert stage_write_interval(cfg.openfoam, stages(cfg)[0]) == pytest.approx(60.0)
 
 
 def test_a_flow_courant_limit_below_that_of_the_surface_is_refused():
@@ -701,6 +716,162 @@ def test_a_rigid_lid_built_in_the_same_folder_removes_the_level(tmp_path):
     write_fields(_M(), _Cfg(mode="rigid-lid"), tmp_path, outflow_stage=0.715,
                  discharges={"inlet-1": 0.135})
     assert not (tmp_path / "constant" / "hRef").exists()
+
+
+# --------------------------------------------------------------------------- #
+# the result seen from above
+# --------------------------------------------------------------------------- #
+
+
+def _plan_columns(depth=0.5):
+    from axqua.solvers.openfoam.planview import Columns
+
+    mesh = _two_phase_mesh(depth=depth)
+    return mesh, Columns.of(mesh)
+
+
+def test_the_depth_of_a_column_is_the_water_of_its_cells():
+    """Water fraction times thickness, summed over the column, and the velocity
+    weighted with it: the seed read back is the depth and the velocity it was made
+    from."""
+    from axqua.solvers.openfoam.fields import initial_alpha
+    from axqua.solvers.openfoam.planview import depth_average
+
+    mesh, columns = _plan_columns(depth=0.5)
+    alpha = initial_alpha(mesh)
+    velocity = np.tile([0.8, -0.6, 0.3], (mesh.n_cells, 1)) * alpha[:, None]
+    view = depth_average(columns, alpha, velocity, time="40")
+    np.testing.assert_allclose(view.depth, 0.5, atol=1e-9)
+    # the mixture of an interface cell moves with one velocity, so the mean of the
+    # water is below the 1.0 m/s of the full cells only by what those cells hold
+    assert np.all(view.speed <= 1.0 + 1e-9) and np.all(view.speed > 0.8)
+    summary = view.summary()
+    assert summary["wetted_area"] == pytest.approx(8.0)
+    assert summary["volume"] == pytest.approx(4.0)
+    assert summary["mean_depth"] == pytest.approx(0.5)
+    assert summary["time"] == 40.0
+
+
+def test_traces_of_water_in_the_air_do_not_make_a_column_wet():
+    from axqua.solvers.openfoam.planview import depth_average
+
+    mesh, columns = _plan_columns()
+    alpha = np.full(mesh.n_cells, 1e-3)          # a thousandth everywhere: 1 mm
+    velocity = np.tile([3.0, 0.0, 0.0], (mesh.n_cells, 1))
+    view = depth_average(columns, alpha, velocity, wet_depth=0.01)
+    assert view.depth.max() == 0.0 and view.speed.max() == 0.0
+
+
+def test_a_field_is_read_whether_it_was_written_in_binary_or_as_text(tmp_path):
+    from axqua.solvers.openfoam.planview import read_cells
+
+    values = np.arange(12, dtype=float).reshape(4, 3) / 7.0
+    head = ("FoamFile\n{\n    format      %s;\n    class       volVectorField;\n}\n"
+            "dimensions [0 1 -1 0 0 0 0];\n\ninternalField   nonuniform List<vector> \n4\n(")
+    (tmp_path / "binary").write_bytes(
+        (head % "binary").encode() + values.astype("<f8").tobytes()
+        + b")\n;\n\nboundaryField\n{\n}\n")
+    rows = "\n".join("(%.17g %.17g %.17g)" % tuple(row) for row in values)
+    (tmp_path / "text").write_text(
+        (head % "ascii") + "\n" + rows + "\n)\n;\n\nboundaryField\n{\n"
+        "    bed { type noSlip; value uniform (9 9 9); }\n}\n")
+    np.testing.assert_allclose(read_cells(tmp_path / "binary", 4), values)
+    np.testing.assert_allclose(read_cells(tmp_path / "text", 4), values)
+    (tmp_path / "uniform").write_text("internalField   uniform 1;\n")
+    np.testing.assert_allclose(read_cells(tmp_path / "uniform", 3), [1.0, 1.0, 1.0])
+    from axqua.core.errors import SolverError
+
+    with pytest.raises(SolverError, match="4 values for a mesh of 5 cells"):
+        read_cells(tmp_path / "binary", 5)
+
+
+def test_the_lattice_is_saved_with_the_case_and_read_back(tmp_path):
+    from axqua.solvers.openfoam.planview import COLUMNS_FILE, Columns
+
+    mesh, columns = _plan_columns()
+    assert columns.save(tmp_path).name == COLUMNS_FILE
+    back = Columns.load(tmp_path)
+    assert back.n_cells == mesh.n_cells and back.n_columns == 8
+    np.testing.assert_array_equal(back.cell_column, columns.cell_column)
+    np.testing.assert_allclose(back.thickness, columns.thickness, rtol=1e-6)
+    np.testing.assert_allclose(back.thickness.reshape(8, -1).sum(axis=1), 1.0, rtol=1e-6)
+    from axqua.core.errors import ConfigError
+
+    with pytest.raises(ConfigError, match="Build the OpenFOAM case again"):
+        Columns.load(tmp_path / "elsewhere")
+
+
+def test_the_plan_view_is_a_result_a_build_can_start_from(tmp_path):
+    """One node per column with the variables of a TELEMAC result: QGIS draws it like
+    one, and State2D reads it, so a coarse 3D model can seed a finer one."""
+    from axqua.core.selafin import read_slf
+    from axqua.solvers.openfoam.fields import initial_alpha
+    from axqua.solvers.openfoam.hotstart import State2D
+    from axqua.solvers.openfoam.planview import depth_average, write_slf
+
+    mesh, columns = _plan_columns(depth=0.5)
+    alpha = initial_alpha(mesh)
+    velocity = np.tile([0.8, 0.0, 0.0], (mesh.n_cells, 1))
+    path = write_slf(depth_average(columns, alpha, velocity, time="1500"),
+                     tmp_path / "depth-averaged.slf")
+    data = read_slf(path)
+    assert {"WATER DEPTH", "FREE SURFACE", "BOTTOM", "VELOCITY U", "VELOCITY V",
+            "SCALAR VELOCITY"} <= set(data["var_names"])
+    assert data["x"].size == 8 and data["ikle"].shape == (6, 3)   # 3 squares of 4 x 2
+    p = np.stack([data["x"], data["y"]], axis=1)[data["ikle"]]
+    area = ((p[:, 1, 0] - p[:, 0, 0]) * (p[:, 2, 1] - p[:, 0, 1])
+            - (p[:, 2, 0] - p[:, 0, 0]) * (p[:, 1, 1] - p[:, 0, 1]))
+    assert np.all(area > 0)                                         # counter-clockwise
+    state = State2D.from_slf(path)
+    np.testing.assert_allclose(state.depth, 0.5, atol=1e-9)
+    np.testing.assert_allclose(state.surface - state.bottom, 0.5, atol=1e-9)
+    np.testing.assert_allclose(state.u, 0.8, atol=1e-9)
+    assert state.velocity_scale() == pytest.approx(0.8)
+
+
+def test_the_latest_time_is_the_last_folder_with_a_result(tmp_path):
+    from axqua.solvers.openfoam.planview import latest_time
+
+    assert latest_time(tmp_path) is None
+    for name, with_result in (("0", True), ("50", True), ("100", True), ("1500", False),
+                              ("constant", False)):
+        (tmp_path / name).mkdir()
+        if with_result:
+            (tmp_path / name / "U").write_text("")
+    assert latest_time(tmp_path) == "100"      # 1500 is still being written, 0 is the seed
+
+
+def test_the_plan_view_is_listed_for_qgis_with_the_styles_of_a_2d_result(tmp_path):
+    from axqua.solvers.openfoam.backend import OpenFoamBackend
+    from axqua.solvers.openfoam.planview import RESULT_NAME
+
+    case_dir = tmp_path / "openfoam"
+    case_dir.mkdir()
+    (case_dir / RESULT_NAME).write_bytes(b"")
+
+    class _Cfg:
+        openfoam_case_dir = case_dir
+
+    class _Ctx:
+        class spec:
+            capability = None
+
+            class meta:
+                verb = "run"
+
+        def __init__(self):
+            self.records = []
+
+        def record(self, name, path, **kwargs):
+            self.records.append((name, Path(path).name, kwargs))
+
+    ctx = _Ctx()
+    OpenFoamBackend().export_qgis_results(_Cfg(), ctx)
+    listed = {name: kwargs for name, file, kwargs in ctx.records if file == RESULT_NAME}
+    assert listed["OpenFOAM result (depth-averaged)"] == {
+        "kind": "mesh", "style": "water-depth", "variable": "WATER DEPTH"}
+    assert listed["OpenFOAM result (depth-averaged) - velocity"]["variable"] == "SCALAR VELOCITY"
+    assert ctx.records[0][1] == RESULT_NAME      # what QGIS draws comes first
 
 
 # --------------------------------------------------------------------------- #

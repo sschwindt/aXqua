@@ -30,7 +30,7 @@ import numpy as np
 from axqua.config import Config
 from axqua.core.capabilities import refresh_markers
 from axqua.solvers.openfoam import (dicts, fields, mesh as ofmesh,
-                                    potential, quality)
+                                    planview, potential, quality)
 from axqua.solvers.openfoam.hotstart import State2D, load_hotstart
 from axqua.solvers.openfoam.polymesh import write_polymesh
 
@@ -210,6 +210,9 @@ def build_case(cfg: Config, *, state: State2D | None = None,
                      f"({DEFAULT_VELOCITY_CAP_FACTOR:g}x the reach's p95 water speed)")
 
     polymesh_dir = write_polymesh(of_mesh.polymesh, case_dir)
+    # which column each cell is in and how thick it is: what a view of the result
+    # from above needs, saved here so that it never depends on a second build
+    planview.Columns.of(of_mesh).save(case_dir)
     if potential.is_potential(cfg):
         # Leg C: single phase, the free surface carried as `zeta` on the top
         # boundary rather than resolved as an interface. Different field set
