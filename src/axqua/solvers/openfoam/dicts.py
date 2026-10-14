@@ -86,10 +86,11 @@ def stages(cfg, *, single: bool = False) -> list[Stage]:
     (``calibration._prespin_template``) and promoted into the template's ``0/``.
     """
     of = cfg.openfoam
+    compression = float(getattr(of, "interface_compression", 1.0))
     if single and of.mode != "rigid-lid":
         return [Stage(name="run", start_from="startTime", end_time=of.end_time,
                       max_courant=of.max_courant,
-                      alpha_scheme="Gauss vanLeer", c_alpha=1.0,
+                      alpha_scheme="Gauss vanLeer", c_alpha=compression,
                       velocity_scheme="Gauss limitedLinearV 1",
                       n_outer_correctors=2,
                       purpose="production run from a pre-spun interface "
@@ -114,14 +115,14 @@ def stages(cfg, *, single: bool = False) -> list[Stage]:
               # altogether instead smears it over 30 s of spin-up, which is just as
               # unhelpful. ESI carries the coefficient as `cAlpha` in fvSolution,
               # not as a trailing number on the scheme the way Foundation did.
-              alpha_scheme="Gauss vanLeer", c_alpha=0.5,
+              alpha_scheme="Gauss vanLeer", c_alpha=0.5 * compression,
               velocity_scheme="Gauss upwind",
               n_outer_correctors=3,
               purpose="settle the interface and the vertical profile from the "
                       "depth-averaged 2D hotstart"),
         Stage(name="run", start_from="latestTime", end_time=of.end_time,
               max_courant=of.max_courant,
-              alpha_scheme="Gauss vanLeer", c_alpha=1.0,
+              alpha_scheme="Gauss vanLeer", c_alpha=compression,
               velocity_scheme="Gauss limitedLinearV 1",
               n_outer_correctors=2,
               purpose="production run at the full Courant number"),

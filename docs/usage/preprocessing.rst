@@ -159,5 +159,7 @@ To build the OpenFOAM model in the plugin, click *Build* in the box *Free surfac
      pressure_correctors: 2
      non_orthogonal_correctors: 1
 
+**Sharpness of the water surface.** In a shallow river, the water surface of a ``vof`` run spreads over several cells. The layers of the mesh follow the bed, and the surface crosses them wherever the bed slopes. On the Isar example with 1 m cells and 14 layers, about a third of the water was in completely filled cells, and the transition from water to air was about as high as the water was deep. The setting ``interface_compression`` (1 by default) sets how strongly OpenFOAM keeps the surface together. With 2, the transition on the Isar example with 2 m cells was half as high, at a third more time steps. Traces of water in a smeared surface also leave the model with the air through its top. aXqua reports this loss after each run as a share of the discharge and includes it in the discharge balance.
+
 The simulated time a model needs to reach a steady state depends on how much water the reach has to store or release before inflow and outflow agree. A 3D model has a different resistance than the 2D model it starts from, and the difference in stored water drains slowly through pools and side channels. On the Isar example, the model with 2 m cells needed about 3000 s of simulated time until the outflow exceeded the inflow by less than 1 %.
 

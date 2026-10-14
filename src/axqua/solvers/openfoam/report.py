@@ -59,14 +59,23 @@ class DischargeHistory:
     #: True when the case runs under a rigid lid. The balance is then STRUCTURAL,
     #: not evidence of anything - see :meth:`lines`.
     rigid_lid: bool = False
+    #: Water leaving through the open top (the ``lidLeak`` monitor), positive out;
+    #: None for a run without that monitor. It is part of the balance: a run that
+    #: loses water through the top is steady when inflow = outflow + that loss, and
+    #: whether the loss is acceptable is the surface verdict's question.
+    top: np.ndarray | None = None
 
     @property
     def imbalance(self) -> np.ndarray:
-        """Relative ``|Q_in| - |Q_out|`` over ``|Q_in|``, the same measure as in 2D."""
+        """Relative ``|Q_in| - |Q_out|`` over ``|Q_in|``, the same measure as in 2D.
+
+        Less the water that leaves through the top, where the run has that monitor.
+        """
         if self.inflow is None or self.outflow is None:
             return np.zeros(0)
         denom = np.where(np.abs(self.inflow) > 1e-12, np.abs(self.inflow), np.nan)
-        return (np.abs(self.inflow) - np.abs(self.outflow)) / denom
+        lost = self.top if self.top is not None else 0.0
+        return (np.abs(self.inflow) - np.abs(self.outflow) - lost) / denom
 
     @property
     def final_imbalance(self) -> float | None:
@@ -126,6 +135,9 @@ class DischargeHistory:
                        f"(prescribed {self.target:g})")
             out.extend(self._delivery_lines())
             out.append(f"  outflow total: {np.abs(self.outflow[-1]):8.4f} m3/s")
+            if self.top is not None:
+                out.append(f"  through top  : {self.top[-1]:8.4f} m3/s "
+                           f"(mean of last 10: {self.top[-10:].mean():.4f})")
             out.append(f"  imbalance    : {100 * imb[-1]:+8.3f}% "
                        f"(tolerance {100 * self.tolerance:g}%)")
         if self.rigid_lid:
@@ -254,11 +266,17 @@ def analyse(cfg, case_dir: str | Path | None = None, *,
 
     inlets = [v for k, v in per_patch.items() if k.startswith("inlet")]
     outlets = [v for k, v in per_patch.items() if k.startswith("outlet")]
+    top = None
+    leak_dir = case_dir / "postProcessing" / "lidLeak"
+    if not rigid_lid and leak_dir.is_dir():
+        t, v = _concat_monitor(sorted(leak_dir.iterdir(), key=lambda p: _as_float(p.name)))
+        if t.size:
+            top = np.interp(base, t, v)
     history = DischargeHistory(
         time=base, per_patch=per_patch, target=target, tolerance=tolerance,
         inflow=np.sum(inlets, axis=0) if inlets else None,
         outflow=np.sum(outlets, axis=0) if outlets else None,
-        rigid_lid=rigid_lid,
+        rigid_lid=rigid_lid, top=top,
     )
     if history.inflow is not None and history.outflow is not None:
         _find_steady(history)
@@ -299,7 +317,9 @@ WALL_CONTACT_TOLERANCE = 0.02    # of the banks patch area
 #: that reads as noise - while venting FIFTEEN TIMES the discharge. The pressure
 #: outlet silently replaced what left, so the domain ran a steady spurious
 #: circulation and every other diagnostic stayed healthy. 1% is already generous:
-#: a lid is a boundary water has no business crossing at all.
+#: a lid is a boundary water has no business crossing at all. Judged on the mean
+#: over the second half of the run, not on one sample: the Isar example at 1 m lost
+#: 0.8 % on average with single samples of 1.7 %.
 LID_LEAK_TOLERANCE = 0.01        # of the prescribed discharge
 
 
@@ -312,6 +332,7 @@ class SurfaceFreedom:
     lid_total: float = 0.0       # the top patch's own area [m2]
     wall_total: float = 0.0      # the banks patch's own area [m2]
     lid_leak: float = 0.0        # peak water flux OUT through the lid [m3/s]
+    lid_leak_mean: float = 0.0   # its mean over the second half of the run [m3/s]
     discharge: float = 0.0       # the prescribed discharge, to scale the leak against
     prescribed: bool = False     # rigid lid: the surface never had freedom to lose
     measured: bool = False       # were the monitors there to read at all?
@@ -332,13 +353,26 @@ class SurfaceFreedom:
 
     @property
     def leak_fraction(self) -> float:
-        """Water lost through the lid, over the discharge the case prescribes."""
+        """Water lost through the lid in the second half of the run, over the
+        discharge the case prescribes."""
+        return self.lid_leak_mean / self.discharge if self.discharge > 0 else 0.0
+
+    @property
+    def peak_leak_fraction(self) -> float:
         return self.lid_leak / self.discharge if self.discharge > 0 else 0.0
 
     @property
+    def touched_lid(self) -> bool:
+        """The surface itself reached the lid: the freeboard was too small."""
+        return self.lid_fraction > LID_CONTACT_TOLERANCE
+
+    @property
+    def leaking(self) -> bool:
+        return self.leak_fraction > LID_LEAK_TOLERANCE
+
+    @property
     def hit_lid(self) -> bool:
-        return (self.lid_fraction > LID_CONTACT_TOLERANCE
-                or self.leak_fraction > LID_LEAK_TOLERANCE)
+        return self.touched_lid or self.leaking
 
     @property
     def hit_wall(self) -> bool:
@@ -361,14 +395,20 @@ class SurfaceFreedom:
         if not self.measured:
             return []
         of = cfg.openfoam
+        traces = (f"; water left through the top as traces in the air: "
+                  f"{self.leak_fraction:.2%} of the discharge over the second half "
+                  f"of the run, at most {self.peak_leak_fraction:.2%}"
+                  if self.lid_leak_mean > 0 else "")
         if self.free:
             return [f"surface   : free - it stayed clear of the lid "
-                    f"({self.lid_fraction:.2%} of that patch ever wet, leaking "
-                    f"{self.leak_fraction:.2%} of the discharge) and of the "
+                    f"({self.lid_fraction:.2%} of that patch ever wet) and of the "
                     f"lateral wall ({self.wall_fraction:.2%}), so the 2D seed bounded "
-                    "it without constraining it"]
-        out = ["surface   : ! CONSTRAINED by the mesh, not by the flow"]
-        if self.hit_lid:
+                    f"it without constraining it{traces}"]
+        if self.touched_lid or self.hit_wall:
+            out = ["surface   : ! CONSTRAINED by the mesh, not by the flow"]
+        else:
+            out = ["surface   : ! WATER LEAVES THROUGH THE TOP of the model"]
+        if self.touched_lid:
             out.append(f"  water reached the lid over up to {self.lid_area:,.1f} m2 "
                        f"({self.lid_fraction:.1%} of it). The freeboard "
                        f"({of.freeboard:g} m) was too small, so the surface could not "
@@ -377,11 +417,21 @@ class SurfaceFreedom:
             if self.lid_leak > 0:
                 out.append(
                     f"  and it did not merely touch: up to {self.lid_leak:,.3f} m3/s "
-                    f"LEFT through the lid, {self.leak_fraction:.0%} of the "
+                    f"LEFT through the lid, {self.peak_leak_fraction:.0%} of the "
                     f"{self.discharge:g} m3/s this case prescribes. Whatever leaves "
                     "that way is replaced through the pressure outlet, so the domain "
                     "carries a spurious circulation of that size while the discharge "
                     "balance still closes. Read no velocity or level off this run.")
+        elif self.leaking:
+            out.append(
+                f"  {self.lid_leak_mean:,.3f} m3/s left through the top over the second "
+                f"half of the run ({self.leak_fraction:.1%} of the {self.discharge:g} "
+                f"m3/s this case prescribes, at most {self.lid_leak:,.3f} m3/s), "
+                f"although the surface stayed clear of it ({self.lid_fraction:.2%} "
+                "of the top ever wet). It leaves as traces of water in the air that "
+                "enters and leaves through the top, which is what a surface smeared "
+                "over several cells gives. The discharge along the reach is short by "
+                "that much, and the balance above counts it.")
         if self.hit_wall:
             out.append(f"  water reached the lateral wall over up to "
                        f"{self.wall_area:,.1f} m2 ({self.wall_fraction:.1%} of it, "
@@ -421,7 +471,7 @@ def surface_freedom(cfg, case_dir: str | Path | None = None) -> SurfaceFreedom:
     # negative sample is air being drawn back in, which is what an atmosphere patch
     # is for. Older runs have no lidLeak folder at all, and read as zero rather than
     # as a failure - the area check still stands on its own.
-    leaked = leak[0] if leak is not None else np.zeros(0)
+    leaked = np.maximum(leak[0], 0.0) if leak is not None else np.zeros(0)
     # The lid/wall monitors are always written, so "both empty after the spin-up
     # filter" means the run has not got there yet - not that nothing happened.
     settled = bool(lid[0].size or wall[0].size)
@@ -429,7 +479,8 @@ def surface_freedom(cfg, case_dir: str | Path | None = None) -> SurfaceFreedom:
         settled=settled,
         lid_area=float(np.max(lid[0])) if lid[0].size else 0.0,
         wall_area=float(np.max(wall[0])) if wall[0].size else 0.0,
-        lid_leak=float(np.max(np.maximum(leaked, 0.0))) if leaked.size else 0.0,
+        lid_leak=float(np.max(leaked)) if leaked.size else 0.0,
+        lid_leak_mean=float(leaked[leaked.size // 2:].mean()) if leaked.size else 0.0,
         # Defensively: this is a diagnostic, and a verdict that raises because a
         # config is missing a field is worse than one that cannot scale the leak.
         discharge=float(getattr(getattr(cfg, "boundaries", None),
@@ -633,6 +684,8 @@ def _write_csv(history: DischargeHistory, path: Path) -> Path:
         data["Q_in_m3s"] = np.abs(history.inflow)
     if history.outflow is not None:
         data["Q_out_m3s"] = np.abs(history.outflow)
+        if history.top is not None:
+            data["Q_top_m3s"] = history.top
         data["relative_imbalance"] = history.imbalance
     pd.DataFrame(data).to_csv(path, index=False)
     log.info("wrote %s", path)
@@ -648,6 +701,8 @@ def _write_plot(history: DischargeHistory, path: Path) -> Path | None:
     fig, (ax_q, ax_i) = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
     for name, values in history.per_patch.items():
         ax_q.plot(history.time, np.abs(values), lw=1.2, label=name)
+    if history.top is not None:
+        ax_q.plot(history.time, history.top, lw=1.2, color="0.4", label="through the top")
     if history.target:
         ax_q.axhline(history.target, color="k", ls="--", lw=1,
                      label=f"prescribed {history.target:g} m3/s")

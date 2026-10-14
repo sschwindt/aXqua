@@ -131,5 +131,5 @@ Before the first ``vof`` run of a new case, run the model once in the mode ``rig
 
 The coarse and the fine model need different folders. The entry ``project.openfoam_dir`` in the case file of the coarse model gives it its own folder, while both case files share the TELEMAC model.
 
-On the Isar example (lww-134, 16 processor cores), the model with 2 m cells and 8 layers (56,000 cells) computed 3000 s of simulated time in 2.3 hours on 8 cores while the computer was shared with another simulation. The model with 1 m cells and 14 layers (290,000 cells) started from its result computes about 100 s of simulated time in 17 minutes on 16 cores.
+On the Isar example, the model with 2 m cells and 8 layers (56,000 cells) computed 3000 s of simulated time in 2.3 hours on 8 processor cores. The model with 1 m cells and 14 layers (290,000 cells) started from its result computed 1500 s in 9.1 hours on 16 cores; its outflow stayed within 1 % of the inflow after 500 s. Both ran while another simulation used the other half of the computer.
 

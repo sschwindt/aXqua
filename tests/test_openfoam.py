@@ -304,6 +304,22 @@ def test_stage_schemes_differ_in_compression_not_in_kind():
         assert "wallDist" in fv_schemes(cfg, stage)     # kOmegaSST needs it
 
 
+def test_the_compression_of_the_surface_is_a_setting_of_the_case():
+    """Twice the usual compression halved the smearing of the surface on the Isar
+    example; the spin-up keeps half of whatever the production stage uses."""
+    from axqua.config import OpenFoam
+    from axqua.solvers.openfoam.dicts import fv_solution, stages
+
+    cfg = _Cfg(interface_compression=2.0)
+    spinup, run = stages(cfg)
+    assert "cAlpha          1;" in fv_solution(cfg, spinup)
+    assert "cAlpha          2;" in fv_solution(cfg, run)
+    (single,) = stages(cfg, single=True)
+    assert single.c_alpha == 2.0
+    with pytest.raises(ValueError, match="interface_compression"):
+        OpenFoam(interface_compression=-1.0).validate()
+
+
 def test_time_step_estimate_is_calibrated_against_measured_runs():
     """The estimate must reproduce what interFoam settles on.
 
@@ -1782,6 +1798,78 @@ def test_a_lid_touched_without_leaking_is_not_a_leak_finding(tmp_path):
     verdict = surface_freedom(_WithQ(), tmp_path)
     assert verdict.lid_leak == pytest.approx(0.0005)
     assert not verdict.hit_lid and verdict.free
+
+
+def _top_monitors(tmp_path, leak, *, contact=0.04):
+    """The monitors of a run of 2.4 m3/s whose surface never reached the top."""
+    for name, values, area in (("lidContact", [contact] * len(leak), 20892.0),
+                               ("wallContact", [0.0] * len(leak), 5000.0),
+                               ("lidLeak", leak, 20892.0)):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            f"# Area   : {area}\n# Time\tvalue\n"
+            + "".join(f"{100 + 5 * i}\t{v}\n" for i, v in enumerate(values)))
+
+    class _WithQ(_Cfg):
+        class boundaries:
+            prescribed_flowrate = 2.4
+
+    return _WithQ()
+
+
+def test_water_lost_as_traces_in_the_air_is_not_a_freeboard_finding(tmp_path):
+    """The Isar example at 1 m lost water through the top for the whole run while
+    its surface never came near it (0.04 m2 of 20,892 m2 of the top ever wet). The
+    verdict blamed the freeboard and said "up to 0.0 m2"; the water left as traces
+    of alpha in the air, which a higher lid does not address."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    cfg = _top_monitors(tmp_path, [0.041, 0.035, 0.030, 0.030])
+    verdict = surface_freedom(cfg, tmp_path)
+    assert not verdict.touched_lid and verdict.leaking and not verdict.free
+    assert verdict.lid_leak == pytest.approx(0.041)                # the peak
+    assert verdict.leak_fraction == pytest.approx(0.030 / 2.4)     # the second half
+    text = " ".join(verdict.lines(cfg))
+    assert "THROUGH THE TOP" in text and "traces of water in the air" in text
+    assert "freeboard" not in text and "CONSTRAINED" not in text
+
+
+def test_a_loss_below_the_tolerance_is_reported_with_a_free_surface(tmp_path):
+    """Judged on the mean, not on one sample: 0.8 % on average with single samples
+    of 1.7 % is a free surface that loses 0.8 %, and the line says so."""
+    from axqua.solvers.openfoam.report import surface_freedom
+
+    cfg = _top_monitors(tmp_path, [0.041, 0.019, 0.019, 0.020])
+    verdict = surface_freedom(cfg, tmp_path)
+    assert verdict.free
+    text = " ".join(verdict.lines(cfg))
+    assert "free" in text and "0.81%" in text and "1.71%" in text
+
+
+def test_the_balance_counts_the_water_that_leaves_through_the_top(tmp_path):
+    """A run that loses water through the top is steady when the inflow equals the
+    outflow plus that loss. Without it the balance of the Isar example could not
+    close and the report asked for a longer run that would not have helped."""
+    from axqua.solvers.openfoam.report import analyse
+
+    n = 12
+    for name, value in (("Q_inlet_1", -2.4), ("Q_outlet_1", 2.38), ("lidLeak", 0.02)):
+        d = tmp_path / "postProcessing" / name / "0"
+        d.mkdir(parents=True)
+        (d / "surfaceFieldValue.dat").write_text(
+            "# Area   : 10\n# Time\tvalue\n"
+            + "".join(f"{100 + 5 * i}\t{value}\n" for i in range(n)))
+
+    class _WithQ(_Cfg):
+        class boundaries:
+            prescribed_flowrate = 2.4
+
+    history = analyse(_WithQ(), tmp_path)
+    assert history.top is not None
+    np.testing.assert_allclose(history.imbalance, 0.0, atol=1e-12)
+    assert history.converged
+    assert any("through top" in line for line in history.lines())
 
 
 def test_an_old_run_without_the_leak_monitor_still_reads(tmp_path):

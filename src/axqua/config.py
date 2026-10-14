@@ -1848,6 +1848,12 @@ class OpenFoam:
     # production stage: 18 with the defaults, 8 with 2 and 1.
     pressure_correctors: int = 3
     non_orthogonal_correctors: int = 2
+    # Interface compression (cAlpha) of the production stage; the spin-up uses half
+    # of it. 1 is the usual value. In a shallow reach the surface crosses the layers
+    # that follow the bed wherever the bed slopes and is smeared there: on the Isar
+    # example (2 m lattice, 8 layers, 40 s) 1 left 19 % of the water in full cells
+    # and a surface 0.26 m thick, 2 left 39 % and 0.12 m, at a third more steps.
+    interface_compression: float = 1.0
     # Cap on |U| enforced by the limitVelocity fvConstraint. Water never reaches it;
     # an air jet does, and this is the most effective single stop on the air phase
     # collapsing the time step. None -> 5x the expected water velocity.
@@ -1896,6 +1902,8 @@ class OpenFoam:
             raise ValueError("openfoam.pressure_correctors must be at least 1")
         if self.non_orthogonal_correctors < 0:
             raise ValueError("openfoam.non_orthogonal_correctors must not be negative")
+        if self.interface_compression < 0:
+            raise ValueError("openfoam.interface_compression must not be negative")
         if self.max_flow_courant is not None and self.max_flow_courant < self.max_courant:
             raise ValueError(
                 f"openfoam.max_flow_courant ({self.max_flow_courant:g}) is smaller than "
