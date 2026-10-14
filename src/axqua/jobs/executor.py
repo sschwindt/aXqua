@@ -342,6 +342,15 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
     """
     if spec.kind not in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD):
         return {}
+    named = getattr(spec.options, "hotstart", None)
+    if named:
+        # The job names the result to start from (a 2D result of another situation,
+        # or the view from above of a coarser 3D run), and the build takes it in
+        # place of the seed. Preparing the seed anyway reported a result that was not
+        # used and, in a case without one, started a TELEMAC pre-run for nothing.
+        log.info("seed: the result named in the job, %s", named)
+        ctx.sink.step("seed", done=True)
+        return {}
     from axqua import prerun
     enabled = getattr(spec.options, "pre_run", None)
     try:

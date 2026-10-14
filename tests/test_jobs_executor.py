@@ -460,3 +460,24 @@ def test_nothing_in_jobs_imports_a_solver_except_the_executor():
     offenders = [p.relative_to(root) for p in root.rglob("*.py")
                  if p.name != "executor.py" and pattern.search(p.read_text("utf-8"))]
     assert offenders == []
+
+
+def test_a_build_that_names_its_hotstart_prepares_no_seed(monkeypatch):
+    """The build takes the result the job names in place of the seed, so preparing
+    the seed anyway reported a result that was not used and, in a case without a 2D
+    result, started a TELEMAC pre-run for nothing."""
+    from types import SimpleNamespace
+
+    from axqua import prerun
+    from axqua.jobs.model import OpenFoamBuildOptions
+
+    def _no_seed(*args, **kwargs):
+        raise AssertionError("the seed must not be prepared")
+
+    monkeypatch.setattr(prerun, "ensure_seed", _no_seed)
+    steps = []
+    ctx = SimpleNamespace(sink=SimpleNamespace(step=lambda name, **kw: steps.append(name)))
+    spec = SimpleNamespace(kind=JobKind.OPENFOAM_BUILD,
+                           options=OpenFoamBuildOptions(hotstart="coarse/depth-averaged.slf"))
+    assert executor._pre_step(spec, object(), ctx) == {}
+    assert steps == ["seed"]

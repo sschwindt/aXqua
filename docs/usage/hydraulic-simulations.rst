@@ -116,3 +116,20 @@ In a terminal, the commands are:
    axqua submit <case-file> --kind openfoam-run
 
 Before the first ``vof`` run of a new case, run the model once in the mode ``rigid-lid`` with a coarse mesh (``cell_size_factor`` of 3 to 5). This run takes minutes and reveals most setup errors.
+
+**The result seen from above.** After a run, aXqua sums the water of each column of the mesh and writes the water depth and the depth-averaged velocity of the last time step into the file ``depth-averaged.slf`` in the folder of the OpenFOAM model. The file has the same variables as a TELEMAC result. *Load results* on the sub-tab *OpenFOAM* adds it to the map with the same styles as a 2D result, so that the two models can be compared directly. The complete three-dimensional result is opened in ParaView with the file ``case.foam`` in the same folder.
+
+**Starting a fine model from a coarse one.** A three-dimensional model often has a lower or higher resistance than the 2D model it starts from, so that the water level of the whole reach has to adjust. That takes thousands of seconds of simulated time, and on a fine mesh, this costs days. It is faster to let a coarse model reach the steady state first and to start the fine model from its result:
+
+#. Build and run the model with a large ``cell_size``, for example 2 m with 8 layers, and a long ``end_time``. Check in the report that inflow and outflow agree.
+#. Build the fine model with the option ``hotstart`` set to the file ``depth-averaged.slf`` of the coarse model, and run it. In a terminal:
+
+   .. code-block:: text
+
+      axqua submit <case-file> --kind openfoam-build --option hotstart=<folder of the coarse model>/depth-averaged.slf
+      axqua submit <case-file> --kind openfoam-run
+
+The coarse and the fine model need different folders. The entry ``project.openfoam_dir`` in the case file of the coarse model gives it its own folder, while both case files share the TELEMAC model.
+
+On the Isar example (lww-134, 16 processor cores), the model with 2 m cells and 8 layers (56,000 cells) computed 3000 s of simulated time in 2.3 hours on 8 cores while the computer was shared with another simulation. The model with 1 m cells and 14 layers (290,000 cells) started from its result computes about 100 s of simulated time in 17 minutes on 16 cores.
+

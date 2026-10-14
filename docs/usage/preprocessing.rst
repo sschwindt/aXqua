@@ -148,3 +148,16 @@ Instead of ``cell_size``, the entry ``cell_size_factor`` sets the horizontal cel
    axqua openfoam <case-file> --check
 
 To build the OpenFOAM model in the plugin, click *Build* in the box *Free surface (VOF)* on the sub-tab *OpenFOAM* of the tab *Hydraulic simulation*. The build reports the time step that the simulation will use and the resulting number of time steps, which indicates the computing time. The TELEMAC warm-up is active by default (``openfoam.pre_run.enabled``). With ``openfoam.pre_run.dimension: 3d``, the warm-up continues with a TELEMAC-3D run, so that the OpenFOAM model also starts with a vertical velocity distribution. This option requires a water depth of several horizontal cell sizes and is skipped with a message in shallow reaches.
+
+**Computing time.** The time step of a ``vof`` run is chosen by OpenFOAM from two limits: the Courant number at the water surface (``max_courant``, 0.9 by default) and the Courant number of the flow in all cells, which is the same number unless ``max_flow_courant`` sets a larger one. In a shallow river, the cells that reach the second limit first are air cells next to the waterline, where the cells are a few centimeters thick. Air needs no accuracy, so a value of 3 is reasonable; the water surface keeps its own limit. Each time step solves the pressure several times. ``pressure_correctors`` (3 by default) and ``non_orthogonal_correctors`` (2 by default) set how often, and values of 2 and 1 reduce the cost of a step by about 40 %. The following settings were used for the Isar example and gave the same result as the defaults in a comparison over 40 s of simulated time:
+
+.. code-block:: yaml
+
+   openfoam:
+     max_courant: 0.9
+     max_flow_courant: 3.0
+     pressure_correctors: 2
+     non_orthogonal_correctors: 1
+
+The simulated time a model needs to reach a steady state depends on how much water the reach has to store or release before inflow and outflow agree. A 3D model has a different resistance than the 2D model it starts from, and the difference in stored water drains slowly through pools and side channels. On the Isar example, the model with 2 m cells needed about 3000 s of simulated time until the outflow exceeded the inflow by less than 1 %.
+
