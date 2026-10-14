@@ -60,7 +60,7 @@ class DischargeHistory:
 
     @property
     def imbalance(self) -> np.ndarray:
-        """Relative |Q_in| - |Q_out| over |Q_in|, the same measure as in 2D."""
+        """Relative ``|Q_in| - |Q_out|`` over ``|Q_in|``, the same measure as in 2D."""
         if self.inflow is None or self.outflow is None:
             return np.zeros(0)
         denom = np.where(np.abs(self.inflow) > 1e-12, np.abs(self.inflow), np.nan)
@@ -68,7 +68,7 @@ class DischargeHistory:
 
     @property
     def final_imbalance(self) -> float | None:
-        """|relative imbalance| the run settled at - the number a study minimises.
+        """``|relative imbalance|`` the run settled at - the number a study minimises.
 
         The mean of the last ``STEADY_WINDOW`` finite samples, not the single last
         one: the same window already decides convergence, and one final sample on a

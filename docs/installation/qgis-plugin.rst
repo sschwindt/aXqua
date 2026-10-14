@@ -1,12 +1,19 @@
 QGIS plugin
 ===========
 
-The plugin is the graphical user interface of aXqua. It does not compute anything itself. It passes every task to the aXqua program, which runs as a separate process next to QGIS. Two installations are therefore required: the plugin in QGIS and the aXqua program in a Python environment.
+The plugin is the graphical user interface of aXqua. It does not compute anything itself. It passes every task to the aXqua program, which runs as a separate process next to QGIS. Two installations are therefore required: the plugin in QGIS and the aXqua program in a Python environment. The aXqua program is **not optional** - without it the plugin has nothing to pass work to - but it can be installed after the plugin, which is the order of the sections below, because the plugin only looks for it when a task is started.
 
 Install QGIS
 ------------
 
 Download QGIS from `qgis.org <https://qgis.org/download/>`_ and install it for the operating system in use. The plugin requires **QGIS 3.44 or newer**, including QGIS 4.
+
+Install the plugin
+------------------
+
+In QGIS, open *Plugins > Manage and Install Plugins*. In the *Settings* tab, tick *Show also experimental plugins*. Search for **aXqua** and click *Install Plugin*.
+
+Until the plugin is listed in the QGIS plugin repository, download the plugin archive (``.zip``) from the `releases page <https://github.com/sschwindt/aXqua/releases>`_ and install it with *Plugins > Manage and Install Plugins > Install from ZIP*.
 
 Install the aXqua program
 -------------------------
@@ -26,16 +33,13 @@ The last command prints the installed version and confirms that the program can 
 
 .. code-block:: bash
 
-   pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git@v1.9.0"
+   pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git"
+
+.. note::
+
+   **Always install the newest HydroBayesCal, and do not pin a version.** The command above deliberately names no tag, so it takes the current state of the repository. HydroBayesCal is developed alongside aXqua by the same group, and its releases are bugfixes plus *additive* features - existing behaviour is extended, never removed - so the newest is always the one to want, and a pinned tag only goes stale and withholds fixes. aXqua declares a minimum version and no maximum for the same reason, and checks for the *capabilities* it uses rather than comparing version numbers.
 
 aXqua can also be installed into the Python that ships with QGIS, provided that the packages listed above can be installed there. The separate environment is the tested route, and it keeps QGIS updates and aXqua updates independent of each other.
-
-Install the plugin
-------------------
-
-In QGIS, open *Plugins > Manage and Install Plugins*. In the *Settings* tab, tick *Show also experimental plugins*. Search for **aXqua** and click *Install Plugin*.
-
-Until the plugin is listed in the QGIS plugin repository, download the plugin archive (``.zip``) from the `releases page <https://github.com/sschwindt/aXqua/releases>`_ and install it with *Plugins > Manage and Install Plugins > Install from ZIP*.
 
 Connect the plugin to the aXqua program
 ---------------------------------------

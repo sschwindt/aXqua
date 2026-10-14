@@ -37,22 +37,30 @@ gui = ["streamlit>=1.30"]
 # An EXTRA rather than a core dependency: it pulls in bayesvalidrox, gpytorch and
 # scikit-learn, none of which is needed to build or run a TELEMAC case, which is what
 # most of axqua does.
-# >=1.4.2 is required, not merely preferred: that is the release that ships the
-# calibration drivers *with the package* (hydroBayesCal.copy_driver). Before it, the
-# drivers lived only in a source checkout, so axqua had to be told where that
-# checkout was via an environment variable - which broke whenever it moved or was
-# absent on a machine.
-# >=1.4.3 additionally hoists save_calibration_data into HydroSimulations, so the
-# "truth value of an array is ambiguous" crash on BAL's first iteration is fixed once
-# for every binding rather than per-binding, and the restart collocation-points CSV
-# that only_bal_mode reads is written by the shared path (axqua's --resume relies
-# on that restart data).
-# >=1.4.4 makes the MULTI-FLOW driver honour the config's `extraction` block. Before
-# it, that driver took run_complex_model's "mean_last" default regardless of the
-# configuration, so a multi-flow calibration averaged the last frames while a
-# single-flow one on the same config did not - the two were fitted to different data.
-# axqua emits `extraction` in config_Telemac.py (see calibration.emit_hbc_config),
-# which only reaches the multi-flow path from this release on.
+#
+# VERSION POLICY: a floor, never a ceiling. HydroBayesCal is developed alongside
+# axqua by the same group, and its releases are bugfixes plus ADDITIVE features -
+# nothing is removed. So the newest release is always the one to want, and an upper
+# bound would only stop a user getting a fix. `pip install 'axqua[calibration]'`
+# therefore resolves to the latest, and that is intended, not an oversight.
+#
+# The floor is the oldest release carrying a capability axqua actually uses, so a
+# too-old install fails at install time rather than halfway through a calibration.
+# What each step added, for the record:
+#   1.4.2  ships the calibration drivers WITH the package (hydroBayesCal.copy_driver);
+#          before it they lived only in a source checkout that axqua had to be told
+#          the location of, which broke whenever it moved.
+#   1.4.3  hoists save_calibration_data into HydroSimulations, fixing the "truth
+#          value of an array is ambiguous" crash on BAL's first iteration once for
+#          every binding, and writing the restart CSV that --resume relies on.
+#   1.4.4  makes the MULTI-FLOW driver honour the config's `extraction` block;
+#          before it, multi-flow silently averaged the last frames while single-flow
+#          on the same config did not, so the two were fitted to different data.
+#
+# Beyond the floor, axqua does NOT check versions: `hbc.require_hbc` tests for the
+# capability it needs (hasattr(hydroBayesCal, "copy_driver")). On an additive-only
+# upstream that is the right test - a version comparison would need editing on every
+# release, and would reject a valid newer one the moment the scheme changed.
 calibration = ["hydrobayescal>=1.8.1"]
 
 [project.scripts]

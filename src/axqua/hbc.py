@@ -57,8 +57,10 @@ def require_hbc():
     if not hasattr(hydroBayesCal, "copy_driver"):
         raise SystemExit(
             "The installed HydroBayesCal is too old: it does not ship the calibration "
-            "drivers with the package (hydroBayesCal.copy_driver is missing). "
-            "Upgrade with:  pip install -U 'hydrobayescal>=1.4.4'"
+            "drivers with the package (hydroBayesCal.copy_driver is missing).\n"
+            "Upgrade to the LATEST release - HydroBayesCal is bugfix-and-additive, so "
+            "newest is always the one to want and axqua never pins an upper bound:\n"
+            "    pip install -U hydrobayescal"
         )
     return hydroBayesCal
 
