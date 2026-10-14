@@ -2172,3 +2172,28 @@ def test_a_margin_that_leaves_a_slot_is_reported(caplog):
         split_outlet_above_tailwater(np.arange(5), centres, stage=0.45, margin=0.20,
                                      cell_size=0.1)
     assert "under two cells" in caplog.text
+
+
+def test_the_outlet_is_walled_at_the_level_the_build_resolved():
+    """Under stage_discharge the tailwater comes from the rating curve, and a case of
+    that kind has no prescribed_elevation: the Isar example was built without any
+    wall on its outlet. The level of a sub-model's crop face still comes first."""
+    from axqua.config import Boundaries, OpenFoam
+    from axqua.solvers.openfoam.mesh import _tailwater_for
+
+    class _Case:
+        openfoam = OpenFoam()
+        boundaries = Boundaries(outflow_condition="stage_discharge")
+
+    assert _tailwater_for(_Case(), "outlet-1") is None
+    assert _tailwater_for(_Case(), "outlet-1", 815.347) == pytest.approx(815.347)
+
+    class _Crop(_Case):
+        openfoam = OpenFoam(outlet_stage={"outlet-1": 0.715})
+
+    assert _tailwater_for(_Crop(), "outlet-1", 815.347) == pytest.approx(0.715)
+
+    class _Fixed(_Case):
+        boundaries = Boundaries(outflow_condition="elevation", prescribed_elevation=0.613)
+
+    assert _tailwater_for(_Fixed(), "outlet-1") == pytest.approx(0.613)

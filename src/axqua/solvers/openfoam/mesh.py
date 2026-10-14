@@ -560,11 +560,19 @@ def extrude(grid: PlanGrid, bed: np.ndarray, lid: np.ndarray, n_layers: int, *,
 # --------------------------------------------------------------------------- #
 
 
-def _tailwater_for(cfg, patch: str):
-    """The level this outlet holds, or None when the case prescribes none."""
+def _tailwater_for(cfg, patch: str, tailwater: float | None = None):
+    """The level this outlet holds, or None when the case prescribes none.
+
+    ``openfoam.outlet_stage`` first, then *tailwater*, the level the build resolved
+    from the outflow condition of the case (under ``stage_discharge`` the rating
+    curve at the discharge of the build, which ``prescribed_elevation`` does not
+    hold), then ``boundaries.prescribed_elevation``.
+    """
     stage = getattr(cfg.openfoam, "outlet_stage", None)
     if isinstance(stage, dict):
         stage = stage.get(patch)
+    if stage is None:
+        stage = tailwater
     if stage is None:
         stage = getattr(cfg.boundaries, "prescribed_elevation", None)
     return None if stage is None else float(stage)
@@ -1012,13 +1020,15 @@ def lid_steps(grid: PlanGrid, lid: np.ndarray, bed: np.ndarray, *,
     return float(np.median(ratio)), float(np.percentile(ratio, 99))
 
 
-def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> OpenFoamMesh:
+def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
+               tailwater: float | None = None) -> OpenFoamMesh:
     """Build the terrain-following hex mesh for *cfg*'s OpenFOAM case.
 
     *state* is an optional :class:`~axqua.solvers.openfoam.hotstart.State2D` (the
     converged TELEMAC 2D result). With one, the lid follows the free surface and the
     footprint can be trimmed to the wetted corridor; without one, the lid is flat and
-    the footprint is the whole ROI - correct, but far more air.
+    the footprint is the whole ROI - correct, but far more air. *tailwater* is the
+    level of the outflow the build resolved, above which an outlet is walled.
     """
     of = cfg.openfoam
     rigid = of.mode == "rigid-lid"
@@ -1224,14 +1234,19 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
 
     boundary = [(BED_PATCH, "wall", bed_owner, bed_quads)]
     banks = labels == BANKS_PATCH
+    # the height of each cell: the slot check of an outlet is about its LAYERS, which
+    # on a river lattice are a tenth of the plan spacing or less
+    level = z[column_corner_vertices(grid)].mean(axis=1)
+    cell_height = np.diff(level, axis=1)[cell_column, cell_layer]
     for name in liquid_names:
         sel = labels == name
         if name.startswith(OUTLET_PREFIX) and of.outlet_air_margin is not None:
-            stage = _tailwater_for(cfg, name)
+            stage = _tailwater_for(cfg, name, tailwater)
             if stage is not None:
+                owners = sides["owner"][sel]
                 keep, walled = split_outlet_above_tailwater(
-                    sides["owner"][sel], cell_centres, stage,
-                    of.outlet_air_margin, cell_size=dx)
+                    owners, cell_centres, stage, of.outlet_air_margin,
+                    cell_size=float(np.median(cell_height[owners])))
                 if walled.any():
                     index = np.flatnonzero(sel)
                     # the air part is a wall, so it joins the domain edge

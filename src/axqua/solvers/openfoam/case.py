@@ -163,7 +163,14 @@ def build_case(cfg: Config, *, state: State2D | None = None,
             "no steady discharge for the OpenFOAM build: set "
             "boundaries.prescribed_flowrate (m3/s) in case-config.yml.")
 
-    of_mesh = ofmesh.build_mesh(cfg, state=state)
+    # The level of the outflow is needed before the mesh, which walls an outlet above
+    # it; a stage per outlet patch (openfoam.outlet_stage) is read by the mesher.
+    tailwater = None
+    if of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
+        from axqua.hydraulics import resolve_outflow_wse
+
+        tailwater = float(resolve_outflow_wse(cfg, q))
+    of_mesh = ofmesh.build_mesh(cfg, state=state, tailwater=tailwater)
     notes = list(of_mesh.notes)
     if state is not None:
         warning = state.resolution_check(ofmesh.plan_spacing(cfg))
@@ -194,9 +201,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
     else:
-        from axqua.hydraulics import resolve_outflow_wse
-
-        stage = float(resolve_outflow_wse(cfg, q))
+        stage = tailwater
         notes.append(f"outlet stage {stage:.3f} m a.s.l. from "
                      f"boundaries.outflow_condition: {cfg.boundaries.outflow_condition}"
                      " - the same prescription the TELEMAC case uses")

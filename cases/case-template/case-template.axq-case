@@ -558,6 +558,12 @@ dem_of_difference:
 #   # p95 water speed. Water never reaches it; a runaway air jet does, and that is
 #   # what collapses the time step.
 #   # air_velocity_cap: 4.0
+#   # The outflow stays open up to its water level plus this margin [m] and is a
+#   # wall above it, so air enters and leaves only through the top. Open over its
+#   # whole height, the outflow let air circulate through the domain and, on
+#   # munich-vsf, finally drew water back in. Not zero: the surface at the outflow
+#   # has to stay free to move.
+#   # outlet_air_margin: 0.25
 #
 #   # ---- bed --------------------------------------------------------------
 #   # nutkRoughWallFunction needs the first cell CENTRE above the roughness crests,
@@ -754,3 +760,7 @@ calibration:
 #   image_width: 1600
 #   image_height: 1000
 #   animation_fps: 10
+#   # Top of the velocity color scale [m/s] in every figure of this case, the map
+#   # styles of the plugin included. 5 suits a lowland river; a chute or a fish
+#   # pass runs faster. The lowest depth drawn is hydrodynamics.wet_depth.
+#   # velocity_scale_max: 5.0
