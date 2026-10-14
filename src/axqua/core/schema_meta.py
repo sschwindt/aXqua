@@ -112,6 +112,20 @@ CURATED: dict[str, dict[str, Any]] = {
     "boundaries.inflow": _c("Hydrograph", "table",
                             help="Discharge over time. Only needed for an unsteady "
                                  "simulation."),
+    "hydrodynamics.wet_depth": _c(
+        "Minimum water depth", "number", unit="m",
+        help="Water shallower than this is not treated as surface flow: on a bed "
+             "with a Nikuradse roughness of 0.05-0.5 m, water 5 mm deep stands "
+             "inside the grain roughness rather than flowing over it. The reports "
+             "of aXqua and the map styles of the plugin both use this value, so "
+             "the picture and the report agree."),
+    "postproc.velocity_scale_max": _c(
+        "Velocity scale maximum", "number", unit="m/s",
+        help="Upper end of the velocity colour scale in every figure of this case. "
+             "Above about 5 m/s a depth-averaged river result is usually a "
+             "wetting/drying artefact in a nearly dry cell, and one such node sets "
+             "the scale and flattens the whole map. A chute or a fish pass runs "
+             "faster and wants a higher value."),
     "initialization.prewet_depth": _c(
         "Water depth at the start", "number", "m",
         help="Starts the simulation with water in the channel, which saves the time "

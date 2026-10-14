@@ -1905,11 +1905,25 @@ class PostProcessing:
     image_width: int = 1600
     image_height: int = 1000
     animation_fps: int = 10
+    #: Upper end of the velocity colour scale [m/s], for every figure of this case -
+    #: the plugin's map styles and the generated VisIt/ParaView scenes alike.
+    #:
+    #: A property of the REACH, not of the computer looking at it. 5 m/s suits a
+    #: lowland river, where a faster node is usually a wetting/drying artefact in a
+    #: nearly-dry cell and letting one such node set the scale flattens the whole map;
+    #: a chute or a fish pass genuinely runs faster and wants a higher number. The
+    #: lower end of the depth scale is not here because it already exists as
+    #: ``hydrodynamics.wet_depth``, which is the same threshold aXqua's own reports
+    #: use - that is the point of it.
+    velocity_scale_max: float = 5.0
 
     def validate(self) -> None:
         if self.backend not in ("visit",):
             raise ValueError(
                 f"postproc.backend must be 'visit', got {self.backend!r}")
+        if self.velocity_scale_max <= 0:
+            raise ValueError("postproc.velocity_scale_max must be positive, got "
+                             f"{self.velocity_scale_max!r}")
         if self.visit is not None and not Path(self.visit).exists():
             raise FileNotFoundError(
                 f"VisIt launcher not found: {self.visit}. Point postproc.visit at "

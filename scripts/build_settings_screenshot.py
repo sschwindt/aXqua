@@ -67,11 +67,9 @@ def _render() -> int:
         def box(widget) -> QRect:
             return QRect(widget.mapTo(dialog, QPoint(0, 0)), widget.size())
 
-        marks = [
-            box(dialog.executable),
-            box(dialog.result),
-            box(dialog.min_depth).united(box(dialog.velocity_cap)),
-        ]
+        # two marks: the dialog holds one setting now. What used to be its other two
+        # rows - the drawing thresholds - belong to the case, and the dialog says so.
+        marks = [box(dialog.executable), box(dialog.result)]
         limits = dialog.rect().adjusted(2, 2, -2, -2)
         pixmap = dialog.grab()
         draw_marks(pixmap, [r.adjusted(-4, -4, 4, 4).intersected(limits)

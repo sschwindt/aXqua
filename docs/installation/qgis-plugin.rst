@@ -83,7 +83,7 @@ Connect the plugin to the aXqua program
 .. figure:: ../img/gui-settings.png
    :alt: The settings of the plugin with the path of the aXqua program
 
-   The dialog *aXqua > Settings* with a correctly entered path. (1) The full path of the program, ending in ``envs/axqua-env/bin/axqua``; the button *...* opens a file dialog instead. (2) *Test* reports the version that this path answers with. (3) Two defaults of the map styles, which have nothing to do with the installation.
+   The dialog *aXqua > Settings* with a correctly entered path. (1) The full path of the program, ending in ``envs/axqua-env/bin/axqua``; the button *...* opens a file dialog instead. (2) *Test* reports the version that this path answers with. How results are drawn is not set here: it belongs to the case (``hydrodynamics.wet_depth`` and ``postproc.velocity_scale_max``).
 
 **The panel.** The tabs follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
 

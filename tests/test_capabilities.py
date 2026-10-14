@@ -421,3 +421,40 @@ def test_openfoam_does_not_import_the_telemac_calibration_adapter():
     assert not offenders, (
         "the OpenFOAM backend imports the TELEMAC calibration adapter; use "
         "axqua.hbc for the shared parts:\n  " + "\n  ".join(offenders))
+
+
+def test_the_case_carries_how_its_results_are_drawn(tmp_path):
+    """The depth below which water is not surface flow, and the top of the velocity
+    colour scale, are properties of the REACH. They used to be per-install settings of
+    the QGIS plugin, which meant a map could be drawn to a different threshold than the
+    report beside it used - munich-vsf sets wet_depth 0.005 against the 0.01 default,
+    so that was not hypothetical."""
+    from axqua.core.capabilities import _display_settings
+
+    class _Cfg:
+        class hydrodynamics:
+            wet_depth = 0.005
+
+        class postproc:
+            velocity_scale_max = 12.0
+
+    assert _display_settings(_Cfg()) == {"wet_depth": 0.005,
+                                         "velocity_scale_max": 12.0}
+
+
+def test_a_config_without_those_fields_still_answers():
+    """`capabilities` is imported to say what a case can do and must not fail on an
+    older config; the answer falls back to the defaults of the two settings."""
+    from axqua.core.capabilities import _display_settings
+
+    assert _display_settings(object()) == {"wet_depth": 0.01,
+                                           "velocity_scale_max": 5.0}
+
+
+def test_the_display_block_reaches_the_json_the_plugin_reads():
+    from axqua.core.capabilities import CaseStatus
+
+    status = CaseStatus(case_dir="/tmp/case",
+                        display={"wet_depth": 0.02, "velocity_scale_max": 8.0})
+    assert status.as_dict()["display"] == {"wet_depth": 0.02,
+                                           "velocity_scale_max": 8.0}

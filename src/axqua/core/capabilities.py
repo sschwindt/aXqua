@@ -275,12 +275,36 @@ def read_marker(path: str | Path) -> SolverStatus:
     )
 
 
+def _display_settings(cfg) -> dict:
+    """How this case's results should be drawn, read off the case.
+
+    Attribute access with defaults rather than a hard reference: this module is
+    imported to answer "what can this case do?" and must not fail because a config
+    predates a field.
+    """
+    hydro = getattr(cfg, "hydrodynamics", None)
+    post = getattr(cfg, "postproc", None)
+    return {
+        "wet_depth": float(getattr(hydro, "wet_depth", 0.01) or 0.01),
+        "velocity_scale_max": float(
+            getattr(post, "velocity_scale_max", 5.0) or 5.0),
+    }
+
+
 @dataclass
 class CaseStatus:
     """The whole case: one :class:`SolverStatus` per registered backend."""
 
     case_dir: Path
     solvers: list[SolverStatus] = field(default_factory=list)
+    #: The case's own display thresholds, for whoever draws its results. Carried here
+    #: because the plugin asks this document what a case is, and these are properties
+    #: of the REACH: `hydrodynamics.wet_depth` is the depth below which water is not
+    #: surface flow (and is the threshold aXqua's own reports already use, so a map
+    #: drawn to a different one disagrees with its own report), and
+    #: `postproc.velocity_scale_max` is the top of the velocity colour scale, which a
+    #: chute and a lowland river do not share.
+    display: dict = field(default_factory=dict)
 
     @classmethod
     def collect(cls, cfg, *, check_env: bool = False) -> "CaseStatus":
@@ -300,7 +324,8 @@ class CaseStatus:
             status.generated = now
             status.version = __version__
             solvers.append(status)
-        return cls(case_dir=Path(cfg.config_dir), solvers=solvers)
+        return cls(case_dir=Path(cfg.config_dir), solvers=solvers,
+                   display=_display_settings(cfg))
 
     def solver(self, name: str) -> SolverStatus | None:
         for status in self.solvers:
@@ -323,6 +348,7 @@ class CaseStatus:
         return {
             "case_dir": str(self.case_dir),
             "solvers": [status.as_dict() for status in self.solvers],
+            "display": dict(self.display),
         }
 
     def render(self) -> str:

@@ -241,6 +241,10 @@ class CaseView:
 
     case_dir: str = ""
     solvers: list[SolverView] = field(default_factory=list)
+    #: How this case's results are drawn, from its own file: ``wet_depth`` and
+    #: ``velocity_scale_max``. Properties of the reach, so they travel with it
+    #: rather than living in the plugin's per-install settings.
+    display: dict = field(default_factory=dict)
 
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "CaseView":
@@ -264,7 +268,8 @@ class CaseView:
                     for c in (entry.get("capabilities") or [])
                 ],
             ))
-        return cls(case_dir=str(payload.get("case_dir") or ""), solvers=solvers)
+        return cls(case_dir=str(payload.get("case_dir") or ""), solvers=solvers,
+                   display=dict(payload.get("display") or {}))
 
     def solver(self, name: str) -> SolverView | None:
         return next((s for s in self.solvers if s.name == name), None)

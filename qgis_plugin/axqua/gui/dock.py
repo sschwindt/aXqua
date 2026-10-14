@@ -30,6 +30,7 @@ from qgis.PyQt.QtWidgets import (QDockWidget, QGroupBox, QPushButton, QSplitter,
 
 from ..compat import (CRITICAL, INFO, WARNING, enum_value, exec_dialog, log_message,
                       push_message)
+from ..core import styles
 from ..core import project as project_io
 from ..core.runner_client import RunnerClient, user_text
 from . import findings as fnd
@@ -68,8 +69,14 @@ class PluginContext:
         self.dock = dock
         settings = read_settings()
         self.client = RunnerClient(settings["executable"] or None)
-        self.min_depth = settings["min_depth"]
-        self.velocity_cap = settings["velocity_cap"]
+        # How results are drawn belongs to the CASE, not to this installation: the
+        # depth below which water is not surface flow is `hydrodynamics.wet_depth`,
+        # which aXqua's own reports already use, and the top of the velocity colour
+        # scale is `postproc.velocity_scale_max`, which a chute and a lowland river do
+        # not share. Until a case is open these are the style defaults, which match
+        # the defaults of those two settings.
+        self.min_depth = styles.DEFAULT_MIN_DEPTH
+        self.velocity_cap = styles.DEFAULT_VELOCITY_MAX
         self.project = project_io.AxquaProject()
         self.case_view: CaseView | None = None
         self.profile: dict | None = None
@@ -77,6 +84,18 @@ class PluginContext:
         self.runner_ok = False
         self.runner_checked = False
         self.runner_error = ""
+
+    def apply_display(self, view) -> None:
+        """Take the drawing thresholds from the case that is open, if it says any.
+
+        A case with no answer leaves the defaults standing rather than resetting to
+        them, so closing a case does not silently restyle a layer already loaded.
+        """
+        display = dict(getattr(view, "display", None) or {})
+        if "wet_depth" in display:
+            self.min_depth = float(display["wet_depth"])
+        if "velocity_scale_max" in display:
+            self.velocity_cap = float(display["velocity_scale_max"])
 
     # -- messaging ----------------------------------------------------------------
     def _message(self, text: str, level) -> None:
@@ -376,10 +395,12 @@ class AxquaDock(QDockWidget):
     def _env_checked(self, view: CaseView) -> None:
         if self.ctx.case_view is not None:
             self.ctx.case_view = view
+            self.ctx.apply_display(view)
         self.case_tab.show_capabilities(view)
 
     def _apply_case_view(self, view: CaseView | None) -> None:
         self.ctx.case_view = view
+        self.ctx.apply_display(view)
         self.case_tab.show_capabilities(view)
         for page in self.pages.values():
             if hasattr(page, "apply"):
@@ -406,8 +427,6 @@ class AxquaDock(QDockWidget):
         if exec_dialog(dialog):
             values = dialog.values()
             self.ctx.client = RunnerClient(values["executable"] or None)
-            self.ctx.min_depth = values["min_depth"]
-            self.ctx.velocity_cap = values["velocity_cap"]
             self.configuration_tab.check_runner()
 
     def submit(self, kinds, options: dict | None = None) -> None:

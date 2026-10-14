@@ -1,17 +1,23 @@
-"""Plugin settings: where axqua is, and the two styling defaults.
+"""Plugin settings: where axqua is.
 
 Deliberately small. Everything about the *model* belongs in the case file and
 everything about the *machine* belongs in axqua's own ``profiles.yml``; duplicating
 either here would create a second place to look when something disagrees.
 
-What is left is genuinely the plugin's own: which executable to talk to, and the two
-rendering thresholds a user may reasonably want to override per install.
+That leaves one setting, and it is genuinely this installation's: which executable to
+talk to. The two drawing thresholds that used to sit here - the minimum water depth
+and the top of the velocity scale - were a case of exactly the duplication above. They
+describe a REACH, not a computer: `hydrodynamics.wet_depth` is the depth below which
+water stands inside the grain roughness rather than flowing over it, and axqua's own
+reports already use it, so a map drawn to a per-install copy disagreed with the report
+beside it; `postproc.velocity_scale_max` is the top of the velocity colour scale, and
+a chute and a lowland river do not share one. They are read from the open case now.
 """
 
 from __future__ import annotations
 
 from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtWidgets import (QDialog, QDialogButtonBox, QDoubleSpinBox, QFileDialog,
+from qgis.PyQt.QtWidgets import (QDialog, QDialogButtonBox, QFileDialog,
                                  QFormLayout, QHBoxLayout, QLabel, QLineEdit,
                                  QPushButton, QVBoxLayout, QWidget)
 
@@ -19,24 +25,16 @@ from ..core import runner_client
 from ..core.runner_client import RunnerClient, RunnerError
 
 KEY_EXECUTABLE = runner_client.SETTINGS_KEY
-KEY_MIN_DEPTH = "axqua/min_depth"
-KEY_VELOCITY_CAP = "axqua/velocity_cap"
 
 
 def read_settings() -> dict:
     settings = QSettings()
-    return {
-        "executable": str(settings.value(KEY_EXECUTABLE, "") or ""),
-        "min_depth": float(settings.value(KEY_MIN_DEPTH, 0.01) or 0.01),
-        "velocity_cap": float(settings.value(KEY_VELOCITY_CAP, 5.0) or 5.0),
-    }
+    return {"executable": str(settings.value(KEY_EXECUTABLE, "") or "")}
 
 
 def write_settings(values: dict) -> None:
     settings = QSettings()
     settings.setValue(KEY_EXECUTABLE, values.get("executable", ""))
-    settings.setValue(KEY_MIN_DEPTH, values.get("min_depth", 0.01))
-    settings.setValue(KEY_VELOCITY_CAP, values.get("velocity_cap", 5.0))
 
 
 class SettingsDialog(QDialog):
@@ -67,29 +65,15 @@ class SettingsDialog(QDialog):
         self.result.setWordWrap(True)
         form.addRow("", self.result)
 
-        self.min_depth = QDoubleSpinBox()
-        self.min_depth.setDecimals(3)
-        self.min_depth.setRange(0.0, 10.0)
-        self.min_depth.setSingleStep(0.005)
-        self.min_depth.setSuffix(" m")
-        self.min_depth.setValue(values["min_depth"])
-        self.min_depth.setToolTip(
-            "Water shallower than this renders transparent. On a bed with a Nikuradse "
-            "roughness of 0.05-0.5 m, water 5 mm deep stands inside the grain roughness "
-            "rather than flowing over it, so drawing it as river overstates the wetted "
-            "extent. axqua's own reports use the same threshold.")
-        form.addRow("Minimum water depth", self.min_depth)
-
-        self.velocity_cap = QDoubleSpinBox()
-        self.velocity_cap.setDecimals(1)
-        self.velocity_cap.setRange(0.5, 100.0)
-        self.velocity_cap.setSuffix(" m/s")
-        self.velocity_cap.setValue(values["velocity_cap"])
-        self.velocity_cap.setToolTip(
-            "Upper end of the velocity colour scale. Above about 5 m/s a depth-averaged "
-            "river result is usually a wetting/drying artefact in a nearly-dry cell, and "
-            "letting one such node set the scale flattens the whole map.")
-        form.addRow("Velocity scale maximum", self.velocity_cap)
+        # A note where two settings used to be, because a user who knew them will
+        # look here first.
+        note = QLabel(
+            "The minimum water depth and the top of the velocity scale are settings "
+            "of the case, not of this computer. They are in the case file under "
+            "hydrodynamics.wet_depth and postproc.velocity_scale_max, and the case "
+            "editor shows them.")
+        note.setWordWrap(True)
+        form.addRow("Drawing of results", note)
 
         layout.addLayout(form)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok
@@ -127,11 +111,7 @@ class SettingsDialog(QDialog):
         self.result.setText(info.describe())
 
     def values(self) -> dict:
-        return {
-            "executable": self.executable.text().strip(),
-            "min_depth": self.min_depth.value(),
-            "velocity_cap": self.velocity_cap.value(),
-        }
+        return {"executable": self.executable.text().strip()}
 
     def accept(self) -> None:      # noqa: D102 - Qt override
         write_settings(self.values())
