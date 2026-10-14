@@ -1585,3 +1585,63 @@ def test_a_flat_lid_passes_without_a_warning(caplog):
             types.SimpleNamespace(polymesh=pm))
     assert steep == 0.0 and flattest == pytest.approx(1.0)
     assert "DOES NOT APPLY" not in caplog.text
+
+
+# --------------------------------------------------------------------------- #
+# the outlet that let the air phase circulate
+# --------------------------------------------------------------------------- #
+
+def test_the_outlet_is_walled_above_the_tailwater():
+    """An outlet spans bed to lid, so above the tailwater it is an open pressure
+    boundary to AIR - and with the lid open too the air phase gets a free loop through
+    the domain. On munich-vsf that loop grew 7.0 -> 9.7 m3/s and eventually reversed
+    the outlet, which is how every leg lost its result at about t=40."""
+    import numpy as np
+
+    from axqua.solvers.openfoam.mesh import split_outlet_above_tailwater
+
+    # six faces of one column, stacked from 0.1 to 1.1 m
+    centres = np.zeros((6, 3))
+    centres[:, 2] = [0.1, 0.3, 0.5, 0.7, 0.9, 1.1]
+    owner = np.arange(6)
+
+    keep, walled = split_outlet_above_tailwater(owner, centres, stage=0.5, margin=0.25)
+    # open up to 0.75, walled above it
+    assert keep.tolist() == [True, True, True, True, False, False]
+    assert walled.tolist() == [False, False, False, False, True, True]
+    assert not (keep & walled).any()          # a partition, nothing counted twice
+
+
+def test_an_outlet_entirely_above_the_tailwater_is_left_open(caplog):
+    """Sealing every face would close the only way out of the domain. That is a
+    configuration error worth saying, not something to act on silently."""
+    import logging
+
+    import numpy as np
+
+    from axqua.solvers.openfoam.mesh import split_outlet_above_tailwater
+
+    centres = np.zeros((3, 3))
+    centres[:, 2] = [2.0, 2.2, 2.4]
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        keep, walled = split_outlet_above_tailwater(
+            np.arange(3), centres, stage=0.5, margin=0.25)
+    assert keep.all() and not walled.any()
+    assert "leaving it fully open" in caplog.text
+
+
+def test_a_margin_that_leaves_a_slot_is_reported(caplog):
+    """Walling at the tailwater itself turns the outlet into a weir; the margin exists
+    to stop that, so too small a one has to be audible."""
+    import logging
+
+    import numpy as np
+
+    from axqua.solvers.openfoam.mesh import split_outlet_above_tailwater
+
+    centres = np.zeros((5, 3))
+    centres[:, 2] = [0.50, 0.55, 0.60, 0.90, 1.20]
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        split_outlet_above_tailwater(np.arange(5), centres, stage=0.45, margin=0.20,
+                                     cell_size=0.1)
+    assert "under two cells" in caplog.text

@@ -1713,6 +1713,20 @@ class OpenFoam:
     # three faces of the KB15 40 m crop. One number on all of them would impose a
     # tailwater the parent never had. A mapping must name every outlet patch.
     outlet_stage: float | dict[str, float] | None = None
+    #: How far above the tailwater an outlet stays OPEN [m]; above that the crop face
+    #: is a wall. The outlet spans bed to lid, so without this its upper part is an
+    #: open pressure boundary to AIR, and with the lid open as well the air phase has
+    #: a free circulation loop through the domain that nothing pins. Measured on
+    #: munich-vsf: that loop grew monotonically from 7.0 to 9.7 m3/s - about 7.5 m/s
+    #: through a 1.28 m2 face - and once large enough it reversed the outlet and
+    #: dragged water in, so every leg lost its result after about t=40 whatever the
+    #: cell size. Walling the air part leaves the lid as the only way air enters or
+    #: leaves, which is what the free surface is for.
+    #:
+    #: Not zero: the surface at the crop face has to be free to move, or the wall
+    #: becomes a weir and a new artefact replaces the old one. The default leaves a
+    #: quarter of a metre.
+    outlet_air_margin: float = 0.25
     # The sub-model's own inflow/outflow lines. A crop that moves the domain away from
     # the case's liquid boundaries leaves it with none - the water has nowhere to enter
     # or leave - and the build stops with exactly that message. Same reasoning as

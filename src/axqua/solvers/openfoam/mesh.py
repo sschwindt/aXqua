@@ -560,6 +560,53 @@ def extrude(grid: PlanGrid, bed: np.ndarray, lid: np.ndarray, n_layers: int, *,
 # --------------------------------------------------------------------------- #
 
 
+def _tailwater_for(cfg, patch: str):
+    """The level this outlet holds, or None when the case prescribes none."""
+    stage = getattr(cfg.openfoam, "outlet_stage", None)
+    if isinstance(stage, dict):
+        stage = stage.get(patch)
+    if stage is None:
+        stage = getattr(cfg.boundaries, "prescribed_elevation", None)
+    return None if stage is None else float(stage)
+
+
+def split_outlet_above_tailwater(owner, cell_centres, stage, margin, *,
+                                 cell_size=0.0):
+    """``(open faces, walled faces)`` for one outlet, split at the tailwater.
+
+    An outlet spans bed to lid. Below the tailwater it passes water, which is what it
+    is for; above, it is an open pressure boundary to AIR - and the lid is open too,
+    so the air phase gets a circulation loop through the domain with nothing setting
+    its rate. On munich-vsf that loop grew from 7.0 to 9.7 m3/s, about 7.5 m/s through
+    a 1.28 m2 face, and once it was large enough it reversed the outlet and dragged
+    water in with it. Every leg - 0.045 m, 0.030 m, MULES and isoAdvector alike - lost
+    its result the same way at about t=40, and the leak was at the downstream end
+    where the water had backed up 28 cm above the stage it was supposed to hold.
+
+    A face is placed by its owner cell's centre, which is the only elevation a lateral
+    face has here. The margin is what keeps this from becoming a weir: the surface at
+    the crop face must still be free to move.
+    """
+    z = np.asarray(cell_centres, dtype=float)[np.asarray(owner), 2]
+    ceiling = float(stage) + float(margin)
+    walled = z > ceiling
+    if walled.all():
+        # every face above the line: the stage is below the whole patch, which is a
+        # configuration error rather than something to silently act on
+        log.warning(
+            "outlet: the tailwater %.3f m + margin %.3f m is below every face of the "
+            "patch (lowest %.3f m); leaving it fully open rather than sealing the "
+            "only way out of the domain", stage, margin, z.min())
+        return np.ones(z.shape, dtype=bool), np.zeros(z.shape, dtype=bool)
+    open_span = float(np.ptp(z[~walled])) if (~walled).any() else 0.0
+    if cell_size and (~walled).any() and open_span < 2 * cell_size:
+        log.warning(
+            "outlet: only %.3f m of it stays open (tailwater %.3f + margin %.3f), "
+            "under two cells. Raise openfoam.outlet_air_margin, or the outflow is "
+            "squeezed through a slot.", open_span, stage, margin)
+    return ~walled, walled
+
+
 def split_structure_sides(midpoints: np.ndarray, banks: np.ndarray,
                           blocked, dx: float) -> tuple[np.ndarray, np.ndarray]:
     """Split the lateral wall faces into ``(domain edge, structure sides)``.
@@ -1176,10 +1223,27 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         cfg, sides["midpoint"], of.boundary_tolerance or 1.5 * of.cell_size)
 
     boundary = [(BED_PATCH, "wall", bed_owner, bed_quads)]
+    banks = labels == BANKS_PATCH
     for name in liquid_names:
         sel = labels == name
+        if name.startswith(OUTLET_PREFIX) and of.outlet_air_margin is not None:
+            stage = _tailwater_for(cfg, name)
+            if stage is not None:
+                keep, walled = split_outlet_above_tailwater(
+                    sides["owner"][sel], cell_centres, stage,
+                    of.outlet_air_margin, cell_size=dx)
+                if walled.any():
+                    index = np.flatnonzero(sel)
+                    # the air part is a wall, so it joins the domain edge
+                    banks[index[walled]] = True
+                    sel = np.zeros_like(sel)
+                    sel[index[keep]] = True
+                    notes.append(
+                        f"{name}: {int(walled.sum()):,} of {int(keep.size):,} faces "
+                        f"are above the tailwater ({stage:.3f} m + "
+                        f"{of.outlet_air_margin:g} m) and are walled, so air cannot "
+                        "circulate in through the outlet and out through the lid")
         boundary.append((name, "patch", sides["owner"][sel], sides["quads"][sel]))
-    banks = labels == BANKS_PATCH
     # Split the solid structures out of the domain edge. A lateral face belongs to a
     # structure when its midpoint sits on the blanked footprint; half a cell diagonal
     # of slack, because the face lies on the boundary of the blanked columns rather
