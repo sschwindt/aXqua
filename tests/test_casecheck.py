@@ -250,8 +250,6 @@ def test_a_path_the_loader_resolves_elsewhere_is_not_called_missing(tmp_path,
     ROI helper writes into the preprocessing folder, so the loader resolves it there.
     Re-deriving it from the raw YAML against the case folder reported two present files
     as missing and told the user to select them again."""
-    from pathlib import Path
-
     from axqua.core import casecheck
 
     # the loader says the file is over here, and it exists

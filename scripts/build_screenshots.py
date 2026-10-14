@@ -84,13 +84,10 @@ def inside_qgis() -> bool:
 
 
 def take_screenshots() -> None:
+    # The painting imports moved with the painting: draw_marks owns them now.
     from qgis.PyQt.QtCore import QEventLoop, QPoint, QRect, QTimer
-    from qgis.PyQt.QtGui import QColor, QFont, QPainter, QPen
     from qgis.PyQt.QtWidgets import QGroupBox, QListWidget, QPushButton, QTableWidget
     from qgis.utils import iface, plugins
-
-    from axqua.compat import enum_value                  # the plugin, as QGIS loaded it
-    from qgis.PyQt.QtCore import Qt
 
     out = Path(os.environ["AXQUA_SHOTS_OUT"])
     case = Path(os.environ["AXQUA_SHOTS_CASE"])
