@@ -259,9 +259,11 @@ def take_screenshots() -> None:
     def wizard() -> None:
         from axqua.gui.install_wizard import InstallWizard
         window = InstallWizard(client, "openfoam", tab.overview)
+        window.resize(792, 780)                # every hint whole, with "Install for"
         window.show()
         fields = window._widgets
         shot(window, "gui-install-wizard", [
+            fields["scope"].parentWidget(),
             fields["folder"].parentWidget(),
             fields["reuse_openfoam"].parentWidget(),
             fields["viewers"].parentWidget(),

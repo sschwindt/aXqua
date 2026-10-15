@@ -65,17 +65,23 @@ LOCAL_NAME = "solvers.local.yml"
 DISCOVERY = {
     "telemac": (
         "/opt/telemac*/configs/pysource.*.sh",
+        # where `axqua install telemac --for-all-users` puts it
+        "/opt/telemac*/telemac-mascaret/configs/pysource.*.sh",
         "/usr/local/telemac*/configs/pysource.*.sh",
         "telemac*/configs/pysource.*.sh",
         "*/telemac-mascaret/configs/pysource.*.sh",
     ),
     "openfoam": (
+        # the sediment stack of `axqua install openfoam --for-all-users`: its own
+        # script, which adds the solvers to the OpenFOAM it is built on
+        "/opt/openfoam-sediment*/shell-rc.sh",
         "/opt/openfoam*/etc/bashrc",
         "/usr/lib/openfoam/openfoam*/etc/bashrc",
         "OpenFOAM-*/etc/bashrc",
         "*/OpenFOAM-*/etc/bashrc",
     ),
-    "visit": ("/opt/visit*/bin/visit", "visit*/bin/visit", "*/visit*/bin/visit"),
+    "visit": ("/opt/visit*/bin/visit", "/opt/*/apps/visit*/bin/visit",
+              "visit*/bin/visit", "*/visit*/bin/visit"),
     "paraview": ("/opt/ParaView*/bin/paraview", "ParaView*/bin/paraview",
                  "*/ParaView*/bin/paraview"),
 }

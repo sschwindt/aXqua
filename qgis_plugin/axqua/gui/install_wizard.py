@@ -38,10 +38,15 @@ VIEWERS_HINT = ("aXqua recommends VisIt: its predefined figures of three-dimensi
                 "publisher. ParaView is a package of the operating system. Both can "
                 "be installed later.")
 
+SCOPE_HINT = ("For all users, an administrator creates the folder before the build and "
+              "hands it over to root at its end; the desktop asks for the password "
+              "both times. The build itself runs as you.")
+
 #: ``(option, label, kind, hint)`` per program. Kinds: folder, file, text, int, bool,
 #: choice (one of CHOICES), openfoam (an installed OpenFOAM, or compiling one).
 FIELDS = {
     "telemac": (
+        ("scope", "Install for", "choice", SCOPE_HINT),
         ("folder", "Installation folder", "folder",
          "TELEMAC is installed in the sub-folder telemac-mascaret of this folder."),
         ("tag", "TELEMAC version", "text",
@@ -55,9 +60,10 @@ FIELDS = {
          "Optional: a downloaded SALOME archive. aXqua does not need SALOME."),
     ),
     "openfoam": (
+        ("scope", "Install for", "choice", SCOPE_HINT),
         ("folder", "Installation folder", "folder",
-         "A folder that does not exist yet. The sediment solvers, the outflow "
-         "boundary and VisIt are installed in it."),
+         "A folder that does not exist yet, or an empty one. The sediment solvers, "
+         "the outflow boundary and VisIt are installed in it."),
         ("reuse_openfoam", "OpenFOAM v2406", "openfoam", ""),
         ("jobs", "Processes for compiling", "int", ""),
         ("viewers", "Postprocessors", "choice", VIEWERS_HINT),
@@ -65,6 +71,7 @@ FIELDS = {
         ("smoke_test", "Run a short test at the end", "bool", ""),
     ),
     "postprocessors": (
+        ("scope", "Install for", "choice", SCOPE_HINT),
         ("folder", "Installation folder", "folder",
          "VisIt is installed in this folder. ParaView is a package of the operating "
          "system."),
@@ -78,6 +85,10 @@ ON_BY_DEFAULT = ("smoke_test", "bind")
 #: ``option -> ((value, text), ...)`` of the settings with a fixed set of answers. The
 #: first entry is the default.
 CHOICES = {
+    "scope": (
+        ("user", "Me only, in my home folder (no administrator rights)"),
+        ("system", "All users of this computer, below /opt (administrator password)"),
+    ),
     "telemac_examples": (
         ("inputs", "Input files only (about 360 files, 460 MB)"),
         ("all", "Everything, with reference results and manuals (1,500 files, 1.65 GB)"),
@@ -273,10 +284,27 @@ class InstallWizard(QDialog):
         self._triangles[key] = triangle
         return holder
 
+    def _default_folder(self, scope: str) -> str:
+        folders = self.entry.get("default_folders") or {}
+        if folders.get(scope):
+            return str(folders[scope])
+        return str(self.entry.get("default_folder") or "") if scope == "user" else ""
+
+    def _scope_changed(self) -> None:
+        """Move the folder along with the scope, unless the user typed one."""
+        folder = self._widgets.get("folder")
+        scope = self._widgets["scope"].currentData() or "user"
+        other = "system" if scope == "user" else "user"
+        if folder is not None and folder.text().strip() in ("", self._default_folder(other)):
+            folder.setText(self._default_folder(scope))
+
     def _fill_defaults(self) -> None:
         folder = self._widgets.get("folder")
         if folder is not None:
             folder.setText(str(self.entry.get("default_folder") or ""))
+        if "scope" in self._widgets:
+            self._widgets["scope"].currentIndexChanged.connect(
+                lambda _=0: self._scope_changed())
         if "jobs" in self._widgets:
             self._widgets["jobs"].setValue(int(self.overview.get("default_jobs") or 1))
         if "reuse_openfoam" in self._widgets:

@@ -519,6 +519,10 @@ def test_another_release_of_openfoam_is_refused_before_anything_runs(
 def test_the_openfoam_installer_only_takes_a_new_folder_or_its_own(
         installers, debian, tmp_path):
     (tmp_path / "target").mkdir()
+    # an empty folder is as good as a new one: an administrator may have made it
+    empty = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no")
+    assert _codes(empty.findings) == {"axqua.install.compiles_openfoam"}
+    (tmp_path / "target" / "notes.txt").write_text("someone else's")
     plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no")
     assert "axqua.install.folder_in_use" in _codes(plan.findings)
     assert not plan.ready
@@ -1283,3 +1287,104 @@ def test_the_command_tells_a_telemac_folder_from_another_one(tmp_path, capsys):
     assert run_install(["telemac-examples", str(tmp_path), "--json"]) != 0
     answer = json.loads(capsys.readouterr().out)
     assert "not the folder of a TELEMAC installation" in answer["error"]["message"]
+
+
+# ---------------------------------------------------------- for me, or for all users
+
+
+def _admin(plan) -> list[str]:
+    return [step.name for step in plan.steps if step.admin]
+
+
+def test_an_installation_for_me_alone_never_needs_an_administrator(installers, debian,
+                                                                   tmp_path):
+    for target in recipes.TARGETS:
+        plan = _plan(target, installers, debian, tmp_path, reuse_openfoam="no")
+        assert plan.options.scope == "user" and not _admin(plan)
+        assert not any(word in ("sudo", "pkexec") for step in plan.steps
+                       for word in step.argv)
+    assert recipes.default_folder("openfoam") == \
+        Path.home() / ".local" / "openfoam-sediment-v2406"
+
+
+def test_for_all_users_an_administrator_creates_the_folder_and_takes_it_over(
+        installers, debian, tmp_path):
+    folder = tmp_path / "shared" / "openfoam"
+    plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
+                 visualization=False, scope="system", folder=folder)
+    assert plan.ready, plan.findings
+    first, build, last = plan.steps
+    assert first.admin and first.argv[:2] == ["/usr/bin/install", "-d"]
+    assert first.argv[-1] == str(folder)
+    assert not build.admin and "--prefix" in build.argv      # the build runs as the user
+    assert last.admin and "chown -R root:root" in last.argv[2] and last.argv[-1] == str(folder)
+    assert first.as_dict()["command"].startswith("sudo ")
+    assert any("all users" in note for note in plan.notes)
+    data = plan.as_dict()
+    assert data["options"]["scope"] == "system"
+    assert recipes.Step.from_dict(data["steps"][0]).admin
+    assert recipes.default_folder("openfoam", "system") == \
+        Path("/opt/openfoam-sediment-v2406")
+
+
+def test_a_folder_for_all_users_must_be_one_of_its_own(installers, debian, tmp_path):
+    plan = _plan("telemac", installers, debian, tmp_path, scope="system",
+                 folder=Path("/opt"))
+    assert "axqua.install.folder_for_all_users" in _codes(plan.findings)
+    assert not plan.ready
+
+    foreign = tmp_path / "foreign"
+    (foreign / "something").mkdir(parents=True)
+    foreign.chmod(0o555)
+    try:
+        plan = _plan("telemac", installers, debian, tmp_path, scope="system",
+                     folder=foreign)
+        assert "axqua.install.folder_not_writable" in _codes(plan.findings)
+        # the marker of an earlier installation for all users makes it ours to take back
+        foreign.chmod(0o755)
+        (foreign / recipes.SYSTEM_MARKER).write_text("")
+        foreign.chmod(0o555)
+        plan = _plan("telemac", installers, debian, tmp_path, scope="system",
+                     folder=foreign)
+        assert plan.ready and plan.steps[0].argv[:2] == ["/bin/chown", "-R"]
+    finally:
+        foreign.chmod(0o755)
+
+
+def test_the_administrator_steps_run_before_and_after_the_build(
+        installers, debian, tmp_path, monkeypatch):
+    calls = tmp_path / "elevated.txt"
+    record = ("import json, sys\n"
+              f"open({str(calls)!r}, 'a').write(json.dumps(sys.argv[1:]) + '\\n')\n")
+    monkeypatch.setattr(runner, "elevated",
+                        lambda argv, interactive: [sys.executable, "-c", record, *argv])
+    folder = tmp_path / "shared" / "openfoam"
+    plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
+                 visualization=False, scope="system", folder=folder, bind=False)
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "succeeded", status
+    done = [json.loads(line) for line in calls.read_text().splitlines()]
+    assert [argv[0] for argv in done] == ["/usr/bin/install", "/bin/sh"]
+    assert (folder / "receipt.json").is_file()                # built in between
+
+
+def test_without_a_way_to_ask_for_the_password_nothing_is_built(
+        installers, debian, tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "elevated", lambda argv, interactive: None)
+    folder = tmp_path / "shared" / "openfoam"
+    plan = _plan("openfoam", installers, debian, tmp_path, reuse_openfoam="no",
+                 visualization=False, scope="system", folder=folder, bind=False)
+    status = runner.start(plan, detach=False)
+    assert status["state"] == "failed"
+    finding = next(f for f in status["findings"] if f["code"] == "axqua.install.needs_admin")
+    assert "--foreground" in finding["remedy"] and str(folder) in finding["remedy"]
+    assert not (folder / "receipt.json").exists()
+
+
+def test_a_terminal_asks_with_sudo_and_the_desktop_with_pkexec(monkeypatch):
+    monkeypatch.setattr(runner.shutil, "which", lambda name: "/usr/bin/" + name)
+    monkeypatch.setattr(recipes, "elevation", lambda: "pkexec")
+    assert runner.elevated(["/bin/true"], interactive=True) == ["sudo", "--", "/bin/true"]
+    assert runner.elevated(["/bin/true"], interactive=False) == ["pkexec", "/bin/true"]
+    monkeypatch.setattr(recipes, "elevation", lambda: "")
+    assert runner.elevated(["/bin/true"], interactive=False) is None

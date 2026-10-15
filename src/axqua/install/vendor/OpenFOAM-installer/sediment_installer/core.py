@@ -242,13 +242,15 @@ def claim_prefix(prefix: Path, identity: str):
     marker = prefix / ".sediment-installer.json"
     if marker.is_symlink():
         raise InstallError("Refusing symlink installation marker")
-    if prefix.exists():
+    # An empty directory is claimed like an absent one: an administrator may have
+    # created it for the user, to install for all users without building as root.
+    if prefix.exists() and (marker.is_file() or not prefix.is_dir() or any(prefix.iterdir())):
         if not marker.is_file():
-            raise InstallError(f"Foreign/unmarked prefix: {prefix}; choose an absent directory")
+            raise InstallError(f"Foreign/unmarked prefix: {prefix}; choose an absent or empty directory")
         if json.loads(marker.read_text(encoding="utf-8")) != {"identity": identity}:
             raise InstallError("Installer/source pin changed; choose a new prefix")
     else:
-        prefix.mkdir(parents=True)
+        prefix.mkdir(parents=True, exist_ok=True)
         marker.write_text(json.dumps({"identity": identity}) + "\n", encoding="utf-8")
 
 

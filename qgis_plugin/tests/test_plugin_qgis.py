@@ -1691,7 +1691,8 @@ def _overview(running=None):
         "openfoam_found": "/usr/lib/openfoam/openfoam2406/etc/bashrc",
         "targets": [
             {"target": "telemac", "title": "TELEMAC", "installed": {},
-             "running": running, "last": running, "default_folder": "/home/x/opt"},
+             "running": running, "last": running, "default_folder": "/home/x/opt",
+             "default_folders": {"user": "/home/x/opt", "system": "/opt/telemac"}},
             {"target": "openfoam", "title": "OpenFOAM v2406 with the sediment solvers",
              "installed": {"openfoam": "/usr/lib/openfoam/openfoam2406/etc/bashrc"},
              "running": None, "last": None,
@@ -1769,7 +1770,8 @@ def test_the_wizard_starts_from_what_aXqua_found_and_sends_what_was_chosen(
         qgis_app, monkeypatch):
     install_wizard = _wizard_now(monkeypatch)
     telemac = install_wizard.InstallWizard(_InstallClient(), "telemac", _overview())
-    assert telemac.options() == {"folder": "/home/x/opt", "tag": "", "salome": "",
+    assert telemac.options() == {"scope": "user", "folder": "/home/x/opt", "tag": "",
+                                 "salome": "",
                                  "telemac_examples": "inputs", "bind": True,
                                  "base": "", "installers": ""}
     # of the example cases, only what a run reads is downloaded unless asked otherwise
@@ -1778,6 +1780,17 @@ def test_the_wizard_starts_from_what_aXqua_found_and_sends_what_was_chosen(
         ["inputs", "all", "none"]
     examples.setCurrentIndex(2)
     assert telemac.options()["telemac_examples"] == "none"
+    # for me alone or for all users; the folder follows the choice until it is typed
+    scope = telemac._widgets["scope"]
+    assert [scope.itemData(i) for i in range(scope.count())] == ["user", "system"]
+    scope.setCurrentIndex(1)
+    assert telemac.options()["folder"] == "/opt/telemac"
+    scope.setCurrentIndex(0)
+    assert telemac.options()["folder"] == "/home/x/opt"
+    telemac._widgets["folder"].setText("/data/telemac")
+    scope.setCurrentIndex(1)
+    assert telemac.options()["folder"] == "/data/telemac"
+    scope.setCurrentIndex(0)
     assert telemac.pages.currentIndex() == 0 and telemac.next_button.text() == "Next"
     telemac.deleteLater()
 

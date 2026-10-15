@@ -76,6 +76,21 @@ The *Check* page of an installation wizard, the last page of a failed installati
 ``the folder ... has a space in its name``
     Neither TELEMAC nor OpenFOAM can be built in a folder whose path contains a space. Select another folder.
 
+.. _axqua-install-folder-for-all-users:
+
+``... cannot be the folder of an installation for all users``
+    At the end of an installation for all users, the whole installation folder is handed over to the administrator. A folder such as ``/opt`` or ``/usr`` itself, or your home folder, would be handed over with everything else it contains. Select a folder of its own, such as ``/opt/telemac``.
+
+.. _axqua-install-folder-not-writable:
+
+``... exists and you cannot write into it``
+    The installation folder of an installation for all users belongs to somebody else and was not made by an installation of aXqua for all users, so aXqua does not take it over. Select a folder that does not exist yet.
+
+.. _axqua-install-needs-admin:
+
+``... needs the rights of an administrator``
+    An installation for all users needs the password of an administrator before and after the build, and this session could neither open the password dialog of the desktop nor ask in a terminal. This happens to an installation that was started detached, without a desktop. Start it in a terminal with ``axqua install start <program> --for-all-users --foreground``, or have an administrator run the command that the message names and start the installation again. Nothing has been built at that point.
+
 .. _axqua-install-folder-in-use:
 
 ``... exists and was not made by this installer``

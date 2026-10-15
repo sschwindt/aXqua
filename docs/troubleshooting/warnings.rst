@@ -141,6 +141,11 @@ The *Check* page of an installation wizard, the last page of a finished installa
 ``... GiB are free in ...; the installation needs about ... GiB``
     The drive of the installation folder may be too small. Select a folder on a drive with more free space on the first page of the wizard.
 
+.. _axqua-install-folder-in-home:
+
+``... is inside your home folder, which other users usually cannot open``
+    An installation for all users was given a folder inside your home folder. Other user accounts usually have no access to a home folder, so they could not run the programs. Select a folder outside of it, such as ``/opt/openfoam-sediment-v2406``.
+
 .. _axqua-install-folder-exists:
 
 ``... exists already`` or ``... holds an installation of this installer, which is continued``

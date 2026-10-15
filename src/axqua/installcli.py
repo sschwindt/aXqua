@@ -43,6 +43,11 @@ def _parser() -> argparse.ArgumentParser:
                    help="what to install: " + ", ".join(recipes.TARGETS)
                         + "; for status and cancel: the installation")
     p.add_argument("--folder", type=Path, help="where to install")
+    p.add_argument("--for-all-users", action="store_true",
+                   help="install below /opt for every user of this computer; needs "
+                        "the password of an administrator before and after the build. "
+                        "Without it, the program is installed for you alone in your "
+                        "home folder and needs no administrator")
     p.add_argument("--tag", default="", help="TELEMAC: the version to build")
     p.add_argument("--salome", type=Path,
                    help="TELEMAC: a downloaded SALOME archive to install with it")
@@ -89,7 +94,8 @@ def _parser() -> argparse.ArgumentParser:
 def _options(args):
     from axqua.install import recipes
     return recipes.Options(
-        folder=args.folder, tag=args.tag or "", salome=args.salome,
+        folder=args.folder, scope="system" if args.for_all_users else "user",
+        tag=args.tag or "", salome=args.salome,
         telemac_examples="none" if args.no_telemac_examples else args.telemac_examples,
         reuse_openfoam=args.reuse_openfoam or "auto", jobs=args.jobs,
         visualization=not args.no_visualization, visit=not args.no_visit,
@@ -242,6 +248,8 @@ def _overview() -> dict:
             "running": runner.latest(target, active_only=True),
             "last": runner.latest(target),
             "default_folder": str(recipes.default_folder(target)),
+            "default_folders": {scope: str(recipes.default_folder(target, scope))
+                                for scope in recipes.SCOPES},
         })
     return {"host": here.as_dict(), "targets": targets,
             "repository": recipes.REPOSITORY, "ref": recipes.PINNED,
@@ -275,7 +283,8 @@ def _plan_lines(plan) -> list[str]:
     for key, value in data["outputs"].items():
         lines.append(f"enters in the profile: {key} = {value}")
     lines += [f.line() for f in plan.findings]
-    lines.append("ready to start: axqua install start " + plan.target if plan.ready
+    scope = " --for-all-users" if plan.options.scope == "system" else ""
+    lines.append("ready to start: axqua install start " + plan.target + scope if plan.ready
                  else "this installation cannot be started as it is")
     return lines
 

@@ -49,7 +49,8 @@ from axqua.core.diagnostics import ERROR, WARNING, Finding
 from axqua.core.profile import OPENFOAM_RELEASE
 from axqua.install import host as hosts
 
-__all__ = ["BUNDLED", "ENV_INSTALLERS", "PINNED", "REPOSITORY", "SYSTEM_PATH", "TARGETS", "TITLES",
+__all__ = ["BUNDLED", "ENV_INSTALLERS", "PINNED", "REPOSITORY", "SCOPES", "SYSTEM_PATH",
+           "TARGETS", "TITLES",
            "Options", "Plan", "Step", "admin_command", "clean_environment",
            "default_folder", "shadowed_tools",
            "elevation", "fetch_installers", "find_openfoam", "install_packages",
@@ -66,6 +67,15 @@ ENV_INSTALLERS = "AXQUA_INSTALLERS"
 BUNDLED = Path(__file__).resolve().parent / "vendor"
 
 TARGETS = ("telemac", "openfoam", "postprocessors")
+
+#: For whom a program is installed. ``user``: in the home folder, by the user alone, no
+#: administrator rights. ``system``: in a folder below /opt that every user of the
+#: computer can run from and nobody but an administrator can change.
+SCOPES = ("user", "system")
+
+#: Written into an installation for all users when it is handed over to root, so that a
+#: later installation into the same folder may take it back (and nothing else).
+SYSTEM_MARKER = ".axqua-installation"
 TITLES = {
     "telemac": "TELEMAC",
     "openfoam": "OpenFOAM v2406 with the sediment solvers",
@@ -153,6 +163,7 @@ class Options:
     """What a user can choose. Everything has a default that works."""
 
     folder: Path | None = None          # where to install
+    scope: str = "user"                 # user: for me only | system: for all users
     tag: str = ""                       # TELEMAC: version tag; empty = the script's own
     salome: Path | None = None          # TELEMAC: a SALOME archive, optional
     #: TELEMAC: how much of its example cases to download. ``inputs``: the files a
@@ -190,6 +201,12 @@ class Options:
                 value = int(value) if value not in (None, "") else None
             elif key in ("visualization", "visit", "examples", "smoke_test", "bind"):
                 value = bool(value)
+            elif key == "scope":
+                value = str(value or "user").strip().lower()
+                if value not in SCOPES:
+                    from axqua.core.errors import ConfigError
+                    raise ConfigError(f"scope must be one of {', '.join(SCOPES)}, "
+                                      f"got {value!r}", subject="scope")
             elif key == "telemac_examples":
                 if isinstance(value, bool):         # the switch this setting once was
                     value = "inputs" if value else "none"
@@ -209,6 +226,7 @@ class Options:
     def as_dict(self) -> dict[str, Any]:
         return {
             "folder": str(self.folder) if self.folder else "",
+            "scope": self.scope,
             "tag": self.tag,
             "salome": str(self.salome) if self.salome else "",
             "telemac_examples": self.telemac_examples,
@@ -225,8 +243,19 @@ class Options:
         }
 
 
-def default_folder(target: str) -> Path:
-    """Where *target* is installed when the user names no folder."""
+def default_folder(target: str, scope: str = "user") -> Path:
+    """Where *target* is installed when the user names no folder.
+
+    For all users, the folders below /opt are those that the discovery of
+    :mod:`axqua.core.machine` searches, so the aXqua of every other user of the
+    computer finds the installation without a profile entry.
+    """
+    if scope == "system":
+        return {
+            "telemac": Path("/opt/telemac"),
+            "openfoam": Path("/opt/openfoam-sediment-v2406"),
+            "postprocessors": Path("/opt/axqua-postprocessors"),
+        }[target]
     home = Path.home()
     return {
         "telemac": home / "opt",
@@ -688,12 +717,15 @@ class Step:
     #: An optional command may fail without failing the installation: what it adds is
     #: reported as missing, and the program itself is installed.
     optional: bool = False
+    #: Run with the rights of an administrator (pkexec, or sudo in a terminal).
+    admin: bool = False
 
     def as_dict(self) -> dict[str, Any]:
         settings = " ".join(f"{key}={_quote(value)}" for key, value in self.env.items())
         return {"name": self.name, "argv": list(self.argv), "cwd": self.cwd,
-                "env": dict(self.env), "optional": self.optional,
-                "command": (settings + " " if settings else "")
+                "env": dict(self.env), "optional": self.optional, "admin": self.admin,
+                "command": ("sudo " if self.admin else "")
+                + (settings + " " if settings else "")
                 + " ".join(_quote(a) for a in self.argv)}
 
     @classmethod
@@ -702,7 +734,8 @@ class Step:
                    argv=[str(a) for a in data.get("argv") or []],
                    cwd=str(data.get("cwd") or ""),
                    env={str(k): str(v) for k, v in (data.get("env") or {}).items()},
-                   optional=bool(data.get("optional")))
+                   optional=bool(data.get("optional")),
+                   admin=bool(data.get("admin")))
 
 
 def _quote(text: str) -> str:
@@ -797,7 +830,7 @@ def plan(target: str, options: Options | None = None, *,
                           remedy="One of: " + ", ".join(TARGETS))
     options = options or Options()
     host = host or hosts.detect(base=options.base or None)
-    folder = (options.folder or default_folder(target)).expanduser()
+    folder = (options.folder or default_folder(target, options.scope)).expanduser()
     if not folder.is_absolute():
         folder = Path.cwd() / folder
     out = Plan(target=target, host=host, options=options, folder=folder)
@@ -857,6 +890,8 @@ def plan(target: str, options: Options | None = None, *,
     builder = {"telemac": _plan_telemac, "openfoam": _plan_openfoam,
                "postprocessors": _plan_postprocessors}[target]
     builder(out, checkout, add)
+    if options.scope == "system":
+        _for_all_users(out, add)
 
     # ---- system packages ---------------------------------------------------------
     out.needed = packages_needed(target, checkout, host, options)
@@ -922,6 +957,79 @@ def _reuse(options: Options) -> Path | None:
     if choice.lower() == "auto":
         return find_openfoam()
     return Path(choice).expanduser()
+
+
+#: Folders an installation for all users must never be: the hand-over at its end gives
+#: the whole folder to root.
+_NOT_A_FOLDER_FOR_ALL = {Path(p) for p in ("/", "/opt", "/usr", "/usr/local", "/home",
+                                           "/srv", "/var", "/etc", "/tmp", "/mnt")}
+
+
+def _owner() -> str:
+    import grp
+    import pwd
+
+    return (pwd.getpwuid(os.getuid()).pw_name + ":"
+            + grp.getgrgid(os.getgid()).gr_name)
+
+
+def _for_all_users(out: Plan, add) -> None:
+    """Install for all users: the same build, between two commands of an administrator.
+
+    The installers refuse to run as root, and they have to: they compile for hours. So
+    an administrator creates the folder for the user first, the user builds in it as
+    with an installation for themselves, and an administrator hands it over to root at
+    the end, readable for everyone and writable for nobody else.
+    """
+    if not out.steps:
+        return                      # nothing is built (ParaView alone, a package)
+    subject = f"install.{out.target}"
+    folder = Path(os.path.abspath(out.folder))
+    if folder in _NOT_A_FOLDER_FOR_ALL or folder == Path.home() \
+            or len(folder.parts) < 3:
+        add(ERROR, "axqua.install.folder_for_all_users",
+            f"{folder} cannot be the folder of an installation for all users, because "
+            "it is handed over to the administrator as a whole at the end",
+            f"Select a folder of its own, such as {default_folder(out.target, 'system')}.",
+            where=f"{subject}.folder")
+        return
+    if Path.home() in folder.parents:
+        add(WARNING, "axqua.install.folder_in_home",
+            f"{folder} is inside your home folder, which other users usually cannot "
+            "open",
+            f"For all users, select a folder outside of it, such as "
+            f"{default_folder(out.target, 'system')}.", where=f"{subject}.folder")
+    owner = _owner()
+    if not folder.exists():
+        out.steps.insert(0, Step(
+            "Create the folder for all users (administrator)",
+            ["/usr/bin/install", "-d", "-m", "0755", "-o", owner.split(":")[0],
+             "-g", owner.split(":")[1], str(folder)], admin=True))
+    elif not os.access(folder, os.W_OK):
+        if not (folder / SYSTEM_MARKER).is_file():
+            add(ERROR, "axqua.install.folder_not_writable",
+                f"{folder} exists and you cannot write into it; it was not made by an "
+                "installation of aXqua for all users",
+                "Select a folder that does not exist yet.", where=f"{subject}.folder")
+            return
+        out.steps.insert(0, Step(
+            "Take the installation back to continue it (administrator)",
+            ["/bin/chown", "-R", owner, str(folder)], admin=True))
+    out.steps.append(Step(
+        "Hand the installation over to all users (administrator)",
+        ["/bin/sh", "-c", 'chown -R root:root -- "$1" && chmod -R u+rwX,go+rX,go-w -- '
+         '"$1" && touch -- "$1/' + SYSTEM_MARKER + '"', "hand-over", str(folder)],
+        admin=True))
+    out.notes.append(
+        "Installed for all users of this computer: the password of an administrator is "
+        "asked twice, before the build to create the folder and at its end to hand it "
+        "over to root. Every user can run the programs; only an administrator can "
+        "change them.")
+    if elevation() != "pkexec":
+        out.notes.append(
+            "This session has no password dialog of the desktop. Start the installation "
+            "in a terminal with 'axqua install start ... --foreground', where sudo asks "
+            "for the password.")
 
 
 def _plan_telemac(out: Plan, checkout: Path, add) -> None:
@@ -1003,12 +1111,12 @@ def _plan_openfoam(out: Plan, checkout: Path, add) -> None:
             "with it.")
         return
     marker = prefix / ".sediment-installer.json"
-    if prefix.exists() and not marker.is_file():
+    if prefix.exists() and not marker.is_file() and any(prefix.iterdir()):
         add(ERROR, "axqua.install.folder_in_use",
             f"{prefix} exists and was not made by this installer, which only installs "
             "into a new folder or continues its own installation",
             "Select a folder that does not exist yet.", where=f"{subject}.folder")
-    elif prefix.exists():
+    elif marker.is_file():
         add(WARNING, "axqua.install.folder_exists",
             f"{prefix} holds an installation of this installer, which is continued",
             "The installer refuses the folder if its own version has changed in the "

@@ -391,6 +391,13 @@ class OwnershipTests(unittest.TestCase):
             core.claim_prefix(self.prefix, "source-pin")
         self.assertEqual(list(self.prefix.iterdir()), [sentinel])
 
+    def test_an_empty_prefix_is_claimed_like_an_absent_one(self):
+        # An administrator creates the folder of an installation for all users.
+        self.prefix.mkdir()
+        core.claim_prefix(self.prefix, "source-pin")
+        marker = self.prefix / ".sediment-installer.json"
+        self.assertEqual(json.loads(marker.read_text()), {"identity": "source-pin"})
+
     def test_changed_identity_is_rejected(self):
         core.claim_prefix(self.prefix, "old-pin")
         with self.assertRaisesRegex(core.InstallError, "source pin changed"):

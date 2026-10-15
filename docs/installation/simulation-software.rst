@@ -18,6 +18,13 @@ The wizards run the installer scripts of the `installer repository <https://gith
 * *Install the packages...* opens the password dialog of the desktop. The password is entered there and does not pass through the plugin.
 * *Copy the command* places the command in the clipboard, to be pasted into a terminal. On a computer that is managed by an institution, send the command to the administrator.
 
+**For me only, or for all users.** The first setting of each wizard, *Install for*, decides who can use the program:
+
+* *Me only* (the default) installs into a folder in your home folder: ``~/opt`` for TELEMAC, ``~/.local/openfoam-sediment-v2406`` for OpenFOAM, and ``~/.local/axqua-postprocessors`` for VisIt. The installation itself requires no administrator rights; only missing system packages do, as described above.
+* *All users of this computer* installs into a folder below ``/opt``: ``/opt/telemac``, ``/opt/openfoam-sediment-v2406``, or ``/opt/axqua-postprocessors``. The build still runs under your user account, because the installers refuse to compile as the administrator. The password of an administrator is asked twice: before the build, to create the folder for you, and at its end, to hand the folder over to the administrator, readable for every user and writable for nobody else. The aXqua of every other user finds the programs in these folders without any entry in their profile. Changing the folder later, for example to add the example cases of TELEMAC, again requires an administrator.
+
+On the desktop, the password dialog of the desktop asks for the password. In a terminal, ``axqua install start openfoam --for-all-users --foreground`` lets ``sudo`` ask for it; a detached installation without a desktop cannot ask and stops before it builds anything.
+
 Click *Check again* afterwards. The installation itself runs with the rights of the ordinary user and writes into the installation folder only.
 
 **From a terminal.** Each wizard corresponds to one command, ``axqua install``, which does the same without QGIS (:doc:`../automation/terminal-syntax`).
@@ -83,7 +90,7 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
    * - Setting
      - Meaning
    * - Installation folder
-     - A folder that does not exist yet. The installer installs into a new folder or continues an installation of its own, and refuses any other folder.
+     - A folder that does not exist yet, or an empty one. The installer installs into a new folder or continues an installation of its own, and refuses any other folder.
    * - OpenFOAM v2406
      - *Use the OpenFOAM v2406 that is installed on this computer* builds the solvers on an existing installation, which takes a few minutes. aXqua enters the installation that it found. Select the file ``etc/bashrc`` of another one with *Browse...*. *Compile OpenFOAM v2406 from its source code* is the choice for a computer without OpenFOAM. It takes several hours and requires about 20 GB of free space.
    * - Processes for compiling
@@ -99,7 +106,7 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
    :alt: The first page of the OpenFOAM installation wizard
    :width: 70%
 
-   The first page of the OpenFOAM wizard. (1) The installation folder. (2) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (3) The selection of the postprocessors. (4) *Next* leads to the page *Check*.
+   The first page of the OpenFOAM wizard. (1) For whom the program is installed: for you alone, or for all users of the computer. (2) The installation folder. (3) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (4) The selection of the postprocessors. (5) *Next* leads to the page *Check*.
 
 A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the `installation instructions of OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, which creates the file ``/usr/lib/openfoam/openfoam2406/etc/bashrc``. The wizard finds this installation by itself.
 

@@ -1019,6 +1019,8 @@ def test_the_choices_of_a_wizard_become_the_flags_of_the_install_command():
     assert install_flags({"telemac_examples": "inputs"}) == []       # the default
     assert install_flags({"telemac_examples": "all"}) == ["--telemac-examples", "all"]
     # the one question of the wizards about the postprocessors; VisIt is the default
+    assert install_flags({"scope": "user"}) == []                     # the default
+    assert install_flags({"scope": "system"}) == ["--for-all-users"]
     assert install_flags({"viewers": "both"}) == []
     assert install_flags({"viewers": "paraview"}) == ["--no-visit"]
     assert install_flags({"viewers": "none"}) == ["--no-visualization"]

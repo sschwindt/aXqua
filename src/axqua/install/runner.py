@@ -30,6 +30,8 @@ import glob
 import json
 import logging
 import os
+import shlex
+import shutil
 import signal
 import subprocess
 import sys
@@ -237,7 +239,7 @@ def start(plan: recipes.Plan, *, detach: bool = True, echo: bool = False
         "findings": [], "outputs": {}, "bound": "",
     })
     if not detach:
-        execute(folder, echo=echo)
+        execute(folder, echo=echo, interactive=_terminal())
         return read(folder)
 
     with open(folder / "runner.log", "ab") as out:
@@ -255,8 +257,34 @@ class _Stop(Exception):
     """The installation was asked to stop."""
 
 
-def execute(folder: str | os.PathLike, *, echo: bool = False) -> int:
-    """Run the commands of an installation folder. This is the runner process."""
+def _terminal() -> bool:
+    """Whether sudo can ask for a password here: a terminal on both ends."""
+    try:
+        return sys.stdin.isatty() and sys.stdout.isatty()
+    except (AttributeError, ValueError):
+        return False
+
+
+def elevated(argv: list[str], *, interactive: bool) -> list[str] | None:
+    """*argv* with the rights of an administrator, or ``None`` if nobody can be asked.
+
+    In a terminal, sudo asks there. Otherwise pkexec opens the password dialog of the
+    desktop, so the password never passes through aXqua.
+    """
+    if interactive and shutil.which("sudo"):
+        return ["sudo", "--", *argv]
+    if recipes.elevation() == "pkexec":
+        return ["pkexec", *argv]
+    return None
+
+
+def execute(folder: str | os.PathLike, *, echo: bool = False,
+            interactive: bool = False) -> int:
+    """Run the commands of an installation folder. This is the runner process.
+
+    *interactive*: this process has a terminal, where sudo can ask for the password
+    of an administrator step.
+    """
     from axqua.jobs import procs
 
     folder = Path(folder)
@@ -303,8 +331,25 @@ def execute(folder: str | os.PathLike, *, echo: bool = False) -> int:
                 out.flush()
                 if echo:
                     print(header, end="", flush=True)
+                if step.admin:
+                    argv = elevated(step.argv, interactive=interactive)
+                    if argv is None:
+                        add(Finding(
+                            ERROR, "axqua.install.needs_admin",
+                            f"'{step.name}' needs the rights of an administrator, and "
+                            "this session can neither show the password dialog of the "
+                            "desktop nor ask in a terminal", subject=subject,
+                            remedy="Start the installation in a terminal with 'axqua "
+                                   "install start ... --foreground', or have an "
+                                   "administrator run: "
+                                   + shlex.join(step.argv)
+                                   + " and then start the installation again."))
+                        return finish("failed", f"'{step.name}' needs an administrator", 1)
+                    step = recipes.Step(step.name, argv, step.cwd, step.env,
+                                        step.optional, admin=True)
                 code = _run_step(step, folder, out, status, stop, echo=echo,
-                                 log_path=log_path)
+                                 log_path=log_path,
+                                 ask_here=step.admin and argv[0] == "sudo")
                 if code and step.optional:
                     # the program is installed; what this step adds is not complete
                     add(Finding(
@@ -399,12 +444,14 @@ _MISSING_ADDITION = {
 
 
 def _run_step(step: recipes.Step, folder: Path, out, status: dict[str, Any],
-              stop: dict[str, bool], *, echo: bool, log_path: Path) -> int:
+              stop: dict[str, bool], *, echo: bool, log_path: Path,
+              ask_here: bool = False) -> int:
+    # sudo asks on the terminal of this session, so it must stay in it.
     proc = subprocess.Popen(
         step.argv, cwd=step.cwd or str(folder),
         env={**recipes.clean_environment(), **step.env},
-        stdin=subprocess.DEVNULL, stdout=out, stderr=subprocess.STDOUT,
-        start_new_session=True, close_fds=True)
+        stdin=None if ask_here else subprocess.DEVNULL, stdout=out,
+        stderr=subprocess.STDOUT, start_new_session=not ask_here, close_fds=True)
     status["child_pid"] = proc.pid
     _write(folder, status)
     shown = log_path.stat().st_size if echo else 0
