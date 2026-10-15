@@ -12,7 +12,7 @@ The schema is the plan's, verbatim, so the example in §6 parses unchanged::
       telemac_linux:
         solver: telemac
         environment: posix
-        setup_script: /home/user/telemac/v9.1/configs/pysource.sh
+        setup_script: /opt/telemac/v9.1/configs/pysource.sh
         mpi_launcher: mpirun
         mpi_processes: 16
         working_root: /scratch/axqua
@@ -42,7 +42,8 @@ from axqua.core.environment import EnvStatus, SolverEnvironment
 from axqua.core.errors import ConfigError
 from axqua.jobs import paths as jobpaths
 
-__all__ = ["Profile", "load_profiles", "resolve", "save_profiles"]
+__all__ = ["Profile", "from_plugin_profile", "implicit", "load_profiles", "resolve",
+           "save_profiles"]
 
 #: TELEMAC's ``systel`` configuration name has no home in ``SolverEnvironment`` and does
 #: not deserve one - it is a TELEMAC concept, and widening a solver-neutral class for it
@@ -204,9 +205,20 @@ def resolve(name: str | None, *, solver: str | None = None, cfg: Any = None,
     ``openfoam.bashrc``), so a user who has never written a ``profiles.yml`` can still
     submit a job. The profile system is an addition, not a new prerequisite.
     """
+    from axqua.core.profile import SUFFIX
+
+    if name and str(name).endswith(SUFFIX):
+        # `--profile /path/to/office.axq-profile`: the computer's own profile file
+        # rather than a name out of profiles.yml. The solver comes from the job kind.
+        return _from_profile_file(name, solver, cfg)
     profiles = load_profiles(path)
     if name:
         if name not in profiles:
+            if Path(str(name)).is_file():
+                # A profile file without the suffix. Asked only after the names: a
+                # file that happens to lie in the working folder must not take the
+                # place of the profile that carries the same name.
+                return _from_profile_file(name, solver, cfg)
             raise ConfigError(
                 f"no solver profile named {name!r}",
                 subject=f"profiles.{name}",
@@ -226,12 +238,89 @@ def resolve(name: str | None, *, solver: str | None = None, cfg: Any = None,
                        + ", ".join(sorted(p.name for p in matching)),
             )
     if cfg is not None:
-        return from_config(cfg, solver or "telemac")
+        return implicit(cfg, solver or "telemac")
     raise ConfigError(
         "no solver profile and no case configuration to derive one from",
         subject="profile",
         remedy=f"Create a profile in {jobpaths.profiles_path()} or pass a case config.",
     )
+
+
+def _from_profile_file(name: str, solver: str | None, cfg: Any) -> Profile:
+    from axqua.core import profile as plugin_profile
+
+    found = from_plugin_profile(plugin_profile.load(name), solver or "telemac", cfg)
+    if found is None:
+        raise ConfigError(
+            f"{name} has no binding for {solver or 'telemac'}",
+            subject=f"solvers.{solver or 'telemac'}",
+            remedy="Add the environment script of that code to the profile.")
+    return found
+
+
+def from_plugin_profile(plugin: Any, solver: str = "telemac", cfg: Any = None
+                        ) -> Profile | None:
+    """The job-system view of one binding of an ``*.axq-profile``.
+
+    ``None`` when the profile does not bind *solver*, so the caller can fall back. The
+    case's own process count fills in where the binding names none: the profile says
+    what the computer has, and a binding without a number has no opinion.
+    """
+    script = plugin.script(solver) if plugin is not None else None
+    if script is None:
+        return None
+    from axqua.core.environment import default_kind
+    from axqua.core.profile import SolverBinding
+
+    # A profile that names the installation folder only has no entry for the code.
+    binding = plugin.solvers.get(solver) or SolverBinding()
+    configured = getattr(getattr(cfg, solver, None), "n_processors", None)
+    return Profile(
+        name=f"{plugin.name or 'profile'}:{solver}",
+        solver=solver,
+        environment=str(binding.environment or default_kind()),
+        setup_script=Path(script),
+        shell=binding.shell,
+        distro=binding.distro,
+        config_name=binding.config_name,
+        mpi_launcher=binding.mpi_launcher,
+        mpi_processes=int(binding.mpi_processes or configured or 1),
+        working_root=Path(plugin.job_root) if plugin.job_root else None,
+        launcher=plugin.launcher or "auto",
+        overrides=dict(binding.overrides),
+    )
+
+
+def implicit(cfg: Any, solver: str = "telemac") -> Profile:
+    """The profile a job uses when none is named.
+
+    The active ``*.axq-profile`` where it binds *solver*, otherwise whatever the case
+    config resolved to (:func:`from_config`). The second half is what keeps a computer
+    without a profile working exactly as before.
+
+    The environment variable of the code and a ``solvers.local.yml`` beside the case
+    outrank the profile here as they do when the case is loaded
+    (:func:`axqua.core.machine.resolve`); a job would otherwise compute with another
+    installation than the one its case was built with. The profile then still says how
+    this computer enters an environment and how many processes it runs. The script is
+    the one that outranks it, and what the profile holds for its own installation (the
+    systel configuration, the variables) is not applied to another one.
+    """
+    from dataclasses import replace
+
+    from axqua.core import machine
+    from axqua.core import profile as plugin_profile
+
+    active = plugin_profile.load_active()
+    found = from_plugin_profile(active, solver, cfg)
+    if found is None:
+        return from_config(cfg, solver)
+    chosen = machine.resolve(solver, case_dir=getattr(cfg, "config_dir", None))
+    if chosen.path is None or chosen.source == str(active.path) \
+            or Path(chosen.path) == found.setup_script:
+        return found
+    return replace(found, name=f"{found.name}, script from {chosen.source}",
+                   setup_script=Path(chosen.path), config_name=None, overrides={})
 
 
 def from_config(cfg: Any, solver: str = "telemac") -> Profile:

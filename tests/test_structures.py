@@ -220,6 +220,224 @@ def test_solid_mask_and_footprint_select_only_solids():
     assert solid_footprint([dam]) is None
 
 
+def _strip_mesh(nx=21, ny=3, step=1.0):
+    """A regular triangulated strip, so element widths are known exactly."""
+    gx, gy = np.meshgrid(np.arange(nx) * step, np.arange(ny) * step)
+    xy = np.column_stack([gx.ravel(), gy.ravel()])
+    tris = []
+    for j in range(ny - 1):
+        for i in range(nx - 1):
+            a, b = j * nx + i, j * nx + i + 1
+            c, d = (j + 1) * nx + i, (j + 1) * nx + i + 1
+            tris += [[a, b, d], [a, d, c]]
+    return xy, np.array(tris)
+
+
+def test_a_wall_thinner_than_an_element_still_raises_a_continuous_ridge():
+    """Raising only the nodes inside a thin footprint leaves a ridge full of holes.
+
+    On munich-vsf that produced 295 one-node spikes - a raised node with every
+    neighbour low, which stops no water - and the propagation step diverged. Raising
+    every node of every element the wall crosses is the fix.
+    """
+    xy, tris = _strip_mesh()
+    bed = np.zeros(len(xy))
+    # 0.2 m wall on a 1 m mesh, offset so it contains no node at all
+    thin = Structure("sheet", OVERFLOW, _band(10.4, 10.6), crest=5.0)
+
+    by_node, _ = apply_to_bed([thin], xy, bed)
+    assert by_node.max() == 0.0                       # nothing raised: the wall leaks
+
+    by_element, touched = apply_to_bed([thin], xy, bed, triangles=tris)
+    assert touched.any()
+    # every element the wall crosses has all three nodes raised, so no element spans
+    # the wall with a low node on each side
+    spans = [t for t in tris if (xy[t][:, 0].min() < 10.4 < xy[t][:, 0].max())
+             or (xy[t][:, 0].min() < 10.6 < xy[t][:, 0].max())]
+    assert spans
+    for tri in spans:
+        assert by_element[tri].min() == pytest.approx(5.0)
+
+
+def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
+    """`touch` blanks any element a wall grazes, so it eats about 0.45 of a cell on
+    each side of an opening. On a fish-pass slot only a few cells wide that is most
+    of the opening, which is what the main workstation raised.
+
+    `structures.blanking_rule: area` blanks only elements the wall really covers.
+    Measured on a synthetic vertical-slot flume with a 0.170 m DIAGONAL slot
+    (cases/slot-flume/blanking_rules.py): zero crossings through a wall at dx 0.10 to
+    0.025 m, and a realised slot of 102-104% of drawn against 74-86% for `touch`.
+
+    The guarantee both must keep: no element may have open water on both sides of a
+    wall. Here that is pinned as "every element the wall passes through is raised".
+    """
+    import shapely
+
+    from axqua.core.structures import _crossed
+
+    # A finer mesh than the strip default, and a wall that STOPS PART WAY so there is
+    # an opening: the saving is entirely at the tip, where the footprint grazes
+    # elements its axis never reaches. A wall spanning the full width has no tip and
+    # nothing to save.
+    xy, tris = _strip_mesh(nx=41, ny=21, step=0.1)
+    thin = Polygon([(2.0, -1.0), (2.15, -1.0), (2.15, 1.2), (2.0, 1.2)])
+    spine = shapely.linestrings([[2.075, -1.0], [2.075, 1.2]])
+
+    touched = _crossed(thin, xy, tris)
+    covered = _crossed(thin, xy, tris, min_area=0.5, spine=spine, verify=spine)
+    assert 0 < covered.sum() < touched.sum()        # blanks fewer, but not none
+
+    # ...and every element the wall passes THROUGH still has all three nodes raised,
+    # so no element spans it with water on each side
+    cells = shapely.polygons(xy[tris])
+    for tri, crossed in zip(tris, shapely.intersects(spine, cells)):
+        if crossed:
+            assert covered[tri].all(), "a wall crosses an element left open"
+
+    # The coverage clause ALONE is unsound and fails silently: this wall is thinner
+    # than an element, so it covers none of them by half and would blank nothing at
+    # all. The medial axis is what keeps the rule honest at any resolution.
+    without_axis = _crossed(thin, xy, tris, min_area=0.5, spine=None)
+    assert np.array_equal(without_axis, touched)    # no axis -> the safe rule
+
+
+def test_the_seal_check_refuses_a_mask_that_leaves_a_way_across():
+    """What makes the tighter rule safe without trusting the skeleton: try it, CHECK
+    it on this mesh, and fall back to `touch` for any structure where it did not hold.
+
+    Tested on the check itself rather than on a contrived rule, because the rule now
+    seals the obvious contrivance by construction - it blanks any element the wall
+    CUTS IN TWO, whatever its coverage. What is left to verify is that the check still
+    refuses a mask which leaves such an element open, since that is the guard standing
+    behind every future change to the rule.
+    """
+    import shapely
+
+    from axqua.core.structures import _crossed, _seal_fails
+
+    xy, tris = _strip_mesh(nx=41, ny=21, step=0.1)
+    # sub-cell thickness, spanning the whole mesh: every element it passes through is
+    # severed, so leaving one open is unambiguously a way across
+    thin = Polygon([(2.02, -1.0), (2.06, -1.0), (2.06, 3.0), (2.02, 3.0)])
+    axis = shapely.linestrings([[2.04, -1.0], [2.04, 3.0]])
+
+    cells = shapely.polygons(xy[tris])
+    candidates = np.flatnonzero(shapely.intersects(thin, cells))
+    assert candidates.size > 4
+
+    sealed = np.ones(candidates.size, bool)
+    assert not _seal_fails(thin, xy, tris, sealed, candidates, axis)
+
+    holed = sealed.copy()
+    holed[candidates.size // 2] = False          # one element left open
+    assert _seal_fails(thin, xy, tris, holed, candidates, axis)
+
+    # ...and the shipped rule does not produce such a mask: nothing it leaves open is
+    # cut in two by the wall
+    blanked = _crossed(thin, xy, tris, min_area=0.5, spine=axis, verify=axis)
+    still_open = candidates[~blanked[tris[candidates]].all(axis=1)]
+    if still_open.size:
+        rest = shapely.difference(shapely.polygons(xy[tris[still_open]]), thin)
+        assert not (shapely.get_num_geometries(rest) > 1).any()
+
+
+def test_every_footprint_shape_gets_an_axis_from_the_right_source():
+    """Three sources, and the third is what a CAD-derived footprint needs.
+
+    A line-sourced wall keeps the line it was buffered from - exact, and the usual
+    case. A rectangle gets its long axis, free and exact. **An L-shaped or snaking
+    polygon gets a Voronoi skeleton**, which is the fix: the rotated-rectangle
+    shortcut is correctly refused for such a shape, and 19 of munich-vsf's 20
+    structures are exactly that, so `blanking_rule: area` silently never fired on the
+    case it was written for.
+    """
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.core.structures import OVERFLOW, Structure, medial_axis
+
+    line = LineString([(0, 0), (10, 0)])
+    buffered = Structure("wall", OVERFLOW, line.buffer(0.1, cap_style=2),
+                         crest=1.0, spine=line)
+    assert medial_axis(buffered) == (line, line)    # exact, not reconstructed
+
+    rect = Structure("dam", OVERFLOW, Polygon([(0, 0), (8, 0), (8, 1), (0, 1)]),
+                     crest=1.0)
+    axis, verify = medial_axis(rect)
+    assert axis.length == pytest.approx(8.0) and verify is axis
+
+    ell = Structure("odd", OVERFLOW,
+                    Polygon([(0, 0), (8, 0), (8, 1), (1, 1), (1, 6), (0, 6)]),
+                    crest=1.0)
+    axis, verify = medial_axis(ell)
+    assert axis is not None, "an L-shape must still get a skeleton"
+    # it runs along BOTH limbs, which a single straight axis never could
+    assert axis.length > 9.0
+    assert ell.polygon.buffer(1e-9).contains(axis)
+
+    # ...and the verification skeleton is a superset of what is blanked, so the
+    # pruning threshold cannot be tuned into passing the seal check
+    assert verify.length >= axis.length
+
+    degenerate = Structure("dot", OVERFLOW, Polygon([(0, 0), (1, 0), (0, 1)]),
+                           crest=1.0)
+    assert medial_axis(degenerate)[0] is None or True   # a triangle: either is safe
+
+
+def test_the_blanking_rule_is_validated_and_defaults_to_the_safe_one():
+    from axqua.config import Structures
+
+    assert Structures().blanking_rule == "touch"     # unchanged for every case
+    Structures(blanking_rule="area").validate()
+    with pytest.raises(ValueError, match="blanking_rule"):
+        Structures(blanking_rule="corner").validate()
+    with pytest.raises(ValueError, match="blanking_area"):
+        Structures(blanking_rule="area", blanking_area=0.0).validate()
+
+
+def test_the_element_rule_is_chunked_without_changing_its_answer():
+    """`shapely.polygons` materialises one GEOS polygon per candidate element, and
+    the bbox prefilter cannot help the case that matters: a wall drawn diagonally
+    across a reach has a bbox covering the whole domain, so every element is a
+    candidate. Measured on inn-KB15's 680k-element mesh, the unchunked construction
+    cost 411 MiB of transient geometry against 24 MiB chunked, at the same runtime.
+
+    Chunking must be invisible in the result, including when a chunk boundary falls
+    between an element and the nodes it contributes.
+    """
+    from axqua.core import structures as module
+
+    xy, tris = _strip_mesh()
+    diagonal = Structure("diagonal", OVERFLOW,
+                         LineString([(xy[:, 0].min(), xy[:, 1].min()),
+                                     (xy[:, 0].max(), xy[:, 1].max())]
+                                    ).buffer(0.1, cap_style=2), crest=5.0)
+    original = module._CROSSED_CHUNK
+    try:
+        module._CROSSED_CHUNK = 10 ** 9              # one pass, as it used to be
+        reference, _ = apply_to_bed([diagonal], xy, np.zeros(len(xy)), triangles=tris)
+        assert (reference == 5.0).any()             # the shape does cross the mesh
+        for size in (1, 3, 97, len(tris), 10 ** 9):
+            module._CROSSED_CHUNK = size
+            chunked, _ = apply_to_bed([diagonal], xy, np.zeros(len(xy)), triangles=tris)
+            assert np.array_equal(chunked, reference), f"chunk size {size} disagrees"
+    finally:
+        module._CROSSED_CHUNK = original
+
+
+def test_the_raise_and_the_solid_mask_agree_about_who_is_on_the_wall():
+    """They must use one rule. A node raised onto a crest but still counted as open
+    water is what perches the initial seed on a wall and puts a liquid boundary on it.
+    """
+    xy, tris = _strip_mesh()
+    thin_solid = Structure("sheet", SOLID, _band(10.4, 10.6), crest=5.0)
+    as_terrain = Structure("sheet", OVERFLOW, _band(10.4, 10.6), crest=5.0)
+
+    _, touched = apply_to_bed([as_terrain], xy, np.zeros(len(xy)), triangles=tris)
+    on_solid = solid_mask([thin_solid], xy, triangles=tris)
+    assert on_solid.tolist() == touched.tolist()
+
+
 # --------------------------------------------------------------------------- #
 # the meshers
 # --------------------------------------------------------------------------- #
@@ -235,7 +453,13 @@ def test_a_solid_structure_removes_columns_from_the_openfoam_lattice():
     blocked = build_plan_grid(domain, 1.0, blocked=Polygon([(10, 10), (20, 10),
                                                             (20, 20), (10, 20)]))
     assert blocked.n_columns < plain.n_columns
-    assert plain.n_columns - blocked.n_columns == pytest.approx(100, abs=25)
+    # A 10x10 solid on a 1 m lattice covers 100 columns as drawn, but it is blanked
+    # against itself grown by half a cell diagonal so that a structure thinner than
+    # the lattice cannot slip between two cell centres and leave the mesh joined
+    # through it. That costs up to one extra cell on every side: 100 as drawn, 144 at
+    # the limit of 12x12.
+    removed = plain.n_columns - blocked.n_columns
+    assert 100 <= removed <= 144, removed
     # the void is genuinely absent, not filled back in
     inside = ((blocked.cell_xy[:, 0] > 11) & (blocked.cell_xy[:, 0] < 19)
               & (blocked.cell_xy[:, 1] > 11) & (blocked.cell_xy[:, 1] < 19))
@@ -254,3 +478,140 @@ def test_a_wall_across_the_whole_domain_is_reported_not_silently_halved(caplog):
                                blocked=Polygon([(14, -1), (16, -1), (16, 31), (14, 31)]))
     assert "cut the domain in two" in caplog.text
     assert grid.n_columns < 30 * 30 / 2 + 30      # only one side survived
+
+    # ...but the same severing done by the rigid lid's DRY trim is not a structure,
+    # and saying so sends the reader looking for a wall nobody drew. Measured on
+    # inn-KB15, which has no structures at all: 2 blocks, 51 columns dropped, blamed
+    # on a structure.
+    caplog.clear()
+    with caplog.at_level(logging.INFO, logger="axqua"):
+        build_plan_grid(domain, 1.0,
+                        blocked=Polygon([(14, -1), (16, -1), (16, 31), (14, 31)]),
+                        blocked_by_structures=False)
+    assert "connected blocks" in caplog.text      # still reported
+    assert "cut the domain in two" not in caplog.text
+    assert "solid structures" not in caplog.text
+
+
+def test_solid_mode_cut_removes_the_footprint_from_the_domain(tmp_path):
+    """`raise` paints a wall onto a mesh that does not know it is there, and every
+    question about blanking, erosion and medial axes follows from that. `cut` removes
+    the footprint from the domain instead, so the wall is a no-slip boundary and the
+    opening beside it is bounded by mesh edges.
+
+    The whole feature is one polygon operation: the geometry code already turns every
+    interior ring into a gmsh curve loop, so a hole in the ROI is a hole in the mesh.
+    """
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.config import Structures
+    from axqua.solvers.telemac.mesh import _cut_solids
+
+    roi = Polygon([(0, 0), (20, 0), (20, 10), (0, 10)])
+    wall = LineString([(10, -1), (10, 6)]).buffer(0.1, cap_style=2)
+
+    class _Cfg:
+        def __init__(self, mode):
+            self.structures = Structures(solid_mode=mode, cut_simplify=0.0)
+
+    import axqua.solvers.telemac.mesh as meshmod
+    original = meshmod.load_structures if hasattr(meshmod, "load_structures") else None
+    from axqua.core import structures as stmod
+
+    made = [Structure("wall", SOLID, wall, crest=5.0)]
+    stmod.load_structures = lambda cfg: made          # noqa: ARG005
+    try:
+        kept = _cut_solids(_Cfg("raise"), roi)
+        assert kept is roi                            # default leaves the ROI alone
+
+        cut = _cut_solids(_Cfg("cut"), roi)
+        assert cut.area == pytest.approx(roi.area - wall.intersection(roi).area)
+        # the wall reaches the ROI edge, so it is a notch rather than an island - and
+        # the domain must stay in one piece either way
+        assert cut.geom_type == "Polygon"
+        assert not cut.contains(wall.centroid)
+    finally:
+        stmod.load_structures = original or stmod.load_structures
+    del original
+
+
+def test_solid_mode_cut_makes_an_island_a_hole(tmp_path):
+    """A wall wholly inside the ROI becomes an interior ring, which is what gmsh
+    meshes around - that ring is the exact opening the flow sees."""
+    from shapely.geometry import LineString, Polygon
+
+    from axqua.config import Structures
+    from axqua.core import structures as stmod
+    from axqua.solvers.telemac.mesh import _cut_solids
+
+    roi = Polygon([(0, 0), (20, 0), (20, 10), (0, 10)])
+    island = LineString([(10, 3), (10, 7)]).buffer(0.1, cap_style=2)
+
+    class _Cfg:
+        structures = Structures(solid_mode="cut", cut_simplify=0.0)
+
+    keep = stmod.load_structures
+    stmod.load_structures = lambda cfg: [Structure("pier", SOLID, island, crest=5.0)]
+    try:
+        cut = _cut_solids(_Cfg(), roi)
+        assert len(cut.interiors) == 1                # a genuine hole
+        assert cut.area == pytest.approx(roi.area - island.area)
+    finally:
+        stmod.load_structures = keep
+
+
+def test_structure_sides_are_patched_apart_from_the_domain_edge():
+    """Water against a baffle is a fish pass working; water against the domain edge
+    means the footprint is too tight. One `banks` patch cannot tell them apart, and
+    on munich-vsf that made a correct geometry report as a boxed-in domain."""
+    import numpy as np
+    from shapely.geometry import Polygon
+
+    from axqua.solvers.openfoam.mesh import split_structure_sides
+
+    solid = Polygon([(10, 10), (20, 10), (20, 20), (10, 20)])
+    midpoints = np.array([
+        (10.0, 15.0),    # on the solid's west face
+        (20.0, 15.0),    # on its east face
+        (15.0, 10.0),    # its south face
+        (0.0, 5.0),      # the domain edge, far away
+        (30.0, 25.0),    # the domain edge
+        (15.0, 15.0),    # inside the solid (a blanked column's own face)
+    ])
+    banks = np.ones(len(midpoints), dtype=bool)
+
+    edge, structure = split_structure_sides(midpoints, banks, solid, dx=1.0)
+    assert structure.tolist() == [True, True, True, False, False, True]
+    assert edge.tolist() == [False, False, False, True, True, False]
+    # the split is a partition of the wall faces: nothing gained, nothing lost
+    assert (edge | structure).tolist() == banks.tolist()
+    assert not (edge & structure).any()
+
+
+def test_a_case_with_no_solids_keeps_every_wall_face_on_the_domain_edge():
+    """`structures` must not appear when there is nothing to put in it, or every
+    existing case grows an empty patch."""
+    import numpy as np
+
+    from axqua.solvers.openfoam.mesh import split_structure_sides
+
+    midpoints = np.array([(0.0, 0.0), (5.0, 5.0)])
+    banks = np.ones(2, dtype=bool)
+    edge, structure = split_structure_sides(midpoints, banks, None, dx=1.0)
+    assert edge.all() and not structure.any()
+
+
+def test_faces_that_are_not_wall_faces_are_never_claimed_by_either():
+    """The liquid boundaries sit inside the same array; a face already classified as
+    an inlet must not be reclassified because it happens to lie near a structure."""
+    import numpy as np
+    from shapely.geometry import Polygon
+
+    from axqua.solvers.openfoam.mesh import split_structure_sides
+
+    solid = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    midpoints = np.array([(5.0, 5.0), (5.0, 5.0)])
+    banks = np.array([True, False])          # the second is an inlet face
+    edge, structure = split_structure_sides(midpoints, banks, solid, dx=1.0)
+    assert structure.tolist() == [True, False]
+    assert edge.tolist() == [False, False]

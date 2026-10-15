@@ -166,6 +166,13 @@ class TelemacBackend(BaseBackend):
                 remedy="Submit a preprocessing job first, or point the job at the case "
                        "workspace that holds the build.",
             )
+        from axqua import bayescal
+
+        # A calibration that was cancelled leaves the last parameter set it tested in
+        # the friction table and the steering file of this case.
+        if bayescal.restore_as_built(cfg):
+            log.warning("restored the built case: a calibration had been interrupted "
+                        "and had left its last tested parameter set in %s", cas.parent)
         runtime = TelemacRuntime(cfg.telemac)
         sink = _sink_for(ctx, name)
         proc = run_solver_streaming(
@@ -180,10 +187,17 @@ class TelemacBackend(BaseBackend):
         if ctx is not None:
             ctx.check_cancelled()
         if proc.returncode != 0:
+            from axqua.workflow import LIMIT_STOP_REMEDY
+
+            # set when TELEMAC-2D stopped itself on its limits, which it reports as a
+            # correct end with exit code 0 (workflow._fail_on_limit_stop)
+            stopped = getattr(proc, "stop_reason", "")
             raise errors.SolverError(
-                f"{solver or cfg.telemac.solver} exited with code {proc.returncode}",
+                stopped
+                or f"{solver or cfg.telemac.solver} exited with code {proc.returncode}",
                 subject=str(cas),
-                remedy=f"Read the listing next to {cas.parent} for the first error.",
+                remedy=(LIMIT_STOP_REMEDY if stopped else
+                        f"Read the listing next to {cas.parent} for the first error."),
                 component=solver or cfg.telemac.solver,
                 return_code=proc.returncode,
                 listing=str(cas.with_suffix(".sortie")),
@@ -250,10 +264,12 @@ class TelemacBackend(BaseBackend):
             # Never the study's own stdin prompt: a detached job must answer from its
             # own record, and every answer is logged (see jobs.interaction).
             ask=(ctx.ask if ctx is not None else None),
+            on_level=_level_progress(ctx),
         )
         if ctx is not None:
             ctx.progress(levels_done=len(report.levels), levels_total=len(report.levels),
                          converged=bool(getattr(report, "converged", False)))
+        _write_study_report(report, base, "mesh-convergence", ctx, readme=True)
         return report
 
     def _vertical_convergence(self, cfg, *, ctx: Any = None,
@@ -266,7 +282,11 @@ class TelemacBackend(BaseBackend):
             kwargs["counts"] = list(layer_counts)
         if ncsize:
             kwargs["n_processors"] = ncsize
-        return run_vertical_convergence(cfg, **kwargs)
+        base = Path(cfg.postprocessing_dir) / "vertical-convergence"
+        report = run_vertical_convergence(cfg, base_dir=base,
+                                          on_level=_level_progress(ctx), **kwargs)
+        _write_study_report(report, base, "vertical-convergence", ctx)
+        return report
 
     def _calibration(self, cfg, *, ctx: Any = None, flows: list | None = None,
                      launch_mode: str = "run", force: bool = False,
@@ -274,9 +294,15 @@ class TelemacBackend(BaseBackend):
                      calibration_quantities: list | None = None,
                      extraction_quantities: list | None = None,
                      vel_err_floor: float | None = None,
-                     depth_err_floor: float | None = None, **_ignored):
+                     depth_err_floor: float | None = None,
+                     validate: bool = False, situation: str = "",
+                     compare_only: bool = False, ncsize: int | None = None,
+                     **_ignored):
         from axqua import bayescal
 
+        if validate:
+            return self._validation(cfg, ctx=ctx, situation=situation,
+                                    compare_only=compare_only, ncsize=ncsize)
         if flows:
             specs = [bayescal.FlowSpec(**f) for f in flows]
             code = bayescal.run_multiflow_calibration(cfg, specs,
@@ -292,7 +318,8 @@ class TelemacBackend(BaseBackend):
                 kwargs["vel_err_floor"] = vel_err_floor
             if depth_err_floor is not None:
                 kwargs["depth_err_floor"] = depth_err_floor
-            code = bayescal.run_single_flow_calibration(cfg, **kwargs)
+            with _calibration_progress(cfg, ctx):
+                code = bayescal.run_single_flow_calibration(cfg, **kwargs)
         if code != 0:
             raise errors.SolverError(
                 f"the calibration driver exited with code {code}",
@@ -302,6 +329,61 @@ class TelemacBackend(BaseBackend):
                 return_code=code,
             )
         return code
+
+    def _validation(self, cfg, *, ctx: Any = None, situation: str = "",
+                    compare_only: bool = False, ncsize: int | None = None):
+        """The calibrated model at another discharge, against what was measured then.
+
+        Runs in the model folder under names of its own, so neither the built case nor
+        the result of the steady run is touched.
+        """
+        import numpy as np
+
+        from axqua import validation
+        from axqua.solvers.telemac import sortie
+        from axqua.solvers.telemac.flux_convergence import relative_imbalance
+
+        chosen = validation.situation_named(cfg, situation or None)
+        setup = None
+        balance = None
+        if not compare_only:
+            calibrated = validation.calibrated_parameters(cfg)
+            log.info("validation %s with the %s of %s", chosen.name,
+                     calibrated.estimate, calibrated.source.parent.parent.parent.name)
+            setup = validation.build(cfg, chosen, calibrated.as_dict())
+            self._launch(cfg, ctx=ctx, cas_file=setup.cas.name, ncsize=ncsize,
+                         solver=None, name="telemac2d",
+                         duration=chosen.duration or None)
+            listing = sortie.latest_sortie(cfg.model_dir, setup.cas.name)
+            if listing is not None:
+                history = sortie.read_sortie(listing)
+                tail = relative_imbalance(history.gross_in, history.gross_out)[-10:]
+                if tail.size:
+                    balance = float(np.nanmean(tail))
+                    setup.notes.append(
+                        "Discharge balance at the end of the validation run: inflow "
+                        f"and outflow differ by {100 * balance:.2f} %.")
+        report = validation.evaluate(cfg, chosen, setup)
+        if balance is not None and balance > float(cfg.hydrodynamics.flux_tolerance):
+            report.notes.append(
+                "The validation run had not reached a steady state: inflow and outflow "
+                f"still differed by {100 * balance:.2f} %. Increase the duration of "
+                "the validation situation.")
+        if ctx is not None:
+            folder = Path(cfg.calibration_dir) / validation.FOLDER
+            tag = validation.slug(chosen.name)
+            ctx.record(f"Validation {chosen.name}: model against measurement",
+                       folder / f"validation-{tag}.csv", kind="table")
+            ctx.record(f"Validation {chosen.name}: summary",
+                       folder / f"validation-{tag}.json", kind="file")
+            ctx.record(f"Validation {chosen.name}: figure",
+                       folder / f"validation-{tag}.png", kind="figure")
+            if setup is not None:
+                ctx.record(f"Validation {chosen.name} (TELEMAC result)", setup.results,
+                           kind="mesh", style=STYLE_DEPTH, variable="WATER DEPTH")
+        for note in report.notes + (setup.notes if setup else []):
+            log.info("validation %s: %s", chosen.name, note)
+        return report
 
     # -- after the run ------------------------------------------------------------
     def postprocess(self, cfg, ctx: Any = None):
@@ -375,27 +457,45 @@ class TelemacBackend(BaseBackend):
         if ctx is None:
             return []
         written: list[Path] = []
+        from axqua.solvers.telemac import threed
+
         # Results, in the order a user wants them: the thing that was computed first.
-        for attr, label, style, variable in (
-            ("results_slf", "TELEMAC result (steady)", STYLE_DEPTH, "WATER DEPTH"),
-            ("results_unsteady_slf", "TELEMAC result (unsteady)", STYLE_DEPTH,
-             "WATER DEPTH"),
-            ("results3d_slf", "TELEMAC-3D result", "", ""),
-            ("results2d_from_3d_slf", "TELEMAC-3D result (depth-averaged)", STYLE_DEPTH,
-             "WATER DEPTH"),
+        # The last column is the dataset the velocity is styled by. A 2D result prints
+        # the scalar velocity; the depth-averaged companion of a 3D run carries the
+        # two components only, which QGIS reads as one vector group named VELOCITY.
+        # The hydrostatic 3D run keeps its results under names of its own.
+        for name, label, velocity in (
+            (getattr(cfg, "results_slf", None), "TELEMAC result (steady)",
+             "SCALAR VELOCITY"),
+            (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
+             "SCALAR VELOCITY"),
+            (getattr(cfg, "results2d_from_3d_slf", None),
+             "TELEMAC-3D result (depth-averaged)", "VELOCITY"),
+            (threed.HYDROSTATIC_RESULT_2D,
+             "TELEMAC-3D result, hydrostatic (depth-averaged)", "VELOCITY"),
         ):
-            name = getattr(cfg, attr, None)
             if not name:
                 continue
             path = cfg.model_path(name)
             if not path.exists():
                 continue
-            ctx.record(label, path, kind="mesh", style=style, variable=variable)
+            ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
+                       variable="WATER DEPTH")
             # The same file carries velocity; a second entry lets the plugin add two
             # differently-styled layers over one dataset without reading it twice.
             ctx.record(f"{label} - velocity", path, kind="mesh", style=STYLE_VELOCITY,
-                       variable="SCALAR VELOCITY")
+                       variable=velocity)
             written.append(path)
+
+        # The 3D results themselves are volumes. QGIS reads SELAFIN in 2D only, so they
+        # are listed as files and not as layers: offered as layers, each *Load results*
+        # ended with "r3d.slf did not load".
+        for name, label in ((getattr(cfg, "results3d_slf", None), "TELEMAC-3D result"),
+                            (threed.HYDROSTATIC_RESULT_3D,
+                             "TELEMAC-3D result, hydrostatic")):
+            if name:
+                ctx.record(f"{label} (3D file, not a map layer)", cfg.model_path(name),
+                           kind="file")
 
         ctx.record("Mesh geometry", cfg.model_path(cfg.geometry_slf), kind="mesh")
         for name, kind in (("mesh-convergence.xlsx", "table"),
@@ -408,6 +508,62 @@ class TelemacBackend(BaseBackend):
 
 
 BACKEND = TelemacBackend()
+
+
+def _level_progress(ctx: Any):
+    """What a convergence study calls after each of its runs; ``None`` without a job."""
+    if ctx is None:
+        return None
+    return lambda done, total, label: ctx.progress(
+        levels_done=done, levels_total=total, current_label=label)
+
+
+def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,
+                        readme: bool = False) -> None:
+    """Write the report of a convergence study next to its levels, and record it.
+
+    The case scripts have always done this after the study returned. The job did not:
+    it ran the study for twenty minutes and left the verdict in its log, so the plugin
+    had nothing to show for it and "the report" the documentation points at did not
+    exist - although :meth:`TelemacBackend.export_qgis_results` already listed the
+    workbook among the results. A workbook that cannot be written must not fail a study
+    that ran.
+    """
+    folder = Path(folder)
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        workbook = report.to_xlsx(folder / f"{stem}.xlsx")
+        summary = folder / f"{stem}.txt"
+        report.save(summary)
+        if readme:
+            from axqua import convergence
+
+            convergence.write_readme(folder, report=report)
+    except Exception as exc:                        # noqa: BLE001
+        log.warning("could not write the %s report: %s: %s", stem, type(exc).__name__, exc)
+        return
+    log.info("%s report -> %s", stem, workbook)
+    if ctx is not None:
+        # the workbook is listed by export_qgis_results, which has always looked for it
+        ctx.record(f"{stem.replace('-', ' ').capitalize()} summary", summary, kind="file")
+
+
+def _calibration_progress(cfg, ctx: Any):
+    """Follow the HydroBayesCal log of a calibration and report its model runs.
+
+    Without a job context there is nobody to report to, and the driver's own output
+    is on the terminal anyway.
+    """
+    from contextlib import nullcontext
+
+    if ctx is None:
+        return nullcontext()
+    from axqua import hbc
+
+    total = int(cfg.calibration.max_runs or 0) or None
+    return hbc.RunCounter(
+        Path(cfg.calibration_dir) / hbc.DRIVER_LOG,
+        lambda run: ctx.progress(iteration=run, max_iterations=total))
 
 
 def _sink_for(ctx: Any, name: str):

@@ -39,23 +39,30 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
              "sigma_levels"),
     "quality": ("MeshReport", "assess"),
     "case": ("OpenFoamArtifacts", "build_case", "estimate_cells", "summarise"),
-    "report": ("DischargeHistory", "SurfaceFreedom", "analyse", "surface_freedom",
+    "report": ("DischargeHistory", "LidApplicability", "SurfaceFreedom", "analyse",
+               "lid_applicability", "surface_freedom", "verdict_lines",
                "write_report"),
     "runtime": ("OpenFoamProgress", "OpenFoamRuntime"),
+    "calibration": ("campaign_config", "emit_openfoam_config", "openfoam_parameters",
+                    "run_openfoam_calibration", "stage_case_template"),
 }
-_SUBMODULES = ("case", "dicts", "fields", "hotstart", "mesh", "polymesh", "quality",
-               "report", "runtime", "spec")
+_SUBMODULES = ("calibration", "case", "dicts", "fields", "hotstart", "mesh", "polymesh",
+               "quality", "report", "runtime", "spec")
 
 _NAME_TO_MODULE = {name: module
                    for module, names in _EXPORTS.items()
                    for name in names}
 
 __all__ = [
-    "DischargeHistory", "MeshReport", "OpenFoamArtifacts", "OpenFoamMesh",
+    "DischargeHistory", "LidApplicability", "MeshReport", "OpenFoamArtifacts",
+    "OpenFoamMesh",
     "OpenFoamProgress", "OpenFoamRuntime", "Patch", "PlanGrid", "PolyMesh",
     "State2D", "SurfaceFreedom", "analyse", "assess", "build_case", "build_mesh",
-    "build_plan_grid", "estimate_cells", "load_hotstart", "sigma_levels",
-    "summarise", "surface_freedom", "write_polymesh", "write_report", *_SUBMODULES,
+    "build_plan_grid", "campaign_config", "emit_openfoam_config", "estimate_cells",
+    "lid_applicability", "load_hotstart", "openfoam_parameters",
+    "run_openfoam_calibration",
+    "sigma_levels", "stage_case_template", "summarise", "surface_freedom",
+    "verdict_lines", "write_polymesh", "write_report", *_SUBMODULES,
 ]
 
 
@@ -85,6 +92,7 @@ if TYPE_CHECKING:  # give type checkers and IDEs the real names
     from axqua.solvers.openfoam.polymesh import Patch, PolyMesh, write_polymesh
     from axqua.solvers.openfoam.quality import assess, MeshReport
     from axqua.solvers.openfoam.report import (
-        analyse, DischargeHistory, write_report,
+        analyse, DischargeHistory, lid_applicability, LidApplicability,
+        verdict_lines, write_report,
     )
     from axqua.solvers.openfoam.runtime import OpenFoamProgress, OpenFoamRuntime

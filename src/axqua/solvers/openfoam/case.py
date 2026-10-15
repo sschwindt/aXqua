@@ -11,10 +11,10 @@ What it produces, under ``<sim_dir>/openfoam/``::
     0/                alpha.water, U, p_rgh, nut, k, omega   (seeded from r2d.slf)
     constant/
       polyMesh/       points, faces, owner, neighbour, boundary
-      g, transportProperties, momentumTransport
+      g, transportProperties, turbulenceProperties
     system/
       controlDict, fvSchemes, fvSolution                     (the ACTIVE stage)
-      fvConstraints, decomposeParDict
+      fvOptions, decomposeParDict
       stage1-spinup/, stage2-run/                            (both dict sets)
     case.foam                                                (ParaView marker)
 """
@@ -29,7 +29,8 @@ import numpy as np
 
 from axqua.config import Config
 from axqua.core.capabilities import refresh_markers
-from axqua.solvers.openfoam import dicts, fields, mesh as ofmesh, quality
+from axqua.solvers.openfoam import (dicts, fields, mesh as ofmesh,
+                                    planview, potential, quality)
 from axqua.solvers.openfoam.hotstart import State2D, load_hotstart
 from axqua.solvers.openfoam.polymesh import write_polymesh
 
@@ -38,12 +39,35 @@ log = logging.getLogger("axqua")
 # multiple of the water velocity at which the limitVelocity constraint bites
 DEFAULT_VELOCITY_CAP_FACTOR = 5.0
 
-# OpenFOAM's cell Courant number is 0.5 * sum|phi| / V * dt - a sum over *all* the
-# cell's faces, so a cell with flow through more than one pair of faces reports more
-# than the textbook U dt / L. Measured on the isar mesh (dt 1.77e-3 s at Courant 0.3
-# where U dt / L predicted 3.8e-3), the ratio is close to 2; the estimate below
-# carries it so the reported cost is the cost, not an optimistic bound.
-COURANT_FACE_SUM_FACTOR = 2.0
+# The time step of a two-phase run, measured on the Isar example after the corrections
+# of 2026-10-13 (1 m cells with 14 layers, thinnest layer 0.031 m, and 2 m cells with
+# 8 layers, thinnest layer 0.057 m; water speed 0.80 m/s at the 95th percentile). Two
+# limits, and both scale with the thinnest layer: the air next to the water reaches a
+# Courant number of 0.9 at 0.026 s and 0.060 s, the water surface at 0.051 s and
+# 0.100 s. Written as Courant x thinnest layer / (factor x water speed), the factor
+# is 1.3 and 1.1 for the air and 0.68 and 0.64 for the surface.
+AIR_SPEED_FACTOR = 1.2
+SURFACE_SPEED_FACTOR = 0.65
+
+
+def _describe_outflow(stage) -> str:
+    """One line for the outlet prescription, scalar or per-patch.
+
+    A crop with several open faces carries a different level on each, and the
+    SPREAD is the number worth seeing: it is what says whether one scalar would
+    have been an acceptable approximation.
+    """
+    from collections.abc import Mapping
+
+    if stage is None:
+        return "free outfall"
+    if isinstance(stage, Mapping):
+        levels = sorted(stage.values())
+        if len(set(levels)) == 1:
+            return f"stage held at {levels[0]:.3f} m a.s.l. on every outlet"
+        return (", ".join(f"{p} {v:.3f}" for p, v in stage.items())
+                + f" m a.s.l. (spread {levels[-1] - levels[0]:.3f} m)")
+    return f"stage held at {float(stage):.3f} m a.s.l."
 
 
 @dataclass
@@ -58,7 +82,7 @@ class OpenFoamArtifacts:
     report: object = None               # openfoam.quality.MeshReport
     discharge: float = 0.0
     inlet_discharges: dict[str, float] = field(default_factory=dict)
-    outflow_stage: float | None = None
+    outflow_stage: "float | dict[str, float] | None" = None
     velocity_cap: float = 0.0
     hotstart: Path | None = None
     notes: list[str] = field(default_factory=list)
@@ -69,8 +93,7 @@ class OpenFoamArtifacts:
         seed = self.hotstart.name if self.hotstart else "none (cold start, flat lid)"
         inflow = ", ".join(f"{k} {v:g} m3/s"
                            for k, v in self.inlet_discharges.items())
-        outflow = (f"stage held at {self.outflow_stage:.3f} m a.s.l."
-                   if self.outflow_stage is not None else "free outfall")
+        outflow = _describe_outflow(self.outflow_stage)
         out = [f"OpenFOAM case built in {self.case_dir}"]
         out.append(f"  hotstart    : {seed}")
         out.append(f"  inflow      : {inflow}")
@@ -110,12 +133,15 @@ def _inlet_discharges(of_mesh, cfg: Config, total: float) -> dict[str, float]:
 def build_case(cfg: Config, *, state: State2D | None = None,
                hotstart: str | Path | None = None,
                case_dir: str | Path | None = None,
-               discharge: float | None = None) -> OpenFoamArtifacts:
+               discharge: float | None = None,
+               uniform_bed_ks: bool = False) -> OpenFoamArtifacts:
     """Build the OpenFOAM case for *cfg*.
 
     *state* short-circuits reading the 2D result (used by tests); *hotstart* points
     at a different ``r2d.slf`` than the config's own; *discharge* overrides
-    ``boundaries.prescribed_flowrate``.
+    ``boundaries.prescribed_flowrate``. *uniform_bed_ks* writes one global bed
+    roughness rather than the per-face list, which is what a calibration template
+    needs (see :func:`axqua.solvers.openfoam.fields._wall_entries`).
     """
     of = cfg.openfoam
     of.validate()
@@ -137,7 +163,14 @@ def build_case(cfg: Config, *, state: State2D | None = None,
             "no steady discharge for the OpenFOAM build: set "
             "boundaries.prescribed_flowrate (m3/s) in case-config.yml.")
 
-    of_mesh = ofmesh.build_mesh(cfg, state=state)
+    # The level of the outflow is needed before the mesh, which walls an outlet above
+    # it; a stage per outlet patch (openfoam.outlet_stage) is read by the mesher.
+    tailwater = None
+    if of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
+        from axqua.hydraulics import resolve_outflow_wse
+
+        tailwater = float(resolve_outflow_wse(cfg, q))
+    of_mesh = ofmesh.build_mesh(cfg, state=state, tailwater=tailwater)
     notes = list(of_mesh.notes)
     if state is not None:
         warning = state.resolution_check(ofmesh.plan_spacing(cfg))
@@ -151,13 +184,24 @@ def build_case(cfg: Config, *, state: State2D | None = None,
             "boundaries.liquid_boundaries reached the domain edge. Without one the "
             "water has nowhere to leave and the run will simply fill up.")
 
-    if cfg.boundaries.outflow_condition == "free":
+    if of.outlet_stage is not None:
+        stage = fields.outlet_stages(of.outlet_stage, of_mesh.outlet_patches)
+        levels = sorted(stage.values())
+        where = ("this domain is a sub-model, so its tailwater is the parent's "
+                 "level at the crop face, not the case's own far-end prescription")
+        if len(set(levels)) > 1:
+            notes.append(
+                "outlet stages " + ", ".join(f"{p} {v:.3f}" for p, v in stage.items())
+                + f" m a.s.l. from openfoam.outlet_stage, spanning "
+                  f"{levels[-1] - levels[0]:.3f} m - " + where)
+        else:
+            notes.append(f"outlet stage {levels[0]:.3f} m a.s.l. from "
+                         f"openfoam.outlet_stage - {where}")
+    elif cfg.boundaries.outflow_condition == "free":
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
     else:
-        from axqua.hydraulics import resolve_outflow_wse
-
-        stage = float(resolve_outflow_wse(cfg, q))
+        stage = tailwater
         notes.append(f"outlet stage {stage:.3f} m a.s.l. from "
                      f"boundaries.outflow_condition: {cfg.boundaries.outflow_condition}"
                      " - the same prescription the TELEMAC case uses")
@@ -171,10 +215,23 @@ def build_case(cfg: Config, *, state: State2D | None = None,
                      f"({DEFAULT_VELOCITY_CAP_FACTOR:g}x the reach's p95 water speed)")
 
     polymesh_dir = write_polymesh(of_mesh.polymesh, case_dir)
-    field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
-                                      outflow_stage=stage, discharges=inlets)
+    # which column each cell is in and how thick it is: what a view of the result
+    # from above needs, saved here so that it never depends on a second build
+    planview.Columns.of(of_mesh).save(case_dir)
+    if potential.is_potential(cfg):
+        # Leg C: single phase, the free surface carried as `zeta` on the top
+        # boundary rather than resolved as an interface. Different field set
+        # (p/p_gh/U/zeta, no alpha) on the same water-only mesh the rigid lid uses.
+        field_files = potential.write_potential_fields(of_mesh, cfg, case_dir,
+                                                      state=state)
+        fields.write_reference_level(case_dir, None)    # left by a two-phase build
+    else:
+        field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
+                                          outflow_stage=stage, discharges=inlets,
+                                          uniform_bed_ks=uniform_bed_ks)
     dict_files = dicts.write_dicts(of_mesh, cfg, case_dir, velocity_cap=cap)
     (case_dir / "case.foam").write_text("")     # so ParaView can open the folder
+    _write_build_record(cfg, of_mesh, case_dir, velocity_cap=float(cap))
 
     report = quality.assess(of_mesh, state=state,
                             roughness_constant=of.roughness_constant)
@@ -192,18 +249,42 @@ def build_case(cfg: Config, *, state: State2D | None = None,
     return art
 
 
-def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> float:
-    """The velocity that actually sets the Courant number.
+#: Written beside ``case.foam`` so the build's own findings survive the terminal.
+#: A build-time warning that only reaches a log is the failure this exists to stop:
+#: munich-vsf ran 61 hours, balanced its discharge to -0.000%, held Courant at 0.90,
+#: and carried no trace of the warning that said the answer could not be trusted.
+BUILD_RECORD = "axqua-build.json"
 
-    In the two-phase case that is the ``limitVelocity`` cap: the fastest cells in the
-    domain are air, and they sit at the cap by construction. **Under a rigid lid there
-    is no air**, so the limit is the water's own speed - using the cap there would
-    over-state the cost several-fold and make the mode look worse than it is.
+
+def _write_build_record(cfg: Config, of_mesh, case_dir: Path, *,
+                        velocity_cap: float) -> Path:
+    """Record the build-time judgements the finished run has to be read against.
+
+    Only what the run itself cannot tell you afterwards. The lid-step ratio is the
+    whole point: it is measured from the *prescribed* surface, so no amount of
+    looking at the result recovers it - and it is the number that decides whether a
+    rigid-lid answer is usable at all.
     """
-    if not getattr(of_mesh, "rigid_lid", False):
-        return velocity_cap
+    import json
+
+    record = {
+        "mode": cfg.openfoam.mode,
+        "rigid_lid": bool(of_mesh.rigid_lid),
+        "velocity_cap": velocity_cap,
+        "n_cells": int(of_mesh.n_cells),
+    }
+    if of_mesh.lid_step_p99 is not None:
+        record["lid_step_median"] = float(of_mesh.lid_step_median)
+        record["lid_step_p99"] = float(of_mesh.lid_step_p99)
+    path = case_dir / BUILD_RECORD
+    path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+    return path
+
+
+def water_speed(of_mesh, cfg: Config, state=None) -> float:
+    """The reach's own water speed [m/s]: the 95th percentile of the 2D result."""
     if state is not None:
-        return max(state.velocity_scale(), 1e-3)
+        return max(float(state.velocity_scale()), 1e-3)
     if getattr(of_mesh, "column_uv", None) is not None:
         speed = np.hypot(of_mesh.column_uv[:, 0], of_mesh.column_uv[:, 1])
         if speed.size:
@@ -211,23 +292,46 @@ def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> 
     return float(cfg.hydrodynamics.initial_velocity_guess)
 
 
+def limiting_velocity(of_mesh, cfg: Config, velocity_cap: float, state=None) -> float:
+    """The velocity that sets the Courant number of the flow.
+
+    Under a rigid lid that is the water's own speed. In the two-phase case it is the
+    air next to the water, which moves a little faster than the water does
+    (:data:`AIR_SPEED_FACTOR`) and never faster than the ``limitVelocity`` cap.
+    **It is not the cap**, although this function said so until October 2026: the
+    runs it was calibrated on had air at the cap because the outflow drove it there
+    (see :func:`axqua.solvers.openfoam.fields.outlet_pressure`), and the estimate
+    built on them was eight times too small once that was corrected.
+    """
+    water = water_speed(of_mesh, cfg, state)
+    if getattr(of_mesh, "rigid_lid", False):
+        return water
+    return min(AIR_SPEED_FACTOR * water, float(velocity_cap))
+
+
+def flow_courant(cfg: Config, courant: float | None = None) -> float:
+    """The Courant limit of the flow in the production stage (``maxCo``)."""
+    of = cfg.openfoam
+    courant = courant if courant is not None else of.max_courant
+    wanted = getattr(of, "max_flow_courant", None)
+    if wanted and of.mode != "rigid-lid":
+        return max(float(wanted), courant)
+    return courant
+
+
 def estimate_time_step(of_mesh, cfg: Config, velocity_cap: float, *,
-                       courant: float | None = None) -> float:
+                       courant: float | None = None, state=None) -> float:
     """Time step [s] the Courant target will settle on.
 
-    Two things about this are not the obvious choices, and both were corrected
-    against a measured run (isar: 2e-3 s at Courant 0.3, where the obvious estimate
-    gave 1e-1 s - fifty times too optimistic):
+    **Two phases.** The limiting **length** is the *thinnest* layer in the mesh, not
+    the bed layer and not ``cell_size``: the bed layer is pinned thick enough to clear
+    the roughness, so the layers above it are thinner wherever a column is shallow,
+    and what crosses a layer is the vertical motion at the waterline. Two limits
+    apply, the Courant number of the flow, which the air next to the water reaches
+    first, and that of the water surface; the smaller step is the estimate. Within
+    12 % of the four measured steps the factors come from.
 
-    * the limiting **length** is the *thinnest* layer in the mesh, not the bed layer
-      and not ``cell_size``. The bed layer is pinned thick enough to clear the
-      roughness, so the layers above it are thinner wherever a column is shallow;
-    * the limiting **velocity** is the ``limitVelocity`` cap, not the reach's own
-      water speed. The Courant number is set by the fastest cells in the domain, and
-      those are air cells sitting at the cap - which is exactly why the cap is worth
-      setting, and why it also sets the cost.
-
-    Neither holds under a **rigid lid**, and taking them across gave an estimate
+    **Rigid lid.** No air, and taking the two-phase model across gave an estimate
     nineteen times too pessimistic (0.019 s against a measured 0.369 s). There the
     water moves horizontally across the full plan spacing, and only its *vertical*
     component - which a terrain-following mesh gets from the bed slope, w ~ u.S -
@@ -238,13 +342,15 @@ def estimate_time_step(of_mesh, cfg: Config, velocity_cap: float, *,
     from axqua.solvers.openfoam.mesh import plan_spacing
 
     dx = plan_spacing(cfg)
-    speed = limiting_velocity(of_mesh, cfg, velocity_cap)
+    speed = limiting_velocity(of_mesh, cfg, velocity_cap, state)
     if getattr(of_mesh, "rigid_lid", False):
         slope = terrain_slope(of_mesh)
         rate = speed / dx + speed * slope / max(of_mesh.min_layer_height, 1e-3)
         return courant / max(rate, 1e-6)
     length = min(of_mesh.min_layer_height, dx)
-    return courant * length / (COURANT_FACE_SUM_FACTOR * max(speed, 1e-3))
+    air = flow_courant(cfg, courant) * length / max(speed, 1e-3)
+    surface = courant * length / (SURFACE_SPEED_FACTOR * water_speed(of_mesh, cfg, state))
+    return min(air, surface)
 
 
 def terrain_slope(of_mesh) -> float:
@@ -291,10 +397,11 @@ def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
     discovering one.
     """
     of = cfg.openfoam
-    dt = estimate_time_step(of_mesh, cfg, velocity_cap)
+    dt = estimate_time_step(of_mesh, cfg, velocity_cap, state=state)
     steps = of.end_time / dt if dt > 0 else float("inf")
     flush = reach_flush_time(of_mesh, state)
-    speed = limiting_velocity(of_mesh, cfg, velocity_cap)
+    speed = limiting_velocity(of_mesh, cfg, velocity_cap, state)
+    courants = f"Courant {of.max_courant:g}"
     from axqua.solvers.openfoam.mesh import plan_spacing
 
     if getattr(of_mesh, "rigid_lid", False):
@@ -303,9 +410,17 @@ def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
                  f"thinnest {of_mesh.min_layer_height:.3f} m layer on a "
                  f"{terrain_slope(of_mesh):.1%} bed slope)")
     else:
-        basis = (f"(set by the thinnest {of_mesh.min_layer_height:.3f} m layer at "
-                 f"{speed:.2f} m/s - the velocity cap, i.e. the air)")
-    out = [f"  time step   : ~{dt:.2e} s at Courant {of.max_courant:g} {basis}",
+        flow = flow_courant(cfg)
+        air = flow * min(of_mesh.min_layer_height, plan_spacing(cfg)) / max(speed, 1e-3)
+        if flow > of.max_courant:
+            courants = (f"Courant {of.max_courant:g} at the water surface and "
+                        f"{flow:g} in the air")
+        what = ("the air next to the water" if air <= dt * (1 + 1e-9)
+                else "the water surface")
+        basis = (f"(set by {what} in the thinnest {of_mesh.min_layer_height:.3f} m "
+                 f"layer; the water moves at {water_speed(of_mesh, cfg, state):.2f} "
+                 "m/s)")
+    out = [f"  time step   : ~{dt:.2e} s at {courants} {basis}",
            f"  run length  : {of.end_time:g} s needs ~{steps:,.0f} time steps "
            f"on {of_mesh.n_cells:,} cells"]
     if flush:
@@ -344,7 +459,14 @@ def summarise(art: OpenFoamArtifacts) -> list[str]:
         out += art.report.lines()
     total = art.report.n_cells if art.report is not None else 0
     if art.mesh is not None and total:
-        water = float(np.mean(fields.initial_alpha(art.mesh) > 0.5))
+        # Under a rigid lid alpha is set to 1 outright (fields.write_fields), so
+        # re-deriving it from the seed here would report a water fraction the case
+        # does not have - and reporting 96.8% for a domain that is water by
+        # construction is exactly the kind of contradiction this line exists to catch.
+        wet_depth = art.cfg.hydrodynamics.wet_depth if art.cfg is not None else 0.01
+        water = (1.0 if getattr(art.mesh, "rigid_lid", False)
+                 else float(np.mean(fields.initial_alpha(
+                     art.mesh, wet_depth=wet_depth) > 0.5)))
         out.append(f"  water at t=0 : {100 * water:.1f}% of cells "
                    f"({total:,} total)")
     if art.mesh is not None and art.cfg is not None:

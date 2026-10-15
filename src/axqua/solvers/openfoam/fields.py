@@ -10,20 +10,32 @@ table.
 ========== ============================ ======================================= =====================
 patch      ``alpha.water``              ``U``                                   ``p_rgh``
 ========== ============================ ======================================= =====================
-inlet      ``variableHeightFlowRate``   ``variableHeightFlowRateInletVelocity`` ``fixedFluxPressure``
+inlet      ``variableHeightFlowRate``   ``flowRateInletVelocity`` (mass flow)   ``fixedFluxPressure``
 outlet     ``inletOutlet`` at the stage ``pressureInletOutletVelocity``         ``prghPressure``
 bed, banks ``zeroGradient``             ``noSlip``                              ``fixedFluxPressure``
 atmosphere ``inletOutlet`` (0)          ``pressureInletOutletVelocity``         ``totalPressure`` 0
 ========== ============================ ======================================= =====================
 
-Two of those deserve their reasoning recorded.
+Three of those deserve their reasoning recorded.
 
-**The inlet does not prescribe a water level.** ``variableHeightFlowRateInletVelocity``
-distributes the prescribed discharge over whatever part of the inlet is *wet*, and
-``variableHeightFlowRate`` lets ``alpha`` at the inlet float between 0 and 1. So the
-inlet stage is an outcome, not an input - which is what you want, because forcing
-both Q and the depth at an inlet over-determines it and shows up as a standing wave
-a few cells downstream.
+**The inlet does not prescribe a water level.** ``variableHeightFlowRate`` lets
+``alpha`` at the inlet float between 0 and 1, so the water on the patch stands as
+high as the water behind it. The inlet stage is an outcome, not an input - which is
+what you want, because forcing both Q and the depth at an inlet over-determines it
+and shows up as a standing wave a few cells downstream.
+
+**The inlet prescribes the mass that enters, not the volume.** One velocity for the
+whole patch, the mass flow of the water divided by the mass per length that stands on
+the patch (``flowRateInletVelocity`` with ``massFlowRate`` and the density field).
+Whatever part of the patch is wet then carries the discharge, and the air above it
+enters at the speed of the water, which nothing notices. The condition written for
+this purpose, ``variableHeightFlowRateInletVelocity``, sets the velocity in
+proportion to ``alpha`` and scales it so that water and air together make up the
+discharge: the water that enters is ``Q <alpha^2> / <alpha>``, short by whatever the
+surface is smeared over on the patch. Measured on the Isar example with the same
+state: 1.434 of 1.6 m3/s and 0.743 of 0.8 m3/s with that condition, 1.596 and 0.798
+with the mass flow (on munich-vsf the older runs delivered 82 to 84 %). What is left,
+0.2 to 0.3 %, is the share of the air in the mass on the patch.
 
 **The outlet holds a stage.** The tutorials use a free outfall (``zeroGradient``
 everywhere), which lets the model choose its own tailwater. This case has a
@@ -33,6 +45,19 @@ calibrated one - the same rating curve the TELEMAC run used - so the outlet gets
 3D analogue of TELEMAC's ``PRESCRIBED ELEVATIONS``, so 2D and 3D are driven
 identically and their results are comparable. ``boundaries.outflow_condition: free``
 still selects the free outfall.
+
+**The air on the outlet is at rest, like the air under the open top.** The solver
+carries ``p_rgh = p + rho g (z - hRef)``, and ``totalPressure 0`` on the open top says
+``p_rgh = 0`` there, which is air at rest at any elevation. The outlet prescribes
+``p``, so above the stage it has to prescribe the pressure of that same air,
+``-rho_air g (z - hRef)``, and the water below the stage hangs on the air pressure at
+the stage. A profile that is simply zero above the stage disagrees with the open top
+by ``rho_air g (z - hRef)``: 8 kPa on a reach at 816 m a.s.l. with ``hRef`` left at
+zero, which is a wind of the speed the velocity limit allows between the outlet and
+the top, and it is that wind, in a handful of cells, that set the time step of the
+whole run (isar: 0.0013 s; see :func:`reference_level`). ``constant/hRef`` is written
+with the lowest outlet stage, so that ``p_rgh`` is the piezometric head above the
+tailwater and stays small.
 
 Initial conditions
 ------------------
@@ -47,6 +72,7 @@ from __future__ import annotations
 
 import io
 import logging
+from collections.abc import Mapping
 from pathlib import Path
 
 import numpy as np
@@ -103,19 +129,32 @@ def render_field(cls: str, obj: str, dimensions: str, internal: str,
 # --------------------------------------------------------------------------- #
 
 
-def initial_alpha(of_mesh) -> np.ndarray:
+def initial_alpha(of_mesh, *, wet_depth: float = 0.01) -> np.ndarray:
     """Per-cell water fraction from the hotstart free surface.
 
     The submerged fraction of each cell, so the interface is sharp to within one
     cell wherever the 2D surface crosses a cell. With no hotstart the domain starts
     dry, which is legitimate but means paying for the whole filling transient in the
     most expensive model of the chain.
+
+    **A column that is dry in the 2D result starts dry.** The free surface of a dry
+    2D node is its own bed, and the bed of the column comes from the terrain model,
+    which resolves what the 2D mesh does not. Wherever the terrain at the column lies
+    below the bed of the nearest dry node, "below the 2D free surface" is a layer of
+    water on dry ground. On the Isar example at 1 m cells that was 583 m3, a sixth of
+    the water of the reach, on 55 % of the dry columns (median 0.03 m, 0.49 m at the
+    99th percentile), and it ran down the banks from the first time step at the speed
+    the velocity limit allows.
     """
     if of_mesh.column_wse is None:
         return np.zeros(of_mesh.n_cells)
     z_lo, z_hi = of_mesh.cell_bounds
-    wse = np.asarray(of_mesh.column_wse, dtype=float)[of_mesh.cell_column]
-    wse = np.where(np.isfinite(wse), wse, -np.inf)
+    surface = np.asarray(of_mesh.column_wse, dtype=float)
+    surface = np.where(np.isfinite(surface), surface, -np.inf)
+    depth = getattr(of_mesh, "column_depth", None)
+    if depth is not None:
+        surface = np.where(np.asarray(depth, dtype=float) > wet_depth, surface, -np.inf)
+    wse = surface[of_mesh.cell_column]
     thickness = np.maximum(z_hi - z_lo, 1e-9)
     return np.clip((wse - z_lo) / thickness, 0.0, 1.0)
 
@@ -168,10 +207,20 @@ def turbulence_scales(state, cfg) -> tuple[float, float, float]:
 # --------------------------------------------------------------------------- #
 
 
-def _wall_entries(of_mesh, cfg, patch: str) -> dict[str, str]:
-    """``nut`` entry for a wall patch, with per-face ``Ks`` on the bed."""
+def _wall_entries(of_mesh, cfg, patch: str, *, uniform: bool = False) -> dict[str, str]:
+    r"""``nut`` entry for a wall patch, with per-face ``Ks`` on the bed.
+
+    *uniform* forces a single ``Ks uniform <value>`` even where the mesh carries a
+    per-face roughness. That is what a **calibration template** needs: HydroBayesCal
+    perturbs ``ks`` by rewriting the one line matching ``^\s*Ks\s+`` with
+    ``Ks uniform <v>;``, and it has no skip logic for a multi-line list - so against
+    a ``nonuniform List<scalar>`` the header is replaced and the list body survives
+    as orphaned tokens, giving an unparseable ``0/nut``. A calibrated ``ks`` is one
+    global number anyway, so there is nothing to lose here and a corrupt dictionary
+    (reported far away, as an OpenFOAM parse error) to avoid.
+    """
     of = cfg.openfoam
-    if patch == "bed" and of_mesh.bed_ks is not None:
+    if patch == "bed" and of_mesh.bed_ks is not None and not uniform:
         ks = np.nan_to_num(np.asarray(of_mesh.bed_ks, dtype=float),
                            nan=of.friction_ks)
         return {"type": "nutkRoughWallFunction",
@@ -184,38 +233,159 @@ def _wall_entries(of_mesh, cfg, patch: str) -> dict[str, str]:
             "value": "uniform 0"}
 
 
-def _outlet_profiles(of_mesh, patch: str, stage: float,
-                     rho: float) -> tuple[str, str]:
+def _patch_lid_level(of_mesh, patch: str) -> float:
+    """Mean lid elevation over one patch [m a.s.l.], the rigid-lid fallback stage.
+
+    Used only when no ``outlet_stage`` was configured. Under a rigid lid the lid *is*
+    the free surface, so its own elevation on the outlet patch is the level the
+    pressure datum has to be referenced to - the geometry already knows the answer.
+    """
+    ids = of_mesh.polymesh.patch_face_ids(patch)
+    quads = of_mesh.polymesh.faces[ids]
+    return float(of_mesh.polymesh.points[quads][:, :, 2].max(axis=1).mean())
+
+
+def outlet_pressure(z: np.ndarray, stage: float, *, water_density: float,
+                    air_density: float, reference: float) -> np.ndarray:
+    """Static pressure [Pa] on outlet faces at the elevations *z* for a tailwater at *stage*.
+
+    Air at rest above the stage, and still water below it that hangs on the pressure
+    of that air at the stage. *reference* is the level ``hRef`` the solver counts the
+    elevation from. ``prghPressure`` turns the profile into
+    ``p_rgh = p + rho g (z - hRef)`` with the density that is at the face, which is
+    zero wherever there is air: the value ``totalPressure 0`` gives the open top. With
+    a profile of zero above the stage the two boundaries disagree by
+    ``rho_air g (z - hRef)`` and air is driven from one to the other.
+    """
+    z = np.asarray(z, dtype=float)
+    air = -air_density * GRAVITY * (z - reference)
+    at_stage = -air_density * GRAVITY * (stage - reference)
+    water = at_stage + water_density * GRAVITY * (stage - z)
+    return np.where(z <= stage, water, air)
+
+
+def _outlet_profiles(of_mesh, patch: str, stage: float, rho: float, *,
+                     air_density: float = 0.0,
+                     reference: float | None = None) -> tuple[str, str]:
     """``(alpha inletValue, p profile)`` on an outlet patch holding *stage*.
 
     ``alpha`` is 1 on faces whose centre lies below the target water level and 0
     above; ``p`` is the still-water hydrostatic pressure of a column standing at that
-    level. Together they are what ``prghPressure`` needs to hold a tailwater.
+    level, continued upwards as air at rest (:func:`outlet_pressure`). Together they
+    are what ``prghPressure`` needs to hold a tailwater.
     """
     ids = of_mesh.polymesh.patch_face_ids(patch)
     z = of_mesh.polymesh.face_centres(ids)[:, 2]
     alpha = (z <= stage).astype(float)
-    pressure = rho * GRAVITY * np.maximum(stage - z, 0.0)
+    pressure = outlet_pressure(z, stage, water_density=rho, air_density=air_density,
+                               reference=stage if reference is None else reference)
     return scalar_list(alpha), scalar_list(pressure)
 
 
+#: ``constant/hRef``: the level the two-phase solver counts the elevation from.
+REFERENCE_FILE = "hRef"
+
+
+def reference_level(of_mesh, stages: Mapping[str, float] | None) -> float:
+    """The level ``hRef`` [m a.s.l.] of the two-phase case.
+
+    The solver works with ``p_rgh = p + rho g (z - hRef)``. Where the water surface
+    stands at ``eta``, ``p_rgh`` jumps across it by ``(rho_water - rho_air) g
+    (eta - hRef)``, and the pressure solution is only as exact as the tolerance of
+    its solver times that jump. Left at zero on a mesh in meters above sea level the
+    jump is 8 MPa where the flow is driven by a few pascals. So the level is put where
+    the water is: at the lowest stage the outlets hold, which also makes ``p_rgh / (rho
+    g)`` the piezometric head above the tailwater. A free outfall prescribes no
+    pressure, and any level of the reach serves: the lowest point of the lid.
+    """
+    if stages:
+        return float(min(stages.values()))
+    return float(np.nanmin(of_mesh.lid))
+
+
+def write_reference_level(case_dir: str | Path, level: float | None) -> Path | None:
+    """Write ``constant/hRef``, or remove it where *level* is ``None``.
+
+    A case that is rebuilt single-phase in the folder of a two-phase one must not
+    keep the file: the solver reads it whenever it is there, and the pressure the
+    rigid lid prescribes at its outlet counts from zero.
+    """
+    path = Path(case_dir) / "constant" / REFERENCE_FILE
+    if level is None:
+        path.unlink(missing_ok=True)
+        return None
+    path.parent.mkdir(parents=True, exist_ok=True)
+    buf = io.StringIO()
+    buf.write(foam_header("uniformDimensionedScalarField", REFERENCE_FILE,
+                          location="constant"))
+    buf.write("dimensions      [0 1 0 0 0 0 0];\n\n")
+    buf.write(f"value           {level:.6f};\n")
+    buf.write(foam_footer())
+    return _write(path, buf.getvalue())
+
+
+def outlet_stages(outflow_stage, patches) -> dict[str, float] | None:
+    """Per-patch tailwater level [m a.s.l.], broadcasting a scalar.
+
+    A single number is the right answer for a whole-reach case, which has one
+    outfall. A **sub-model crop does not**: cutting a reach mid-stream leaves
+    several open faces at different stations, and the free surface across them
+    spans whatever the parent's water-surface slope puts there - 1.18 m on the
+    KB15 40 m crop. Prescribing one level on all of them would impose a
+    tailwater the parent model never had on at least one face.
+
+    A mapping must name **every** outlet patch. Silently defaulting the ones it
+    omits would reintroduce exactly the bug this exists to prevent, in the case
+    where it is hardest to notice.
+    """
+    patches = list(patches)
+    if outflow_stage is None:
+        return None
+    if isinstance(outflow_stage, Mapping):
+        missing = [p for p in patches if p not in outflow_stage]
+        if missing:
+            raise ValueError(
+                f"openfoam.outlet_stage names {sorted(outflow_stage)} but the mesh "
+                f"has outlet patch(es) {missing} with no level. Give every outlet "
+                "its own tailwater, or use a single number if they really do share "
+                "one - a crop's open faces sit at different stations and generally "
+                "do not.")
+        return {p: float(outflow_stage[p]) for p in patches}
+    return {p: float(outflow_stage) for p in patches}
+
+
 def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
-                 outflow_stage: float | None = None,
-                 discharges: dict[str, float] | None = None) -> list[Path]:
+                 outflow_stage: "float | Mapping[str, float] | None" = None,
+                 discharges: dict[str, float] | None = None,
+                 uniform_bed_ks: bool = False) -> list[Path]:
     """Write ``0/{alpha.water, U, p_rgh, nut, k, omega|epsilon}``.
 
     *outflow_stage* is the water level [m a.s.l.] the outlet patches hold; ``None``
     selects the free-outfall boundary instead (``outflow_condition: free``).
     *discharges* maps each inlet patch to its own Q [m3/s].
+    *uniform_bed_ks* writes one global bed roughness instead of the per-face list
+    (see :func:`_wall_entries`); set it for a calibration template.
     """
     of = cfg.openfoam
     rigid = getattr(of_mesh, "rigid_lid", False)
+    # Resolve to one level PER OUTLET PATCH up front, so the three boundary
+    # conditions below cannot disagree about what the tailwater is.
+    stages = outlet_stages(outflow_stage, of_mesh.outlet_patches)
+    # The level the two-phase solver counts the elevation from. Under a rigid lid
+    # there is none: the pressure its outlet prescribes counts from zero.
+    reference = None if rigid else reference_level(of_mesh, stages)
     case_dir = Path(case_dir)
     zero = case_dir / "0"
     zero.mkdir(parents=True, exist_ok=True)
     discharges = discharges or {}
-    walls = ["bed", "banks"]
     top = of_mesh.top_patch if hasattr(of_mesh, "top_patch") else "atmosphere"
+    # Every wall-type patch the mesher actually made, not a hardcoded pair: the
+    # lateral faces are split into `banks` (the domain edge) and `structures` (the
+    # sides of blanked solids), and a mesh with no solids has only the first. They
+    # take the same conditions - a wall is a wall to the solver - so the only thing
+    # that must not happen is one of them being left without any. Under a rigid lid
+    # the top patch is a wall too, and it is excluded: it takes slip, not noSlip.
+    walls = list(getattr(of_mesh, "wall_patches", None) or ["bed", "banks"])
     written: list[Path] = []
 
     # Under a rigid lid the domain is water only, so alpha is identically 1: no
@@ -223,7 +393,8 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     # single-phase solver while keeping its p_rgh + gravity treatment intact. That is
     # the whole trick - the air phase is removed by construction rather than modelled
     # cheaply, and none of the pressure formulation has to be re-derived.
-    alpha = (np.ones(of_mesh.n_cells) if rigid else initial_alpha(of_mesh))
+    alpha = (np.ones(of_mesh.n_cells) if rigid
+             else initial_alpha(of_mesh, wet_depth=cfg.hydrodynamics.wet_depth))
     velocity = initial_velocity(of_mesh, alpha, state)
     k, epsilon, omega = turbulence_scales(state, cfg)
 
@@ -235,10 +406,13 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         bc[patch] = {"type": "variableHeightFlowRate", "lowerBound": "0",
                      "upperBound": "1", "value": "uniform 0"}
     for patch in of_mesh.outlet_patches:
-        if outflow_stage is None:
+        # Under a rigid lid the outlet is fully wet to the lid, so there is no water
+        # level to find on the patch and the face-by-face profile is not computed -
+        # it would only be discarded below.
+        if rigid or stages is None:
             bc[patch] = {"type": "zeroGradient"}
         else:
-            inlet_value, _ = _outlet_profiles(of_mesh, patch, outflow_stage,
+            inlet_value, _ = _outlet_profiles(of_mesh, patch, stages[patch],
                                               of.water_density)
             bc[patch] = {"type": "inletOutlet", "inletValue": inlet_value,
                          "value": inlet_value}
@@ -252,8 +426,6 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         # has nothing to vary
         for patch in of_mesh.inlet_patches:
             bc[patch] = {"type": "fixedValue", "value": "uniform 1"}
-        for patch in of_mesh.outlet_patches:
-            bc[patch] = {"type": "zeroGradient"}
     written.append(_write(zero / "alpha.water", render_field(
         "volScalarField", "alpha.water", "[0 0 0 0 0 0 0]",
         scalar_list(alpha), bc)))
@@ -270,11 +442,15 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         bc[patch] = ({"type": "flowRateInletVelocity",
                       "volumetricFlowRate": f"constant {q:g}",
                       "value": "uniform (0 0 0)"} if rigid else
-                     {"type": "variableHeightFlowRateInletVelocity",
-                      "flowRate": f"{q:g}", "alpha": "alpha.water",
+                     # the mass of the water, over the mass that stands on the
+                     # patch: see the module text. rhoInlet serves the one
+                     # evaluation before the solver has made its density field.
+                     {"type": "flowRateInletVelocity",
+                      "massFlowRate": f"constant {q * of.water_density:.8g}",
+                      "rho": "rho", "rhoInlet": f"{of.water_density:g}",
                       "value": "uniform (0 0 0)"})
     for patch in of_mesh.outlet_patches:
-        bc[patch] = ({"type": "zeroGradient"} if outflow_stage is None else
+        bc[patch] = ({"type": "zeroGradient"} if stages is None else
                      {"type": "pressureInletOutletVelocity",
                       "value": "uniform (0 0 0)"})
     for patch in walls:
@@ -292,15 +468,29 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         bc[patch] = {"type": "fixedFluxPressure", "value": "uniform 0"}
     for patch in of_mesh.outlet_patches:
         if rigid:
-            # The lid IS the free surface, so the surface at the outlet is already
-            # fixed by the geometry; p_rgh = 0 there is exactly "atmospheric at the
-            # surface". Prescribing a stage as well would over-determine it.
-            bc[patch] = {"type": "fixedValue", "value": "uniform 0"}
-        elif outflow_stage is None:
+            # The lid IS the free surface, so the outlet needs a LEVEL rather than a
+            # profile - but it is not zero, and this used to say it was.
+            #
+            # OpenFOAM carries p_rgh = p - rho*(g & C), so for a hydrostatic column
+            # whose surface stands at z_s the whole patch has p_rgh = rho*g*z_s: a
+            # constant, but a constant equal to the free-surface elevation head, not
+            # to nothing. Writing 0 puts the zero-pressure level at the mesh DATUM
+            # instead of at the water surface, which on this case (z_s = 0.715 m in
+            # local CAD metres) offset every reported pressure by -7.0 kPa. Velocities
+            # are unaffected - a uniform shift of p has no gradient - but anything
+            # read FROM the pressure is wrong, and correct_lid.py is exactly that: it
+            # reported a 0.87 m lid error that was purely this datum.
+            level = (stages[patch] if stages is not None
+                     else _patch_lid_level(of_mesh, patch))
+            bc[patch] = {"type": "fixedValue",
+                         "value": f"uniform {of.water_density * GRAVITY * level:.6g}"}
+        elif stages is None:
             bc[patch] = {"type": "zeroGradient"}
         else:
-            _, profile = _outlet_profiles(of_mesh, patch, outflow_stage,
-                                          of.water_density)
+            _, profile = _outlet_profiles(of_mesh, patch, stages[patch],
+                                          of.water_density,
+                                          air_density=of.air_density,
+                                          reference=reference)
             bc[patch] = {"type": "prghPressure", "p": profile, "value": "uniform 0"}
     for patch in walls:
         bc[patch] = {"type": "fixedFluxPressure", "value": "uniform 0"}
@@ -308,6 +498,9 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
                {"type": "totalPressure", "p0": "uniform 0"})
     written.append(_write(zero / "p_rgh", render_field(
         "volScalarField", "p_rgh", "[1 -1 -2 0 0 0 0]", "uniform 0", bc)))
+    reference_file = write_reference_level(case_dir, reference)
+    if reference_file is not None:
+        written.append(reference_file)
 
     if of.turbulence == "laminar":
         return written
@@ -316,7 +509,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     bc = {p: {"type": "calculated", "value": "uniform 0"}
           for p in of_mesh.inlet_patches + of_mesh.outlet_patches + [top]}
     for patch in walls:
-        bc[patch] = _wall_entries(of_mesh, cfg, patch)
+        bc[patch] = _wall_entries(of_mesh, cfg, patch, uniform=uniform_bed_ks)
     written.append(_write(zero / "nut", render_field(
         "volScalarField", "nut", "[0 2 -1 0 0 0 0]", "uniform 0", bc)))
 

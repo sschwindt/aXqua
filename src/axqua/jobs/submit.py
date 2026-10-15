@@ -51,7 +51,7 @@ def build_spec(cfg: Any, kind: str | JobKind, *, profile: profiles.Profile | Non
 
     kind = kind if isinstance(kind, JobKind) else parse_kind(kind)
     meta = KIND_META[kind]
-    profile = profile or profiles.from_config(cfg, meta.solver)
+    profile = profile or profiles.implicit(cfg, meta.solver)
     job_id = job_id or ids.make_job_id(getattr(cfg, "name", "case"), meta.slug)
 
     # Process count, most specific wins, and the *resolved* number is frozen - so a job
@@ -149,13 +149,23 @@ def submit_job(cfg: Any, kind: str | JobKind, *,
         # directory behind for the user to clean up.
         return spec
 
-    resolved = profile or profiles.from_config(cfg, spec.solver)
+    resolved = profile or profiles.implicit(cfg, spec.solver)
     env = resolved.solver_environment()
     captured: dict[str, str] = {}
     if validate_env and spec.meta.needs_environment:
         captured = _validate_and_capture(resolved, env, spec)
 
     jd = create_job(cfg, spec, job_root=job_root)
+    if spec.workspace.mode == "case":
+        # The ticket that fixes this job's place among the jobs of its case. Written
+        # here and not by the runner, so that the order is the order of submission and
+        # not the order in which the detached runners happen to start.
+        from axqua.jobs import workspace as case_queue
+
+        try:
+            case_queue.enqueue(cfg.model_dir, spec, jd.root)
+        except OSError as exc:
+            log.debug("no ticket written (%s); the runner writes it when it starts", exc)
     try:
         _launch(jd, spec, env, captured, resolved)
     except Exception as exc:                        # noqa: BLE001
@@ -211,7 +221,12 @@ def _launch(jd: JobDir, spec: JobSpec, env, captured: dict[str, str],
     if env.distro:
         captured["AXQUA_WSL_DISTRO"] = str(env.distro)
 
-    requested = spec.launcher.get("requested") or profile.launcher or "auto"
+    # "auto" on the command line means "no opinion", so the profile's choice applies.
+    # Reading it as a choice of its own - which `or` does, since the string is truthy -
+    # meant a launcher set in a profile was never used.
+    requested = spec.launcher.get("requested") or "auto"
+    if requested == "auto":
+        requested = profile.launcher or "auto"
     chosen = launcher_mod.select_launcher(env, prefer=requested)
     argv = launcher_mod.runner_argv(jd.root)
     handle = chosen.submit(jd, argv, env=captured, cwd=jd.root)

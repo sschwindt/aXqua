@@ -30,7 +30,7 @@ caller does:
 ``SolverError``       the solver ran and failed            -> read the listing
 ``MeshError``         the mesh could not be built or used  -> change resolution
 
-Nothing here is required to raise these: existing ``ValueError``s keep working, and
+Nothing here is required to raise these: existing ``ValueError`` raises keep working, and
 this is additive. Use it where the failure has an obvious remedy worth carrying.
 """
 

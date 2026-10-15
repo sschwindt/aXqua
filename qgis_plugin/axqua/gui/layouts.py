@@ -112,23 +112,63 @@ def _add_north_arrow(layout: QgsPrintLayout) -> None:
     layout.addLayoutItem(label)
 
 
-def _add_flow_arrow(layout: QgsPrintLayout, canvas) -> None:
-    """A bold Q arrow along the reach's principal axis.
+def reach_bearing(project=None) -> float | None:
+    """The flow direction from the reach itself, or None if nothing says.
 
-    The direction comes from the extent's own aspect: a river reach is longer than it is
-    wide, so its bounding box points along the flow far more often than not. That is a
-    weak inference and is why the arrow is labelled ``Q`` rather than presented as a
-    measured direction - the user can rotate it, and a wrong arrow they can see is better
-    than a confident one they cannot check.
+    A line layer named for what it is - centerline, axis, reach, thalweg - is exactly
+    the geometry aXqua's preprocessing already writes, and its first-to-last bearing is
+    a *measurement*. Without one there is nothing here worth guessing from, and the
+    caller falls back to the extent's aspect.
     """
-    extent = canvas.extent()
-    horizontal = extent.width() >= extent.height()
+    from qgis.core import QgsProject, QgsWkbTypes
+    project = project or QgsProject.instance()
+    names = ("centerline", "centreline", "center line", "thalweg", "reach", "axis")
+    for layer in project.mapLayers().values():
+        if not hasattr(layer, "geometryType") or not hasattr(layer, "getFeatures"):
+            continue
+        try:
+            if layer.geometryType() != QgsWkbTypes.GeometryType.LineGeometry:
+                continue
+        except (AttributeError, TypeError):
+            continue
+        if not any(word in (layer.name() or "").lower() for word in names):
+            continue
+        for feature in layer.getFeatures():
+            geometry = feature.geometry()
+            if geometry is None or geometry.isEmpty():
+                continue
+            points = geometry.asPolyline() or (geometry.asMultiPolyline() or [[]])[0]
+            if len(points) < 2:
+                continue
+            first, last = points[0], points[-1]
+            return bearing(last.x() - first.x(), last.y() - first.y())
+    return None
+
+
+def _add_flow_arrow(layout: QgsPrintLayout, canvas) -> None:
+    """A bold Q arrow along the reach.
+
+    Taken from a centerline layer when the project has one, which makes it a direction
+    that was measured rather than inferred. Failing that it falls back to the extent's
+    own aspect - a river reach is longer than it is wide, so its bounding box points
+    along the flow more often than not - and that is why the arrow is labelled ``Q``
+    rather than presented as authoritative: the user can rotate it, and a wrong arrow
+    they can see beats a confident one they cannot check.
+    """
     x, y = PAGE_W - 60.0, MARGIN + 62.0
     length = 34.0
-    if horizontal:
-        points = [QPointF(x, y), QPointF(x + length, y)]
-    else:
-        points = [QPointF(x + length / 2, y), QPointF(x + length / 2, y + length)]
+    heading = reach_bearing()
+    if heading is None:
+        extent = canvas.extent()
+        # East for a wide extent, north for a tall one.
+        heading = 90.0 if extent.width() >= extent.height() else 0.0
+    angle = math.radians(heading)
+    # Compass bearing to page direction: the layout's y axis grows downward while the
+    # map is drawn north-up, so north is -y.
+    dx, dy = math.sin(angle), -math.cos(angle)
+    cx, cy = x + length / 2.0, y + length / 2.0
+    points = [QPointF(cx - dx * length / 2.0, cy - dy * length / 2.0),
+              QPointF(cx + dx * length / 2.0, cy + dy * length / 2.0)]
 
     arrow = QgsLayoutItemPolyline(QPolygonF(points), layout)
     arrow.setEndMarker(QgsLayoutItemPolyline.MarkerMode.ArrowHead)

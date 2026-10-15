@@ -84,6 +84,10 @@ class ResultManifest:
     objective: float | None = None
     entries: list[ResultEntry] = field(default_factory=list)
     summary: dict[str, Any] = field(default_factory=dict)
+    #: The coordinate reference system of the case. A SELAFIN file carries none, so a
+    #: result opened in QGIS had no CRS at all and did not line up with a base map
+    #: unless the project happened to use the same one.
+    crs_epsg: int | None = None
 
     def add(self, name: str, path: str | os.PathLike, *, kind: str = "file",
             style: str = STYLE_NONE, variable: str = "", description: str = "",
@@ -118,6 +122,7 @@ class ResultManifest:
             "kind": self.kind,
             "generated": self.generated,
             "objective": self.objective,
+            "crs_epsg": self.crs_epsg,
             "summary": dict(self.summary),
             "results": [e.as_dict() for e in self.entries],
         }
@@ -133,7 +138,17 @@ class ResultManifest:
             objective=data.get("objective"),
             entries=[ResultEntry.from_dict(e) for e in (data.get("results") or [])],
             summary=dict(data.get("summary") or {}),
+            crs_epsg=_epsg(data.get("crs_epsg")),
         )
+
+
+def _epsg(value: Any) -> int | None:
+    """An EPSG code, or ``None`` for anything that is not a positive whole number."""
+    try:
+        code = int(value)
+    except (TypeError, ValueError):
+        return None
+    return code if code > 0 else None
 
 
 def write_manifest(job_dir: JobDir | str | os.PathLike,

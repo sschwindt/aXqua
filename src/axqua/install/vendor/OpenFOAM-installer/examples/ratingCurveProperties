@@ -1,0 +1,27 @@
+/* EXAMPLE ONLY: replace with measured/modelled site-specific Q-stage data. */
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class dictionary;
+    location "constant";
+    object ratingCurveProperties;
+}
+
+enabled false;            // Opt in only after hydraulic validation.
+outletPatch outletWater;
+relaxation 0.1;           // Dimensionless per hydraulic iteration, NOT seconds.
+gravity 9.81;             // m/s2; z must point up.
+minDepth 0.001;           // m; abort instead of eroding the bed to repair depth.
+minStageElevation 0.0;    // m in the SAME vertical datum as mesh points.
+outOfBounds error;        // "error" (default) or explicit "clamp"; no extrapolation.
+
+// (outward volumetric discharge [m3/s], absolute water-surface elevation [m])
+// This is illustrative, not a recommended rating for Olsen's cylinder case.
+table
+(
+    (0.00 0.20)
+    (0.10 0.24)
+    (0.25 0.30)
+    (0.50 0.40)
+);

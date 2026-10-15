@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from axqua import prerun
@@ -192,8 +193,77 @@ def test_require_error_stops_on_an_unconverged_pre_run(tmp_path, spy, monkeypatc
     assert warned.ok and warned.converged is False
     assert "NOT reached flux balance" in " ".join(warned.summary())
 
-    with pytest.raises(RuntimeError, match="did not reach flux balance"):
+    with pytest.raises(RuntimeError, match="not reached flux balance"):
         prerun.ensure_seed(_cfg(tmp_path, require="error"))
+
+
+def test_require_error_also_stops_on_a_REUSED_result(tmp_path, spy, monkeypatch):
+    """The gate used to live inside `_coarse_pre_run`, so it could only fire for a
+    seed this module had produced. With `reuse: true` as the default, the commonest
+    seed of all - the case's own r2d.slf - was never gated."""
+    monkeypatch.setattr(prerun, "_judge",
+                        lambda result, model_dir, cfg: _unconverged(result))
+    cfg = _cfg(tmp_path, require="error")
+    (cfg.model_dir / "r2d.slf").write_bytes(b"")
+
+    with pytest.raises(RuntimeError, match="not reached flux balance"):
+        prerun.ensure_seed(cfg)
+    assert not spy                               # and it never started a solver
+
+
+def test_require_error_stops_on_an_unconverged_3d_seed(tmp_path, spy, monkeypatch):
+    """The reported gap: under `dimension: 3d` the seed that is actually used is the
+    3D result, whose flux balance nothing judged - so `require: error` could not fire
+    however bad the 3D run was."""
+    cfg = _cfg(tmp_path, dimension="3d", require="error")
+    (cfg.model_dir / "r2d.slf").write_bytes(b"")
+
+    def converged_2d(result, model_dir, c):
+        result.converged, result.imbalance = True, 1e-5
+        return result
+
+    def diverging_3d(c, seed):
+        seed.path = cfg.model_dir / "r3d-hydrostatic.slf"
+        seed.source = prerun.PRE_RUN_3D
+        seed.converged, seed.imbalance = False, 2.4   # munich: 0.135 in, 0.459 out
+        return seed
+
+    monkeypatch.setattr(prerun, "_judge", converged_2d)
+    monkeypatch.setattr(prerun, "_extend_to_3d", diverging_3d)
+    with pytest.raises(RuntimeError, match=r"r3d-hydrostatic\.slf"):
+        prerun.ensure_seed(cfg)
+
+
+def test_an_unjudgeable_seed_is_reported_but_does_not_raise(tmp_path, spy, monkeypatch):
+    """A result carried in from another machine has no listing beside it. Refusing to
+    build on it would be obstructive - but saying nothing is how this went unnoticed,
+    so the summary says out loud that it could not be judged."""
+    cfg = _cfg(tmp_path, require="error")
+    (cfg.model_dir / "r2d.slf").write_bytes(b"")
+    seed = prerun.ensure_seed(cfg)
+    assert seed.ok and seed.converged is None
+    assert "could not be judged" in " ".join(seed.summary())
+
+
+def test_an_unreadable_listing_is_warned_about_not_swallowed(tmp_path, monkeypatch,
+                                                             caplog):
+    """The silent `log.debug` swallow is what hid the 3D gap: a listing that exists
+    but defeats the reader is a real problem, not the same thing as having none."""
+    from axqua.solvers.telemac import sortie
+
+    cfg = _cfg(tmp_path)
+    result = prerun.SeedResult(path=cfg.model_dir / "r2d.slf", source=prerun.EXISTING)
+    result.path.write_bytes(b"")
+    listing = cfg.model_dir / "steady2d.cas_2026-01-01-00h00min00s.sortie"
+    listing.write_text("nothing a parser can use\n")
+    monkeypatch.setattr(sortie, "read_sortie",
+                        lambda p: (_ for _ in ()).throw(ValueError("no block")))
+
+    with caplog.at_level("WARNING", logger="axqua"):
+        out = prerun._judge(result, cfg.model_dir, cfg)
+    assert out.converged is None
+    assert "could not be read" in " ".join(out.notes)
+    assert "could not judge the seed" in caplog.text
 
 
 def _unconverged(result):
@@ -274,7 +344,6 @@ def test_a_diverged_3d_result_is_not_adopted_as_a_seed(tmp_path):
     """A diverged TELEMAC run does not always fail loudly - it can march to the end
     and write a file full of NaN. Seeding U from that gives an OpenFOAM run that dies
     with no visible cause."""
-    import numpy as np
 
     from axqua.core.selafin import write_geometry
 
@@ -332,3 +401,73 @@ def test_a_3d_seed_does_not_claim_the_2d_run_was_recomputed(tmp_path, spy,
     text = " ".join(prerun.ensure_seed(cfg).summary())
     assert "TELEMAC-3D pre-run" in text
     assert "dedicated coarse" not in text
+
+
+# --------------------------------------------------------------------------- #
+# reusing the 3D pre-run
+# --------------------------------------------------------------------------- #
+
+
+def _cfg_with_reuse(reuse: bool):
+    class _PreRun:
+        pass
+
+    pre = _PreRun()
+    pre.reuse = reuse
+
+    class _OF:
+        pass
+
+    of = _OF()
+    of.pre_run = pre
+
+    class _Cfg:
+        pass
+
+    cfg = _Cfg()
+    cfg.openfoam = of
+    return cfg
+
+
+def _slf_pair(tmp_path, monkeypatch, *, newer=True):
+    """A 2D seed and a 3D result beside it, with controllable mtimes.
+
+    The files are placeholders: whether the *contents* are usable is ``_is_finite``'s
+    question and is tested against it, while ``_reusable_3d`` decides on the reuse
+    flag, existence and which of the two is newer.
+    """
+    import os
+
+    monkeypatch.setattr(prerun, "_is_finite", lambda path: True)
+    two_d = tmp_path / "r2d.slf"
+    three_d = tmp_path / "r3d-hydrostatic.slf"
+    for path in (two_d, three_d):
+        path.write_bytes(b"placeholder")
+    stamp = os.path.getmtime(two_d)
+    os.utime(three_d, (stamp + 10, stamp + 10) if newer else (stamp - 10, stamp - 10))
+    return two_d, three_d
+
+
+def test_an_existing_3d_pre_run_is_reused(tmp_path, monkeypatch):
+    """pre_run.reuse used to cover only the 2D result, so any later failure - a missing
+    sub-model boundary line, a bad ROI - re-ran a solver step that had been correct.
+    On the Munich fish pass that was 3 h 15 min an attempt."""
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch)
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(True)) is True
+
+
+def test_a_3d_pre_run_older_than_its_2d_seed_is_not_reused(tmp_path, monkeypatch):
+    """A re-converged 2D run invalidates the profile derived from the old one."""
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch, newer=False)
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(True)) is False
+
+
+def test_reuse_off_always_re_runs(tmp_path, monkeypatch):
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch)
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(False)) is False
+
+
+def test_a_missing_3d_result_is_not_reused(tmp_path, monkeypatch):
+    two_d, three_d = _slf_pair(tmp_path, monkeypatch)
+    three_d.unlink()
+    assert prerun._reusable_3d(three_d, two_d, _cfg_with_reuse(True)) is False

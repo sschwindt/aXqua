@@ -3,7 +3,7 @@
 Thin wrapper around :func:`axqua.run_single_flow_calibration` - all the
 logic lives in ``axqua.bayescal``. Run AFTER ``preprocessing.py`` (builds the
 case) and ``initial_run.py`` (confirms it runs). It compiles the FlowTracker
-velocity ground truth (from ``ground_truth.sources`` in case-config.yml) into the
+velocity ground truth (from ``ground_truth.sources`` in the case file) into the
 HydroBayesCal calibration-points CSV, makes sure the ``.cas`` prints SCALAR
 VELOCITY, emits ``config_Telemac.py`` and launches HydroBayesCal.
 
@@ -22,8 +22,9 @@ from pathlib import Path
 
 from axqua import run_single_flow_calibration
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = find_case_file(Path(__file__).resolve().parent)
 
 # calibration target (edit to switch quantity); water depth is extracted alongside
 CALIBRATION_QUANTITIES = ["SCALAR VELOCITY"]

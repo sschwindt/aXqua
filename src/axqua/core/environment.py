@@ -250,8 +250,17 @@ class SolverEnvironment:
         if script is _UNSET:
             script = self.script
         if script:
-            # `set -e` so a failing source aborts before the command runs
-            payload = f"set -e; source {shlex.quote(script)}; {command}"
+            # The guard is `test -r`, not `set -e` around the source itself.
+            # `set -e; source <script>` looked equivalent but is not: OpenFOAM
+            # Foundation's etc/bashrc returns non-zero from a benign bash warning
+            # ("pop_var_context: head of shell_variables not a function context")
+            # when sourced in a non-interactive login shell, so `set -e` aborted
+            # before the command ever ran and every OpenFOAM call reported the
+            # environment as broken. An unreadable script still fails loudly - that
+            # is what the guard was for - while a noisy but working one proceeds,
+            # and the command itself still runs under `set -e`.
+            payload = (f"set -e; test -r {shlex.quote(script)}; set +e; "
+                       f"source {shlex.quote(script)}; set -e; {command}")
         else:
             payload = command
         argv = [shell, "-lc", payload]

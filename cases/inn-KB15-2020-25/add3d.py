@@ -23,7 +23,7 @@ After ``initial_run.py`` has produced the converged 2D steady result
   the fixed time step for a Courant number of 0.6 (3D has no DESIRED COURANT NUMBER).
 
 Pass ``--run`` to also launch ``telemac3d.py`` on the produced case (needs a real
-``telemac.pysource`` in case-config.yml). Otherwise it only writes the steering and
+the TELEMAC binding of the profile of this computer). Otherwise it only writes the steering and
 prints the command to run it.
 
 Run: mamba run -n axqua-env python cases/<your-case>/add3d.py [--run]
@@ -38,7 +38,7 @@ from axqua import build_3d_cas, setup_logging
 from axqua.config import load_config
 from axqua.env import TelemacRuntime
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "inn-KB15-2020-25.axq-case"
 cfg = load_config(CONFIG)
 
 

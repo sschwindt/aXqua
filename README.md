@@ -17,7 +17,7 @@ axqua status <JOB_ID>                                          # where it is
 axqua cancel <JOB_ID>                                          # stop it, and everything it started
 ```
 
-Close the terminal, log out, restart QGIS: the job carries on. See [`docs/advanced.rst`](docs/advanced.rst).
+Close the terminal, log out, restart QGIS: the job carries on. See [`docs/automation/batch-headless.rst`](docs/automation/batch-headless.rst).
 
 ## Migrating from hydromate
 
@@ -66,22 +66,33 @@ tested rather than assumed.
 Jobs submitted before the rename keep running - they are ordinary system processes and
 know nothing about the package name.
 
+## One file for the reach, one for the computer
+
+A case is described by a **case file** (`*.axq-case`): terrain, boundaries, roughness, simulation settings and measurements. It names nothing that belongs to one computer, so a case folder can be copied or published as it is. Where Python, TELEMAC, OpenFOAM, ParaView and VisIt are installed is the **profile** of the computer (`*.axq-profile`):
+
+```bash
+axqua profile init     # detect what is installed and write the profile
+axqua profile check    # verify it, including whether the simulation software starts
+axqua migrate case-config.yml --to-case   # convert a case file of an earlier version
+```
+
+Case files named `case-config.yml` and the settings files of earlier versions keep working.
+
 ## Documentation
 
 Full docs (Sphinx) live in `docs/`, in the order you need them:
 
-| doc | what it covers |
+| section | what it covers |
 |---|---|
-| [`docs/installation.rst`](docs/installation.rst) | the simulation software, the axqua environment, and installing the QGIS plugin |
-| [`docs/qgis_plugin.rst`](docs/qgis_plugin.rst) | using aXqua from QGIS - the primary interface |
-| [`docs/preprocessing.rst`](docs/preprocessing.rst) | the common preprocessing workflow: input files, config, ground truth, meshing, structures, building and checking a case |
-| [`docs/telemac.rst`](docs/telemac.rst) | the TELEMAC path: initial condition, initial run, numerics, 3D, gain-lose reaches, GAIA |
-| [`docs/openfoam.rst`](docs/openfoam.rst) | the OpenFOAM path (seeded by a TELEMAC run), and the rigid-lid shortcut |
-| [`docs/hbc.rst`](docs/hbc.rst) | what aXqua hands to HydroBayesCal for the Bayesian calibration |
-| [`docs/results.rst`](docs/results.rst) | result visualization and export: the case folder, the run reports, QGIS/ParaView/CSV, layouts and movies |
-| [`docs/advanced.rst`](docs/advanced.rst) | running simulations outside your session: detached jobs, solver profiles, debugging |
-| [`docs/help.rst`](docs/help.rst) | troubleshooting and tips |
-| [`docs/development.rst`](docs/development.rst) | architecture, package layout and the generated code reference |
+| [`docs/index.rst`](docs/index.rst) | purpose |
+| [`docs/installation/`](docs/installation/index.rst) | installation and configuration: the QGIS plugin, the simulation software, the plugin setup, the postprocessors |
+| [`docs/usage/`](docs/usage/index.rst) | usage: case setup, preprocessing, hydraulic simulations, mesh convergence, morphodynamic simulations, calibration and validation, postprocessing, batch-processing |
+| [`docs/automation/`](docs/automation/index.rst) | terminal syntax and headless batch-processing |
+| [`docs/code/`](docs/code/index.rst) | structure of the software and the generated code reference |
+| [`docs/troubleshooting/`](docs/troubleshooting/index.rst) | tips, log files, warning and error messages |
+| [`docs/license.rst`](docs/license.rst) | license and disclaimer |
+
+The outline is fixed and pinned by `tests/test_docs_outline.py`.
 
 ### Building / recompiling the docs
 
@@ -93,7 +104,7 @@ make -C docs html                            # build into docs/_build/html
 xdg-open docs/_build/html/index.html         # open it (macOS: `open`)
 ```
 
-**After editing** any `.rst` under `docs/` (or a docstring - `codedocs.rst` pulls them from `src/` via autodoc), just re-run `make -C docs html`; Sphinx rebuilds only what changed. For a **clean rebuild** (e.g. after moving/renaming pages, or to shake out stale cross-references), wipe the cache first:
+**After editing** any `.rst` under `docs/` (or a docstring - the pages under `docs/code/` pull them from `src/` via autodoc), just re-run `make -C docs html`; Sphinx rebuilds only what changed. For a **clean rebuild** (e.g. after moving/renaming pages, or to shake out stale cross-references), wipe the cache first:
 
 ```bash
 make -C docs clean html                      # remove docs/_build, then rebuild
@@ -203,8 +214,17 @@ ln -s "$PWD/qgis_plugin/axqua" \
 ```
 
 Then enable *aXqua* in **Plugins > Manage and Install Plugins**. See
-[`docs/qgis_plugin.rst`](docs/qgis_plugin.rst) and
+[`docs/installation/qgis-plugin.rst`](docs/installation/qgis-plugin.rst) and
 [`qgis_plugin/axqua/README.md`](qgis_plugin/axqua/README.md).
+
+Where the system QGIS is older than 3.44, `scripts/qgis_dev.sh` does all of this with the QGIS of a conda environment and a QGIS user profile of its own, so that no existing profile is changed:
+
+```bash
+conda create -n qgis-dev -c conda-forge "qgis>=3.44"   # once
+scripts/qgis_dev.sh
+```
+
+**To try the plugin with a ready-made case**, get the example case with *Example case...* on the *Case Setup* tab or with `axqua example get --folder <folder>`, and follow its guide, [`cases/example-isar/README.md`](cases/example-isar/README.md). It is a fast version of a research case of the Isar River: the model is built in one minute and a steady simulation takes about two minutes. The folder contains its input data (6 MB), which may be reused on citing aXqua (`cases/example-isar/LICENSE.md`).
 
 The plugin is GPL-2.0-or-later, because it links PyQGIS; `axqua` itself stays
 BSD-3-Clause and remains usable on its own.

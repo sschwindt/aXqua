@@ -65,6 +65,7 @@ BLOCK_LAYER: dict[str, Layer] = {
     "calibration": Layer.SHARED,
     "morphodynamics": Layer.SHARED,
     "dem_of_difference": Layer.SHARED,
+    "fine_sediment": Layer.SHARED,  # the sediment and the goal; OpenFOAM-only *today*
     "gain_lose": Layer.SHARED,      # a property of the reach; TELEMAC-only *today*
     "structures": Layer.SHARED,     # dams and walls are terrain, and both codes mesh them
     "drying": Layer.TELEMAC,
@@ -90,6 +91,17 @@ SHARED_FIELDS: dict[str, tuple[str, ...]] = {
                       "desired_courant"),
 }
 
+# Settings that describe the COMPUTER rather than the reach: where a simulation code is
+# installed and how its environment is entered. They belong to the profile of the
+# computer (axqua.core.profile). A case file written for sharing leaves them out
+# (config.dump_config(portable=True)); a case file that still carries them keeps
+# loading, with the profile taking precedence.
+MACHINE_FIELDS: dict[str, tuple[str, ...]] = {
+    "telemac": ("pysource", "environment", "version", "solver_python"),
+    "openfoam": ("bashrc", "environment"),
+    "postproc": ("visit", "environment"),
+}
+
 # Legacy key -> canonical key, applied at load. Dotted, so a block rename and a field
 # rename use one mechanism. This is what makes a future field move safe: add the
 # mapping here, and every existing config keeps loading.
@@ -104,6 +116,32 @@ LEGACY_KEYS: dict[str, str] = {
     # remaps two field *values*; it is listed here only so a reader of this table sees
     # the whole set of renames in one place.
 }
+
+
+# Settings that are a choice among words of which one is `off`. YAML does not take an
+# unquoted `off` for a word: it reads "no". Written the natural way, `pick_up: off` was
+# refused with "got False", and a form showed the choice as False.
+OFF_IS_A_WORD: dict[str, tuple[str, ...]] = {
+    "fine_sediment": ("pick_up",),
+    "gain_lose": ("mode", "water_table"),
+    "percolation": ("mode", "water_table"),      # the older name of gain_lose
+}
+
+
+def restore_words(raw: dict) -> dict:
+    """Put the word ``off`` back where YAML read it as a boolean, in place.
+
+    Applied wherever a case file is parsed, so that the loader, the check and an
+    editor of the case see the same value.
+    """
+    for block, names in OFF_IS_A_WORD.items():
+        section = raw.get(block)
+        if not isinstance(section, dict):
+            continue
+        for name in names:
+            if section.get(name) is False:
+                section[name] = "off"
+    return raw
 
 
 def classify_setting(key: str) -> Layer:
@@ -153,6 +191,31 @@ def warn_legacy(renamed: list[str], source: str = "") -> None:
     where = f" in {source}" if source else ""
     log.warning("deprecated config keys%s, still loaded but rename them: %s",
                 where, "; ".join(sorted(renamed)))
+
+
+def strip_machine_fields(data: dict) -> list[str]:
+    """Remove the :data:`MACHINE_FIELDS` from a config mapping, in place.
+
+    Returns the dotted keys that were removed, so the caller can say what moved to the
+    profile instead of dropping it without a word.
+    """
+    removed: list[str] = []
+    for block, names in MACHINE_FIELDS.items():
+        section = data.get(block)
+        if not isinstance(section, dict):
+            continue
+        for name in names:
+            if name in section:
+                value = section.pop(name)
+                # An empty `environment:` block is a default, not a setting that moved.
+                if value not in (None, "", {}) and not _is_default_environment(value):
+                    removed.append(f"{block}.{name}")
+    return removed
+
+
+def _is_default_environment(value) -> bool:
+    return isinstance(value, dict) and not any(
+        v not in (None, "", {}, []) for v in value.values())
 
 
 # `classify` reads fine inside this module; at package level it says nothing about

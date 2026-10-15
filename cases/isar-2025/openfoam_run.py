@@ -43,7 +43,7 @@ from axqua.solvers.openfoam import OpenFoamRuntime, report
 
 # optional CLI arg selects the scenario config
 CONFIG = Path(__file__).resolve().parent / (
-    sys.argv[1] if len(sys.argv) > 1 else "case-config.yml")
+    sys.argv[1] if len(sys.argv) > 1 else "isar-2025.axq-case")
 cfg = load_config(CONFIG)
 
 # Number of MPI ranks for this run. None -> openfoam.n_processors from the config.
@@ -103,7 +103,11 @@ def main() -> None:
             continue
         print(f"\n=== stage: {stage.name} - {stage.purpose} ===")
         print(f"    to t = {stage.end_time:g} s at Courant {stage.max_courant:g}\n")
-        start = 0.0 if stage.name == "spinup" else cfg.openfoam.spinup_time
+        # start_from, not the stage name: a rigid-lid case has ONE stage and it is
+        # called "run", but it starts from t=0 like a spin-up does. Keying off the
+        # name told the progress bar the run began at spinup_time and it reported
+        # a run that was already 8 s in before the first step.
+        start = 0.0 if stage.start_from == "startTime" else cfg.openfoam.spinup_time
         # cfg is passed so the stage dictionaries are regenerated from THIS config:
         # editing end_time / max_courant and re-running must actually take effect
         proc = runtime.run_stage(case_dir, stage.name, end_time=stage.end_time,
@@ -132,8 +136,13 @@ def main() -> None:
     # its own level: the lid and the footprint were both sized from the 2D seed, and
     # a run that pressed against either was constrained by a meshing decision rather
     # than by the flow - which nothing else in the output would reveal.
-    print("\n=== was the surface free? ===")
-    for line in report.surface_freedom(cfg, case_dir).lines(cfg):
+    # ...and under a rigid lid, whether the prescribed surface was smooth enough on
+    # the scale of a cell for the mode to apply at all. That is a property of the
+    # INPUT, so the finished run cannot be asked - it is recorded at build time and
+    # read back here, which is why it reaches the result instead of scrolling past
+    # in a build log.
+    print("\n=== was the surface free, and did the lid apply? ===")
+    for line in report.verdict_lines(cfg, case_dir):
         print(line)
     print(f"\nopen {case_dir / 'case.foam'} in ParaView to view the result "
           "(threshold alpha.water > 0.5 to see the water phase alone).")

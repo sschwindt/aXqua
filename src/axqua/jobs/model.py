@@ -147,8 +147,11 @@ class JobKind(str, Enum):
     UNSTEADY_RUN = "unsteady"
     OPENFOAM_BUILD = "openfoam-build"
     OPENFOAM_RUN = "openfoam-run"
+    OPENFOAM_SEDIMENT_BUILD = "openfoam-sediment-build"
+    OPENFOAM_SEDIMENT_RUN = "openfoam-sediment"
     CALIBRATION = "calibration"
     CALIBRATION_MULTIFLOW = "calibration-multiflow"
+    VALIDATION = "validation"
 
     def __str__(self) -> str:
         return self.value
@@ -165,7 +168,10 @@ def parse_kind(value: str) -> JobKind:
                "meshconv": JobKind.MESH_CONVERGENCE, "3d": JobKind.BUILD_3D,
                "steady3d": JobKind.STEADY_RUN_3D, "vertconv": JobKind.VERTICAL_CONVERGENCE,
                "bal": JobKind.CALIBRATION, "balmf": JobKind.CALIBRATION_MULTIFLOW,
-               "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN}
+               "val": JobKind.VALIDATION,
+               "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN,
+               "fine-sediment-build": JobKind.OPENFOAM_SEDIMENT_BUILD,
+               "fine-sediment": JobKind.OPENFOAM_SEDIMENT_RUN}
     if text in aliases:
         return aliases[text]
     raise ConfigError(
@@ -317,6 +323,27 @@ class OpenFoamRunOptions(Options):
 
 
 @dataclass
+class OpenFoamSedimentBuildOptions(Options):
+    """The case of the fine sediment simulation.
+
+    *pre_run* and *hotstart* say where the water surface comes from, as for the build
+    of the free-surface case. The cell size is that of the block ``openfoam``.
+    """
+
+    pre_run: bool | None = None
+    hotstart: str | None = None
+
+
+@dataclass
+class OpenFoamSedimentRunOptions(Options):
+    """The fine sediment simulation. *iterations* replaces ``fine_sediment.iterations``
+    for this run."""
+
+    iterations: int | None = None
+    check_mesh: bool = True
+
+
+@dataclass
 class CalibrationOptions(Options):
     """``run_Bayes_cal.py``."""
 
@@ -326,6 +353,22 @@ class CalibrationOptions(Options):
     vel_err_floor: float | None = None
     depth_err_floor: float | None = None
 
+
+
+@dataclass
+class ValidationOptions(Options):
+    """The calibrated model, run for a validation situation and compared with it.
+
+    *situation* names an entry of ``calibration.validation`` in the case file and may
+    stay empty when the case has only one. *compare_only* repeats the comparison for a
+    run that exists, after the measurements were corrected for example.
+    """
+
+    situation: str = ""
+    compare_only: bool = False
+    ncsize: int | None = None
+    #: What tells the study of the calibration capability that this is a validation.
+    validate: bool = True
 
 @dataclass
 class MultiflowCalibrationOptions(Options):
@@ -474,15 +517,20 @@ class KindMeta:
     needs_environment: bool
 
 
-#: Build kinds default to ``workspace: job`` (they produce their own inputs, so a
-#: self-contained directory is right). Run kinds default to ``workspace: case``, because
-#: they hotstart from a result that already sits in the case's ``model_dir`` and copying
-#: it would violate the large-data rule (plan §26).
+#: Every kind defaults to ``workspace: case``. Run kinds must: they hotstart from a
+#: result that already sits in the case's ``model_dir``, and copying it would violate
+#: the large-data rule (plan §26). The build did not use to - it defaulted to
+#: ``job``, a self-contained directory - and that made the default chain unusable:
+#: ``submit --kind preprocessing`` followed by ``submit --kind steady`` failed with "no
+#: built case", because the build sat in a job folder the run never looked in, and the
+#: case status kept reporting the case as unbuilt. That is the two buttons of the
+#: plugin's first tab. ``--workspace job`` still gives the self-contained build, and
+#: ``--from-job`` is how a run is pointed at it.
 KIND_META: dict[JobKind, KindMeta] = {
     JobKind.PREPROCESSING: KindMeta(
         JobKind.PREPROCESSING, "preproc", "telemac", "Build the TELEMAC case",
         Capability.STEADY2D, "build", PreprocessingOptions, PreprocessingProgress,
-        "job", False),
+        "case", False),
     JobKind.STEADY_RUN: KindMeta(
         JobKind.STEADY_RUN, "steady", "telemac", "Steady 2D run",
         Capability.STEADY2D, "run", SteadyRunOptions, SolverRunProgress, "case", True),
@@ -512,6 +560,14 @@ KIND_META: dict[JobKind, KindMeta] = {
         JobKind.OPENFOAM_RUN, "ofrun", "openfoam", "OpenFOAM interFoam run",
         Capability.FREE_SURFACE_3D, "run", OpenFoamRunOptions, SolverRunProgress,
         "case", True),
+    JobKind.OPENFOAM_SEDIMENT_BUILD: KindMeta(
+        JobKind.OPENFOAM_SEDIMENT_BUILD, "ofsedbuild", "openfoam",
+        "Build the fine sediment case", Capability.MORPHODYNAMICS, "build",
+        OpenFoamSedimentBuildOptions, OpenFoamBuildProgress, "case", False),
+    JobKind.OPENFOAM_SEDIMENT_RUN: KindMeta(
+        JobKind.OPENFOAM_SEDIMENT_RUN, "ofsed", "openfoam",
+        "Fine sediment simulation (sediDriftFoam2)", Capability.MORPHODYNAMICS, "run",
+        OpenFoamSedimentRunOptions, SolverRunProgress, "case", True),
     JobKind.CALIBRATION: KindMeta(
         JobKind.CALIBRATION, "bal", "telemac", "HydroBayesCal calibration",
         Capability.CALIBRATION, "study", CalibrationOptions, CalibrationProgress,
@@ -520,6 +576,10 @@ KIND_META: dict[JobKind, KindMeta] = {
         JobKind.CALIBRATION_MULTIFLOW, "balmf", "telemac",
         "HydroBayesCal multi-flow calibration", Capability.CALIBRATION, "study",
         MultiflowCalibrationOptions, CalibrationProgress, "case", True),
+    JobKind.VALIDATION: KindMeta(
+        JobKind.VALIDATION, "val", "telemac",
+        "Validation with data of another flow situation", Capability.CALIBRATION,
+        "study", ValidationOptions, SolverRunProgress, "case", True),
 }
 
 

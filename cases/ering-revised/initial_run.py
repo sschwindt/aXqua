@@ -20,7 +20,7 @@ with that steady time as ``DURATION`` and the constant Q / H prescriptions kept
 alive. The per-processor ``*_p0000N.sortie`` copies of a parallel run are deleted.
 See ``axqua.flux_convergence``.
 
-Needs ``telemac.pysource`` in case-config.yml to point at a real TELEMAC env.
+Needs a TELEMAC binding in the profile of this computer (``axqua profile``).
 Run: mamba run -n axqua-env python cases/<your-case>/initial_run.py
 """
 
@@ -39,11 +39,11 @@ from axqua.config import load_config
 from axqua.env import TelemacRuntime
 from axqua.flux_convergence import HOTSTART_TOLERANCE, analyze_flux_convergence
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "ering-revised.axq-case"
 cfg = load_config(CONFIG)
 
 # Number of parallel MPI processes for this test run. None -> use the core
-# count assigned in preprocessing (case-config.yml telemac.n_processors);
+# count assigned in preprocessing (ering-revised.axq-case telemac.n_processors);
 # set an integer here to override it for this run only (e.g. NCSIZE = 8).
 NCSIZE: int | None = None
 

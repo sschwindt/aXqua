@@ -316,3 +316,49 @@ if __name__ == "__main__":
 
     tmp = Path(tempfile.mkdtemp())
     run_boundary_test(tmp)
+
+
+# --------------------------------------------------------------------------- #
+# the exchange needs the case to ask for it
+# --------------------------------------------------------------------------- #
+def test_lines_in_the_layer_alone_do_not_switch_an_exchange_on(tmp_path, caplog):
+    """The layer is shared between cases. A case that said nothing about an exchange
+    got one anyway, as fixed-rate source regions on a thin strip, which is the least
+    stable form there is: on the Isar reach it ended a run at its first time step."""
+    import logging
+
+    from axqua import boundary
+
+    cfg = _internal_lines_cfg(tmp_path)
+    assert not cfg.gain_lose.active and cfg.boundaries.internal_sources is False
+    with caplog.at_level(logging.WARNING, logger="axqua"):
+        assert boundary.exchange_regions(cfg, _internal_lines_mesh()) == []
+    assert "2 internal exchange line(s)" in caplog.text
+    assert "NO exchange is modelled" in caplog.text
+    assert "gain_lose" in caplog.text and "internal_sources" in caplog.text
+
+
+def test_the_fixed_rate_regions_are_still_there_for_a_case_that_asks(tmp_path):
+    from axqua import boundary
+
+    cfg = _internal_lines_cfg(tmp_path, "  internal_sources: true\n")
+    regions = boundary.exchange_regions(cfg, _internal_lines_mesh())
+    assert sorted(region.discharge for region in regions) == [-0.065, 0.065]
+
+
+def test_a_layer_without_internal_lines_says_nothing(tmp_path, caplog):
+    import logging
+    from types import SimpleNamespace
+
+    from axqua import boundary
+
+    cfg = _internal_lines_cfg(tmp_path)
+    plain = SimpleNamespace(gain_lose=cfg.gain_lose, boundaries=cfg.boundaries)
+    original = boundary.load_internal_source_regions
+    boundary.load_internal_source_regions = lambda cfg, mesh=None: []
+    try:
+        with caplog.at_level(logging.WARNING, logger="axqua"):
+            assert boundary.exchange_regions(plain) == []
+    finally:
+        boundary.load_internal_source_regions = original
+    assert caplog.text == ""

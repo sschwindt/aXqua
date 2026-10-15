@@ -36,6 +36,26 @@ from axqua_plugin.gui.capability_tabs import CaseView  # noqa: E402
 # ------------------------------------------------------------------ metadata
 
 
+def test_qgis_can_read_the_metadata():
+    """Read the file the way QGIS does when it looks for plugins.
+
+    ``findPlugins`` in ``qgis/utils.py`` parses ``metadata.txt`` with ``configparser``
+    and drops a plugin whose file does not parse, silently. The plugin is then absent
+    from the Plugin Manager. A changelog line in the first column was enough: every
+    test passed, because the tests import the plugin directly, and no QGIS could
+    enable it.
+    """
+    import configparser
+
+    parser = configparser.ConfigParser()
+    with (PLUGIN_ROOT / "axqua" / "metadata.txt").open(encoding="utf-8") as handle:
+        parser.read_file(handle)
+    assert parser.get("general", "name") == "aXqua"
+    assert parser.get("general", "qgisMinimumVersion") == "3.44"
+    # every release of the changelog is a continuation line of the one key
+    assert "0.2.0" in parser.get("general", "changelog", raw=True)
+
+
 def test_metadata_declares_both_qgis_generations():
     """QGIS 4 is Qt6-only and decides compatibility from ``qgisMaximumVersion``; the old
     ``supportsQt6`` flag was removed from core and is ignored."""
@@ -49,6 +69,28 @@ def test_metadata_declares_both_qgis_generations():
     for key in ("homepage", "repository", "tracker", "license", "description", "about"):
         assert fields[key].strip(), f"metadata.txt needs a {key}"
     assert "GPL" in fields["license"]
+
+
+def test_the_package_version_is_the_manifests():
+    """``__init__.py`` used to repeat the number, and drifted from it across two
+    releases without anything noticing. The manifest is what QGIS shows, so it is the
+    source and the module reads it."""
+    import axqua_plugin
+
+    text = (PLUGIN_ROOT / "axqua" / "metadata.txt").read_text(encoding="utf-8")
+    declared = next(line.split("=", 1)[1].strip() for line in text.splitlines()
+                    if line.startswith("version="))
+    assert axqua_plugin.__version__ == declared
+    assert declared != "0.0.0", "the manifest could not be read at import time"
+
+
+def test_the_changelog_is_headed_by_the_shipped_version():
+    """A manifest whose changelog opens with an older version is the first thing a
+    plugin-repository reviewer notices."""
+    text = (PLUGIN_ROOT / "axqua" / "metadata.txt").read_text(encoding="utf-8")
+    fields = dict(line.split("=", 1) for line in text.splitlines()
+                  if "=" in line and not line.startswith(" "))
+    assert fields["changelog"].strip() == fields["version"].strip()
 
 
 def test_no_compiled_resources_are_shipped():
@@ -86,7 +128,7 @@ def test_the_plugin_never_imports_axqua():
 # ----------------------------------------------------------- executable discovery
 
 
-def _fake_axqua(tmp_path: Path, *, version: str = "axqua 0.2.0",
+def _fake_axqua(tmp_path: Path, *, version: str = "axqua 0.3.5",
                     exit_code: int = 0) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "axqua"
@@ -132,6 +174,29 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
     # The instruction has to be one that actually works: aXqua is not on PyPI yet,
     # and guidance that 404s is worse than none.
     assert "github.com/sschwindt/aXqua" in message
+
+
+@pytest.mark.skipif(os.name == "nt", reason="shell script stub")
+def test_an_axqua_too_old_for_this_plugin_is_refused_by_name(tmp_path, monkeypatch):
+    """The documentation has required aXqua 0.3 since the first release, and nothing
+    checked - so an older one presented as a series of unexplained parse failures at
+    every verb rather than as one sentence here."""
+    old = _fake_axqua(tmp_path, version="axqua 0.2.0")
+    monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    with pytest.raises(runner_client.RunnerNotFound) as excinfo:
+        runner_client.find_executable(str(old))
+    assert "0.3 or newer" in str(excinfo.value)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="shell script stub")
+def test_an_unusual_version_string_is_accepted(tmp_path, monkeypatch):
+    """Refusing to run something because its version is a git describe string would be
+    worse than the problem the check exists for."""
+    dev = _fake_axqua(tmp_path, version="axqua 0.4.0.dev3+g1a2b3c4")
+    monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    assert runner_client.find_executable(str(dev)).version.startswith("0.4.0")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
@@ -189,7 +254,7 @@ def test_a_structured_failure_reaches_the_user_with_its_remedy():
 def test_output_that_is_not_json_is_reported_as_such(tmp_path, monkeypatch):
     script = tmp_path / "axqua"
     script.write_text("#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo "
-                      "'axqua 0.2.0'; else echo 'Segmentation fault'; fi\n",
+                      "'axqua 0.3.5'; else echo 'Segmentation fault'; fi\n",
                       encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     client = runner_client.RunnerClient(str(script))
@@ -365,6 +430,8 @@ MATRIX = {
             {"capability": "steady2d", "implemented": "yes", "configured": True,
              "built": True, "run": False},
             {"capability": "free_surface_3d", "implemented": "n/a"},
+            {"capability": "unsteady2d", "implemented": "yes", "configured": False,
+             "built": None, "run": None},
             {"capability": "morphodynamics", "implemented": "yes", "configured": False,
              "built": None, "run": None},
         ]},
@@ -397,9 +464,93 @@ def test_an_unimplemented_capability_is_shown_disabled_with_a_reason():
 
 def test_a_capability_the_case_does_not_ask_for_says_so():
     view = CaseView.from_payload(MATRIX)
-    capability = view.solver("telemac").capability("morphodynamics")
+    capability = view.solver("telemac").capability("unsteady2d")
     assert capability.enabled is True and capability.can_submit is False
-    assert "case-config.yml" in capability.reason
+    assert "the case file" in capability.reason
+
+
+def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
+    """A capability axqua implements without a job kind used to render *enabled*, with
+    a Build and a Submit button that could not do anything, because there is no
+    ``--kind`` to send. None of today's capabilities is in that position, so this uses
+    one the plugin has never heard of.
+    """
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    capability = CapabilityView(name="ice_cover", solver="telemac", implemented="yes",
+                                configured=True)
+    assert capability.visible is True                  # the gap is worth seeing
+    assert capability.submittable is False
+    assert capability.enabled is False
+    assert capability.can_submit is False
+    assert capability.state_text == "not available yet"
+    assert "cannot be started from the plugin yet" in capability.reason
+
+
+def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
+    """GAIA is coupled to the steady and unsteady runs by a block of the case file.
+    The tab said "no job kind - run it from a Python driver", which was wrong twice."""
+    view = CaseView.from_payload(MATRIX)
+    capability = view.solver("telemac").capability("morphodynamics")
+    assert capability.visible is True and capability.can_submit is False
+    assert capability.state_text != "not available yet"
+    assert "coupled with GAIA" in capability.reason
+    assert "Python driver" not in capability.reason
+
+
+def test_morphodynamics_of_openfoam_is_a_simulation_of_its_own():
+    """Under the same name TELEMAC couples GAIA to its hydraulic runs, and OpenFOAM
+    computes fine sediment over a bed that stays in place, with a build and a run. The
+    explanation of the first must not stand on the tab of the second."""
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    fine = CapabilityView(name="morphodynamics", solver="openfoam", implemented="yes",
+                          configured=True, built=False, run=False)
+    assert fine.title == "Fine sediment over a fixed bed"
+    assert (fine.build_kind, fine.submit_kind) == (
+        "openfoam-sediment-build", "openfoam-sediment")
+    assert fine.enabled and fine.can_submit and fine.needs_build
+    assert fine.reason == "" and fine.state_text == "configured"
+
+    asked_for_nothing = CapabilityView(name="morphodynamics", solver="openfoam",
+                                       implemented="yes", configured=False)
+    assert "does not ask for Fine sediment over a fixed bed" in asked_for_nothing.reason
+
+    gaia = CapabilityView(name="morphodynamics", solver="telemac", implemented="yes",
+                          configured=True)
+    assert gaia.title == "Morphodynamics" and gaia.submit_kind is None
+    assert "coupled with GAIA" in gaia.reason
+
+
+def test_the_unsteady_3d_tab_is_the_unsteady_job_with_the_3d_switch_set():
+    """It said "no job kind" while a check box on the Unsteady 2D tab did its job."""
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    capability = CapabilityView(name="unsteady3d", solver="telemac", implemented="yes",
+                                configured=True, built=False)
+    assert capability.submit_kind == "unsteady" and capability.build_kind == "build-3d"
+    assert capability.fixed_options == {"mode_3d": True}
+    assert capability.can_submit is True and capability.needs_build is True
+    plain = CapabilityView(name="unsteady2d", solver="telemac", implemented="yes",
+                           configured=True)
+    assert plain.submit_kind == "unsteady" and plain.fixed_options == {}
+
+
+def test_a_capability_that_is_part_of_another_run_says_so():
+    """The gain-lose reach is a block of the case file. With it, the exchange is built
+    and simulated with the steady model, so "run it from a Python driver" was wrong and
+    "no job kind" hid that it had already run."""
+    from axqua_plugin.gui.capability_tabs import CapabilityView
+
+    capability = CapabilityView(name="gain_lose", solver="telemac", implemented="yes",
+                                configured=True, built=True, run=True)
+    assert capability.can_submit is False              # still nothing to submit here
+    assert capability.state_text == "configured, built, run"
+    assert "together with the Steady 2D simulation" in capability.reason
+    assert "Python driver" not in capability.reason
+    unused = CapabilityView(name="gain_lose", solver="telemac", implemented="yes",
+                            configured=False)
+    assert unused.state_text == "not set up"
 
 
 def test_actions_follow_configured_built_and_run():
@@ -425,6 +576,169 @@ def test_a_capability_this_plugin_has_never_heard_of_still_gets_a_tab():
     assert capability.visible and capability.title == "Ice jam"
 
 
+# --------------------------------------------------------------- audit regressions
+#
+# One test per defect the end-to-end audit found. They are grouped here rather than
+# scattered because what they have in common is the reason they existed: each was a
+# plausible-looking line that nothing exercised.
+
+
+def test_a_queued_job_keeps_the_dashboard_polling():
+    """QUEUED was in neither the terminal nor the active set, so ``interval_ms`` said
+    "stop the timer" for a dashboard whose only job had just been submitted - and the
+    row then never moved until the user pressed Refresh."""
+    table = job_model.JobTable()
+    table.replace([{"job_id": "JOB-1", "root": "/tmp/JOB-1", "state": "QUEUED"}])
+    assert table.has_active is True
+    assert table.interval_ms(visible=True) == job_model.INTERVAL_ACTIVE_MS
+    assert table.interval_ms(visible=False) == job_model.INTERVAL_HIDDEN_MS
+
+
+def test_a_completed_job_stops_the_timer():
+    table = job_model.JobTable()
+    table.replace([{"job_id": "JOB-1", "root": "/tmp/JOB-1", "state": "COMPLETED"}])
+    assert table.interval_ms(visible=True) == 0
+
+
+@pytest.mark.parametrize("payload", [
+    {"kind": "solver_run", "duration": "n/a", "simulated_time": 12.0},
+    {"kind": "solver_run", "duration": 100.0, "simulated_time": None, "iteration": "?"},
+    {"kind": "calibration", "best_objective": "pending"},
+    {"kind": "openfoam_build", "cells": "many"},
+])
+def test_a_broken_progress_payload_does_not_raise_in_a_timer_slot(payload):
+    """``status.json`` is written by the solver side, and a crashed run can leave a
+    string where a number belongs. Formatting it with ``:.4g`` raises inside a QTimer
+    slot, with the table half painted and the traceback nowhere the user can see."""
+    job = job_model.Job(job_id="JOB-1", root=Path("/tmp/JOB-1"), progress=payload)
+    assert isinstance(job.progress_text, str)
+    assert isinstance(job.objective_text, str)
+
+
+def test_a_usable_number_is_still_formatted():
+    job = job_model.Job(job_id="JOB-1", root=Path("/tmp/JOB-1"),
+                        progress={"kind": "calibration", "best_objective": 0.0123456})
+    assert job.objective_text == "0.01235"
+    assert job_model._number(True) is None       # a flag is not a count
+
+
+def test_an_unstructured_failure_shows_what_axqua_printed():
+    """axqua dying with a traceback used to reach the user as "axqua returned something
+    that is not JSON" - a statement about the protocol, for what is usually one readable
+    line about a missing library."""
+    exc = runner_client.RunnerError(
+        "axqua returned something that is not JSON",
+        returncode=1,
+        stderr="Traceback (most recent call last):\n  ...\n"
+               "ImportError: libgdal.so.32: cannot open shared object file")
+    text = exc.user_text()
+    assert "libgdal" in text
+    assert "exited with code 1" in text
+
+
+def test_a_structured_failure_shows_the_remedy_and_not_the_noise():
+    """When axqua explains itself, its remedy is the answer - and stderr is then full of
+    the narration it deliberately sent there."""
+    exc = runner_client.RunnerError(
+        "the mesh has 14 zero-area elements", remedy="Lower breakline_size and rebuild.",
+        stderr="INFO reading DEM\nINFO meshing\n" * 50)
+    text = exc.user_text()
+    assert text == ("the mesh has 14 zero-area elements\n"
+                    "Lower breakline_size and rebuild.")
+
+
+def test_user_text_handles_anything_thrown_at_it():
+    assert runner_client.user_text(ValueError("plain")) == "plain"
+    assert "remedy" in runner_client.user_text(
+        runner_client.RunnerError("failed", remedy="remedy"))
+
+
+def test_a_case_added_before_the_project_is_saved_survives_the_save(tmp_path):
+    """Stored relative to QGIS's working directory, an entry resolved later against the
+    project's own folder - a path that had never existed anywhere."""
+    case = tmp_path / "cases" / "inn" / "case-config.yml"
+    case.parent.mkdir(parents=True)
+    case.write_text("telemac: {}\n", encoding="utf-8")
+
+    project = project_io.AxquaProject()
+    project.add_case(case)
+    assert Path(project.cases[0]).is_absolute()
+    assert project.active_case_path() == case
+
+    project_io.save(project, tmp_path / "reach.axqua-prj")
+    # Now that there is a folder to be relative to, the entry becomes portable.
+    assert project.cases[0] == str(Path("cases") / "inn" / "case-config.yml")
+    assert project.active_case_path() == case
+    assert project_io.load(tmp_path / "reach.axqua-prj").active_case_path() == case
+
+
+def test_the_glob_fallback_is_bounded(tmp_path):
+    """An OpenFOAM job directory holds a time directory per write per rank. Walking one
+    unbounded is minutes of stat calls with nothing on screen to explain the freeze."""
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    for rank in range(3):
+        deep = results / f"processor{rank}" / "0.1" / "uniform"
+        deep.mkdir(parents=True)
+        (deep / "time").write_text("noise", encoding="utf-8")
+    (results / "reach.slf").write_text("mesh", encoding="utf-8")
+
+    found = result_loader.discover(tmp_path)
+    assert [i.name for i in found.layers] == ["reach"]
+    assert found.from_manifest is False
+    assert len(result_loader._walk(results, 4)) == 4
+
+
+def test_the_manifest_wins_over_the_glob(tmp_path):
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "r2d.slf").write_text("mesh", encoding="utf-8")
+    (results / "results.json").write_text(json.dumps({
+        "job_id": "JOB-7",
+        "results": [{"name": "depth", "path": "results/r2d.slf", "kind": "mesh",
+                     "style": "water-depth", "variable": "WATER DEPTH"}]}),
+        encoding="utf-8")
+
+    found = result_loader.discover(tmp_path)
+    assert found.from_manifest is True and found.job_id == "JOB-7"
+    assert found.layers[0].variable == "WATER DEPTH"
+
+
+def test_the_crs_of_the_case_is_read_from_the_manifest(tmp_path):
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "r2d.slf").write_text("mesh", encoding="utf-8")
+    entry = {"name": "depth", "path": "results/r2d.slf", "kind": "mesh"}
+    manifest = results / "results.json"
+
+    manifest.write_text(json.dumps({"crs_epsg": 25832, "results": [entry]}), "utf-8")
+    assert result_loader.discover(tmp_path).crs_epsg == 25832
+    # a job that predates the entry, and one whose entry is unusable
+    manifest.write_text(json.dumps({"results": [entry]}), "utf-8")
+    assert result_loader.discover(tmp_path).crs_epsg is None
+    manifest.write_text(json.dumps({"crs_epsg": "utm", "results": [entry]}), "utf-8")
+    assert result_loader.discover(tmp_path).crs_epsg is None
+
+
+def test_a_corrupt_manifest_falls_back_to_the_glob(tmp_path):
+    from axqua_plugin.core import result_loader
+
+    results = tmp_path / "results"
+    results.mkdir()
+    (results / "r2d.slf").write_text("mesh", encoding="utf-8")
+    (results / "results.json").write_text("{ this is not json", encoding="utf-8")
+
+    found = result_loader.discover(tmp_path)
+    assert found.from_manifest is False
+    assert [i.name for i in found.layers] == ["r2d"]
+
+
 # ------------------------------------------------- Qt6 and security regressions
 #
 # Both classes of problem below were reported by plugins.qgis.org's own analysis on
@@ -442,6 +756,31 @@ UNSCOPED_ENUMS = [
     (r"QgsLegendStyle\.(Title|Group|Subgroup|SymbolLabel)", "QgsLegendStyle.Style.*"),
     (r"Qt\.(UserRole|AlignRight|AlignCenter|MatchExactly)\b", "Qt.<Scope>.*"),
 ]
+
+#: Every scope ``Qt`` member the plugin uses lives under. Anything else spelled
+#: ``Qt.Something`` is an unscoped literal, which is the Qt6 hazard - listing the scopes
+#: rather than the members means a *newly written* unscoped enum is caught too, which
+#: the six patterns above could not do.
+QT_SCOPES = {"ItemDataRole", "AlignmentFlag", "DockWidgetArea", "ItemFlag", "MatchFlag",
+             "CheckState", "CursorShape", "Orientation", "TextFormat", "KeyboardModifier",
+             "WindowType", "FocusPolicy", "ScrollBarPolicy", "PenStyle", "GlobalColor"}
+
+
+def test_no_new_unscoped_qt_enum_creeps_in():
+    """The rule compat.py states, enforced generally rather than case by case."""
+    import re
+
+    used = re.compile(r"\bQt\.([A-Z][A-Za-z_]*)")
+    offenders = []
+    for path in (PLUGIN_ROOT / "axqua").rglob("*.py"):
+        if path.name == "compat.py":
+            continue
+        for n, line in enumerate(path.read_text("utf-8").splitlines(), 1):
+            for name in used.findall(line):
+                if name not in QT_SCOPES:
+                    offenders.append(f"{path.relative_to(PLUGIN_ROOT)}:{n}  Qt.{name}")
+    assert offenders == [], (
+        "unscoped Qt enum - resolve it in compat.py with enum_value: " + str(offenders))
 
 
 @pytest.mark.parametrize("pattern,scoped", UNSCOPED_ENUMS)
@@ -509,3 +848,197 @@ def test_the_plugin_passes_a_security_scan():
     assert results == [], "\n".join(
         f"{r['filename']}:{r['line_number']} [{r['test_id']}] {r['issue_text']}"
         for r in results)
+
+
+def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
+    """Its progress is still empty, and "iter 0" beside STARTING reads as a job that
+    hangs."""
+    from axqua_plugin.core.job_model import Job as JobRow
+
+    waiting = JobRow(job_id="b", root=Path("."), state="STARTING", kind="calibration",
+                     phase="waiting for 2026-10-08-example-isar-steady-8e7bc5",
+                     progress={"kind": "calibration"})
+    assert waiting.progress_text == "waiting for 2026-10-08-example-isar-steady-8e7bc5"
+    running = JobRow(job_id="b", root=Path("."), state="RUNNING", kind="calibration", phase="",
+                     progress={"kind": "calibration", "iteration": 5,
+                               "max_iterations": 12})
+    assert running.progress_text == "iter 5/12"
+    # a phase left over on a job that has ended is not a reason to say it waits
+    ended = JobRow(job_id="b", root=Path("."), state="CANCELLED", kind="calibration",
+                   phase="waiting for x", progress={"kind": "calibration"})
+    assert not ended.progress_text.startswith("waiting")
+
+
+# ------------------------------------------------------------------ the fixed tabs
+
+#: The tabs the user's instructions prescribe, in their order, with their sub-tabs.
+PRESCRIBED = [
+    ("Configuration", []),
+    ("Case Setup", []),
+    ("Preprocessing", []),
+    ("Hydraulic simulation", ["Telemac", "OpenFOAM"]),
+    ("Mesh convergence", []),
+    ("Morphodynamic simulation", ["Telemac", "OpenFOAM"]),
+    ("Calibration & validation", []),
+    ("Postprocessing", ["QGIS", "ParaView", "VisIt"]),
+    ("Batch-processing", []),
+]
+
+DOCS = PLUGIN_ROOT.parent / "docs"
+
+
+def test_the_tabs_are_the_prescribed_ones_in_their_order():
+    from axqua_plugin.gui import sections
+
+    assert [(s.title, [sub.title for sub in s.subsections])
+            for s in sections.SECTIONS] == PRESCRIBED
+
+
+def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
+    """Help opens ``<page>.html#<label>``. A label that moved to another page, or was
+    renamed, would open the right book at the wrong place without any error."""
+    from axqua_plugin.gui import sections
+
+    keys = sections.help_keys()
+    # 9 tabs, 7 sub-tabs, 3 installation wizards and the window of the example case
+    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7 + 3 + 1
+    for key, page, label in keys:
+        text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
+        assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
+    assert sections.help_target("hydraulics") == ("usage/hydraulic-simulations",
+                                                  "help-hydraulics")
+    assert sections.help_target("hydraulics", "openfoam")[1] == "help-hydraulics-openfoam"
+
+
+def test_a_capability_is_shown_on_the_tab_of_its_section():
+    from axqua_plugin.gui import sections
+
+    assert sections.placement("telemac", "steady2d") == ("hydraulics", "telemac")
+    assert sections.placement("telemac", "gain_lose") == ("hydraulics", "telemac")
+    assert sections.placement("openfoam", "free_surface_3d") == ("hydraulics", "openfoam")
+    assert sections.placement("telemac", "vertical_convergence") == ("mesh", "")
+    assert sections.placement("telemac", "morphodynamics") == ("morphodynamics",
+                                                               "telemac")
+    assert sections.placement("openfoam", "calibration") == ("calibration", "")
+
+
+def test_a_capability_nobody_placed_still_gets_shown():
+    """aXqua may grow a capability this plugin has never heard of. It appears with the
+    simulations of its solver instead of nowhere."""
+    from axqua_plugin.gui import sections
+
+    assert sections.placement("telemac", "ice_cover") == ("hydraulics", "telemac")
+    assert sections.placement("delft3d", "tides") == ("hydraulics", "")
+
+
+def test_help_opens_the_built_documentation_and_the_published_one_without_it(tmp_path):
+    from axqua_plugin.gui import help as help_pages
+
+    published = help_pages.url_for("mesh", local=tmp_path)
+    assert published == ("https://axqua.readthedocs.io/en/latest/"
+                         "usage/mesh-convergence.html#help-mesh-convergence")
+    assert help_pages.url_for("postprocessing", "visit", local=tmp_path).endswith(
+        "usage/postprocessing.html#help-postprocessing-visit")
+
+    (tmp_path / "postprocessing-visit.html").write_text("redirect", encoding="utf-8")
+    local = help_pages.url_for("postprocessing", "visit", local=tmp_path)
+    assert local.startswith("file://") and local.endswith("postprocessing-visit.html")
+    # the redirect page carries the anchor, because a file address may lose it
+    page = help_pages.redirect_page("usage/postprocessing", "help-postprocessing-visit")
+    assert "url=html/usage/postprocessing.html#help-postprocessing-visit" in page
+
+
+def test_a_finding_links_to_its_code_on_the_page_of_its_severity(tmp_path):
+    from axqua_plugin.gui import help as help_pages
+
+    warning = help_pages.url_for_code("axqua.environment.ambient", local=tmp_path)
+    assert warning.endswith("troubleshooting/warnings.html#axqua-environment-ambient")
+    error = help_pages.url_for_code("axqua.config.invalid_value", "error", local=tmp_path)
+    assert error.endswith("troubleshooting/errors.html#axqua-config-invalid-value")
+
+
+# ------------------------------------------------------------------ batch
+
+
+def test_the_steps_of_a_batch_keep_the_order_of_the_workflow():
+    from axqua_plugin.core import batch
+
+    assert batch.ordered(["calibration", "steady", "nonsense", "preprocessing",
+                          "steady"]) == ["preprocessing", "steady", "calibration"]
+    assert [s.kind for s in batch.STEPS if s.default] == ["preprocessing", "steady"]
+
+
+def test_the_fine_sediment_steps_follow_the_hydraulic_ones_in_a_batch():
+    """In the order of the tabs: behind the hydraulic simulations, before the
+    calibration. They belong to OpenFOAM, which the step says, because TELEMAC has a
+    capability of the same name."""
+    from axqua_plugin.core import batch
+
+    kinds = [s.kind for s in batch.STEPS]
+    build, run = kinds.index("openfoam-sediment-build"), kinds.index("openfoam-sediment")
+    assert kinds.index("steady-3d") < build < run < kinds.index("calibration")
+    assert batch.step("openfoam-sediment").solver == "openfoam"
+    assert batch.step("openfoam-sediment").needs == "morphodynamics"
+    assert batch.ordered(["openfoam-sediment", "steady", "openfoam-sediment-build"]) == [
+        "steady", "openfoam-sediment-build", "openfoam-sediment"]
+
+
+def test_the_batch_script_waits_for_each_job_and_stops_at_a_failed_one(tmp_path):
+    import subprocess
+
+    from axqua_plugin.core import batch
+
+    text = batch.script("/data/my reach/case.axq-case", ["steady", "preprocessing"],
+                        axqua="/opt/my env/bin/axqua")
+    assert "AXQUA='/opt/my env/bin/axqua'" in text          # a space stays one word
+    assert "CASE='/data/my reach/case.axq-case'" in text
+    assert text.index("run_step preprocessing") < text.index("run_step steady")
+    assert '[ "$state" = "COMPLETED" ] || exit 1' in text
+    script = tmp_path / "batch.sh"
+    script.write_text(text, encoding="utf-8")
+    assert subprocess.run(["bash", "-n", str(script)]).returncode == 0
+
+
+def test_the_choices_of_a_wizard_become_the_flags_of_the_install_command():
+    """An empty field sends nothing, so that aXqua applies its own default."""
+    from axqua_plugin.core.runner_client import install_flags
+
+    assert install_flags(None) == []
+    assert install_flags({"folder": "", "tag": "", "jobs": 0, "visualization": True,
+                          "smoke_test": True, "bind": True, "examples": False}) == []
+    assert install_flags({"folder": "/home/x/opt", "tag": "v9.1.1",
+                          "salome": "/home/x/SALOME 9.15.tar.gz"}) == [
+        "--folder", "/home/x/opt", "--tag", "v9.1.1",
+        "--salome", "/home/x/SALOME 9.15.tar.gz"]          # one argument, with its space
+    assert install_flags({"reuse_openfoam": "no", "jobs": 4, "visualization": False,
+                          "examples": True, "smoke_test": False, "bind": False,
+                          "base": "ubuntu24", "telemac_examples": "none"}) == [
+        "--reuse-openfoam", "no", "--jobs", "4", "--base", "ubuntu24",
+        "--telemac-examples", "none", "--no-visualization", "--examples",
+        "--no-smoke-test", "--no-bind"]
+    assert install_flags({"telemac_examples": "inputs"}) == []       # the default
+    assert install_flags({"telemac_examples": "all"}) == ["--telemac-examples", "all"]
+    # the one question of the wizards about the postprocessors; VisIt is the default
+    assert install_flags({"scope": "user"}) == []                     # the default
+    assert install_flags({"scope": "system"}) == ["--for-all-users"]
+    assert install_flags({"viewers": "both"}) == []
+    assert install_flags({"viewers": "paraview"}) == ["--no-visit"]
+    assert install_flags({"viewers": "none"}) == ["--no-visualization"]
+    assert install_flags({"visit": False}) == ["--no-visit"]          # what a script sends
+
+
+def test_the_client_asks_for_an_example_with_its_name_and_folder(monkeypatch):
+    from axqua_plugin.core import runner_client
+
+    sent = []
+
+    class Answer:
+        data = {"folder": "/work/example-isar"}
+
+    client = runner_client.RunnerClient.__new__(runner_client.RunnerClient)
+    monkeypatch.setattr(runner_client.RunnerClient, "call",
+                        lambda self, args, **kwargs: sent.append(list(args)) or Answer())
+    assert client.example_get("example-isar", "/work") == {"folder": "/work/example-isar"}
+    client.example_list()
+    assert sent == [["example", "get", "example-isar", "--folder", "/work"],
+                    ["example", "list"]]

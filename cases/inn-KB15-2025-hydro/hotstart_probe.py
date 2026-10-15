@@ -40,7 +40,7 @@ from axqua.env import TelemacRuntime
 from axqua.logsetup import setup_logging
 
 HERE = Path(__file__).resolve().parent
-CONFIG = HERE / "case-config.yml"
+CONFIG = HERE / "inn-KB15-2025-hydro.axq-case"
 
 DURATION = 2500.0     # long enough to see a plateau if it comes early
 # TELEMAC printout periods count TIME STEPS, not seconds. The base case's 500

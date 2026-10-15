@@ -65,14 +65,41 @@ class RunnerError(RuntimeError):
         self.stderr = stderr
 
     def user_text(self) -> str:
+        """Everything known about the failure, in the order a reader needs it.
+
+        A structured error carries its own remedy and that is the whole answer. An
+        *unstructured* one - a traceback, a missing shared library, a solver environment
+        that will not source - carries no remedy, and then the tail of what axqua
+        actually printed is the only diagnosis there is. Discarding it, as this used to,
+        left the user with "axqua returned something that is not JSON" for every one of
+        those failures.
+        """
         parts = [self.message]
         if self.remedy:
             parts.append(self.remedy)
+        else:
+            detail = _tail(self.stderr)
+            if self.returncode:
+                parts.append(f"axqua exited with code {self.returncode}."
+                             + (f"\n{detail}" if detail else ""))
+            elif detail:
+                parts.append(detail)
         return "\n".join(parts)
 
 
 class RunnerNotFound(RunnerError):
     """axqua could not be located. The message names every place looked."""
+
+
+def user_text(exc: Exception) -> str:
+    """The most informative rendering of *exc* there is.
+
+    Every error callback in the plugin goes through this. ``str(exc)`` on a
+    :class:`RunnerError` is only its first line, and silently drops the remedy that
+    axqua computed and sent precisely so the user would not have to guess - which is
+    what every asynchronous failure path used to do, exactly where jobs fail.
+    """
+    return exc.user_text() if isinstance(exc, RunnerError) else str(exc)
 
 
 @dataclass
@@ -130,8 +157,8 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
         lines += ["", "What was tried:"] + problems
     lines += ["", "Install it with",
               "    pip install git+https://github.com/sschwindt/aXqua.git",
-              "in the environment that has your solver tooling (aXqua is not on PyPI "
-              "yet), then set the path in aXqua > Settings."]
+              "in the Python environment of your choice, then set the path in "
+              "aXqua > Settings."]
     raise RunnerNotFound("\n".join(lines))
 
 
@@ -169,7 +196,35 @@ def _probe(path: str) -> str:
         # Something else answered. Reporting it as a wrong executable is far kinder than
         # letting it fail obscurely at submit time.
         raise RunnerError(f"this does not look like axqua (said {text[:60]!r})")
-    return text.split()[-1]
+    version = text.split()[-1]
+    _require_minimum(version)
+    return version
+
+
+#: The oldest axqua that speaks the JSON envelope this plugin reads. Documented as a
+#: requirement since the first release, and until now never actually checked - so an
+#: older one presented as a series of unexplained parse failures instead.
+MINIMUM_VERSION = (0, 3)
+
+
+def _require_minimum(version: str) -> None:
+    parts = []
+    for piece in version.split(".")[:2]:
+        digits = "".join(c for c in piece if c.isdigit())
+        if not digits:
+            break
+        parts.append(int(digits))
+    if len(parts) < 2:
+        # An unparseable version (a git describe string, a local build) is accepted:
+        # refusing to run something merely because its version is unusual would be worse
+        # than the problem this check exists for.
+        return
+    if tuple(parts) < MINIMUM_VERSION:
+        raise RunnerError(
+            f"this plugin needs axqua {MINIMUM_VERSION[0]}.{MINIMUM_VERSION[1]} or "
+            f"newer, and this one is {version}",
+            remedy="Upgrade it with 'pip install --upgrade "
+                   "git+https://github.com/sschwindt/aXqua.git' in its Python environment.")
 
 
 def _no_window() -> dict:
@@ -215,8 +270,8 @@ class RunnerClient:
 
     # -- the call -----------------------------------------------------------------
     def call(self, args: Sequence[str], *, timeout: float | None = None,
-             expect_json: bool = True) -> Result:
-        """Run one axqua command.
+             expect_json: bool = True, input_text: str | None = None) -> Result:
+        """Run one axqua command. *input_text* is what the command reads on stdin.
 
         The argument list is passed as a **list**, never joined into a shell string, so
         a path with a space or a quote in it cannot become two arguments or a second
@@ -232,7 +287,7 @@ class RunnerClient:
             # space, a quote or a semicolon stays one argument and cannot start a
             # second command.
             proc = subprocess.run(  # nosec B603
-                argv, capture_output=True, text=True,
+                argv, capture_output=True, text=True, input=input_text,
                 timeout=timeout or self.timeout, **_no_window())
         except subprocess.TimeoutExpired as exc:
             raise RunnerError(
@@ -338,8 +393,177 @@ class RunnerClient:
     def profiles(self) -> dict:
         return self.call(["profiles", "list"]).data or {}
 
+    # -- a case file --------------------------------------------------------------
+    def schema(self) -> dict:
+        """``{sections: [...]}``: every setting of a case file, for the editor."""
+        return self.call(["schema"], timeout=60).data or {}
+
+    def case_read(self, case: str | os.PathLike) -> dict:
+        """``{path, folder, data}``: the case file as it is written."""
+        return self.call(["case", "read", str(case)]).data or {}
+
+    def case_write(self, case: str | os.PathLike, data: dict) -> dict:
+        """Write the case and check it. Returns ``{path, backup, findings}``."""
+        return self.call(["case", "write", str(case)], timeout=120,
+                         input_text=json.dumps({"data": data})).data or {}
+
+    def case_new(self, case: str | os.PathLike, name: str = "") -> dict:
+        """Create a case file with the entries every case has."""
+        args = ["case", "new", str(case)] + (["--name", name] if name else [])
+        return self.call(args, timeout=60).data or {}
+
+    # -- the example cases --------------------------------------------------------
+    def example_list(self) -> dict:
+        """``{source, examples: [{name, title, summary, megabytes, files}]}``."""
+        return self.call(["example", "list"], timeout=120).data or {}
+
+    def example_get(self, name: str, folder: str | os.PathLike) -> dict:
+        """Put the example *name* into ``<folder>/<name>``. Returns ``{folder, case,
+        guide, files, megabytes, source}``. An example is a few megabytes."""
+        return self.call(["example", "get", str(name), "--folder", str(folder)],
+                         timeout=900).data or {}
+
+    def case_check(self, case: str | os.PathLike) -> dict:
+        """``{path, findings}``: everything that is wrong with the case."""
+        return self.call(["check", str(case)], timeout=120).data or {}
+
+    # -- the profile of this computer ---------------------------------------------
+    def profile_path(self) -> dict:
+        """``{path, exists}`` of the active profile."""
+        return self.call(["profile", "path"]).data or {}
+
+    def profile_show(self) -> dict:
+        """The active profile. Raises :class:`RunnerError` where there is none."""
+        return self.call(["profile", "show"]).data or {}
+
+    def profile_detect(self) -> dict:
+        """What aXqua finds on this computer, as a profile that is not saved yet."""
+        return self.call(["profile", "detect"], timeout=60).data or {}
+
+    def profile_check(self, *, probe: bool = True) -> dict:
+        """``{path, findings}``. With *probe*, the simulation programs are started
+        once, which is what tells a working installation from a path that exists."""
+        args = ["profile", "check"] + ([] if probe else ["--no-probe"])
+        return self.call(args, timeout=180).data or {}
+
+    def profile_write(self, profile: dict) -> dict:
+        """Save *profile* as the active profile. Returns ``{path, backup, findings}``;
+        *backup* is where a file that could not be read was kept."""
+        return self.call(["profile", "write"], input_text=json.dumps(profile),
+                         timeout=60).data or {}
+
+    def profile_locate(self, program: str, folder: str | os.PathLike) -> dict:
+        """``{program, folder, script, candidates}``: the environment script or the
+        launcher of *program* in the folder it is installed in. *script* is empty
+        where the folder holds none, or several."""
+        return self.call(["profile", "locate", str(program), str(folder)],
+                         timeout=60).data or {}
+
+    # -- validation ---------------------------------------------------------------
+    def validation_info(self, case: str | os.PathLike) -> dict:
+        """``{situations, boundaries, outflow_condition, calibrated, reports}``: what
+        the validation form of a case shows."""
+        return self.call(["validation", str(case)], timeout=120).data or {}
+
+    # -- results for ParaView and VisIt -------------------------------------------
+    def export_list(self, case: str | os.PathLike) -> dict:
+        """``{folder, results: [...]}``: the TELEMAC results of a case, and which of
+        them are exported already."""
+        return self.call(["export", str(case), "--list"], timeout=120).data or {}
+
+    def export_results(self, case: str | os.PathLike, names: Sequence[str] = (), *,
+                       frames: str = "all") -> dict:
+        """Convert results of a case into files ParaView and VisIt open."""
+        args = ["export", str(case), "--frames", str(frames)]
+        for name in names:
+            args += ["--result", str(name)]
+        return self.call(args, timeout=3600).data or {}
+
+    # -- installing the simulation programs ---------------------------------------
+    def install_overview(self) -> dict:
+        """``{host, targets: [{target, title, installed, running, last}], ...}``."""
+        return self.call(["install", "overview"], timeout=60).data or {}
+
+    def install_plan(self, target: str, options: dict | None = None) -> dict:
+        """What installing *target* would do, and what is missing. Changes nothing.
+
+        The first call downloads the installer scripts (2 MB), hence the long limit.
+        """
+        return self.call(["install", "plan", target, *install_flags(options)],
+                         timeout=300).data or {}
+
+    def install_packages(self, target: str, options: dict | None = None, *,
+                         elevate: bool = False) -> dict:
+        """The system packages *target* needs. With *elevate*, the missing ones are
+        installed, and the desktop asks for the administrator password."""
+        args = ["install", "packages", target, *install_flags(options)]
+        return self.call(args + (["--elevate"] if elevate else []),
+                         timeout=3600 if elevate else 300).data or {}
+
+    def install_start(self, target: str, options: dict | None = None) -> dict:
+        """Start the installation as a process of its own; returns its status."""
+        return self.call(["install", "start", target, *install_flags(options)],
+                         timeout=300).data or {}
+
+    def install_status(self, ident: str, *, tail: int = 0) -> dict:
+        """The state of one installation, with the last *tail* lines of its log."""
+        args = ["install", "status", ident] + (["--tail", str(tail)] if tail else [])
+        return self.call(args, timeout=60).data or {}
+
+    def install_cancel(self, ident: str) -> dict:
+        return self.call(["install", "cancel", ident], timeout=120).data or {}
+
     def kinds(self) -> list[dict]:
         return list(self.call(["submit", "x", "--help-kinds"]).data or [])
+
+
+#: ``option -> flag`` of ``axqua install``, for the options that carry a value.
+_INSTALL_VALUES = (("folder", "--folder"), ("tag", "--tag"), ("salome", "--salome"),
+                   ("reuse_openfoam", "--reuse-openfoam"), ("jobs", "--jobs"),
+                   ("installers", "--installers"), ("ref", "--ref"), ("base", "--base"))
+
+
+def install_flags(options: dict | None) -> list[str]:
+    """The command-line form of the choices made in an installation wizard.
+
+    An empty value sends no flag, so that aXqua applies its own default. The switches
+    are sent only where they differ from the default, for the same reason.
+    """
+    options = options or {}
+    flags: list[str] = []
+    for key, flag in _INSTALL_VALUES:
+        value = options.get(key)
+        if value not in (None, "", 0):
+            flags += [flag, str(value)]
+    if options.get("scope") == "system":                        # "user" is the default
+        flags.append("--for-all-users")
+    if options.get("telemac_examples") in ("all", "none"):      # "inputs" is the default
+        flags += ["--telemac-examples", str(options["telemac_examples"])]
+    # "viewers" is the one question of the wizards: both programs, ParaView alone, or
+    # none. The two switches are what a script sends.
+    viewers = options.get("viewers")
+    if options.get("visualization") is False or viewers == "none":
+        flags.append("--no-visualization")
+    elif options.get("visit") is False or viewers == "paraview":
+        flags.append("--no-visit")
+    if options.get("examples"):
+        flags.append("--examples")
+    if options.get("smoke_test") is False:
+        flags.append("--no-smoke-test")
+    if options.get("bind") is False:
+        flags.append("--no-bind")
+    return flags
+
+
+def _tail(text: str, lines: int = 6) -> str:
+    """The last few non-empty lines of a subprocess's output.
+
+    Bounded on both axes - the count and each line's length - because this ends up in a
+    message bar, and a 2 KB traceback pasted into one would push the useful part of the
+    interface off the screen.
+    """
+    kept = [line.rstrip()[:200] for line in (text or "").splitlines() if line.strip()]
+    return "\n".join(kept[-lines:])
 
 
 def _parse(text: str) -> dict | None:

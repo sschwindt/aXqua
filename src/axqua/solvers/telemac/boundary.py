@@ -204,6 +204,38 @@ def _percolation_patches(cfg: Config) -> list[dict]:
     return patches
 
 
+def exchange_regions(cfg: Config, mesh: "Mesh | None" = None
+                     ) -> list["InternalSourceRegion"]:
+    """The internal exchange a build applies: the ``int-*`` lines, if the case asks.
+
+    The lines are a property of the boundary layer, and a layer is shared between
+    cases. They used to be applied whenever the layer held them, so a case that said
+    nothing about an exchange got one anyway, in its least stable form: a fixed-rate
+    source region on a thin strip. On the isar-2025 reach that ends a run at its first
+    time step. An exchange now needs the case to ask for it, with a ``gain_lose`` block
+    or with ``boundaries.internal_sources: true`` for the fixed-rate regions. Without
+    either, the lines are reported and left out.
+    """
+    if cfg.gain_lose.active or cfg.boundaries.internal_sources:
+        return load_internal_source_regions(cfg, mesh)
+    try:
+        # without the mesh: nothing is checked that only matters when they are applied
+        ignored = load_internal_source_regions(cfg)
+    except Exception as exc:                        # noqa: BLE001 - they are unused
+        log.debug("internal lines not read (%s); they are not applied anyway", exc)
+        return []
+    if ignored:
+        names = ", ".join(f"{region.name} ({region.discharge:+g} m3/s)"
+                          for region in ignored)
+        log.warning(
+            "the liquid-boundary layer holds %d internal exchange line(s): %s. This "
+            "case has no gain_lose block, so NO exchange is modelled. Add "
+            "'gain_lose: {enabled: true, zone: <porous body>}' to model it, or "
+            "'boundaries.internal_sources: true' for fixed-rate source regions.",
+            len(ignored), names)
+    return []
+
+
 def load_internal_source_regions(cfg: Config,
                                  mesh: "Mesh | None" = None
                                  ) -> list["InternalSourceRegion"]:
@@ -303,17 +335,83 @@ def load_internal_source_regions(cfg: Config,
     return regions
 
 
-def _match_tolerance(cfg: Config) -> float:
+def _match_tolerance(cfg: Config, mesh: Mesh | None = None) -> float:
     """Distance below which a contour node is taken to lie on a liquid line.
 
-    Tied to the local boundary edge length so it captures on-line nodes without
-    grabbing wall nodes deep past the inflow/outflow line ends: ~2 floodplain
-    edges for the anisotropic mesh, else the isotropic default/breakline size.
+    Measured from the **mesh that was actually built** wherever possible: two median
+    boundary edges, which is what "on the line" means for a node. The configured sizes
+    are only a fallback for callers without a mesh, and a poor one - taking the largest
+    of them (``breakline_size`` defaults to 3 m, deliberately coarser than a fine
+    ``default_size``) yields a tolerance of metres on a centimetre mesh, which quietly
+    swallows metres of wall either side of a short inflow line and prescribes the
+    discharge across all of it.
     """
     scale = cfg.mesh.size_scale
     if _anisotropic_enabled(cfg):
-        return max(cfg.mesh.floodplain_size, cfg.mesh.channel_size) * scale * 2.0
-    return max(cfg.mesh.default_size, cfg.mesh.breakline_size) * scale * 1.5
+        configured = max(cfg.mesh.floodplain_size, cfg.mesh.channel_size) * scale * 2.0
+    else:
+        configured = max(cfg.mesh.default_size, cfg.mesh.breakline_size) * scale * 1.5
+    if mesh is None:
+        return configured
+    edge = _median_boundary_edge(mesh)
+    if edge <= 0:
+        return configured
+    # Clamped by the mesh, never widened by it: the configured sizes are what a case
+    # has always been matched with, and only the case where they are far coarser than
+    # the mesh is a bug. Here breakline_size (3 m by default, deliberately coarse) beat
+    # a 5 cm default_size and produced a 4.5 m tolerance on a 5 cm mesh, which swallowed
+    # metres of wall either side of a 0.6 m inlet.
+    return min(configured, 2.0 * edge)
+
+
+def _solid_footprint(cfg: Config):
+    """Union of the case's solid structure footprints, or None when it has none."""
+    try:
+        from axqua.core.structures import load_structures, solid_footprint
+
+        return solid_footprint(load_structures(cfg))
+    except Exception as error:                       # report-only: never block a build
+        log.debug("no solid footprints available for boundary classification: %s", error)
+        return None
+
+
+def _on_solid(cfg: Config, mesh: Mesh):
+    """Nodes a solid structure stands on, by the element rule the bed raise uses.
+
+    Testing a node's own centre is not enough. A wall thinner than an element raises
+    the bed of every node of the elements it crosses, so a node can end up standing on
+    a crest while its centre falls outside the footprint. Keeping such a node as a
+    liquid boundary prescribes a discharge or a stage on top of the wall.
+    """
+    import numpy as np
+
+    try:
+        from axqua.core.structures import (blanking_area, load_structures,
+                                           solid_mask)
+
+        structures = load_structures(cfg)
+    except Exception as error:                       # report-only: never block a build
+        log.debug("no solid footprints available for boundary classification: %s", error)
+        return None
+    if not structures:
+        return None
+    xy = np.column_stack([mesh.x, mesh.y])
+    return solid_mask(structures, xy, triangles=mesh.triangles,
+                      min_area=blanking_area(cfg))
+
+
+def _median_boundary_edge(mesh: Mesh) -> float:
+    """Median distance between consecutive contour nodes of the mesh."""
+    import numpy as np
+
+    nodes = np.asarray(mesh.boundary_nodes)
+    if nodes.size < 3:
+        return 0.0
+    x = np.asarray(mesh.x)[nodes]
+    y = np.asarray(mesh.y)[nodes]
+    steps = np.hypot(np.diff(x), np.diff(y))
+    steps = steps[steps > 0]
+    return float(np.median(steps)) if steps.size else 0.0
 
 
 def _contour_length(node_ids: list[int], mesh: Mesh) -> float:
@@ -519,9 +617,13 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
     from shapely.geometry import Point
 
     lines = liquid_lines(cfg)
-    tol = _match_tolerance(cfg)
+    tol = _match_tolerance(cfg, mesh)
+    log.info("  liquid-boundary matching tolerance %.3f m (two median contour edges)",
+             tol)
+    on_solid_node = _on_solid(cfg, mesh)
 
     kinds: list[str] = []
+    on_solid = 0
     for node in mesh.boundary_nodes:
         p = Point(mesh.x[node], mesh.y[node])
         best_kind, best_dist = "wall", tol
@@ -529,7 +631,18 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
             d = geom.distance(p)
             if d < best_dist:
                 best_kind, best_dist = kind, d
+        # A node standing inside a solid structure is not a way in or out, whatever it
+        # is near: the structure is burned into the bed, so the node's bed sits a metre
+        # or more above the opening beside it, and prescribing a discharge or a stage
+        # there pours water onto the crest. It shows up as a single node metres deep at
+        # the boundary while its neighbours run at several m/s.
+        if best_kind != "wall" and on_solid_node is not None and on_solid_node[node]:
+            best_kind = "wall"
+            on_solid += 1
         kinds.append(best_kind)
+    if on_solid:
+        log.info("  %d contour node(s) excluded from the liquid boundaries: they stand "
+                 "on a solid structure", on_solid)
 
     liquids, node_map = _number_liquid_boundaries(mesh, kinds)
     if not liquids:

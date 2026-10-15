@@ -49,6 +49,7 @@ PRIMARY_KIND = {
     "steady2d": "steady",
     "unsteady2d": "unsteady",
     "steady3d": "steady-3d",
+    "unsteady3d": "unsteady",
     "free_surface_3d": "openfoam-run",
     "mesh_convergence": "mesh-convergence",
     "vertical_convergence": "vertical-convergence",
@@ -60,15 +61,58 @@ BUILD_KIND = {
     "steady2d": "preprocessing",
     "unsteady2d": "unsteady",
     "steady3d": "build-3d",
+    "unsteady3d": "build-3d",
     "free_surface_3d": "openfoam-build",
 }
+
+#: Where one solver does something else under the name of a capability than the others.
+#: Morphodynamics is the coupled simulation with GAIA for TELEMAC, which is part of the
+#: hydraulic runs, and a simulation of its own for OpenFOAM: fine sediment over a bed
+#: that stays in place. Looked up before the tables above, by (solver, capability).
+BY_SOLVER = {
+    ("openfoam", "morphodynamics"): {
+        "title": "Fine sediment over a fixed bed",
+        "kind": "openfoam-sediment",
+        "build": "openfoam-sediment-build",
+    },
+}
+
+#: Options a tab always sends with its run, because they are what makes the kind run
+#: this capability and not its sibling. The unsteady kind runs in 2D unless told
+#: otherwise, so the Unsteady 3D tab is that kind with the switch set. It used to be a
+#: tab that said "no job kind" while the check box that did its job sat on another tab.
+FIXED_OPTIONS = {"unsteady3d": {"mode_3d": True}}
 
 NOT_IMPLEMENTED_REASON = (
     "axqua does not implement this for {solver} yet. It is a gap in axqua, not "
     "a limitation of your case.")
 NOT_CONFIGURED_REASON = (
-    "This case does not ask for {title} yet. Add the relevant block to case-config.yml "
+    "This case does not ask for {title} yet. Add the relevant block to the case file "
     "(see the annotated template) and refresh.")
+#: A capability axqua implements without a job kind has no ``--kind`` the runner could
+#: be given. Saying so is the honest answer; the alternative - which this used to do -
+#: is an enabled tab with two buttons that cannot do anything. None of today's
+#: capabilities is in that position any more (see :data:`PART_OF` and
+#: :data:`FIXED_OPTIONS`), and a future one still gets this text rather than dead buttons.
+NO_JOB_KIND_REASON = "{title} with {solver} cannot be started from the plugin yet."
+
+
+#: Capabilities that are not simulations of their own. They are switched on in the case
+#: file and are then built and run with another capability's jobs, so "there is no job
+#: kind, run it from a Python driver" is the wrong thing to tell the user: with the block
+#: in the case file it has already run, as part of the steady simulation.
+PART_OF = {
+    "gain_lose": (
+        "The exchange with a porous body is part of the hydraulic model and not a "
+        "simulation of its own. With the block gain_lose in the case file, it is built "
+        "and run together with the Steady 2D simulation. There is nothing to submit on "
+        "this tab."),
+    "morphodynamics": (
+        "Sediment transport and bed change are computed together with the flow and "
+        "not in a simulation of their own. With the block morphodynamics in the case "
+        "file, the steady and the unsteady simulations run coupled with GAIA. There "
+        "is nothing to submit on this tab."),
+}
 
 
 @dataclass
@@ -83,8 +127,19 @@ class CapabilityView:
     run: bool | None = None
 
     @property
+    def own(self) -> dict:
+        """What this solver does differently under the name of the capability."""
+        return BY_SOLVER.get((self.solver, self.name), {})
+
+    @property
+    def part_of(self) -> str:
+        """The explanation of a capability that is run with another one's jobs."""
+        return "" if self.own else PART_OF.get(self.name, "")
+
+    @property
     def title(self) -> str:
-        return TITLES.get(self.name, self.name.replace("_", " ").capitalize())
+        return self.own.get("title") or TITLES.get(
+            self.name, self.name.replace("_", " ").capitalize())
 
     @property
     def visible(self) -> bool:
@@ -92,8 +147,17 @@ class CapabilityView:
         return self.implemented != "n/a"
 
     @property
+    def submittable(self) -> bool:
+        """Is there a job kind behind this capability at all?
+
+        Not every capability axqua implements is exposed as a job. Without a kind the
+        runner has nothing to be asked for, so the tab can only explain itself.
+        """
+        return bool(self.submit_kind or self.build_kind)
+
+    @property
     def enabled(self) -> bool:
-        return self.implemented == "yes"
+        return self.implemented == "yes" and self.submittable
 
     @property
     def can_submit(self) -> bool:
@@ -114,6 +178,11 @@ class CapabilityView:
         """Why an action is unavailable - shown, never left to be guessed."""
         if self.implemented == "no":
             return NOT_IMPLEMENTED_REASON.format(solver=self.solver)
+        if self.part_of:
+            return self.part_of
+        if not self.submittable:
+            # Before "not configured": configuring it would not help.
+            return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
         if not self.configured:
             return NOT_CONFIGURED_REASON.format(title=self.title)
         return ""
@@ -122,6 +191,8 @@ class CapabilityView:
     def state_text(self) -> str:
         if self.implemented != "yes":
             return "not available"
+        if not self.submittable and not self.part_of:
+            return "not available yet"
         marks = [name for name, flag in (("configured", self.configured),
                                          ("built", self.built), ("run", self.run))
                  if flag]
@@ -129,11 +200,16 @@ class CapabilityView:
 
     @property
     def submit_kind(self) -> str | None:
-        return PRIMARY_KIND.get(self.name)
+        return self.own.get("kind") or PRIMARY_KIND.get(self.name)
 
     @property
     def build_kind(self) -> str | None:
-        return BUILD_KIND.get(self.name)
+        return self.own.get("build") or BUILD_KIND.get(self.name)
+
+    @property
+    def fixed_options(self) -> dict:
+        """What this tab adds to every run it submits (see :data:`FIXED_OPTIONS`)."""
+        return dict(FIXED_OPTIONS.get(self.name, {}))
 
 
 @dataclass
@@ -162,6 +238,10 @@ class CaseView:
 
     case_dir: str = ""
     solvers: list[SolverView] = field(default_factory=list)
+    #: How this case's results are drawn, from its own file: ``wet_depth`` and
+    #: ``velocity_scale_max``. Properties of the reach, so they travel with it
+    #: rather than living in the plugin's per-install settings.
+    display: dict = field(default_factory=dict)
 
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "CaseView":
@@ -185,7 +265,8 @@ class CaseView:
                     for c in (entry.get("capabilities") or [])
                 ],
             ))
-        return cls(case_dir=str(payload.get("case_dir") or ""), solvers=solvers)
+        return cls(case_dir=str(payload.get("case_dir") or ""), solvers=solvers,
+                   display=dict(payload.get("display") or {}))
 
     def solver(self, name: str) -> SolverView | None:
         return next((s for s in self.solvers if s.name == name), None)

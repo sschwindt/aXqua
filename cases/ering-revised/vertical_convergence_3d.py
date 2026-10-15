@@ -30,7 +30,7 @@ from pathlib import Path
 from axqua import logging_to, run_vertical_convergence
 from axqua.config import load_config
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "ering-revised.axq-case"
 cfg = load_config(CONFIG)
 
 CONV_TOLERANCE = 0.02     # convergence tolerance on the QoI (2%)

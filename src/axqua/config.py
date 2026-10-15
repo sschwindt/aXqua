@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import os
-from dataclasses import dataclass, field, fields
+from dataclasses import MISSING, dataclass, field, fields
 from pathlib import Path
 from typing import Any
 
@@ -140,14 +140,35 @@ class TelemacEnv:
     solver_python: str | None = None
 
     def validate(self) -> None:
+        self.validate_installation()
+        self.validate_choice()
+
+    def validate_choice(self) -> None:
+        """What the case chooses. Separate from the installation, which is a fact about
+        the computer: an editor of the case checks this and not that."""
+        if self.solver not in ("telemac2d", "telemac3d"):
+            raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
+
+    def validate_installation(self) -> None:
+        if self.pysource is None:
+            # Unset is its own mistake and deserves its own sentence: Path(None) raises
+            # a TypeError from pathlib that says nothing about the configuration.
+            raise FileNotFoundError(
+                "telemac.pysource is not set. Point it at the environment script of "
+                "your TELEMAC installation, e.g. "
+                "/opt/telemac/configs/pysource.sh"
+            )
         if not Path(self.pysource).is_file():
             raise FileNotFoundError(
                 f"TELEMAC pysource script not found: {self.pysource}. "
                 "Set telemac.pysource to e.g. "
-                "/home/schwindt/opt/telemac/configs/pysource.mint22.sh"
+                "/opt/telemac/configs/pysource.sh"
             )
-        if self.solver not in ("telemac2d", "telemac3d"):
-            raise ValueError(f"telemac.solver must be telemac2d|telemac3d, got {self.solver!r}")
+
+
+#: Valid ``GroundTruthSource.profile`` rules. Must stay in step with
+#: :data:`axqua.ground_truth.PROFILE_RULES` (fenced by a test).
+PROFILE_RULES = ("single", "all", "drop-lowest", "depth-average")
 
 
 @dataclass
@@ -166,6 +187,33 @@ class GroundTruthSource:
     values: Path | None = None           # measured-values file (e.g. .ft.sum xlsx)
     positions: Path | None = None        # position layer (shp/gpkg) to join coords from
     join_key: str = "ID"
+
+    #: Worksheet to read the values from. ``None`` keeps the historic behaviour
+    #: (the first sheet, one row per vertical). Name a per-reading profile sheet
+    #: to use any ``profile`` rule other than ``single``.
+    sheet: str | int | None = None
+
+    #: Which reading of a multi-depth vertical becomes a target - see
+    #: :func:`axqua.ground_truth.select_profile_rows`. ``single`` is the default
+    #: and reproduces the previous behaviour exactly.
+    profile: str = "single"
+
+    #: Column identifying the vertical a reading belongs to, for the profile
+    #: rules. Defaults to ``join_key``.
+    group_key: str | None = None
+
+    def __post_init__(self) -> None:
+        # Spelled out rather than imported from axqua.ground_truth: that module
+        # pulls pandas, and this runs on every config load - including the
+        # capability listing, which tests/test_capabilities.py requires to import
+        # nothing heavy. test_profile_rules_match_the_implementation fences the
+        # duplication.
+        if self.profile not in PROFILE_RULES:
+            raise ValueError(
+                f"ground_truth source {self.category!r}: unknown profile rule "
+                f"{self.profile!r}; expected one of {', '.join(PROFILE_RULES)}")
+        if self.group_key is None:
+            self.group_key = self.join_key
 
 
 @dataclass
@@ -214,16 +262,26 @@ class Geodata:
     control_sections: Path | None = None
     control_section_name_field: str | None = None  # attribute holding each line's name
 
-    def validate(self) -> None:
+    def validate(self, *, produced: frozenset[str] = frozenset()) -> None:
+        """Check the inputs exist.
+
+        *produced* names the entries an earlier stage writes rather than the user
+        supplying - the CAD surface stage, in practice. Those are allowed to be
+        missing here, because validating a case before its first build is exactly when
+        they do not exist yet, and refusing to validate would make ``--check`` useless
+        for the one kind of case that most needs checking first. What produces them
+        validates its own inputs instead (:meth:`Surfaces.validate`).
+        """
         required = {"dem_initial": self.dem_initial, "boundary": self.boundary}
-        missing = [name for name, p in required.items() if p is None or not Path(p).exists()]
+        missing = [name for name, p in required.items()
+                   if name not in produced and (p is None or not Path(p).exists())]
         if missing:
             raise FileNotFoundError(f"Missing required geodata: {missing}")
         for name in ("dem_target", "breaklines", "mesh_zones", "channel_centerline",
                      "roughness_zones", "roughness_table", "region_points",
                      "region_table", "dem_of_difference", "control_sections"):
             p = getattr(self, name)
-            if p is not None and not Path(p).exists():
+            if name not in produced and p is not None and not Path(p).exists():
                 raise FileNotFoundError(f"geodata.{name} set but not found: {p}")
 
 
@@ -250,10 +308,187 @@ class Structures:
     # remove, so the bed is raised to the crest plus this freeboard instead - the
     # standard practice for a never-overtopped wall in TELEMAC.
     solid_freeboard_2d: float = 2.0
+    # Which elements a structure blanks, on a 2D mesh. Both guarantee that no element
+    # spans a wall with open water on each side; they differ in what they cost.
+    #
+    #   "touch" (default) - every element the footprint intersects at all. Safe by
+    #       construction and errs CLOSED: it eats about 0.45 of a cell on each side of
+    #       an opening, so a drawn slot of w realises w - 0.9 dx.
+    #   "area"  - only elements the footprint covers by at least `blanking_area`.
+    #       Measured on a synthetic vertical-slot flume with a 0.170 m diagonal slot
+    #       (cases/slot-flume/blanking_rules.py): zero through-crossings at dx 0.10 to
+    #       0.025 m, and a realised slot of 102-104% of drawn against 74-86% for
+    #       "touch". It errs slightly OPEN instead: a few slivers of water stand inside
+    #       the concrete without passing through it.
+    #
+    # `touch` remains the default because it is the conservative error on a structure
+    # whose job is to stop water, and because it is what every existing result was
+    # produced with. Choose `area` when an opening is only a few elements wide and
+    # eroding it half a cell a side matters more than a sliver of water in a wall.
+    blanking_rule: str = "touch"        # touch | area
+    blanking_area: float = 0.5          # `area` only: covered fraction that blanks
+    # How a SOLID structure reaches a 2D mesh.
+    #
+    #   "raise" (default) - the bed is lifted to crest + solid_freeboard_2d where the
+    #       structure stands. The mesh does not know the wall is there, so the wall is
+    #       PAINTED ONTO it: whether an opening survives depends on which elements got
+    #       raised, and that is where `blanking_rule`, the medial axis and the whole
+    #       erosion question come from. Every existing result was produced this way.
+    #   "cut"   - the footprint is removed from the meshed domain, so the wall becomes
+    #       a no-slip boundary and the opening is bounded by MESH EDGES cut from the
+    #       polygon. The slot is then exact by construction: no blanking rule, no
+    #       erosion, no medial axis, no seal check, and no need for a finer mesh -
+    #       the geometry lives in the boundary rather than in the bed.
+    #
+    # `cut` is what a wall physically is and is the better representation where an
+    # opening matters: on munich-vsf the pass slot is 0.1697 m drawn, the raise path
+    # delivers 0.0894 m, and the level follows the narrowest slot (slot relation,
+    # within 5%). It is not the default because it changes the domain itself, so every
+    # result produced under `raise` would move.
+    solid_mode: str = "raise"           # raise | cut
+    # Vertices closer together than this are dropped from a cut footprint before it
+    # becomes mesh boundary. A CAD-derived outline carries a vertex every raster cell,
+    # and gmsh would put a node on each; 5 mm is far below the 0.17 m that matters.
+    cut_simplify: float = 0.005
 
     def validate(self) -> None:
         if self.default_width <= 0:
             raise ValueError("structures.default_width must be > 0")
+        if self.solid_mode not in ("raise", "cut"):
+            raise ValueError("structures.solid_mode must be 'raise' or 'cut', "
+                             f"got {self.solid_mode!r}")
+        if self.cut_simplify < 0:
+            raise ValueError("structures.cut_simplify must be >= 0")
+        if self.blanking_rule not in ("touch", "area"):
+            raise ValueError("structures.blanking_rule must be 'touch' or 'area', "
+                             f"got {self.blanking_rule!r}")
+        if not 0.0 < self.blanking_area <= 1.0:
+            raise ValueError("structures.blanking_area must be in (0, 1], got "
+                             f"{self.blanking_area}")
+
+
+#: what a CAD part is, and therefore what it becomes downstream
+SURFACE_ROLES = ("bed", "wall", "inflow", "outflow", "roi", "ignore")
+
+
+@dataclass
+class SurfacePart:
+    """One STL part of a CAD assembly, and the role it plays in the model.
+
+    ``bed`` parts are rasterised into the DEM; ``wall`` parts become
+    :class:`Structures` footprints with a crest; ``inflow`` / ``outflow`` parts become
+    the lines of the liquid-boundary layer; ``roi`` overrides the domain outline that
+    is otherwise the bed's own coverage; ``ignore`` is for the parts a CFD export
+    carries that are not geometry at all - the air-phase bounding patches of a VOF
+    case being the usual ones.
+    """
+
+    file: Path
+    role: str = "bed"
+    zone_id: int | None = None    # roughness zone this material becomes
+    ks: float | None = None       # its Nikuradse roughness [m], paired with zone_id
+    name: str | None = None       # label in reports and layers; defaults to the stem
+
+    def label(self) -> str:
+        return self.name or Path(self.file).stem
+
+    def validate(self) -> None:
+        if self.role not in SURFACE_ROLES:
+            raise ValueError(f"surfaces.parts[{self.label()}].role must be one of "
+                             f"{list(SURFACE_ROLES)}, got {self.role!r}")
+        if not Path(self.file).exists():
+            raise FileNotFoundError(f"surfaces part not found: {self.file}")
+        if (self.ks is not None) != (self.zone_id is not None):
+            raise ValueError(
+                f"surfaces.parts[{self.label()}]: zone_id and ks go together - a "
+                f"roughness zone needs a value, and a value needs a zone to sit in")
+
+
+@dataclass
+class Surfaces:
+    """CAD geometry as the terrain and domain of a case (optional; off by default).
+
+    For a structure that was **designed rather than surveyed** - a fish pass, a
+    culvert, a flume - there is no DEM and there never will be. This block names the
+    STL parts of the CAD assembly and what each one is, and the surface stage turns
+    them into the ordinary artifacts the rest of axqua consumes: a DEM, an ROI
+    polygon, liquid-boundary lines, structure footprints and roughness zones. Nothing
+    downstream knows that a CAD file was involved. See :mod:`axqua.core.surfaces`.
+
+    The transform places CAD-local coordinates on the map. Leave it at the identity to
+    work in local coordinates: the model is physically the same either way, and only
+    its position on a map is arbitrary. ``axqua georef`` derives one from a DXF.
+    """
+
+    parts: list[SurfacePart] = field(default_factory=list)
+    resolution: float = 0.05           # DEM cell size [m]
+    # the similarity transform onto project coordinates (see core.surfaces.Transform)
+    scale: float = 1.0                 # 0.001 for a drawing in millimetres
+    rotation_deg: float = 0.0
+    dx: float = 0.0
+    dy: float = 0.0
+    dz: float = 0.0
+    # facet classification; a facet between the two is neither rasterised nor turned
+    # into a footprint, and is reported so the thresholds can be widened knowingly
+    bed_max_slope_deg: float = 45.0
+    wall_min_slope_deg: float = 70.0
+    simplify: float | None = None      # polygon simplification tolerance [m]
+    min_wall_area: float = 0.0         # drop wall footprints smaller than this [m2]
+    max_triangles: int | None = None   # guard against an unexpectedly huge part
+    # produced artifact names, written into preprocessing_dir
+    dem_name: str = "dem-from-surfaces.tif"
+    roi_name: str = "roi-from-surfaces.gpkg"
+    boundaries_name: str = "liquid-boundaries-from-surfaces.gpkg"
+    structures_name: str = "structures-from-surfaces.gpkg"
+    roughness_zones_name: str = "roughness-zones-from-surfaces.gpkg"
+    roughness_table_name: str = "roughness-table-from-surfaces.csv"
+
+    @property
+    def active(self) -> bool:
+        return bool(self.parts)
+
+    def by_role(self, role: str) -> list[SurfacePart]:
+        return [p for p in self.parts if p.role == role]
+
+    @property
+    def has_roughness_zones(self) -> bool:
+        return any(p.zone_id is not None for p in self.parts)
+
+    def transform(self):
+        """The :class:`axqua.core.surfaces.Transform` this block describes."""
+        from axqua.core.surfaces import Transform
+
+        return Transform(scale=self.scale, rotation_deg=self.rotation_deg,
+                         dx=self.dx, dy=self.dy, dz=self.dz)
+
+    def validate(self) -> None:
+        if not self.active:
+            return
+        if self.resolution <= 0:
+            raise ValueError("surfaces.resolution must be > 0")
+        if self.scale <= 0:
+            raise ValueError("surfaces.scale must be > 0")
+        if not (0.0 < self.bed_max_slope_deg < 90.0):
+            raise ValueError("surfaces.bed_max_slope_deg must be between 0 and 90")
+        if not (0.0 < self.wall_min_slope_deg <= 90.0):
+            raise ValueError("surfaces.wall_min_slope_deg must be between 0 and 90")
+        if self.wall_min_slope_deg < self.bed_max_slope_deg:
+            raise ValueError(
+                "surfaces.wall_min_slope_deg must not be below bed_max_slope_deg, "
+                "otherwise a facet would be both bed and wall")
+        for part in self.parts:
+            part.validate()
+        if not self.by_role("bed"):
+            raise ValueError(
+                "surfaces needs at least one part with role: bed - the DEM has to "
+                "come from somewhere")
+        zones = [(p.zone_id, p.ks) for p in self.parts if p.zone_id is not None]
+        by_zone: dict[int, float] = {}
+        for zone_id, ks in zones:
+            if by_zone.setdefault(zone_id, ks) != ks:
+                raise ValueError(
+                    f"surfaces: zone_id {zone_id} is given two different ks values "
+                    f"({by_zone[zone_id]} and {ks}); one zone is one roughness")
 
 
 @dataclass
@@ -295,9 +530,19 @@ class Boundaries:
     # velocities and collapses the CFL-adaptive time step (TELEMAC has no depth
     # guard on negative sources).
     internal_source_region_width: float = 3.0
+    # Whether the internal lines exchange water although the case has no gain_lose
+    # block. Off: without that block there is no exchange, whatever the layer holds.
+    # On: each line is applied as a fixed-rate source region, as before October 2026,
+    # when a layer that carried the lines switched the exchange on by itself. A fixed
+    # rate keeps withdrawing from a cell that is running dry, and velocities diverge
+    # (the isar-2025 reach: U = -1002 m/s at the first time step). Prefer gain_lose,
+    # which limits the withdrawal by the water depth.
+    internal_sources: bool = False
 
-    def validate(self) -> None:
-        if self.liquid_boundaries is None or not Path(self.liquid_boundaries).exists():
+    def validate(self, *, produced: frozenset[str] = frozenset()) -> None:
+        if "liquid_boundaries" not in produced and (
+                self.liquid_boundaries is None
+                or not Path(self.liquid_boundaries).exists()):
             raise FileNotFoundError(
                 f"boundaries.liquid_boundaries not found: {self.liquid_boundaries}"
             )
@@ -710,6 +955,18 @@ class GroundTruth:
     sources: list[GroundTruthSource] = field(default_factory=list)  # raw sources to compile
     targets: CalibrationTargets | None = None  # filled calibration-target-data.xlsx
 
+    #: How well the survey's HORIZONTAL coordinates are known. A calibration reads
+    #: the model at the measurement's coordinates, so a position error is charged
+    #: to the model - or to whichever parameter happens to absorb it. Naming the
+    #: survey's GNSS solution quality (``rtk-fixed`` / ``rtk-float`` / ``dgps`` /
+    #: ``standalone``) turns that into an error bar instead. Leave unset and
+    #: nothing changes; the default is no positional uncertainty at all.
+    position_quality: str | None = None
+
+    #: Explicit horizontal sigma [m], winning over ``position_quality`` - for a
+    #: survey whose real accuracy is known rather than assumed.
+    position_sigma: float | None = None
+
     def problems(self) -> list[str]:
         """Return ground-truth input problems as messages (empty when all OK).
 
@@ -1034,6 +1291,101 @@ class Morphodynamics:
 
 
 @dataclass
+class FineSediment:
+    """Fine sediment that the flow carries over a bed which stays in place.
+
+    The transport of one grain size in suspension, its settling onto the bed and its
+    pick-up from the bed, computed in three dimensions. The bed elevation does not
+    change: what the simulation returns is how much fine sediment the riverbed takes up
+    or gives off, per bed area. That is the quantity to look at where fines move
+    through a reach whose gravel bed stays where it is.
+
+    A fact about the reach and the goal of the modeling, so it is not a block of one
+    simulation program. Today the OpenFOAM backend computes it, with the solver
+    ``sediDriftFoam2`` of Nils Reidar B. Olsen
+    (:mod:`axqua.solvers.openfoam.sediment`), and ``morphodynamics`` stays the block
+    of the coupled TELEMAC and GAIA simulation, where the bed moves.
+    """
+
+    # Simulate the fine sediment. The other settings of this block have no effect
+    # while this is off.
+    enabled: bool = False
+    # Diameter of the grains [m]. The simulation carries one grain size.
+    grain_size: float = 0.0002
+    # Settling velocity of the grains in still water [m/s]. Leave empty to have it
+    # computed from the grain size after Ferguson and Church (2004).
+    fall_velocity: float | None = None
+    # Sediment concentration of the water that enters the reach [kg/m3]. One number
+    # for all inflow lines, or one per line, such as {inlet-1: 0.02, inlet-2: 0}.
+    inflow_concentration: float | dict[str, float] = 0.0
+    # What the bed gives back to the flow. suspended: the reference concentration of
+    # van Rijn, for a bed that consists of the fine sediment. bedload: his bed load
+    # formula. off: the bed only takes sediment up, as a gravel bed with open pores.
+    pick_up: str = "suspended"
+    # Roughness height with which the shear stress on the grains is computed [m].
+    # Leave empty for the median roughness of the wetted bed.
+    roughness: float | None = None
+    # Thickness of the cells at the bed [m]. Leave empty for the smallest water depth
+    # of the model divided by its number of layers.
+    bottom_layer: float | None = None
+    # Largest number of iterations of the steady simulation.
+    iterations: int = 2000
+    # Time over which the computed rates act [s]. Leave empty to get rates only.
+    period: float | None = None
+    # Thickness of the bed layer whose content of fines is reported [m].
+    layer_thickness: float = 0.1
+    # Share of pores between the coarse grains of that layer, before fines fill
+    # them [-].
+    porosity: float = 0.3
+    # Share of fines in the dry mass of that layer at the start [-].
+    initial_fraction: float = 0.0
+
+    def validate(self) -> None:
+        if not self.enabled:
+            return
+        if self.pick_up not in ("suspended", "bedload", "off"):
+            raise ValueError("fine_sediment.pick_up must be 'suspended', 'bedload' or "
+                             f"'off', got {self.pick_up!r}")
+        positive = {"grain_size": self.grain_size, "layer_thickness": self.layer_thickness}
+        for name in ("fall_velocity", "roughness", "bottom_layer", "period"):
+            if getattr(self, name) is not None:
+                positive[name] = getattr(self, name)
+        for name, value in positive.items():
+            if not float(value) > 0:
+                raise ValueError(f"fine_sediment.{name} must be larger than 0, "
+                                 f"got {value!r}")
+        if self.grain_size > 0.002:
+            # The formulas of the solver are those of van Rijn for sand; a larger grain
+            # is no fine sediment and does not travel in suspension.
+            raise ValueError(
+                f"fine_sediment.grain_size is {self.grain_size:g} m. The grain size is "
+                "given in meters and the simulation is made for sand and silt, up to "
+                "0.002 m")
+        if int(self.iterations) < 1:
+            raise ValueError("fine_sediment.iterations must be at least 1")
+        if not 0 < float(self.porosity) < 1:
+            raise ValueError("fine_sediment.porosity is a share between 0 and 1, "
+                             f"got {self.porosity!r}")
+        if not 0 <= float(self.initial_fraction) < 1:
+            raise ValueError("fine_sediment.initial_fraction is a share from 0 to less "
+                             f"than 1, got {self.initial_fraction!r}")
+        values = (self.inflow_concentration.values()
+                  if isinstance(self.inflow_concentration, dict)
+                  else [self.inflow_concentration])
+        for value in values:
+            if not isinstance(value, (int, float)) or isinstance(value, bool) \
+                    or float(value) < 0:
+                raise ValueError("fine_sediment.inflow_concentration is a mass per "
+                                 f"volume of water in kg/m3 and cannot be {value!r}")
+            if float(value) > 100:
+                # 100 kg/m3 is 4 % of the volume: no river carries that in suspension,
+                # and the usual slip is a value in mg/l
+                raise ValueError(
+                    f"fine_sediment.inflow_concentration is {value:g} kg/m3, which is "
+                    "more than a river carries. The unit is kg/m3: 20 mg/l are 0.02")
+
+
+@dataclass
 class DemOfDifference:
     """DEM-of-Difference (DoD) computation with a minimum level of detection (LoD).
 
@@ -1094,6 +1446,59 @@ class CalibrationParameter:
 
 
 @dataclass
+class ValidationSituation:
+    """Measurements from ANOTHER flow situation, to validate a calibrated model.
+
+    Every dataset under ``ground_truth`` is calibration data. A validation needs data
+    the calibration has not seen, and in a river that means another situation: another
+    discharge, another survey. Measurements of one survey are taken in one flow field
+    within hours of each other; holding some of them back tests how well the model
+    interpolates within that flow field, not whether its parameters hold when the
+    discharge changes. Splitting one dataset (leave-one-out, k-fold, a random share)
+    is therefore not offered.
+
+    The situation is described by what differs from the calibrated case: its
+    measurements (``sources``, as under ``ground_truth``) and its boundary values.
+    Mesh, bed and every other setting are those of the calibrated model.
+    """
+
+    name: str = "validation"
+    sources: list[GroundTruthSource] = field(default_factory=list)
+    #: Total inflow of the situation [m3/s]. Without ``inflows`` it is distributed
+    #: over the inflow boundaries like the discharge of the calibrated case.
+    prescribed_flowrate: float | None = None
+    #: Discharge per inflow boundary [m3/s], by the number of the liquid boundary
+    #: (as TELEMAC numbers them; ``axqua validation`` lists them). For a reach
+    #: whose branches carry another share of the flow in this situation.
+    inflows: dict[int, float] = field(default_factory=dict)
+    #: Outflow water level [m], where the case prescribes one
+    #: (``boundaries.outflow_condition: elevation``). With a rating curve the level
+    #: follows from the discharge.
+    prescribed_elevation: float | None = None
+    duration: float | None = None       # simulated time [s]; default: the case's
+
+    @property
+    def total_flowrate(self) -> float | None:
+        if self.inflows:
+            return float(sum(self.inflows.values()))
+        return None if self.prescribed_flowrate is None else float(self.prescribed_flowrate)
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None
+                  ) -> "ValidationSituation":
+        d = _only_known(cls, dict(d or {}))
+        sources = []
+        for src in d.pop("sources", None) or []:
+            src = _only_known(GroundTruthSource, dict(src))
+            if cfg_dir is not None:
+                src["values"] = _resolve(cfg_dir, src.get("values"))
+                src["positions"] = _resolve(cfg_dir, src.get("positions"))
+            sources.append(GroundTruthSource(**src))
+        inflows = {int(k): float(v) for k, v in (d.pop("inflows", None) or {}).items()}
+        return cls(sources=sources, inflows=inflows, **d)
+
+
+@dataclass
 class Calibration:
     parameters: list[CalibrationParameter] = field(default_factory=list)
     calibration_quantities: list[str] = field(default_factory=lambda: ["WATER DEPTH"])
@@ -1131,13 +1536,20 @@ class Calibration:
     solver_name: str = "Telemac2d"        # 'Telemac2d' | 'Telemac3d'
     control_file: str | None = None       # .cas to calibrate (default: cfg.cas_file)
     results_base: str | None = None       # results basename (default: from the .cas)
+    #: Independent datasets from other flow situations (see ValidationSituation).
+    validation: list[ValidationSituation] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, d: dict[str, Any]) -> "Calibration":
+    def from_dict(cls, d: dict[str, Any], cfg_dir: Path | None = None) -> "Calibration":
         params = [CalibrationParameter(**_only_known(CalibrationParameter, p))
                   for p in d.get("parameters", [])]
-        rest = {k: v for k, v in d.items() if k != "parameters"}
-        return cls(parameters=params, **_only_known(cls, rest))
+        given = d.get("validation") or []
+        if isinstance(given, dict):               # one situation, written without a list
+            given = [given]
+        situations = [ValidationSituation.from_dict(item, cfg_dir) for item in given]
+        rest = {k: v for k, v in d.items() if k not in ("parameters", "validation")}
+        return cls(parameters=params, validation=situations,
+                   **_only_known(cls, rest))
 
 
 @dataclass
@@ -1188,9 +1600,14 @@ class PreRun:
     duration: float | None = None   # [s] else hydrodynamics.duration
     n_processors: int | None = None  # else telemac.n_processors
     directory: str = "pre-run"      # under model_dir
-    # What to do when the pre-run does not reach flux balance. A seed that is merely
+    # What to do when the seed has not reached flux balance. A seed that is merely
     # close is still far better than a cold start, so `warn` is the default; `error`
-    # is for a workflow that must not build on an unconverged surface.
+    # is for a workflow that must not build on an unconverged surface. It applies to
+    # whichever seed is adopted - a reused r2d.slf, a coarse pre-run, or the 3D run
+    # under `dimension: 3d` - not only to one this block produced. A seed whose flux
+    # balance cannot be judged at all (no listing beside it) is reported as such and
+    # does not raise: refusing a result carried in from another machine would be
+    # obstructive.
     require: str = "warn"           # warn | error
 
     def validate(self) -> None:
@@ -1238,7 +1655,12 @@ class OpenFoam:
     # because the Foundation OpenFOAM axqua targets has no native Windows build.
     environment: Environment = field(default_factory=Environment)
     n_processors: int = 1
+    #: ``interFoam`` (algebraic VOF with interface compression) or ``interIsoFoam``
+    #: (isoAdvector, geometric interface advection). ESI v2406 only for the latter.
     solver: str = "interFoam"
+    #: Reconstruction scheme when ``solver`` is ``interIsoFoam``: ``plicRDF``,
+    #: ``gradAlpha`` or ``isoAlpha``. Ignored by ``interFoam``.
+    iso_reconstruction: str = "plicRDF"
 
     # ---- the TELEMAC pre-run that seeds this case ---------------------------
     pre_run: PreRun = field(default_factory=PreRun)
@@ -1264,6 +1686,52 @@ class OpenFoam:
     cell_size_factor: float | None = None
     n_layers: int = 14              # sigma layers per column
     domain: str = "wetted"          # wetted | roi
+    # An ROI for the OpenFOAM domain alone, overriding geodata.boundary. The point is
+    # a **sub-model**: the 2D run covers the whole reach cheaply, while most reaches
+    # have only a short stretch worth solving in 3D - a structure, a confluence, a
+    # fish pass - and the uniform channel above and below it costs VOF cells at no
+    # gain. Kept separate from geodata.boundary so one case config can describe both
+    # models; pointing geodata.boundary at the smaller polygon would silently re-cut
+    # the 2D mesh the seed comes from.
+    #
+    # A crop that removes the case's liquid boundaries makes this a sub-model in the
+    # full sense: it then needs its own inflow and outflow lines and its own
+    # prescribed Q and stage, read from the parent result at those stations rather
+    # than guessed. See cases/munich-vsf/make_openfoam_roi.py.
+    roi: Path | None = None
+    # The tailwater for that sub-model [m a.s.l.]. A crop moves the outflow to a new
+    # station, where the reach does not carry the stage the case prescribes at its own
+    # far end - so prescribing the case value there would impose a level the parent
+    # model never had. Read it from the parent result at the crop face instead.
+    # ``boundaries.prescribed_elevation`` is deliberately not reused: the 2D case is
+    # converged against it, and editing it to suit the 3D crop would silently change
+    # the model the seed comes from.
+    # A single number where the crop really has one outfall; a {patch: level}
+    # mapping where it does not. Cutting a reach mid-stream generally leaves
+    # SEVERAL open faces at different stations, and the parent's water surface
+    # across them spans whatever its own slope puts there - 1.18 m across the
+    # three faces of the KB15 40 m crop. One number on all of them would impose a
+    # tailwater the parent never had. A mapping must name every outlet patch.
+    outlet_stage: float | dict[str, float] | None = None
+    #: How far above the tailwater an outlet stays OPEN [m]; above that the crop face
+    #: is a wall. The outlet spans bed to lid, so without this its upper part is an
+    #: open pressure boundary to AIR, and with the lid open as well the air phase has
+    #: a free circulation loop through the domain that nothing pins. Measured on
+    #: munich-vsf: that loop grew monotonically from 7.0 to 9.7 m3/s - about 7.5 m/s
+    #: through a 1.28 m2 face - and once large enough it reversed the outlet and
+    #: dragged water in, so every leg lost its result after about t=40 whatever the
+    #: cell size. Walling the air part leaves the lid as the only way air enters or
+    #: leaves, which is what the free surface is for.
+    #:
+    #: Not zero: the surface at the crop face has to be free to move, or the wall
+    #: becomes a weir and a new artefact replaces the old one. The default leaves a
+    #: quarter of a metre.
+    outlet_air_margin: float = 0.25
+    # The sub-model's own inflow/outflow lines. A crop that moves the domain away from
+    # the case's liquid boundaries leaves it with none - the water has nowhere to enter
+    # or leave - and the build stops with exactly that message. Same reasoning as
+    # ``roi``: the 2D case keeps its own lines, because it is converged against them.
+    liquid_boundaries: Path | None = None
     wet_margin: float = 5.0         # [m] buffer around the 2D wetted extent
     lid: str = "follow"             # follow (the 2D free surface) | flat
     lid_elevation: float | None = None      # pin the lid to this level [m a.s.l.]
@@ -1293,11 +1761,39 @@ class OpenFoam:
     # Measured on isar at 5x coarsening: pinning gave 48 incorrectly oriented face
     # pyramids and 84 deg non-orthogonality; without it, 20 and 46 deg.
     auto_bed_layer: bool | None = None
+    # Let a rigid-lid build cut n_layers to what the bed roughness and the shallowest
+    # meshed column allow. None means "decide from the mode": on under a rigid lid,
+    # irrelevant otherwise. False keeps the configured n_layers.
+    #
+    # The reduction is right by default - carrying a two-phase layer count into a
+    # water-only column makes cells three to four times thinner, and past a point
+    # thinner than the grains on the bed. But it is driven by min_water_depth, which is
+    # ALSO the trim threshold, so a case cannot buy layers back without discarding real
+    # wet area. munich-vsf is that case: ks 0.08 m against a 0.20 m floor gives two
+    # layers, in a reach whose median meshed column is 0.77 m deep and whose whole
+    # reason for being solved in 3D is the vertical structure of a slot jet.
+    auto_layers: bool | None = None
     # rigid-lid only: the shallowest water column that is meshed at all, and the floor
     # on column height. A column thinner than this cannot be divided into n_layers
     # cells without collapsing into slivers that checkMesh rejects. 0.20 m took the
     # isar 5x test mesh to zero bad faces.
     min_water_depth: float = 0.20
+    # rigid-lid only: build anyway when the lid-step test says the mode does not
+    # apply. The test measures how far the PRESCRIBED free surface moves within two
+    # cells as a fraction of the local depth (mesh.lid_steps). Above ~0.5 the lid is
+    # doubtful and the build warns; above 1.0 the surface steps further than the
+    # water is deep - a weir, a drop structure, or the slots of a fish pass - and a
+    # lid cannot answer a drop by plunging, so it converts the head into velocity
+    # instead. That is not a lid, and the build refuses rather than spend days
+    # producing a number nobody should use: two munich-vsf runs finished, balanced
+    # their discharge to -0.000%, held Courant at 0.90 for 61 hours, and were
+    # invalid.
+    #
+    # Set true to build anyway - for a deliberate experiment, or to compare against
+    # the two-phase answer. The verdict still reaches the result either way
+    # (report.lid_applicability -> run-verdict.txt), so overriding suppresses the
+    # refusal, never the finding.
+    allow_stepped_lid: bool = False
     boundary_tolerance: float | None = None  # [m] liquid-line match (default 1.5*dx)
     max_plan_columns: int = 4_000_000
 
@@ -1310,15 +1806,58 @@ class OpenFoam:
     surface_tension: float = 0.07
     roughness_constant: float = 0.5   # nutkRoughWallFunction Cs
     friction_ks: float = 0.05         # fallback ks [m] with no roughness zones
+    # k-epsilon closure coefficients, at OpenFOAM's own defaults. Written into
+    # constant/turbulenceProperties only when turbulence == "kEpsilon", so a kOmegaSST
+    # case is unaffected. They exist as config fields because they are calibration
+    # PARAMETERS (see axqua.solvers.openfoam.calibration): OpenFOAM silently falls
+    # back to built-in values for a coefficient that is absent from the file, so a
+    # perturbed coefficient has to be written explicitly or the perturbation is a
+    # no-op that nothing reports.
+    kepsilon_cmu: float = 0.09
+    kepsilon_c1: float = 1.44
+    kepsilon_c2: float = 1.92
+    kepsilon_sigmak: float = 1.0
+    kepsilon_sigma_eps: float = 1.3
 
     # ---- run ----------------------------------------------------------------
     spinup_time: float = 30.0       # [s] stage 1 (settle the interface)
     end_time: float = 300.0         # [s] end of stage 2
     write_interval: float = 10.0    # [s] of simulated time
+    # How many time directories to keep (OpenFOAM's purgeWrite; 0 = keep all).
+    # 0 is right for a single production run whose whole time series is wanted.
+    # A calibration campaign sets it to n_avg_timesteps + 1: only the trailing
+    # window is ever read, and dozens of binary time directories per run x tens of
+    # runs is a lot of disk written to be deleted.
+    purge_write: int = 0
     initial_time_step: float = 0.001
     max_time_step: float = 0.5
     max_courant: float = 0.9        # stage 2 (stage 1 uses spinup_courant)
     spinup_courant: float = 0.3
+    # Courant limit of the flow in stage 2 where it may be larger than max_courant.
+    # The time step of a two-phase run obeys two limits: one at the water surface
+    # (max_courant) and one in every cell, and the cells that reach the second one
+    # first are air crossing thin layers, where the accuracy of a time step is of no
+    # interest. With 3 here the surface keeps its limit and the step of the Isar
+    # example doubles. None keeps one number for both.
+    max_flow_courant: float | None = None
+    # Pressure solutions per time step: correctors of the pressure (nCorrectors) and,
+    # within each, corrections for faces that are not at a right angle to the line
+    # between their cells (nNonOrthogonalCorrectors). 3 and 2 are on the safe side
+    # for a mesh that follows a steep bed. Each corrector costs one solution per
+    # non-orthogonal correction plus one, in each of the two outer correctors of the
+    # production stage: 18 with the defaults, 8 with 2 and 1.
+    pressure_correctors: int = 3
+    non_orthogonal_correctors: int = 2
+    # Interface compression (cAlpha) of the production stage; the spin-up uses half
+    # of it. 1 is the usual value. In a shallow reach the surface crosses the layers
+    # that follow the bed wherever the bed slopes and is smeared there: on the Isar
+    # example (2 m lattice, 8 layers, 40 s) 1 left 19 % of the water in full cells
+    # and a surface 0.26 m thick, 2 left 39 % and 0.12 m, at a third more steps. On
+    # the 1 m lattice (14 layers, 600 s) 2 left 60 % against 36 % and 0.06 against
+    # 0.23 m; the reach averages stayed, but single columns changed by 0.09 m/s and
+    # 1.7 cm (rms), the bed shear stress rose by a tenth and the water lost through
+    # the top went from 0.8 to 1.5 % of the discharge.
+    interface_compression: float = 1.0
     # Cap on |U| enforced by the limitVelocity fvConstraint. Water never reaches it;
     # an air jet does, and this is the most effective single stop on the air phase
     # collapsing the time step. None -> 5x the expected water velocity.
@@ -1334,6 +1873,19 @@ class OpenFoam:
         if self.domain not in ("wetted", "roi"):
             raise ValueError(
                 f"openfoam.domain must be 'wetted' or 'roi', got {self.domain!r}")
+        if (self.liquid_boundaries is not None
+                and not Path(self.liquid_boundaries).exists()):
+            raise ValueError(
+                f"openfoam.liquid_boundaries {self.liquid_boundaries} does not exist. "
+                "A cropped domain needs its own inflow and outflow lines; write them "
+                "first, or remove the key to use the case's own.")
+        if self.roi is not None and not Path(self.roi).exists():
+            # Checked here rather than at mesh time: a missing sub-model ROI should
+            # stop the build in the first second, not after the pre-run has spent an
+            # hour producing a seed for a domain that cannot be cut.
+            raise ValueError(
+                f"openfoam.roi {self.roi} does not exist. Write it first (see the "
+                "case's ROI helper), or remove the key to mesh the whole reach.")
         if self.headroom_mode not in ("auto", "fixed"):
             raise ValueError("openfoam.headroom_mode must be 'auto' or 'fixed', "
                              f"got {self.headroom_mode!r}")
@@ -1350,6 +1902,18 @@ class OpenFoam:
         if self.freeboard <= 0:
             raise ValueError("openfoam.freeboard must be > 0 (the air layer above "
                              "the free surface)")
+        if self.pressure_correctors < 1:
+            raise ValueError("openfoam.pressure_correctors must be at least 1")
+        if self.non_orthogonal_correctors < 0:
+            raise ValueError("openfoam.non_orthogonal_correctors must not be negative")
+        if self.interface_compression < 0:
+            raise ValueError("openfoam.interface_compression must not be negative")
+        if self.max_flow_courant is not None and self.max_flow_courant < self.max_courant:
+            raise ValueError(
+                f"openfoam.max_flow_courant ({self.max_flow_courant:g}) is smaller than "
+                f"max_courant ({self.max_courant:g}). It is the limit of all cells, "
+                "the water surface included, so the smaller number would be the "
+                "limit of both: lower max_courant instead, or remove the entry.")
         if self.end_time <= self.spinup_time:
             raise ValueError(
                 f"openfoam.end_time ({self.end_time}) must exceed spinup_time "
@@ -1358,13 +1922,69 @@ class OpenFoam:
             raise FileNotFoundError(
                 f"OpenFOAM bashrc not found: {self.bashrc}. Point openfoam.bashrc at "
                 "the etc/bashrc of your install (e.g. "
-                "/home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc)."
+                "/opt/openfoam9/etc/bashrc)."
             )
 
 
 # --------------------------------------------------------------------------- #
 # top-level config
 # --------------------------------------------------------------------------- #
+
+
+@dataclass
+class PostProcessing:
+    """Visualisation: which tool draws the figures, and what to draw.
+
+    ``visit`` is the VisIt **launcher** (an executable), not a script to source -
+    which is why it is not spelled like ``telemac.pysource`` / ``openfoam.bashrc``
+    even though it occupies the same slot in its block. VisIt ships its own Python,
+    so axqua generates a script and runs it with ``visit -cli -nowin -s`` rather
+    than importing anything (see :mod:`axqua.postproc`). ``environment`` covers the
+    rare install that still needs a setup script, and is what makes this work
+    through WSL on Windows.
+
+    Additive: a config with no ``postproc:`` block gets these defaults and nothing
+    in either solver path consults them.
+    """
+
+    visit: Path | None = None
+    environment: Environment = field(default_factory=Environment)
+    backend: str = "visit"
+    scenes: list[str] = field(default_factory=lambda: [
+        "free-surface", "velocity-plan", "profiles"])
+    # separate ints rather than a tuple, so the YAML round-trip is exact
+    image_width: int = 1600
+    image_height: int = 1000
+    animation_fps: int = 10
+    #: Upper end of the velocity colour scale [m/s], for every figure of this case -
+    #: the plugin's map styles and the generated VisIt/ParaView scenes alike.
+    #:
+    #: A property of the REACH, not of the computer looking at it. 5 m/s suits a
+    #: lowland river, where a faster node is usually a wetting/drying artefact in a
+    #: nearly-dry cell and letting one such node set the scale flattens the whole map;
+    #: a chute or a fish pass genuinely runs faster and wants a higher number. The
+    #: lower end of the depth scale is not here because it already exists as
+    #: ``hydrodynamics.wet_depth``, which is the same threshold aXqua's own reports
+    #: use - that is the point of it.
+    velocity_scale_max: float = 5.0
+
+    def validate(self) -> None:
+        if self.backend not in ("visit",):
+            raise ValueError(
+                f"postproc.backend must be 'visit', got {self.backend!r}")
+        if self.velocity_scale_max <= 0:
+            raise ValueError("postproc.velocity_scale_max must be positive, got "
+                             f"{self.velocity_scale_max!r}")
+        if self.visit is not None and not Path(self.visit).exists():
+            raise FileNotFoundError(
+                f"VisIt launcher not found: {self.visit}. Point postproc.visit at "
+                "the `visit` executable of your install, e.g. "
+                "/opt/visit/bin/visit")
+        for name, value in (("image_width", self.image_width),
+                            ("image_height", self.image_height),
+                            ("animation_fps", self.animation_fps)):
+            if int(value) <= 0:
+                raise ValueError(f"postproc.{name} must be positive, got {value}")
 
 
 @dataclass
@@ -1395,8 +2015,13 @@ class Config:
     drying: Drying = field(default_factory=Drying)
     # dams / weirs / walls / buildings (optional; see axqua.core.structures)
     structures: Structures = field(default_factory=Structures)
+    # CAD geometry as terrain (optional; see axqua.core.surfaces)
+    surfaces: Surfaces = field(default_factory=Surfaces)
     # OpenFOAM free-surface extension (optional; see axqua.solvers.openfoam)
     openfoam: OpenFoam = field(default_factory=OpenFoam)
+    # fine sediment over a bed that stays in place (optional; off by default)
+    fine_sediment: FineSediment = field(default_factory=FineSediment)
+    postproc: PostProcessing = field(default_factory=PostProcessing)
     # where the OpenFOAM case tree is written; defaults to <sim_dir>/openfoam
     openfoam_dir: Path | None = None
     # Top-level blocks the YAML actually contained. Every solver section has a
@@ -1451,6 +2076,31 @@ class Config:
     def calibration_path(self, filename: str) -> Path:
         return Path(self.calibration_dir) / filename
 
+    def surfaces_produce(self) -> frozenset[str]:
+        """Which geodata/boundaries entries the CAD surface stage writes.
+
+        Only the ones still pointing at the stage's own output: a case is free to take
+        its bed from CAD and its roughness zones from a layer drawn in QGIS, and an
+        entry the user redirected is theirs to provide.
+        """
+        if not self.surfaces.active:
+            return frozenset()
+        candidates = {
+            "dem_initial": self.surfaces.dem_name,
+            "boundary": self.surfaces.roi_name,
+            "structures": self.surfaces.structures_name,
+            "roughness_zones": self.surfaces.roughness_zones_name,
+            "roughness_table": self.surfaces.roughness_table_name,
+            "liquid_boundaries": self.surfaces.boundaries_name,
+        }
+        owner = {"liquid_boundaries": self.boundaries}
+        produced = set()
+        for key, filename in candidates.items():
+            current = getattr(owner.get(key, self.geodata), key, None)
+            if current is not None and Path(current) == self.preprocessing_path(filename):
+                produced.add(key)
+        return frozenset(produced)
+
     @property
     def rigid_lid(self) -> bool:
         """Convenience: is the OpenFOAM case single-phase under a fixed lid?"""
@@ -1472,6 +2122,15 @@ class Config:
         return self.openfoam_case_dir / filename
 
     @property
+    def fine_sediment_case_dir(self) -> Path:
+        """The OpenFOAM case of the fine sediment simulation, beside the other one.
+
+        A folder of its own, because the simulation runs another solver on a mesh with
+        other patch names and another vertical spacing than the free-surface case.
+        """
+        return self.openfoam_case_dir.with_name(self.openfoam_case_dir.name + "-sediment")
+
+    @property
     def ground_truth_path(self) -> Path:
         """Where the tidy ground-truth table lives (explicit input, else compiled)."""
         if self.ground_truth.measurements is not None:
@@ -1479,44 +2138,91 @@ class Config:
         return self.preprocessing_path(self.ground_truth_xlsx)
 
     def validate(self) -> None:
-        self.telemac.validate()
-        self.geodata.validate()
-        self.boundaries.validate()
+        """Refuse a case that cannot be built, at the first thing that is wrong."""
+        for _about, step in self.checks():
+            step()
+
+    def checks(self) -> list[tuple[str, Any]]:
+        """What :meth:`validate` verifies, as separate steps: ``(what about, step)``.
+
+        ``validate`` runs them in this order and stops at the first that raises, which
+        is right before a build. An editor of the case runs every one of them
+        (:mod:`axqua.core.casecheck`) so that it can show all problems at once. A step
+        marked ``machine`` is about this computer and not about the reach - where
+        TELEMAC is installed - and belongs to the check of the profile.
+        """
+        def produced() -> frozenset[str]:
+            # What the surface stage will write does not have to exist yet; its own
+            # inputs (the STL parts) are validated instead.
+            return self.surfaces_produce() if self.surfaces.active else frozenset()
+
+        return [
+            ("machine", self.telemac.validate_installation),
+            ("telemac", self.telemac.validate_choice),
+            ("surfaces", self.surfaces.validate),
+            ("geodata", lambda: self.geodata.validate(produced=produced())),
+            ("boundaries", lambda: self.boundaries.validate(produced=produced())),
+            ("ground_truth", self._note_ground_truth),
+            ("boundaries", self._check_outflow),
+            ("initialization", self._check_prewet),
+            ("morphodynamics", self._check_bed_change_data),
+            ("gain_lose", self.percolation.validate),
+            ("machine", self.telemac.environment.validate),
+            ("machine", self.openfoam.environment.validate),
+            ("structures", self.structures.validate),
+            ("openfoam", self.openfoam.validate),
+            ("fine_sediment", self.fine_sediment.validate),
+            ("machine", self.postproc.environment.validate),
+            ("postproc", self.postproc.validate),
+            ("initialization", self.initialization.validate),
+            ("drying", lambda: self.drying.validate(self.percolation)),
+            ("dem_of_difference", self.dem_of_difference.validate),
+            ("dem_of_difference", self._check_difference_data),
+        ]
+
+    def _note_ground_truth(self) -> None:
         # ground truth is non-fatal: it feeds only the calibration/HydroBayesCal
         # setup, so a missing/mismatched source warns and skips that setup rather
         # than aborting the model build (see GroundTruth.problems / pipeline stage 5).
         for problem in self.ground_truth.problems():
             log.warning("%s; HydroBayesCal setup will be skipped", problem)
+
+    def _check_outflow(self) -> None:
         cond = self.boundaries.outflow_condition
         if cond == "stage_discharge" and self.boundaries.stage_discharge is None:
-            raise ValueError(
-                "outflow_condition: stage_discharge requires boundaries.stage_discharge "
-                "(a Q-h rating CSV alongside the config). Generate one from a "
-                "Manning/Strickler value and channel geometry with `axqua rating`."
-            )
+            # A MISSING rating is a supported state, not an error: `rating_method`
+            # exists to say how one is synthesised, and `workflow.prepare_steady_inputs`
+            # does it from the outflow liquid line and the DEM before the build. So
+            # this refused cases that work - munich-vsf among them, where
+            # `preprocessing.py` runs fine but a bare `load_config(...).validate()`
+            # raised. It refuses only when synthesis is impossible too.
+            # What synthesis needs - the outflow liquid line and the DEM - is
+            # required of every case and has been validated above, so there is
+            # nothing left to refuse on. Say what will happen instead.
+            log.info("boundaries.stage_discharge is not set; the outflow rating will "
+                     "be synthesised (rating_method: %s) from the outflow line and "
+                     "the DEM", self.boundaries.rating_method)
         if cond == "elevation" and self.boundaries.prescribed_elevation is None:
             raise ValueError(
                 "outflow_condition: elevation requires boundaries.prescribed_elevation"
             )
+
+    def _check_prewet(self) -> None:
         if self.initialization.prewet_depth is not None and self.geodata.mesh_zones is None:
             raise ValueError(
                 "initialization.prewet_depth needs geodata.mesh_zones (with a "
                 "'*channel*' Zone Name) to define the region to pre-wet."
             )
+
+    def _check_bed_change_data(self) -> None:
         if self.morphodynamics.enabled and self.geodata.dem_target is None \
                 and self.geodata.dem_of_difference is None:
             raise ValueError(
                 "morphodynamics.enabled but no geodata.dem_target / dem_of_difference "
                 "provided for topographic-change calibration data."
             )
-        self.percolation.validate()
-        self.telemac.environment.validate()
-        self.openfoam.environment.validate()
-        self.structures.validate()
-        self.openfoam.validate()
-        self.initialization.validate()
-        self.drying.validate(self.percolation)
-        self.dem_of_difference.validate()
+
+    def _check_difference_data(self) -> None:
         if self.dem_of_difference.enabled and self.geodata.dem_target is None \
                 and self.geodata.dem_of_difference is None:
             raise ValueError(
@@ -1606,6 +2312,8 @@ def load_config(path: str | os.PathLike) -> Config:
     cfg_dir = path.parent
     with open(path) as fh:
         raw = yaml.safe_load(fh) or {}
+    if isinstance(raw, dict):
+        schema.restore_words(raw)       # an unquoted `off` is a choice, not a "no"
 
     # deprecated keys, renamed in place and reported once (axqua.core.schema)
     schema.warn_legacy(schema.apply_legacy(raw), path.name)
@@ -1624,9 +2332,27 @@ def load_config(path: str | os.PathLike) -> Config:
 
     # telemac env
     tdict = dict(raw.get("telemac", {}))
-    tdict["pysource"] = _resolve(cfg_dir, tdict.get("pysource"))
+    # Where the solver lives is a property of the MACHINE, not of the reach. The
+    # config value is now the last resort before discovery, behind the environment,
+    # the per-machine settings file and a gitignored case-local override - so a
+    # shared case config never has to name anyone's home directory. See
+    # axqua.core.machine.
+    from axqua.core import machine as _machine
+
+    _t = _machine.resolve("telemac", configured=tdict.get("pysource"), case_dir=cfg_dir)
+    tdict["pysource"] = _t.path if _t else _resolve(cfg_dir, tdict.get("pysource"))
     tdict["environment"] = _load_environment(tdict.get("environment"), cfg_dir)
     telemac = TelemacEnv(**_only_known(TelemacEnv, tdict))
+
+    # CAD surfaces: parsed before geodata because, when present, they *supply* the
+    # geodata a surveyed case would have provided as files
+    sdict = dict(raw.get("surfaces") or {})
+    parts = []
+    for entry in sdict.pop("parts", None) or []:
+        pdict = dict(entry)
+        pdict["file"] = _resolve(cfg_dir, pdict.get("file"))
+        parts.append(SurfacePart(**_only_known(SurfacePart, pdict)))
+    surfaces = Surfaces(parts=parts, **_only_known(Surfaces, sdict))
 
     # geodata (resolve every path against the config dir)
     gdict = dict(raw.get("geodata") or {})
@@ -1634,6 +2360,22 @@ def load_config(path: str | os.PathLike) -> Config:
     for key in list(gdict):
         if key not in _geodata_scalars:
             gdict[key] = _resolve(cfg_dir, gdict[key])
+    if surfaces.active:
+        # The surface stage writes these; an explicit geodata entry still wins, so a
+        # case can take its bed from CAD and its roughness zones from a drawn layer.
+        produced = {
+            "dem_initial": preprocessing_dir / surfaces.dem_name,
+            "boundary": preprocessing_dir / surfaces.roi_name,
+        }
+        if surfaces.by_role("wall"):
+            produced["structures"] = preprocessing_dir / surfaces.structures_name
+        if surfaces.has_roughness_zones:
+            produced["roughness_zones"] = (preprocessing_dir
+                                           / surfaces.roughness_zones_name)
+            produced["roughness_table"] = (preprocessing_dir
+                                           / surfaces.roughness_table_name)
+        for key, value in produced.items():
+            gdict.setdefault(key, value)
     geodata = Geodata(**_only_known(Geodata, gdict))
 
     # boundaries: liquid-boundary lines / inflow / rating are paths; the rest scalars
@@ -1641,6 +2383,9 @@ def load_config(path: str | os.PathLike) -> Config:
     for key in ("liquid_boundaries", "inflow", "stage_discharge"):
         if key in bdict:
             bdict[key] = _resolve(cfg_dir, bdict[key])
+    if surfaces.active and (surfaces.by_role("inflow") or surfaces.by_role("outflow")):
+        bdict.setdefault("liquid_boundaries",
+                         preprocessing_dir / surfaces.boundaries_name)
     boundaries = Boundaries(**_only_known(Boundaries, bdict))
 
     initialization = Initialization(
@@ -1665,7 +2410,11 @@ def load_config(path: str | os.PathLike) -> Config:
                 tdict[key] = _resolve(cfg_dir, tdict[key])
         targets = CalibrationTargets(**tdict)
     ground_truth = GroundTruth(measurements=measurements, sources=sources,
-                               targets=targets)
+                               targets=targets,
+                               **_only_known(GroundTruth,
+                                             {k: v for k, v in gtdict.items()
+                                              if k in ("position_quality",
+                                                       "position_sigma")}))
 
     mesh = MeshConfig(**_only_known(MeshConfig, raw.get("mesh", {}) or {}))
     # YAML maps keys may come back as str; coerce region_sizes keys to int
@@ -1679,17 +2428,44 @@ def load_config(path: str | os.PathLike) -> Config:
     gain_lose = _load_gain_lose(raw, cfg_dir)
     drying = Drying(**_only_known(Drying, raw.get("drying", {}) or {}))
     structures = Structures(**_only_known(Structures, raw.get("structures", {}) or {}))
-    calib = Calibration.from_dict(raw.get("calibration", {}) or {})
+    fine_sediment = _load_fine_sediment(raw.get("fine_sediment"))
+    calib = Calibration.from_dict(raw.get("calibration", {}) or {}, cfg_dir)
 
     # OpenFOAM extension: absent block -> defaults, and nothing consults them
     ofdict = dict(raw.get("openfoam") or {})
     if "bashrc" in ofdict and ofdict["bashrc"] is not None:
         ofdict["bashrc"] = _resolve(cfg_dir, ofdict["bashrc"])
+    # The sub-model's geodata. Resolved against the preprocessing folder first - that
+    # is where the surfaces stage and its helpers write geodata - then against the
+    # config's own folder, so both `roi: roi-fishpass.gpkg` and a full path work.
+    for key in ("roi", "liquid_boundaries"):
+        if ofdict.get(key) is None:
+            continue
+        candidate = Path(str(ofdict[key])).expanduser()
+        if not candidate.is_absolute():
+            beside = Path(preprocessing_dir) / candidate
+            candidate = beside if beside.exists() else _resolve(cfg_dir, candidate)
+        ofdict[key] = candidate
+    _of = _machine.resolve("openfoam", configured=ofdict.get("bashrc"),
+                           case_dir=cfg_dir)
+    if _of:
+        ofdict["bashrc"] = _of.path
     ofdict["environment"] = _load_environment(ofdict.get("environment"), cfg_dir)
     ofdict["pre_run"] = PreRun(**_only_known(PreRun, dict(ofdict.get("pre_run") or {})))
     openfoam = OpenFoam(**_only_known(OpenFoam, ofdict))
     openfoam_dir = _resolve(cfg_dir, project.get("openfoam_dir")) if \
         project.get("openfoam_dir") else None
+
+    # Post-processing: absent block -> defaults, and nothing consults them
+    ppdict = dict(raw.get("postproc") or {})
+    # The VisIt launcher is resolved like a solver's setup script: it is a path on
+    # this computer, so the profile is where it belongs and the case value is the
+    # fallback. Nothing found leaves it unset, and the bare command `visit` is tried.
+    _visit = _machine.resolve("visit", configured=ppdict.get("visit"), case_dir=cfg_dir)
+    if _visit:
+        ppdict["visit"] = _visit.path
+    ppdict["environment"] = _load_environment(ppdict.get("environment"), cfg_dir)
+    postproc = PostProcessing(**_only_known(PostProcessing, ppdict))
 
     cfg = Config(
         name=project.get("name", path.stem),
@@ -1713,7 +2489,10 @@ def load_config(path: str | os.PathLike) -> Config:
         gain_lose=gain_lose,
         drying=drying,
         structures=structures,
+        surfaces=surfaces,
         openfoam=openfoam,
+        fine_sediment=fine_sediment,
+        postproc=postproc,
         openfoam_dir=openfoam_dir,
         declared_blocks=frozenset(raw),
     )
@@ -1722,6 +2501,24 @@ def load_config(path: str | os.PathLike) -> Config:
         if hasattr(cfg, key):
             setattr(cfg, key, value)
     return cfg
+
+
+def _load_fine_sediment(raw: Any) -> FineSediment:
+    """The ``fine_sediment`` block. The inflow concentration per line is kept with the
+    names of the lines as text, which is what a case written back by aXqua holds."""
+    data = _only_known(FineSediment, dict(raw or {}))
+    per_line = data.get("inflow_concentration")
+    if isinstance(per_line, str):
+        # a form hands over what was typed: "0.02", or "{inlet-1: 0.02, inlet-2: 0}"
+        try:
+            per_line = yaml.safe_load(per_line)
+        except yaml.YAMLError:
+            pass                                  # the check names the value as it is
+    if isinstance(per_line, dict):
+        per_line = {str(name): value for name, value in per_line.items()}
+    if per_line is not None:
+        data["inflow_concentration"] = per_line
+    return FineSediment(**data)
 
 
 # --------------------------------------------------------------------------- #
@@ -1759,8 +2556,16 @@ def _dump_value(value: Any, base: Path) -> Any:
     return value
 
 
-def config_to_dict(cfg: "Config", *, base: Path | None = None) -> dict[str, Any]:
-    """The config as plain data, shaped the way ``load_config`` reads it back."""
+def config_to_dict(cfg: "Config", *, base: Path | None = None,
+                   portable: bool = False) -> dict[str, Any]:
+    """The config as plain data, shaped the way ``load_config`` reads it back.
+
+    *portable* leaves out the settings that describe the computer
+    (:data:`axqua.core.schema.MACHINE_FIELDS`), which is the form a case file is
+    shared in. The default keeps them, because the other caller is a job record: a
+    job has to be reproducible from its own folder, including the installation it ran
+    with.
+    """
     base = Path(base) if base else Path(cfg.config_dir)
     out: dict[str, Any] = {"project": {
         "name": cfg.name,
@@ -1778,6 +2583,8 @@ def config_to_dict(cfg: "Config", *, base: Path | None = None) -> dict[str, Any]
             continue
         value = getattr(cfg, f.name)
         if hasattr(value, "__dataclass_fields__"):
+            if _never_asked_for(cfg, f, value, base):
+                continue
             out[f.name] = _dump_value(value, base)
 
     # output filename overrides, only where they differ from the defaults - a dump
@@ -1788,11 +2595,38 @@ def config_to_dict(cfg: "Config", *, base: Path | None = None) -> dict[str, Any]
                if hasattr(cfg, k) and getattr(cfg, k) != v}
     if outputs:
         out["outputs"] = outputs
+    if portable:
+        schema.strip_machine_fields(out)
     return out
 
 
+def _never_asked_for(cfg: "Config", f, value, base: Path) -> bool:
+    """Whether a top-level block is absent from the case and still at its defaults.
+
+    Every optional block has a dataclass with defaults, so ``cfg.openfoam`` exists
+    whether or not the case mentions OpenFOAM - and a block that is *written* is a
+    block that is *declared* on the next load. A dump that wrote them all therefore
+    turned every TELEMAC case into one that also asks for OpenFOAM: the job copy of a
+    case grew an OpenFOAM marker, and a migrated case grew OpenFOAM tabs in the plugin.
+
+    The comparison leaves the machine settings out, because the loader fills those in
+    from the profile of the computer for every block, declared or not. A block that a
+    script changed after loading no longer equals its defaults and is written.
+    """
+    if not cfg.declared_blocks or f.name in cfg.declared_blocks:
+        return False
+    if f.default_factory is MISSING:
+        return False
+    current = _dump_value(value, base)
+    default = _dump_value(f.default_factory(), base)
+    for name in schema.MACHINE_FIELDS.get(f.name, ()):
+        current.pop(name, None)
+        default.pop(name, None)
+    return current == default
+
+
 def dump_config(cfg: "Config", path: str | os.PathLike | None = None, *,
-                base: Path | None = None) -> str:
+                base: Path | None = None, portable: bool = False) -> str:
     """Write *cfg* back out as YAML; returns the text, and writes it if given a path.
 
     The counterpart to :func:`load_config`, and the reason it exists is that anything
@@ -1805,8 +2639,8 @@ def dump_config(cfg: "Config", path: str | os.PathLike | None = None, *,
     longer describes is worse than no comment, and the template configs in
     ``cases/case-template/`` are where the explanations are meant to live.
     """
-    text = yaml.safe_dump(config_to_dict(cfg, base=base), sort_keys=False,
-                          default_flow_style=False, allow_unicode=True)
+    text = yaml.safe_dump(config_to_dict(cfg, base=base, portable=portable),
+                          sort_keys=False, default_flow_style=False, allow_unicode=True)
     if path is not None:
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)

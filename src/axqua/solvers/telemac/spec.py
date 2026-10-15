@@ -21,6 +21,9 @@ from axqua.core.registry import BackendSpec, CapabilitySpec
 
 # the three 3D steering files add3d.py writes (axqua.threed)
 HYDROSTATIC_CAS = "hotstart3d_hydrostatic.cas"
+#: What the hydrostatic run writes. It keeps a name of its own so that it does not
+#: overwrite the non-hydrostatic result (``Config.results3d_slf``).
+HYDROSTATIC_RESULT = "r3d-hydrostatic.slf"
 HYDRODYN_CAS = "hotstart3d_hydrodyn.cas"
 UNSTEADY3D_CAS = "unsteady3d.cas"
 
@@ -48,6 +51,39 @@ def _model(cfg, name: str) -> Path:
 
 def _exists(cfg, name: str) -> bool:
     return _model(cfg, name).is_file()
+
+
+def result_files(cfg) -> list[tuple[str, str, Path]]:
+    """Every result file a TELEMAC case can have: ``(name, what it is, path)``.
+
+    All of them, whether they exist or not; the caller looks. The names are the ones
+    the steering files are written with, so a case that renames a result in its case
+    file is followed. The hydrostatic 3D run keeps names of its own.
+    """
+    steady = Path(str(getattr(cfg, "results_slf", "r2d.slf")))
+    rows = [
+        (steady.name, "steady simulation, 2D"),
+        # the name steering.write_hotstart_cas gives the continued run
+        (f"{steady.stem}-hotstart{steady.suffix}", "continued steady simulation, 2D"),
+        (getattr(cfg, "results_unsteady_slf", "r2d-unsteady.slf"),
+         "unsteady simulation, 2D"),
+        (getattr(cfg, "results3d_slf", "r3d.slf"), "3D simulation"),
+        (getattr(cfg, "results2d_from_3d_slf", "r3d-2d.slf"),
+         "3D simulation, depth-averaged"),
+        (HYDROSTATIC_RESULT, "3D simulation, hydrostatic"),
+        ("r3d-2d-hydrostatic.slf", "3D simulation, hydrostatic, depth-averaged"),
+        (getattr(cfg, "results3d_unsteady_slf", "r3d-unsteady.slf"),
+         "unsteady simulation, 3D"),
+        (getattr(cfg, "results2d_from_3d_unsteady_slf", "r3d-2d-unsteady.slf"),
+         "unsteady simulation, 3D, depth-averaged"),
+    ]
+    seen: set[str] = set()
+    out = []
+    for name, label in rows:
+        if name and name not in seen:
+            seen.add(name)
+            out.append((name, label, _model(cfg, name)))
+    return out
 
 
 # --------------------------------------------------------------------------- #
@@ -103,7 +139,10 @@ SPEC = BackendSpec(
             support=Support.SUPPORTED,
             configured=_three_d_configured,
             built=lambda cfg: _exists(cfg, HYDRODYN_CAS) or _exists(cfg, HYDROSTATIC_CAS),
-            run=lambda cfg: _exists(cfg, cfg.results3d_slf),
+            # Either variant is a steady 3D run. Only the non-hydrostatic result was
+            # looked for, so the variant the plugin runs never showed as run.
+            run=lambda cfg: (_exists(cfg, cfg.results3d_slf)
+                             or _exists(cfg, HYDROSTATIC_RESULT)),
         ),
         Capability.UNSTEADY3D: CapabilitySpec(
             support=Support.SUPPORTED,

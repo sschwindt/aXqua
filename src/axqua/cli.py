@@ -43,6 +43,7 @@ from pathlib import Path
 
 from axqua import __version__, pipeline
 from axqua.config import load_config
+from axqua.jobcli import parse_args
 from axqua.logsetup import setup_logging
 
 
@@ -111,7 +112,7 @@ def _rating_parser() -> argparse.ArgumentParser:
 
 
 def _run_rating(argv: list[str]) -> int:
-    args = _rating_parser().parse_args(argv)
+    args = parse_args(_rating_parser(), argv, "rating")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.rating import generate_stage_discharge
@@ -152,7 +153,7 @@ def _targets_parser() -> argparse.ArgumentParser:
 
 
 def _run_targets(argv: list[str]) -> int:
-    args = _targets_parser().parse_args(argv)
+    args = parse_args(_targets_parser(), argv, "targets")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.targets import write_target_template
@@ -169,6 +170,150 @@ def _run_targets(argv: list[str]) -> int:
              "re-run the build to refresh the calibration CSV + HydroBayesCal config",
              out, args.config)
     return 0
+
+
+def _surface_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="axqua surface",
+        description="Turn the CAD surfaces of a case into the geodata the rest of the "
+                    "workflow expects: a DEM from the bed parts, an ROI polygon from "
+                    "their coverage, liquid-boundary lines from the inlet/outlet "
+                    "patches, structure footprints with crests from the walls, and "
+                    "roughness zones from the materials. Runs automatically as stage 0 "
+                    "of a build; this verb is for inspecting the result first.",
+    )
+    p.add_argument("config", type=Path, help="path to the YAML configuration file")
+    p.add_argument("--force", action="store_true",
+                   help="rebuild even when the artifacts are newer than the CAD parts")
+    p.add_argument("--json", dest="as_json", action="store_true",
+                   help="emit the artifacts as JSON - what a QGIS plugin reads to "
+                        "offer the CAD-derived geodata before a build is spent")
+    p.add_argument("-v", "--verbose", action="store_true")
+    return p
+
+
+def _run_surface(argv: list[str]) -> int:
+    args = parse_args(_surface_parser(), argv, "surface")
+    from axqua import jobcli, surface_stage
+    from axqua.core.errors import ConfigError
+
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    log = logging.getLogger("axqua")
+    if args.as_json:
+        # Narration to stderr so stdout carries the document alone.
+        jobcli._setup_logging(args)
+
+    try:
+        cfg = load_config(args.config)
+        if not cfg.surfaces.active:
+            # Raised rather than returned, so it goes out through the same envelope and
+            # the same exit code as every other configuration error. It used to return
+            # a bare 2, which collides with EXIT_CONFIG only by coincidence.
+            raise ConfigError(
+                f"{args.config} declares no surfaces block with parts - nothing to "
+                "derive", subject="surfaces",
+                remedy="See the CAD drawings part of docs/usage/case-setup.rst.")
+        cfg.ensure_dirs()
+        produced = surface_stage.run(cfg, force=args.force)
+    except Exception as exc:
+        return jobcli.fail("surface", exc, as_json=args.as_json, verbose=args.verbose)
+
+    if args.as_json:
+        return jobcli.emit("surface", {
+            "skipped": bool(produced.skipped),
+            "artifacts": {name: (str(path) if path else None) for name, path in (
+                ("dem", produced.dem), ("roi", produced.roi),
+                ("liquid_boundaries", produced.liquid_boundaries),
+                ("structures", produced.structures),
+                ("roughness_zones", produced.roughness_zones),
+                ("roughness_table", produced.roughness_table))},
+            "paths": [str(p) for p in produced.paths()],
+            "reports": produced.reports,
+        }, as_json=True)
+    for path in produced.paths():
+        log.info("wrote %s", path)
+    log.info("inspect these in QGIS, then build the case with `axqua %s`", args.config)
+    return 0
+
+
+def _georef_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(
+        prog="axqua georef",
+        description="Propose the transform that places CAD-local STL geometry on the "
+                    "map, by matching its footprint against a georeferenced DXF of the "
+                    "same structure. Reports the scale, the rotation candidates and "
+                    "the translation for you to check, and prints the config block to "
+                    "paste - it changes nothing on its own.",
+    )
+    p.add_argument("--stl", type=Path, required=True,
+                   help="an STL part, ideally the one covering the whole structure")
+    p.add_argument("--dxf", type=Path, default=None,
+                   help="the georeferenced drawing of the same structure (not needed "
+                        "when --control-point pairs are given)")
+    p.add_argument("--layer", action="append", default=None,
+                   help="restrict the drawing to this layer (repeatable); without it "
+                        "the extent is the whole sheet, title block included")
+    p.add_argument("--list-layers", action="store_true",
+                   help="list the drawing's layers with their feature counts and exit")
+    p.add_argument("--rotation", type=float, default=None,
+                   help="pick one of the reported rotation candidates [degrees]")
+    p.add_argument("--control-point", action="append", default=None,
+                   metavar="CADX,CADY:MAPX,MAPY",
+                   help="a point identified in both the CAD and the map, repeatable. "
+                        "Two of them fix the transform exactly and bypass the "
+                        "bounding-box match entirely - which is what a drawing sheet "
+                        "holding several views needs. --dxf is then optional.")
+    p.add_argument("--dz", type=float, default=0.0,
+                   help="vertical shift [m], if the drawing's datum differs")
+    p.add_argument("--json", dest="as_json", action="store_true",
+                   help="emit the proposed transform as JSON")
+    p.add_argument("-v", "--verbose", action="store_true")
+    return p
+
+
+def _run_georef(argv: list[str]) -> int:
+    args = parse_args(_georef_parser(), argv, "georef")
+    from axqua import georef, jobcli
+
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    log = logging.getLogger("axqua")
+    if args.as_json:
+        jobcli._setup_logging(args)
+
+    try:
+        if args.list_layers:
+            layers = list(georef.dxf_layers(args.dxf))
+            if args.as_json:
+                return jobcli.emit("georef.layers",
+                                   [{"layer": n, "features": c} for n, c in layers],
+                                   as_json=True)
+            for name, count in layers:
+                log.info("%8d  %s", count, name)
+            return 0
+        if args.control_point:
+            result = georef.match_control_points(args.stl, args.control_point,
+                                                 dz=args.dz)
+            georef.log_control_points(args.stl, result)
+        else:
+            result = georef.log_match(georef.match(
+                args.stl, args.dxf, layers=args.layer, rotation_deg=args.rotation,
+                dz=args.dz))
+    except Exception as exc:
+        return jobcli.fail("georef", exc, as_json=args.as_json, verbose=args.verbose)
+
+    if args.as_json:
+        transform = result.transform
+        return jobcli.emit("georef", {
+            "verdict": result.verdict,
+            "message": result.message,
+            "recommendation": result.recommendation,
+            "transform": {"scale": transform.scale,
+                          "rotation_deg": transform.rotation_deg,
+                          "dx": transform.dx, "dy": transform.dy, "dz": transform.dz},
+            "rotation_candidates": list(result.rotation_candidates),
+            "config_block": result.as_yaml(),
+        }, as_json=True)
+    return 0 if result.verdict == "match" else 1
 
 
 def _status_parser() -> argparse.ArgumentParser:
@@ -196,7 +341,7 @@ def _status_parser() -> argparse.ArgumentParser:
 
 
 def _run_status(argv: list[str]) -> int:
-    args = _status_parser().parse_args(argv)
+    args = parse_args(_status_parser(), argv, "case-status")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     from axqua import jobcli
     from axqua.core.capabilities import CaseStatus
@@ -252,7 +397,7 @@ def _openfoam_parser() -> argparse.ArgumentParser:
 
 
 def _run_openfoam(argv: list[str]) -> int:
-    args = _openfoam_parser().parse_args(argv)
+    args = parse_args(_openfoam_parser(), argv, "openfoam")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.solvers.openfoam import build_case, estimate_cells, load_hotstart, summarise
@@ -292,7 +437,7 @@ def _run_openfoam(argv: list[str]) -> int:
 
 
 def _run_build(argv: list[str] | None) -> int:
-    args = _build_parser().parse_args(argv)
+    args = parse_args(_build_parser(), argv, "build")
     level = logging.DEBUG if args.verbose else logging.INFO
     setup_logging(level=level)            # console now; compound logfile once config loads
     log = logging.getLogger("axqua")
@@ -326,7 +471,7 @@ def _run_build(argv: list[str] | None) -> int:
 
 
 def _run_clip(argv: list[str]) -> int:
-    args = _clip_parser().parse_args(argv)
+    args = parse_args(_clip_parser(), argv, "clip")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.dem import clip_to_roi
@@ -363,23 +508,57 @@ def _migrate_parser() -> argparse.ArgumentParser:
                    help="write here (default: print to stdout)")
     p.add_argument("--in-place", action="store_true",
                    help="overwrite the config, keeping a .bak copy beside it")
+    p.add_argument("--to-case", action="store_true",
+                   help="write an .axq-case file beside the config (or to --out): the "
+                        "same case without the settings that describe this computer, "
+                        "which belong to its profile ('axqua profile'). The original "
+                        "file is left as it is. An .axq-case file of that name that "
+                        "exists already is not replaced unless --out names it. For a "
+                        "config that is an .axq-case file itself, this is --in-place.")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
 
 def _run_migrate(argv: list[str]) -> int:
-    args = _migrate_parser().parse_args(argv)
+    args = parse_args(_migrate_parser(), argv, "migrate")
     setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
     log = logging.getLogger("axqua")
     from axqua.config import dump_config
 
+    from axqua.core import casefile, schema
+
+    if args.to_case and args.in_place:
+        log.error("--to-case writes a new file and cannot be combined with --in-place")
+        return 2
+    if args.to_case and not args.out:
+        # Named after the case folder, so a folder of cases is a folder of files that
+        # say which reach they are. A variant keeps its own name (case-config-vof.yml
+        # becomes case-config-vof.axq-case), since that is what tells variants apart.
+        stem = (args.config.resolve().parent.name
+                if args.config.name in casefile.LEGACY_NAMES else args.config.stem)
+        derived = args.config.with_name(stem + casefile.SUFFIX)
+        if derived.resolve() == args.config.resolve():
+            # The config is a case file already, so there is no second file to write:
+            # it is brought up to date where it is, with the copy --in-place keeps.
+            args.in_place = True
+        elif derived.exists():
+            # A name nobody typed must not cost a file that may have been edited since
+            # it was written. Naming it is the way to say that it may be replaced.
+            log.error("%s exists already and was left as it is. To replace it, name "
+                      "it: -o %s. To keep both, name another file.", derived, derived)
+            return 1
+        else:
+            args.out = derived
+    target = args.config if args.in_place else args.out
+    # A file of the case type never carries machine settings, however it was asked for.
+    portable = bool(args.to_case or (target and casefile.is_case_file(target)))
     try:
         cfg = load_config(args.config)
         # Written relative to where the file will LIVE, not where it came from, so
         # `-o elsewhere/case.yml` does not silently break every relative data path.
-        target = args.config if args.in_place else args.out
         base = Path(target).resolve().parent if target else Path(cfg.config_dir)
-        text = dump_config(cfg, base=base)
+        text = dump_config(cfg, base=base, portable=portable)
+        moved = schema.strip_machine_fields(_raw_config(args.config)) if portable else []
     except Exception as exc:
         log.error("%s: %s", type(exc).__name__, exc)
         if args.verbose:
@@ -397,7 +576,19 @@ def _run_migrate(argv: list[str]) -> int:
         log.info("wrote %s", args.out)
     else:
         print(text, end="")
+        return 0
+    if moved:
+        log.info("left out, because they describe this computer and belong to its "
+                 "profile: %s. Run 'axqua profile init' if it has none yet.",
+                 ", ".join(moved))
     return 0
+
+
+def _raw_config(path: Path) -> dict:
+    """The config as written, to report which machine settings a case file carried."""
+    import yaml
+    with open(path, encoding="utf-8") as handle:
+        return yaml.safe_load(handle) or {}
 
 def _job(name: str):
     """Late-bind a job verb.
@@ -412,15 +603,127 @@ def _job(name: str):
     return run
 
 
+def _case_cli(name: str, argv: list[str]) -> int:
+    """The verbs an editor of a case file uses (:mod:`axqua.casecli`)."""
+    from axqua import casecli
+    return getattr(casecli, name)(argv)
+
+
+def _run_validation(argv: list[str]) -> int:
+    """``axqua validation`` - what a case has for one (:mod:`axqua.validationcli`)."""
+    from axqua import validationcli
+    return validationcli.run_validation(argv)
+
+
+def _run_example(argv: list[str]) -> int:
+    """``axqua example`` - the example cases (:mod:`axqua.examplecli`)."""
+    from axqua import examplecli
+    return examplecli.run_example(argv)
+
+
+def _run_export(argv: list[str]) -> int:
+    """``axqua export`` - results for ParaView and VisIt (:mod:`axqua.exportcli`)."""
+    from axqua import exportcli
+    return exportcli.run_export(argv)
+
+
+def _run_install(argv: list[str]) -> int:
+    """``axqua install`` - the simulation programs (:mod:`axqua.installcli`)."""
+    from axqua import installcli
+    return installcli.run_install(argv)
+
+
+def _run_profile(argv: list[str]) -> int:
+    """``axqua profile`` - late-bound like the job verbs, and for the same reason."""
+    from axqua import profilecli
+    return profilecli.run_profile(argv)
+
+
 #: The whole command surface, as a table. A verb is one entry here plus its ``_run_*``;
 #: the alternative - ``argparse`` subparsers - cannot express the default form
 #: (``axqua <config.yml>``, with no verb at all) without a pre-pass on ``argv[0]``,
 #: so the chain would survive the conversion anyway and only the help output would churn.
+def _postproc_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="axqua postproc",
+        description="Render figures from a case's solver results (VisIt).")
+    parser.add_argument("config", type=Path, help="case-config.yml")
+    parser.add_argument("--scene", action="append", dest="scenes", default=None,
+                        help="scene to render (repeatable); default: postproc.scenes")
+    parser.add_argument("--solver", default=None, choices=("openfoam", "telemac"),
+                        help="only draw results from this solver")
+    parser.add_argument("--backend", default=None, help="override postproc.backend")
+    parser.add_argument("--time", default="last",
+                        help="'last' (default), 'first', or a time-slider state")
+    parser.add_argument("-o", "--out", type=Path, default=None,
+                        help="output directory (default: <postprocessing_dir>/figures)")
+    parser.add_argument("--list", action="store_true",
+                        help="report which scenes are available, and why not")
+    parser.add_argument("--script-only", action="store_true",
+                        help="write the generated scripts and stop (needs no VisIt)")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    return parser
+
+
+def _run_postproc(argv: list[str]) -> int:
+    args = _postproc_parser().parse_args(argv)
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    from axqua.postproc import render as render_mod
+
+    try:
+        cfg = load_config(args.config)
+        if args.backend:
+            cfg.postproc.backend = args.backend
+        names = args.scenes if args.scenes else (cfg.postproc.scenes or None)
+
+        if args.list:
+            for line in render_mod.plan_lines(cfg, names=names, solver=args.solver):
+                print(line)
+            return 0
+        return render_mod.render(cfg, names=names, solver=args.solver,
+                                 out_dir=args.out, script_only=args.script_only)
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger("axqua").error("%s: %s", type(exc).__name__, exc)
+        if args.verbose:
+            raise
+        return 1
+
+
+def _run_check_gt(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="axqua check-gt",
+        description="Check the compiled ground-truth elevations against the model.")
+    parser.add_argument("config", type=Path)
+    parser.add_argument("--strict", action="store_true",
+                        help="exit non-zero on an error finding")
+    parser.add_argument("-v", "--verbose", action="store_true")
+    args = parser.parse_args(argv)
+    setup_logging(level=logging.DEBUG if args.verbose else logging.INFO)
+    from axqua.ground_truth_qa import check_ground_truth_elevations, report
+
+    try:
+        cfg = load_config(args.config)
+        findings = check_ground_truth_elevations(cfg)
+        report(findings, strict=args.strict)
+        return 1 if (args.strict and any(f.severity == "error" for f in findings)) else 0
+    except SystemExit:
+        return 1
+    except Exception as exc:  # noqa: BLE001
+        logging.getLogger("axqua").error("%s: %s", type(exc).__name__, exc)
+        if args.verbose:
+            raise
+        return 1
+
+
 _DISPATCH = {
     "clip": lambda argv: _run_clip(argv),
+    "check-gt": lambda argv: _run_check_gt(argv),
+    "postproc": lambda argv: _run_postproc(argv),
     "rating": lambda argv: _run_rating(argv),
     "migrate": lambda argv: _run_migrate(argv),
     "targets": lambda argv: _run_targets(argv),
+    "surface": lambda argv: _run_surface(argv),
+    "georef": lambda argv: _run_georef(argv),
     "openfoam": lambda argv: _run_openfoam(argv),
     "case-status": lambda argv: _run_status(argv),
     "submit": _job("run_submit"),
@@ -429,7 +732,37 @@ _DISPATCH = {
     "logs": _job("run_logs"),
     "list": _job("run_list"),
     "profiles": _job("run_profiles"),
+    "profile": lambda argv: _run_profile(argv),
+    "install": lambda argv: _run_install(argv),
+    "export": lambda argv: _run_export(argv),
+    "validation": lambda argv: _run_validation(argv),
+    "example": lambda argv: _run_example(argv),
+    "schema": lambda argv: _case_cli("run_schema", argv),
+    "case": lambda argv: _case_cli("run_case", argv),
+    "check": lambda argv: _case_cli("run_check", argv),
 }
+
+
+#: Flags of either ``status`` form that take a separate value. The token after one of
+#: them is that value, not the subject of the command - without this,
+#: ``axqua status --job-root /scratch JOB-123`` dispatched on ``/scratch``, which exists,
+#: and so reported the *case* status of a directory. The dispatch was correct only for
+#: as long as nobody put a flag first.
+_STATUS_VALUE_FLAGS = {"--job-root", "--timeout"}
+
+
+def _first_positional(argv: list[str]) -> str:
+    """The first token that is a subject rather than a flag or a flag's value."""
+    skip = False
+    for token in argv:
+        if skip:
+            skip = False
+            continue
+        if token.startswith("-"):
+            skip = token in _STATUS_VALUE_FLAGS      # --flag=value needs no skip
+            continue
+        return token
+    return ""
 
 
 def _dispatch_status(argv: list[str]) -> int:
@@ -440,8 +773,7 @@ def _dispatch_status(argv: list[str]) -> int:
     spelling. Anything matching the job-id grammar is a job. Neither can be mistaken for
     the other, so there is no guess here, only a rule.
     """
-    positional = [a for a in argv if not a.startswith("-")]
-    first = positional[0] if positional else ""
+    first = _first_positional(argv)
     if first and Path(first).exists():
         logging.getLogger("axqua").warning(
             "'axqua status <config>' now also accepts a job id; the case form is "

@@ -30,9 +30,21 @@ from axqua.core.environment import (
     windows_to_wsl, wsl_to_windows,
 )
 
-TELEMAC_PYSOURCE = Path(
-    "/home/modelling/telemac-v911/telemac-mascaret/configs/pysource.debian12.sh")
-OPENFOAM_BASHRC = Path("/home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc")
+# Resolved for THIS machine, not hard-coded to one developer's home directory.
+# The previous constants named /home/modelling/... so these tests silently skipped
+# on every other machine - including ones where both solvers are installed, which
+# is the "check that would have caught nothing" failure mode. Path(os.devnull) is
+# a readable path that is not a setup script, so `.is_file()` is False and the
+# skipif still fires cleanly when nothing is configured.
+def _resolved(key: str) -> Path:
+    from axqua.core.machine import resolve
+
+    found = resolve(key)
+    return found.path if found and found.path.is_file() else Path("/nonexistent")
+
+
+TELEMAC_PYSOURCE = _resolved("telemac")
+OPENFOAM_BASHRC = _resolved("openfoam")
 
 
 # --------------------------------------------------------------------------- #
@@ -280,8 +292,13 @@ def test_the_real_openfoam_environment_validates():
     status = SolverEnvironment(kind="posix",
                                setup_script=OPENFOAM_BASHRC).validate("openfoam")
     assert status, status.detail
-    assert status.variables["WM_PROJECT_VERSION"] == "9"
-    assert "OpenFOAM 9" in status.detail
+    # NOT a literal version. Which OpenFOAM is installed is a property of the machine,
+    # not of this project: this assertion read "9" while the box had v12 and then
+    # v2406, and failed for a week on a difference that was never a defect. What has
+    # to hold is that the environment initialises and names some version.
+    assert status.variables["WM_PROJECT"] == "OpenFOAM"
+    assert status.variables["WM_PROJECT_VERSION"].strip()
+    assert "OpenFOAM" in status.detail
 
 
 # --------------------------------------------------------------------------- #
@@ -315,3 +332,51 @@ def test_shell_runtime_still_wraps_the_way_it_always_did():
     assert argv[0] == "bash" and argv[1] == "-lc"
     assert "source /opt/telemac/pysource.sh" in argv[2]
     assert runtime.env_script == Path("/opt/telemac/pysource.sh")
+
+
+def test_a_noisy_setup_script_still_reaches_the_command(tmp_path):
+    """A setup script that returns non-zero from a warning must not abort the run.
+
+    OpenFOAM Foundation's etc/bashrc does exactly this when sourced in a
+    non-interactive login shell ("pop_var_context: head of shell_variables not a
+    function context"). Under the old `set -e; source <script>` payload the shell
+    exited before the command ran, so every OpenFOAM call reported the environment
+    as broken while the environment was in fact fine.
+    """
+    import subprocess
+
+    from axqua.core.environment import EnvironmentKind, SolverEnvironment
+
+    script = tmp_path / "noisy.sh"
+    script.write_text("export MARKER=set\n"
+                      "echo 'a benign warning' >&2\n"
+                      "false\n")          # the trailing non-zero, as OF9's bashrc has
+    env = SolverEnvironment(kind=EnvironmentKind.POSIX, setup_script=script)
+    proc = subprocess.run(env.command("echo \"$MARKER\""), capture_output=True, text=True)
+    assert proc.returncode == 0
+    assert proc.stdout.strip() == "set", "the sourced environment must still apply"
+
+
+def test_an_unreadable_setup_script_still_fails_loudly(tmp_path):
+    """The guard the payload exists for: never run the command in a bare shell."""
+    import subprocess
+
+    from axqua.core.environment import EnvironmentKind, SolverEnvironment
+
+    env = SolverEnvironment(kind=EnvironmentKind.POSIX,
+                            setup_script=tmp_path / "not-here.sh")
+    proc = subprocess.run(env.command("echo SHOULD_NOT_PRINT"),
+                          capture_output=True, text=True)
+    assert proc.returncode != 0
+    assert "SHOULD_NOT_PRINT" not in proc.stdout
+
+
+def test_the_commands_own_exit_code_still_propagates(tmp_path):
+    import subprocess
+
+    from axqua.core.environment import EnvironmentKind, SolverEnvironment
+
+    script = tmp_path / "ok.sh"
+    script.write_text("export MARKER=set\n")
+    env = SolverEnvironment(kind=EnvironmentKind.POSIX, setup_script=script)
+    assert subprocess.run(env.command("exit 42")).returncode == 42

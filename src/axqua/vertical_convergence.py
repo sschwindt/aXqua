@@ -393,9 +393,13 @@ def run_vertical_convergence(cfg: Config, *, results_2d: str | Path | None = Non
                              hotstart: str = "constant_depth",
                              n_time_steps: int | None = None,
                              target_time: float | None = None,
-                             min_depth: float | None = None
+                             min_depth: float | None = None,
+                             on_level=None
                              ) -> VerticalConvergenceReport:
     """Run the vertical-layer convergence study and return the report.
+
+    *on_level(done, total, label)* is called before the first run and after each, so
+    that a job can report which layer count is running.
 
     Needs the converged 2D result (``initial_run`` output) for the hotstart, the
     horizontal mesh and the probe points. *counts* overrides the auto-derived layer
@@ -429,9 +433,20 @@ def run_vertical_convergence(cfg: Config, *, results_2d: str | Path | None = Non
             min_depth=min_depth)
 
     results: list[VerticalLevel] = []
+
+    def _report_level(label: str) -> None:
+        if on_level is None:
+            return
+        try:
+            on_level(len(results), len(counts), label)
+        except Exception:                # noqa: BLE001 - reporting must not stop a study
+            log.debug("the level listener failed", exc_info=True)
+
+    _report_level(f"{counts[0]} levels" if len(counts) else "")
     for n in counts:
         log.info("vertical convergence: running %d sigma levels", n)
         results.append(simulate(n, probes, quantities))
+        _report_level(f"{n} levels")
         r = results[-1]
         log.info("  %d levels: dz~%.3f m, %d 3D nodes, dt~%s s, runtime %s",
                  n, r.dz, r.n_nodes3d, r.time_step,

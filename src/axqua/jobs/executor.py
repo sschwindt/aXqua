@@ -28,6 +28,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from contextlib import ExitStack
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
@@ -35,7 +36,7 @@ from typing import Any, Callable
 from axqua.core import errors, registry
 from axqua.core.capabilities import Capability
 from axqua.core.errors import ErrorRecord
-from axqua.jobs import events, logs, results
+from axqua.jobs import events, logs, results, workspace
 from axqua.jobs.interaction import PolicyAsk
 from axqua.jobs.lock import JobLock
 from axqua.jobs.model import (KIND_META, JobKind, JobSpec, JobState, JobStatus,
@@ -243,7 +244,9 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
     ctx: ExecutionContext | None = None
 
     log.info("job %s: %s (%s)", spec.job_id, meta.title, spec.solver)
-    with events.using_sink(combined):
+    # Entered inside the block below and left after it, so that the simulation folder
+    # of the case stays held until the final state of the job has been written.
+    with events.using_sink(combined), ExitStack() as held:
         try:
             if cancel.requested:
                 # Cancelled before it ever really started: there is nothing to tear down.
@@ -252,20 +255,27 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
 
             cfg = load_config(jd.frozen_config)
             apply_workspace(cfg, spec, jd)
+            # a result file carries no CRS of its own; whoever opens it needs the case's
+            manifest.crs_epsg = results._epsg(getattr(cfg, "crs_epsg", None))
             logs.require_free_space(jd.root, spec.resources.min_free_bytes)
 
             ctx = ExecutionContext(job_dir=jd, spec=spec, cfg=cfg, sink=combined,
                                    cancel=cancel, manifest=manifest, log=log)
 
+            # Another job of this case may be working in the same folder. This one
+            # waits for it, still QUEUED, and says whom it waits for.
+            held.enter_context(workspace.held_for(cfg.model_dir, spec, cancel=cancel,
+                                                  sink=combined, job_dir=jd.root))
+
             status.transition(JobState.STARTING)
-            status_sink.flush()
+            status_sink.state_changed()
 
             backend = _load_backend(spec)
             if meta.needs_environment:
                 _check_environment(backend, cfg, spec)
 
             status.transition(JobState.RUNNING)
-            status_sink.flush()
+            status_sink.state_changed()
 
             verb = getattr(backend, meta.verb, None)
             if verb is None:
@@ -282,7 +292,7 @@ def _run(jd: JobDir, *, sink: Any = None) -> int:
             cancel.check()
 
             status.transition(JobState.POSTPROCESSING)
-            status_sink.flush()
+            status_sink.state_changed()
             _postprocess(backend, cfg, ctx, manifest, artifacts)
 
             results.write_manifest(jd, manifest)
@@ -327,9 +337,19 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
     would make one backend reach into its sibling - forbidden by
     ``tests/test_capabilities.py``, and wrong regardless. So it happens here, above both,
     which is exactly where ``prerun.py`` already documents that such orchestration
-    belongs.
+    belongs. The case of the fine sediment simulation takes its water surface from the
+    same result.
     """
-    if spec.kind is not JobKind.OPENFOAM_BUILD:
+    if spec.kind not in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD):
+        return {}
+    named = getattr(spec.options, "hotstart", None)
+    if named:
+        # The job names the result to start from (a 2D result of another situation,
+        # or the view from above of a coarser 3D run), and the build takes it in
+        # place of the seed. Preparing the seed anyway reported a result that was not
+        # used and, in a case without one, started a TELEMAC pre-run for nothing.
+        log.info("seed: the result named in the job, %s", named)
+        ctx.sink.step("seed", done=True)
         return {}
     from axqua import prerun
     enabled = getattr(spec.options, "pre_run", None)

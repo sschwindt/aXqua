@@ -108,7 +108,8 @@ class OpenFoamRuntime(ShellRuntime):
             raise ValueError(
                 "openfoam.bashrc is not set. Point it at the etc/bashrc of your "
                 "OpenFOAM install (e.g. "
-                "/home/modelling/OpenFOAM/OpenFOAM-9/etc/bashrc) in case-config.yml."
+                "/opt/openfoam9/etc/bashrc), or set AXQUA_OPENFOAM_BASHRC / "
+                "~/.config/axqua/solvers.yml - see axqua.core.machine."
             )
         super().__init__(environment=SolverEnvironment.from_config(
             getattr(of_config, "environment", None), legacy_script=of_config.bashrc))

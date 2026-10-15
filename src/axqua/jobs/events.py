@@ -187,6 +187,17 @@ class StatusFileSink(NullSink):
             object.__setattr__(progress, "pending_question", question)
             self._touch(force=True)
 
+    def state_changed(self) -> None:
+        """Write the status now, because its state was just changed.
+
+        The executor assigns a transition on the status object itself, so this sink
+        still considers itself clean and :meth:`flush` skips the write. The new state
+        then reached the file only when a progress event happened to follow. A steady
+        run reports progress within seconds; a calibration reports none, and stood in
+        the dashboard as STARTING for as long as it ran.
+        """
+        self._touch(force=True)
+
     # -- writing ------------------------------------------------------------------
     def _touch(self, *, force: bool) -> None:
         self._dirty = True

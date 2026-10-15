@@ -30,9 +30,10 @@ from pathlib import Path
 from axqua import (build_3d_cases, format_3d_cases, run_solver_streaming,
                        setup_logging)
 from axqua.config import load_config
+from axqua.core.casefile import find_case_file
 from axqua.env import TelemacRuntime
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = find_case_file(Path(__file__).resolve().parent)
 cfg = load_config(CONFIG)
 
 # Step count / listing spacing of the hydrostatic flux-convergence run. None ->

@@ -9,7 +9,7 @@ side by side and nothing clobbers the production ``simulation/`` case.
     T3  + losing region spread over the whole percolation patch
     T4  + USER_RAIN depth-limited percolation Fortran
 
-Everything a rung changes relative to ``case-config.yml`` is listed in ``RUNGS``
+Everything a rung changes relative to ``isar-2025.axq-case`` is listed in ``RUNGS``
 below - nothing is hidden, so a rung can be reproduced by hand from the base config.
 
 Usage:
@@ -41,7 +41,7 @@ from axqua.config import load_config
 from axqua.env import TelemacRuntime
 from axqua.flux_convergence import HOTSTART_TOLERANCE, analyze_flux_convergence
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "isar-2025.axq-case"
 
 # Per-rung overrides applied to the base config, plus what each rung is testing.
 RUNGS: dict[str, dict] = {

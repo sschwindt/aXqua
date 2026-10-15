@@ -24,14 +24,26 @@ def _reset_axqua_logging():
 
 
 @pytest.fixture(autouse=True)
-def _isolate_axqua_dirs(tmp_path_factory, monkeypatch):
+def _isolate_axqua_dirs(tmp_path_factory):
     """Point every axqua user directory at a temporary one.
 
     Without this the suite writes jobs, a SQLite index and solver profiles into the
     developer's real ``~/.config`` and ``~/.local/share`` - and, worse, a test could
     read or cancel one of their actual jobs. Autouse rather than opt-in, because the
     failure mode is silent and only shows up on someone's own machine.
+
+    **It patches through a ``MonkeyPatch`` of its own, not through the ``monkeypatch``
+    fixture a test receives.** They used to be the same object, so a test that called
+    ``monkeypatch.undo()`` to get one real function back also undid every line below,
+    and then worked on the developer's computer: one such test wrote a profile naming
+    a pytest folder as the OpenFOAM installation into ``~/.config/axqua``, which the
+    next real job of that computer then failed on.
     """
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        yield from _isolated(tmp_path_factory, monkeypatch)
+
+
+def _isolated(tmp_path_factory, monkeypatch):
     root = tmp_path_factory.mktemp("axqua-home")
     for var, name in (("AXQUA_CONFIG_DIR", "config"),
                       ("AXQUA_DATA_DIR", "data"),
@@ -42,6 +54,22 @@ def _isolate_axqua_dirs(tmp_path_factory, monkeypatch):
     # A launcher preference leaking in from the developer's shell would make the
     # selection tests assert about their machine rather than about the code.
     monkeypatch.delenv("AXQUA_LAUNCHER", raising=False)
+
+    # Solver resolution too (axqua.core.machine). This one bit: three surface-stage
+    # tests write a stub pysource beside a stub config and expect it to be used, but
+    # a machine settings file OUTRANKS the case config - so the suite passed on a
+    # machine that had ~/.config/axqua/solvers.yml and failed on one that did not,
+    # for no reason in the code under test. AXQUA_HOME moves the settings file into
+    # the tmp dir, the env vars are cleared, and AXQUA_SOLVER_ROOT stops discovery
+    # wandering into a site install.
+    monkeypatch.setenv("AXQUA_HOME", str(root / "solvers"))
+    (root / "solvers").mkdir(parents=True, exist_ok=True)
+    # ... and the profile, which outranks the settings file: the default one is found
+    # beside it (so it moves with AXQUA_HOME), and one named through the environment is
+    # cleared like the solver variables.
+    for var in ("AXQUA_TELEMAC_PYSOURCE", "AXQUA_OPENFOAM_BASHRC", "AXQUA_VISIT",
+                "AXQUA_PARAVIEW", "AXQUA_SOLVER_ROOT", "AXQUA_PROFILE"):
+        monkeypatch.delenv(var, raising=False)
     yield root
 
 

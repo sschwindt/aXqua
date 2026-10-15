@@ -1,0 +1,323 @@
+# =============================================================================
+# axqua case configuration - Inn river (Bavaria), 2025 hydro survey
+# =============================================================================
+# All relative paths resolve against THIS file's directory. The co-development
+# dataset lives under user-sources/ (kept out of version control).
+# Build with:
+#   axqua cases/inn-2025-hydro/inn-KB15-2025-hydro.axq-case --check    # validate first
+#   axqua cases/inn-2025-hydro/inn-KB15-2025-hydro.axq-case            # build the case
+#
+# Sections: project / telemac / geodata / boundaries / initialization / mesh /
+#           friction / hydrodynamics / morphodynamics / ground_truth / calibration
+# -----------------------------------------------------------------------------
+
+project:
+  name: inn                    # case name; used in titles and file headers
+  crs_epsg: 25832              # [REQUIRED] project CRS, metric. 25832 = ETRS89/UTM32N
+  sim_dir: axqua-case
+  preprocessing_dir: axqua-case/preprocessing
+  model_dir: axqua-case/simulation
+  postprocessing_dir: axqua-case/postprocessing
+  calibration_dir: axqua-case/calibration-validation
+
+telemac:
+  # [REQUIRED] the pysource.*.sh of YOUR TELEMAC install; sourced (not imported).
+  # Machine-specific, so it does NOT belong in a shared config. Resolution order:
+  #   $AXQUA_TELEMAC_PYSOURCE > ~/.config/axqua/solvers.yml > solvers.local.yml
+  #   beside this file > the value here > discovery. Left as a placeholder so a
+  #   checkout on any machine works without editing a tracked file.
+  # Where TELEMAC is installed is a setting of the computer, not of the case:
+  # see `axqua profile` (the Configuration tab of the QGIS plugin).
+  solver: telemac2d            # telemac2d | telemac3d
+  n_processors: 16              # = physical cores (OpenMPI slots; 16 CPUs are hyperthreads)
+
+geodata:
+  # Pure geodata files (boundary CONDITIONS are in `boundaries`, ground truth in
+  # `ground_truth`). Paths resolve relative to THIS file; data under user-sources/.
+  # ---- required -----------------------------------------------------------
+  # The raw LiDAR survey. correct_dem_bathymetry.py produces a bathymetry-
+  # corrected variant (the wetted bed is ~0.34 m too high, growing with depth);
+  # it is NOT adopted here, because it invalidates the ks=0.411 2D posterior,
+  # which was fitted against water levels on this bed, and because a 3D velocity
+  # campaign on the corrected bed did NOT improve (see the README). Switch the
+  # path below to DEM-2025-20cm-bathy-corrected.tif to adopt it deliberately.
+  dem_initial: user-sources/geodata/DEM-2025-20cm.tif  # [REQUIRED] baseline terrain (GeoTIFF)
+  boundary: user-sources/geodata/roi-kb15.gpkg         # [REQUIRED] ROI / max wetted extent polygon
+  # ---- optional -----------------------------------------------------------
+  dem_target: user-sources/geodata/DEM-2025-20cm.tif   # 2nd DEM, enables morphodynamic target
+  # mesh zones + channel centerline drive the anisotropic, flow-aligned meshing.
+  mesh_zones: user-sources/geodata/mesh-zones.gpkg
+  channel_centerline: user-sources/geodata/channel-centerline.gpkg
+  # roughness zones (integer 'Zone ID') + a CSV mapping id -> ks drive the friction
+  # zonation (zone 1 = channel ks ~0.2 m, zone 2 = floodplain ks ~0.5 m).
+  roughness_zones: user-sources/geodata/roughness-zones.gpkg
+  roughness_table: user-sources/geodata/roughness-table.csv
+  # dem_of_difference: path/to/dod.tif         # precomputed bed-change raster (else from DEMs)
+
+boundaries:
+  # liquid boundaries: a LINE layer whose 'Type (inflow/outflow)' field tags each
+  # line; the lines MUST coincide with the OUTER BOUNDS of the mesh zones. Inflow
+  # nodes get 4 5 5, outflow nodes 5 4 4 (prescribed elevation) or 4 4 4 (free),
+  # every other outer node a solid wall 2 2 2.
+  liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg  # [REQUIRED for a build]
+  # inflow: user-sources/hydraulics/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
+  # THIS case's steady boundary conditions, read straight from here for steady2d.cas:
+  prescribed_flowrate: 47.3    # inflow Q [m3/s] for steady2d.cas
+  # outflow (downstream) boundary type: stage_discharge (WSE from the rating curve
+  # at the simulated Q) | elevation (fixed prescribed_elevation) | free (Neumann).
+  outflow_condition: stage_discharge
+  # prescribed_elevation: 0.0  # m a.s.l.; only for outflow_condition: elevation
+  # outlet rating curve (Q,WSE): one Q-h pair at the steady discharge suffices.
+  stage_discharge: user-sources/geodata/rating-curve.csv
+
+initialization:
+  # dry start (default): the domain starts dry except a thin plug at the inflow line
+  # (a fully dry bed makes DEBIMP abort at the prescribed-Q inflow). Tune if needed:
+  # dry_start_depth: 0.5    # inflow-plug seed depth [m]
+  # dry_start_extent: 7.5   # plug buffer around the inflow line [m] (default ~5 cells)
+  # Pre-wetted hotstart for the HydroBayesCal calibration fleet: every calibration
+  # run starts from a wet channel instead of marching the wetting front from the
+  # inflow (the dry-start march took ~17 h of wall time on this 680k-element mesh;
+  # comment this out to return to the dry start).
+  prewet_depth: 0.2         # ALTERNATIVE hotstart: wet the whole channel zone (needs geodata.mesh_zones)
+
+mesh:
+  # Anisotropic, flow-aligned strategy (used when geodata.mesh_zones +
+  # geodata.channel_centerline are set). Each mesh-zone polygon is sized by its own
+  # 'Max Edge Length (m)' field; the *_size values below are FALLBACKS.
+  channel_size: 0.5            # fallback channel edge length (m)
+  floodplain_size: 1.5         # fallback floodplain edge length (m); default outside all zones
+  refinement_size: 0.5         # fallback 'refinement' zone edge length (m)
+  # zone_size_field: "Max Edge Length (m)"  # per-polygon edge length field (default shown)
+  growth_ratio: 1.2            # max edge-size growth per element (channel -> floodplain)
+  channel_anisotropy: 4.0      # along-flow / cross-flow edge ratio in the channel
+  max_aspect_ratio: 4.0        # hard cap on cell aspect ratio (AnisoMax + post-mesh edge flips)
+
+friction:
+  # .tbl priority: explicit `zones` (MATID) -> roughness zones (geodata.roughness_zones
+  # + roughness_table: one `<Zone ID> NIKU <ks> NULL` row each) -> single default.
+  roughness_law: 5             # law for roughness-zone rows (5 = NIKU, ks in m)
+  default_law: 4               # 4 = Manning (0 NOFR, 1 HAAL, 2 CHEZ, 3 STRI, 5 NIKU, 7 COWH)
+  default_coefficient: 0.03
+  # lateral (wall) boundary friction; also the roughness used to synthesise the
+  # outflow stage-discharge curve when missing.
+  boundary_law: 3              # 3 = Strickler
+  boundary_coefficient: 38     # Strickler Kst
+
+hydrodynamics:
+  regime: steady               # steady | unsteady (the initial run is always steady)
+  # With variable_timestep on, time_step is only the conservative CFL START step; the
+  # run marches to steady state for `duration` seconds while TELEMAC holds the Courant.
+  time_step: 0.25              # conservative CFL start step [s]
+  # 1500 s suffices for the PRE-WETTED hotstart: the monitored run balanced its
+  # boundary fluxes to <1% after ~430 s of simulated time (3x margin here); the
+  # dry-start wetting march needed 5000 s.
+  duration: 5000.0             # simulated time [s] for the steady march to convergence
+  n_time_steps: 15000          # only bounds a FIXED-step run (variable_timestep: false)
+  graphic_printout_period: 500
+  listing_printout_period: 500
+  finite_volumes: false        # true -> HLLC finite-volume kernel (const viscosity only)
+  # Turbulence: "auto" picks k-epsilon (3) / Spalart-Allmaras (6) / Smagorinski (4)
+  # from the mesh resolution vs the flow depth and the velocity guess.
+  turbulence_model: auto       # auto | 1 const | 3 k-epsilon | 4 Smagorinski | 6 Spalart-Allmaras
+  initial_velocity_guess: 1.0  # assumed mean flow [m/s]; sizes eddy viscosity + model choice
+  # Courant 0.6 for the pre-wetted calibration fleet (no advancing dry front, the
+  # locally-implicit distributive scheme takes it; ~2x larger dt than the 0.30
+  # default that guards the dry start).
+  desired_courant: 0.40        # target Courant for the CFL-adaptive march (default 0.30)
+  # Ambient (background) eddy viscosity added to the Spalart-Allmaras closure;
+  # emitted as VELOCITY DIFFUSIVITY so HydroBayesCal can perturb it (July-2026
+  # 3-parameter calibration; midpoint of the [0.001, 0.05] m2/s prior).
+  velocity_diffusivity: 0.01   # m2/s
+
+# morphodynamics:              # optional GAIA extension (v1 focuses on 2D hydraulics)
+#   enabled: true
+#   gaia_results_base: rgaia
+#   sediment_classes:
+#     - { diameter: 0.0008, density: 2650, shields: 0.047 }
+
+dem_of_difference:
+  # Optional DoD (geodata.dem_target - geodata.dem_initial) with a minimum level of
+  # detection; off here (dem_initial and dem_target are the same 2025 survey). Point
+  # dem_target at a different-epoch DEM to enable. See cases/case-template for options.
+  enabled: false
+  # uncertainty_initial: 0.05
+  # uncertainty_target: 0.03
+  # confidence_level: 0.95
+  # min_lod: 0.10
+  mask_below_lod: true
+
+ground_truth:
+  # The September-2025 survey was positioned with an RTK FLOAT solution, not a
+  # fixed one: decimetre-to-metre horizontal, not centimetre. That is not a detail
+  # here - the modelled depth at these verticals is 0.374 m while the deepest node
+  # 3 m away is 0.648 m, so the position uncertainty moves the modelled value by
+  # more than the discrepancy being calibrated against. Declaring it adds that
+  # spread to each target's _ERROR in quadrature instead of charging it to the
+  # roughness. The depths and velocities themselves are sound - a wading rod and a
+  # FlowTracker do not depend on GNSS.
+  position_quality: rtk-float
+  # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
+  # axqua compiles into it. Compiled to preprocessing/ground-truth.xlsx unless
+  # `measurements` gives an explicit output path.
+  # measurements: path/to/ground-truth.xlsx    # (a) user-authored tidy table
+  sources:                                      # (b) raw sources -> compiled tidy table
+    # FlowTracker2 Sept-2025 campaign (KB15 sheet = sheet 0 of the revised
+    # FT_TKE_Summary.xlsx: one row per vertical at ~0.6 x depth, numeric IDs
+    # 1501..1530), joined by ID to the DGPS positions GeoPackage (EPSG:25832).
+    #
+    # USE THE -zcorrected LAYER. The raw dgps-flowtracker-kb15-sept25.gpkg stores
+    # the GNSS **ANTENNA** elevation in z, not the bed: the rover pole was 2.26 m
+    # for IDs 1501-1511, 2.51 m for 1512 and 2.70 m for 1513-1530. The corrected
+    # layer subtracts those (x/y identical) and carries z_raw_antenna,
+    # pole_height and wse_implied as the audit trail. The pole heights were
+    # recovered from the flat-water-surface condition and hold to +/-2 cm within
+    # each pool. NEVER join targets to the raw layer's z - doing so put the 2026
+    # OpenFOAM calibration targets ~2.3 m above the water, where HydroBayesCal's
+    # cutoff-free nearest-point search silently returned ~0.003 m/s.
+    # `axqua check-gt` now refuses this class of error.
+    - { category: hydraulics, kind: flowtracker, join_key: ID,
+        values: user-sources/ground-truth/hydraulics/FT_TKE_Summary.xlsx,
+        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-kb15-sept25-zcorrected.gpkg }
+
+calibration:
+  # calibration target set by run_Bayes_cal.py: SCALAR VELOCITY (FlowTracker at
+  # 0.6 x depth ~ depth-averaged velocity); WATER DEPTH is extracted alongside.
+  # Combined water-level + velocity calibration (July 2026): WATER DEPTH_DATA
+  # carries the bathymetry-corrected water-level target (WSE_measured - model
+  # bed), SCALAR VELOCITY the profile-averaged FlowTracker speed with a
+  # structural discrepancy error term - see prepare_corrected_targets.py.
+  calibration_quantities: ["WATER DEPTH", "SCALAR VELOCITY"] # measured columns used for calibration
+  extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]  # quantities pulled from results
+  measurement_error: 0.10      # fraction of the measured value
+  # initial design of experiments: Sobol sequence over the 3D parameter space
+  # (a factorial grid would degenerate to the cube corners at 8-16 samples),
+  # then Bayesian Active Learning adds up to (max_runs - init_runs) more.
+  parameter_sampling_method: sobol
+  # August 2026 re-start on the 6-zone roughness map (5 calibrated parameters:
+  # zones 1/3/4/5 + VELOCITY DIFFUSIVITY). HydroBayesCal >= 1.5 sizes the initial
+  # design at ~10 runs per parameter (5 -> 50, rounded to 64 for a balanced Sobol
+  # block) and grows it adaptively from 2**ceil(log2(4*n)) = 32, stopping as soon
+  # as the GP is measurably sufficient. init_runs is the CEILING, so the ladder can
+  # only save simulations - the ones it saves become BAL iterations.
+  init_runs: 64                # ceiling for the initial design (adaptive ladder starts at 32)
+  max_runs: 88                 # total runs (initial + active-learning iterations)
+  gp_library: gpy
+  # ROUGHNESS ZONES ARE NOT LISTED HERE. They come from geodata.roughness_table
+  # (columns zone_id, ks_min, ks_max, calibration): every zone flagged
+  # calibration=True becomes a `zone<N>` parameter over [ks_min, ks_max], so the
+  # zonation is defined in exactly one place. Only NON-zone parameters belong below.
+  #
+  # Flagged False, so pinned at their nominal (midpoint) ks:
+  #  * zone 2 - floodplain, 3% wet at Q=47 m3/s. Pinned at 0.5 m.
+  #  * zone 6 - 84% dry, median wet depth 0.042 m, i.e. the flow depth is BELOW the
+  #    roughness height over the whole [0.01, 0.3] prior, where the Nikuradse law
+  #    has no physical meaning. Two measurement points, both in partially-wet
+  #    cells. Pinned at 0.155 m (dropped from calibration 2026-08-11).
+  # Zones 3 and 4 carry no measurement points but stay calibrated: they are wet and
+  # conveying (zone 4 is 99.5% wet and the fastest zone in the reach, a strongly
+  # dissipating patch directly upstream of the measurements), so they act on the
+  # measured points even though nothing was measured inside them.
+  #
+  # VELOCITY DIFFUSIVITY governs the lateral momentum exchange toward the slow
+  # near-bank measurement points - the misfit the July-2026 ks-only calibration
+  # could not close with roughness alone.
+  #
+  # ROUGHNESS COEFFICIENT OF BOUNDARIES was dropped after the July-2026
+  # 3-parameter run returned a completely flat marginal for it (posterior = prior):
+  # the wall friction is not identifiable from these targets, and each extra
+  # non-identifiable dimension costs ~10 initial-design runs.
+  parameters:
+    - { name: "VELOCITY DIFFUSIVITY", min: 0.001, max: 0.05,
+        comment: "ambient eddy viscosity [m2/s]; Elder ~3e-3, transverse mixing ~0.02" }
+    # --- OpenFOAM only (run_Bayes_cal_openfoam.py) ------------------------------
+    # The two calibrations share this list and each takes only its own: the TELEMAC
+    # emitter drops ks/Cmu (calibration.telemac_parameters) and the OpenFOAM one
+    # drops zone<N> and the .cas keywords (openfoam.calibration.openfoam_parameters).
+    # NOTE ks here is ONE GLOBAL VALUE for the whole bed - HydroBayesCal's OpenFOAM
+    # binding has no per-zone roughness - so it is NOT comparable with the zone1/3/4/5
+    # posterior of the 2D calibration and must not be reported beside it.
+    # The prior spans the wetted range of roughness-table.csv (0.05-0.30 m).
+    - { name: "ks", min: 0.02, max: 0.30,
+        comment: "OpenFOAM bed Nikuradse Ks [m], nutkRoughWallFunction; one global value" }
+    - { name: "Cmu", min: 0.06, max: 0.12,
+        comment: "k-epsilon eddy-viscosity constant [-]; standard 0.09" }
+    # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+
+
+# ---------------------------------------------------------------------------- #
+# OpenFOAM (interFoam) - the 3D free-surface extension
+# ---------------------------------------------------------------------------- #
+# Built and calibrated by openfoam_preprocessing.py / run_Bayes_cal_openfoam.py /
+# openfoam_verify_posterior.py. Everything here is additive: the TELEMAC path does
+# not read this block.
+openfoam:
+  # OpenFOAM Foundation 9, built from source on this machine with g++-10 and the
+  # system OpenMPI. It must be the FOUNDATION line, not ESI/openfoam.com: aXqua
+  # writes constant/momentumTransport, system/fvConstraints and a
+  # "Gauss interfaceCompression vanLeer" alpha scheme, all of which are Foundation
+  # spellings.
+  # NO bashrc here on purpose. aXqua now writes ESI OpenFOAM dictionaries
+  # (constant/turbulenceProperties with RASModel, system/fvOptions, cAlpha in
+  # fvSolution), which Foundation OpenFOAM does not read. Which ESI install to
+  # source is a property of the machine, not of this case, so it comes from
+  # axqua.core.machine: $AXQUA_OPENFOAM_BASHRC, a case-local solvers.local.yml,
+  # or ~/.config/axqua/solvers.yml. Naming a path here would hard-code one
+  # machine's layout into the repository.
+  n_processors: 8
+
+  pre_run:
+    # This case already has a converged 2.3 GB r2d.slf from initial_run.py, which
+    # is worth far more as a seed than any fresh coarse run, so reuse it and never
+    # start TELEMAC from here.
+    enabled: true
+    reuse: true
+    dimension: 2d
+    require: warn
+
+  # --- what is solved --------------------------------------------------------
+  # The CALIBRATION campaign overrides these to rigid-lid at cell_size_factor 4
+  # (see run_Bayes_cal_openfoam.py); the values below are the PRODUCTION case that
+  # openfoam_preprocessing.py and openfoam_verify_posterior.py build - two-phase,
+  # with a free surface, because that is what the campaign's rigid lid gives up
+  # and what the verification run exists to check.
+  mode: vof
+  cell_size: 1.5          # [m] plan lattice. The KB15 ROI is 320,290 m2: at 0.5 m
+                          # this is ~6 M cells, which is a production run but not
+                          # something to build casually.
+  n_layers: 12
+
+  domain: wetted          # trim to the 2D wetted extent + wet_margin
+  wet_margin: 5.0
+  align_to_flow: true     # rotate the lattice onto the reach's principal axis
+
+  lid: follow             # the lid tracks the 2D free surface + freeboard
+  freeboard: 0.5
+  headroom_mode: auto     # size freeboard/wet_margin from the seed's own flow
+
+  auto_bed_layer: true    # pin the bed layer to ~2x the wetted median ks
+  # k-epsilon, NOT the kOmegaSST default: the calibration perturbs kEpsilonCoeffs,
+  # which only exist under this closure. Keeping the production case on the same
+  # closure is what makes the calibrated coefficients mean anything here.
+  turbulence: kEpsilon
+
+  spinup_time: 30.0
+  end_time: 300.0
+  max_courant: 0.9
+  spinup_courant: 0.3
+  write_interval: 10.0
+
+
+# ---------------------------------------------------------------------------- #
+# Post-processing (VisIt)
+# ---------------------------------------------------------------------------- #
+# Driven by postprocessing.py / `axqua postproc`. VisIt ships its own Python, so
+# axqua generates a script and runs it with `visit -cli -nowin -s` rather than
+# importing anything - `visit` below is the LAUNCHER executable, which is why it
+# is not spelled like telemac.pysource / openfoam.bashrc.
+postproc:
+  # The VisIt launcher is a setting of the computer: see `axqua profile`.
+  backend: visit
+  scenes: ["free-surface", "velocity-plan", "profiles"]
+  image_width: 1600
+  image_height: 1000

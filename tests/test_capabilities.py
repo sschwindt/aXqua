@@ -46,14 +46,14 @@ def test_unsupported_capability_reports_no_further_axes():
 
 
 def test_not_applicable_is_distinct_from_not_implemented():
-    """OpenFOAM has no depth-averaged mode (n/a); it has no morphodynamics *yet* (no).
-    Reporting both as 'no' would tell a user to wait for something that is never
-    coming."""
+    """OpenFOAM has no depth-averaged mode (n/a); it has no mesh convergence study
+    *yet* (no). Reporting both as 'no' would tell a user to wait for something that is
+    never coming."""
     from axqua.solvers.openfoam.spec import SPEC as openfoam
     from axqua.solvers.telemac.spec import SPEC as telemac
 
     assert openfoam.support(Capability.STEADY2D) is Support.NOT_APPLICABLE
-    assert openfoam.support(Capability.MORPHODYNAMICS) is Support.NOT_IMPLEMENTED
+    assert openfoam.support(Capability.MESH_CONVERGENCE) is Support.NOT_IMPLEMENTED
     assert telemac.support(Capability.FREE_SURFACE_3D) is Support.NOT_APPLICABLE
     assert telemac.support(Capability.MORPHODYNAMICS) is Support.SUPPORTED
 
@@ -173,8 +173,12 @@ def test_both_builtin_backends_are_registered():
 def test_supporting_answers_which_code_can_do_this():
     morph = [s.name for s in registry.supporting(Capability.MORPHODYNAMICS)]
     vof = [s.name for s in registry.supporting(Capability.FREE_SURFACE_3D)]
-    assert morph == ["telemac"]
+    unsteady = [s.name for s in registry.supporting(Capability.UNSTEADY2D)]
+    # both, and not the same thing: a bed that moves with GAIA, and fine sediment
+    # over a bed that stays in place with OpenFOAM
+    assert sorted(morph) == ["openfoam", "telemac"]
     assert vof == ["openfoam"]
+    assert unsteady == ["telemac"]
 
 
 def test_registering_a_third_party_backend():
@@ -392,3 +396,65 @@ def test_openfoam_does_not_import_the_telemac_backend():
                 offenders.append(f"{path.name}:{number}: {line.strip()}")
     assert not offenders, ("the OpenFOAM backend reaches into TELEMAC:\n  "
                            + "\n  ".join(offenders))
+
+
+def test_openfoam_does_not_import_the_telemac_calibration_adapter():
+    """``axqua.bayescal`` is the TELEMAC calibration adapter, not shared plumbing.
+
+    It does not live under ``solvers/telemac/``, so the sibling check above cannot
+    see it - but importing it from the OpenFOAM backend would leak TELEMAC's .cas
+    rewriting and its pysource launch into OpenFOAM's calibration path just the
+    same. What the two share is ``axqua.hbc``, which is deliberately solver-neutral.
+    """
+    import pathlib
+    import re
+
+    root = (pathlib.Path(__file__).resolve().parent.parent / "src" / "axqua"
+            / "solvers" / "openfoam")
+    offenders = []
+    for path in root.rglob("*.py"):
+        for number, line in enumerate(path.read_text().splitlines(), 1):
+            # import statements only: a docstring cross-reference naming where the
+            # TELEMAC half lives is documentation worth having, not a dependency.
+            if re.match(r"\s*(from|import)\s+axqua\.bayescal\b", line):
+                offenders.append(f"{path.name}:{number}: {line.strip()}")
+    assert not offenders, (
+        "the OpenFOAM backend imports the TELEMAC calibration adapter; use "
+        "axqua.hbc for the shared parts:\n  " + "\n  ".join(offenders))
+
+
+def test_the_case_carries_how_its_results_are_drawn(tmp_path):
+    """The depth below which water is not surface flow, and the top of the velocity
+    colour scale, are properties of the REACH. They used to be per-install settings of
+    the QGIS plugin, which meant a map could be drawn to a different threshold than the
+    report beside it used - munich-vsf sets wet_depth 0.005 against the 0.01 default,
+    so that was not hypothetical."""
+    from axqua.core.capabilities import _display_settings
+
+    class _Cfg:
+        class hydrodynamics:
+            wet_depth = 0.005
+
+        class postproc:
+            velocity_scale_max = 12.0
+
+    assert _display_settings(_Cfg()) == {"wet_depth": 0.005,
+                                         "velocity_scale_max": 12.0}
+
+
+def test_a_config_without_those_fields_still_answers():
+    """`capabilities` is imported to say what a case can do and must not fail on an
+    older config; the answer falls back to the defaults of the two settings."""
+    from axqua.core.capabilities import _display_settings
+
+    assert _display_settings(object()) == {"wet_depth": 0.01,
+                                           "velocity_scale_max": 5.0}
+
+
+def test_the_display_block_reaches_the_json_the_plugin_reads():
+    from axqua.core.capabilities import CaseStatus
+
+    status = CaseStatus(case_dir="/tmp/case",
+                        display={"wet_depth": 0.02, "velocity_scale_max": 8.0})
+    assert status.as_dict()["display"] == {"wet_depth": 0.02,
+                                           "velocity_scale_max": 8.0}

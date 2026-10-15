@@ -3,7 +3,7 @@
 Turns the steady case built by ``preprocessing.py`` + ``initial_run.py`` into a
 hydrograph-driven **quasi-steady** run, hotstarted from the converged 2D result
 ``r2d.slf`` (see ``axqua.unsteady``). The flood wave Q(t) comes from THIS case's
-``boundaries.inflow`` time series in ``case-config.yml`` (a varying discharge - a
+``boundaries.inflow`` time series in ``isar-2025.axq-case`` (a varying discharge - a
 constant Q is the steady case). axqua's generated ``boundaries.cli`` is reused
 unchanged: the inflow discharge is driven by the ``LIQUID BOUNDARIES FILE`` and the
 downstream water level by its prescribed elevation / rating, so there is no manual
@@ -32,7 +32,7 @@ from axqua import (build_unsteady_3d_case, build_unsteady_case,
 from axqua.config import load_config
 from axqua.env import TelemacRuntime
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "isar-2025.axq-case"
 cfg = load_config(CONFIG)
 
 # ---- user options (edit these) ------------------------------------------------
@@ -43,7 +43,7 @@ CONTROL_SECTIONS = True   # write CONTROL SECTIONS (per-boundary flux verificati
 # to whichever run is built here - the unsteady 2D case (MODE_3D=False) or the
 # unsteady 3D case (MODE_3D=True); a flood wave is what reworks the bed. Suspended
 # load is transported as TELEMAC tracers through the coupling. Needs sediment classes
-# (morphodynamics.sediment_classes) in case-config.yml; the bed-process capacities
+# (morphodynamics.sediment_classes) in isar-2025.axq-case; the bed-process capacities
 # (morphological_factor, slope_effect, secondary_currents, active_layer_thickness,
 # prescribed_solid_discharges) also come from that morphodynamics block.
 GAIA_ENABLED = False      # master switch for morphodynamics

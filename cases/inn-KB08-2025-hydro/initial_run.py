@@ -15,7 +15,7 @@ imbalance and its convergence rate) -- and reports the simulation time at which 
 boundary fluxes reach mass balance to the hotstart tolerance (1e-4; 0.01% imbalance).
 See ``axqua.flux_convergence``.
 
-Needs ``telemac.pysource`` in case-config.yml to point at a real TELEMAC env.
+Needs a TELEMAC binding in the profile of this computer (``axqua profile``).
 Run: mamba run -n axqua-env python cases/example-Inn/initial_run.py
 """
 
@@ -34,11 +34,11 @@ from axqua.config import load_config
 from axqua.env import TelemacRuntime
 from axqua.flux_convergence import HOTSTART_TOLERANCE, analyze_flux_convergence
 
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+CONFIG = Path(__file__).resolve().parent / "inn-KB08-2025-hydro.axq-case"
 cfg = load_config(CONFIG)
 
 # Number of parallel MPI processes for this test run. None -> use the core
-# count assigned in preprocessing (case-config.yml telemac.n_processors);
+# count assigned in preprocessing (inn-KB08-2025-hydro.axq-case telemac.n_processors);
 # set an integer here to override it for this run only (e.g. NCSIZE = 8).
 NCSIZE: int | None = None
 

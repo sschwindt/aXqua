@@ -244,7 +244,10 @@ def run_solver_streaming(runtime: TelemacRuntime, cfg: Config, *,
     run or a hydrograph-spanning unsteady run), else :func:`expected_duration`.
     *cwd* overrides the run folder (default ``cfg.model_dir`` - the convergence
     studies run each level in its own subfolder). Returns the ``CompletedProcess``
-    (its ``returncode`` reports success/failure; a non-zero exit does not raise).
+    (its ``returncode`` reports success/failure; a non-zero exit does not raise). A run
+    that TELEMAC-2D ended itself because a value left its limits comes back as a
+    failure too, although TELEMAC reports it as a correct end: see
+    :func:`_fail_on_limit_stop`.
 
     *sink* is an event sink (:mod:`axqua.jobs.events`): the same parsed iteration
     and simulated time that drive the terminal bar are also emitted as structured
@@ -261,14 +264,64 @@ def run_solver_streaming(runtime: TelemacRuntime, cfg: Config, *,
     # structured progress even though it has no terminal to draw a bar on.
     progress = (SolverProgress(duration, sink=sink, echo=show_progress)
                 if (show_progress or sink is not None) else None)
-    on_line = progress.feed if progress else print
+    from axqua.solvers.telemac.sortie import LIMIT_STOP
+
+    feed = progress.feed if progress else print
+    stopped_on_limits: list[str] = []
+
+    def on_line(line: str) -> None:
+        if LIMIT_STOP in line:
+            stopped_on_limits.append(line)
+        feed(line)
+
+    run_dir = Path(cwd or cfg.model_dir)
     try:
-        return runtime.run_solver(cas_file, cwd=cwd or cfg.model_dir, ncsize=ncsize,
+        proc = runtime.run_solver(cas_file, cwd=run_dir, ncsize=ncsize,
                                   solver=solver, check=False, on_line=on_line,
                                   should_stop=should_stop)
     finally:
         if progress is not None:
             progress.close()
+    if stopped_on_limits:
+        _fail_on_limit_stop(proc, run_dir, Path(cas_file).name,
+                            progress.time if progress is not None else None)
+    return proc
+
+
+#: The return code of a run that TELEMAC-2D stopped on its limits
+#: (:data:`axqua.solvers.telemac.sortie.LIMIT_STOP`). TELEMAC's own ``plante.F`` uses 2
+#: for a "controlled" stop on an error, which is what this is.
+LIMIT_STOP_CODE = 2
+
+#: What to do about it, in the words every caller can pass on.
+LIMIT_STOP_REMEDY = (
+    "A value of that size is a numerical instability, not a flow. Look at the mesh, "
+    "the bed and the initial water depth at that position. Common causes are a sink "
+    "or a liquid boundary on nearly dry cells, an initial water surface far from the "
+    "steady one, and a time step that is too large (hydrodynamics.desired_courant).")
+
+
+def _fail_on_limit_stop(proc, run_dir: Path, cas_name: str,
+                        time: float | None) -> None:
+    """Turn a run that TELEMAC-2D stopped on its limits into a failed run.
+
+    TELEMAC-2D treats this as a programmed stop: it prints ``CORRECT END OF RUN`` and
+    exits with code 0, although the velocities had just left the range of a river by
+    three orders of magnitude. Every caller judges a run by its return code, so the
+    code is corrected here, once, and the reason is attached as ``proc.stop_reason``
+    for a caller that can say more than a number.
+    """
+    from axqua.solvers.telemac.sortie import find_limit_stops
+
+    stops = find_limit_stops(run_dir, cas_name)
+    where = stops[0].describe() if stops else "the listing does not name the node"
+    more = f", and at {len(stops) - 1} more node(s)" if len(stops) > 1 else ""
+    when = f" at t = {time:g} s" if time is not None else ""
+    proc.stop_reason = ("TELEMAC-2D stopped the run" + when
+                        + f" because a value left its limits: {where}{more}")
+    if proc.returncode == 0:
+        proc.returncode = LIMIT_STOP_CODE
+    log.error("%s. %s", proc.stop_reason, LIMIT_STOP_REMEDY)
 
 
 # --------------------------------------------------------------------------- #

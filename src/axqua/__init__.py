@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING
 # Single source of truth: whatever was installed. The literal is the fallback for a
 # source checkout that was never `pip install`ed, and is kept in step with
 # pyproject.toml by a test.
-_FALLBACK_VERSION = "0.4.1"
+_FALLBACK_VERSION = "0.5.0"
 
 try:
     from importlib.metadata import version as _pkg_version
@@ -56,6 +56,9 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
     "core.errors": ("ConfigError", "ErrorRecord", "GeodataError",
                     "AxquaError", "MeshError", "SolverError"),
     "core.schema": ("Layer", "classify_setting"),
+    "core.casefile": ("find_case_file",),
+    "core.profile": ("AxquaProfile",),
+    "core.diagnostics": ("Finding",),
     "core.geodata": ("read_roughness_table", "read_roughness_zones", "ZoneRoughness"),
     "dem": ("clip_dem_to_roi", "clip_to_roi", "dem_of_difference", "propagated_lod",
             "resolve_lod"),
@@ -101,7 +104,7 @@ _EXPORTS: dict[str, tuple[str, ...]] = {
 # Historic module names stay listed: they are shims (see axqua/mesh.py and
 # friends) that alias the moved modules, so `from axqua import pipeline`
 # keeps working for case scripts written before the backends were split out.
-_SUBMODULES = ("core", "solvers", "campaigns", "openfoam", "config", "pipeline",
+_SUBMODULES = ("core", "solvers", "campaigns", "hbc", "openfoam", "config", "pipeline",
                "cli", "mesh", "steering", "selafin")
 
 _NAME_TO_MODULE = {name: module
@@ -113,9 +116,10 @@ _NAME_TO_MODULE = {name: module
 # tells them these names exist. tests/test_capabilities.py asserts it stays in step
 # with _EXPORTS, so the duplication cannot drift.
 __all__ = [
-    "BackendSpec", "Capability", "CapabilitySpec", "CapabilityState", "CaseStatus",
+    "AxquaProfile", "BackendSpec", "Capability", "CapabilitySpec", "CapabilityState",
+    "CaseStatus", "Finding", "find_case_file",
     "Config", "ConfigError", "ErrorRecord", "FlowSpec", "FluxConvergence",
-    "GeodataError", "AxquaError", "Layer", "MeshError", "MeshValidity",
+    "GeodataError", "AxquaError", "hbc", "Layer", "MeshError", "MeshValidity",
     "OutletProfile", "SolverError", "ZoneRoughness",
     "PhreaticPlane", "ProgressBar", "SolverBackend", "SolverProgress",
     "SeedResult", "SolverStatus", "Sortie", "Support", "WettingReport",

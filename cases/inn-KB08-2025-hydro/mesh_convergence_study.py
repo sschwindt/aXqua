@@ -30,7 +30,7 @@ and the purpose of every produced file) is written alongside, ready for data
 publication. The study creates and works in its own
 ``axqua-case/mesh-convergence/`` folder.
 
-The discharge and the outflow stage prescription come from ``case-config.yml``
+The discharge and the outflow stage prescription come from ``inn-KB08-2025-hydro.axq-case``
 (same source as preprocessing.py); each mesh is **pre-wetted**: the channel is
 seeded with ``INITIAL_DEPTH`` (0.5 m by default) of water on the nodes inside the
 ``channel`` mesh-zones, and the run is continued from that hotstart so the solver
@@ -59,8 +59,8 @@ from pathlib import Path
 from axqua import convergence, logging_to, prepare_steady_inputs
 from axqua.config import load_config
 
-# case-config.yml lives next to this script (in the case folder)
-CONFIG = Path(__file__).resolve().parent / "case-config.yml"
+# inn-KB08-2025-hydro.axq-case lives next to this script (in the case folder)
+CONFIG = Path(__file__).resolve().parent / "inn-KB08-2025-hydro.axq-case"
 cfg = load_config(CONFIG)
 
 CONV_TOLERANCE = 0.05   # GCI / relative-change goal (Celik et al. 2008: 5-10%)

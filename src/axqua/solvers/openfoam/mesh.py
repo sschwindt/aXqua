@@ -48,6 +48,14 @@ BED_PATCH = "bed"
 ATMOSPHERE_PATCH = "atmosphere"
 LID_PATCH = "lid"      # rigid-lid mode: the free surface, as a slip wall
 BANKS_PATCH = "banks"
+#: Lateral faces that bound a SOLID STRUCTURE rather than the edge of the domain.
+#: Kept apart from `banks` because the two answer opposite questions. Water against
+#: the domain edge means the footprint was drawn too tight and the result is wrong;
+#: water against a baffle is what a fish pass IS. Merged, the `wallContact` monitor
+#: reported 44.8% on munich-vsf and was read as "the domain stopped the flow
+#: spreading" - on a geometry whose 20 baffles were already 41.5% wet in the seed,
+#: at t=0, before a single 3D step.
+STRUCTURES_PATCH = "structures"
 INLET_PREFIX = "inlet"
 OUTLET_PREFIX = "outlet"
 
@@ -123,7 +131,8 @@ def flow_angle(cfg: Config) -> float:
 
 
 def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
-                    max_columns: int = 4_000_000, blocked=None) -> PlanGrid:
+                    max_columns: int = 4_000_000, blocked=None,
+                    blocked_by_structures: bool = True) -> PlanGrid:
     """Lay a uniform lattice of spacing *dx* over *polygon* (a shapely geometry).
 
     A column is kept when its centre lies inside the polygon; the kept set is then
@@ -131,6 +140,19 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
     is a single block with no interior voids (an interior void would become a
     spurious internal wall, and a detached island a disconnected mesh region that
     ``decomposePar`` and the pressure solve both dislike).
+
+    *blocked* is geometry to cut out of the footprint. Under a rigid lid that is not
+    only the solid structures: the **dry** part of the reach is cut out too, because
+    a column with no water in it has nothing to mesh. *blocked_by_structures* says
+    which, and exists only so the diagnostics name the right cause - a braided reach
+    routinely loses a few pockets to the dry trim, and reporting that as "a solid
+    structure has cut the domain in two" sends the reader looking for a wall that was
+    never drawn. Measured on inn-KB15, which has no structures at all: 2 blocks, 51
+    columns dropped, blamed on a structure.
+
+    It defaults to True so that a caller who cuts out geometry and says nothing still
+    gets the warning - being told about a wall that turns out to be a dry bar is a
+    smaller failure than not being told the domain was severed.
     """
     import shapely
     from scipy import ndimage
@@ -163,24 +185,73 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
         # AFTER the hole fill, never before: a building punched out of the domain is
         # exactly the interior void that binary_fill_holes exists to close, so
         # blanking first would simply be undone.
-        solid = shapely.contains_xy(blocked, world[:, 0], world[:, 1]).reshape(ny, nx)
+        # A column is blanked when the solid INTERSECTS ITS CELL SQUARE, not when it
+        # contains the cell centre.
+        #
+        # Testing the centre lets a wall thinner than dx - or one that merely passes
+        # between two rows of centres - block nothing at all, and the mesh then joins
+        # the two sides of it. A structure is there precisely because its two sides
+        # are at different levels, so such a hole carries the whole head difference:
+        # on munich-vsf (3 cm lattice, sheet-steel baffles) 8,222 columns straddled a
+        # baffle and the fish pass short-circuited itself.
+        #
+        # The first fix here dilated the solid by half a cell diagonal and tested the
+        # centre against that. It seals, but it also fattens every structure whether
+        # or not it was at risk, and on this geometry that was not a rounding error:
+        # it cut the narrowest opening across the fish pass from 2.25 m to 0.09 m,
+        # three cells, and the run built on it pressurised its upstream half to 20 m
+        # of head because the water had nowhere to go. A 5 m weir crest on a 1 m
+        # lattice would likewise have been widened 28%, silently changing a physical
+        # parameter.
+        #
+        # Intersection gives the guarantee without the fattening: a solid cannot cross
+        # a cell without intersecting it, so nothing can leak, while a structure that
+        # already spans several cells grows by strictly less than a half-diagonal. The
+        # cheap dilation is kept only as a CANDIDATE FILTER - exact intersection is
+        # then evaluated on those few thousand cells rather than on all of them.
+        half = float(dx) / 2.0
+        near = shapely.contains_xy(blocked.buffer(float(dx) * np.sqrt(2.0) / 2.0),
+                                   world[:, 0], world[:, 1])
+        cand = np.flatnonzero(near)
+        flat = np.zeros(world.shape[0], dtype=bool)
+        if cand.size:
+            # Axis-aligned in the GRID frame, then rotated, so the test stays exact
+            # when align_to_flow has turned the lattice off the world axes.
+            corners = np.array([[-half, -half], [half, -half],
+                                [half, half], [-half, half]]) @ rot.T
+            squares = shapely.polygons(
+                world[cand][:, None, :] + corners[None, :, :])
+            flat[cand] = shapely.intersects(blocked, squares)
+        solid = flat.reshape(ny, nx)
+        leaky = int((keep & solid).sum()) - int(
+            (keep & shapely.contains_xy(blocked, world[:, 0],
+                                        world[:, 1]).reshape(ny, nx)).sum())
         removed = int((keep & solid).sum())
         keep = keep & ~solid
         if removed:
-            log.info("plan grid: %d columns removed by solid structures (%.0f m2)",
-                     removed, removed * dx * dx)
+            # Same count, honest attribution: under a rigid lid `blocked` carries the
+            # dry part of the reach as well as the structures, and calling a trimmed
+            # gravel bar a "solid structure" is how a reader goes looking for a wall
+            # that was never drawn.
+            what = ("solid structures" if blocked_by_structures
+                    else "the blanking footprint")
+            log.info("plan grid: %d columns removed by %s (%.0f m2), "
+                     "of which %d come from sealing them to the lattice (a column is "
+                     "blanked where the geometry crosses its %.3f m cell, so none of "
+                     "them leak)",
+                     removed, what, removed * dx * dx, leaky, float(dx))
     labels, n = ndimage.label(keep)          # 4-connectivity (the default structure)
     if n > 1:
         sizes = ndimage.sum(keep, labels, range(1, n + 1))
         largest = labels == (int(np.argmax(sizes)) + 1)
         dropped = int(keep.sum() - largest.sum())
         keep = largest
-        level = log.warning if (blocked is not None and dropped) else log.info
+        by_structure = blocked_by_structures and dropped
+        level = log.warning if by_structure else log.info
         level("plan grid: kept the largest of %d connected blocks (%d columns, "
               "%d dropped)%s", n, int(keep.sum()), dropped,
               " - a solid structure has cut the domain in two; check that a wall was "
-              "not drawn right across the channel" if blocked is not None and dropped
-              else "")
+              "not drawn right across the channel" if by_structure else "")
     if not keep.any():
         raise ValueError("the plan lattice has no column inside the domain polygon; "
                          "check openfoam.cell_size against the domain size")
@@ -280,6 +351,11 @@ class OpenFoamMesh:
     column_uv: np.ndarray | None = None       # (n_columns, 2) hotstart depth-averaged U
     bed_ks: np.ndarray | None = None          # (n bed faces,) Nikuradse ks per bed face
     rigid_lid: bool = False                   # water-only domain under a slip lid
+    #: :func:`lid_steps` of the lid this mesh was built with - the rigid lid's
+    #: applicability test, kept rather than logged and forgotten. `None` under a
+    #: two-phase lid, where the surface is solved and the question does not arise.
+    lid_step_median: float | None = None
+    lid_step_p99: float | None = None
     inlet_patches: list[str] = field(default_factory=list)
     outlet_patches: list[str] = field(default_factory=list)
     inlet_discharge: dict[str, float] = field(default_factory=dict)
@@ -288,6 +364,19 @@ class OpenFoamMesh:
     @property
     def n_cells(self) -> int:
         return self.polymesh.n_cells
+
+    @property
+    def wall_patches(self) -> list[str]:
+        """Every no-slip wall patch: the bed, the domain edge, the structure sides.
+
+        Read off the mesh that was actually built rather than listed as a constant,
+        because `structures` exists only when the case has solid structures to blank.
+        The top patch is excluded even under a rigid lid, where it IS a wall: an
+        air-water interface carries negligible shear, so it takes slip.
+        """
+        top = self.top_patch
+        return [p.name for p in self.polymesh.patches
+                if p.type == "wall" and p.name != top]
 
     @property
     def top_patch(self) -> str:
@@ -471,6 +560,90 @@ def extrude(grid: PlanGrid, bed: np.ndarray, lid: np.ndarray, n_layers: int, *,
 # --------------------------------------------------------------------------- #
 
 
+def _tailwater_for(cfg, patch: str, tailwater: float | None = None):
+    """The level this outlet holds, or None when the case prescribes none.
+
+    ``openfoam.outlet_stage`` first, then *tailwater*, the level the build resolved
+    from the outflow condition of the case (under ``stage_discharge`` the rating
+    curve at the discharge of the build, which ``prescribed_elevation`` does not
+    hold), then ``boundaries.prescribed_elevation``.
+    """
+    stage = getattr(cfg.openfoam, "outlet_stage", None)
+    if isinstance(stage, dict):
+        stage = stage.get(patch)
+    if stage is None:
+        stage = tailwater
+    if stage is None:
+        stage = getattr(cfg.boundaries, "prescribed_elevation", None)
+    return None if stage is None else float(stage)
+
+
+def split_outlet_above_tailwater(owner, cell_centres, stage, margin, *,
+                                 cell_size=0.0):
+    """``(open faces, walled faces)`` for one outlet, split at the tailwater.
+
+    An outlet spans bed to lid. Below the tailwater it passes water, which is what it
+    is for; above, it is an open pressure boundary to AIR - and the lid is open too,
+    so the air phase gets a circulation loop through the domain with nothing setting
+    its rate. On munich-vsf that loop grew from 7.0 to 9.7 m3/s, about 7.5 m/s through
+    a 1.28 m2 face, and once it was large enough it reversed the outlet and dragged
+    water in with it. Every leg - 0.045 m, 0.030 m, MULES and isoAdvector alike - lost
+    its result the same way at about t=40, and the leak was at the downstream end
+    where the water had backed up 28 cm above the stage it was supposed to hold.
+
+    A face is placed by its owner cell's centre, which is the only elevation a lateral
+    face has here. The margin is what keeps this from becoming a weir: the surface at
+    the crop face must still be free to move.
+    """
+    z = np.asarray(cell_centres, dtype=float)[np.asarray(owner), 2]
+    ceiling = float(stage) + float(margin)
+    walled = z > ceiling
+    if walled.all():
+        # every face above the line: the stage is below the whole patch, which is a
+        # configuration error rather than something to silently act on
+        log.warning(
+            "outlet: the tailwater %.3f m + margin %.3f m is below every face of the "
+            "patch (lowest %.3f m); leaving it fully open rather than sealing the "
+            "only way out of the domain", stage, margin, z.min())
+        return np.ones(z.shape, dtype=bool), np.zeros(z.shape, dtype=bool)
+    open_span = float(np.ptp(z[~walled])) if (~walled).any() else 0.0
+    if cell_size and (~walled).any() and open_span < 2 * cell_size:
+        log.warning(
+            "outlet: only %.3f m of it stays open (tailwater %.3f + margin %.3f), "
+            "under two cells. Raise openfoam.outlet_air_margin, or the outflow is "
+            "squeezed through a slot.", open_span, stage, margin)
+    return ~walled, walled
+
+
+def split_structure_sides(midpoints: np.ndarray, banks: np.ndarray,
+                          blocked, dx: float) -> tuple[np.ndarray, np.ndarray]:
+    """Split the lateral wall faces into ``(domain edge, structure sides)``.
+
+    The two answer opposite questions, which is the whole reason to separate them.
+    Water against the domain edge means the footprint was drawn too tight and the
+    result is not trustworthy; water against a baffle is a vertical-slot fish pass
+    working as designed. Merged into one ``banks`` patch they are indistinguishable,
+    and on munich-vsf the combined monitor read 44.8% and was reported as "the
+    footprint stopped the flow spreading" - on a geometry whose twenty baffles were
+    already 41.5% wet in the TELEMAC seed, at t=0, before a single 3D step was taken.
+
+    A face belongs to a structure when its midpoint falls on the blanked footprint
+    grown by half a cell diagonal. The slack is needed, not cosmetic: the face lies
+    on the *boundary* of the blanked columns rather than inside them, and blanking
+    is by cell-square intersection, so a face can legitimately stand that far from
+    the solid it bounds. Growing by more would start claiming the domain edge where
+    a structure happens to sit against it.
+    """
+    import shapely
+
+    on_structure = np.zeros(banks.shape, dtype=bool)
+    if blocked is not None and not blocked.is_empty and banks.any():
+        mid = midpoints[banks]
+        near = blocked.buffer(float(dx) * np.sqrt(2.0) / 2.0)
+        on_structure[banks] = shapely.contains_xy(near, mid[:, 0], mid[:, 1])
+    return banks & ~on_structure, on_structure
+
+
 def classify_sides(cfg: Config, midpoints: np.ndarray,
                    tolerance: float) -> tuple[np.ndarray, list[str], dict[str, float]]:
     """Tag each exposed lateral face as an inlet, an outlet, or a bank wall.
@@ -489,6 +662,7 @@ def classify_sides(cfg: Config, midpoints: np.ndarray,
     labels = np.full(midpoints.shape[0], BANKS_PATCH, dtype=object)
     names: list[str] = []
     discharges: dict[str, float] = {}
+    cfg = _with_submodel_boundaries(cfg)
     if cfg.boundaries.liquid_boundaries is None or midpoints.shape[0] == 0:
         return labels, names, discharges
 
@@ -625,14 +799,108 @@ def resolve_margin(cfg: Config, state) -> float:
     return float(state.lateral_margin(of.wet_margin, bank_slope=of.bank_slope))
 
 
+def resolve_lid(cfg: Config, grid: PlanGrid, bed: np.ndarray,
+                wse_v: np.ndarray | None, freeboard: float, *,
+                notes: list[str] | None = None) -> np.ndarray:
+    """The lid elevation at every plan vertex [m a.s.l.].
+
+    Four cases, and which one applies decides what the model can say about the water
+    surface:
+
+    * **rigid lid** - the lid *is* ``wse_v``, the converged 2D free surface, sampled
+      per vertex. Sloping, stepped, and prescribed: no freeboard, because a freeboard
+      would be air;
+    * **``lid: follow`` with a 2D seed** - a freeboard above that same surface, then
+      smoothed, so most air cells never exist but the surface can still move;
+    * **``lid: flat``, or no seed at all** - a horizontal plane over the whole reach,
+      which is correct and carries the full air column;
+    * **``lid_elevation``** - pinned where the case says, in any mode.
+
+    The floor keeps the column from closing onto the bed: ``min_water_depth`` under a
+    rigid lid, ``min_column_height`` otherwise.
+    """
+    of = cfg.openfoam
+    rigid = of.mode == "rigid-lid"
+    notes = notes if notes is not None else []
+    if wse_v is not None:
+        lid = wse_v + freeboard
+    else:
+        lid = np.full_like(bed, float(np.nanmax(bed)) + of.freeboard)
+        notes.append("no 2D hotstart: flat lid, so the domain carries the full air column")
+    if rigid:
+        # The lid IS the free surface. No freeboard, because a freeboard would be air.
+        lid = np.where(np.isfinite(wse_v), wse_v, bed)
+        notes.append("lid placed on the 2D free surface (freeboard ignored)")
+    if of.lid == "flat" and not rigid:
+        lid = np.full_like(lid, float(np.nanmax(lid)))
+        notes.append(f"flat lid at {lid[0]:.3f} m a.s.l.")
+    if of.lid_elevation is not None:
+        lid = np.full_like(lid, float(of.lid_elevation))
+        notes.append(f"lid pinned to the configured {of.lid_elevation:g} m a.s.l.")
+    floor = of.min_water_depth if rigid else of.min_column_height
+    lid = np.maximum(lid, bed + floor)
+    if of.lid == "follow" and not rigid:
+        lid = _smooth_lid(grid, lid, passes=of.lid_smoothing, dilate=of.lid_dilation)
+        lid = np.maximum(lid, bed + of.min_column_height)
+    # Under a rigid lid the lid IS the converged 2D free surface: already smooth, and
+    # smoothing it again only pushes it into the bed in steep places, where the
+    # re-clamp then leaves a kink that inverts cells.
+    return lid
+
+
+def resolve_layers(cfg: Config, bed_ks: np.ndarray | None,
+                   column_height: np.ndarray | None = None, *,
+                   notes: list[str] | None = None) -> int:
+    """Sigma layers per column, after the rigid-lid roughness check.
+
+    Under a rigid lid the layers span the WATER only (isar: 0.2-1.0 m), not water plus
+    freeboard (0.7-1.8 m), so a count carried over from a two-phase case gives cells
+    three to four times thinner. Past a point they are thinner than the grains on the
+    bed - meaningless, and thin enough that the bed's variation within one plan cell
+    folds them, which ``checkMesh`` rejects as incorrectly oriented face pyramids.
+
+    The check is sized on the SHALLOWEST meshed column (``min_water_depth``), so a
+    reach whose typical column is much deeper than that floor pays for its own
+    margins. ``openfoam.auto_layers: false`` says the case has looked at that trade and
+    wants its layer count anyway; the note then records what it costs in the shallow
+    columns, which is where the folded cells would appear.
+    """
+    of = cfg.openfoam
+    notes = notes if notes is not None else []
+    n_layers = int(of.n_layers)
+    if of.mode != "rigid-lid":
+        return n_layers
+    thinnest = float(np.nanmedian(bed_ks)) if bed_ks is not None else 0.05
+    thinnest = max(thinnest, 0.05)
+    fit = max(2, int(of.min_water_depth / thinnest))
+    if fit >= n_layers:
+        return n_layers
+    if of.auto_layers is not False:
+        notes.append(
+            f"{n_layers} layers reduced to {fit}: the shallowest meshed column is "
+            f"{of.min_water_depth:g} m, and {n_layers} layers would make cells "
+            f"thinner than the bed roughness ({thinnest:.3f} m)")
+        return fit
+    typical = (float(np.nanmedian(column_height)) if column_height is not None
+               else float(of.min_water_depth))
+    notes.append(
+        f"auto_layers: false - keeping {n_layers} layers where the roughness would "
+        f"allow {fit}. Over the median {typical:.2f} m column that is "
+        f"{typical / n_layers:.3f} m cells, but in the shallowest meshed column "
+        f"({of.min_water_depth:g} m) it is {of.min_water_depth / n_layers:.3f} m "
+        f"against a {thinnest:.3f} m bed roughness - check the quality report for "
+        "folded cells there")
+    return n_layers
+
+
 def _domain_polygon(cfg: Config, state, *, domain: str, wet_margin: float,
                     wet_depth: float):
     """The plan footprint the lattice covers: the ROI, or the wetted corridor."""
     from shapely.ops import unary_union
 
-    roi = dataset(cfg).roi_polygon()
+    roi, roi_label = _openfoam_roi(cfg)
     if domain == "roi" or state is None:
-        return roi, "the full ROI boundary"
+        return roi, roi_label
     wet = state.wet_footprint(wet_depth=wet_depth, buffer=wet_margin)
     if wet is None or wet.is_empty:
         log.warning("no wetted footprint in the 2D result; meshing the full ROI")
@@ -643,7 +911,56 @@ def _domain_polygon(cfg: Config, state, *, domain: str, wet_margin: float,
     if clipped.geom_type == "MultiPolygon":
         clipped = max(clipped.geoms, key=lambda g: g.area)
     return clipped, (f"the 2D wetted extent (H > {wet_depth:g} m) buffered by "
-                     f"{wet_margin:g} m, clipped to the ROI")
+                     f"{wet_margin:g} m, clipped to {roi_label}")
+
+
+def _with_submodel_boundaries(cfg: Config) -> Config:
+    """*cfg*, with the sub-model's own liquid lines in place of the case's.
+
+    A cropped OpenFOAM domain no longer touches the boundaries the reach enters and
+    leaves by, so it carries its own - swapped in here rather than in the case config,
+    which the 2D run is converged against.
+    """
+    override = getattr(cfg.openfoam, "liquid_boundaries", None)
+    if not override:
+        return cfg
+    import copy
+    local = copy.copy(cfg)
+    local.boundaries = copy.copy(cfg.boundaries)
+    local.boundaries.liquid_boundaries = Path(override)
+    return local
+
+
+def _openfoam_roi(cfg: Config):
+    """(polygon, label) for the ROI the OpenFOAM domain is cut from.
+
+    ``openfoam.roi`` overrides the case boundary so a sub-model - a structure, a fish
+    pass - can be meshed in 3D without the uniform channel above and below it, while
+    the 2D case keeps the full reach it was built and converged on.
+    """
+    override = getattr(cfg.openfoam, "roi", None)
+    if not override:
+        return dataset(cfg).roi_polygon(), "the full ROI boundary"
+
+    import geopandas as gpd
+    from shapely.ops import polygonize, unary_union
+
+    path = Path(override)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"openfoam.roi points at {path}, which does not exist. It is written by "
+            "the case's own ROI helper; run that first, or unset openfoam.roi to mesh "
+            "the whole reach.")
+    gdf = gpd.read_file(path)
+    geoms = [g for g in gdf.geometry.values if g is not None and not g.is_empty]
+    if not geoms:
+        raise ValueError(f"openfoam.roi {path.name} holds no geometry")
+    if set(gdf.geom_type) & {"LineString", "MultiLineString"}:
+        polys = list(polygonize(unary_union(geoms)))
+        if not polys:
+            raise ValueError(f"{path.name}: boundary lines do not close into a polygon")
+        return max(polys, key=lambda p: p.area), f"the OpenFOAM ROI {path.name}"
+    return unary_union(geoms), f"the OpenFOAM ROI {path.name}"
 
 
 # --------------------------------------------------------------------------- #
@@ -664,19 +981,71 @@ def plan_spacing(cfg: Config) -> float:
     return float(factor) * float(geodata.nominal_channel_size(cfg))
 
 
-def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> OpenFoamMesh:
+def lid_steps(grid: PlanGrid, lid: np.ndarray, bed: np.ndarray, *,
+              radius: int = 2) -> tuple[float, float]:
+    """``(median, p99)`` of the lid's local range as a fraction of the water depth.
+
+    **The applicability test for a rigid lid**, and the one that was missing when
+    munich-vsf spent 61 hours producing a field its velocity cap was holding together.
+
+    A rigid lid is a slip *wall* at the free surface, so wherever the prescribed
+    surface drops sharply the ceiling becomes a near-vertical step and the flow
+    beneath it is squeezed through a sluice that does not exist. A real free surface
+    answers a drop by plunging; a lid cannot, so it converts the head into velocity
+    instead - ``sqrt(2 g dz)``, which for a 1 m step is 4.4 m/s in a reach whose own
+    water moves at 0.4.
+
+    Small everywhere (a few per cent) means the surface is smooth on the scale of a
+    cell and the lid is a fair approximation. Order 1 means the surface has steps as
+    large as the water is deep - a weir, a drop structure, the slots of a fish pass -
+    and those are exactly the places a rigid lid must not be used.
+    """
+    from scipy.ndimage import maximum_filter, minimum_filter
+
+    corners = column_corner_vertices(grid)
+    col_lid = lid[corners].mean(axis=1)
+    col_depth = np.maximum((lid - bed)[corners].mean(axis=1), 1e-3)
+    field = np.full(grid.col_id.shape, np.nan)
+    inside = grid.col_id >= 0
+    field[inside] = col_lid[grid.col_id[inside]]
+    size = 2 * radius + 1
+    span = (maximum_filter(np.nan_to_num(field, nan=-1e9), size)
+            - minimum_filter(np.nan_to_num(field, nan=+1e9), size))
+    per_col = np.full(grid.n_columns, np.nan)
+    per_col[grid.col_id[inside]] = span[inside]
+    ratio = per_col / col_depth
+    ratio = ratio[np.isfinite(ratio)]
+    if not ratio.size:
+        return 0.0, 0.0
+    return float(np.median(ratio)), float(np.percentile(ratio, 99))
+
+
+def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
+               tailwater: float | None = None) -> OpenFoamMesh:
     """Build the terrain-following hex mesh for *cfg*'s OpenFOAM case.
 
     *state* is an optional :class:`~axqua.solvers.openfoam.hotstart.State2D` (the
     converged TELEMAC 2D result). With one, the lid follows the free surface and the
     footprint can be trimmed to the wetted corridor; without one, the lid is flat and
-    the footprint is the whole ROI - correct, but far more air.
+    the footprint is the whole ROI - correct, but far more air. *tailwater* is the
+    level of the outflow the build resolved, above which an outlet is walled.
     """
     of = cfg.openfoam
     rigid = of.mode == "rigid-lid"
+    if rigid and state is None:
+        # Said here rather than discovered at the lid, where it used to surface as a
+        # bare NameError: under a rigid lid the lid IS the 2D free surface, so without
+        # a 2D result there is no lid to place and nothing to fall back on. A flat one
+        # would be a horizontal water surface, which is the thing this mode exists to
+        # avoid.
+        raise ValueError(
+            "openfoam.mode: rigid-lid needs a 2D result to take the free surface from, "
+            "and none was given. Run the pre-run (openfoam.pre_run.enabled) or pass a "
+            "--hotstart, or switch to mode: vof to solve the surface instead.")
     dx = plan_spacing(cfg)
     dem = Path(dem) if dem is not None else Path(cfg.geodata.dem_initial)
     notes: list[str] = []
+    lid_step_median = lid_step_p99 = None
     if of.cell_size_factor:
         notes.append(f"plan spacing {dx:.2f} m = {of.cell_size_factor:g}x the 2D "
                      f"channel size ({geodata.nominal_channel_size(cfg):.2f} m)")
@@ -713,16 +1082,17 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
 
             blocked = (dry_footprint if blocked is None
                        else unary_union([blocked, dry_footprint]))
-    if blocked is not None:
-        notes.append(f"{sum(1 for s in structures if s.mode == SOLID)} solid "
-                     "structure(s) removed from the domain: their sides become "
-                     "no-slip walls from bed to lid")
+    n_solid = sum(1 for s in structures if s.mode == SOLID)
+    if n_solid:
+        notes.append(f"{n_solid} solid structure(s) removed from the domain: their "
+                     "sides become no-slip walls from bed to lid")
 
     angle = flow_angle(cfg) if of.align_to_flow else 0.0
     if of.align_to_flow:
         notes.append(f"lattice rotated {np.degrees(angle):+.1f} deg onto the reach axis")
     grid = build_plan_grid(polygon, dx, angle=angle,
-                           max_columns=of.max_plan_columns, blocked=blocked)
+                           max_columns=of.max_plan_columns, blocked=blocked,
+                           blocked_by_structures=bool(n_solid))
     if rigid:
         notes.append("domain trimmed to the wetted body; the waterline is a vertical "
                      "wall and cannot move")
@@ -740,36 +1110,83 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
 
     # ---- lid ---------------------------------------------------------------
     column_wse = column_depth = column_uv = None
+    wse_v = None
     if state is not None:
         wse_v = state.sample_surface(grid.vert_xy)
         column_wse, column_depth, column_uv = state.sample_columns(grid.cell_xy)
         wse_v = np.where(np.isfinite(wse_v), wse_v, bed)
         wse_v = np.maximum(wse_v, bed)
-        freeboard = resolve_headroom(cfg, state, notes=notes)
-        lid = wse_v + freeboard
-    else:
-        base = float(np.nanmax(bed))
-        lid = np.full_like(bed, base + of.freeboard)
-        notes.append("no 2D hotstart: flat lid, so the domain carries the full air column")
-    if rigid:
-        # The lid IS the free surface. No freeboard, because a freeboard would be air.
-        lid = np.where(np.isfinite(wse_v), wse_v, bed)
-        notes.append("lid placed on the 2D free surface (freeboard ignored)")
-    if of.lid == "flat" and not rigid:
-        lid = np.full_like(lid, float(np.nanmax(lid)))
-        notes.append(f"flat lid at {lid[0]:.3f} m a.s.l.")
-    if of.lid_elevation is not None:
-        lid = np.full_like(lid, float(of.lid_elevation))
-        notes.append(f"lid pinned to the configured {of.lid_elevation:g} m a.s.l.")
+    freeboard = resolve_headroom(cfg, state, notes=notes) if state is not None \
+        else float(of.freeboard)
+    lid = resolve_lid(cfg, grid, bed, wse_v, freeboard, notes=notes)
     floor = of.min_water_depth if rigid else of.min_column_height
-    lid = np.maximum(lid, bed + floor)
-    if of.lid == "follow" and not rigid:
-        lid = _smooth_lid(grid, lid, passes=of.lid_smoothing,
-                          dilate=of.lid_dilation)
-        lid = np.maximum(lid, bed + of.min_column_height)
-    # Under a rigid lid the lid IS the converged 2D free surface: already smooth, and
-    # smoothing it again only pushes it into the bed in steep places, where the
-    # re-clamp then leaves a kink that inverts cells.
+
+    if rigid:
+        # Asked here, at build time, because the answer decides whether the mode is
+        # applicable at all - and the run itself will not tell you. munich-vsf
+        # finished, balanced its discharge to -0.000% and reported a healthy Courant
+        # number for 61 hours while its velocity cap held 3,719 cells together.
+        lid_step_median, lid_step_p99 = step_med, step_p99 = lid_steps(grid, lid, bed)
+        notes.append(f"lid steps: the prescribed surface moves {100 * step_med:.1f}% "
+                     f"of the local depth within 2 cells (p99 {100 * step_p99:.0f}%)")
+        # from `report`, which owns the two grades, so the refusal here and the
+        # verdict a reader sees afterwards are the same numbers rather than copies
+        from axqua.solvers.openfoam.report import LID_STEP_SEVERE, LID_STEP_WARN
+
+        # LEG C IS EXEMPT, and the exemption is the whole reason it exists. The
+        # refusal below rests on the top boundary being a WALL: a wall cannot answer
+        # a drop by plunging, so it converts the head into velocity instead. Under
+        # potentialFreeSurfaceFoam the top is not a wall - the surface is free to
+        # move there, carried as `zeta` - so the premise does not hold and the step
+        # is a mesh-quality question (which `quality` reports) rather than a mode
+        # error. Keeping the lid ON the stepped 2D surface is also what keeps leg C's
+        # OWN validity condition satisfied: its linearisation needs |zeta - z_lid|
+        # small, and a lid that already follows the surface leaves only the 3D
+        # correction for zeta to carry.
+        from . import potential
+
+        if potential.is_potential(cfg):
+            notes.append(
+                "lid steps are not a refusal here: the top boundary is a free "
+                "surface (zeta), not a wall, so it answers a drop by moving")
+        elif step_p99 > LID_STEP_SEVERE and not of.allow_stepped_lid:
+            # A refusal, not a warning: above one depth the surface steps further than
+            # the water is deep, which is a weir, a drop, or the slots of a fish pass.
+            # A lid is a WALL there, and the velocity it produces is an artefact of
+            # the mode. Two munich-vsf runs finished, balanced their discharge to
+            # -0.000%, held Courant at 0.90 for 61 hours, and were invalid - so the
+            # cost of building anyway is days, and the cost of stopping is a rebuild.
+            raise ValueError(
+                f"RIGID LID DOES NOT APPLY HERE: at the 99th percentile the "
+                f"prescribed free surface steps {100 * step_p99:.0f}% of the local "
+                f"water depth within two cells (median {100 * step_med:.1f}%), which "
+                f"is more than the water is deep. A lid is a WALL, so it cannot "
+                f"answer a drop by plunging the way a free surface does - it converts "
+                f"the head into velocity instead (sqrt(2 g dz): a 1 m step drives "
+                f"4.4 m/s), and the fastest cells in the result will be that artefact "
+                f"rather than the flow.\n"
+                f"  Use openfoam.mode: vof where the surface has to move; or check "
+                f"that the steps are real rather than the 2D result read across a "
+                f"structure the lattice is too coarse to seal; or set "
+                f"openfoam.allow_stepped_lid: true to build anyway (the verdict still "
+                f"reaches the result either way).")
+        if step_p99 > LID_STEP_WARN:
+            severe = step_p99 > LID_STEP_SEVERE
+            message = (
+                f"RIGID LID {'DOES NOT APPLY' if severe else 'MAY NOT APPLY'} HERE: "
+                f"at the 99th percentile the prescribed "
+                f"free surface steps {100 * step_p99:.0f}% of the local water depth "
+                f"within two cells. A lid is a WALL, so it cannot answer a drop by "
+                f"plunging the way a free surface does - it converts the head into "
+                f"velocity instead (sqrt(2 g dz), so a 1 m step drives 4.4 m/s). "
+                f"Expect the fastest cells to sit at those steps and the velocity cap "
+                f"to become load-bearing. Either use mode: vof where the surface has "
+                f"to move, or check that the steps are real rather than the 2D result "
+                f"read across a structure the lattice is too coarse to seal."
+                + (" Built anyway: openfoam.allow_stepped_lid is set." if severe
+                   else ""))
+            notes.append(message)
+            log.warning("%s", message)
 
     # ---- bed layer sized against the roughness ------------------------------
     bed_ks = _roughness_at(cfg, grid.cell_xy)
@@ -805,23 +1222,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
                 f"bed layer pinned to {bed_layer:.3f} m (2x the wetted median ks, so "
                 "the first cell centre clears the roughness crests)")
 
-    n_layers = of.n_layers
-    if rigid:
-        # Under a rigid lid the layers span the WATER only (isar: 0.2-1.0 m), not
-        # water plus freeboard (0.7-1.8 m), so the count carried over from a
-        # two-phase case gives cells three to four times thinner. Past a point they
-        # are thinner than the grains on the bed - meaningless, and thin enough that
-        # the bed's variation within one plan cell folds them, which checkMesh
-        # rejects as incorrectly oriented face pyramids.
-        thinnest = float(np.nanmedian(bed_ks)) if bed_ks is not None else 0.05
-        thinnest = max(thinnest, 0.05)
-        fit = max(2, int(of.min_water_depth / thinnest))
-        if fit < n_layers:
-            notes.append(
-                f"{n_layers} layers reduced to {fit}: the shallowest meshed column is "
-                f"{of.min_water_depth:g} m, and {n_layers} layers would make cells "
-                f"thinner than the bed roughness ({thinnest:.3f} m)")
-            n_layers = fit
+    n_layers = resolve_layers(cfg, bed_ks, np.maximum(lid - bed, floor), notes=notes)
 
     (points, internal, (bed_quads, bed_owner), (top_quads, top_owner), sides,
      z, cell_centres, cell_column, cell_layer) = extrude(
@@ -832,15 +1233,61 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         cfg, sides["midpoint"], of.boundary_tolerance or 1.5 * of.cell_size)
 
     boundary = [(BED_PATCH, "wall", bed_owner, bed_quads)]
+    banks = labels == BANKS_PATCH
+    # the height of each cell: the slot check of an outlet is about its LAYERS, which
+    # on a river lattice are a tenth of the plan spacing or less
+    level = z[column_corner_vertices(grid)].mean(axis=1)
+    cell_height = np.diff(level, axis=1)[cell_column, cell_layer]
     for name in liquid_names:
         sel = labels == name
+        if name.startswith(OUTLET_PREFIX) and of.outlet_air_margin is not None:
+            stage = _tailwater_for(cfg, name, tailwater)
+            if stage is not None:
+                owners = sides["owner"][sel]
+                keep, walled = split_outlet_above_tailwater(
+                    owners, cell_centres, stage, of.outlet_air_margin,
+                    cell_size=float(np.median(cell_height[owners])))
+                if walled.any():
+                    index = np.flatnonzero(sel)
+                    # the air part is a wall, so it joins the domain edge
+                    banks[index[walled]] = True
+                    sel = np.zeros_like(sel)
+                    sel[index[keep]] = True
+                    notes.append(
+                        f"{name}: {int(walled.sum()):,} of {int(keep.size):,} faces "
+                        f"are above the tailwater ({stage:.3f} m + "
+                        f"{of.outlet_air_margin:g} m) and are walled, so air cannot "
+                        "circulate in through the outlet and out through the lid")
         boundary.append((name, "patch", sides["owner"][sel], sides["quads"][sel]))
-    banks = labels == BANKS_PATCH
-    boundary.append((BANKS_PATCH, "wall", sides["owner"][banks], sides["quads"][banks]))
+    # Split the solid structures out of the domain edge. A lateral face belongs to a
+    # structure when its midpoint sits on the blanked footprint; half a cell diagonal
+    # of slack, because the face lies on the boundary of the blanked columns rather
+    # than inside them, and the blanking is by cell-square INTERSECTION (above), so a
+    # face can stand up to that far from the solid it bounds.
+    edge, on_structure = split_structure_sides(sides["midpoint"], banks, blocked, dx)
+    boundary.append((BANKS_PATCH, "wall", sides["owner"][edge], sides["quads"][edge]))
+    if on_structure.any():
+        boundary.append((STRUCTURES_PATCH, "wall",
+                         sides["owner"][on_structure], sides["quads"][on_structure]))
+        notes.append(
+            f"{int(on_structure.sum()):,} lateral faces bound a solid structure and "
+            f"are patched as '{STRUCTURES_PATCH}', apart from the {int(edge.sum()):,} "
+            f"on the domain edge - water touching a baffle is the flow doing its job, "
+            "water touching the edge means the footprint is too tight")
     top_name = LID_PATCH if rigid else ATMOSPHERE_PATCH
-    # a wall type, because a rigid lid IS a boundary the flow cannot cross; the slip
-    # condition on U is what keeps it shear-free, as an air-water interface is
-    boundary.append((top_name, "wall" if rigid else "patch", top_owner, top_quads))
+    # A rigid lid IS a boundary the flow cannot cross, so `wall` is right for it; the
+    # slip condition on U is what keeps it shear-free, as an air-water interface is.
+    #
+    # LEG C IS THE EXCEPTION, and getting this wrong cost an evening. Under
+    # potentialFreeSurfaceFoam the surface MOVES BY FLUX THROUGH THIS PATCH, and the
+    # `wall` type puts it in the `wall` group - so kOmegaSST applied wall functions
+    # and a zero wall distance at the free surface. The symptom was not subtle and
+    # also not diagnostic: 100% of cells velocity-limited at 6 m/s within three time
+    # steps, and SIGFPE inside kOmegaSSTBase::correct().
+    from . import potential
+
+    top_type = "patch" if (potential.is_potential(cfg) or not rigid) else "wall"
+    boundary.append((top_name, top_type, top_owner, top_quads))
 
     mesh = assemble(points, internal, boundary, cell_centres)
     problems = validate(mesh)
@@ -856,6 +1303,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None) -> Ope
         column_bed=column_bed, column_wse=column_wse, column_depth=column_depth,
         column_uv=column_uv, bed_ks=bed_ks,
         rigid_lid=rigid,
+        lid_step_median=lid_step_median, lid_step_p99=lid_step_p99,
         inlet_patches=[n for n in liquid_names if n.startswith(INLET_PREFIX)],
         outlet_patches=[n for n in liquid_names if n.startswith(OUTLET_PREFIX)],
         inlet_discharge=discharges, notes=notes,

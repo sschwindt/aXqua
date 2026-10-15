@@ -45,59 +45,33 @@ Lessons baked in (see the module functions):
 
 from __future__ import annotations
 
-import shlex
+import logging
 import shutil
-import subprocess
 import sys
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-from axqua import campaigns
+from axqua import campaigns, hbc
 from axqua.config import Config
 from axqua.ground_truth import compile_ground_truth, read_tidy
 from axqua.rating import synthesize_outflow_rating
+
+log = logging.getLogger("axqua")
 
 
 # --------------------------------------------------------------------------- #
 # install location
 # --------------------------------------------------------------------------- #
-def require_hbc():
-    """Import HydroBayesCal, or explain how to install it.
-
-    It is an **optional dependency** (``pip install axqua[calibration]``): the
-    surrogate stack it pulls in - bayesvalidrox, gpytorch, scikit-learn - is heavy and
-    irrelevant to building or running a TELEMAC case, which is what most of axqua
-    does. So it is imported where it is used rather than at module import.
-    """
-    try:
-        import hydroBayesCal
-    except ImportError as exc:                       # pragma: no cover - install aid
-        raise SystemExit(
-            "HydroBayesCal is not installed. It is an optional dependency:\n"
-            "    pip install 'axqua[calibration]'\n"
-            "or, for a local checkout you are also developing:\n"
-            "    pip install -e /path/to/hydrobayescal\n"
-            f"(import failed: {exc})"
-        ) from exc
-    if not hasattr(hydroBayesCal, "copy_driver"):
-        raise SystemExit(
-            "The installed HydroBayesCal is too old: it does not ship the calibration "
-            "drivers with the package (hydroBayesCal.copy_driver is missing). "
-            "Upgrade with:  pip install -U 'hydrobayescal>=1.4.4'"
-        )
-    return hydroBayesCal
-
-
-def _hbc_version() -> str:
-    """Installed HydroBayesCal version, for the staging log."""
-    from importlib.metadata import PackageNotFoundError, version
-    try:
-        return version("hydrobayescal")
-    except PackageNotFoundError:                     # pragma: no cover
-        return "unknown"
+# require_hbc / _hbc_version / stage_driver now live in axqua.hbc (they are the
+# same whichever solver is calibrated). Re-exported, not reimplemented, so every
+# existing import of them from axqua.bayescal keeps working.
+require_hbc = hbc.require_hbc
+_hbc_version = hbc.hbc_version
+stage_driver = hbc.stage_driver
 
 
 # --------------------------------------------------------------------------- #
@@ -127,113 +101,35 @@ def ensure_graphic_output(cas_path: Path, code: str = "M") -> bool:
     return True
 
 
-def stage_driver(out_dir: Path, template_name: str, *, checkout: Path | None = None,
-                 also: tuple[str, ...] = ()) -> Path:
-    """Copy a HydroBayesCal driver into ``out_dir`` with the extraction window
-    patched ``mean_last`` -> ``last``.
-
-    The driver comes from the **installed** HydroBayesCal package
-    (``hydroBayesCal.copy_driver``, which also brings any sibling a driver imports),
-    so there is no checkout path to configure. *checkout* overrides that with a
-    source tree, for developing against an unreleased driver.
-
-    The extraction window is patched because the stock drivers average the last
-    *window* of SELAFIN frames (``mean_last``); on a run that marches to steady state
-    from a dry or pre-wetted start, that averages the residual transient into the
-    calibration values. ``last`` takes the converged frame. *also* names further
-    drivers to place beside it (kept for callers that name the companion explicitly;
-    ``copy_driver`` already brings known siblings).
-
-    **Every** staged file is patched, not just the primary one. That is not caution:
-    ``bal_telemac_multiflow.py`` imports ``run_complex_model`` / ``run_bal_model``
-    from its ``bal_telemac.py`` sibling and calls them *without* passing
-    ``output_extraction_time``, so a multi-flow run takes the sibling's default. With
-    only the primary patched, multi-flow calibrations silently averaged the transient
-    - the exact failure this patch exists to prevent - while single-flow ones did not.
-    """
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    if checkout is not None:
-        checkout = Path(checkout)
-
-        def _find(name):
-            candidates = (checkout / name,
-                          checkout / "templates" / name,
-                          checkout / "src" / "hydroBayesCal" / "drivers" / name)
-            return next((p for p in candidates if p.is_file()), None)
-
-        primary = _find(template_name)
-        if primary is None:
-            raise SystemExit(
-                f"HydroBayesCal driver {template_name!r} not found in {checkout}")
-        for name in also:
-            src = _find(name)
-            if src is None:
-                raise SystemExit(f"companion driver {name!r} not found in {checkout}")
-            shutil.copy2(src, out_dir / name)
-        source = "checkout"
-    else:
-        hbc = require_hbc()
-        hbc.copy_driver(template_name, out_dir)
-        for name in also:
-            hbc.copy_driver(name, out_dir)
-        primary = out_dir / template_name
-        source = f"hydroBayesCal {_hbc_version()}"
-
-    if checkout is not None:
-        # the checkout branch has not copied the primary yet
-        shutil.copy2(primary, out_dir / template_name)
-
-    patched = 0
-    for staged in sorted(out_dir.glob("*.py")):
-        text = staged.read_text()
-        n = text.count('output_extraction_time="mean_last"')
-        if n:
-            staged.write_text(text.replace('output_extraction_time="mean_last"',
-                                           'output_extraction_time="last"'))
-            patched += n
-    print(f"staged {template_name} from {source}"
-          + (f" (+{', '.join(also)})" if also else "")
-          + f" -> {out_dir}"
-          + (f" (extraction mean_last -> last, {patched} sites)" if patched else ""))
-    return out_dir / template_name
-
-
 def other_calibration_running(model_dir: Path) -> bool:
     """A TELEMAC run from this model dir already active (would fight over the
     shared friction.tbl)."""
-    probe = subprocess.run(["pgrep", "-fa", "telemac2d"], capture_output=True, text=True)
-    return str(model_dir) in probe.stdout or "steady2d" in probe.stdout
+    return hbc.solver_running("telemac2d", model_dir, extra=("steady2d",))
+
+
+def _telemac_environment(cfg: Config):
+    """The TELEMAC environment a staged driver is launched inside.
+
+    ``environment`` is read defensively: the previous implementation needed nothing
+    but ``telemac.pysource``, so requiring the newer structured block would narrow
+    what a caller may pass for no gain (``from_config(None, ...)`` already falls
+    back to a POSIX environment against the legacy script).
+    """
+    return hbc.solver_environment(getattr(cfg.telemac, "environment", None),
+                                  cfg.telemac.pysource)
 
 
 def launch(cfg: Config, driver: Path, config_path: Path, *, env: str | None = None,
            note: str = "HydroBayesCal calibration") -> int:
-    """Run a staged driver, in **this** interpreter's environment.
-
-    HydroBayesCal is a dependency of axqua, so it is importable here - there is
-    no second conda environment to name and no interpreter to guess. The driver is
-    still run as a subprocess rather than imported, for two reasons that matter over
-    a calibration lasting hours: it is a script with module-level state and an
-    ``argparse`` ``main()``, and it has to run **with TELEMAC sourced**, since every
-    surrogate iteration launches the solver. Sourcing mutates the environment, which
-    is exactly the sort of thing not to do to the caller's own process.
-
-    ``sys.executable`` is used explicitly so the subshell cannot pick up a different
-    ``python`` from the sourced TELEMAC environment.
+    """Run a staged TELEMAC driver with TELEMAC sourced. See :func:`axqua.hbc.launch_driver`.
 
     *env* is accepted and ignored; it named the separate conda environment this used
-    to need. Returns the driver's exit code.
+    to need, before HydroBayesCal became a dependency of axqua itself.
     """
     if env:
         print(f"note: env={env!r} ignored - HydroBayesCal now runs in axqua's own "
               "environment (it is a dependency), so no separate env is needed")
-    inner = (f"source {shlex.quote(str(cfg.telemac.pysource))}; "
-             f"cd {shlex.quote(str(driver.parent))}; "
-             f"{shlex.quote(sys.executable)} -u {shlex.quote(driver.name)} "
-             f"--config {shlex.quote(str(config_path))}")
-    print(f"\nlaunching {note}:\n  {inner}\n")
-    return subprocess.run(["bash", "-lc", "set -e; " + inner]).returncode
+    return hbc.launch_driver(_telemac_environment(cfg), driver, config_path, note=note)
 
 
 # --------------------------------------------------------------------------- #
@@ -265,10 +161,53 @@ def build_velocity_csv(cfg: Config, *, vel_err_floor: float = campaigns.VELOCITY
         df["v_err"] if "v_err" in df.columns else 0.0,
         df["h"], [f"pt-{i + 1}" for i in range(len(df))],
         vel_err_floor, depth_err_floor).drop(columns="label")
+    out = _inside_the_model(cfg, out)
     path = cfg.calibration_path(cfg.calibration_csv)
     path.parent.mkdir(parents=True, exist_ok=True)
     out.to_csv(path, index=False)
     return path, out
+
+
+def _inside_the_model(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
+    """Leave out the measurement points that lie outside the model.
+
+    A campaign often includes the cross sections at which the inflow was gauged,
+    upstream of where the model begins. HydroBayesCal reads the model at the node
+    nearest to a point with no limit on the distance, so such a point is compared with
+    a node on the model boundary: a velocity measured in mid-channel against one at a
+    wall. Of the 56 verticals of the Isar campaign of November 2025, 23 lie upstream of
+    the model.
+    """
+    from shapely.geometry import Point
+
+    outline = cfg.geodata.boundary
+    if outline is None or not Path(outline).exists() or points.empty:
+        return points
+    try:
+        import geopandas as gpd
+
+        layer = gpd.read_file(outline)
+        if layer.crs is not None and layer.crs.to_epsg() != cfg.crs_epsg:
+            layer = layer.to_crs(epsg=cfg.crs_epsg)
+        shape = layer.geometry.union_all() if hasattr(layer.geometry, "union_all") \
+            else layer.geometry.unary_union
+        if shape.geom_type in ("LineString", "MultiLineString"):
+            from shapely.ops import polygonize, unary_union
+            shape = unary_union(list(polygonize(shape)))
+        inside = [shape.covers(Point(float(x), float(y)))
+                  for x, y in zip(points["x"], points["y"])]
+    except Exception as exc:                     # noqa: BLE001 - never lose the data
+        log.warning("could not tell which measurement points lie inside the model "
+                    "(%s); all of them are used", exc)
+        return points
+    outside = len(inside) - sum(inside)
+    if outside:
+        log.warning("%d of %d measurement points lie outside the model outline and "
+                    "are left out", outside, len(inside))
+        points = points.loc[inside].reset_index(drop=True)
+        if "id" in points.columns:
+            points["id"] = range(1, len(points) + 1)
+    return points
 
 
 def run_single_flow_calibration(
@@ -310,7 +249,75 @@ def run_single_flow_calibration(
         print(f"  cd {driver.parent} && {sys.executable} {driver.name} "
               f"--config {config_path}")
         return 0
-    return launch(cfg, driver, config_path, env=env, note="HydroBayesCal calibration")
+    with case_as_built(cfg):
+        return launch(cfg, driver, config_path, env=env,
+                      note="HydroBayesCal calibration")
+
+
+#: Folder in the calibration directory that holds the files of the built case while a
+#: calibration rewrites them.
+AS_BUILT = "case-as-built"
+
+
+def _rewritten_by_the_driver(cfg: Config) -> list[str]:
+    """The files of the built case a HydroBayesCal run writes into, relative to it."""
+    names = [cfg.calibration.control_file or cfg.cas_file, cfg.friction_tbl]
+    if cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran":
+        names.append("user_fortran/user_rain.f")
+    if cfg.morphodynamics.enabled:
+        names.append(cfg.gaia_cas)
+    return [str(name) for name in names if name]
+
+
+@contextmanager
+def case_as_built(cfg: Config):
+    """Hand the built case back the way the calibration found it.
+
+    HydroBayesCal runs TELEMAC in the folder of the built case and writes every
+    parameter set it tests into the files there: the roughness values into the
+    friction table, the name of the results file into the steering file. When it has
+    finished, the case holds the **last set it tried**, which is neither the case
+    that was built nor the calibrated one, and the next steady run uses it without a
+    word. On the Isar example the friction table read ks = 0.195 m in zone 4 after a
+    calibration of a case built with 0.05 m.
+
+    The files are copied into the calibration folder before the driver starts and
+    copied back when it returns, whether it succeeded or not. A calibration that is
+    killed restores nothing; see :func:`restore_as_built` for that case.
+    """
+    model = Path(cfg.model_dir)
+    keep = cfg.calibration_path(AS_BUILT)
+    restore_as_built(cfg)
+    for name in _rewritten_by_the_driver(cfg):
+        if (model / name).is_file():
+            (keep / name).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(model / name, keep / name)
+    try:
+        yield
+    finally:
+        restore_as_built(cfg)
+
+
+def restore_as_built(cfg: Config) -> bool:
+    """Copy the files a calibration set aside back into the built case.
+
+    Returns whether there was anything to restore. A copy is only ever found here
+    outside a running calibration when that calibration was killed, by a cancelled job
+    or a power cut, before it could restore the case itself. The copy is then the case
+    as built, and what is in the model folder is the last parameter set the driver had
+    reached. Every TELEMAC run of the case calls this first, so a cancelled calibration
+    cannot leak into the next simulation.
+    """
+    keep = cfg.calibration_path(AS_BUILT)
+    if not keep.is_dir():
+        return False
+    model = Path(cfg.model_dir)
+    for source in sorted(path for path in keep.rglob("*") if path.is_file()):
+        target = model / source.relative_to(keep)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+    shutil.rmtree(keep, ignore_errors=True)
+    return True
 
 
 # --------------------------------------------------------------------------- #

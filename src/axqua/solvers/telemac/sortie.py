@@ -13,6 +13,32 @@ which is everything needed to judge whether a steady run has converged: at stead
 state the boundary fluxes balance (total inflow = total outflow) and the domain
 volume stops changing. This module turns that listing into arrays.
 
+**TELEMAC-3D prints a different block** (``telemac3d/bil3d.f``), and it has to be read
+too - a 3D pre-run seeds OpenFOAM exactly as a 2D one does, and until this was handled
+its flux balance could not be judged at all::
+
+                    MASS BALANCE
+
+      WATER
+    VOLUME AT THE PREVIOUS TIME STEP              :     105.4575
+    VOLUME AT THE PRESENT TIME STEP               :     105.4497
+    VOLUME LEAVING DOMAIN DURING THIS TIME STEP   :    0.7793448E-02
+    ERROR ON THE VOLUME DURING THIS TIME STEP     :   -0.1874828E-12
+      BOUNDARY FLUXES FOR WATER IN M3/S ( >0 : ENTERING )
+    FLUX BOUNDARY      1                          :    0.1350000
+    FLUX BOUNDARY      2                          :   -0.4133374
+
+Three things differ and each is handled explicitly. (1) There is no
+``VOLUME IN THE DOMAIN`` line; the domain volume is ``VOLUME AT THE PRESENT TIME
+STEP``. (2) **The block carries no time.** TELEMAC-3D prints it only in the
+``ITERATION ... TIME ... ( N S)`` header that immediately precedes the block, so that
+header's time is attached to the block that follows it - still a single-pass
+association made while reading, not two sequences zipped afterwards, so it cannot
+slip. (3) The error line is the *absolute* volume error of one time step, where
+TELEMAC-2D prints a *relative* one; :attr:`Sortie.dimension` says which listing a
+result came from, and ``volume_error`` must be read accordingly. The fluxes - the only
+thing convergence is actually judged on - mean the same in both.
+
 **Why axqua parses this itself.** The obvious alternative is TELEMAC's own
 ``postel.parser_output`` (and the ``pythomac`` package that adapts it), but both are
 GPL-3 while axqua is BSD-3, so neither can be vendored here. The file *format*
@@ -54,7 +80,23 @@ _RE_FLUX = re.compile(
 _RE_ERROR = re.compile(
     rf"\s*RELATIVE ERROR IN VOLUME AT T\s*=\s*(?P<time>{_NUM})\s*S\s*:\s*"
     rf"(?P<value>{_NUM})", re.IGNORECASE)
-_RE_ITERATION = re.compile(r"\s*ITERATION\s+(?P<iteration>\d+)\s+TIME", re.IGNORECASE)
+_RE_ITERATION = re.compile(
+    r"\s*ITERATION\s+(?P<iteration>\d+)\s+TIME\b(?P<rest>.*)", re.IGNORECASE)
+
+# --- TELEMAC-3D (telemac3d/bil3d.f) ---------------------------------------- #
+# The whole line is the header, so 'GAIA MASS-BALANCE OF SEDIMENTS' (hyphenated and
+# followed by more text) cannot be mistaken for it. 'FINAL MASS BALANCE' is the
+# end-of-run summary and starts no per-printout block.
+_RE_BALANCE_3D = re.compile(r"\s*(?P<final>FINAL\s+)?MASS BALANCE\s*\Z", re.IGNORECASE)
+_RE_VOLUME_3D = re.compile(
+    rf"\s*VOLUME AT THE PRESENT TIME STEP\s*:\s*(?P<value>{_NUM})", re.IGNORECASE)
+_RE_ERROR_3D = re.compile(
+    rf"\s*ERROR ON THE VOLUME DURING THIS TIME STEP\s*:\s*(?P<value>{_NUM})",
+    re.IGNORECASE)
+# '( 250.0000 S)' - the cumulated time TELEMAC prints after the D/H/MN breakdown
+_RE_ITER_TOTAL = re.compile(rf"\(\s*(?P<value>{_NUM})\s*S\s*\)", re.IGNORECASE)
+_RE_ITER_PARTS = re.compile(
+    rf"(?P<value>{_NUM})\s*(?P<unit>D|H|MN|S)\b", re.IGNORECASE)
 _RE_STUDY = re.compile(r"\s*.*NAME OF THE STUDY\s*:?\s*$", re.IGNORECASE)
 _RE_EXEC = re.compile(
     r"\A\s*(?:(?P<days>\d+)\s*DAYS|(?P<hours>\d+)\s*HOURS"
@@ -63,6 +105,27 @@ _RE_EXEC = re.compile(
 
 def _to_float(text: str) -> float:
     return float(text.replace("d", "e").replace("D", "E"))
+
+
+def _iteration_time(rest: str) -> float | None:
+    """Simulated time [s] out of the tail of an ``ITERATION ... TIME`` header.
+
+    TELEMAC-3D is the only caller that needs this: its balance block carries no time
+    of its own. Both printed forms are read - the cumulated ``( 250.0000 S)`` that
+    follows the breakdown, and the ``0 D  0 H  4 MN  10.0000 S`` breakdown itself as a
+    fallback for a listing that omits the total. Returns ``None`` rather than a guess
+    when neither is there, so the block is dropped as incomplete instead of being
+    committed at the wrong instant.
+    """
+    total = _RE_ITER_TOTAL.search(rest)
+    if total:
+        return _to_float(total.group("value"))
+    factors = {"D": 86400.0, "H": 3600.0, "MN": 60.0, "S": 1.0}
+    seconds, seen = 0.0, False
+    for match in _RE_ITER_PARTS.finditer(rest):
+        seconds += factors[match.group("unit").upper()] * _to_float(match.group("value"))
+        seen = True
+    return seconds if seen else None
 
 
 @dataclass
@@ -80,7 +143,13 @@ class Sortie:
     time: np.ndarray               # simulated time [s]
     volume: np.ndarray             # water volume in the domain [m3]
     fluxes: np.ndarray             # (n_printouts, n_boundaries) signed [m3/s]
-    volume_error: np.ndarray       # relative volume error reported by TELEMAC
+    volume_error: np.ndarray       # volume error as TELEMAC printed it - see below
+    #: which listing shape this came from: ``"2d"`` (TELEMAC-2D) or ``"3d"``
+    #: (TELEMAC-3D). It matters for ``volume_error`` alone, which TELEMAC-2D prints
+    #: relative and TELEMAC-3D prints as an absolute per-step volume; the value is
+    #: passed through as printed rather than converted, so the two are not silently
+    #: made to look alike. Everything else means the same in both.
+    dimension: str = "2d"
 
     @property
     def n_boundaries(self) -> int:
@@ -130,6 +199,9 @@ class Sortie:
 def read_sortie(path: str | Path) -> Sortie:
     """Parse the water-volume balance history out of a ``.sortie`` listing.
 
+    Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module
+    docstring); which one a listing carried is reported as :attr:`Sortie.dimension`.
+
     Raises :class:`ValueError` when the listing holds no complete balance block -
     normally because the run was launched without ``-s`` or without
     ``PRINTING CUMULATED FLOWRATES : YES``.
@@ -138,7 +210,9 @@ def read_sortie(path: str | Path) -> Sortie:
     study = "UNKNOWN"
     exec_seconds = 0.0
     iteration = 0
+    iter_time: float | None = None
     want_study = False
+    dimension = "2d"
 
     iterations: list[int] = []
     times: list[float] = []
@@ -148,6 +222,31 @@ def read_sortie(path: str | Path) -> Sortie:
 
     volume: float | None = None
     pending: dict[int, float] = {}
+    # A TELEMAC-3D block has no closing line, so it is committed when the next one
+    # starts (or at end of file). `block_3d` holds the one being collected.
+    block_3d: dict | None = None
+
+    def close_3d() -> None:
+        """Commit the 3D block being collected, if it is complete.
+
+        Complete means volume + error + at least one boundary flux + a time from the
+        header above it. An incomplete one - the ``INITIAL VOLUME OF WATER IN THE
+        DOMAIN`` block that opens the run, or a tail truncated by a crash - is
+        dropped rather than padded, exactly as for 2D.
+        """
+        nonlocal block_3d, dimension
+        block = block_3d
+        block_3d = None
+        if block is None or not block["fluxes"]:
+            return
+        if block["volume"] is None or block["error"] is None or block["time"] is None:
+            return
+        iterations.append(block["iteration"])
+        times.append(block["time"])
+        volumes.append(block["volume"])
+        errors.append(block["error"])
+        flux_rows.append(block["fluxes"])
+        dimension = "3d"
 
     with open(path, errors="replace") as fh:
         for line in fh:
@@ -163,6 +262,15 @@ def read_sortie(path: str | Path) -> Sortie:
             match = _RE_ITERATION.match(line)
             if match:
                 iteration = int(match.group("iteration"))
+                iter_time = _iteration_time(match.group("rest"))
+                continue
+
+            match = _RE_BALANCE_3D.match(line)
+            if match:
+                close_3d()
+                if not match.group("final"):
+                    block_3d = {"volume": None, "error": None, "fluxes": {},
+                                "iteration": iteration, "time": iter_time}
                 continue
 
             match = _RE_VOLUME.match(line)
@@ -172,10 +280,25 @@ def read_sortie(path: str | Path) -> Sortie:
                 pending = {}
                 continue
 
+            if block_3d is not None:
+                match = _RE_VOLUME_3D.match(line)
+                if match:
+                    block_3d["volume"] = _to_float(match.group("value"))
+                    continue
+                match = _RE_ERROR_3D.match(line)
+                if match:
+                    block_3d["error"] = _to_float(match.group("value"))
+                    continue
+
             match = _RE_FLUX.match(line)
-            if match and volume is not None:
-                pending[int(match.group("index"))] = _to_float(match.group("value"))
-                continue
+            if match:
+                if block_3d is not None:
+                    block_3d["fluxes"][int(match.group("index"))] = _to_float(
+                        match.group("value"))
+                    continue
+                if volume is not None:
+                    pending[int(match.group("index"))] = _to_float(match.group("value"))
+                    continue
 
             match = _RE_ERROR.match(line)
             if match and volume is not None:
@@ -193,6 +316,7 @@ def read_sortie(path: str | Path) -> Sortie:
                                      ("minutes", 60), ("seconds", 1)):
                     if match.group(unit) is not None:
                         exec_seconds += factor * int(match.group(unit))
+    close_3d()
 
     if not flux_rows:
         raise ValueError(
@@ -219,6 +343,7 @@ def read_sortie(path: str | Path) -> Sortie:
         volume=np.asarray(volumes, dtype=float)[keep],
         fluxes=fluxes[keep],
         volume_error=np.asarray(errors, dtype=float)[keep],
+        dimension=dimension,
     )
 
 
@@ -241,6 +366,86 @@ def processor_sorties(model_dir: str | Path, cas_name: str) -> list[Path]:
     """The per-processor ``*_p0000N.sortie`` copies of a parallel run."""
     return sorted(p for p in Path(model_dir).glob(f"{cas_name}_*.sortie")
                   if re.search(r"_p\d+\.sortie$", p.name))
+
+
+# --------------------------------------------------------------------------- #
+# a run that TELEMAC-2D stopped itself
+# --------------------------------------------------------------------------- #
+
+#: What TELEMAC-2D prints when ``CONTROL OF LIMITS`` ends a run.
+#:
+#: ``telemac2d.F`` calls this a "neat (programmed) stop": the solver returns from its
+#: time loop, prints ``CORRECT END OF RUN`` and exits with code 0. The exit code can
+#: therefore not tell a run that blew up at the first time step from one that finished,
+#: and a job that trusted it reported the first as completed.
+LIMIT_STOP = "LIMIT VALUES TRESPASSED"
+
+#: The three lines ``isitok.f`` writes per offending node (its FORMAT 101).
+_LIMIT_REPORT = re.compile(
+    r"(LOWER|UPPER) LIMIT ON (\w) REACHED AT POINT\s+(\S+)\s+"
+    r"WITH COORDINATES\s*(\S+)\s+AND\s+(\S+)\s+"
+    r"THE VALUE OF \w IS\s*(\S+)\s+THE LIMIT IS:\s*(\S+)")
+
+_LIMIT_NAMES = {"H": "water depth", "U": "velocity U", "V": "velocity V", "T": "tracer"}
+_LIMIT_UNITS = {"H": "m", "U": "m/s", "V": "m/s", "T": ""}
+
+
+@dataclass(frozen=True)
+class LimitStop:
+    """One node at which a value left the range ``LIMIT VALUES`` allows."""
+
+    bound: str          # LOWER | UPPER
+    variable: str       # H | U | V | T
+    x: float
+    y: float
+    value: float
+    limit: float
+
+    def describe(self) -> str:
+        name = _LIMIT_NAMES.get(self.variable, self.variable)
+        unit = _LIMIT_UNITS.get(self.variable, "")
+        return (f"{name} = {self.value:g} {unit}".rstrip()
+                + f" at x = {self.x:.1f}, y = {self.y:.1f}"
+                + f" (the {self.bound.lower()} limit is {self.limit:g})")
+
+
+def _fortran_float(text: str) -> float:
+    """A number as Fortran's G format prints it; ``nan`` for a field of asterisks."""
+    try:
+        return float(text)
+    except ValueError:
+        return float("nan")
+
+
+def read_limit_stops(text: str) -> list[LimitStop]:
+    """The nodes a listing names as having left their limits, in listing order.
+
+    The node number is not kept: in a parallel run it counts within one subdomain and
+    means nothing on the mesh the user sees. The coordinates do.
+    """
+    return [LimitStop(bound, variable, _fortran_float(x), _fortran_float(y),
+                      _fortran_float(value), _fortran_float(limit))
+            for bound, variable, _point, x, y, value, limit
+            in _LIMIT_REPORT.findall(text)]
+
+
+def find_limit_stops(model_dir: str | Path, cas_name: str) -> list[LimitStop]:
+    """Where the newest run of *cas_name* left its limits; empty when it did not.
+
+    In a parallel run only the subdomain that owns the node reports it, into its own
+    ``_p0000N`` listing, so those are read as well as the main one.
+    """
+    main = latest_sortie(model_dir, cas_name)
+    if main is None:
+        return []
+    stem = main.name[: -len(".sortie")]
+    found: list[LimitStop] = []
+    for path in [main, *sorted(Path(model_dir).glob(f"{stem}_p*.sortie"))]:
+        try:
+            found += read_limit_stops(path.read_text(errors="replace"))
+        except OSError:
+            continue
+    return found
 
 
 # --------------------------------------------------------------------------- #

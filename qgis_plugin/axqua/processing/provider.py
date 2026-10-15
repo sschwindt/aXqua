@@ -37,4 +37,6 @@ class AxquaProvider(QgsProcessingProvider):
         return "aXqua (TELEMAC / OpenFOAM)"
 
     def icon(self):
-        return icon("axqua.svg")
+        # the same mark as the toolbar and the Plugin Manager; the Processing
+        # toolbox draws it small, which is what the .ico's 16 and 24 px are for
+        return icon("favicon.ico")

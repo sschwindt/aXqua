@@ -1,5 +1,5 @@
 # --- Worked-example cases (data + produced artifacts; NOT in the package) --
-# Each case lives under cases/<name>/ and keeps ONLY its case-config.yml, the
+# Each case lives under cases/<name>/ and keeps ONLY its case file (*.axq-case), the
 # example scripts (*.py) and docs (*.md) in version control. The large source
 # data go in cases/<name>/user-sources/ and the produced artifacts in
 # cases/<name>/axqua-case/ (preprocessing/ simulation/ postprocessing/
@@ -60,12 +60,17 @@ dist/
 # --- Environments / editors / tooling --------------------------------------
 .venv/
 .env
-.claude/
+# `.claude/*`, not `.claude/`: git cannot re-include anything inside an excluded
+# DIRECTORY, so excluding the contents is what lets the skills below be negated.
+.claude/*
+# the skills carry design documentation that used to live in CLAUDE.md, so they
+# stay in version control; settings.local.json and the rest stay ignored.
+!.claude/skills/
 .idea/
 .vscode/
 .spyproject/
 # emacs autosave / backup files, which otherwise sit next to an edited config and
-# get swept into a commit (#case-config.yml#, case-config.yml~)
+# get swept into a commit (#my-case.axq-case#, my-case.axq-case~)
 \#*\#
 .\#*
 *~
@@ -99,3 +104,21 @@ docs/_build/
 # scripts/build_plugin_zip.py); it is a release asset, not source.
 /dist/
 docs/_build/
+
+# VisIt writes a session log into the working directory on every `visit -cli`
+# run, so `axqua postproc` drops one wherever it is invoked from.
+visitlog.py
+
+# per-case solver path override (machine-specific; see axqua.core.machine)
+cases/*/solvers.local.yml
+solvers.local.yml
+
+# the documentation built into the plugin folder (scripts/build_plugin_zip.py)
+qgis_plugin/axqua/help/
+
+# --- The example cases ARE tracked with their input data ---------------------
+# An example is a folder that works on its own (axqua.core.examples): its data are
+# reduced to a few megabytes by scripts/build_example_data.py and are downloaded from
+# this repository by "axqua example get". These lines come last on purpose: they have
+# to win over the rule for user-sources above and over the file types (*.tif, *.gpkg).
+!/cases/example-isar/user-sources/**

@@ -4,11 +4,11 @@ Put **your** source data here. This folder is **gitignored** for real cases (it
 holds large GeoTIFFs/GeoPackages that must stay out of version control - see the
 20 MB CI guard); only this README is tracked, to document the expected layout.
 
-All data must be in the project CRS set in `case-config.yml` (`project.crs_epsg`,
+All data must be in the project CRS set in `case-template.axq-case` (`project.crs_epsg`,
 e.g. EPSG:25832 / a metric CRS). Layers in another CRS are reprojected on ingest,
 but check the vertical datum of any elevation/gauge data yourself.
 
-Expected layout (filenames are examples - point `case-config.yml` `inputs.*` at
+Expected layout (filenames are examples - point `case-template.axq-case` `inputs.*` at
 whatever you actually use):
 
 ```
