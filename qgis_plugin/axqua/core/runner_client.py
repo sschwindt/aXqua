@@ -151,17 +151,14 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
     # Never a silent fallback to some other interpreter: say what was tried.
     lines = ["axqua could not be found.", "", "Looked in:",
              f"  1. the plugin setting ({configured or 'not set'})",
-             # Both spellings, because both are honoured: a shell profile written before
-             # the rename still works, and a message that named only the new one would
-             # send that user looking for a variable they have already set.
-             f"  2. ${ENV_VAR}, or ${LEGACY_ENV_VAR} ({from_env or 'not set'})",
+             f"  2. ${ENV_VAR} ({from_env or 'not set'})",
              f"  3. PATH ({on_path or 'not found'})"]
     if problems:
         lines += ["", "What was tried:"] + problems
     lines += ["", "Install it with",
               "    pip install git+https://github.com/sschwindt/aXqua.git",
-              "in the environment that has your solver tooling (aXqua is not on PyPI "
-              "yet), then set the path in aXqua > Settings."]
+              "in the Python environment of your choice, then set the path in "
+              "aXqua > Settings."]
     raise RunnerNotFound("\n".join(lines))
 
 
@@ -227,8 +224,7 @@ def _require_minimum(version: str) -> None:
             f"this plugin needs axqua {MINIMUM_VERSION[0]}.{MINIMUM_VERSION[1]} or "
             f"newer, and this one is {version}",
             remedy="Upgrade it with 'pip install --upgrade "
-                   "git+https://github.com/sschwindt/aXqua.git' in the environment that "
-                   "has your solver tooling.")
+                   "git+https://github.com/sschwindt/aXqua.git' in its Python environment.")
 
 
 def _no_window() -> dict:

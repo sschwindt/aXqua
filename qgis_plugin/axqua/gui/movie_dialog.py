@@ -269,7 +269,7 @@ class MovieDialog(QDialog):
             self.reject()
             return
         self._cancelled = True
-        self.note.setText("Cancelling after the current frame...")
+        self.note.setText("Canceling after the current frame...")
 
     def _finish(self) -> None:
         self._running = False
@@ -277,7 +277,7 @@ class MovieDialog(QDialog):
         if self._frames_dir is None or self._output is None:
             return
         if self._cancelled:
-            self.note.setText(f"Cancelled. {self._step} frame(s) kept in "
+            self.note.setText(f"Canceled. {self._step} frame(s) kept in "
                               f"{self._frames_dir}.")
             return
         self._encode(self._frames_dir, self._output, self._step)

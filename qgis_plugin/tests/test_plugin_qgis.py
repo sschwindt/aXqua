@@ -2253,3 +2253,18 @@ def test_validation_is_a_step_of_a_batch_after_the_calibration():
 
     assert batch.ordered(["validation", "calibration", "steady"]) == \
         ["steady", "calibration", "validation"]
+
+
+def test_every_processing_algorithm_loads(qgis_app):
+    """QGIS loads the provider at start; one algorithm that raised there opened an
+    error dialog at every start of QGIS (and hung a headless one). The import of
+    results read two settings that had moved into the case."""
+    from axqua_plugin.processing.provider import AxquaProvider
+
+    provider = AxquaProvider()
+    provider.loadAlgorithms()
+    for algorithm in provider.algorithms():
+        algorithm.initAlgorithm({})
+        assert algorithm.shortHelpString()
+    names = {algorithm.name() for algorithm in provider.algorithms()}
+    assert {"importresults"} <= names and len(names) == 3

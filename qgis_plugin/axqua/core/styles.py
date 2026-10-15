@@ -89,9 +89,9 @@ class VelocityStyle:
     def warning(self) -> str:
         if self.clamped_from is None:
             return ""
-        return (f"The mesh reaches {self.clamped_from:.2f} m/s; the colour scale is "
+        return (f"The mesh reaches {self.clamped_from:.2f} m/s; the color scale is "
                 f"capped at {self.maximum:.1f} m/s. Velocities above ~5 m/s in a "
-                "depth-averaged result are usually a wetting/drying artefact in a "
+                "depth-averaged result are usually a wetting/drying artifact in a "
                 "nearly-dry cell rather than real flow. Override the maximum if the "
                 "reach genuinely is that fast.")
 

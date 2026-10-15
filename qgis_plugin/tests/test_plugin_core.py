@@ -483,8 +483,8 @@ def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
     assert capability.submittable is False
     assert capability.enabled is False
     assert capability.can_submit is False
-    assert capability.state_text == "no job kind"
-    assert "Python driver" in capability.reason
+    assert capability.state_text == "not available yet"
+    assert "cannot be started from the plugin yet" in capability.reason
 
 
 def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
@@ -493,7 +493,7 @@ def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
     view = CaseView.from_payload(MATRIX)
     capability = view.solver("telemac").capability("morphodynamics")
     assert capability.visible is True and capability.can_submit is False
-    assert capability.state_text != "no job kind"
+    assert capability.state_text != "not available yet"
     assert "coupled with GAIA" in capability.reason
     assert "Python driver" not in capability.reason
 

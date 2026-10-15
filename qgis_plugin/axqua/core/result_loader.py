@@ -369,7 +369,7 @@ class ResultLoader:
                 # and a user who is not told will read that as a modelling result.
                 self.warnings.append(
                     f"{item.name}: the depth range could not be read from the file "
-                    f"({why}), so the colour scale is capped at 1 m. Adjust it in "
+                    f"({why}), so the color scale is capped at 1 m. Adjust it in "
                     "Layer Properties > Symbology.")
                 maximum = 1.0
             style = styles.DepthStyle(minimum=self.min_depth, maximum=maximum)

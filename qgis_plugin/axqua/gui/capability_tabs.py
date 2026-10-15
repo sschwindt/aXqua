@@ -94,10 +94,7 @@ NOT_CONFIGURED_REASON = (
 #: is an enabled tab with two buttons that cannot do anything. None of today's
 #: capabilities is in that position any more (see :data:`PART_OF` and
 #: :data:`FIXED_OPTIONS`), and a future one still gets this text rather than dead buttons.
-NO_JOB_KIND_REASON = (
-    "axqua implements {title} for {solver}, but not yet as a job the runner can "
-    "submit - there is no job kind for it. Run it from a Python driver in the case "
-    "folder for now.")
+NO_JOB_KIND_REASON = "{title} with {solver} cannot be started from the plugin yet."
 
 
 #: Capabilities that are not simulations of their own. They are switched on in the case
@@ -195,7 +192,7 @@ class CapabilityView:
         if self.implemented != "yes":
             return "not available"
         if not self.submittable and not self.part_of:
-            return "no job kind"
+            return "not available yet"
         marks = [name for name, flag in (("configured", self.configured),
                                          ("built", self.built), ("run", self.run))
                  if flag]

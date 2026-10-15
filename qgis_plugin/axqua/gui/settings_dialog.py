@@ -1,17 +1,9 @@
 """Plugin settings: where axqua is.
 
 Deliberately small. Everything about the *model* belongs in the case file and
-everything about the *machine* belongs in axqua's own ``profiles.yml``; duplicating
-either here would create a second place to look when something disagrees.
-
-That leaves one setting, and it is genuinely this installation's: which executable to
-talk to. The two drawing thresholds that used to sit here - the minimum water depth
-and the top of the velocity scale - were a case of exactly the duplication above. They
-describe a REACH, not a computer: `hydrodynamics.wet_depth` is the depth below which
-water stands inside the grain roughness rather than flowing over it, and axqua's own
-reports already use it, so a map drawn to a per-install copy disagreed with the report
-beside it; `postproc.velocity_scale_max` is the top of the velocity colour scale, and
-a chute and a lowland river do not share one. They are read from the open case now.
+everything about the *machine* belongs in axqua's own profile; duplicating either here
+would create a second place to look when something disagrees. That leaves one setting
+that is genuinely this installation's: which executable to talk to.
 """
 
 from __future__ import annotations
@@ -41,7 +33,7 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("aXqua settings")
-        self.resize(620, 260)
+        self.resize(620, 130)
         values = read_settings()
 
         layout = QVBoxLayout(self)
@@ -64,16 +56,6 @@ class SettingsDialog(QDialog):
         self.result = QLabel("")
         self.result.setWordWrap(True)
         form.addRow("", self.result)
-
-        # A note where two settings used to be, because a user who knew them will
-        # look here first.
-        note = QLabel(
-            "The minimum water depth and the top of the velocity scale are settings "
-            "of the case, not of this computer. They are in the case file under "
-            "hydrodynamics.wet_depth and postproc.velocity_scale_max, and the case "
-            "editor shows them.")
-        note.setWordWrap(True)
-        form.addRow("Drawing of results", note)
 
         layout.addLayout(form)
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok

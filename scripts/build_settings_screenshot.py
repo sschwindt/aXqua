@@ -56,7 +56,7 @@ def _render() -> int:
         dialog = SettingsDialog()
         # wide enough that the whole path is readable: the figure exists to show what
         # a correct entry looks like, and a field scrolled to its end shows the tail
-        dialog.resize(820, 250)
+        dialog.resize(820, 130)
         dialog.executable.setText(SHOWN_PATH)
         dialog.executable.setCursorPosition(0)
         dialog.result.setText(SHOWN_RESULT.format(version=_axqua_version()))

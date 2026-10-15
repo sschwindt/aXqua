@@ -14,8 +14,8 @@ from pathlib import Path
 from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterFile,
                        QgsProcessingParameterNumber)
 
+from ...core import styles
 from ...core.result_loader import ResultLoader, discover
-from ...gui.settings_dialog import read_settings
 
 
 class ImportResultsAlgorithm(QgsProcessingAlgorithm):
@@ -48,18 +48,17 @@ class ImportResultsAlgorithm(QgsProcessingAlgorithm):
                 "never copied.")
 
     def initAlgorithm(self, config=None):    # noqa: N802 - QGIS naming
-        settings = read_settings()
         self.addParameter(QgsProcessingParameterFile(
             self.JOB_DIR, "Job directory",
             behavior=QgsProcessingParameterFile.Behavior.Folder))
         self.addParameter(QgsProcessingParameterNumber(
             self.MIN_DEPTH, "Minimum water depth (m), below which depth is transparent",
             type=QgsProcessingParameterNumber.Type.Double,
-            defaultValue=settings["min_depth"], minValue=0.0))
+            defaultValue=styles.DEFAULT_MIN_DEPTH, minValue=0.0))
         self.addParameter(QgsProcessingParameterNumber(
             self.VELOCITY_CAP, "Velocity scale maximum (m/s)",
             type=QgsProcessingParameterNumber.Type.Double,
-            defaultValue=settings["velocity_cap"], minValue=0.1))
+            defaultValue=styles.DEFAULT_VELOCITY_MAX, minValue=0.1))
         from qgis.core import QgsProcessingOutputNumber
         self.addOutput(QgsProcessingOutputNumber(self.COUNT, "Layers added"))
 
@@ -73,10 +72,8 @@ class ImportResultsAlgorithm(QgsProcessingAlgorithm):
         results = discover(job_dir)
         if not results.layers:
             raise QgsProcessingException(
-                f"{job_dir} holds nothing QGIS can open."
-                + ("" if results.from_manifest
-                   else " There is no result manifest either, so this was a plain scan "
-                        "of the folder."))
+                f"{job_dir} holds no results QGIS can open. Select the folder of a "
+                "completed job.")
         loader = ResultLoader(context.project(), min_depth=min_depth, velocity_cap=cap)
         added = loader.load(results)
         for warning in loader.warnings:

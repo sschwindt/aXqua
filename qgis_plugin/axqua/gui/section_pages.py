@@ -604,13 +604,12 @@ class BatchPage(QWidget):
 
     def show_profile(self, profile) -> None:
         root = get(profile or {}, "jobs.root") or "the default folder of aXqua"
-        how = get(profile or {}, "jobs.launcher") or "auto"
         self.detach.setText(
             "Every job is detached from QGIS when it is submitted: it keeps running "
             "when QGIS is closed, and the job list shows it with its current state "
             "when QGIS is opened again.\n\n"
-            f"Jobs are kept in {root} and detached with the method '{how}'. Both are "
-            "set in the profile of this computer (tab Configuration).")
+            f"Jobs are kept in {root}, which is set in the profile of this computer "
+            "(tab Configuration).")
 
 
 def _qt():

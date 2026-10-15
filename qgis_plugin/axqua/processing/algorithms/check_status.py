@@ -41,7 +41,7 @@ class CheckStatusAlgorithm(QgsProcessingAlgorithm):
         return "jobs"
 
     def shortHelpString(self) -> str:  # noqa: N802 - QGIS naming
-        return ("Reports the current state of a axqua job (QUEUED, RUNNING, "
+        return ("Reports the current state of an aXqua job (QUEUED, RUNNING, "
                 "COMPLETED, FAILED, CANCELLED ...) together with its progress.\n\n"
                 "Returns immediately - it does not wait for the job to finish.")
 
