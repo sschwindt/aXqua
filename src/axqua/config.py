@@ -1852,7 +1852,11 @@ class OpenFoam:
     # of it. 1 is the usual value. In a shallow reach the surface crosses the layers
     # that follow the bed wherever the bed slopes and is smeared there: on the Isar
     # example (2 m lattice, 8 layers, 40 s) 1 left 19 % of the water in full cells
-    # and a surface 0.26 m thick, 2 left 39 % and 0.12 m, at a third more steps.
+    # and a surface 0.26 m thick, 2 left 39 % and 0.12 m, at a third more steps. On
+    # the 1 m lattice (14 layers, 600 s) 2 left 60 % against 36 % and 0.06 against
+    # 0.23 m; the reach averages stayed, but single columns changed by 0.09 m/s and
+    # 1.7 cm (rms), the bed shear stress rose by a tenth and the water lost through
+    # the top went from 0.8 to 1.5 % of the discharge.
     interface_compression: float = 1.0
     # Cap on |U| enforced by the limitVelocity fvConstraint. Water never reaches it;
     # an air jet does, and this is the most effective single stop on the air phase
