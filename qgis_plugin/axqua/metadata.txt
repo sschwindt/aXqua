@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM river models from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install git+https://github.com/sschwindt/aXqua.git', and needs a working TELEMAC and/or OpenFOAM installation.
-version=0.4.2
+version=0.5.0
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -27,19 +27,27 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=0.4.2
-    - Export movie is reachable at last, from the aXqua menu, and renders without
-      freezing QGIS.
-    - Nothing runs axqua on the GUI thread any more: the startup probe, the job
-      list, result discovery and the log path are all backgrounded.
-    - Errors show what axqua actually said - its remedy, or the tail of its output -
-      instead of "returned something that is not JSON".
-    - Option check boxes are tri-state, so an untouched form no longer overrides
-      case-config.yml.
-    - A freshly submitted job keeps the dashboard polling; loading results twice no
-      longer duplicates the layers.
-    - Capabilities axqua cannot submit as a job are disabled with the reason, and a
-      case that enables no solver says so instead of showing an empty panel.
+changelog=0.5.0
+    - Installation wizards for TELEMAC, OpenFOAM with the sediment solvers, ParaView
+      and VisIt, for you alone or for all users of the computer.
+    - The OpenFOAM installation no longer depends on the website of the sediment
+      solvers: their source code ships with aXqua.
+    - A profile per computer names where the programs are installed; a case file
+      (.axq-case) describes the reach. The profile editor and the case editor edit
+      them, and a check reports everything that is not in order at once.
+    - The panel follows the workflow: Configuration, Case Setup, Preprocessing,
+      Hydraulic simulation, Morphodynamic simulation, Calibration and validation,
+      Postprocessing, Batch-processing, each with its Help page.
+    - Jobs of a case run one after the other and keep running when QGIS is closed.
+    - Validation of a calibrated model against measurements of another flow
+      situation.
+    - Fine sediment over a bed that stays in place, simulated with OpenFOAM.
+    - Results export to ParaView and VisIt; a loaded result shows its last time
+      step.
+    - The Isar example case downloads with its data and a step-by-step guide.
+    - Export movie is in the aXqua menu, and QGIS stays responsive while aXqua
+      works.
+    - Errors show what aXqua said and what to do about it.
     0.2.0
     - First release.
     - Persistent job runner: submit, monitor and cancel TELEMAC/OpenFOAM runs that
