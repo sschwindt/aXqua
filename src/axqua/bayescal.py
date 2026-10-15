@@ -335,8 +335,8 @@ class FlowSpec:
     """
     name: str                       # short tag (steering + results names)
     discharge: float                # m3/s
-    kind: str                       # adapter | transect | inline | csv
-    values: Path                    # FlowTracker xlsx (or a ready CSV for kind "csv")
+    kind: str                       # adapter | transect | inline | points | csv
+    values: Path                    # FlowTracker xlsx, point layer ("points") or a ready CSV ("csv")
     positions: Path | None = None   # DGPS point layer (adapter/transect)
     sheet: str = "KB15"
     duration: float | None = None   # steady sim seconds (default: cfg duration)
@@ -365,6 +365,9 @@ class FlowSpec:
                                               label=self.name)
         if self.kind == "inline":
             return campaigns.compile_inline(self.values, self.sheet,
+                                            self.vel_err_floor, label=self.name)
+        if self.kind == "points":
+            return campaigns.compile_points(self.values, crs_epsg,
                                             self.vel_err_floor, label=self.name)
         raise ValueError(f"flow {self.name!r}: unknown kind {self.kind!r}")
 

@@ -15,9 +15,9 @@ and 5, plus VELOCITY DIFFUSIVITY from ``inn-KB15-2025-hydro.axq-case`` - 5 param
 (floodplain, 3% wet) and zone 6 (84% dry, flow shallower than its own roughness
 height) are pinned. Add or retire a zone by editing the CSV, nothing else.
 
-Campaigns (see user-sources/ground-truth/hydraulics/discharge-info.md):
+Campaigns (see user-sources/ground-truth/README.md):
 
-* **Sept 2025, Q=47.3 m3/s** - revised summary workbook, 30 reach-spanning pts.
+* **Sept 2025, Q=47.3 m3/s** - 30 reach-spanning verticals.
 * **Nov 2025, Q=48.45 m3/s** - one taped cross-section (22 verticals in ~10 m).
   Its per-point velocity error is floored high (0.05 m/s) so this single, model-
   over-predicted section informs but does not dominate the joint likelihood.
@@ -48,16 +48,17 @@ from axqua.config import DEFAULT_SIM_DIR, LEGACY_SIM_DIR, load_config
 
 HERE = Path(__file__).resolve().parent
 CONFIG = HERE / "inn-KB15-2025-hydro.axq-case"
-GT = HERE / "user-sources/ground-truth/hydraulics"
-GEO = HERE / "user-sources/geodata"
+FT = HERE / "user-sources/ground-truth/flowtracker"
 
 # case-specific flow set (the only thing this script declares).
-# Since July 2026 the targets come pre-compiled by prepare_corrected_targets.py
-# (kind "csv"): pole-corrected DGPS z, bathymetry-corrected water-level depth
-# targets, profile-averaged velocities with a structural discrepancy term -
-# see README.md "Data particularities". Run that script first after any
-# ground-truth change. (The raw adapter/transect specs are kept below for
-# reference, commented out.)
+# Since 2026-10-15 the targets are read straight from the corrected campaign layers
+# of 2026-10-14 (kind "points", one target per vertical, the USGS three-point depth
+# average of the velocity). They replaced the CSVs of prepare_corrected_targets.py,
+# which were built on the superseded July positions (see README.md).
+#
+# A campaign calibrated here is calibration data: with both September and November
+# in the joint calibration, November is no validation situation for it, and the
+# validation has to use March or August 2026 (calibration.validation).
 # The artifact folder was renamed axqua-case, but this case was built before the
 # rename and its results are on disk under the old name. Mirror the rule
 # config.py uses (_resolve_sim_dir) instead of hard-coding either spelling.
@@ -91,21 +92,17 @@ HOTSTART_SEED = "hotstart-seed.slf"   # slim one-frame extract of r2d.slf
 HOTSTART_DURATION = 2500.0            # s (~1.8-2.4 h per run on 16 cores)
 
 FLOWS = [
-    FlowSpec(name="q47-3", discharge=47.3, kind="csv",
+    FlowSpec(name="q47-3", discharge=47.3, kind="points",
              duration=HOTSTART_DURATION, hotstart_from=HOTSTART_SEED,
-             values=PREP / "measurements-corrected-q47-3.csv"),
-    FlowSpec(name="q48-45", discharge=48.45, kind="csv",
+             values=FT / "Sep25/KB15_Sep25.gpkg"),
+    # one dense cross-section: its error is floored high so that it informs but
+    # does not dominate the joint likelihood
+    FlowSpec(name="q48-45", discharge=48.45, kind="points",
              duration=HOTSTART_DURATION, hotstart_from=HOTSTART_SEED,
-             values=PREP / "measurements-corrected-q48-45.csv"),
-    # FlowSpec(name="q47-3", discharge=47.3, kind="adapter", duration=1500.0,
-    #          values=GT / "FT_TKE_Summary.xlsx",
-    #          positions=GEO / "flowtracker2/dgps-flowtracker-kb15-sept25-zcorrected.gpkg"),
-    # FlowSpec(name="q48-45", discharge=48.45, kind="transect", duration=1500.0,
-    #          values=GT / "FT_TKE_Summary_Nov25.xlsx",
-    #          positions=GEO / "TKE_KB15_Nov25.gpkg", vel_err_floor=0.05),
+             values=FT / "Nov25/KB15_Nov25.gpkg", vel_err_floor=0.05),
     # EXCLUDED (wadeable margins not comparable to modelled channel velocity):
-    # FlowSpec(name="q45-8", discharge=45.8, kind="inline", duration=3000.0,
-    #          values=GT / "FT_TKE_Summary_March26.xlsx"),
+    # FlowSpec(name="q45-8", discharge=45.8, kind="points", duration=3000.0,
+    #          values=FT / "Mar26/KB15_Mar26.gpkg"),
 ]
 
 

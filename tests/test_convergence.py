@@ -504,3 +504,26 @@ def test_a_failing_listener_does_not_stop_the_study(tmp_path):
         levels=[("coarse", 2.0, 6.0), ("medium", 1.4, 4.2), ("fine", 1.0, 3.0)],
         extend_ratio=None, on_level=broken)
     assert len(rep.levels) == 3
+
+
+def test_probes_outside_the_model_are_left_out(tmp_path):
+    """A campaign's gauging sections upstream of the model are no probes: on the Isar
+    example they were 23 of 56 and decided the verdict."""
+    import types
+
+    import geopandas as gpd
+    import pandas as pd
+    from shapely.geometry import box
+
+    from axqua import ground_truth
+    from axqua.convergence import default_probes
+
+    outline = tmp_path / "roi.gpkg"
+    gpd.GeoDataFrame(geometry=[box(0, 0, 10, 10)], crs="EPSG:25832").to_file(outline)
+    table = tmp_path / "ground-truth.xlsx"
+    ground_truth.write_tidy({"hydraulics": pd.DataFrame(
+        {"x": [5.0, 50.0, 2.0], "y": [5.0, 5.0, 8.0], "z": 0.0, "u": 1.0})}, table)
+    cfg = types.SimpleNamespace(ground_truth_path=table, crs_epsg=25832,
+                                geodata=types.SimpleNamespace(boundary=outline,
+                                                              channel_centerline=None))
+    assert default_probes(cfg).tolist() == [[5.0, 5.0], [2.0, 8.0]]

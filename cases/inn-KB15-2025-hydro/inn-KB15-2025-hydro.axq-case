@@ -35,12 +35,11 @@ geodata:
   # Pure geodata files (boundary CONDITIONS are in `boundaries`, ground truth in
   # `ground_truth`). Paths resolve relative to THIS file; data under user-sources/.
   # ---- required -----------------------------------------------------------
-  # The raw LiDAR survey. correct_dem_bathymetry.py produces a bathymetry-
-  # corrected variant (the wetted bed is ~0.34 m too high, growing with depth);
-  # it is NOT adopted here, because it invalidates the ks=0.411 2D posterior,
-  # which was fitted against water levels on this bed, and because a 3D velocity
-  # campaign on the corrected bed did NOT improve (see the README). Switch the
-  # path below to DEM-2025-20cm-bathy-corrected.tif to adopt it deliberately.
+  # The raw LiDAR survey. A bathymetry-corrected variant fitted in August 2026 to
+  # the DGPS bed elevations of the July pole-height reconstruction was never
+  # adopted, and was retired on 2026-10-15 with the data it was fitted to: the
+  # corrected campaign data of 2026-10-14 use one pole height (2.31 m) where the
+  # reconstruction had 2.26 / 2.51 / 2.70 m. See the README.
   dem_initial: user-sources/geodata/DEM-2025-20cm.tif  # [REQUIRED] baseline terrain (GeoTIFF)
   boundary: user-sources/geodata/roi-kb15.gpkg         # [REQUIRED] ROI / max wetted extent polygon
   # ---- optional -----------------------------------------------------------
@@ -177,13 +176,14 @@ ground_truth:
       profile: depth-average
 
 calibration:
-  # calibration target set by run_Bayes_cal.py: SCALAR VELOCITY (FlowTracker at
-  # 0.6 x depth ~ depth-averaged velocity); WATER DEPTH is extracted alongside.
-  # Combined water-level + velocity calibration (July 2026): WATER DEPTH_DATA
-  # carries the bathymetry-corrected water-level target (WSE_measured - model
-  # bed), SCALAR VELOCITY the profile-averaged FlowTracker speed with a
-  # structural discrepancy error term - see prepare_corrected_targets.py.
-  calibration_quantities: ["WATER DEPTH", "SCALAR VELOCITY"] # measured columns used for calibration
+  # SCALAR VELOCITY is the depth-averaged FlowTracker velocity of each vertical
+  # (profile: depth-average in ground_truth). WATER DEPTH is the measured depth;
+  # the water-level target of July 2026, which corrected for the too-high wetted
+  # bed of the DEM, was built on the superseded positions and was retired on
+  # 2026-10-15 (see the README). The raw depth is therefore NOT a calibration
+  # target: the photogrammetric DEM is ~0.3 m too high in the wetted channel, so a
+  # measured depth is not comparable to a modelled one. It is still extracted.
+  calibration_quantities: ["SCALAR VELOCITY"]                # measured columns used for calibration
   extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]  # quantities pulled from results
   measurement_error: 0.10      # fraction of the measured value
   # initial design of experiments: Sobol sequence over the 3D parameter space

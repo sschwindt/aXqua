@@ -1,5 +1,6 @@
-"""Unit tests for the multi-campaign velocity-CSV primitives (no solver, no I/O)."""
+"""Unit tests for the multi-campaign velocity-CSV primitives (no solver)."""
 
+import pytest
 import numpy as np
 
 from axqua import campaigns
@@ -54,3 +55,25 @@ def test_compile_campaign_rejects_unknown_layout():
         assert "unknown campaign layout" in str(e)
     else:
         raise AssertionError("expected ValueError for unknown layout")
+
+
+def test_a_point_layer_gives_one_calibration_point_per_vertical(tmp_path):
+    # the layout of the corrected campaign layers of 2026-10: one point per reading
+    import geopandas as gpd
+    from shapely.geometry import Point
+
+    from axqua.campaigns import compile_campaign
+
+    rows = [(100.0, 200.0, 0.10, 0.50, 1.0), (100.0, 200.0, 0.30, 0.50, 0.8),
+            (100.0, 200.0, 0.40, 0.50, 0.6), (110.0, 200.0, 0.12, 0.20, 0.3)]
+    layer = tmp_path / "campaign.gpkg"
+    gpd.GeoDataFrame({"Meas. Depth (m)": [r[2] for r in rows],
+                      "Total Depth (m)": [r[3] for r in rows],
+                      "v_x (m/s)": [r[4] for r in rows], "v_y (m/s)": 0.0},
+                     geometry=[Point(r[0], r[1]) for r in rows],
+                     crs="EPSG:25832").to_file(layer, driver="GPKG")
+    out = compile_campaign("points", layer=layer, crs_epsg=25832, label="sep")
+    assert list(out["label"]) == ["sep-1", "sep-2"]
+    # USGS three-point average (1.0 + 2*0.8 + 0.6) / 4 for the first vertical
+    assert out["SCALAR VELOCITY_DATA"].tolist() == pytest.approx([0.8, 0.3])
+    assert out["WATER DEPTH_DATA"].tolist() == pytest.approx([0.5, 0.2])

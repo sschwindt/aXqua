@@ -50,8 +50,10 @@ EXAMPLES: dict[str, dict] = {
         "title": "Isar River, losing and gaining reach",
         "summary": "A braided gravel-bed reach of 6.6 ha at a discharge of 2.4 m3/s, "
                    "which loses water into a gravel bar and gains it back. "
-                   "Two-dimensional TELEMAC model with about 26,500 nodes: the build "
-                   "takes one minute and the steady simulation about two minutes.",
+                   "Two-dimensional TELEMAC model with about 26,500 nodes: build, "
+                   "steady simulation, Bayesian calibration of two roughness values "
+                   "against FlowTracker measurements, and validation against a second "
+                   "flow situation, in about 20 minutes.",
         "case": "example-isar.axq-case",
         "documents": ["README.md", "LICENSE.md", "LICENSE-CC-BY-4.0.txt"],
         "origin": "isar-2025/user-sources",
@@ -66,10 +68,12 @@ EXAMPLES: dict[str, dict] = {
             "geodata/control-sections.gpkg": ("geodata/baffles.gpkg", "copy"),
             "geodata/liquid-boundaries.gpkg": ("geodata/liquid-boundaries.gpkg", "copy"),
             "geodata/percolation-zone.gpkg": ("geodata/percolation-zone.gpkg", "copy"),
-            # The velocity measurements (two FlowTracker campaigns) are NOT part of
-            # the example yet: their positions are being corrected. They return here,
-            # with the blocks ground_truth and calibration of the case file, when the
-            # corrected table is in.
+            # the two FlowTracker campaigns with the corrected DGPS positions of
+            # 2026-10-14: calibration (November) and validation (September)
+            "ground-truth/flowtracker-2025-11.gpkg":
+                ("ground-truth/flowtracker/Nov25/Isar_Nov25.gpkg", "copy"),
+            "ground-truth/flowtracker-2025-09.gpkg":
+                ("ground-truth/flowtracker/Sep25/Isar_Sep25.gpkg", "copy"),
         },
     },
 }

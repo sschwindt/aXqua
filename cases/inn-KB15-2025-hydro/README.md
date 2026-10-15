@@ -5,6 +5,8 @@ from the 2025 UAS survey and calibrated with HydroBayesCal against FlowTracker2
 field campaigns at several steady discharges (multi-flow Bayesian calibration
 of the channel roughness).
 
+> **Note of 2026-10-15.** The user delivered corrected FlowTracker2/DGPS data on 2026-10-14 (`user-sources/ground-truth/README.md`). They replace the July 2026 corrections this README describes: the September and March positions moved by 0.23 m, and the bed elevations use one pole height of 2.31 m where the July reconstruction had 2.26 / 2.51 / 2.70 m. Therefore `prepare_corrected_targets.py` (pole-corrected targets, water-level depth targets, profile averages) and `correct_dem_bathymetry.py` (DEM correction fitted to the pole-corrected bed) were removed, and the superseded layers and workbooks were moved out of the case to `/srv/private/axqua-superseded-2026-10-15/` on lww-134. The case file reads the corrected layers with `profile: depth-average`, and `run_Bayes_cal_multiflow.py` reads them directly (`kind="points"`). Whether the water-level target should be rebuilt on the corrected data is open. The text below is the record of the work up to that date.
+
 ## Structure and workflow
 
 Standard aXqua case layout (see the repository `README.md` and
@@ -15,9 +17,7 @@ this folder). Ordered steps:
    (mesh `geometry.slf`, `boundaries.cli`, `friction.tbl`, `steady2d.cas`).
 2. `initial_run.py` - steady test run + boundary-flux convergence check.
 3. `mesh_convergence_study.py` - horizontal grid independence.
-4. `prepare_corrected_targets.py` - **case-specific**: compiles the corrected
-   calibration-target CSVs into `axqua-case/preprocessing/` (see "Data
-   particularities" - run this before any calibration re-run).
+4. (removed on 2026-10-15, see the note below) `prepare_corrected_targets.py`.
 5. `run_Bayes_cal_multiflow.py [--smoke|--run|--resume]` - multi-discharge
    Bayesian calibration (one shared channel `ks` against all campaigns
    jointly). `run_Bayes_cal.py` is the single-flow variant.

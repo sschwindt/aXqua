@@ -125,18 +125,29 @@ def calibrated_parameters(cfg) -> CalibratedSet:
     with open(source, "rb") as handle:
         data = pickle.load(handle)          # nosec B301 - written by the calibration
     names = [str(name) for name in data.get("calibration_parameters") or []]
-    optimum = data.get("joint_optimum") or []
+    optimum = data.get("joint_optimum")
+    optimum = [] if optimum is None else optimum
     estimate = "joint posterior maximum"
     values = None
-    if optimum and optimum[-1] is not None:
+    if len(optimum) and optimum[-1] is not None:
         values = np.asarray(optimum[-1], dtype=float).ravel()
-    if values is None or values.size != len(names):
-        posterior = data.get("posterior") or []
-        if not posterior:
+    # HydroBayesCal writes NaN as the joint maximum when too few prior samples survive
+    # the likelihood to estimate a density (one, on the example of 2026-10-15, whose
+    # model was 37 % too slow at every point). A NaN would be written into the
+    # friction table of the validation run and wreck it, so the mean of the
+    # posterior sample stands in, and the estimate says how many samples it rests on.
+    if values is None or values.size != len(names) or not np.isfinite(values).all():
+        posterior = data.get("posterior")
+        if posterior is None or not len(posterior):
             raise ConfigError(f"{source} holds no posterior", subject="calibration",
                               remedy="Run the calibration again.")
-        values = np.asarray(posterior[-1], dtype=float).mean(axis=0).ravel()
-        estimate = "posterior mean"
+        sample = np.atleast_2d(np.asarray(posterior[-1], dtype=float))
+        values = sample.mean(axis=0).ravel()
+        estimate = ("posterior mean" if len(sample) > 1 else
+                    "the only posterior sample (no joint maximum could be estimated)")
+    if not np.isfinite(values).all():
+        raise ConfigError(f"{source} holds no finite calibrated values",
+                          subject="calibration", remedy="Run the calibration again.")
     if values.size != len(names) or not names:
         raise ConfigError(f"{source} does not name its parameters",
                           subject="calibration")

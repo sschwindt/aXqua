@@ -109,9 +109,12 @@ def analyse(cfg, probe_dir: Path) -> int:
     """Frame-by-frame drift of the calibration-point QoI -> the plateau time."""
     from axqua.core.selafin import read_slf
 
-    pts = pd.concat([pd.read_csv(cfg.preprocessing_dir
-                                 / f"measurements-corrected-{n}.csv")
-                     for n in ("q47-3", "q48-45")], ignore_index=True)
+    from axqua.campaigns import compile_points
+
+    ft = Path(__file__).resolve().parent / "user-sources/ground-truth/flowtracker"
+    pts = pd.concat([compile_points(ft / layer, cfg.crs_epsg)
+                     for layer in ("Sep25/KB15_Sep25.gpkg", "Nov25/KB15_Nov25.gpkg")],
+                    ignore_index=True)
     px, py = pts.iloc[:, 1].to_numpy(), pts.iloc[:, 2].to_numpy()
 
     print(f"\n{'level':>8} {'t [s]':>8} {'dH vs final':>12} {'dU vs final':>12}")

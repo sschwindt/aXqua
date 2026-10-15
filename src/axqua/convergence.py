@@ -799,8 +799,15 @@ def default_probes(cfg: Config, n: int = 40) -> np.ndarray:
         try:
             from axqua import ground_truth
 
+            from axqua.bayescal import _inside_the_model
+
             tables = ground_truth.read_tidy(gt)
-            pts = np.vstack([t[["x", "y"]].to_numpy(dtype=float)
+            # Points outside the model (a campaign's gauging sections upstream of
+            # it) are left out, as the calibration leaves them out: sampled at the
+            # nearest node they compare a wall with mid-channel. On the Isar example
+            # they were 23 of 56 probes and decided the verdict.
+            pts = np.vstack([_inside_the_model(cfg, t[["x", "y"]])
+                             .to_numpy(dtype=float)
                              for t in tables.values() if {"x", "y"} <= set(t.columns)])
             if len(pts):
                 return pts
