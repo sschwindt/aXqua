@@ -5,6 +5,13 @@ the repository named in :data:`REPOSITORY`, at the commit named in :data:`PINNED
 is the version this release of aXqua was tested with. Nothing is taken from a moving
 branch unless the user asks for it (``--ref main``).
 
+The OpenFOAM installer of that repository is shipped with aXqua (:data:`BUNDLED`, MIT
+license), together with the source files of Olsen's sediment solvers (GPL-3.0-or-later),
+because Olsen's web site is the only place they are published and it answered HTTP 502
+in October 2026. The OpenFOAM and the ParaView/VisIt installations run that copy and
+download nothing from the repository; a local copy (``$AXQUA_INSTALLERS``) or another
+commit (``--ref``) still replaces it.
+
 What aXqua adds to the scripts is what a click needs and a terminal does not:
 
 *It asks no password.* The scripts install system packages with ``sudo``, which needs a
@@ -42,7 +49,7 @@ from axqua.core.diagnostics import ERROR, WARNING, Finding
 from axqua.core.profile import OPENFOAM_RELEASE
 from axqua.install import host as hosts
 
-__all__ = ["ENV_INSTALLERS", "PINNED", "REPOSITORY", "SYSTEM_PATH", "TARGETS", "TITLES",
+__all__ = ["BUNDLED", "ENV_INSTALLERS", "PINNED", "REPOSITORY", "SYSTEM_PATH", "TARGETS", "TITLES",
            "Options", "Plan", "Step", "admin_command", "clean_environment",
            "default_folder", "shadowed_tools",
            "elevation", "fetch_installers", "find_openfoam", "install_packages",
@@ -54,6 +61,9 @@ PINNED = "12fcb7e8b19d355a63d983ddcbd25d10b3abc398"
 
 #: A local copy of the installer scripts, used instead of downloading them.
 ENV_INSTALLERS = "AXQUA_INSTALLERS"
+
+#: The folder that holds aXqua's own copy of ``OpenFOAM-installer`` (see the module text).
+BUNDLED = Path(__file__).resolve().parent / "vendor"
 
 TARGETS = ("telemac", "openfoam", "postprocessors")
 TITLES = {
@@ -307,6 +317,11 @@ def _which(name: str) -> str | None:
 
 def _is_commit(ref: str) -> bool:
     return bool(re.fullmatch(r"[0-9a-f]{40}", ref))
+
+
+def _other_installers(options: Options) -> bool:
+    """Whether the user named installer scripts other than the ones of this release."""
+    return bool(options.installers or os.environ.get(ENV_INSTALLERS) or options.ref)
 
 
 def fetch_installers(options: Options, *, root: Path | None = None) -> Path:
@@ -736,8 +751,10 @@ class Plan:
             "options": self.options.as_dict(),
             "folder": str(self.folder),
             "installers": {"path": str(self.installers) if self.installers else "",
-                           "repository": REPOSITORY,
-                           "ref": self.options.ref or PINNED},
+                           "repository": ("bundled with aXqua"
+                                          if self.installers == BUNDLED else REPOSITORY),
+                           "ref": ("" if self.installers == BUNDLED
+                                   else self.options.ref or PINNED)},
             "steps": [step.as_dict() for step in self.steps],
             "packages": {"needed": self.needed, "missing": self.missing,
                          "unavailable": self.unavailable,
@@ -768,9 +785,10 @@ def plan(target: str, options: Options | None = None, *,
          host: hosts.Host | None = None, check_packages: bool = True) -> Plan:
     """What installing *target* on this computer takes. Never raises for a finding.
 
-    The installer scripts are downloaded for this (2 MB), because the list of system
-    packages is read out of them. A plan with an error finding has no steps that could
-    be started; a plan with warnings can.
+    The installer scripts are read for this, because the list of system packages is read
+    out of them: those of TELEMAC are downloaded (2 MB), the OpenFOAM installer is the
+    copy shipped with aXqua. A plan with an error finding has no steps that could be
+    started; a plan with warnings can.
     """
     from axqua.core.errors import AxquaError, ConfigError
 
@@ -829,7 +847,8 @@ def plan(target: str, options: Options | None = None, *,
 
     # ---- the installer scripts ---------------------------------------------------
     try:
-        checkout = fetch_installers(options)
+        checkout = (BUNDLED if target != "telemac" and not _other_installers(options)
+                    else fetch_installers(options))
     except AxquaError as exc:
         add(ERROR, "axqua.install.no_installer", exc.message, exc.remedy or "")
         return out

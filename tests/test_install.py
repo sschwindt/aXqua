@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -663,6 +665,50 @@ def test_a_failed_download_is_a_finding_with_the_way_around_it(tmp_path, monkeyp
     finding = next(f for f in plan.findings if f.code == "axqua.install.no_installer")
     assert recipes.ENV_INSTALLERS in finding.remedy
     assert not plan.ready
+
+
+@pytest.mark.parametrize("target", ["openfoam", "postprocessors"])
+def test_openfoam_and_the_postprocessors_use_the_installer_shipped_with_axqua(
+        target, tmp_path, monkeypatch, debian):
+    """Reported by two users in October 2026: Olsen's site answered HTTP 502 and the
+    installation stopped. The installer and Olsen's sources are shipped with aXqua, so
+    neither the repository nor his site is needed."""
+    monkeypatch.delenv(recipes.ENV_INSTALLERS, raising=False)
+    monkeypatch.setattr(recipes, "fetch_installers",
+                        lambda *a, **k: pytest.fail("the installers were downloaded"))
+    plan = recipes.plan(target, recipes.Options(folder=tmp_path / "t",
+                                                reuse_openfoam="no"),
+                        host=debian, check_packages=False)
+    assert plan.installers == recipes.BUNDLED
+    assert plan.steps and all(str(recipes.BUNDLED) in " ".join(map(str, step.argv))
+                              for step in plan.steps)
+    assert "paraview" in plan.needed
+    assert plan.as_dict()["installers"]["repository"] == "bundled with aXqua"
+
+
+def test_the_shipped_installer_passes_its_own_tests():
+    """Among them: every source file of Olsen is shipped with its pinned bytes and is
+    taken from there without a download."""
+    folder = recipes.BUNDLED / recipes.OPENFOAM_DIR
+    done = subprocess.run([sys.executable, "-B", "-m", "unittest", "discover", "-s",
+                           "tests", "-p", "test_*.py"], cwd=folder, capture_output=True,
+                          text=True, timeout=300)
+    assert done.returncode == 0, done.stderr[-3000:]
+
+
+def test_the_shipped_installer_runs_with_the_python_of_debian_12():
+    """Up to commit 12fcb7e the installer used an f-string that needs Python 3.12."""
+    folder = recipes.BUNDLED / recipes.OPENFOAM_DIR
+    old = [p for p in (shutil.which("python3.10"), shutil.which("python3.11")) if p]
+    if not old:
+        pytest.skip("no Python 3.10 or 3.11 on this computer")
+    files = [str(f) for f in sorted(folder.rglob("*.py"))]
+    probe = ("import sys\nfor name in sys.argv[1:]:\n"
+             "    compile(open(name, encoding='utf-8').read(), name, 'exec')\n")
+    for python in old:
+        done = subprocess.run([python, "-I", "-c", probe, *files], capture_output=True,
+                              text=True, timeout=120)
+        assert done.returncode == 0, done.stderr
 
 
 def test_a_plan_is_a_document_a_window_can_show(installers, debian, tmp_path):

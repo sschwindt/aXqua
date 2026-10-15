@@ -35,3 +35,9 @@ eBook Hydro-Informatics (https://hydro-informatics.com, file
 `img/telemac/active-layers-web.jpg`), author Sebastian Schwindt, who is also the author
 of axqua and authorised its use here. The image carries a Creative Commons
 BY-NC-ND mark and is NOT covered by the BSD 3-Clause License of this repository.
+
+src/axqua/install/vendor/OpenFOAM-installer/
+---------------------------------------------
+A copy of the OpenFOAM installer of https://github.com/Ecohydraulics/numerical-software-installers (commit 12fcb7e, MIT License, see its LICENSE), with the changes listed in its VENDORED.md. It is NOT covered by the BSD 3-Clause License of this repository.
+
+Its folder olsen-sources/ holds the source files of the sediment solvers sediDriftFoam and sediDriftFoam2 by Nils Reidar B. Olsen, unchanged, under the GNU General Public License version 3 or later (text in LICENSES/GPL-3.0-or-later.txt), as is cpp/olsenRatingCurve.H. They are shipped as an aggregate: aXqua neither links nor imports them, the installer compiles them into separate programs, and aXqua runs those programs as external solvers. The GPL therefore applies to these files and the programs built from them, not to aXqua.

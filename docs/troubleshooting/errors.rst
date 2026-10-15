@@ -94,7 +94,7 @@ The *Check* page of an installation wizard, the last page of a failed installati
 .. _axqua-install-no-installer:
 
 ``the installer scripts could not be downloaded``
-    aXqua downloads the installer scripts before it checks the computer and did not reach the repository. Verify the internet connection. For a computer without a connection, copy the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_ onto it and select its folder under *Further settings* (in a terminal: the environment variable ``AXQUA_INSTALLERS``).
+    aXqua downloads the TELEMAC installer scripts before it checks the computer and did not reach the repository. The OpenFOAM installer and the source code of Olsen's solvers are shipped with aXqua and are not downloaded. Verify the internet connection. For a computer without a connection, copy the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_ onto it and select its folder under *Further settings* (in a terminal: the environment variable ``AXQUA_INSTALLERS``).
 
 .. _axqua-install-python-too-old:
 

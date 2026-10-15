@@ -11,7 +11,7 @@ The wizards are opened on the *Configuration* tab, in the box *Simulation softwa
 
 At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the profile of the computer (:ref:`plugin-profile`), and starts it once. No further configuration is required.
 
-The wizards run the installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the first page.
+The wizards run the installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen's sediment solvers, so that installing OpenFOAM does not depend on the website where Olsen publishes them (it was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the first page.
 
 **System packages and administrator rights.** Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The *Check* page states how many of the required packages are missing and shows the one command that installs them. The command can be run in two ways:
 

@@ -79,10 +79,12 @@ openfoam = "axqua.solvers.openfoam.spec:SPEC"
 where = ["src"]
 
 [tool.setuptools.package-data]
-axqua = ["templates/*.cas", "templates/*.tbl"]
+axqua = ["templates/*.cas", "templates/*.tbl", "install/vendor/**/*"]
 
 [tool.ruff]
 line-length = 100
+# A copy of another project, kept as close to its original as possible (VENDORED.md).
+extend-exclude = ["src/axqua/install/vendor"]
 
 [tool.ruff.lint]
 # Pinned EXPLICITLY rather than left to ruff's defaults: those defaults widened in
