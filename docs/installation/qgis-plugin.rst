@@ -15,7 +15,9 @@ Install QGIS
 Install the plugin
 ------------------
 
-* *Plugins > Manage and Install Plugins*.
+Open **QGIS*, then:
+
+* Go to *Plugins > Manage and Install Plugins*.
 * In the *Settings* tab, tick *Show also experimental plugins*.
 * Search for **aXqua**, click *Install Plugin*.
 
@@ -24,7 +26,9 @@ Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `r
 Install the aXqua program
 -------------------------
 
-Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The tested route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_:
+Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The best route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which can be installed as follows:
+
+* Open **terminal** and enter:
 
 .. code-block:: bash
 
@@ -38,13 +42,17 @@ Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``s
 ``axqua --version`` printing a version confirms the installation.
 
 * **Bayesian calibration** needs one more package: ``pip install ".[calibration]"``.
-* If pip finds no matching ``hydrobayescal``, it is not on PyPI yet. Install it from source, without a version tag, so that the newest is taken:
+
+.. note::
+
+   If pip finds no matching ``hydrobayescal``, it is not on PyPI yet. Install it from source, without a version tag, so that the newest is taken:
 
   .. code-block:: bash
 
      pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git"
 
-* **Upgrade** both to the newest versions from the ``aXqua`` folder of the clone:
+
+* To **upgrade** ``axqua`` and ``hydrobayescal`` to the newest versions from the ``aXqua`` folder of the clone:
 
   .. code-block:: bash
 
@@ -54,9 +62,12 @@ Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``s
      pip install --upgrade --force-reinstall --no-deps "git+https://github.com/Ecohydraulics/hydrobayescal.git"
      axqua --version
 
-  ``--force-reinstall`` is needed because a newer HydroBayesCal on GitHub may carry the same version number as the installed one, which pip would otherwise keep. ``--no-deps`` leaves the packages of the conda environment untouched. *Check* on the *Configuration* tab of the plugin then reports the new version.
+  ``--force-reinstall`` is needed because a newer HydroBayesCal on GitHub may have the same version number as the installed one, which pip would otherwise keep. ``--no-deps`` leaves the packages of the conda environment untouched. *Check* on the *Configuration* tab of the plugin then reports the new version.
 
-* aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently.
+.. tip::
+
+   aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently.
+
 
 .. _find-the-axqua-path:
 
@@ -79,11 +90,16 @@ macOS      ``/Users/<user>/miniforge3/envs/axqua-env/bin/axqua``
 Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 =========  ====================================================================
 
-* Nothing printed: the environment is not active, or ``pip install .`` did not run in it.
-* To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\Scripts\axqua.exe`` (Windows).
+.. warning::
+
+   * If the above commands to print anything, the environment is not active, or ``pip install .`` did not run in it.
+   * To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\Scripts\axqua.exe`` (Windows).
+
 
 Connect the plugin to the aXqua program
 ---------------------------------------
+
+Back in **QGIS**:
 
 * Open the aXqua panel from the toolbar and click *Check* on the *Configuration* tab.
 * The plugin looks in three places, in this order: the path in *aXqua > Settings*, the variable ``AXQUA_EXE``, the system search path.
@@ -97,7 +113,14 @@ Connect the plugin to the aXqua program
 
    The dialog *aXqua > Settings* with a correctly entered path. (1) The full path of the program, ending in ``envs/axqua-env/bin/axqua``; the button *...* opens a file dialog instead. (2) *Test* reports the version that this path answers with.
 
-**The panel.** The tabs follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
+.. important::
+
+   This section only explains the very basic installation of the aXqua QGIS plugin (aka the **frontend**) and the required code behind the scenes (aka the **backend**). The next sections explain the installation of :doc:`installation/simulation-software` (TELEMAC and OpenFOAM), :doc:`installation/plugin-setup`, and the installation of :doc:`installation/postprocessors` (ParaView and Visit DAV).
+
+aXqua panel layout
+------------------
+
+After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
 
 .. figure:: ../img/gui-qgis-window.png
    :alt: The aXqua panel in the QGIS window

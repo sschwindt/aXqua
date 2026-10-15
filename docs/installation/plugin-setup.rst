@@ -3,7 +3,7 @@
 Plugin setup
 ============
 
-The plugin setup contains everything that describes the **computer** and not the river: where Python and the simulation software are installed, and where simulations are written. These settings are made once per computer. They are kept apart from the description of a river reach (:doc:`../usage/case-setup`), so that a case can be copied to another computer without changes.
+The plugin setup contains everything that describes the **computer** and not the simulation project, that is, where Python and the simulation software are installed, and where simulations will be written. These **settings are made once per computer**. They are kept apart from the description of a reach (:doc:`../usage/case-setup`), so that a case can be copied to another computer without changes.
 
 .. _plugin-profile:
 

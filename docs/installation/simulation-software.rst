@@ -1,24 +1,42 @@
 Simulation Software
 ===================
 
-aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed on the computer on which the simulations run. The plugin installs them with one wizard per program. Install TELEMAC first. OpenFOAM is optional and builds on TELEMAC.
+aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin installs them with one wizard per program. Install TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC.
 
-The wizards are opened on the *Configuration* tab, in the box *Simulation software*. The box names the operating system that aXqua detected, and states for each program where it is installed or that it was not found. Each wizard has three pages:
+.. note::
+   On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2). The wizards of a QGIS that runs in Windows do not install into WSL. Install a distribution with ``wsl --install -d Ubuntu-24.04`` in a **PowerShell** (similar to Linux **terminal**) with administrator rights, install aXqua inside the distribution, and run ``axqua install start telemac`` in its terminal. Select an installation folder in the Linux file system: a build in a Windows folder (``/mnt/c/...``) is slower by an order of magnitude. This route has not yet been tested on a real Windows installation.
 
-#. **Settings.** The installation folder and the few choices that the installer offers. Every folder and file is selected in a dialog, so nothing has to be typed.
-#. **Check.** aXqua examines the computer and lists the commands that it is about to run, the expected duration, and everything that is not in order. Nothing has been changed at this point. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error, with which it cannot.
-#. **Installation.** The wizard shows the current step and the end of the installation log. The installation is a process of its own: the wizard and QGIS can be closed while it runs. The *Configuration* tab reports that an installation is running, and the wizard shows it again when it is reopened.
+Installation wizards (short version)
+------------------------------------
 
-At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the profile of the computer (:ref:`plugin-profile`), and starts it once. No further configuration is required.
+The wizards are opened on the **Configuration** tab, in the box **Simulation & postprocessing software** showing the operating system that the aXqua *Check* button detected.
 
-The wizards run the installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen's sediment solvers, so that installing OpenFOAM does not depend on the website where Olsen publishes them (it was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the first page.
+.. note::
+    If the aXqua program *Check* identified existing TELEMAC, OpenFOAM or postprocessor software installation, the box states for each program where it is installed or that it was not found.
 
-**System packages and administrator rights.** Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The *Check* page states how many of the required packages are missing and shows the one command that installs them. The command can be run in two ways:
+To start the installation of each software, click **Install <software-name>...** and an installation wizard opens. Each wizard has three intuitive tabs in which users make choices according to their needs:
+
+#. **Settings:** Installation folder and installer choices. Every folder and file is selected in a dialog, so nothing has to be typed. Details on software-specific settings are provided below on this page.
+#. **Check:** aXqua examines the computer and lists the commands that it is about to run, expected duration, and everything that is not in order. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error. To proceed with the installation:
+    * Completed the prompts in **the dialog frame that shows required user actions to be executed in terminal.**
+    * Then click on the **INSTALL button on the bottom-left.**
+#. **Installation:** Run and show the current step and the end of the installation log. The installation is a process of its own: the wizard and QGIS can be closed while it runs. The *Configuration* tab reports that an installation is running, and the wizard shows it again when it is reopened.
+
+At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the computer profile (:ref:`plugin-profile`), and starts it once. No further configuration is required.
+
+.. note::
+    The wizards run installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen's sediment solvers, so that installing OpenFOAM does not depend on the website where Nils Reidar Olsen publishes them (the repo was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the first page.
+
+
+User rights
+-----------
+
+**System packages and administrator rights:** Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The *Check* page states how many of the required packages are missing and shows the one command that installs them. The command can be run in two ways:
 
 * *Install the packages...* opens the password dialog of the desktop. The password is entered there and does not pass through the plugin.
 * *Copy the command* places the command in the clipboard, to be pasted into a terminal. On a computer that is managed by an institution, send the command to the administrator.
 
-**For me only, or for all users.** The first setting of each wizard, *Install for*, decides who can use the program:
+**For me only, or for all users:** The first setting of each wizard, *Install for*, decides who can use the program:
 
 * *Me only* (the default) installs into a folder in your home folder: ``~/opt`` for TELEMAC, ``~/.local/openfoam-sediment-v2406`` for OpenFOAM, and ``~/.local/axqua-postprocessors`` for VisIt. The installation itself requires no administrator rights; only missing system packages do, as described above.
 * *All users of this computer* installs into a folder below ``/opt``: ``/opt/telemac``, ``/opt/openfoam-sediment-v2406``, or ``/opt/axqua-postprocessors``. The build still runs under your user account, because the installers refuse to compile as the administrator. The password of an administrator is asked twice: before the build, to create the folder for you, and at its end, to hand the folder over to the administrator, readable for every user and writable for nobody else. The aXqua of every other user finds the programs in these folders without any entry in their profile. Changing the folder later, for example to add the example cases of TELEMAC, again requires an administrator.
@@ -29,16 +47,15 @@ Click *Check again* afterwards. The installation itself runs with the rights of 
 
 **From a terminal.** Each wizard corresponds to one command, ``axqua install``, which does the same without QGIS (:doc:`../automation/terminal-syntax`).
 
-**Windows.** On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2). The wizards of a QGIS that runs in Windows do not install into WSL. Install a distribution with ``wsl --install -d Ubuntu-24.04`` in a PowerShell with administrator rights, install aXqua inside the distribution, and run ``axqua install start telemac`` in its terminal. Select an installation folder in the Linux file system: a build in a Windows folder (``/mnt/c/...``) is slower by an order of magnitude. This route has not yet been tested on a real Windows installation.
 
 .. _install-telemac:
 
 TELEMAC
 -------
 
-`TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and the three-dimensional (3D) flow equations. Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.
+`TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC), . Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.
 
-Click *Install TELEMAC...* on the *Configuration* tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its first page has four settings:
+Click **Install TELEMAC...** on the **Configuration** tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its first page has four settings:
 
 .. list-table::
    :header-rows: 1
@@ -51,9 +68,9 @@ Click *Install TELEMAC...* on the *Configuration* tab. The wizard is available o
    * - TELEMAC version
      - Leave the field empty for v9.1.1.
    * - Example cases of TELEMAC
-     - TELEMAC is distributed with about 830 example cases. Their steering files are always installed with the source code. The setting selects how many of their large files are downloaded in addition. *Input files only* (the default) downloads what a run of an example reads, which is mainly its mesh: about 360 files and 460 MB. *Everything* also downloads the reference results, with which TELEMAC validates itself, and the manuals: 1,500 files and 1.65 GB, which takes about one hour. *Steering files only* downloads none of the large files. aXqua itself requires none of these files.
+     - TELEMAC is distributed with about 830 example cases. Their steering files are always installed with the source code. The setting selects how many of their large files are downloaded in addition. *Input files of examples only* (the default) downloads what a run of an example reads, which is mainly its mesh: about 360 files and 460 MB. *Everything* also downloads the reference results, with which TELEMAC validates itself, and the manuals: 1,500 files and 1.65 GB, which takes about one hour. *Steering files only* downloads none of the large example files. aXqua itself requires none of these files.
    * - SALOME archive
-     - Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua does not require SALOME, because it generates the mesh and the input files itself.
+     - Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua uses `Gmsh <https://gmsh.info/>`_  and does not require SALOME, because it generates the mesh and the input files itself.
 
 The installation downloads the source code of TELEMAC and compiles it for parallel computation with the system libraries MPI, MUMPS, METIS and MED. It requires about 2.5 GB of free space with the input files of the example cases and about 5 GB with everything. On a workstation with 32 processor cores, the installation with the default setting took 11 minutes, of which the input files of the example cases took 7 minutes.
 
@@ -70,7 +87,7 @@ A manual installation is described in the `TELEMAC installation tutorial <https:
 OpenFOAM
 --------
 
-`OpenFOAM <https://www.openfoam.com/>`_ resolves the flow in three dimensions including the water surface. aXqua requires **OpenFOAM v2406** as distributed by OpenCFD (``openfoam.com``). Other versions, in particular the releases of the OpenFOAM Foundation (``openfoam.org``), use different file formats and do not read the input files that aXqua writes.
+`OpenFOAM <https://www.openfoam.com/>`_ enables a better resolution of flow in 3D, which is particularly important for the simulation of hydraulic structures such as weirs or vertical slot fishways. aXqua is designed to function with **OpenFOAM v2406** as distributed by OpenCFD (``openfoam.com``), which is compatible with (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_). The releases of the OpenFOAM Foundation (``openfoam.org``) use different file formats and do not read the input files that aXqua writes.
 
 .. important::
 
