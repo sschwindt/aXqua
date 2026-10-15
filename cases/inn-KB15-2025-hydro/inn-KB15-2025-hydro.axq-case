@@ -148,37 +148,33 @@ dem_of_difference:
   mask_below_lod: true
 
 ground_truth:
+  # FlowTracker2 campaigns with corrected DGPS positions (delivered 2026-10-14), one
+  # folder per campaign under user-sources/ground-truth/flowtracker/: the point layer
+  # (one point per reading, several readings per vertical, EPSG:25832) and the
+  # summary workbook it was exported from (the 2025 and March 2026 workbooks hold
+  # both gravel bars, KB8 and KB15). See the README there.
+  #
+  # CALIBRATION: September 1-2, 2025, the flow situation of this model.
+  # depth-average reduces each vertical to the USGS three-point depth average of the
+  # velocity components, which is what a depth-averaged model computes. The
+  # OpenFOAM calibration reads the same table; give it profile: all, so that every
+  # reading becomes a target at its own height.
+  #
   # The September-2025 survey was positioned with an RTK FLOAT solution, not a
-  # fixed one: decimetre-to-metre horizontal, not centimetre. That is not a detail
-  # here - the modelled depth at these verticals is 0.374 m while the deepest node
-  # 3 m away is 0.648 m, so the position uncertainty moves the modelled value by
-  # more than the discrepancy being calibrated against. Declaring it adds that
-  # spread to each target's _ERROR in quadrature instead of charging it to the
-  # roughness. The depths and velocities themselves are sound - a wading rod and a
-  # FlowTracker do not depend on GNSS.
+  # fixed one: decimetre-to-metre horizontal, not centimetre. The modelled depth at
+  # these verticals is 0.374 m while the deepest node 3 m away is 0.648 m, so the
+  # position uncertainty moves the modelled value by more than the discrepancy
+  # being calibrated against; declaring it adds that spread to each target's _ERROR
+  # in quadrature instead of charging it to the roughness. The correction of
+  # 2026-10-14 moved every September and March position by the same 0.23 m
+  # (+0.22 m east, +0.08 m north) and left November in place. Remove this line if
+  # the corrected positions count as a fixed solution.
   position_quality: rtk-float
-  # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
-  # axqua compiles into it. Compiled to preprocessing/ground-truth.xlsx unless
-  # `measurements` gives an explicit output path.
-  # measurements: path/to/ground-truth.xlsx    # (a) user-authored tidy table
-  sources:                                      # (b) raw sources -> compiled tidy table
-    # FlowTracker2 Sept-2025 campaign (KB15 sheet = sheet 0 of the revised
-    # FT_TKE_Summary.xlsx: one row per vertical at ~0.6 x depth, numeric IDs
-    # 1501..1530), joined by ID to the DGPS positions GeoPackage (EPSG:25832).
-    #
-    # USE THE -zcorrected LAYER. The raw dgps-flowtracker-kb15-sept25.gpkg stores
-    # the GNSS **ANTENNA** elevation in z, not the bed: the rover pole was 2.26 m
-    # for IDs 1501-1511, 2.51 m for 1512 and 2.70 m for 1513-1530. The corrected
-    # layer subtracts those (x/y identical) and carries z_raw_antenna,
-    # pole_height and wse_implied as the audit trail. The pole heights were
-    # recovered from the flat-water-surface condition and hold to +/-2 cm within
-    # each pool. NEVER join targets to the raw layer's z - doing so put the 2026
-    # OpenFOAM calibration targets ~2.3 m above the water, where HydroBayesCal's
-    # cutoff-free nearest-point search silently returned ~0.003 m/s.
-    # `axqua check-gt` now refuses this class of error.
-    - { category: hydraulics, kind: flowtracker, join_key: ID,
-        values: user-sources/ground-truth/hydraulics/FT_TKE_Summary.xlsx,
-        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-kb15-sept25-zcorrected.gpkg }
+  sources:
+    - category: hydraulics
+      kind: points
+      positions: user-sources/ground-truth/flowtracker/Sep25/KB15_Sep25.gpkg
+      profile: depth-average
 
 calibration:
   # calibration target set by run_Bayes_cal.py: SCALAR VELOCITY (FlowTracker at
@@ -243,6 +239,33 @@ calibration:
     - { name: "Cmu", min: 0.06, max: 0.12,
         comment: "k-epsilon eddy-viscosity constant [-]; standard 0.09" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+  # VALIDATION: measurements of other flow situations, which the calibration does
+  # not see (never a split of the calibration data). Discharges of the residual-flow
+  # reach from user-sources/ground-truth/hydraulics/discharge-info.md (KB15).
+  validation:
+    - name: November 2025
+      prescribed_flowrate: 48.45  # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Nov25/KB15_Nov25.gpkg
+          profile: depth-average
+    - name: March 2026
+      prescribed_flowrate: 45.8   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Mar26/KB15_Mar26.gpkg
+          profile: depth-average
+    # August 2026: the discharge of that day is not in the data delivered so far;
+    # enter it and remove the comment signs.
+    # - name: August 2026
+    #   prescribed_flowrate: <Q>  # [m3/s]
+    #   sources:
+    #     - category: hydraulics
+    #       kind: points
+    #       positions: user-sources/ground-truth/flowtracker/Aug26/KB15_Aug26.gpkg
+    #       profile: depth-average
 
 
 # ---------------------------------------------------------------------------- #

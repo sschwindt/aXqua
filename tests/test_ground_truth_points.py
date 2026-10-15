@@ -54,6 +54,15 @@ def test_a_unit_in_brackets_is_not_part_of_the_name():
         "x", "y", "u", "v", "w", "h", "h_meas", "tke", "something else"]
 
 
+def test_a_unit_in_parentheses_is_not_part_of_the_name_either():
+    # the corrected campaign layers of October 2026 write their headers this way
+    frame = pd.DataFrame(columns=["Point Name", "Meas. Depth (m)", "Total Depth (m)",
+                                  "v_x (m/s)", "v_y (m/s)", "v_z (m/s)", "TKE (m²/s²)",
+                                  "TKE2D (m²/s²)", "v_err(x)"])
+    assert list(_canonical_columns(frame).columns) == [
+        "point name", "h_meas", "h", "u", "v", "w", "tke", "tke2d", "u_err"]
+
+
 def test_two_headers_for_one_quantity_do_not_produce_a_table_in_a_column():
     frame = pd.DataFrame({"x": [1.0], "East.": [9.0], "y": [2.0]})
     out = _canonical_columns(frame)

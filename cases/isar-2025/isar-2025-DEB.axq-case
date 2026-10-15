@@ -133,18 +133,21 @@ dem_of_difference:
   mask_below_lod: true
 
 ground_truth:
-  # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
-  # axqua compiles into it. Compiled to preprocessing/ground-truth.xlsx unless
-  # `measurements` gives an explicit output path.
-  # measurements: path/to/ground-truth.xlsx    # (a) user-authored tidy table
-  sources:                                      # (b) raw sources -> compiled tidy table
-    # FlowTracker2 Sept-2025 campaign (KB15 sheet = sheet 0 of the revised
-    # FT_TKE_Summary.xlsx: one row per vertical at ~0.6 x depth, numeric IDs
-    # 1501..1530), joined by ID to the DGPS positions GeoPackage (EPSG:25832,
-    # z = bed elevation from the DGPS survey).
-    - { category: hydraulics, kind: flowtracker, join_key: ID,
-        values: user-sources/ground-truth/hydraulics/FT_TKE_Summary.xlsx,
-        positions: user-sources/geodata/flowtracker2/dgps-flowtracker-kb15-sept25.gpkg }
+  # FlowTracker2 campaigns with corrected DGPS positions (delivered 2026-10-14), one
+  # folder per campaign under user-sources/ground-truth/flowtracker/: the point layer
+  # (one point per reading, several readings per vertical, EPSG:25832) and the
+  # summary workbook it was exported from. See the README there.
+  #
+  # CALIBRATION: November 24-25, 2025, the flow situation of this model (2.6 m3/s in
+  # the main channel; the model carries 2.4 m3/s, 1.6 + 0.8 in its two inflows).
+  # 74 readings on 56 verticals. depth-average reduces each vertical to the USGS
+  # three-point depth average of the velocity components, which is what a
+  # depth-averaged model computes.
+  sources:
+    - category: hydraulics
+      kind: points
+      positions: user-sources/ground-truth/flowtracker/Nov25/Isar_Nov25.gpkg
+      profile: depth-average
 
 calibration:
   # calibration target set by run_Bayes_cal.py: SCALAR VELOCITY (FlowTracker at
@@ -167,3 +170,24 @@ calibration:
     - { name: zone1, min: 0.05, max: 0.45, comment: "channel ks [m] (Nikuradse), d50..3*d90" }
     # - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+  # VALIDATION: measurements of other flow situations, which the calibration does
+  # not see (never a split of the calibration data).
+  validation:
+    # September 30, 2025: about 5.3 m3/s, 5.1 in the main channel and 0.2 in the
+    # side channel. 196 readings on 83 verticals.
+    - name: September 2025
+      inflows: {1: 0.2, 3: 5.1}  # [m3/s] per liquid boundary: 1 side channel, 3 main channel
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Sep25/Isar_Sep25.gpkg
+          profile: depth-average
+    # August 4, 2026: 97 readings on 65 verticals. The discharge of that day is not
+    # in the data delivered so far; enter it and remove the comment signs.
+    # - name: August 2026
+    #   inflows: {1: <side channel>, 3: <main channel>}  # [m3/s]
+    #   sources:
+    #     - category: hydraulics
+    #       kind: points
+    #       positions: user-sources/ground-truth/flowtracker/Aug26/Isar_Aug26.gpkg
+    #       profile: depth-average

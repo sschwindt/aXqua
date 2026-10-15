@@ -77,7 +77,7 @@ Two alternatives to the workbook exist. ``ground_truth.measurements`` names a ta
          kind: points
          positions: user-sources/ground-truth/velocity-measurements.gpkg
 
-The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate reference system, or a table (CSV file or Excel workbook) with the columns ``x`` and ``y`` in the coordinate reference system of the case. aXqua recognizes the following column names, in upper or lower case and with or without a unit in square brackets, for example ``v(x) [m/s]``:
+The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate reference system, or a table (CSV file or Excel workbook) with the columns ``x`` and ``y`` in the coordinate reference system of the case. aXqua recognizes the following column names, in upper or lower case and with or without a unit in square brackets or parentheses, for example ``v(x) [m/s]`` or ``v_x (m/s)``:
 
 .. list-table::
    :header-rows: 1
@@ -88,7 +88,7 @@ The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate r
    * - Coordinates of a table
      - ``x`` and ``y``, or ``easting`` and ``northing``
    * - Velocity components in m/s
-     - ``u``, ``v``, ``w``, or ``v(x)``, ``v(y)``, ``v(z)``, or ``VelX``, ``VelY``, ``VelZ``
+     - ``u``, ``v``, ``w``, or ``v(x)``, ``v(y)``, ``v(z)``, or ``v_x``, ``v_y``, ``v_z``, or ``VelX``, ``VelY``, ``VelZ``
    * - Total water depth in m
      - ``h``, ``depth``, ``water_depth`` or ``Total Depth``
    * - Depth of a reading below the water surface in m

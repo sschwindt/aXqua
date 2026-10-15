@@ -51,7 +51,11 @@ boundaries:
   liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg  # [REQUIRED for a build]
   # inflow: user-sources/hydraulics/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
   # THIS case's steady boundary conditions, read straight from here for steady2d.cas:
-  prescribed_flowrate: 35.0    # inflow Q [m3/s] for steady2d.cas
+  # 47.3 m3/s on September 1-2, 2025, the calibration campaign: the discharge
+  # recorded for KB15 on the same days (both gravel bars lie on the residual-flow
+  # reach). It was 35.0 before 2026-10-15, which matched no campaign; the model in
+  # /home/modelling/models/inn-kb08 ran at 46.7.
+  prescribed_flowrate: 47.3    # inflow Q [m3/s] for steady2d.cas
   # outflow (downstream) boundary type: stage_discharge (WSE from the rating curve
   # at the simulated Q) | elevation (fixed prescribed_elevation) | free (Neumann).
   outflow_condition: stage_discharge
@@ -123,18 +127,22 @@ dem_of_difference:
   mask_below_lod: true
 
 ground_truth:
-  # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
-  # axqua compiles into it. Compiled to preprocessing/ground-truth.xlsx unless
-  # `measurements` gives an explicit output path.
-  # measurements: path/to/ground-truth.xlsx    # (a) user-authored tidy table
-  sources:                                      # (b) raw sources -> compiled tidy table
-    # FlowTracker2 Sept-2025 campaign (KB8 sheet = sheet 0 of the revised
-    # FT_TKE_Summary.xlsx: one row per vertical at ~0.6 x depth, numeric IDs
-    # 801..831), joined by ID to the DGPS positions GeoPackage (EPSG:25832,
-    # z = bed elevation from the DGPS survey).
-    - { category: hydraulics, kind: flowtracker, join_key: ID,
-        values: user-sources/ground-truth/FT_TKE_Summary.xlsx,
-        positions: user-sources/geodata/FlowTracker2/dgps-flowtracker-kb8-sept25.gpkg }
+  # FlowTracker2 campaigns with corrected DGPS positions (delivered 2026-10-14), one
+  # folder per campaign under user-sources/ground-truth/flowtracker/: the point layer
+  # (one point per reading, several readings per vertical, EPSG:25832) and the
+  # summary workbook it was exported from (the 2025 and March 2026 workbooks hold
+  # both gravel bars, KB8 and KB15). See the README there.
+  #
+  # CALIBRATION: September 1-2, 2025, the flow situation of this model.
+  # depth-average reduces each vertical to the USGS three-point depth average of the
+  # velocity components, which is what a depth-averaged model computes. The
+  # OpenFOAM calibration reads the same table; give it profile: all, so that every
+  # reading becomes a target at its own height.
+  sources:
+    - category: hydraulics
+      kind: points
+      positions: user-sources/ground-truth/flowtracker/Sep25/KB8_Sep25.gpkg
+      profile: depth-average
 
 calibration:
   calibration_quantities: ["WATER DEPTH"]                    # measured columns used for calibration
@@ -148,3 +156,31 @@ calibration:
     - { name: zone1, min: 0.05, max: 0.50, comment: "channel ks [m] (Nikuradse)" }
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+  # VALIDATION: measurements of other flow situations, which the calibration does
+  # not see (never a split of the calibration data). The discharges are those
+  # recorded for KB15 on the same days (user-sources/ground-truth/README.md): both
+  # gravel bars lie on the residual-flow reach of the Inn, 4 km apart.
+  validation:
+    - name: November 2025
+      prescribed_flowrate: 48.45  # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Nov25/KB8_Nov25.gpkg
+          profile: depth-average
+    - name: March 2026
+      prescribed_flowrate: 45.8   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Mar26/KB8_Mar26.gpkg
+          profile: depth-average
+    # August 2026: the discharge of that day is not in the data delivered so far;
+    # enter it and remove the comment signs.
+    # - name: August 2026
+    #   prescribed_flowrate: <Q>  # [m3/s]
+    #   sources:
+    #     - category: hydraulics
+    #       kind: points
+    #       positions: user-sources/ground-truth/flowtracker/Aug26/KB8_Aug26.gpkg
+    #       profile: depth-average
