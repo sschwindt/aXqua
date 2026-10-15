@@ -44,6 +44,18 @@ Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``s
 
      pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git"
 
+* **Upgrade** both to the newest versions from the ``aXqua`` folder of the clone:
+
+  .. code-block:: bash
+
+     mamba activate axqua-env
+     git pull
+     pip install --upgrade .
+     pip install --upgrade --force-reinstall --no-deps "git+https://github.com/Ecohydraulics/hydrobayescal.git"
+     axqua --version
+
+  ``--force-reinstall`` is needed because a newer HydroBayesCal on GitHub may carry the same version number as the installed one, which pip would otherwise keep. ``--no-deps`` leaves the packages of the conda environment untouched. *Check* on the *Configuration* tab of the plugin then reports the new version.
+
 * aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently.
 
 .. _find-the-axqua-path:
