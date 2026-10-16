@@ -77,7 +77,10 @@ mesh:
   channel_size: 0.5            # fallback channel edge length (m)
   floodplain_size: 2.5         # fallback floodplain edge length (m); default outside all zones
   refinement_size: 0.5         # fallback 'refinement' zone edge length (m)
-  # zone_size_field: "Max Edge Length (m)"  # per-polygon edge length field (default shown)
+  # The KB08 mesh-zones layer names its field without the unit (channel 0.2 m,
+  # floodplain 3.0 m); with the default "Max Edge Length (m)" it would be ignored
+  # and the fallback sizes above used instead.
+  zone_size_field: "Max Edge Length"  # per-polygon edge length field
   growth_ratio: 1.2            # max edge-size growth per element (channel -> floodplain)
   channel_anisotropy: 4.0      # along-flow / cross-flow edge ratio in the channel
   max_aspect_ratio: 4.0        # hard cap on cell aspect ratio (AnisoMax + post-mesh edge flips)
