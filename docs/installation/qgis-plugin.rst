@@ -28,7 +28,62 @@ Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `r
 Install the aXqua program (backend)
 -----------------------------------
 
-Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The best route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which can be installed as follows:
+Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The best route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which can be installed using git.
+
+.. note::
+
+   **Installing Git**
+
+   Git is a version control system used to clone repositories, track changes, and keep local files synchronized with a remote repository.
+
+   .. tab-set::
+
+      .. tab-item:: Linux
+
+         Open a terminal and install Git using the package manager. On **Debian, Ubuntu, or Linux Mint:**
+
+         .. code-block:: bash
+
+            sudo apt update
+            sudo apt install git
+
+         On **Fedora:**
+
+         .. code-block:: bash
+
+            sudo dnf install git
+
+         For other distributions, see the `Git installation instructions for Linux <https://git-scm.com/install/linux>`_.
+
+      .. tab-item:: Windows
+
+         Download and run the `Git for Windows installer <https://git-scm.com/install/windows>`_. The installer includes Git Bash, a terminal for running Git commands. After installation, open Git Bash from the Start menu. PowerShell or Command Prompt users reopen the interface, so that it recognizes the newly installed Git executable.
+
+      .. tab-item:: macOS
+
+         Open Terminal and install Apple's Command Line Tools, which include Git:
+
+         .. code-block:: bash
+
+            xcode-select --install
+
+         Follow the installation dialog to complete the setup. Alternatively, use `Homebrew <https://brew.sh/>`_ to install Git with:
+
+         .. code-block:: bash
+
+            brew install git
+
+   **Verify the `git` installation**
+
+   In terminal, PowerShell, or Git Bash, run:
+
+   .. code-block:: console
+
+      git --version
+
+   A Git version number confirms that the installation is available. For detailed installation instructions and tutorials on cloning repositories, updating files, pushing changes, and collaborating with branches, see the `hydro-informatics.com Git tutorials <https://hydro-informatics.com/git/>`_.
+
+With Git available, **install the aXqua backend** as follows:
 
 * Open **terminal** and enter:
 
