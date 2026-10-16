@@ -240,32 +240,35 @@ calibration:
         comment: "k-epsilon eddy-viscosity constant [-]; standard 0.09" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
   # VALIDATION: measurements of other flow situations, which the calibration does
-  # not see (never a split of the calibration data). Discharges of the residual-flow
-  # reach from user-sources/ground-truth/hydraulics/discharge-info.md (KB15).
+  # not see (never a split of the calibration data). Discharges: the gauge Kraiburg
+  # (residual-flow reach of the Inn), averaged over the measurement hours of each
+  # campaign (user-sources/ground-truth/hydraulics/discharge-records-*.xlsx); the
+  # model's 47.3 m3/s of September is the Kraiburg value as well. The gauge
+  # Muehldorf, 2.6 km downstream of KB15, reads 4 to 10 m3/s more (Sep 54.3, Nov
+  # 47.8, Mar 45.8-47.0, Aug 53.9-55.4); which gauge represents the gravel bars is
+  # open (see user-sources/ground-truth/README.md).
   validation:
     - name: November 2025
-      prescribed_flowrate: 48.45  # [m3/s]
+      prescribed_flowrate: 38.2   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Nov25/KB15_Nov25.gpkg
           profile: depth-average
     - name: March 2026
-      prescribed_flowrate: 45.8   # [m3/s]
+      prescribed_flowrate: 41.5   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Mar26/KB15_Mar26.gpkg
           profile: depth-average
-    # August 2026: the discharge of that day is not in the data delivered so far;
-    # enter it and remove the comment signs.
-    # - name: August 2026
-    #   prescribed_flowrate: <Q>  # [m3/s]
-    #   sources:
-    #     - category: hydraulics
-    #       kind: points
-    #       positions: user-sources/ground-truth/flowtracker/Aug26/KB15_Aug26.gpkg
-    #       profile: depth-average
+    - name: August 2026
+      prescribed_flowrate: 52.1   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Aug26/KB15_Aug26.gpkg
+          profile: depth-average
 
 
 # ---------------------------------------------------------------------------- #

@@ -456,12 +456,14 @@ calibration:
   init_runs: 8                 # initial (factorial) design samples
   max_runs: 15                 # total runs (initial + active-learning iterations)
   gp_library: gpy
-  # Calibrate the CHANNEL roughness only (zone1 = roughness zone 1 in friction.tbl).
-  # Bounds from the bed GSD (d50 ~ 0.05 m, d90 ~ 0.15 m): ks in [d50, 3*d90]
-  # = [0.05, 0.45] m (van Rijn: ks = 1..3 x d90). The floodplain (zone2) stays at
-  # its roughness-table value (0.5 m).
+  # Calibrate the two roughness zones in which the November verticals lie: 17 of
+  # the 33 inside the model in zone 4 (coarse gravel), 11 in zone 5 (coarse gravel
+  # with cobbles); zone 1 (sand), calibrated before 2026-10-16, holds none. The
+  # example ended with zone 4 at its upper bound of 0.30 m, so its range is wider
+  # here (van Rijn: ks = 1..3 x d90, d90 ~ 0.15 m).
   parameters:
-    - { name: zone1, min: 0.05, max: 0.45, comment: "channel ks [m] (Nikuradse), d50..3*d90" }
+    - { name: zone4, min: 0.02, max: 0.60, comment: "ks of coarse gravel [m]" }
+    - { name: zone5, min: 0.05, max: 0.60, comment: "ks of coarse gravel with cobbles [m]" }
     # - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
   # VALIDATION: measurements of other flow situations, which the calibration does
@@ -476,12 +478,16 @@ calibration:
           kind: points
           positions: user-sources/ground-truth/flowtracker/Sep25/Isar_Sep25.gpkg
           profile: depth-average
-    # August 4, 2026: 97 readings on 65 verticals. The discharge of that day is not
-    # in the data delivered so far; enter it and remove the comment signs.
-    # - name: August 2026
-    #   inflows: {1: <side channel>, 3: <main channel>}  # [m3/s]
-    #   sources:
-    #     - category: hydraulics
-    #       kind: points
-    #       positions: user-sources/ground-truth/flowtracker/Aug26/Isar_Aug26.gpkg
-    #       profile: depth-average
+    # August 4, 2026: 97 readings on 65 verticals (40 inside the model). The gauge
+    # Rissbachdücker gave 4.88 m3/s on average over the measurement hours
+    # (user-sources/ground-truth/hydraulics/discharge-records-20260802-20260806.xlsx);
+    # it gave 5.15 during the September campaign, when 5.3 were measured in the
+    # reach. The split between the channels was not measured; it is taken from
+    # September (0.2 m3/s in the side channel).
+    - name: August 2026
+      inflows: {1: 0.2, 3: 4.7}  # [m3/s] per liquid boundary: 1 side channel, 3 main channel
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Aug26/Isar_Aug26.gpkg
+          profile: depth-average

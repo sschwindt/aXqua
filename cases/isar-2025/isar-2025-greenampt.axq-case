@@ -364,12 +364,16 @@ calibration:
           kind: points
           positions: user-sources/ground-truth/flowtracker/Sep25/Isar_Sep25.gpkg
           profile: depth-average
-    # August 4, 2026: 97 readings on 65 verticals. The discharge of that day is not
-    # in the data delivered so far; enter it and remove the comment signs.
-    # - name: August 2026
-    #   inflows: {1: <side channel>, 3: <main channel>}  # [m3/s]
-    #   sources:
-    #     - category: hydraulics
-    #       kind: points
-    #       positions: user-sources/ground-truth/flowtracker/Aug26/Isar_Aug26.gpkg
-    #       profile: depth-average
+    # August 4, 2026: 97 readings on 65 verticals (40 inside the model). The gauge
+    # Rissbachdücker gave 4.88 m3/s on average over the measurement hours
+    # (user-sources/ground-truth/hydraulics/discharge-records-20260802-20260806.xlsx);
+    # it gave 5.15 during the September campaign, when 5.3 were measured in the
+    # reach. The split between the channels was not measured; it is taken from
+    # September (0.2 m3/s in the side channel).
+    - name: August 2026
+      inflows: {1: 0.2, 3: 4.7}  # [m3/s] per liquid boundary: 1 side channel, 3 main channel
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Aug26/Isar_Aug26.gpkg
+          profile: depth-average

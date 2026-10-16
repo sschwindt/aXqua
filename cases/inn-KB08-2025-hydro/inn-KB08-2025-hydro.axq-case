@@ -51,9 +51,9 @@ boundaries:
   liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg  # [REQUIRED for a build]
   # inflow: user-sources/hydraulics/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
   # THIS case's steady boundary conditions, read straight from here for steady2d.cas:
-  # 47.3 m3/s on September 1-2, 2025, the calibration campaign: the discharge
-  # recorded for KB15 on the same days (both gravel bars lie on the residual-flow
-  # reach). It was 35.0 before 2026-10-15, which matched no campaign; the model in
+  # 47.3 m3/s on September 1-2, 2025, the calibration campaign: the gauge Kraiburg
+  # gave 46.2-47.3 (mean 46.9) over the measurement hours, and KB15 runs at 47.3.
+  # It was 35.0 before 2026-10-15, which matched no campaign; the model in
   # /home/modelling/models/inn-kb08 ran at 46.7.
   prescribed_flowrate: 47.3    # inflow Q [m3/s] for steady2d.cas
   # outflow (downstream) boundary type: stage_discharge (WSE from the rating curve
@@ -160,30 +160,32 @@ calibration:
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
   # VALIDATION: measurements of other flow situations, which the calibration does
-  # not see (never a split of the calibration data). The discharges are those
-  # recorded for KB15 on the same days (user-sources/ground-truth/README.md): both
-  # gravel bars lie on the residual-flow reach of the Inn, 4 km apart.
+  # not see (never a split of the calibration data). Discharges: the gauge Kraiburg
+  # (residual-flow reach of the Inn), averaged over the measurement hours of each
+  # campaign (user-sources/ground-truth/hydraulics/discharge-records-*.xlsx); the
+  # model's 47.3 m3/s of September is the Kraiburg value as well. The gauge
+  # Muehldorf, 2.6 km downstream of KB15, reads 4 to 10 m3/s more (Sep 54.3, Nov
+  # 47.8, Mar 45.8-47.0, Aug 53.9-55.4); which gauge represents the gravel bars is
+  # open (see user-sources/ground-truth/README.md).
   validation:
     - name: November 2025
-      prescribed_flowrate: 48.45  # [m3/s]
+      prescribed_flowrate: 37.8   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Nov25/KB8_Nov25.gpkg
           profile: depth-average
     - name: March 2026
-      prescribed_flowrate: 45.8   # [m3/s]
+      prescribed_flowrate: 43.0   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Mar26/KB8_Mar26.gpkg
           profile: depth-average
-    # August 2026: the discharge of that day is not in the data delivered so far;
-    # enter it and remove the comment signs.
-    # - name: August 2026
-    #   prescribed_flowrate: <Q>  # [m3/s]
-    #   sources:
-    #     - category: hydraulics
-    #       kind: points
-    #       positions: user-sources/ground-truth/flowtracker/Aug26/KB8_Aug26.gpkg
-    #       profile: depth-average
+    - name: August 2026
+      prescribed_flowrate: 53.0   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Aug26/KB8_Aug26.gpkg
+          profile: depth-average

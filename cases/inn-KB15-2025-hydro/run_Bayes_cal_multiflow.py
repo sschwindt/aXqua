@@ -18,7 +18,7 @@ height) are pinned. Add or retire a zone by editing the CSV, nothing else.
 Campaigns (see user-sources/ground-truth/README.md):
 
 * **Sept 2025, Q=47.3 m3/s** - 30 reach-spanning verticals.
-* **Nov 2025, Q=48.45 m3/s** - one taped cross-section (22 verticals in ~10 m).
+* **Nov 2025, Q=38.2 m3/s** (gauge Kraiburg; 48.45 before 2026-10-16) - one taped cross-section (22 verticals in ~10 m).
   Its per-point velocity error is floored high (0.05 m/s) so this single, model-
   over-predicted section informs but does not dominate the joint likelihood.
 * **March 2026, Q=45.8 m3/s - EXCLUDED (comparability, not discharge).** Only 5
@@ -97,11 +97,11 @@ FLOWS = [
              values=FT / "Sep25/KB15_Sep25.gpkg"),
     # one dense cross-section: its error is floored high so that it informs but
     # does not dominate the joint likelihood
-    FlowSpec(name="q48-45", discharge=48.45, kind="points",
+    FlowSpec(name="q38-2", discharge=38.2, kind="points",
              duration=HOTSTART_DURATION, hotstart_from=HOTSTART_SEED,
              values=FT / "Nov25/KB15_Nov25.gpkg", vel_err_floor=0.05),
     # EXCLUDED (wadeable margins not comparable to modelled channel velocity):
-    # FlowSpec(name="q45-8", discharge=45.8, kind="points", duration=3000.0,
+    # FlowSpec(name="q41-5", discharge=41.5, kind="points", duration=3000.0,
     #          values=FT / "Mar26/KB15_Mar26.gpkg"),
 ]
 
