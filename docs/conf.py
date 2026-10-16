@@ -106,3 +106,6 @@ html_theme_options = {
     "sticky_navigation": True,
 }
 html_css_files = ["axqua.css"]
+html_baseurl = os.environ.get(
+    "READTHEDOCS_CANONICAL_URL", "https://axqua.eu/"
+)
