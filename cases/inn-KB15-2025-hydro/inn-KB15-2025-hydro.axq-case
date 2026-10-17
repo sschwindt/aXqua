@@ -61,13 +61,16 @@ boundaries:
   liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg  # [REQUIRED for a build]
   # inflow: user-sources/hydraulics/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
   # THIS case's steady boundary conditions, read straight from here for steady2d.cas:
-  prescribed_flowrate: 47.3    # inflow Q [m3/s] for steady2d.cas
+  prescribed_flowrate: 54.3    # inflow Q [m3/s] for steady2d.cas
   # outflow (downstream) boundary type: stage_discharge (WSE from the rating curve
   # at the simulated Q) | elevation (fixed prescribed_elevation) | free (Neumann).
+  # Outflow: the water level of a rating curve that aXqua computes from the terrain
+  # cross section at the outflow line (normal flow, friction slope = bed slope) for
+  # the discharge of each run, so every validation situation gets its own level.
+  # The measured stage is too uncertain to prescribe (the user, 2026-10-17); a free
+  # outflow (outflow_condition: free) is the fallback if this misbehaves.
   outflow_condition: stage_discharge
-  # prescribed_elevation: 0.0  # m a.s.l.; only for outflow_condition: elevation
-  # outlet rating curve (Q,WSE): one Q-h pair at the steady discharge suffices.
-  stage_discharge: user-sources/geodata/rating-curve.csv
+  rating_method: section
 
 initialization:
   # dry start (default): the domain starts dry except a thin plug at the inflow line
@@ -180,10 +183,11 @@ calibration:
   # (profile: depth-average in ground_truth). WATER DEPTH is the measured depth;
   # the water-level target of July 2026, which corrected for the too-high wetted
   # bed of the DEM, was built on the superseded positions and was retired on
-  # 2026-10-15 (see the README). The raw depth is therefore NOT a calibration
-  # target: the photogrammetric DEM is ~0.3 m too high in the wetted channel, so a
-  # measured depth is not comparable to a modelled one. It is still extracted.
-  calibration_quantities: ["SCALAR VELOCITY"]                # measured columns used for calibration
+  # 2026-10-15 (see the README). Both quantities are calibration targets (the
+  # user, 2026-10-17: depth and velocity together, hydrostatics and dynamics).
+  # Mind the earlier finding that the photogrammetric DEM is ~0.3 m too high in
+  # the wetted channel: it biases the measured-against-modelled depth.
+  calibration_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]                # measured columns used for calibration
   extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]  # quantities pulled from results
   measurement_error: 0.10      # fraction of the measured value
   # initial design of experiments: Sobol sequence over the 3D parameter space
@@ -240,30 +244,27 @@ calibration:
         comment: "k-epsilon eddy-viscosity constant [-]; standard 0.09" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
   # VALIDATION: measurements of other flow situations, which the calibration does
-  # not see (never a split of the calibration data). Discharges: the gauge Kraiburg
-  # (residual-flow reach of the Inn), averaged over the measurement hours of each
-  # campaign (user-sources/ground-truth/hydraulics/discharge-records-*.xlsx); the
-  # model's 47.3 m3/s of September is the Kraiburg value as well. The gauge
-  # Muehldorf, 2.6 km downstream of KB15, reads 4 to 10 m3/s more (Sep 54.3, Nov
-  # 47.8, Mar 45.8-47.0, Aug 53.9-55.4); which gauge represents the gravel bars is
-  # open (see user-sources/ground-truth/README.md).
+  # not see (never a split of the calibration data). Discharges: the gauge Muehldorf
+  # (the user, 2026-10-17: it defines the discharge of the gravel bars better than
+  # Kraiburg), averaged over the measurement hours of each campaign
+  # (user-sources/ground-truth/hydraulics/discharge-records-*.xlsx).
   validation:
     - name: November 2025
-      prescribed_flowrate: 38.2   # [m3/s]
+      prescribed_flowrate: 47.8   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Nov25/KB15_Nov25.gpkg
           profile: depth-average
     - name: March 2026
-      prescribed_flowrate: 41.5   # [m3/s]
+      prescribed_flowrate: 45.8   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
           positions: user-sources/ground-truth/flowtracker/Mar26/KB15_Mar26.gpkg
           profile: depth-average
     - name: August 2026
-      prescribed_flowrate: 52.1   # [m3/s]
+      prescribed_flowrate: 55.4   # [m3/s]
       sources:
         - category: hydraulics
           kind: points
