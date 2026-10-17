@@ -166,9 +166,12 @@ class OpenFoamRuntime(ShellRuntime):
         return not fatal, failed, out
 
     # ------------------------------------------------------------- decomposition
-    def decompose(self, case_dir: str | Path, *, force: bool = True):
+    def decompose(self, case_dir: str | Path, *, force: bool = True,
+                  dictionary: str | Path | None = None):
+        """``decomposePar``, with *dictionary* instead of the case's ``system/decomposeParDict`` where given (:func:`dicts.decomposition_for`)."""
         flag = " -force" if force else ""
-        return self.run(f"decomposePar{flag}", cwd=case_dir, check=True)
+        return self.run(f"decomposePar{flag}{_dictionary_option(case_dir, dictionary)}",
+                        cwd=case_dir, check=True)
 
     def reconstruct(self, case_dir: str | Path, *, latest: bool = False):
         flag = " -latestTime" if latest else ""
@@ -191,7 +194,8 @@ class OpenFoamRuntime(ShellRuntime):
     def run_stage(self, case_dir: str | Path, stage: str, *, end_time: float,
                   start_time: float = 0.0, n_processors: int | None = None,
                   cfg=None, show_progress: bool = True,
-                  sink=None, should_stop=None):
+                  sink=None, should_stop=None,
+                  decomposition: str | Path | None = None):
         """Activate *stage*'s dictionaries and run the solver over them.
 
         Pass *cfg* so the dictionaries are regenerated from the configuration this
@@ -201,6 +205,8 @@ class OpenFoamRuntime(ShellRuntime):
 
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
+
+        *decomposition* is the dictionary the case was decomposed with, where it is not the case's own; a parallel solver reads it as well and refuses one that names more domains than it has ranks.
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
@@ -209,7 +215,8 @@ class OpenFoamRuntime(ShellRuntime):
             # Through the environment, not a hard-coded "mpirun": MS-MPI on Windows
             # provides `mpiexec`, and a profile may point at `srun` on a cluster. The
             # launcher is a configured field, not a constant (plan §13).
-            command = self.environment.mpi_command(f"{self.of.solver} -parallel", n)
+            command = self.environment.mpi_command(
+                f"{self.of.solver} -parallel{_dictionary_option(case_dir, decomposition)}", n)
         else:
             command = self.of.solver
 
@@ -234,3 +241,15 @@ class OpenFoamRuntime(ShellRuntime):
             except ValueError:
                 continue
         return max(times) if times else 0.0
+
+
+def _dictionary_option(case_dir: str | Path, dictionary: str | Path | None) -> str:
+    """`` -decomposeParDict <file>`` relative to the case, or nothing."""
+    if dictionary is None:
+        return ""
+    path = Path(dictionary)
+    try:
+        path = path.relative_to(Path(case_dir))
+    except ValueError:
+        pass
+    return f" -decomposeParDict {shlex.quote(path.as_posix())}"

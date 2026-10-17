@@ -1773,7 +1773,14 @@ def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_di
     table._show(entry, "7.0")
     assert table.discharge_conflicts() == ["High flow"]
     editor.save()
-    assert any("different discharges" in f.message for f in editor.findings)
+    assert any(f.code == "axqua.config.discharge_conflict" for f in editor.findings)
+    # a row moved to a situation without a discharge does not take its old one along
+    table.set_role(3, "validation", "Summer")
+    assert entry["discharge"].text() == "" and table.missing_discharge() == ["Summer"]
+    # with the calibration switched off, nothing of the situations is saved or warned of
+    editor.switches["calibration"].setChecked(False)
+    editor.save()
+    assert not any(f.subject == "calibration.validation" for f in editor.findings)
     editor.deleteLater()
 
 

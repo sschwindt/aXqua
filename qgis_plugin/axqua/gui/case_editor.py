@@ -437,16 +437,14 @@ class MeasurementTable(QWidget):
         entry["discharge"].blockSignals(False)
 
     def _discharge_changed(self, entry: dict, text: str) -> None:
-        """The discharge is one of the situation: the other files of the same situation
-        show it too."""
+        """The discharge is one of the situation: the other files of the same situation show it too."""
         for other in self._others(entry):
             if other["discharge"].text() != text:
                 self._show(other, text)
         self.editor.changed()
 
     def _joined(self, entry: dict) -> None:
-        """A file that joins a validation situation, by its name or by its role, shows
-        the discharge of the situation; a situation without one takes the file's."""
+        """A file that joins a validation situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's."""
         given = next((o["discharge"].text() for o in self._others(entry)
                       if o["discharge"].text().strip()), None)
         if given is not None:
@@ -481,6 +479,7 @@ class MeasurementTable(QWidget):
                  discharge: str = "") -> None:
         entry = self._rows[row]
         entry["situation"].setText(situation)
+        self._show(entry, "")         # the discharge of its former situation is not this one's
         if entry["use"].currentData() == role:
             self._joined(entry)
         else:
@@ -540,8 +539,7 @@ class MeasurementTable(QWidget):
         return sources, situations
 
     def discharge_conflicts(self) -> list[str]:
-        """Validation situations whose files show different discharges. The table keeps
-        them equal; this is the guard for what it could not."""
+        """Validation situations whose files show different discharges. The table keeps them equal; this is the guard for what it could not."""
         seen: dict[str, set[float]] = {}
         for entry in self._rows:
             name = self._situation_of(entry)
@@ -924,14 +922,16 @@ class CaseEditor(EditorDialog):
             "warning", "axqua.config.incomplete",
             f"{(self._meta(key) or {}).get('label', key)}: required for this case and "
             "not set yet.", subject=key) for key in self.missing_required()]
-        if self.measurements is not None:
+        # the validation situations are saved with the calibration block only
+        switch = self.switches.get("calibration")
+        if self.measurements is not None and (switch is None or switch.isChecked()):
             unreadable += [fnd.Finding(
                 "warning", "axqua.config.incomplete",
                 f"The validation situation {name!r} has no discharge.",
                 subject="calibration.validation")
                 for name in self.measurements.missing_discharge()]
             unreadable += [fnd.Finding(
-                "warning", "axqua.config.incomplete",
+                "warning", "axqua.config.discharge_conflict",
                 f"The files of the validation situation {name!r} show different "
                 "discharges; the last one in the table was saved.",
                 subject="calibration.validation")

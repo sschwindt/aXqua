@@ -229,7 +229,7 @@ def synthesize_outflow_rating(cfg, discharge, *, side_slope: float = 0.0,
              "bed=%.2f m (thalweg), slope=%.5f, banks %g:1, %s",
              ", ".join(f"{q:.2f}" for q in flows), width, bed_elevation, slope,
              side_slope, rough)
-    return generate_stage_discharge(out, discharge, manning=manning, strickler=strickler,
+    return generate_stage_discharge(out, flows, manning=manning, strickler=strickler,
                                     slope=slope, bottom_width=width, side_slope=side_slope,
                                     bed_elevation=bed_elevation)
 

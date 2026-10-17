@@ -729,10 +729,14 @@ limitU
     return _dict_file("fvOptions", body, location="system")
 
 
-def decompose_par_dict(cfg=None, *, n_processors: int | None = None) -> str:
-    """``system/decomposeParDict`` for *n_processors*, else for the case's own."""
-    n = max(int(n_processors if n_processors is not None
-                else cfg.openfoam.n_processors), 1)
+def decompose_par_dict(cfg) -> str:
+    """``system/decomposeParDict`` for the processor count of the case."""
+    return decomposition_dict(cfg.openfoam.n_processors)
+
+
+def decomposition_dict(n_processors: int) -> str:
+    """A ``decomposeParDict`` that splits a case into *n_processors* domains."""
+    n = max(int(n_processors), 1)
     body = f"""numberOfSubdomains {n};
 
 // 'scotch' rather than 'simple'/'hierarchical': the wetted corridor is a sinuous,
@@ -744,8 +748,7 @@ method          scotch;
 
 
 def decomposition_of(case_dir: str | Path) -> int | None:
-    """``numberOfSubdomains`` of the case's ``system/decomposeParDict``, None without
-    one."""
+    """``numberOfSubdomains`` of the case's ``system/decomposeParDict``, None without one."""
     path = Path(case_dir) / "system" / "decomposeParDict"
     if not path.is_file():
         return None
@@ -753,33 +756,29 @@ def decomposition_of(case_dir: str | Path) -> int | None:
     return int(found.group(1)) if found else None
 
 
-def decompose_for(case_dir: str | Path, n_processors: int) -> str | None:
-    """Make ``system/decomposeParDict`` split the case into *n_processors* domains.
+def decomposition_for(case_dir: str | Path, n_processors: int) -> Path | None:
+    """The decomposition dictionary of a run on *n_processors* ranks, for ``-decomposeParDict``.
 
-    Every consumer that runs ``decomposePar`` calls this with the ranks it starts:
-    a file left by a run on other ranks would split the case for those. A file that
-    already names the number is left as it is, with its method and coefficients,
-    which may be the user's; otherwise aXqua's scotch decomposition for the number is
-    written. Returns the previous text when the file was replaced (``""`` when there
-    was none), so a caller can put it back, and None when nothing changed.
+    None where the case's own ``system/decomposeParDict`` names that number: the run uses it, with its method and coefficients, which may be the user's. Otherwise aXqua's scotch decomposition for the number is written to ``system/decomposeParDict-<n>`` and that file is returned; ``decomposePar`` and the solver are both given it, so the case's own file is never changed (a run on other ranks, killed or not, leaves nothing behind in it).
     """
-    path = Path(case_dir) / "system" / "decomposeParDict"
     n = max(int(n_processors), 1)
     if decomposition_of(case_dir) == n:
         return None
-    previous = path.read_text() if path.is_file() else ""
+    path = Path(case_dir) / "system" / f"decomposeParDict-{n}"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(decompose_par_dict(n_processors=n))
-    return previous
+    path.write_text(decomposition_dict(n))
+    return path
 
 
-def restore_decomposition(case_dir: str | Path, previous: str) -> None:
-    """Put back what :func:`decompose_for` replaced (no file where there was none)."""
+def write_decomposition(case_dir: str | Path, n_processors: int) -> bool:
+    """Make the case's own ``system/decomposeParDict`` name *n_processors* domains, for a case that others decompose with that file (the calibration template, which HydroBayesCal copies). A file that names the number already is left as it is. Returns whether the file was written."""
+    n = max(int(n_processors), 1)
+    if decomposition_of(case_dir) == n:
+        return False
     path = Path(case_dir) / "system" / "decomposeParDict"
-    if previous:
-        path.write_text(previous)
-    else:
-        path.unlink(missing_ok=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(decomposition_dict(n))
+    return True
 
 
 # --------------------------------------------------------------------------- #

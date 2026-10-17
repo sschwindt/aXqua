@@ -98,6 +98,7 @@ def test_every_level_is_built_from_the_same_seed_and_compared_from_above(tmp_pat
     assert again.built == [] and len(resumed.levels) == 4
     np.testing.assert_allclose([level.scale for level in resumed.levels],
                                [1.3, 1.0, 1 / 1.3, 1 / 1.69])
+    assert json.loads((folder / "level.json").read_text())["scale"] == 1.0   # corrected
 
 
 def test_the_backend_runs_the_study_and_writes_its_report(tmp_path, monkeypatch):
@@ -156,11 +157,14 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
         def check_mesh(self, _case):
             return True, [], None
 
-        def decompose(self, case_dir):
-            seen["dict"] = (case_dir / "system" / "decomposeParDict").read_text()
+        def decompose(self, case_dir, dictionary=None):
+            used = dictionary or case_dir / "system" / "decomposeParDict"
+            seen["dict"] = Path(used).read_text()
+            seen["decomposed with"] = dictionary
 
-        def run_stage(self, *a, n_processors=None, **k):
+        def run_stage(self, *a, n_processors=None, decomposition=None, **k):
             seen.setdefault("ranks", []).append(n_processors)
+            seen["solver reads"] = decomposition
             return SimpleNamespace(returncode=0)
 
         def reconstruct(self, _case):
@@ -173,34 +177,35 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
     BACKEND.run(cfg, None, n_processors=4)
     assert "numberOfSubdomains 4;" in seen["dict"]
     assert set(seen["ranks"]) == {4} and seen["reconstructed"]
+    # a file of the run's own, given to decomposePar and to the solver alike
+    assert seen["decomposed with"] == seen["solver reads"] == (
+        case / "system" / "decomposeParDict-4")
     assert cfg.openfoam.n_processors == 1                  # the case is not changed
-
-    # the case's file is put back after the run
     assert (case / "system" / "decomposeParDict").read_text() == "numberOfSubdomains 1;\n"
-    # the case's own ranks after a run on others: the dict is the case's again
+    # on the ranks the case's file names, the case's file is used
     cfg.openfoam.n_processors = 8
+    (case / "system" / "decomposeParDict").write_text("numberOfSubdomains 8;\n")
     BACKEND.run(cfg, None)
-    assert "numberOfSubdomains 8;" in seen["dict"]
+    assert seen["decomposed with"] is None and seen["solver reads"] is None
+    assert seen["dict"] == "numberOfSubdomains 8;\n"
 
 
-def test_a_decomposition_is_replaced_only_for_another_count(tmp_path):
+def test_a_case_keeps_its_own_decomposition_file(tmp_path):
     from axqua.solvers.openfoam import dicts
+    from axqua.solvers.openfoam.runtime import _dictionary_option
 
     system = tmp_path / "system"
     system.mkdir()
     own = "numberOfSubdomains 4;\nmethod hierarchical;\ncoeffs { n (2 2 1); }\n"
     (system / "decomposeParDict").write_text(own)
     assert dicts.decomposition_of(tmp_path) == 4
-    assert dicts.decompose_for(tmp_path, 4) is None             # the user's file stays
-    assert (system / "decomposeParDict").read_text() == own
-    previous = dicts.decompose_for(tmp_path, 6)
-    assert previous == own and dicts.decomposition_of(tmp_path) == 6
-    assert "scotch" in (system / "decomposeParDict").read_text()
-    dicts.restore_decomposition(tmp_path, previous)
-    assert (system / "decomposeParDict").read_text() == own
-    # a case without the file gets one, and loses it again on restore
-    (system / "decomposeParDict").unlink()
-    previous = dicts.decompose_for(tmp_path, 2)
-    assert previous == "" and dicts.decomposition_of(tmp_path) == 2
-    dicts.restore_decomposition(tmp_path, previous)
-    assert not (system / "decomposeParDict").exists()
+    assert dicts.decomposition_for(tmp_path, 4) is None        # the user's file is used
+    other = dicts.decomposition_for(tmp_path, 6)
+    assert other == system / "decomposeParDict-6" and "scotch" in other.read_text()
+    assert (system / "decomposeParDict").read_text() == own    # and never changed
+    assert _dictionary_option(tmp_path, other) == " -decomposeParDict system/decomposeParDict-6"
+    assert _dictionary_option(tmp_path, None) == ""
+    # the calibration template is decomposed by others with its own file
+    assert dicts.write_decomposition(tmp_path, 4) is False
+    assert dicts.write_decomposition(tmp_path, 2) is True
+    assert dicts.decomposition_of(tmp_path) == 2

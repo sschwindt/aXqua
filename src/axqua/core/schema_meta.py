@@ -327,8 +327,7 @@ CURATED: dict[str, dict[str, Any]] = {
              "renders with VisIt."),
 }
 
-#: Settings whose choices are a constant of :mod:`axqua.config` that the loader checks
-#: against, so that the form and the loader cannot disagree.
+#: Settings whose choices are a constant of :mod:`axqua.config` that the loader checks against, so that the form and the loader cannot disagree.
 CONFIG_CHOICES: dict[str, str] = {
     "postproc.telemac_maps": "TELEMAC_MAPS",
     "postproc.map_style": "MAP_STYLES",
@@ -390,6 +389,10 @@ def _kind(annotation: Any, default: Any, name: str) -> str:
     return "yaml"                                 # a list, a table or a nested block
 
 
+#: A ``# ---- name ----`` heading in the source of a dataclass, which groups the fields below it.
+_HEADING = re.compile(r"^\s*#\s*-{3,}\s*(.+?)\s*-{3,}\s*$")
+
+
 def _comments(cls: type) -> dict[str, str]:
     """The comment that stands with each field in the source of a dataclass."""
     try:
@@ -399,10 +402,9 @@ def _comments(cls: type) -> dict[str, str]:
     out: dict[str, str] = {}
     pending: list[str] = []
     field_line = re.compile(r"^\s{4}([a-z_][a-z0-9_]*)\s*:\s*[^=#]+(?:=[^#]*)?(?:#\s*(.*))?$")
-    heading = re.compile(r"^\s*#\s*-{3,}.*-{3,}\s*$")
     for line in lines:
         stripped = line.strip()
-        if heading.match(line):                 # a group heading, not an explanation
+        if _HEADING.match(line):                # a group heading, not an explanation
             pending = []
             continue
         if stripped.startswith("#"):
@@ -424,12 +426,11 @@ def _groups(cls: type) -> dict[str, str]:
         lines = inspect.getsource(cls).splitlines()
     except (OSError, TypeError):
         return {}
-    heading = re.compile(r"^\s*#\s*-{3,}\s*(.+?)\s*-{3,}\s*$")
     field_line = re.compile(r"^\s{4}([a-z_][a-z0-9_]*)\s*:")
     out: dict[str, str] = {}
     current = ""
     for line in lines:
-        found = heading.match(line)
+        found = _HEADING.match(line)
         if found:
             current = found.group(1).strip().lower()
             continue

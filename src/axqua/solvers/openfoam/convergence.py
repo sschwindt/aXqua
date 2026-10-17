@@ -25,6 +25,7 @@ do not apply to these levels and are not made.
 from __future__ import annotations
 
 import copy
+import json
 import logging
 import time
 from pathlib import Path
@@ -153,8 +154,20 @@ def run_openfoam_mesh_convergence(cfg, *, seed: Any = None,
         extend_ratio=refinement_ratio, max_extra_levels=max_extra_levels,
         auto_extend=auto_extend, ask=ask, on_level=on_level, probes=probes,
         result_name=planview.RESULT_NAME, check_validity=False)
-    # A level taken over from an earlier study carries the scale its level.json
-    # stored, which before 2026-10-17 was relative to the first level simulated.
+    # A level taken over from an earlier study carries the scale its level.json stored, which before 2026-10-17 was relative to the first level simulated; the file is corrected too, so that the next resume reads the right one.
     for level in report.levels:
-        level.scale = level.cell_size / spacing
+        scale = level.cell_size / spacing
+        if abs(level.scale - scale) > 1e-9:
+            level.scale = scale
+            _correct_scale(base_dir / _slug(level.label) / "level.json", scale)
     return report
+
+
+def _correct_scale(path: Path, scale: float) -> None:
+    """Write the size scale into the ``level.json`` of a level, if it has one."""
+    try:
+        meta = json.loads(path.read_text())
+    except (OSError, ValueError):
+        return
+    meta["scale"] = scale
+    path.write_text(json.dumps(meta, indent=2))
