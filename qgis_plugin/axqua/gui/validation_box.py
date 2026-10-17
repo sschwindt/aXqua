@@ -213,6 +213,7 @@ class ValidationBox(QGroupBox):
             sources = situation.get("sources") or []
             self.layer.setText(str((sources[0] if sources else {}).get("positions")
                                    or ""))
+        self._mark_required()
         hints = []
         if note:
             hints.append(note)
@@ -236,6 +237,17 @@ class ValidationBox(QGroupBox):
         ready = self.case is not None
         self.save_button.setEnabled(ready)
         self.run_button.setEnabled(ready and bool(self.info.get("calibrated")))
+
+    def _mark_required(self) -> None:
+        """The validation data and the discharges of the situation are what a
+        validation needs: their labels in aXqua purple, like every required entry."""
+        from .style import mark_required
+
+        for field in [self.layer.parentWidget(), self.total, self.level,
+                      *self._inflows.values()]:
+            label = self.form.labelForField(field)
+            if label is not None:
+                mark_required(label, True)
 
     # -- choosing the layer --------------------------------------------------------
     def browse(self) -> None:

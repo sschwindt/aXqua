@@ -41,7 +41,7 @@ from ..core.tasks import run_async
 from . import findings as fnd
 from . import help as help_pages
 from . import report_issue
-from .style import AXQUA_PURPLE, DONE_BUTTON_STYLE, REQUIRED_STYLE
+from .style import AXQUA_PURPLE, DONE_BUTTON_STYLE, REQUIRED_STYLE, mark_required
 
 VIEWERS_HINT = ("aXqua recommends VisIt: its predefined figures of three-dimensional "
                 "results are rendered with it. VisIt is a download of 600 MB from its "
@@ -89,6 +89,9 @@ FIELDS = {
         ("viewers", "Postprocessors", "choice", VIEWERS_HINT),
     ),
 }
+
+#: The settings an installation cannot do without, marked in aXqua purple.
+REQUIRED = ("folder",)
 
 #: The switches that are on unless the user turns them off.
 ON_BY_DEFAULT = ("smoke_test", "bind")
@@ -269,6 +272,10 @@ class InstallWizard(QDialog):
             self._reinstall_row(form)
         for key, label, kind, hint in FIELDS[self.target]:
             form.addRow("" if kind == "bool" else label, self._row(key, label, kind))
+            if key in REQUIRED:
+                mark_required(form.labelForField(form.itemAt(form.rowCount() - 1,
+                                                             _FIELD_ROLE).widget()),
+                              True)
             if hint:
                 form.addRow("", _note(hint))
         layout.addLayout(form)
@@ -887,6 +894,9 @@ class InstallWizard(QDialog):
         self.timer.stop()
         self.fix_timer.stop()
         super().closeEvent(event)
+
+
+_FIELD_ROLE = enum_value(QFormLayout, "ItemRole.FieldRole", "FieldRole")
 
 
 def _note(text: str) -> QLabel:

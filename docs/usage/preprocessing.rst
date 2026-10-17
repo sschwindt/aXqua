@@ -41,7 +41,7 @@ Meshing
 
 The mesh is created **once** and then reused by all subsequent TELEMAC simulations of the case, including simulations with a varying discharge and 3D simulations, which use the same mesh in plan view. The only exception is the mesh convergence study, which deliberately creates several meshes of different resolution (:doc:`mesh-convergence`).
 
-Two properties of the mesh generation are relevant in practice:
+aXqua generates the triangular mesh with the open-source mesh generator `Gmsh <https://gmsh.info/>`_ (Geuzaine and Remacle 2009), which it controls directly, so that neither SALOME nor another graphical program is needed. Two properties of the mesh generation are relevant in practice:
 
 * The edge lengths in the mesh zones are target values. The realized triangles deviate slightly from them, in particular at the transition between the channel and the floodplain, where the triangle size changes gradually.
 * Two builds from identical inputs produce slightly different meshes, with differences of less than 1 % in the number of nodes. Both meshes are valid. A result should therefore always be reported together with the mesh on which it was computed, and the mesh file should be kept.
@@ -167,3 +167,8 @@ To build the OpenFOAM model in the plugin, click *Build* in the box *Free surfac
 
 The simulated time a model needs to reach a steady state depends on how much water the reach has to store or release before inflow and outflow agree. A 3D model has a different resistance than the 2D model it starts from, and the difference in stored water drains slowly through pools and side channels. On the Isar example, the model with 2 m cells needed about 3000 s of simulated time until the outflow exceeded the inflow by less than 1 %.
 
+.. rubric:: References
+
+Geuzaine, C., Remacle, J.-F., 2009. Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering 79, 1309–1331. https://doi.org/10.1002/nme.2579
+
+Thorenz, C., 2024. Boundary conditions for hydraulic structures modelling with OpenFOAM. 10th International Symposium on Hydraulic Structures, Zurich. https://doi.org/10.3929/ethz-b-000675949

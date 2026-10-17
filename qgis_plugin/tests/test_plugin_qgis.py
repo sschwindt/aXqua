@@ -2249,6 +2249,11 @@ def test_the_tabs_of_a_wizard_can_be_visited_in_any_order(qgis_app, monkeypatch)
     install_wizard = _wizard_now(monkeypatch)
     client = _InstallClient()
     wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    # the installation folder is the one setting that is required: aXqua purple
+    from qgis.PyQt.QtWidgets import QLabel
+    folder = next(label for label in wizard.findChildren(QLabel)
+                  if label.text() == "Installation folder")
+    assert "#2e014b" in folder.styleSheet()
     assert [wizard.tabs.tabText(i) for i in range(3)] == \
         ["Settings", "Check", "Installation"]
     wizard.tabs.setCurrentIndex(2)                               # straight there
