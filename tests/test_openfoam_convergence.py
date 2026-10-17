@@ -8,6 +8,7 @@ the plan spacing at second order, as a consistent discretization does.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -177,39 +178,93 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
     assert cfg.openfoam.n_processors == 1                  # the case is not changed
 
 
-def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
-    """What the backend does, the per-case openfoam_run.py scripts get as well: they call decompose() without their ranks and run_stage() with them."""
+def _runtime(tmp_path, monkeypatch, case_file_names=1):
+    """An OpenFoamRuntime whose commands are recorded, with decomposePar leaving the processor folders it would leave."""
     from axqua.config import OpenFoam
     from axqua.solvers.openfoam.runtime import OpenFoamRuntime
 
+    tmp_path.mkdir(parents=True, exist_ok=True)
     bashrc = tmp_path / "bashrc.sh"
     bashrc.write_text("# stub\n")
     case = tmp_path / "case"
     (case / "system").mkdir(parents=True)
-    (case / "system" / "decomposeParDict").write_text("numberOfSubdomains 1;\n")
-    runtime = OpenFoamRuntime(OpenFoam(bashrc=bashrc, n_processors=1))
+    (case / "system" / "decomposeParDict").write_text(
+        f"numberOfSubdomains {case_file_names};\n")
+    runtime = OpenFoamRuntime(OpenFoam(bashrc=bashrc, n_processors=case_file_names))
     commands = []
 
     def run(command, **kw):
         commands.append(command)
-        if command.startswith("decomposePar"):          # what decomposePar leaves behind
+        if command.startswith("decomposePar"):
             for old in case.glob("processor*"):
                 old.rmdir()
-            n = 4 if "decomposeParDict-4" in command else 1
-            for i in range(n):
+            found = re.search(r"decomposeParDict-(\d+)", command)
+            for i in range(int(found.group(1)) if found else case_file_names):
                 (case / f"processor{i}").mkdir()
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(runtime, "run", run)
     monkeypatch.setattr("axqua.solvers.openfoam.dicts.activate", lambda *a, **k: None)
-    runtime.decompose(case)                               # as the scripts do: the case's file
-    runtime.run_stage(case, "spinup", end_time=1.0, n_processors=4, show_progress=False)
-    runtime.run_stage(case, "run", end_time=2.0, n_processors=4, show_progress=False)
-    assert commands[0] == "decomposePar -force"
-    assert commands[1] == "decomposePar -force -decomposeParDict system/decomposeParDict-4"
-    assert all(c.endswith("-parallel -decomposeParDict system/decomposeParDict-4")
-               for c in commands[2:]) and len(commands) == 4   # split once, not per stage
+    return runtime, case, commands
+
+
+def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
+    """What the backend does, the per-case openfoam_run.py scripts get as well."""
+    runtime, case, commands = _runtime(tmp_path, monkeypatch)
+    runtime.decompose(case, n_processors=4)                 # the tracked scripts
+    for stage in ("spinup", "run"):
+        runtime.run_stage(case, stage, end_time=1.0, n_processors=4, show_progress=False)
+    assert commands[0] == "decomposePar -force -decomposeParDict system/decomposeParDict-4"
+    assert len(commands) == 3 and all(
+        c.endswith("-parallel -decomposeParDict system/decomposeParDict-4") for c in commands[1:])
     assert (case / "system" / "decomposeParDict").read_text() == "numberOfSubdomains 1;\n"
+
+    # munich-vsf's script decomposes without its ranks: split again, once, before the first stage
+    runtime, case, commands = _runtime(tmp_path / "vsf", monkeypatch)
+    runtime.decompose(case)
+    for stage in ("spinup", "run"):
+        runtime.run_stage(case, stage, end_time=1.0, n_processors=4, show_progress=False)
+    assert commands[:2] == ["decomposePar -force",
+                            "decomposePar -force -decomposeParDict system/decomposeParDict-4"]
+    assert len(commands) == 4
+
+
+def test_a_case_whose_file_names_the_ranks_is_run_with_it(tmp_path, monkeypatch):
+    runtime, case, commands = _runtime(tmp_path, monkeypatch, case_file_names=4)
+    runtime.decompose(case, n_processors=4)
+    runtime.run_stage(case, "run", end_time=1.0, n_processors=4, show_progress=False)
+    assert commands[0] == "decomposePar -force"
+    assert commands[1].endswith("interFoam -parallel")
+    assert not list((case / "system").glob("decomposeParDict-*"))
+
+
+def test_results_of_an_earlier_stage_are_not_deleted_by_splitting_again(tmp_path,
+                                                                        monkeypatch):
+    import pytest
+
+    from axqua.core.errors import SolverError
+    from axqua.solvers.openfoam.runtime import parallel_results, processor_count
+
+    runtime, case, commands = _runtime(tmp_path, monkeypatch)
+    runtime.decompose(case, n_processors=8)
+    runtime.run_stage(case, "spinup", end_time=1.0, n_processors=8, show_progress=False)
+    for i in range(8):                                       # what the spin-up wrote
+        (case / f"processor{i}" / "8.5").mkdir()
+    assert processor_count(case) == 8 and parallel_results(case) == ["8.5"]
+    with pytest.raises(SolverError, match="would delete them") as raised:
+        runtime.run_stage(case, "run", end_time=2.0, n_processors=4, show_progress=False)
+    assert "on 8 ranks" in raised.value.remedy
+    assert not any(c.startswith("decomposePar") for c in commands[2:])
+
+
+def test_a_collated_decomposition_is_counted_by_its_folder(tmp_path):
+    from axqua.solvers.openfoam.runtime import parallel_results, processor_count
+
+    (tmp_path / "processors4" / "0").mkdir(parents=True)
+    assert processor_count(tmp_path) == 4 and parallel_results(tmp_path) == []
+    (tmp_path / "processors4" / "1.5").mkdir()
+    assert parallel_results(tmp_path) == ["1.5"]
+    assert processor_count(tmp_path / "missing") == 0
 
 
 def test_a_case_keeps_its_own_decomposition_file(tmp_path):

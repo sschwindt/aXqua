@@ -21,6 +21,7 @@ import shlex
 from pathlib import Path
 from typing import Callable
 
+from axqua.core import errors
 from axqua.core.environment import SolverEnvironment
 from axqua.env import ShellRuntime
 from axqua.solvers.openfoam import dicts
@@ -175,6 +176,18 @@ class OpenFoamRuntime(ShellRuntime):
         return self.run(f"decomposePar{flag}{_dictionary_option(case_dir, dictionary)}",
                         cwd=case_dir, check=True)
 
+    def _split_for(self, case_dir: Path, n: int) -> None:
+        """Split a case that is split into another number of domains for *n* ranks, unless that would delete results of an earlier stage."""
+        found = processor_count(case_dir)
+        kept = parallel_results(case_dir)
+        if kept:
+            raise errors.SolverError(
+                f"the case is split into {found} domains and its processor folders hold the results of an earlier stage (t = {', '.join(kept)} s); splitting it again for {n} ranks would delete them",
+                subject=str(case_dir),
+                remedy=f"Run this stage on {found} ranks, or put the result together with reconstructPar and run all stages again.")
+        log.info("the case is split into %d domains, not %d; decomposing it for %d ranks", found, n, n)
+        self.decompose(case_dir, n_processors=n)
+
     def reconstruct(self, case_dir: str | Path, *, latest: bool = False):
         flag = " -latestTime" if latest else ""
         return self.run(f"reconstructPar{flag}", cwd=case_dir, check=False)
@@ -207,17 +220,15 @@ class OpenFoamRuntime(ShellRuntime):
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
 
-        A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks), and a case split for another number of ranks is split again for these: a script that sets its ranks and then calls :meth:`decompose` without them used to end in "Number of processor directories = 1 is not equal to the number of ranks".
+        A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks). A case split for another number of ranks is split again for these where that loses nothing; where its processor folders hold results of an earlier stage, splitting again would delete them, and the stage stops with a message instead (:meth:`_split_for`).
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
         n = n_processors if n_processors is not None else self.of.n_processors
         if n and n > 1:
-            decomposition = dicts.decomposition_for(case_dir, n)
             if processor_count(case_dir) != n:
-                log.info("the case is not split into %d domains; decomposing it for "
-                         "%d ranks", n, n)
-                self.decompose(case_dir, n_processors=n)
+                self._split_for(case_dir, n)
+            decomposition = dicts.decomposition_for(case_dir, n)
             # Through the environment, not a hard-coded "mpirun": MS-MPI on Windows
             # provides `mpiexec`, and a profile may point at `srun` on a cluster. The
             # launcher is a configured field, not a constant (plan §13).
@@ -261,7 +272,41 @@ def _dictionary_option(case_dir: str | Path, dictionary: str | Path | None) -> s
     return f" -decomposeParDict {shlex.quote(path.as_posix())}"
 
 
+_PROCESSOR = re.compile(r"processor(\d+)")
+#: The single folder of a collated decomposition (``processors4``, or ``processors4_0-3`` per host).
+_COLLATED = re.compile(r"processors(\d+)(_\d+-\d+)?")
+
+
+def _processor_folders(case_dir: str | Path) -> tuple[int, list[Path]]:
+    """``(number of domains, folders that hold them)``: the ``processor<N>`` folders, or the ``processors<N>`` folder of a collated decomposition."""
+    case_dir = Path(case_dir)
+    if not case_dir.is_dir():
+        return 0, []
+    single, collated, count = [], [], 0
+    for path in case_dir.iterdir():
+        if not path.is_dir():
+            continue
+        if _PROCESSOR.fullmatch(path.name):
+            single.append(path)
+        elif (found := _COLLATED.fullmatch(path.name)):
+            collated.append(path)
+            count = max(count, int(found.group(1)))
+    return (count, collated) if collated else (len(single), single)
+
+
 def processor_count(case_dir: str | Path) -> int:
-    """How many ``processor<N>`` folders the case has, which is the number of domains it is split into."""
-    return sum(1 for path in Path(case_dir).glob("processor*")
-               if path.is_dir() and path.name[len("processor"):].isdigit())
+    """The number of domains the case is split into (0 when it is not split)."""
+    return _processor_folders(case_dir)[0]
+
+
+def parallel_results(case_dir: str | Path) -> list[str]:
+    """The times after the start that the processor folders hold, sorted: results that splitting the case again would delete."""
+    times = set()
+    for folder in _processor_folders(case_dir)[1]:
+        for path in folder.iterdir():
+            try:
+                if path.is_dir() and float(path.name) > 0:
+                    times.add(path.name)
+            except ValueError:
+                continue
+    return sorted(times, key=float)

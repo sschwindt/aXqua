@@ -775,8 +775,10 @@ def _write_decomposition(case_dir: str | Path, n_processors: int, name: str) -> 
     if decomposition_of(case_dir) == n:
         return None
     path = Path(case_dir) / "system" / name
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(decomposition_dict(n))
+    text = decomposition_dict(n)
+    if not (path.is_file() and path.read_text() == text):    # each stage asks again
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
     return path
 
 

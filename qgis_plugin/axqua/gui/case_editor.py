@@ -481,7 +481,7 @@ class MeasurementTable(QWidget):
         before = self._situation_of(entry)
         after = (situation.strip() or "validation") if role == "validation" else None
         entry["situation"].setText(situation)
-        if after != before:
+        if after is None or after != before:
             self._show(entry, "")     # the discharge of its former situation is not this one's
         if entry["use"].currentData() == role:
             self._joined(entry)
