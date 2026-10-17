@@ -34,7 +34,7 @@ ParaView
 
 `ParaView <https://www.paraview.org/download/>`_ is suited for the interactive inspection of three-dimensional results.
 
-The wizards use the ParaView package of the operating system, which is one of the system packages listed on the *Check* page. Installing it requires administrator rights (:doc:`simulation-software`). Once the package is installed, the wizard enters the program ``/usr/bin/paraview`` in the profile under ``postprocessors.paraview``. A newer ParaView from the ParaView website can be used instead: unpack it and select the unpacked folder as the installation folder of ParaView in the profile editor.
+The wizards use the ParaView package of the operating system, which is one of the system packages listed on the *Check* tab. Installing it requires administrator rights (:doc:`simulation-software`). Once the package is installed, the wizard enters the program ``/usr/bin/paraview`` in the profile under ``postprocessors.paraview``. A newer ParaView from the ParaView website can be used instead: unpack it and select the unpacked folder as the installation folder of ParaView in the profile editor.
 
 ParaView opens an OpenFOAM case directly. It does not read the result format of TELEMAC (SELAFIN), and neither does VisIt. aXqua therefore exports TELEMAC results into a format that both programs read (:ref:`help-postprocessing-paraview`).
 

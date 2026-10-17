@@ -25,7 +25,9 @@ DOCS = Path(__file__).resolve().parents[1] / "docs"
 OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
     ("Installation & Configuration", "installation/index", [
         ("QGIS plugin", "qgis-plugin", None),
-        ("Simulation Software", "simulation-software", ["TELEMAC", "OpenFOAM"]),
+        # the first two headings are the user's own (2026-10-15)
+        ("Simulation Software", "simulation-software",
+         ["Installation wizards (short version)", "User rights", "TELEMAC", "OpenFOAM"]),
         ("Plugin setup", "plugin-setup",
          ["Plugin profile", "Define solver bindings", "Job execution"]),
         ("Postprocessors", "postprocessors", ["VisIt", "ParaView"]),

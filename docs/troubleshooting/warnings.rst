@@ -119,7 +119,7 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 Installation of the simulation software
 ---------------------------------------
 
-The *Check* page of an installation wizard, the last page of a finished installation, and ``axqua install plan`` report the following warnings. An installation can be started with a warning.
+The *Check* tab of an installation wizard, the *Installation* tab of a finished installation, and ``axqua install plan`` report the following warnings. An installation can be started with a warning.
 
 .. _axqua-install-packages-missing:
 
@@ -139,7 +139,7 @@ The *Check* page of an installation wizard, the last page of a finished installa
 .. _axqua-install-little-space:
 
 ``... GiB are free in ...; the installation needs about ... GiB``
-    The drive of the installation folder may be too small. Select a folder on a drive with more free space on the first page of the wizard.
+    The drive of the installation folder may be too small. Select a folder on a drive with more free space on the *Settings* tab of the wizard.
 
 .. _axqua-install-folder-in-home:
 
@@ -154,12 +154,12 @@ The *Check* page of an installation wizard, the last page of a finished installa
 .. _axqua-install-compiles-openfoam:
 
 ``no OpenFOAM v2406 was found on this computer, so it is compiled from its source code``
-    Compiling OpenFOAM takes several hours and about 20 GB. If OpenFOAM v2406 is installed, select its file ``etc/bashrc`` on the first page of the wizard. A packaged OpenFOAM v2406, which an administrator installs in a few minutes, avoids the compilation (:ref:`install-openfoam`).
+    Compiling OpenFOAM takes several hours and about 20 GB. If OpenFOAM v2406 is installed, select its file ``etc/bashrc`` on the *Settings* tab of the wizard. A packaged OpenFOAM v2406, which an administrator installs in a few minutes, avoids the compilation (:ref:`install-openfoam`).
 
 .. _axqua-install-paraview-missing:
 
 ``ParaView is not installed``
-    The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* page, or enter another ParaView in the profile editor (:ref:`install-paraview`).
+    The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* tab, or enter another ParaView in the profile editor (:ref:`install-paraview`).
 
 .. _axqua-install-visit-missing:
 

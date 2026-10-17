@@ -520,7 +520,8 @@ class RunnerClient:
 #: ``option -> flag`` of ``axqua install``, for the options that carry a value.
 _INSTALL_VALUES = (("folder", "--folder"), ("tag", "--tag"), ("salome", "--salome"),
                    ("reuse_openfoam", "--reuse-openfoam"), ("jobs", "--jobs"),
-                   ("installers", "--installers"), ("ref", "--ref"), ("base", "--base"))
+                   ("installers", "--installers"), ("ref", "--ref"), ("base", "--base"),
+                   ("reinstall", "--reinstall"))
 
 
 def install_flags(options: dict | None) -> list[str]:

@@ -532,6 +532,80 @@ def test_the_openfoam_installer_only_takes_a_new_folder_or_its_own(
     assert again.ready
 
 
+def test_an_openfoam_folder_of_another_installer_version_is_replaced_not_continued(
+        debian, tmp_path):
+    """The installer refuses to continue a folder another version of it started; the
+    plan says so before anything runs, and offers to remove it and install anew."""
+    folder = tmp_path / "target"
+    folder.mkdir()
+    (folder / ".sediment-installer.json").write_text('{"identity": "an older one"}')
+    options = dict(folder=folder, reuse_openfoam="no")
+    plan = recipes.plan("openfoam", recipes.Options(**options), host=debian,
+                        check_packages=False)
+    assert "axqua.install.installer_changed" in _codes(plan.findings)
+    assert not plan.ready and not plan.steps
+    replace = recipes.plan("openfoam", recipes.Options(reinstall="replace", **options),
+                           host=debian, check_packages=False)
+    assert "axqua.install.installer_changed" not in _codes(replace.findings)
+    assert replace.steps[0].argv == ["/bin/rm", "-rf", "--", str(folder)]
+    assert not replace.steps[0].admin
+    assert "--prefix" in replace.steps[1].argv
+    # the identity the plan computes is the one the installer itself writes
+    current = recipes.installer_identity(recipes.BUNDLED, sys.executable, None)
+    (folder / ".sediment-installer.json").write_text(json.dumps({"identity": current}))
+    same = recipes.plan("openfoam", recipes.Options(**options), host=debian,
+                        check_packages=False)
+    assert "axqua.install.folder_exists" in _codes(same.findings) and same.ready
+
+
+def test_replacing_removes_only_what_an_installer_made(installers, debian, tmp_path):
+    root = tmp_path / "target"
+    (root / "telemac-mascaret" / "sources").mkdir(parents=True)
+    (root / "other-work").mkdir()
+    looks_wrong = _plan("telemac", installers, debian, tmp_path, reinstall="replace")
+    assert "axqua.install.nothing_to_replace" in _codes(looks_wrong.findings)
+    assert not looks_wrong.ready
+    (root / "telemac-mascaret" / "configs").mkdir()
+    plan = _plan("telemac", installers, debian, tmp_path, reinstall="replace")
+    assert plan.ready and "axqua.install.folder_exists" not in _codes(plan.findings)
+    assert plan.steps[0].argv == ["/bin/rm", "-rf", "--", str(root / "telemac-mascaret")]
+    home = _plan("telemac", installers, debian, tmp_path, reinstall="replace",
+                 folder=Path.home())
+    assert "axqua.install.nothing_to_replace" in _codes(home.findings)
+    foreign = tmp_path / "foreign"
+    (foreign / "apps").mkdir(parents=True)
+    assert recipes._removal("openfoam", foreign)[0] == []
+    (foreign / "apps" / "visit3_5_0.linux-x86_64").mkdir()
+    assert recipes._removal("postprocessors", foreign)[0] == \
+        [foreign / "apps" / "visit3_5_0.linux-x86_64"]
+
+
+def test_the_folder_of_an_existing_installation_is_told_from_its_program(tmp_path):
+    home = tmp_path / "opt" / "telemac-mascaret"
+    (home / "sources").mkdir(parents=True)
+    (home / "configs").mkdir()
+    found = recipes.existing_installation(
+        "telemac", {"telemac": str(home / "configs" / "pysource.debian12.sh")})
+    assert found == {"folder": str(tmp_path / "opt"), "removable": True,
+                     "removes": str(home)}
+    stack = tmp_path / "openfoam-sediment"
+    stack.mkdir()
+    (stack / ".sediment-installer.json").write_text("{}")
+    assert recipes.existing_installation(
+        "openfoam", {"openfoam": str(stack / "shell-rc.sh")})["removable"]
+    system = recipes.existing_installation(
+        "openfoam", {"openfoam": "/usr/lib/openfoam/openfoam2406/etc/bashrc"})
+    assert system == {"folder": "/usr/lib/openfoam/openfoam2406", "removable": False,
+                      "removes": ""}
+    visit = tmp_path / "pp" / "apps" / "visit-3.5.0-debian12" / "bin" / "visit"
+    assert recipes.existing_installation("postprocessors", {"visit": str(visit)}) == {
+        "folder": str(tmp_path / "pp"), "removable": True,
+        "removes": str(visit.parents[1])}
+    assert not recipes.existing_installation(
+        "postprocessors", {"visit": "/usr/bin/visit"})["removable"]
+    assert recipes.Options.from_dict({"reinstall": "replace"}).reinstall == "replace"
+
+
 def test_a_compiler_in_usr_local_does_not_decide_what_openfoam_is_built_with(
         installers, debian, tmp_path, monkeypatch):
     """Found on the development computer: a GCC 9.4 of 2021 in /usr/local/bin came

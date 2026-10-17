@@ -170,12 +170,12 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 
 .. warning::
 
-   * If the above commands to print anything, the environment is not active, or ``pip install .`` did not run in it.
+   * If the above commands do not print anything, the environment is not active, or ``pip install .`` did not run in it.
    * To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\Scripts\axqua.exe`` (Windows).
 
 .. important::
 
-   This section only explains the very basic installation of the aXqua QGIS plugin (aka the **frontend**) and the required code behind the scenes (aka the **backend**). The next sections explain the installation of :doc:`installation/simulation-software` (TELEMAC and OpenFOAM), :doc:`installation/plugin-setup`, and the installation of :doc:`installation/postprocessors` (ParaView and Visit DAV).
+   This section only explains the very basic installation of the aXqua QGIS plugin (aka the **frontend**) and the required code behind the scenes (aka the **backend**). The next sections explain the installation of :doc:`simulation-software` (TELEMAC and OpenFOAM), :doc:`plugin-setup`, and the installation of :doc:`postprocessors` (ParaView and Visit DAV).
 
 aXqua panel layout
 ------------------

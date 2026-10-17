@@ -30,15 +30,7 @@ itself (its button is hidden in the Steady 2D box), with the capability matrix a
 "checkup" table. **The job list is below the tabs**, not one of them: a job is submitted on
 one tab and its result is used on another.
 
-**Help opens the docs at the section of the tab that is showing** (`gui/help.py`). Each
-section and sub-section names its page and `help-...` label, and a test reads the `.rst`
-files to assert every label is on its page. `scripts/build_plugin_zip.py` builds the docs
-into `<plugin>/help/html` and writes **one redirect page per tab key**
-(`help/hydraulics-telemac.html`), because a `file://` address does not reliably keep its
-`#anchor` through the desktop opener. The bundled build passes `-t plugin_help`, which
-drops `sphinx.ext.viewcode` in `docs/conf.py`, and prunes every font format but woff2:
-25 MiB became 8.4 (3.7 MB zipped; the repository limit is 25). A linked dev folder has no
-bundle unless `--help-only` was run (it is gitignored), and Help then opens Read the Docs.
+**Help opens the online docs at the section of the tab that is showing** (`gui/help.py`; the user's decision of 2026-10-16: "the Help button ... should refer to the online help on axqua.readthedocs.io (that will soon be replaced with axqua.eu)"). Each section and sub-section names its page and `help-...` label, and a test reads the `.rst` files to assert every label is on its page. The address is `https://axqua.readthedocs.io/en/latest/<page>.html#<label>`; Read the Docs forwards to `axqua.eu` once that is the canonical domain (on 2026-10-17 `https://axqua.eu` still failed the TLS handshake from lww-134 while `www.axqua.eu` answered). **No copy of the docs is built into the archive any more**: `scripts/build_plugin_zip.py` lost `build_help`, `--help-only` and `--no-help`, a leftover `help/` folder in a linked plugin folder is left out of the archive, and the `plugin_help` tag of `docs/conf.py` is gone.
 
 **Findings and triangles** (`gui/findings.py`): what `axqua profile check` returns, shown
 as an orange (warning) or dark-red (error) triangle at the row whose dotted key equals the
@@ -79,20 +71,9 @@ bottom list; a finding for a setting without a row adds the row. Both editors sh
 `axqua case write` keeps `<name>.bak` once, because writing goes through the data and
 loses hand-written comments - the editor's header says so.
 
-**The installation wizards** (`gui/install_wizard.py`) are one window with three pages -
-Settings, Check, Installation - and decide nothing themselves: the form is a small table
-(`FIELDS`), the Check page shows what `axqua install plan` answers, and the Installation
-page polls `axqua install status --tail` every 2 s. An installation is a detached process
-of the library (see `axqua/install/` in the root notes), so closing the wizard or QGIS
-does not stop it; the Configuration tab keeps a 15 s timer while one runs and its button
-then reads *Show the installation...*, which reopens the wizard on page 3. **The plugin
-never sees a password**: missing system packages are shown with their command (*Copy the
-command*), and *Install the packages...* calls `axqua install packages --elevate`, which
-lets the desktop's own dialog ask. A wizard is not a tab, so its Help target lives in
-`sections.WINDOWS` and gets a redirect page like every tab key. **The postprocessors are
-one question** (`viewers`: *ParaView and VisIt (recommended)*, *ParaView only*, and for
-OpenFOAM *None*), which `install_flags` turns into `--no-visit` / `--no-visualization`;
-the recommended answer is the first and the default.
+**The installation wizards** (`gui/install_wizard.py`) are one window with three **tabs** - Settings, Check, Installation - that can be visited in any order (the user's order of 2026-10-16; they were pages of a stacked widget), with *Back*/*Next* walking through them; opening the Check tab with settings other than those of the plan shown checks again. They decide nothing themselves: the form is a small table (`FIELDS`), the Check tab shows what `axqua install plan` answers, and the Installation tab polls `axqua install status --tail` every 2 s. The *Install* button sits at the bottom-left of the Check tab (the user's docs say so). An installation is a detached process of the library (see `axqua/install/` in the root notes), so closing the wizard or QGIS does not stop it; the Configuration tab keeps a 15 s timer while one runs and its button then reads *Show the installation...*, which reopens the wizard on the Installation tab. **The plugin never sees a password**: missing system packages are shown under the heading `REQUIRED USER ACTIONS in TERMINAL:` (bold, aXqua purple `#2e014b`, `gui/style.py`) in a box of at least 120 px with purple text; *Run fixes* runs `axqua install packages --elevate` (pkexec, the desktop's dialog) or, without a desktop dialog, opens a terminal window with the command (`terminal_argv`) and re-checks every 15 s; after a pkexec round it re-checks and repeats while the missing list shrinks (`MAX_FIX_ROUNDS` 3). When the fixes stop making progress, or the check itself fails, *Report issue* appears (also on the Installation tab of a failed installation): `gui/report_issue.py` writes a report (home folder as `~`) into an editable window with *Open on GitHub* (prefilled new-issue URL; needs a GitHub account), *Send by e-mail* (`mailto:`; no account) and *Copy report*; both addresses are read from `metadata.txt` (`tracker`, `email`). After a successful installation the cancel button reads *Installation complete* on dark gray-green (`DONE_GREEN`) and closes the window. A wizard is not a tab, so its Help target lives in `sections.WINDOWS`. **The postprocessors are one question** (`viewers`: *ParaView and VisIt (recommended)*, *ParaView only*, and for OpenFOAM *None*), which `install_flags` turns into `--no-visit` / `--no-visualization`; the recommended answer is the first and the default.
+
+**Installing again** (the user's order of 2026-10-16). On the Configuration tab the box is *Simulation & postprocessing software*; a found program is dark green (`FOUND_GREEN`), "Not found on this computer." bold aXqua purple. *Install ...* for a program whose `installed` entry is set asks "Software already installed. Continue with re-installation?"; *Yes* opens the wizard with `reinstall=True`, whose Settings tab starts with *Existing installation*: `replace` (remove, then install in the same folder), `continue` (the installers' own resume), `new` (a new folder, `<folder>-2`; sends no option). `axqua install overview` reports per target `existing: {folder, removable, removes}` (`recipes.existing_installation`, told from the program aXqua runs); only an installation an aXqua installer made is removable, so for an OpenFOAM or ParaView of the operating system only `new` is offered. The library side is `Options.reinstall` / `--reinstall continue|replace`: `replace` adds a first step `rm -rf` of exactly `recipes._removal(...)` (TELEMAC's `telemac-mascaret` subfolder, a folder with the OpenFOAM installer's marker, the `apps/visit*` folders), as administrator for an installation for all users, before the folder is created again. **The OpenFOAM installer refuses to continue a folder another version of it started** (its identity hashes its own files): the plan now computes that identity with the installer's own function (`IDENTITY_DRIVER`, `installer_identity`) and reports `axqua.install.installer_changed` before anything runs, unless `replace` is chosen. Every change to the vendored installer changes the identity, so after an update every existing OpenFOAM folder needs `replace` or a new folder.
 
 **The ParaView and VisIt sub-tabs** (`section_pages.ProgramPage`) list the TELEMAC results
 of the active case (`axqua export <case> --list`), export the selected ones in a background

@@ -931,29 +931,27 @@ def test_a_capability_nobody_placed_still_gets_shown():
     assert sections.placement("delft3d", "tides") == ("hydraulics", "")
 
 
-def test_help_opens_the_built_documentation_and_the_published_one_without_it(tmp_path):
+def test_help_opens_the_online_documentation_at_the_section_of_the_tab():
+    """The user's decision of 2026-10-16: Help opens the online documentation, not a
+    copy built into the plugin."""
     from axqua_plugin.gui import help as help_pages
 
-    published = help_pages.url_for("mesh", local=tmp_path)
-    assert published == ("https://axqua.readthedocs.io/en/latest/"
-                         "usage/mesh-convergence.html#help-mesh-convergence")
-    assert help_pages.url_for("postprocessing", "visit", local=tmp_path).endswith(
+    assert help_pages.url_for("mesh") == ("https://axqua.readthedocs.io/en/latest/"
+                                          "usage/mesh-convergence.html"
+                                          "#help-mesh-convergence")
+    assert help_pages.url_for("postprocessing", "visit").endswith(
         "usage/postprocessing.html#help-postprocessing-visit")
-
-    (tmp_path / "postprocessing-visit.html").write_text("redirect", encoding="utf-8")
-    local = help_pages.url_for("postprocessing", "visit", local=tmp_path)
-    assert local.startswith("file://") and local.endswith("postprocessing-visit.html")
-    # the redirect page carries the anchor, because a file address may lose it
-    page = help_pages.redirect_page("usage/postprocessing", "help-postprocessing-visit")
-    assert "url=html/usage/postprocessing.html#help-postprocessing-visit" in page
+    assert help_pages.url_for_window("install-telemac").endswith(
+        "installation/simulation-software.html#install-telemac")
+    assert not hasattr(help_pages, "LOCAL")
 
 
-def test_a_finding_links_to_its_code_on_the_page_of_its_severity(tmp_path):
+def test_a_finding_links_to_its_code_on_the_page_of_its_severity():
     from axqua_plugin.gui import help as help_pages
 
-    warning = help_pages.url_for_code("axqua.environment.ambient", local=tmp_path)
+    warning = help_pages.url_for_code("axqua.environment.ambient")
     assert warning.endswith("troubleshooting/warnings.html#axqua-environment-ambient")
-    error = help_pages.url_for_code("axqua.config.invalid_value", "error", local=tmp_path)
+    error = help_pages.url_for_code("axqua.config.invalid_value", "error")
     assert error.endswith("troubleshooting/errors.html#axqua-config-invalid-value")
 
 

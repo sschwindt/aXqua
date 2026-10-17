@@ -18,23 +18,33 @@ To start the installation of each software, click **Install <software-name>...**
 
 #. **Settings:** Installation folder and installer choices. Every folder and file is selected in a dialog, so nothing has to be typed. Details on software-specific settings are provided below on this page.
 #. **Check:** aXqua examines the computer and lists the commands that it is about to run, expected duration, and everything that is not in order. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error. To proceed with the installation:
-    * Completed the prompts in **the dialog frame that shows required user actions to be executed in terminal.**
+    * Complete the prompts in **the dialog frame that shows required user actions to be executed in terminal.**
     * Then click on the **INSTALL button on the bottom-left.**
 #. **Installation:** Run and show the current step and the end of the installation log. The installation is a process of its own: the wizard and QGIS can be closed while it runs. The *Configuration* tab reports that an installation is running, and the wizard shows it again when it is reopened.
 
-At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the computer profile (:ref:`plugin-profile`), and starts it once. No further configuration is required.
+The tabs can be visited in any order, and *Back* and *Next* at the bottom of the wizard walk through them. Changed settings are checked again when the *Check* tab is opened.
+
+At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the computer profile (:ref:`plugin-profile`), and starts it once. After a successful installation, the button *Cancel the installation* turns dark gray-green and reads *Installation complete*; a click closes the wizard. No further configuration is required.
+
+In the box **Simulation & postprocessing software**, the path of a program that was found is written in dark green, and *Not found on this computer.* in bold dark purple. Clicking *Install <software-name>...* for a program that is installed already first asks *Software already installed. Continue with re-installation?* *No* returns to the *Configuration* tab. *Yes* opens the wizard, whose *Settings* tab then starts with the setting *Existing installation*:
+
+* *Remove the existing installation and install it again in its folder* deletes the earlier installation before the new one is built. aXqua removes only an installation that one of its installers made: the subfolder ``telemac-mascaret`` of TELEMAC, a folder of the OpenFOAM installer, or the VisIt folders of the postprocessors.
+* *Continue in the existing folder* keeps what is downloaded and built and repeats the remaining steps. The OpenFOAM installer refuses to continue a folder that another version of it started; the *Check* tab says so before anything runs.
+* *Install it again in a new folder* leaves the existing installation untouched.
 
 .. note::
-    The wizards run installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen's sediment solvers, so that installing OpenFOAM does not depend on the website where Nils Reidar Olsen publishes them (the repo was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the first page.
+    The wizards run installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen's sediment solvers, so that installing OpenFOAM does not depend on the website where Nils Reidar Olsen publishes them (the repo was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the *Settings* tab.
 
 
 User rights
 -----------
 
-**System packages and administrator rights:** Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The *Check* page states how many of the required packages are missing and shows the one command that installs them. The command can be run in two ways:
+**System packages and administrator rights:** Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The *Check* tab states how many of the required packages are missing and shows the one command that installs them in a box below the heading **REQUIRED USER ACTIONS in TERMINAL:**, both in dark purple. The command can be run in two ways:
 
-* *Install the packages...* opens the password dialog of the desktop. The password is entered there and does not pass through the plugin.
+* *Run fixes* runs the command. On a desktop, the password dialog of the desktop asks for the password; otherwise a terminal window opens and asks for it. The password does not pass through the plugin. aXqua then checks the computer again and repeats the fixes as long as they make progress.
 * *Copy the command* places the command in the clipboard, to be pasted into a terminal. On a computer that is managed by an institution, send the command to the administrator.
+
+If the fixes do not solve the problem, for instance because the same packages remain missing, the button *Report issue* appears. It opens a window with a report of the computer, the command, and what the check found, in which your home folder is written as ``~``. The report can be read and changed before it is sent: *Open on GitHub* opens a new issue in the `issue tracker <https://github.com/sschwindt/aXqua/issues>`_ (a free GitHub account is required), *Send by e-mail* opens the mail program with the report (no account is required), and *Copy report* places it in the clipboard. A failed installation offers the same button on the *Installation* tab, with the end of the installation log in the report.
 
 **For me only, or for all users:** The first setting of each wizard, *Install for*, decides who can use the program:
 
@@ -53,9 +63,9 @@ Click *Check again* afterwards. The installation itself runs with the rights of 
 TELEMAC
 -------
 
-`TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC), . Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.
+`TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC). Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.
 
-Click **Install TELEMAC...** on the **Configuration** tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its first page has four settings:
+Click **Install TELEMAC...** on the **Configuration** tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its *Settings* tab has four settings besides *Install for*:
 
 .. list-table::
    :header-rows: 1
@@ -70,7 +80,7 @@ Click **Install TELEMAC...** on the **Configuration** tab. The wizard is availab
    * - Example cases of TELEMAC
      - TELEMAC is distributed with about 830 example cases. Their steering files are always installed with the source code. The setting selects how many of their large files are downloaded in addition. *Input files of examples only* (the default) downloads what a run of an example reads, which is mainly its mesh: about 360 files and 460 MB. *Everything* also downloads the reference results, with which TELEMAC validates itself, and the manuals: 1,500 files and 1.65 GB, which takes about one hour. *Steering files only* downloads none of the large example files. aXqua itself requires none of these files.
    * - SALOME archive
-     - Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua uses `Gmsh <https://gmsh.info/>`_  and does not require SALOME, because it generates the mesh and the input files itself.
+     - Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua uses `Gmsh <https://gmsh.info/>`_ (Geuzaine and Remacle 2009) and does not require SALOME, because it generates the mesh and the input files itself.
 
 The installation downloads the source code of TELEMAC and compiles it for parallel computation with the system libraries MPI, MUMPS, METIS and MED. It requires about 2.5 GB of free space with the input files of the example cases and about 5 GB with everything. On a workstation with 32 processor cores, the installation with the default setting took 11 minutes, of which the input files of the example cases took 7 minutes.
 
@@ -87,7 +97,7 @@ A manual installation is described in the `TELEMAC installation tutorial <https:
 OpenFOAM
 --------
 
-`OpenFOAM <https://www.openfoam.com/>`_ enables a better resolution of flow in 3D, which is particularly important for the simulation of hydraulic structures such as weirs or vertical slot fishways. aXqua is designed to function with **OpenFOAM v2406** as distributed by OpenCFD (``openfoam.com``), which is compatible with (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_). The releases of the OpenFOAM Foundation (``openfoam.org``) use different file formats and do not read the input files that aXqua writes.
+`OpenFOAM <https://www.openfoam.com/>`_ enables a better resolution of flow in 3D, which is particularly important for the simulation of hydraulic structures such as weirs or vertical slot fishways. aXqua is designed to function with **OpenFOAM v2406** as distributed by OpenCFD (``openfoam.com``), which is compatible with the sediment transport solvers **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_). The releases of the OpenFOAM Foundation (``openfoam.org``) use different file formats and do not read the input files that aXqua writes.
 
 .. important::
 
@@ -120,10 +130,10 @@ Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available 
      - Runs ``interFoam`` for a few time steps with the outflow boundary of the BAW, which verifies that the compiled library can be loaded.
 
 .. figure:: ../img/gui-install-wizard.png
-   :alt: The first page of the OpenFOAM installation wizard
+   :alt: The Settings tab of the OpenFOAM installation wizard
    :width: 70%
 
-   The first page of the OpenFOAM wizard. (1) For whom the program is installed: for you alone, or for all users of the computer. (2) The installation folder. (3) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (4) The selection of the postprocessors. (5) *Next* leads to the page *Check*.
+   The *Settings* tab of the OpenFOAM wizard. (1) For whom the program is installed: for you alone, or for all users of the computer. (2) The installation folder. (3) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (4) The selection of the postprocessors. (5) *Next* leads to the tab *Check*.
 
 A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the `installation instructions of OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, which creates the file ``/usr/lib/openfoam/openfoam2406/etc/bashrc``. The wizard finds this installation by itself.
 
@@ -132,3 +142,7 @@ The result is the file ``shell-rc.sh`` in the installation folder. It is the **e
 .. note::
 
    aXqua does not yet set up simulations with the sediment transport solvers or with the stage-discharge outflow boundary (:ref:`help-morphodynamics-openfoam`). Both are installed and can be used from a terminal.
+
+.. rubric:: References
+
+Geuzaine, C., Remacle, J.-F., 2009. Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering 79, 1309–1331. https://doi.org/10.1002/nme.2579

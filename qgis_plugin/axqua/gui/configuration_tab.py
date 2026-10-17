@@ -14,14 +14,16 @@ from __future__ import annotations
 
 from qgis.PyQt.QtCore import QTimer
 from qgis.PyQt.QtWidgets import (QFormLayout, QGroupBox, QHBoxLayout, QLabel,
-                                 QPushButton, QScrollArea, QVBoxLayout, QWidget)
+                                 QMessageBox, QPushButton, QScrollArea, QVBoxLayout,
+                                 QWidget)
 
-from ..compat import exec_dialog
+from ..compat import enum_value, exec_dialog
 from ..core.runner_client import RunnerError, user_text
 from ..core.tasks import run_async
 from . import findings as fnd
 from .install_wizard import InstallWizard
 from .profile_editor import ProfileEditor, get
+from .style import FOUND_STYLE, MISSING_STYLE
 
 #: What the summary shows: ``(dotted key, label)``.
 SUMMARY = (
@@ -53,6 +55,16 @@ NO_PROFILE = ("This computer has no profile yet. A profile tells aXqua where TEL
 SOFTWARE = ("A wizard installs each program and enters it in the profile. Install "
             "TELEMAC first: aXqua starts every OpenFOAM simulation from a short "
             "TELEMAC run.")
+
+#: The title of the box with the wizards: it installs the postprocessors too. A group
+#: box reads "&" as the mark of a shortcut key, so the title doubles it.
+SOFTWARE_TITLE = "Simulation && postprocessing software"
+
+#: Asked before the wizard of a program that is installed already.
+ALREADY_INSTALLED = "Software already installed. Continue with re-installation?"
+
+#: What the box says about a program it did not find.
+NOT_FOUND = "Not found on this computer."
 
 #: What the wizards install: ``(target, name on the button)``.
 PROGRAMS = (("telemac", "TELEMAC"), ("openfoam", "OpenFOAM"),
@@ -136,7 +148,7 @@ class ConfigurationTab(QWidget):
         profile_layout.addWidget(self.finding_list)
         layout.addWidget(profile_box)
 
-        software_box = QGroupBox("Simulation software")
+        software_box = QGroupBox(SOFTWARE_TITLE)
         software_layout = QVBoxLayout(software_box)
         note = QLabel(SOFTWARE)
         note.setWordWrap(True)
@@ -307,7 +319,12 @@ class ConfigurationTab(QWidget):
             target = entry.get("target")
             if target not in self._program_labels:
                 continue
-            self._program_labels[target].setText(describe_program(entry))
+            label = self._program_labels[target]
+            label.setText(describe_program(entry))
+            # found: dark green; not found: aXqua purple, bold; running: plain
+            found = bool(entry.get("installed")) and not entry.get("running")
+            label.setStyleSheet(FOUND_STYLE if found else
+                                "" if entry.get("running") else MISSING_STYLE)
             button = self._program_buttons[target]
             button.setEnabled(True)
             name = dict(PROGRAMS)[target]
@@ -322,10 +339,26 @@ class ConfigurationTab(QWidget):
             self.install_timer.stop()
 
     def open_wizard(self, target: str) -> None:
+        """The wizard of *target*. A program that is installed already is installed
+        again only after a question, and the wizard then offers what happens to the
+        installation that exists."""
+        entry = next((t for t in self.overview.get("targets") or []
+                      if t.get("target") == target), {})
+        reinstall = bool(entry.get("installed")) and not entry.get("running")
+        if reinstall and not self.confirm_reinstall():
+            return
         wizard = InstallWizard(self.ctx.client, target, self.overview, parent=self,
-                               on_done=lambda _status: self._installed())
+                               on_done=lambda _status: self._installed(),
+                               reinstall=reinstall)
         exec_dialog(wizard)
         self.load_software()
+
+    def confirm_reinstall(self) -> bool:
+        """Yes goes on to the wizard, No back to this tab."""
+        yes = enum_value(QMessageBox, "StandardButton.Yes", "Yes")
+        no = enum_value(QMessageBox, "StandardButton.No", "No")
+        answer = QMessageBox.question(self, "aXqua", ALREADY_INSTALLED, yes | no, no)
+        return answer == yes
 
     def _installed(self) -> None:
         """An installation has ended: the profile may name a new program now."""
@@ -367,8 +400,8 @@ def describe_program(entry: dict) -> str:
     if installed:
         return "; ".join(str(path) for path in installed.values())
     if last.get("state") == "failed":
-        return "Not found on this computer. The last installation failed."
-    return "Not found on this computer."
+        return NOT_FOUND + " The last installation failed."
+    return NOT_FOUND
 
 
 def _wrap(layout) -> QWidget:

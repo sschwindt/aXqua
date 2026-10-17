@@ -153,6 +153,15 @@ def icon(name: str) -> QIcon:
     return QIcon(str(path)) if path.exists() else QIcon()
 
 
+def theme_icon(name: str) -> QIcon:
+    """An icon of the active QGIS theme, such as ``mActionOptions.svg`` (a cogwheel)."""
+    try:
+        from qgis.core import QgsApplication
+        return QgsApplication.getThemeIcon("/" + name.lstrip("/"))
+    except Exception:                          # noqa: BLE001 - an icon is a nicety
+        return QIcon()
+
+
 def color(spec: str, alpha: int | None = None) -> QColor:
     out = QColor(spec)
     if alpha is not None:

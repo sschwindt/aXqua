@@ -49,12 +49,12 @@ Installation
 Installation of the simulation software
 ---------------------------------------
 
-The *Check* page of an installation wizard, the last page of a failed installation, and ``axqua install`` report the following errors. An installation cannot be started with an error of the *Check* page.
+The *Check* tab of an installation wizard, the *Installation* tab of a failed installation, and ``axqua install`` report the following errors. An installation cannot be started with an error of the *Check* tab.
 
 .. _axqua-install-unsupported-system:
 
 ``there is no installer for this system``
-    The installer scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, and the TELEMAC installer does not cover Ubuntu 22.04. The OpenFOAM installer and the VisIt installer additionally require an x86-64 processor. On a system that is built on one of the supported systems, select the base system under *Further settings* on the first page of the wizard. Otherwise install the program by hand and enter it in the profile editor (:doc:`../installation/simulation-software`).
+    The installer scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, and the TELEMAC installer does not cover Ubuntu 22.04. The OpenFOAM installer and the VisIt installer additionally require an x86-64 processor. On a system that is built on one of the supported systems, select the base system under *Further settings* on the *Settings* tab of the wizard. Otherwise install the program by hand and enter it in the profile editor (:doc:`../installation/simulation-software`).
 
 .. _axqua-install-windows-needs-wsl:
 
@@ -96,10 +96,20 @@ The *Check* page of an installation wizard, the last page of a failed installati
 ``... exists and was not made by this installer``
     The OpenFOAM installer installs into a new folder or continues an installation of its own. Select a folder that does not exist yet.
 
+.. _axqua-install-installer-changed:
+
+``... holds an installation made by another version of the installer or against another OpenFOAM``
+    The OpenFOAM installer continues only what the same version of it started with the same OpenFOAM. Open the wizard with *Install OpenFOAM...*, answer *Yes* to the question whether to install again, and select *Remove the existing installation and install it again in its folder*, or select a new folder.
+
+.. _axqua-install-nothing-to-replace:
+
+``there is no earlier installation to remove: ...``
+    *Remove the existing installation* was selected for a folder that holds no installation that an installer of aXqua made. aXqua removes only such installations. Select the folder of the existing installation, or install into a new folder.
+
 .. _axqua-install-file-missing:
 
 ``the SALOME archive ... does not exist`` or ``the OpenFOAM environment script ... does not exist``
-    A file that was selected on the first page of the wizard is not on this computer. Select it again, or clear the field.
+    A file that was selected on the *Settings* tab of the wizard is not on this computer. Select it again, or clear the field.
 
 .. _axqua-install-wrong-openfoam:
 
@@ -129,12 +139,12 @@ The *Check* page of an installation wizard, the last page of a failed installati
     The installer reported success, but a program that it should have built is missing, so the build failed in part. Search the installation log for the first line that contains ``Error``.
 
 ``the program this installation enters in the profile is not on this computer``
-    The installation consists of a package of the operating system, and the package is not installed. Install the system packages that the *Check* page of the wizard lists, then start the installation again.
+    The installation consists of a package of the operating system, and the package is not installed. Install the system packages that the *Check* tab of the wizard lists, then start the installation again.
 
 .. _axqua-install-packages-required:
 
 ``without VisIt, this installation is the system package of ParaView alone, which is not installed yet``
-    With the selection *ParaView only*, the installation of the postprocessors downloads nothing: ParaView is a package of the operating system, and the wizard only enters it in the profile. Install the system packages that the *Check* page lists, which requires administrator rights, and click *Check again* (:ref:`install-paraview`).
+    With the selection *ParaView only*, the installation of the postprocessors downloads nothing: ParaView is a package of the operating system, and the wizard only enters it in the profile. Install the system packages that the *Check* tab lists, which requires administrator rights, and click *Check again* (:ref:`install-paraview`).
 
 .. _axqua-install-interrupted:
 

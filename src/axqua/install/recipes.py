@@ -85,6 +85,11 @@ TITLES = {
 #: What can be downloaded of the example cases of TELEMAC (Options.telemac_examples).
 TELEMAC_EXAMPLES = ("inputs", "all", "none")
 
+#: What happens to an installation that exists in the folder (Options.reinstall).
+#: ``""``/``continue``: the installer continues in it, keeping what is downloaded and
+#: built; ``replace``: the earlier installation is removed first and installed anew.
+REINSTALL = ("", "continue", "replace")
+
 #: ``base -> (installer script, environment script it writes)``.
 TELEMAC_SCRIPTS = {
     "debian12": ("debian12/telemac_debian12_installer.sh", "pysource.debian12.sh"),
@@ -155,6 +160,20 @@ raise SystemExit(installer.main(sys.argv[2:]))
 """
 
 
+#: Prints the identity the OpenFOAM installer writes into a folder it installs into: a
+#: hash of its own files and of the OpenFOAM it builds on. The installer refuses to
+#: continue a folder whose identity differs, so the plan compares the two first.
+IDENTITY_DRIVER = """\
+import sys
+from pathlib import Path
+from types import SimpleNamespace
+sys.path.insert(0, sys.argv[1])
+from sediment_installer import installer
+reuse = Path(sys.argv[2]) if sys.argv[2] else None
+print(installer.identity(SimpleNamespace(reuse_openfoam=reuse)))
+"""
+
+
 # --------------------------------------------------------------------------- options
 
 
@@ -182,6 +201,8 @@ class Options:
     ref: str = ""                       # another commit or branch of the scripts
     base: str = ""                      # the base of an unrecognized derivative
     bind: bool = True                   # enter the result into the profile
+    #: What happens to an earlier installation in the folder (see :data:`REINSTALL`).
+    reinstall: str = ""
 
     @classmethod
     def from_dict(cls, data: dict[str, Any] | None) -> "Options":
@@ -207,6 +228,12 @@ class Options:
                     from axqua.core.errors import ConfigError
                     raise ConfigError(f"scope must be one of {', '.join(SCOPES)}, "
                                       f"got {value!r}", subject="scope")
+            elif key == "reinstall":
+                value = str(value or "").strip().lower()
+                if value not in REINSTALL:
+                    from axqua.core.errors import ConfigError
+                    raise ConfigError("reinstall must be one of continue, replace, "
+                                      f"got {value!r}", subject="reinstall")
             elif key == "telemac_examples":
                 if isinstance(value, bool):         # the switch this setting once was
                     value = "inputs" if value else "none"
@@ -240,6 +267,7 @@ class Options:
             "ref": self.ref,
             "base": self.base,
             "bind": self.bind,
+            "reinstall": self.reinstall,
         }
 
 
@@ -262,6 +290,70 @@ def default_folder(target: str, scope: str = "user") -> Path:
         "openfoam": home / ".local" / "openfoam-sediment-v2406",
         "postprocessors": home / ".local" / "axqua-postprocessors",
     }[target]
+
+
+def existing_installation(target: str, installed: dict[str, str]) -> dict[str, Any]:
+    """The folder of an installation of *target* that exists, told from its programs.
+
+    *installed* maps a program (``telemac``, ``openfoam``, ``paraview``, ``visit``) to
+    the file aXqua runs for it. The answer names the folder an installation wizard
+    offers to install into again, and whether aXqua may remove what is in it: only an
+    installation that one of the installers made is ever removed, never an OpenFOAM or
+    a ParaView of the operating system.
+    """
+    out: dict[str, Any] = {"folder": "", "removable": False, "removes": ""}
+    if target == "telemac" and installed.get("telemac"):
+        home = Path(installed["telemac"]).parent.parent       # configs/pysource.*.sh
+        if home.name == "telemac-mascaret":
+            out.update(folder=str(home.parent), removes=str(home),
+                       removable=(home / "sources").is_dir() and (home / "configs").is_dir())
+        else:
+            out["folder"] = str(home)
+    elif target == "openfoam" and installed.get("openfoam"):
+        script = Path(installed["openfoam"])
+        if (script.parent / ".sediment-installer.json").is_file():
+            out.update(folder=str(script.parent), removes=str(script.parent),
+                       removable=True)
+        else:                                                 # <openfoam>/etc/bashrc
+            out["folder"] = str(script.parent.parent)
+    elif target == "postprocessors" and installed.get("visit"):
+        launcher = Path(installed["visit"])
+        if len(launcher.parts) > 4 and launcher.parents[1].name.startswith("visit") \
+                and launcher.parents[2].name == "apps":
+            out.update(folder=str(launcher.parents[3]), removes=str(launcher.parents[1]),
+                       removable=True)
+    return out
+
+
+def _removal(target: str, folder: Path) -> tuple[list[Path], str]:
+    """What ``reinstall: replace`` removes in *folder*, or ``([], why not)``.
+
+    Only what one of the installers made: the folder ``telemac-mascaret`` of TELEMAC
+    (not the folder around it, which may hold other things), a folder the OpenFOAM
+    installer marked as its own, and the VisIt folders below ``apps``.
+    """
+    folder = Path(os.path.abspath(folder))
+    if folder in _NOT_A_FOLDER_FOR_ALL or folder == Path.home() or len(folder.parts) < 3:
+        return [], f"{folder} is not the folder of one installation"
+    if target == "telemac":
+        home = folder / "telemac-mascaret"
+        if not home.exists():
+            return [], f"{folder} holds no TELEMAC installation"
+        if not ((home / "sources").is_dir() and (home / "configs").is_dir()):
+            return [], f"{home} does not look like a TELEMAC installation"
+        return [home], ""
+    if target == "openfoam":
+        if not folder.exists():
+            return [], f"{folder} holds no installation"
+        if not (folder / ".sediment-installer.json").is_file():
+            return [], (f"{folder} was not made by the OpenFOAM installer of aXqua, so "
+                        "aXqua does not remove it")
+        return [folder], ""
+    found = sorted(p for p in (folder / "apps").glob("visit*") if p.is_dir()) \
+        if (folder / "apps").is_dir() else []
+    if not found:
+        return [], f"{folder} holds no VisIt installation"
+    return found, ""
 
 
 def default_jobs() -> int:
@@ -446,6 +538,36 @@ def _download_archive(ref: str, staging: Path) -> None:
         if len(tops) != 1:
             raise RuntimeError("the archive does not hold exactly one folder")
         tops[0].rename(staging)
+
+
+def _marker_identity(marker: Path) -> str:
+    """The identity the OpenFOAM installer wrote into a folder, or ''."""
+    import json
+
+    try:
+        return str(json.loads(marker.read_text(encoding="utf-8")).get("identity") or "")
+    except (OSError, ValueError, AttributeError):
+        return ""
+
+
+def installer_identity(checkout: Path, python: str | None,
+                       reuse: Path | None) -> str:
+    """The identity the OpenFOAM installer of *checkout* gives a folder, or ''.
+
+    Computed by the installer's own function, so that the plan and the installer
+    cannot disagree about it.
+    """
+    if not python:
+        return ""
+    try:
+        done = subprocess.run(
+            [python, "-I", "-B", "-c", IDENTITY_DRIVER, str(Path(checkout) / OPENFOAM_DIR),
+             str(Path(reuse).expanduser().resolve()) if reuse else ""],
+            capture_output=True, text=True, timeout=60, check=False)
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    lines = done.stdout.strip().splitlines()
+    return lines[-1].strip() if done.returncode == 0 and lines else ""
 
 
 def installer_python(checkout: Path) -> str | None:
@@ -890,8 +1012,23 @@ def plan(target: str, options: Options | None = None, *,
     builder = {"telemac": _plan_telemac, "openfoam": _plan_openfoam,
                "postprocessors": _plan_postprocessors}[target]
     builder(out, checkout, add)
+    replaced: list[Path] = []
+    if options.reinstall == "replace":
+        replaced, why = _removal(target, folder)
+        if not replaced:
+            add(ERROR, "axqua.install.nothing_to_replace",
+                f"there is no earlier installation to remove: {why}",
+                "Select the folder of the existing installation, or install into a "
+                "new folder.", where=f"{subject}.folder")
     if options.scope == "system":
-        _for_all_users(out, add)
+        _for_all_users(out, add, gone=Path(os.path.abspath(folder)) in replaced)
+    if replaced and out.steps:
+        system = options.scope == "system"
+        out.steps.insert(0, Step(
+            "Remove the earlier installation" + (" (administrator)" if system else ""),
+            ["/bin/rm", "-rf", "--", *(str(path) for path in replaced)], admin=system))
+        out.notes.append("The earlier installation is removed before it is installed "
+                         "again: " + ", ".join(str(path) for path in replaced) + ".")
 
     # ---- system packages ---------------------------------------------------------
     out.needed = packages_needed(target, checkout, host, options)
@@ -973,13 +1110,14 @@ def _owner() -> str:
             + grp.getgrgid(os.getgid()).gr_name)
 
 
-def _for_all_users(out: Plan, add) -> None:
+def _for_all_users(out: Plan, add, *, gone: bool = False) -> None:
     """Install for all users: the same build, between two commands of an administrator.
 
     The installers refuse to run as root, and they have to: they compile for hours. So
     an administrator creates the folder for the user first, the user builds in it as
     with an installation for themselves, and an administrator hands it over to root at
-    the end, readable for everyone and writable for nobody else.
+    the end, readable for everyone and writable for nobody else. *gone*: the folder is
+    removed first, to be installed anew (``reinstall: replace``).
     """
     if not out.steps:
         return                      # nothing is built (ParaView alone, a package)
@@ -1000,7 +1138,7 @@ def _for_all_users(out: Plan, add) -> None:
             f"For all users, select a folder outside of it, such as "
             f"{default_folder(out.target, 'system')}.", where=f"{subject}.folder")
     owner = _owner()
-    if not folder.exists():
+    if not folder.exists() or gone:
         out.steps.insert(0, Step(
             "Create the folder for all users (administrator)",
             ["/usr/bin/install", "-d", "-m", "0755", "-o", owner.split(":")[0],
@@ -1049,7 +1187,7 @@ def _plan_telemac(out: Plan, checkout: Path, add) -> None:
             f"the SALOME archive {out.options.salome} does not exist",
             "Select the downloaded archive, or leave the field empty: aXqua does not "
             "need SALOME.", where=f"{subject}.salome")
-    if home.exists():
+    if home.exists() and out.options.reinstall != "replace":
         add(WARNING, "axqua.install.folder_exists",
             f"{home} exists already; the installer keeps its source code and builds "
             "TELEMAC in it again",
@@ -1111,16 +1249,28 @@ def _plan_openfoam(out: Plan, checkout: Path, add) -> None:
             "with it.")
         return
     marker = prefix / ".sediment-installer.json"
+    replace = out.options.reinstall == "replace"
     if prefix.exists() and not marker.is_file() and any(prefix.iterdir()):
         add(ERROR, "axqua.install.folder_in_use",
             f"{prefix} exists and was not made by this installer, which only installs "
             "into a new folder or continues its own installation",
             "Select a folder that does not exist yet.", where=f"{subject}.folder")
-    elif marker.is_file():
-        add(WARNING, "axqua.install.folder_exists",
-            f"{prefix} holds an installation of this installer, which is continued",
-            "The installer refuses the folder if its own version has changed in the "
-            "meantime. Select a new folder in that case.", where=f"{subject}.folder")
+    elif marker.is_file() and not replace:
+        written = _marker_identity(marker)
+        current = installer_identity(checkout, python, _reuse(out.options))
+        if written and current and written != current:
+            add(ERROR, "axqua.install.installer_changed",
+                f"{prefix} holds an installation made by another version of the "
+                "installer or against another OpenFOAM, which the installer does not "
+                "continue",
+                "Remove the earlier installation and install it again (the choice "
+                "for an existing installation in the settings), or select a new "
+                "folder.", where=f"{subject}.folder")
+        else:
+            add(WARNING, "axqua.install.folder_exists",
+                f"{prefix} holds an installation of this installer, which is continued",
+                "Select a new folder, or remove the earlier installation first, to "
+                "install from the beginning.", where=f"{subject}.folder")
 
     jobs = out.options.jobs or default_jobs()
     shadowed = shadowed_tools()

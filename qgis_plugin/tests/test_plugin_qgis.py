@@ -912,7 +912,6 @@ def test_help_opens_the_section_of_the_tab_that_is_showing(dock, monkeypatch):
 
     opened = []
     monkeypatch.setattr(help_pages, "open_url", lambda url: opened.append(url) or True)
-    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
     dock.show_section("case")
     dock.open_help()
     dock.show_section("hydraulics", "openfoam")
@@ -1649,7 +1648,6 @@ def test_an_example_case_is_downloaded_and_added_to_the_cases(dock, tmp_path,
     # Help opens the paragraph on the example case
     urls = []
     monkeypatch.setattr(help_pages, "open_url", lambda url: urls.append(url) or True)
-    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
     help_pages.open_window_help(example_dialog.HELP_KEY)
     assert urls[-1].endswith("usage/case-setup.html#help-example-case")
     window.deleteLater()
@@ -1840,12 +1838,18 @@ def test_missing_packages_are_shown_with_their_command_and_do_not_block(
     client = _InstallClient(_plan(missing=["gfortran"], findings=[warning, exists]))
     wizard = install_wizard.InstallWizard(client, "telemac", _overview())
     wizard.go_next()
-    assert wizard.pages.currentIndex() == 1 and wizard.next_button.text() == "Install"
+    assert wizard.pages.currentIndex() == 1 and wizard.install_button.text() == "Install"
     assert client.calls[0][:2] == ("plan", "telemac")
     assert "1 of 3 system packages" in wizard.package_label.text()
     assert wizard.package_command.toPlainText().endswith("install -y gfortran")
-    assert not wizard.copy_button.isHidden() and wizard.elevate_button.isEnabled()
-    assert wizard.next_button.isEnabled()                        # a warning only
+    # the required actions in a terminal, under their heading in aXqua purple
+    assert not wizard.actions_heading.isHidden()
+    assert wizard.actions_heading.text() == "REQUIRED USER ACTIONS in TERMINAL:"
+    assert "#2e014b" in wizard.actions_heading.styleSheet()
+    assert "#2e014b" in wizard.package_command.styleSheet()
+    assert wizard.package_command.minimumHeight() >= 120
+    assert not wizard.copy_button.isHidden() and wizard.fix_button.isEnabled()
+    assert wizard.install_button.isEnabled()                     # a warning only
     assert len(wizard.finding_list.findings) == 2
     assert not wizard._triangles["folder"].isHidden()            # at the row concerned
     assert wizard._triangles["tag"].isHidden()
@@ -1856,15 +1860,14 @@ def test_missing_packages_are_shown_with_their_command_and_do_not_block(
     wizard.install_packages()                                    # the desktop asks
     assert ("packages", "telemac", True) in client.calls
     assert "All 3 system packages" in wizard.package_label.text()
-    assert wizard.copy_button.isHidden()
+    assert wizard.copy_button.isHidden() and wizard.actions_heading.isHidden()
     assert "The packages were installed" in wizard.plan_label.text()
     wizard.deleteLater()
 
     terminal = _InstallClient(_plan(missing=["gfortran"], elevation=""))
     plain = install_wizard.InstallWizard(terminal, "telemac", _overview())
     plain.go_next()
-    assert not plain.elevate_button.isEnabled()                  # no desktop dialog
-    assert "terminal" in plain.elevate_button.toolTip()
+    assert "terminal" in plain.fix_button.toolTip()              # no desktop dialog
     plain.deleteLater()
 
 
@@ -1875,8 +1878,8 @@ def test_an_installation_that_cannot_work_cannot_be_started(qgis_app, monkeypatc
     client = _InstallClient(_plan(ready=False, findings=[error]))
     wizard = install_wizard.InstallWizard(client, "telemac", _overview())
     wizard.go_next()
-    assert not wizard.next_button.isEnabled()
-    assert "cannot be started" in wizard.next_button.toolTip()
+    assert not wizard.install_button.isEnabled()
+    assert "cannot be started" in wizard.install_button.toolTip()
     wizard.go_back()
     assert wizard.pages.currentIndex() == 0 and wizard.next_button.isEnabled()
     wizard.deleteLater()
@@ -1898,10 +1901,11 @@ def test_an_installation_is_followed_until_it_ends_and_reported_once(
     wizard = install_wizard.InstallWizard(client, "telemac", _overview(),
                                           on_done=reported.append)
     wizard.go_next()
-    wizard.go_next()                                             # Install
+    wizard.install_button.click()
     assert client.calls[-1][0] == "start"
     assert wizard.pages.currentIndex() == 2 and wizard.timer.isActive()
-    assert wizard.next_button.isHidden() and wizard.back_button.isHidden()
+    assert wizard.next_button.isHidden() and not wizard.back_button.isHidden()
+    assert not wizard.install_button.isEnabled()                 # one at a time
 
     wizard.poll()
     assert "step 1 of 1" in wizard.state_label.text()
@@ -1912,7 +1916,10 @@ def test_an_installation_is_followed_until_it_ends_and_reported_once(
     wizard.poll()
     assert "finished" in wizard.state_label.text()
     assert "default.axq-profile" in wizard.state_label.text()
-    assert not wizard.timer.isActive() and not wizard.cancel_button.isEnabled()
+    assert not wizard.timer.isActive()
+    # the cancel button says that the work is done, in dark gray-green
+    assert wizard.cancel_button.text() == "Installation complete"
+    assert "#5b7a5e" in wizard.cancel_button.styleSheet()
     assert len(reported) == 1 and reported[0]["state"] == "succeeded"
     wizard.show_status(done)                                     # shown again
     assert len(reported) == 1
@@ -1948,7 +1955,6 @@ def test_the_help_of_a_wizard_opens_the_section_on_its_program(qgis_app, monkeyp
     install_wizard = _wizard_now(monkeypatch)
     opened = []
     monkeypatch.setattr(help_pages, "open_url", lambda url: opened.append(url) or True)
-    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
     for target in ("telemac", "openfoam", "postprocessors"):
         wizard = install_wizard.InstallWizard(_InstallClient(), target, _overview())
         wizard.open_help()
@@ -1957,6 +1963,163 @@ def test_the_help_of_a_wizard_opens_the_section_on_its_program(qgis_app, monkeyp
         "installation/simulation-software.html#install-telemac",
         "installation/simulation-software.html#install-openfoam",
         "installation/postprocessors.html#help-postprocessors"]
+
+
+def test_the_tabs_of_a_wizard_can_be_visited_in_any_order(qgis_app, monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    client = _InstallClient()
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    assert [wizard.tabs.tabText(i) for i in range(3)] == \
+        ["Settings", "Check", "Installation"]
+    wizard.tabs.setCurrentIndex(2)                               # straight there
+    assert "No installation has been started" in wizard.state_label.text()
+    assert not wizard.cancel_button.isEnabled()
+    wizard.tabs.setCurrentIndex(1)                               # checks on arrival
+    assert [call[0] for call in client.calls] == ["plan"]
+    wizard.tabs.setCurrentIndex(0)
+    wizard.tabs.setCurrentIndex(1)                               # same settings
+    assert [call[0] for call in client.calls] == ["plan"]
+    wizard.tabs.setCurrentIndex(0)
+    wizard._widgets["tag"].setText("v9.0.0")
+    wizard.tabs.setCurrentIndex(1)                               # other settings
+    assert [call[0] for call in client.calls] == ["plan", "plan"]
+    assert client.calls[-1][2]["tag"] == "v9.0.0"
+    wizard.deleteLater()
+
+
+class _StubbornClient(_InstallClient):
+    """Each round of fixes installs one package, until the last one will not go."""
+
+    def __init__(self, missing):
+        super().__init__(_plan(missing=missing))
+        self.missing = list(missing)
+
+    def install_plan(self, target, options):
+        self.calls.append(("plan", target, dict(options)))
+        return _plan(missing=self.missing)
+
+    def install_packages(self, target, options, *, elevate=False):
+        self.calls.append(("packages", target, elevate))
+        if len(self.missing) > 1:
+            self.missing.pop(0)
+        return {"installation": {"message": "the command ended with code 100"}}
+
+
+def test_run_fixes_repeats_while_it_helps_and_then_offers_a_report(qgis_app,
+                                                                  monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    client = _StubbornClient(["gfortran", "cmake", "libmetis-dev"])
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    wizard.go_next()
+    assert wizard.report_button.isHidden()
+    wizard.fix_button.click()
+    # two rounds helped, the third found the same package missing as before
+    assert [c[0] for c in client.calls].count("packages") == 3
+    assert wizard.missing() == ["libmetis-dev"]
+    assert not wizard.report_button.isHidden()
+    assert "libmetis-dev" in wizard.package_label.text()
+    assert "code 100" in wizard.package_label.text()
+
+    shown = []
+    monkeypatch.setattr(install_wizard, "exec_dialog",
+                        lambda dialog: shown.append(dialog) or 0)
+    wizard.report()
+    text = shown[0].report_text.toPlainText()
+    assert "libmetis-dev" in text and "3 round(s)" in text
+    assert shown[0].report_title.text() == "Installation of telemac does not work out"
+    wizard.deleteLater()
+
+    helped = _StubbornClient(["gfortran"])
+    helped.install_packages = lambda target, options, elevate=False: (
+        helped.missing.clear() or {"installation": {"message": ""}})
+    done = install_wizard.InstallWizard(helped, "telemac", _overview())
+    done.go_next()
+    done.fix_button.click()
+    assert "The fixes worked" in done.package_label.text()
+    assert done.report_button.isHidden() and done.install_button.isEnabled()
+    done.deleteLater()
+
+
+def test_a_report_is_shown_before_it_is_sent_and_names_no_home_folder(qgis_app):
+    from axqua_plugin.gui import report_issue
+
+    plan = _plan(missing=["gfortran"])
+    plan["findings"] = [{"severity": "error", "code": "axqua.install.x",
+                         "message": f"{Path.home()}/opt cannot be written"}]
+    title, body = report_issue.installation_report("openfoam", plan, rounds=2)
+    assert "~/opt cannot be written" in body and str(Path.home()) not in body
+    assert "gfortran" in body and "2 round(s)" in body
+    info = report_issue.metadata()
+    assert info["tracker"].startswith("https://github.com/") and "@" in info["email"]
+    url = report_issue.issue_url(title, body, info["tracker"])
+    assert url.startswith(info["tracker"] + "/new?title=Installation")
+    long = report_issue.mail_url(title, "x" * 5000, "a@b.c")
+    assert long.startswith("mailto:a@b.c?subject=") and len(long) < 2500
+
+
+def test_an_installed_program_is_installed_again_only_after_a_question(dock,
+                                                                       monkeypatch):
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    from axqua_plugin.gui import configuration_tab
+
+    tab = dock.configuration_tab
+    tab.show_software(_overview())
+    # found in dark green, not found in aXqua purple and bold
+    assert "#1b5e20" in tab._program_labels["openfoam"].styleSheet()
+    missing = tab._program_labels["postprocessors"]
+    assert "#2e014b" in missing.styleSheet() and "bold" in missing.styleSheet()
+    assert tab.findChildren(configuration_tab.QGroupBox)[-1].title() == \
+        "Simulation && postprocessing software"
+
+    opened = []
+    monkeypatch.setattr(configuration_tab, "InstallWizard",
+                        lambda *a, **k: opened.append(k) or object())
+    monkeypatch.setattr(configuration_tab, "exec_dialog", lambda _w: 0)
+    asked = []
+    no = configuration_tab.enum_value(QMessageBox, "StandardButton.No", "No")
+    yes = configuration_tab.enum_value(QMessageBox, "StandardButton.Yes", "Yes")
+    monkeypatch.setattr(QMessageBox, "question",
+                        lambda *a, **k: asked.append(a[2]) or no)
+    tab.open_wizard("openfoam")                                  # No: back to the tab
+    assert asked == ["Software already installed. Continue with re-installation?"]
+    assert opened == []
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: yes)
+    tab.open_wizard("openfoam")
+    assert opened[-1]["reinstall"] is True
+    asked.clear()
+    tab.open_wizard("postprocessors")                            # nothing to ask
+    assert asked == [] and opened[-1]["reinstall"] is False
+
+
+def test_a_wizard_for_an_installed_program_says_what_happens_to_it(qgis_app,
+                                                                   monkeypatch,
+                                                                   tmp_path):
+    install_wizard = _wizard_now(monkeypatch)
+    overview = _overview()
+    entry = next(t for t in overview["targets"] if t["target"] == "telemac")
+    entry["existing"] = {"folder": str(tmp_path / "opt"), "removable": True,
+                         "removes": str(tmp_path / "opt" / "telemac-mascaret")}
+    wizard = install_wizard.InstallWizard(_InstallClient(), "telemac", overview,
+                                          reinstall=True)
+    choice = wizard._widgets["reinstall"]
+    assert [choice.itemData(i) for i in range(choice.count())] == \
+        ["replace", "continue", "new"]
+    assert wizard.options()["reinstall"] == "replace"
+    assert wizard.options()["folder"] == str(tmp_path / "opt")
+    choice.setCurrentIndex(2)                                    # a new folder
+    assert wizard.options()["reinstall"] == ""
+    assert wizard.options()["folder"] == str(tmp_path / "opt-2")
+    assert wizard.windowTitle().startswith("Install again")
+    wizard.deleteLater()
+
+    entry["existing"] = {"folder": "/usr/lib/openfoam/openfoam2406", "removable": False}
+    foreign = install_wizard.InstallWizard(_InstallClient(), "telemac", overview,
+                                           reinstall=True)
+    choice = foreign._widgets["reinstall"]
+    assert [choice.itemData(i) for i in range(choice.count())] == ["new"]
+    assert "leaves it as it is" in foreign.reinstall_note.text()
+    foreign.deleteLater()
 
 
 def test_the_configuration_tab_says_what_is_installed_and_what_is_running(dock):
