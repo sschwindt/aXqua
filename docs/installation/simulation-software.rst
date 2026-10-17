@@ -141,7 +141,7 @@ The result is the file ``shell-rc.sh`` in the installation folder. It is the **e
 
 .. note::
 
-   aXqua does not yet set up simulations with the sediment transport solvers or with the stage-discharge outflow boundary (:ref:`help-morphodynamics-openfoam`). Both are installed and can be used from a terminal.
+   aXqua sets up simulations with the sediment transport solver sediDriftFoam2, for fine sediment over a bed that stays in place (*Simulations > Morphodynamics* with the simulation program *OpenFOAM*, :ref:`help-morphodynamics-openfoam`), and OpenFOAM simulations with the stage-discharge outflow boundary of the BAW (``openfoam.outflow_boundary: rating-curve``, :ref:`preprocessing-openfoam-choices`). The variant ``sediDriftFoam2Rating``, which moves the bed and the water surface, is installed but not set up by aXqua, because aXqua keeps the bed and the surface of a sediment simulation in place.
 
 .. rubric:: References
 

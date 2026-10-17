@@ -130,6 +130,44 @@ def _inlet_discharges(of_mesh, cfg: Config, total: float) -> dict[str, float]:
     return {p: total * counts[p] / n_total for p in patches}
 
 
+#: Discharges, as shares of the case's own, at which a derived rating curve is
+#: tabulated for an outlet that follows it (``openfoam.outflow_boundary:
+#: rating-curve``). The outlet of the BAW refuses to extrapolate, so the range has to
+#: cover what the outflow does while the run settles.
+RATING_SHARES = (0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0)
+
+
+def _derive_rating(cfg, discharges, *, out):
+    """A rating curve from the terrain at the outflow, by the case's own method."""
+    from axqua import rating
+
+    if getattr(cfg.boundaries, "rating_method", "trapezoid") == "section":
+        return rating.synthesize_outflow_rating_from_section(cfg, discharges, out=out)
+    return rating.synthesize_outflow_rating(cfg, discharges, out=out)
+
+
+def rating_table(cfg, discharge: float, folder, *, derive=None
+                 ) -> list[tuple[float, float]]:
+    """The stage-discharge relation an outlet follows: ``[(Q, h), ...]`` sorted by Q.
+
+    ``boundaries.stage_discharge`` where it has at least two discharges; otherwise a
+    curve derived from the terrain over :data:`RATING_SHARES` of *discharge*, written
+    to *folder* (one pair is enough for a fixed level, not for a relation).
+    """
+    from axqua.hydraulics import read_rating_pairs
+
+    given = getattr(cfg.boundaries, "stage_discharge", None)
+    if given and Path(given).is_file():
+        q, h = read_rating_pairs(Path(given))
+        if len(set(q.tolist())) >= 2:
+            return [(float(a), float(b)) for a, b in zip(q, h)]
+    out = Path(folder) / "rating-curve-openfoam.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    (derive or _derive_rating)(cfg, [discharge * f for f in RATING_SHARES], out=out)
+    q, h = read_rating_pairs(out)
+    return [(float(a), float(b)) for a, b in zip(q, h)]
+
+
 def build_case(cfg: Config, *, state: State2D | None = None,
                hotstart: str | Path | None = None,
                case_dir: str | Path | None = None,
@@ -166,7 +204,13 @@ def build_case(cfg: Config, *, state: State2D | None = None,
     # The level of the outflow is needed before the mesh, which walls an outlet above
     # it; a stage per outlet patch (openfoam.outlet_stage) is read by the mesher.
     tailwater = None
-    if of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
+    rating = None
+    if dicts.uses_rating_outlet(cfg):
+        # the outlet follows a stage-discharge relation; the run starts from its level
+        # at the discharge of the case, and the mesher walls the outlet above that
+        rating = rating_table(cfg, q, case_dir)
+        tailwater = float(np.interp(q, [r[0] for r in rating], [r[1] for r in rating]))
+    elif of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
         from axqua.hydraulics import resolve_outflow_wse
 
         tailwater = float(resolve_outflow_wse(cfg, q))
@@ -197,6 +241,20 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         else:
             notes.append(f"outlet stage {levels[0]:.3f} m a.s.l. from "
                          f"openfoam.outlet_stage - {where}")
+    elif rating is not None:
+        stage = tailwater
+        notes.append(
+            f"outlet follows a stage-discharge relation of {len(rating)} pairs "
+            f"(Q {rating[0][0]:.3g} to {rating[-1][0]:.3g} m3/s) with the boundary "
+            f"condition waterLevel_alpha_prgh of the BAW; it starts at {stage:.3f} m "
+            "a.s.l., the level at the discharge of the case. The library "
+            f"{dicts.BAW_LIBRARY} has to be in the OpenFOAM installation (the one aXqua "
+            "installs has it).")
+        if len(of_mesh.outlet_patches) > 1:
+            notes.append(
+                f"{len(of_mesh.outlet_patches)} outlets each follow the same relation "
+                "with the discharge through their own patch, which is right only where "
+                "each outlet has a rating curve of that shape")
     elif cfg.boundaries.outflow_condition == "free":
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
@@ -228,7 +286,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
     else:
         field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
                                           outflow_stage=stage, discharges=inlets,
-                                          uniform_bed_ks=uniform_bed_ks)
+                                          uniform_bed_ks=uniform_bed_ks, rating=rating)
     dict_files = dicts.write_dicts(of_mesh, cfg, case_dir, velocity_cap=cap)
     (case_dir / "case.foam").write_text("")     # so ParaView can open the folder
     _write_build_record(cfg, of_mesh, case_dir, velocity_cap=float(cap))

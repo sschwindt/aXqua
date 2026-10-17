@@ -1727,6 +1727,15 @@ class OpenFoam:
     #: becomes a weir and a new artefact replaces the old one. The default leaves a
     #: quarter of a metre.
     outlet_air_margin: float = 0.25
+    #: What the outlets of a two-phase case hold. ``level``: the water level that
+    #: ``boundaries.outflow_condition`` gives at the discharge of the case, for the
+    #: whole run. ``rating-curve``: the level that a stage-discharge relation gives at
+    #: the discharge that actually leaves through the outlet, at every time step, with
+    #: the boundary condition of the BAW (Thorenz 2024) that the OpenFOAM installation
+    #: of aXqua builds. The relation is ``boundaries.stage_discharge`` where it has at
+    #: least two pairs, else it is derived from the terrain by
+    #: ``boundaries.rating_method`` over a range of discharges around the case's own.
+    outflow_boundary: str = "level"
     # The sub-model's own inflow/outflow lines. A crop that moves the domain away from
     # the case's liquid boundaries leaves it with none - the water has nowhere to enter
     # or leave - and the build stops with exactly that message. Same reasoning as
@@ -1870,6 +1879,19 @@ class OpenFoam:
                 f"openfoam.mode must be 'vof' or 'rigid-lid', got {self.mode!r}")
         if self.cell_size_factor is not None and self.cell_size_factor <= 0:
             raise ValueError("openfoam.cell_size_factor must be > 0")
+        if self.outflow_boundary not in ("level", "rating-curve"):
+            raise ValueError("openfoam.outflow_boundary must be 'level' or "
+                             f"'rating-curve', got {self.outflow_boundary!r}")
+        if self.outflow_boundary == "rating-curve" and self.mode == "rigid-lid":
+            raise ValueError(
+                "openfoam.outflow_boundary: rating-curve needs a free surface: under "
+                "mode: rigid-lid the level at the outlet is the lid itself. Use mode: "
+                "vof, or outflow_boundary: level.")
+        if self.outflow_boundary == "rating-curve" and self.outlet_stage is not None:
+            raise ValueError(
+                "openfoam.outlet_stage gives a sub-model fixed levels at its crop faces; "
+                "it cannot be combined with outflow_boundary: rating-curve. Remove one "
+                "of the two.")
         if self.domain not in ("wetted", "roi"):
             raise ValueError(
                 f"openfoam.domain must be 'wetted' or 'roi', got {self.domain!r}")

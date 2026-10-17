@@ -286,6 +286,11 @@ CURATED: dict[str, dict[str, Any]] = {
     "calibration.init_runs": _c("Simulations before the surrogate model", "int"),
     "calibration.max_runs": _c("Simulations in total", "int"),
     "openfoam.mode": _c("Free surface", "choice", choices=("vof", "rigid-lid")),
+    "openfoam.outflow_boundary": _c(
+        "Outflow boundary", "choice", choices=("level", "rating-curve"),
+        help="level: one water level for the whole run. rating-curve: the level that "
+             "the stage-discharge relation gives for the discharge that leaves the "
+             "model, at every time step (boundary condition of the BAW)."),
     "openfoam.cell_size_factor": _c(
         "Cell size relative to the channel edge length", "number", "-",
         help="3 makes the lattice three times coarser than the TELEMAC mesh in the "
