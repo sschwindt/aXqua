@@ -872,13 +872,14 @@ def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
 # ------------------------------------------------------------------ the fixed tabs
 
 #: The tabs the user's instructions prescribe, in their order, with their sub-tabs.
+#: The user's corrections of 2026-10-16: Mesh convergence and Morphodynamic simulation
+#: moved into Simulations, whose TELEMAC sub-tab is the baseline.
 PRESCRIBED = [
     ("Configuration", []),
     ("Case Setup", []),
     ("Preprocessing", []),
-    ("Hydraulic simulation", ["Telemac", "OpenFOAM"]),
-    ("Mesh convergence", []),
-    ("Morphodynamic simulation", ["Telemac", "OpenFOAM"]),
+    ("Simulations", ["Baseline (Telemac)", "OpenFOAM", "Mesh convergence",
+                     "Morphodynamics"]),
     ("Calibration & validation", []),
     ("Postprocessing", ["QGIS", "ParaView", "VisIt"]),
     ("Batch-processing", []),
@@ -900,14 +901,19 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 9 tabs, 7 sub-tabs, 3 installation wizards and the window of the example case
-    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7 + 3 + 1
+    # 7 tabs, 7 sub-tabs, 3 installation wizards and the window of the example case
+    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 1
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
     assert sections.help_target("hydraulics") == ("usage/hydraulic-simulations",
                                                   "help-hydraulics")
     assert sections.help_target("hydraulics", "openfoam")[1] == "help-hydraulics-openfoam"
+    # a study within Simulations opens its own page
+    assert sections.help_target("hydraulics", "mesh") == ("usage/mesh-convergence",
+                                                          "help-mesh-convergence")
+    assert sections.help_target("hydraulics", "morphodynamics")[0] == \
+        "usage/morphodynamic-simulations"
 
 
 def test_a_capability_is_shown_on_the_tab_of_its_section():
@@ -916,9 +922,13 @@ def test_a_capability_is_shown_on_the_tab_of_its_section():
     assert sections.placement("telemac", "steady2d") == ("hydraulics", "telemac")
     assert sections.placement("telemac", "gain_lose") == ("hydraulics", "telemac")
     assert sections.placement("openfoam", "free_surface_3d") == ("hydraulics", "openfoam")
-    assert sections.placement("telemac", "vertical_convergence") == ("mesh", "")
-    assert sections.placement("telemac", "morphodynamics") == ("morphodynamics",
-                                                               "telemac")
+    assert sections.placement("telemac", "vertical_convergence") == ("hydraulics",
+                                                                     "mesh")
+    assert sections.placement("openfoam", "mesh_convergence") == ("hydraulics", "mesh")
+    assert sections.placement("telemac", "morphodynamics") == ("hydraulics",
+                                                               "morphodynamics")
+    assert sections.placement("openfoam", "morphodynamics") == ("hydraulics",
+                                                                "morphodynamics")
     assert sections.placement("openfoam", "calibration") == ("calibration", "")
 
 
@@ -936,9 +946,9 @@ def test_help_opens_the_online_documentation_at_the_section_of_the_tab():
     copy built into the plugin."""
     from axqua_plugin.gui import help as help_pages
 
-    assert help_pages.url_for("mesh") == ("https://axqua.readthedocs.io/en/latest/"
-                                          "usage/mesh-convergence.html"
-                                          "#help-mesh-convergence")
+    assert help_pages.url_for("hydraulics", "mesh") == (
+        "https://axqua.readthedocs.io/en/latest/usage/mesh-convergence.html"
+        "#help-mesh-convergence")
     assert help_pages.url_for("postprocessing", "visit").endswith(
         "usage/postprocessing.html#help-postprocessing-visit")
     assert help_pages.url_for_window("install-telemac").endswith(

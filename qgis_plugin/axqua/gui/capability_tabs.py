@@ -75,6 +75,11 @@ BY_SOLVER = {
         "kind": "openfoam-sediment",
         "build": "openfoam-sediment-build",
     },
+    # the study of the OpenFOAM model is a kind of its own (it builds every level)
+    ("openfoam", "mesh_convergence"): {
+        "title": "Mesh convergence of the OpenFOAM model",
+        "kind": "openfoam-mesh-convergence",
+    },
 }
 
 #: Options a tab always sends with its run, because they are what makes the kind run

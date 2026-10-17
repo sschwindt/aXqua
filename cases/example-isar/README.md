@@ -29,11 +29,11 @@ Measured run times with 8 processor cores on a workstation with 16 cores:
 | Step | Button in the plugin | Run time |
 | --- | --- | --- |
 | Build the model | *Preprocessing* > *Build* | 1 min |
-| Steady simulation | *Hydraulic simulation* > *Telemac* > *Steady 2D* > *Submit* | 1.5 min |
+| Steady simulation | *Simulations* > *Baseline (Telemac)* > *Steady 2D* > *Submit* | 1.5 min |
 | Bayesian calibration | *Calibration & validation* > *Submit* | 16 min |
 | Validation | *Calibration & validation* > *Validate* | 1.5 min |
 | Mesh convergence study (optional) | *Mesh convergence* > *Submit* | 15 min |
-| Three-dimensional model (optional) | *Hydraulic simulation* > *Telemac* > *Steady 3D* > *Build*, then *Submit* | 19 min |
+| Three-dimensional model (optional) | *Simulations* > *Baseline (Telemac)* > *Steady 3D* > *Build*, then *Submit* | 19 min |
 
 ## Requirements
 
@@ -75,7 +75,7 @@ Jobs of one case run one after the other. A job that is submitted while another 
 
 ## Step 3: Run the steady simulation and load the result
 
-1. Go to the tab *Hydraulic simulation*, sub-tab *Telemac*. In the box *Steady 2D*, click *Submit*.
+1. Go to the tab *Simulations*, sub-tab *Baseline (Telemac)*. In the box *Steady 2D*, click *Submit*.
 2. In the list of jobs, the column *Progress* shows the simulated share of the 3000 s and the number of time steps. The run is complete after about 1.5 min.
 3. Select the completed job in the list and click *Load results* below the list.
 
@@ -160,9 +160,9 @@ The numbers of a repeated run differ slightly from those above, because the mesh
 
 ## Optional steps
 
-**Mesh convergence.** On the tab *Mesh convergence*, the box *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 33 calibration verticals inside the model. The study takes about 15 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 5.1 % and the flow velocity by 6.6 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the list of jobs shows the number of completed meshes, for example `level 2/4`.
+**Mesh convergence.** On the tab *Simulations*, sub-tab *Mesh convergence*, with the simulation program *TELEMAC*, the box *Mesh convergence* repeats the steady simulation on four meshes with a refinement ratio of 1.3 (edge lengths of 1.17, 0.90, 0.69, and 0.53 m across the channel) and compares water depth and flow velocity at the 33 calibration verticals inside the model. The study takes about 15 min and writes its report into `axqua-case/postprocessing/mesh-convergence/` as a workbook (`mesh-convergence.xlsx`) and as text (`mesh-convergence.txt`). The report states the grid convergence index and recommends a cell size. In this example, the verdict is `NOT converged`: between the two finest meshes, the water depth at the verticals still changes by 5.1 % and the flow velocity by 6.6 %, against a tolerance of 5 %. The mesh of this example is therefore too coarse for a final model, which is the price of its short run time. With the option *Refine automatically until converged*, the study continues with finer meshes until the tolerance is met. The column *Progress* of the list of jobs shows the number of completed meshes, for example `level 2/4`.
 
-**Three-dimensional model.** On the tab *Hydraulic simulation*, sub-tab *Telemac*, the box *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the variant that is selected under *Variant*: the hydrostatic simulation, which verifies the discharge balance in 3D and takes about 19 min, or the non-hydrostatic simulation, which takes about 10 min. *Load results* then adds the depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The box *Vertical convergence* on the tab *Mesh convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
+**Three-dimensional model.** On the tab *Simulations*, sub-tab *Baseline (Telemac)*, the box *Steady 3D* becomes active as soon as a 2D result exists, because the 3D simulation starts from it. *Build* writes the TELEMAC-3D steering files within seconds. *Submit* runs the variant that is selected under *Variant*: the hydrostatic simulation, which verifies the discharge balance in 3D and takes about 19 min, or the non-hydrostatic simulation, which takes about 10 min. *Load results* then adds the depth-averaged result to the map. For the coarse mesh of this example, aXqua selects only two vertical levels, so that the 3D result adds little to the 2D result. The step demonstrates the workflow. The box *Vertical convergence* on the sub-tab *Mesh convergence* repeats the 3D simulation with different numbers of vertical levels. It was not run for this guide.
 
 **Several steps at once.** On the tab *Batch-processing*, tick the steps to run and click *Submit the ticked steps*. The jobs are submitted in the order of the list, and each waits for the one before it. *Generate batch-processing script...* writes a shell script that runs the same steps without QGIS and stops when a step fails.
 
@@ -170,10 +170,10 @@ The numbers of a repeated run differ slightly from those above, because the mesh
 
 | Tab or box | State in this example |
 | --- | --- |
-| *Hydraulic simulation* > *Telemac*: *Unsteady 2D*, *Unsteady 3D* | inactive, because the case file prescribes a constant discharge and no hydrograph (`boundaries.inflow`) |
-| *Hydraulic simulation* > *Telemac*: *Gain-lose reach* | nothing to submit. The exchange with the gravel bar is a block of the case file, and it is built and simulated together with the steady 2D model. The box states `configured, built, run` after step 3 |
-| *Hydraulic simulation* > *OpenFOAM* | states that this case does not use OpenFOAM |
-| *Morphodynamic simulation* | nothing to submit. Sediment transport is switched on with the block `morphodynamics` of the case file and is then computed together with the flow. This example has no such block |
+| *Simulations* > *Baseline (Telemac)*: *Unsteady 2D*, *Unsteady 3D* | inactive, because the case file prescribes a constant discharge and no hydrograph (`boundaries.inflow`) |
+| *Simulations* > *Baseline (Telemac)*: *Gain-lose reach* | nothing to submit. The exchange with the gravel bar is a block of the case file, and it is built and simulated together with the steady 2D model. The box states `configured, built, run` after step 3 |
+| *Simulations* > *OpenFOAM* | states that this case does not use OpenFOAM |
+| *Simulations* > *Morphodynamics* | nothing to submit. Sediment transport is switched on with the block `morphodynamics` of the case file and is then computed together with the flow. This example has no such block |
 | *Postprocessing* > *QGIS* | loads the result of the selected job, adds an A3 print layout, and exports a movie of an unsteady result |
 | *Postprocessing* > *ParaView*, *VisIt* | list the TELEMAC results of the case. *Export* converts the selected results into files that both programs read, and *Open in ParaView* or *Open in VisIt* starts the program of the profile with them |
 | *Configuration* > *Simulation software* | states where TELEMAC, OpenFOAM, ParaView and VisIt are installed. *Install ...* opens the installation wizard of a program that is missing |

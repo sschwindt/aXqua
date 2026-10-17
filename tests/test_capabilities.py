@@ -46,14 +46,15 @@ def test_unsupported_capability_reports_no_further_axes():
 
 
 def test_not_applicable_is_distinct_from_not_implemented():
-    """OpenFOAM has no depth-averaged mode (n/a); it has no mesh convergence study
+    """OpenFOAM has no depth-averaged mode (n/a); it has no vertical convergence study
     *yet* (no). Reporting both as 'no' would tell a user to wait for something that is
-    never coming."""
+    never coming. Its mesh convergence study exists since 2026-10-17."""
     from axqua.solvers.openfoam.spec import SPEC as openfoam
     from axqua.solvers.telemac.spec import SPEC as telemac
 
     assert openfoam.support(Capability.STEADY2D) is Support.NOT_APPLICABLE
-    assert openfoam.support(Capability.MESH_CONVERGENCE) is Support.NOT_IMPLEMENTED
+    assert openfoam.support(Capability.VERTICAL_CONVERGENCE) is Support.NOT_IMPLEMENTED
+    assert openfoam.support(Capability.MESH_CONVERGENCE) is Support.SUPPORTED
     assert telemac.support(Capability.FREE_SURFACE_3D) is Support.NOT_APPLICABLE
     assert telemac.support(Capability.MORPHODYNAMICS) is Support.SUPPORTED
 

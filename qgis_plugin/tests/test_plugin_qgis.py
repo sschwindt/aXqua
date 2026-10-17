@@ -894,14 +894,12 @@ def dock(qgis_app, monkeypatch):
 
 def test_the_panel_has_the_prescribed_tabs_and_sub_tabs(dock):
     titles = [dock.tabs.tabText(i).replace("&&", "&") for i in range(dock.tabs.count())]
-    assert titles == ["Configuration", "Case Setup", "Preprocessing",
-                      "Hydraulic simulation", "Mesh convergence",
-                      "Morphodynamic simulation", "Calibration & validation",
-                      "Postprocessing", "Batch-processing"]
+    assert titles == ["Configuration", "Case Setup", "Preprocessing", "Simulations",
+                      "Calibration & validation", "Postprocessing", "Batch-processing"]
     inner = {key: [tabs.tabText(i) for i in range(tabs.count())]
              for key, tabs in dock.subtabs.items()}
-    assert inner == {"hydraulics": ["Telemac", "OpenFOAM"],
-                     "morphodynamics": ["Telemac", "OpenFOAM"],
+    assert inner == {"hydraulics": ["Baseline (Telemac)", "OpenFOAM",
+                                    "Mesh convergence", "Morphodynamics"],
                      "postprocessing": ["QGIS", "ParaView", "VisIt"]}
     # the job list is below the tabs and not one of them
     assert dock.jobs_tab.parent() is not None and dock.tabs.indexOf(dock.jobs_tab) == -1
@@ -935,10 +933,14 @@ def test_the_capabilities_of_a_case_appear_on_the_tabs_of_their_sections(dock):
     # the build of the 2D model has a tab of its own; the 3D build stays with its run
     assert telemac.tab("telemac", "steady2d").build_button.isHidden()
     assert not telemac.tab("telemac", "steady3d").build_button.isHidden()
-    assert [key[1] for key in dock.page("mesh")._boxes] == [
-        "mesh_convergence", "vertical_convergence"]
+    mesh = dock.page("hydraulics", "mesh")
+    assert mesh.solver == "telemac"
+    assert [key[1] for key in mesh._boxes] == ["mesh_convergence", "vertical_convergence"]
+    mesh.choose("openfoam")                    # this case does not use OpenFOAM
+    assert mesh._boxes == {} and "does not use OpenFOAM" in mesh.note.text()
+    mesh.choose("telemac")
     assert list(dock.page("calibration")._boxes) == [("telemac", "calibration")]
-    assert list(dock.page("morphodynamics", "telemac")._boxes) == [
+    assert list(dock.page("hydraulics", "morphodynamics")._boxes) == [
         ("telemac", "morphodynamics")]
     # a case without an openfoam block: the sub-tab says so instead of being empty
     openfoam = dock.page("hydraulics", "openfoam")
@@ -1004,9 +1006,34 @@ def test_the_fine_sediment_steps_of_a_batch_need_openfoam_to_be_asked(dock):
                                             "implemented": "yes", "configured": True,
                                             "built": False, "run": False}]}
     assert offered(fine) is True
-    box = dock.page("morphodynamics", "openfoam").tab("openfoam", "morphodynamics")
+    morphodynamics = dock.page("hydraulics", "morphodynamics")
+    morphodynamics.choose("openfoam")
+    box = morphodynamics.tab("openfoam", "morphodynamics")
     assert box.build_button.isEnabled() and box.submit_button.isEnabled()
     assert not box.results_button.isEnabled()              # nothing has run yet
+
+
+def test_the_mesh_study_of_the_openfoam_model_is_chosen_on_the_simulations_tab(dock):
+    """The user's correction of 2026-10-16: Mesh convergence is a sub-tab of
+    Simulations, where the study is run with TELEMAC or with OpenFOAM."""
+    import copy
+
+    from axqua_plugin.gui.capability_tabs import CaseView
+
+    both = copy.deepcopy(EXAMPLE)
+    both["solvers"][1] = {"solver": "openfoam", "enabled": True, "env_ok": True,
+                          "capabilities": [{"capability": "mesh_convergence",
+                                            "implemented": "yes", "configured": True,
+                                            "built": False, "run": False}]}
+    dock._apply_case_view(CaseView.from_payload(both))
+    mesh = dock.page("hydraulics", "mesh")
+    assert [key[0] for key in mesh._boxes] == ["telemac", "telemac"]
+    mesh.choose("openfoam")
+    assert list(mesh._boxes) == [("openfoam", "mesh_convergence")]
+    box = mesh.tab("openfoam", "mesh_convergence")
+    assert box.view.submit_kind == "openfoam-mesh-convergence"
+    assert box.view.build_kind is None and box.submit_button.isEnabled()
+    assert "pre_run" in box._fields
 
 
 def test_every_step_of_a_batch_is_on_the_screen(dock):

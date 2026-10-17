@@ -199,6 +199,8 @@ class OpenFoamBackend(BaseBackend):
 
         if _is_sediment(ctx):
             return self._book_sediment(cfg, ctx)
+        if _is_mesh_study(ctx):
+            return {}                    # the study wrote its own report
         case_dir = Path(cfg.openfoam_case_dir)
         out: dict[str, Any] = {}
 
@@ -268,7 +270,8 @@ class OpenFoamBackend(BaseBackend):
     def study(self, cfg, capability=None, *, ctx: Any = None,
               launch_mode: str = "prepare", checkout=None, rebuild: bool = False,
               seed=None, **kwargs):
-        """Multi-run investigations. Currently only the calibration campaign.
+        """Multi-run investigations: the calibration campaign and the mesh
+        convergence study.
 
         The 2D seed is passed in rather than obtained here: ``axqua.prerun`` imports
         the TELEMAC backend transitively, and this module must not reach into it
@@ -276,6 +279,8 @@ class OpenFoamBackend(BaseBackend):
         """
         from axqua.core.capabilities import Capability
 
+        if capability is Capability.MESH_CONVERGENCE:
+            return self._mesh_convergence(cfg, ctx=ctx, seed=seed, **kwargs)
         if capability is not Capability.CALIBRATION:
             return super().study(cfg, capability, **kwargs)
         from axqua.solvers.openfoam.calibration import run_openfoam_calibration
@@ -283,9 +288,38 @@ class OpenFoamBackend(BaseBackend):
             cfg, launch_mode=launch_mode, checkout=checkout, rebuild=rebuild,
             state=seed, ctx=ctx, **kwargs)
 
+    def _mesh_convergence(self, cfg, *, ctx: Any = None, seed=None,
+                          discharge: float | None = None, refinement_ratio: float = 1.3,
+                          tolerance: float = 0.05, n_coarser: int = 1, n_finer: int = 2,
+                          max_extra_levels: int = 3, auto_extend: bool = False,
+                          n_processors: int | None = None, **_ignored):
+        """The mesh convergence study of the free-surface model
+        (:mod:`axqua.solvers.openfoam.convergence`)."""
+        from axqua import convergence
+        from axqua.solvers.openfoam import convergence as of_convergence
+
+        report = of_convergence.run_openfoam_mesh_convergence(
+            cfg, seed=seed, discharge=discharge, refinement_ratio=refinement_ratio,
+            tolerance=tolerance, n_coarser=n_coarser, n_finer=n_finer,
+            max_extra_levels=max_extra_levels, auto_extend=auto_extend,
+            n_processors=n_processors,
+            # never the study's own stdin prompt (see jobs.interaction)
+            ask=(ctx.ask if ctx is not None else None),
+            on_level=convergence.level_progress(ctx),
+            check_cancelled=(ctx.check_cancelled if ctx is not None else None))
+        if ctx is not None:
+            ctx.progress(levels_done=len(report.levels), levels_total=len(report.levels),
+                         converged=bool(getattr(report, "converged", False)))
+        convergence.write_study_report(
+            report, Path(cfg.postprocessing_dir) / of_convergence.FOLDER,
+            of_convergence.STEM, ctx)
+        return report
+
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
         """The relative inlet/outlet discharge imbalance - what the run is judged on."""
         from axqua.solvers.openfoam import report
+        if _is_mesh_study(ctx):
+            return None
         if _is_sediment(ctx):
             # how far the sediment budget of the reach is from closing, as a share
             summary = getattr(getattr(ctx, "manifest", None), "summary", {}) or {}
@@ -376,6 +410,12 @@ class OpenFoamBackend(BaseBackend):
             return []
         if _is_sediment(ctx):
             return self._export_sediment(cfg, ctx)
+        if _is_mesh_study(ctx):
+            from axqua.solvers.openfoam.convergence import FOLDER, STEM
+
+            workbook = Path(cfg.postprocessing_dir) / FOLDER / f"{STEM}.xlsx"
+            ctx.record("Mesh-convergence report", workbook, kind="table")
+            return [workbook] if workbook.exists() else []
         case_dir = Path(cfg.openfoam_case_dir)
         written: list[Path] = []
 
@@ -439,6 +479,11 @@ BACKEND = OpenFoamBackend()
 def _is_sediment(ctx: Any) -> bool:
     """Whether the job at hand is one of the fine sediment simulation."""
     return getattr(ctx, "capability", None) is Capability.MORPHODYNAMICS
+
+
+def _is_mesh_study(ctx: Any) -> bool:
+    """Whether the job at hand is the mesh convergence study."""
+    return getattr(ctx, "capability", None) is Capability.MESH_CONVERGENCE
 
 
 def _wants_vtk(ctx: Any) -> bool:

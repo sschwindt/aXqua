@@ -983,13 +983,15 @@ def _write_level_json(level_dir: Path, level: LevelResult, ch: float,
         log.warning("could not write %s/level.json: %s", level_dir, exc)
 
 
-def _scan_completed(cfg: Config, base_dir: Path, levels) -> dict[str, Path]:
+def _scan_completed(cfg: Config, base_dir: Path, levels, *,
+                    result_name: str | None = None) -> dict[str, Path]:
     """Map ``{label: level_dir}`` of planned levels with a reusable result.
 
     A level is reusable when its folder holds both the result SELAFIN and a
     ``level.json`` whose channel/floodplain sizes match the planned tuple (so a
-    changed ladder never silently reuses a mesh built at different sizes)."""
-    results_slf = getattr(cfg, "results_slf", "r2d.slf")
+    changed ladder never silently reuses a mesh built at different sizes).
+    *result_name* is the result file of a level (TELEMAC's ``r2d.slf`` by default)."""
+    results_slf = result_name or getattr(cfg, "results_slf", "r2d.slf")
     done: dict[str, Path] = {}
     for label, ch, fp in levels:
         d = Path(base_dir) / _slug(label)
@@ -1012,13 +1014,15 @@ def _scan_completed(cfg: Config, base_dir: Path, levels) -> dict[str, Path]:
 
 def _load_completed_level(cfg: Config, level_dir: Path, label: str, probes,
                           quantities, *, ks=None,
-                          pinned_model: int | None = None) -> LevelResult | None:
+                          pinned_model: int | None = None,
+                          result_name: str | None = None,
+                          check_validity: bool = True) -> LevelResult | None:
     """Rebuild a :class:`LevelResult` from an existing per-level folder, or None
     (-> the level is re-run). QoI/statistics are re-extracted from the stored
     result SELAFIN; runtime and sizes come from ``level.json``."""
     try:
         meta = json.loads((Path(level_dir) / "level.json").read_text())
-        res = Path(level_dir) / getattr(cfg, "results_slf", "r2d.slf")
+        res = Path(level_dir) / (result_name or getattr(cfg, "results_slf", "r2d.slf"))
         data = selafin.read_slf(res, frame=-1)
         min_edge, mean_depth, mean_vel = _geom_stats(data, probes)
         dt = _cfl_dt(min_edge, mean_depth, mean_vel)
@@ -1026,11 +1030,12 @@ def _load_completed_level(cfg: Config, level_dir: Path, label: str, probes,
         cell_size = float(meta.get("cell_size") or meta["channel_size"])
         validity = None
         try:
-            from axqua import mesh_validity
+            if check_validity:
+                from axqua import mesh_validity
 
-            validity = mesh_validity.check_level(
-                cfg, dx=cell_size, depth=mean_depth, velocity=mean_vel, ks=ks,
-                pinned_model=pinned_model)
+                validity = mesh_validity.check_level(
+                    cfg, dx=cell_size, depth=mean_depth, velocity=mean_vel, ks=ks,
+                    pinned_model=pinned_model)
         except Exception as exc:                 # dummy test configs
             log.debug("validity check skipped for reused '%s': %s", label, exc)
         return LevelResult(label=label, cell_size=cell_size,
@@ -1120,7 +1125,8 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                          extend_ratio: float | None = None,
                          max_extra_levels: int = 3,
                          auto_extend: bool = False,
-                         ask=None, on_level=None) -> ConvergenceReport:
+                         ask=None, on_level=None, result_name: str | None = None,
+                         check_validity: bool = True) -> ConvergenceReport:
     """Run the convergence study and return the :class:`ConvergenceReport`.
 
     *on_level(done, total, label)* is called before the first mesh and after every
@@ -1155,6 +1161,11 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
     grid at a time until it reaches the GCI/relative-change goal, exhausts
     *max_extra_levels*, or a level fails to mesh/run (the practical refinement
     limit) - then it writes the report from the completed levels.
+
+    *result_name* and *check_validity* serve a study of another code (the OpenFOAM
+    free-surface model, :mod:`axqua.solvers.openfoam.convergence`): the result file
+    of a level, and whether the checks of the TELEMAC turbulence and roughness
+    closure (:mod:`axqua.mesh_validity`) apply to its levels at all.
     """
     levels = list(levels or default_levels(cfg))
     quantities = list(quantities)
@@ -1172,22 +1183,24 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
         cfg, discharge, base_dir=base_dir, runtime=runtime, n_processors=n_processors)
 
     # study context for the validity checks (graceful for bare test configs)
-    try:
-        from axqua import steering
+    pinned = ks_channel = None
+    if check_validity:
+        try:
+            from axqua import steering
 
-        pinned = steering.select_turbulence_model(cfg)[0]
-    except Exception:
-        pinned = None
-    try:
-        from axqua import mesh_validity
+            pinned = steering.select_turbulence_model(cfg)[0]
+        except Exception:
+            pinned = None
+        try:
+            from axqua import mesh_validity
 
-        ks_channel = mesh_validity.channel_ks(cfg)
-    except Exception:
-        ks_channel = None
+            ks_channel = mesh_validity.channel_ks(cfg)
+        except Exception:
+            ks_channel = None
 
     reuse: dict[str, Path] = {}
     if base_dir.exists():
-        done = _scan_completed(cfg, base_dir, levels)
+        done = _scan_completed(cfg, base_dir, levels, result_name=result_name)
         if done:
             summary = ", ".join(f"'{lbl}'" for lbl in done)
             if ask(f"mesh convergence: found {len(done)} completed level(s) in "
@@ -1211,7 +1224,9 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
         res = None
         if label in reuse:
             res = _load_completed_level(cfg, reuse[label], label, probes, quantities,
-                                        ks=ks_channel, pinned_model=pinned)
+                                        ks=ks_channel, pinned_model=pinned,
+                                        result_name=result_name,
+                                        check_validity=check_validity)
             if res is not None:
                 log.info("mesh convergence: reused completed '%s' (%d elements, "
                          "runtime %.0f s)", label, res.n_elem, res.runtime_s or 0.0)
@@ -1237,6 +1252,8 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
                    if est is not None else "unknown (no runtimes recorded)")
         validity_txt = ""
         try:
+            if not check_validity:
+                raise LookupError("no closure checks for this code")
             from axqua import mesh_validity
 
             cand = mesh_validity.check_level(
@@ -1310,3 +1327,42 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
              "CONVERGED" if report.converged else "NOT converged",
              tolerance * 100, report.verdict_basis, rec["cell_size"])
     return report
+
+
+# --------------------------------------------------------------------------- #
+# what a job does with a finished study
+# --------------------------------------------------------------------------- #
+
+
+def level_progress(ctx):
+    """What a convergence study calls after each of its runs; ``None`` without a job."""
+    if ctx is None:
+        return None
+    return lambda done, total, label: ctx.progress(
+        levels_done=done, levels_total=total, current_label=label)
+
+
+def write_study_report(report, folder: Path, stem: str, ctx, *,
+                       readme: bool = False) -> None:
+    """Write the report of a convergence study next to its levels, and record it.
+
+    The case scripts have always done this after the study returned. The job did not:
+    it ran the study for twenty minutes and left the verdict in its log, so the plugin
+    had nothing to show for it and "the report" the documentation points at did not
+    exist. A workbook that cannot be written must not fail a study that ran. Shared by
+    the backends: a study of each code ends the same way.
+    """
+    folder = Path(folder)
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
+        workbook = report.to_xlsx(folder / f"{stem}.xlsx")
+        summary = folder / f"{stem}.txt"
+        report.save(summary)
+        if readme:
+            write_readme(folder, report=report)
+    except Exception as exc:                        # noqa: BLE001
+        log.warning("could not write the %s report: %s: %s", stem, type(exc).__name__, exc)
+        return
+    log.info("%s report -> %s", stem, workbook)
+    if ctx is not None:
+        ctx.record(f"{stem.replace('-', ' ').capitalize()} summary", summary, kind="file")

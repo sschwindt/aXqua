@@ -42,6 +42,10 @@ OPTION_FIELDS = {
     "openfoam-sediment-build": [("pre_run", "Use TELEMAC warm-up", "bool", True)],
     # "count" is a whole number without the limit of the processor cores
     "openfoam-sediment": [("iterations", "Iterations at most", "count", 0)],
+    "openfoam-mesh-convergence": [
+        ("n_processors", "MPI ranks", "int", 0),
+        ("auto_extend", "Refine automatically until converged", "bool", False),
+        ("pre_run", "Use TELEMAC warm-up", "bool", True)],
 }
 
 

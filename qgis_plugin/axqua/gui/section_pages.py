@@ -51,6 +51,8 @@ class SectionPage(QWidget):
         self.empty_text = empty_text
         self.hide_build = set(hide_build)
         self._boxes: dict[tuple[str, str], tuple[QGroupBox, CapabilityTab]] = {}
+        #: the index of the first box in the layout: after the note
+        self._first_box = 1
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         body = QWidget()
@@ -99,7 +101,7 @@ class SectionPage(QWidget):
                 inner.setContentsMargins(4, 4, 4, 4)
                 inner.addWidget(tab)
                 self._boxes[key] = (box, tab)
-                self._layout.insertWidget(position + 1, box)
+                self._layout.insertWidget(position + self._first_box, box)
             box.setTitle(title)
             if key in self.hide_build:
                 tab.build_button.setVisible(False)
@@ -115,6 +117,49 @@ class SectionPage(QWidget):
     def tab(self, solver: str, capability: str) -> CapabilityTab | None:
         box = self._boxes.get((solver, capability))
         return box[1] if box else None
+
+
+class SolverChoicePage(SectionPage):
+    """A sub-tab whose study or simulation exists for TELEMAC and for OpenFOAM.
+
+    A choice at the top selects the simulation program, and the page shows the boxes of
+    that program only: the mesh convergence study of the TELEMAC or of the OpenFOAM
+    model, the morphodynamic simulation with TELEMAC and GAIA or with OpenFOAM and
+    sediDriftFoam2.
+    """
+
+    def __init__(self, context, section_key: str, sub_key: str, *,
+                 empty_texts: dict[str, str] | None = None, parent=None) -> None:
+        super().__init__(context, section_key, sub_key, parent=parent)
+        self.empty_texts = dict(empty_texts or {})
+        self._view = None
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Simulation program:"))
+        self.solver_choice = QComboBox()
+        for solver, title in sections.SOLVERS:
+            self.solver_choice.addItem(title, solver)
+        self.solver_choice.currentIndexChanged.connect(lambda _=0: self.apply(self._view))
+        row.addWidget(self.solver_choice)
+        row.addStretch(1)
+        self._layout.insertLayout(0, row)
+        self._first_box = 2                    # after the choice and the note
+
+    @property
+    def solver(self) -> str:
+        return self.solver_choice.currentData() or "telemac"
+
+    def capabilities(self, case_view) -> list:
+        return [c for c in super().capabilities(case_view) if c.solver == self.solver]
+
+    def apply(self, case_view) -> None:
+        self._view = case_view
+        self.empty_text = self.empty_texts.get(self.solver, "")
+        super().apply(case_view)
+
+    def choose(self, solver: str) -> None:
+        index = self.solver_choice.findData(solver)
+        if index >= 0:
+            self.solver_choice.setCurrentIndex(index)
 
 
 class PreprocessingPage(QWidget):
@@ -145,8 +190,8 @@ class PreprocessingPage(QWidget):
         layout.addWidget(build_box)
 
         self.openfoam_note = _label(
-            "The OpenFOAM case is built on the tab Hydraulic simulation > OpenFOAM, "
-            "because its build starts from the TELEMAC warm-up run.")
+            "The OpenFOAM case is built on the tab Simulations > OpenFOAM, because its "
+            "build starts from the TELEMAC warm-up run.")
         layout.addWidget(self.openfoam_note)
 
         check_box = QGroupBox("Preprocessing checkup")

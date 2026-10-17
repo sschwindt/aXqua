@@ -18,7 +18,7 @@ submitted in a row are started by three processes that reach the lock in any ord
 run before its build. Each job therefore leaves a ticket in the folder when it is
 *submitted*, and only the job with the oldest ticket may take the lock.
 
-TELEMAC jobs take part, and three job kinds of OpenFOAM (:data:`QUEUED_WITH_THE_CASE`).
+TELEMAC jobs take part, and four job kinds of OpenFOAM (:data:`QUEUED_WITH_THE_CASE`).
 A run of the free-surface model works in a case folder of its own
 (``openfoam.case_dir``), several of which may share one TELEMAC folder and run side by
 side on purpose, so it stays out. A build is another matter: it reads the 2D result
@@ -79,7 +79,7 @@ class FolderLock(JobLock):
 #: Job kinds of another solver that wait in the queue of the case all the same: the
 #: builds read the 2D result, and the fine sediment run follows its build.
 QUEUED_WITH_THE_CASE = frozenset({"openfoam-build", "openfoam-sediment-build",
-                                  "openfoam-sediment"})
+                                  "openfoam-sediment", "openfoam-mesh-convergence"})
 
 
 def applies(spec: Any) -> bool:

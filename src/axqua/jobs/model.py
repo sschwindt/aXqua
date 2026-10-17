@@ -149,6 +149,7 @@ class JobKind(str, Enum):
     OPENFOAM_RUN = "openfoam-run"
     OPENFOAM_SEDIMENT_BUILD = "openfoam-sediment-build"
     OPENFOAM_SEDIMENT_RUN = "openfoam-sediment"
+    OPENFOAM_MESH_CONVERGENCE = "openfoam-mesh-convergence"
     CALIBRATION = "calibration"
     CALIBRATION_MULTIFLOW = "calibration-multiflow"
     VALIDATION = "validation"
@@ -171,7 +172,8 @@ def parse_kind(value: str) -> JobKind:
                "val": JobKind.VALIDATION,
                "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN,
                "fine-sediment-build": JobKind.OPENFOAM_SEDIMENT_BUILD,
-               "fine-sediment": JobKind.OPENFOAM_SEDIMENT_RUN}
+               "fine-sediment": JobKind.OPENFOAM_SEDIMENT_RUN,
+               "of-meshconv": JobKind.OPENFOAM_MESH_CONVERGENCE}
     if text in aliases:
         return aliases[text]
     raise ConfigError(
@@ -260,6 +262,28 @@ class MeshConvergenceOptions(Options):
     auto_extend: bool = False
     initial_depth: float | None = 0.5
     ncsize: int | None = None
+    answers: dict[str, bool] = field(default_factory=lambda: {"resume": True,
+                                                             "extend": False})
+
+
+@dataclass
+class OpenFoamMeshConvergenceOptions(Options):
+    """The mesh convergence study of the OpenFOAM free-surface model.
+
+    *pre_run* and *hotstart* say where the 2D result every level starts from comes
+    from, as for ``openfoam-build``.
+    """
+
+    discharge: float | None = None
+    refinement_ratio: float = 1.3
+    tolerance: float = 0.05
+    n_coarser: int = 1
+    n_finer: int = 2
+    max_extra_levels: int = 3
+    auto_extend: bool = False
+    n_processors: int | None = None
+    pre_run: bool | None = None
+    hotstart: str | None = None
     answers: dict[str, bool] = field(default_factory=lambda: {"resume": True,
                                                              "extend": False})
 
@@ -568,6 +592,10 @@ KIND_META: dict[JobKind, KindMeta] = {
         JobKind.OPENFOAM_SEDIMENT_RUN, "ofsed", "openfoam",
         "Fine sediment simulation (sediDriftFoam2)", Capability.MORPHODYNAMICS, "run",
         OpenFoamSedimentRunOptions, SolverRunProgress, "case", True),
+    JobKind.OPENFOAM_MESH_CONVERGENCE: KindMeta(
+        JobKind.OPENFOAM_MESH_CONVERGENCE, "ofmeshconv", "openfoam",
+        "Mesh-convergence study of the OpenFOAM model", Capability.MESH_CONVERGENCE,
+        "study", OpenFoamMeshConvergenceOptions, LadderProgress, "case", True),
     JobKind.CALIBRATION: KindMeta(
         JobKind.CALIBRATION, "bal", "telemac", "HydroBayesCal calibration",
         Capability.CALIBRATION, "study", CalibrationOptions, CalibrationProgress,

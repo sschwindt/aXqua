@@ -1,0 +1,125 @@
+"""The mesh convergence study of the OpenFOAM free-surface model.
+
+No OpenFOAM: the backend is a stand-in that records what it was asked to build, and
+the result seen from above is a small SELAFIN whose depth and velocity converge with
+the plan spacing at second order, as a consistent discretization does.
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from types import SimpleNamespace
+
+import numpy as np
+
+from axqua.core import selafin
+from axqua.core.capabilities import Capability
+from axqua.solvers.openfoam import convergence as ofc
+
+
+def _cfg(tmp_path: Path, cell_size: float = 1.0):
+    return SimpleNamespace(
+        name="lattice", postprocessing_dir=tmp_path / "post", openfoam_dir=None,
+        openfoam=SimpleNamespace(cell_size=cell_size, cell_size_factor=None),
+        boundaries=SimpleNamespace(prescribed_flowrate=2.4))
+
+
+class _Backend:
+    def __init__(self):
+        self.built: list[tuple[float, Path, object]] = []
+        self.runs = 0
+
+    def build(self, cfg, capability=None, *, seed=None, **_):
+        self.built.append((cfg.openfoam.cell_size, Path(cfg.openfoam_dir), seed))
+        Path(cfg.openfoam_dir).mkdir(parents=True, exist_ok=True)
+        return SimpleNamespace(mesh=SimpleNamespace(n_cells=int(1000 / cfg.openfoam.cell_size ** 2)))
+
+    def run(self, cfg, capability=None, *, n_processors=None, **_):
+        self.runs += 1
+
+
+def _plan_view(cfg, folder: Path):
+    """Depth and velocity that approach 0.40 m and 0.80 m/s as dx**2."""
+    dx = cfg.openfoam.cell_size
+    xs, ys = np.meshgrid(np.arange(5.0), np.arange(5.0))
+    x, y = xs.ravel() * 10.0, ys.ravel() * 10.0
+    triangles = []
+    for j in range(4):
+        for i in range(4):
+            a = j * 5 + i
+            triangles += [(a, a + 1, a + 6), (a, a + 6, a + 5)]
+    ikle = np.array(triangles) + 1
+    depth = np.full(x.size, 0.40 + 0.02 * dx ** 2)
+    speed = np.full(x.size, 0.80 - 0.03 * dx ** 2)
+    out = Path(folder) / "depth-averaged.slf"
+    selafin._write_selafin(out, x, y, ikle, np.zeros(x.size, dtype=int),
+                           [("WATER DEPTH", "M", depth), ("SCALAR VELOCITY", "M/S", speed)],
+                           title="test", date=(2026, 1, 1, 0, 0, 0), double_precision=True)
+    return out, {}
+
+
+PROBES = np.array([[12.0, 13.0], [25.0, 20.0], [31.0, 8.0]])
+
+
+def test_the_ladder_refines_the_plan_spacing_of_the_case(tmp_path):
+    levels = ofc.openfoam_levels(_cfg(tmp_path, 2.0))
+    assert [label for label, _, _ in levels] == ["coarser x1.30", "baseline",
+                                                 "finer x1.30", "finer x1.69"]
+    assert [round(dx, 4) for _, dx, _ in levels] == [2.6, 2.0, round(2 / 1.3, 4),
+                                                     round(2 / 1.69, 4)]
+
+
+def test_every_level_is_built_from_the_same_seed_and_compared_from_above(tmp_path):
+    backend = _Backend()
+    report = ofc.run_openfoam_mesh_convergence(
+        _cfg(tmp_path), seed="/case/simulation/r2d.slf", probes=PROBES,
+        backend=backend, plan_view=_plan_view, ask=lambda *a, **k: True)
+    assert [round(dx, 3) for dx, _, _ in backend.built] == [1.3, 1.0, 0.769, 0.592]
+    assert {seed for _, _, seed in backend.built} == {"/case/simulation/r2d.slf"}
+    assert backend.runs == 4
+    assert report.converged
+    assert all(level.validity is None for level in report.levels)   # no TELEMAC closure
+    np.testing.assert_allclose(report.levels[1].qoi["WATER DEPTH"], 0.42)
+    folder = tmp_path / "post" / "openfoam-mesh-convergence" / "baseline"
+    assert json.loads((folder / "level.json").read_text())["channel_size"] == 1.0
+
+    # a second study takes the finished levels without building anything again
+    again = _Backend()
+    resumed = ofc.run_openfoam_mesh_convergence(
+        _cfg(tmp_path), probes=PROBES, backend=again, plan_view=_plan_view,
+        ask=lambda *a, **k: True)
+    assert again.built == [] and len(resumed.levels) == 4
+
+
+def test_the_backend_runs_the_study_and_writes_its_report(tmp_path, monkeypatch):
+    from axqua.solvers.openfoam.backend import BACKEND
+
+    recorded = []
+    ctx = SimpleNamespace(ask=lambda *a, **k: True, check_cancelled=lambda: None,
+                          progress=lambda **kw: None,
+                          record=lambda *a, **k: recorded.append(a[0]))
+    original = ofc.run_openfoam_mesh_convergence
+    monkeypatch.setattr(ofc, "run_openfoam_mesh_convergence",
+                        lambda cfg, **kw: original(cfg, probes=PROBES, backend=_Backend(),
+                                                   plan_view=_plan_view, **kw))
+    report = BACKEND.study(_cfg(tmp_path), Capability.MESH_CONVERGENCE, ctx=ctx,
+                           seed="r2d.slf", n_processors=2, answers={"resume": True})
+    assert report.converged
+    folder = tmp_path / "post" / "openfoam-mesh-convergence"
+    assert (folder / "openfoam-mesh-convergence.xlsx").is_file()
+    assert recorded == ["Openfoam mesh convergence summary"]
+
+
+def test_the_study_is_a_job_kind_that_waits_for_the_case_and_gets_its_seed():
+    from axqua.jobs import workspace
+    from axqua.jobs.model import KIND_META, JobKind, parse_kind
+
+    meta = KIND_META[JobKind.OPENFOAM_MESH_CONVERGENCE]
+    assert (meta.solver, meta.capability, meta.verb) == ("openfoam",
+                                                          Capability.MESH_CONVERGENCE,
+                                                          "study")
+    assert parse_kind("of-meshconv") is JobKind.OPENFOAM_MESH_CONVERGENCE
+    assert "openfoam-mesh-convergence" in workspace.QUEUED_WITH_THE_CASE
+    options = meta.options.from_dict({"n_processors": 4, "auto_extend": True})
+    assert options.answers == {"resume": True, "extend": False}

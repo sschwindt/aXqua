@@ -70,23 +70,26 @@ The following options can be changed:
 Run mesh convergence study
 --------------------------
 
-In the plugin, set the options on the *Mesh convergence* tab and click *Submit*. In a terminal:
+In the plugin, go to the tab *Simulations*, sub-tab *Mesh convergence*, select the simulation program (*TELEMAC* or *OpenFOAM*), set the options and click *Submit*. In a terminal:
 
 .. code-block:: text
 
    axqua submit <case-file> --kind mesh-convergence
    axqua submit <case-file> --kind mesh-convergence --option tolerance=0.05 --option auto_extend=true
+   axqua submit <case-file> --kind openfoam-mesh-convergence
 
 .. figure:: ../img/gui-mesh-convergence.png
-   :alt: The Mesh convergence tab of the plugin
+   :alt: The sub-tab Mesh convergence of the plugin
    :width: 70%
 
-   The *Mesh convergence* tab. (1) The options of the study. (2) *Submit* starts the study as a job. (3) *Load results* adds the results to the map.
+   The sub-tab *Mesh convergence* of the tab *Simulations*. (1) The options of the study. (2) *Submit* starts the study as a job. (3) *Load results* adds the results to the map.
 
 Plan sufficient time and disk space:
 
 * **Time.** Each mesh requires its own preprocessing and its own simulation. With every refinement step, the number of cells grows and the time step shrinks, so that the computing time roughly doubles from one mesh to the next finer one. The finest mesh dominates the total time. A study typically takes several times as long as the dry run of the case.
 * **Disk space.** Each mesh has its own folder with its model and its results. For fine meshes, a single result file can reach several hundred megabytes.
+
+**With OpenFOAM.** The study of the OpenFOAM model refines the plan spacing of its lattice (``openfoam.cell_size``, or the spacing that ``openfoam.cell_size_factor`` derives from the TELEMAC mesh) with the same refinement ratio of 1.3, one coarser and two finer than the baseline, and keeps the number of vertical layers. Each mesh is built from the same steady 2D TELEMAC result (the warm-up, :ref:`warm-up-concept`) and run to ``openfoam.end_time``. The water depth and the depth-averaged velocity of each column are compared at the same points as in the TELEMAC study, so that the grid convergence index of both models means the same. The checks of the TELEMAC turbulence model and of the bed roughness do not apply to the OpenFOAM meshes and are not made. Each mesh of a three-dimensional model is expensive: the finest of the four meshes has about 2.9 times as many columns as the baseline, and its time step is about 1.7 times shorter. The study writes into ``axqua-case/postprocessing/openfoam-mesh-convergence/``.
 
 The study can be interrupted. When it is started again, the meshes that are already complete are reused. If a refined mesh cannot be created or its simulation fails, the study ends and reports the meshes that were completed. This marks the practical limit of refinement for the case.
 
@@ -107,7 +110,7 @@ The study is passed when the GCI of the finest meshes is below the tolerance. Th
 
 **Recommended cell size.** The report recommends the coarsest mesh whose results lie within the tolerance, and states how much faster this mesh is than the finest one. To adopt it, set ``mesh.size_scale`` in the case file to the ratio of the recommended and the baseline edge length, which scales the edge lengths of all mesh zones, and repeat the preprocessing.
 
-**Interpretation.** The purpose of the study is not to find a mesh on which the results no longer change. Such mesh independence is practically not attainable for a river model. Each refinement resolves more detail of the terrain, shifts the edge of the water and changes the conditions under which the turbulence model is valid, so that the results keep changing slightly. The purpose is to select a mesh whose remaining uncertainty is known and small in comparison with the uncertainty of the field measurements, at a computing time that the subsequent calibration with its many simulations can afford.
+**Interpretation.** The purpose of the study is not to find a mesh on which the results no longer change. Such mesh independence is practically not attainable for a model of a natural water body. Each refinement resolves more detail of the terrain, shifts the edge of the water and changes the conditions under which the turbulence model is valid, so that the results keep changing slightly. The purpose is to select a mesh whose remaining uncertainty is known and small in comparison with the uncertainty of the field measurements, at a computing time that the subsequent calibration with its many simulations can afford.
 
 Keep the selected mesh for all following steps. The calibration compensates a part of the mesh error through the calibrated parameters. Parameters that were calibrated on one mesh are therefore not valid on another one.
 

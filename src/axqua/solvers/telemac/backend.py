@@ -512,40 +512,18 @@ BACKEND = TelemacBackend()
 
 def _level_progress(ctx: Any):
     """What a convergence study calls after each of its runs; ``None`` without a job."""
-    if ctx is None:
-        return None
-    return lambda done, total, label: ctx.progress(
-        levels_done=done, levels_total=total, current_label=label)
+    from axqua.convergence import level_progress
+
+    return level_progress(ctx)
 
 
 def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,
                         readme: bool = False) -> None:
-    """Write the report of a convergence study next to its levels, and record it.
+    """Write the report of a convergence study next to its levels, and record it
+    (:func:`axqua.convergence.write_study_report`, shared with OpenFOAM)."""
+    from axqua.convergence import write_study_report
 
-    The case scripts have always done this after the study returned. The job did not:
-    it ran the study for twenty minutes and left the verdict in its log, so the plugin
-    had nothing to show for it and "the report" the documentation points at did not
-    exist - although :meth:`TelemacBackend.export_qgis_results` already listed the
-    workbook among the results. A workbook that cannot be written must not fail a study
-    that ran.
-    """
-    folder = Path(folder)
-    try:
-        folder.mkdir(parents=True, exist_ok=True)
-        workbook = report.to_xlsx(folder / f"{stem}.xlsx")
-        summary = folder / f"{stem}.txt"
-        report.save(summary)
-        if readme:
-            from axqua import convergence
-
-            convergence.write_readme(folder, report=report)
-    except Exception as exc:                        # noqa: BLE001
-        log.warning("could not write the %s report: %s: %s", stem, type(exc).__name__, exc)
-        return
-    log.info("%s report -> %s", stem, workbook)
-    if ctx is not None:
-        # the workbook is listed by export_qgis_results, which has always looked for it
-        ctx.record(f"{stem.replace('-', ' ').capitalize()} summary", summary, kind="file")
+    write_study_report(report, folder, stem, ctx, readme=readme)
 
 
 def _calibration_progress(cfg, ctx: Any):

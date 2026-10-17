@@ -12,7 +12,9 @@ distinction between *not applicable* and *not implemented* carries real informat
 * ``morphodynamics`` is supported as **fine sediment over a bed that stays in
   place** (:mod:`axqua.solvers.openfoam.sediment`, the block ``fine_sediment`` of
   the case). A bed that moves is the coupled TELEMAC and GAIA simulation.
-* the convergence studies are **not implemented**: each is genuinely possible for
+* the **mesh convergence** study is supported: the plan spacing of the lattice on a
+  ladder with one refinement factor (:mod:`axqua.solvers.openfoam.convergence`). The
+  vertical convergence study is **not implemented**: it is genuinely possible for
   OpenFOAM and simply is not built yet. A user deciding which code to set up
   deserves to see that difference.
 * ``calibration`` **is** supported - see
@@ -95,6 +97,11 @@ def _mesh_built(cfg) -> bool:
     return (_case(cfg) / "constant" / "polyMesh" / "faces").is_file()
 
 
+def _mesh_study(cfg) -> Path:
+    # the name of solvers/openfoam/convergence.FOLDER, which this module must not import
+    return Path(cfg.postprocessing_dir) / "openfoam-mesh-convergence"
+
+
 def _sediment_case(cfg) -> Path:
     return Path(cfg.fine_sediment_case_dir)
 
@@ -161,7 +168,12 @@ SPEC = BackendSpec(
         ),
         # Possible, not yet built.
         Capability.GAIN_LOSE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
-        Capability.MESH_CONVERGENCE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
+        Capability.MESH_CONVERGENCE: CapabilitySpec(
+            support=Support.SUPPORTED,
+            configured=lambda cfg: "openfoam" in cfg.declared_blocks,
+            built=lambda cfg: _mesh_study(cfg).is_dir(),
+            run=lambda cfg: any(_mesh_study(cfg).glob("openfoam-mesh-convergence.*")),
+        ),
         Capability.VERTICAL_CONVERGENCE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
         Capability.CALIBRATION: CapabilitySpec(
             support=Support.SUPPORTED,

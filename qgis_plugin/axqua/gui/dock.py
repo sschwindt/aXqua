@@ -1,10 +1,9 @@
 """The panel: the tabs of the workflow, and the job list below them.
 
-The tabs are fixed and follow the documentation section by section
-(:mod:`.sections`): Configuration, Case Setup, Preprocessing, Hydraulic simulation,
-Mesh convergence, Morphodynamic simulation, Calibration & validation, Postprocessing and
-Batch-processing. *Help* opens the documentation at the section of the tab that is
-showing.
+The tabs are fixed and follow the workflow (:mod:`.sections`): Configuration, Case
+Setup, Preprocessing, Simulations (Baseline (Telemac), OpenFOAM, Mesh convergence,
+Morphodynamics), Calibration & validation, Postprocessing and Batch-processing. *Help*
+opens the online documentation at the section of the tab that is showing.
 
 What a tab offers still comes from ``axqua case-status --json``: the plugin does not
 know what TELEMAC or OpenFOAM can do, it *asks*, so a capability added to aXqua appears
@@ -41,22 +40,27 @@ from .case_tab import CaseTab
 from .configuration_tab import ConfigurationTab
 from .jobs_widget import JobsWidget
 from .section_pages import (BatchPage, PreprocessingPage, ProgramPage, QgisPage,
-                            SectionPage)
+                            SectionPage, SolverChoicePage)
 from .settings_dialog import SettingsDialog, read_settings
 
-#: What a sub-tab says when the active case has nothing for it.
+#: What a sub-tab says when the active case has nothing for it. A sub-tab with a
+#: choice of the simulation program has one text per program.
 EMPTY = {
-    ("hydraulics", "telemac"): "This case does not use TELEMAC. Add a telemac: block to "
-                               "its case file.",
-    ("hydraulics", "openfoam"): "This case does not use OpenFOAM. Add an openfoam: "
-                                "block to its case file to simulate the free surface "
-                                "in three dimensions.",
-    ("mesh", ""): "This case has no simulation for which a mesh study can be run.",
-    ("morphodynamics", "telemac"): "This case does not use TELEMAC.",
-    ("morphodynamics", "openfoam"): "This case does not use OpenFOAM. Add a "
-                                    "fine_sediment: block to its case file to "
-                                    "simulate fine sediment over a bed that stays in "
-                                    "place.",
+    ("hydraulics", "telemac"): "This case does not use TELEMAC. Switch on the TELEMAC "
+                               "settings in Case settings.",
+    ("hydraulics", "openfoam"): "This case does not use OpenFOAM. Switch on the "
+                                "OpenFOAM settings in Case settings to simulate the "
+                                "free surface in three dimensions.",
+    ("hydraulics", "mesh", "telemac"): "This case does not use TELEMAC, so no mesh "
+                                       "study of a TELEMAC model can be run.",
+    ("hydraulics", "mesh", "openfoam"): "This case does not use OpenFOAM. Switch on "
+                                        "the OpenFOAM settings in Case settings to "
+                                        "study the mesh of the OpenFOAM model.",
+    ("hydraulics", "morphodynamics", "telemac"): "This case does not use TELEMAC.",
+    ("hydraulics", "morphodynamics", "openfoam"): (
+        "This case does not use OpenFOAM for morphodynamics. Switch on Fine sediment "
+        "over a fixed bed in Case settings > Morphodynamic simulation to simulate fine "
+        "sediment with sediDriftFoam2 over a bed that stays in place."),
     ("calibration", ""): "This case has no simulation that can be calibrated.",
 }
 
@@ -279,6 +283,12 @@ class AxquaDock(QDockWidget):
             from .validation_box import CalibrationPage
             return CalibrationPage(self.ctx, key, sub,
                                    empty_text=EMPTY.get((key, sub), ""))
+        placed = sections.section(key).subsection(sub) if sub else None
+        if placed is not None and placed.choose_solver:
+            return SolverChoicePage(
+                self.ctx, key, sub,
+                empty_texts={solver: EMPTY.get((key, sub, solver), "")
+                             for solver, _ in sections.SOLVERS})
         # the build of the 2D model has a tab of its own
         hide = (sections.PREPROCESSING_CAPABILITY,) if key == "hydraulics" else ()
         return SectionPage(self.ctx, key, sub, empty_text=EMPTY.get((key, sub), ""),

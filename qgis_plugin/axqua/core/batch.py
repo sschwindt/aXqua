@@ -28,7 +28,10 @@ class Step:
 STEPS: tuple[Step, ...] = (
     Step("preprocessing", "Build the TELEMAC model", "steady2d", True),
     Step("steady", "Steady 2D simulation", "steady2d", True),
-    Step("mesh-convergence", "Mesh convergence study", "mesh_convergence"),
+    Step("mesh-convergence", "Mesh convergence study (TELEMAC)", "mesh_convergence",
+         solver="telemac"),
+    Step("openfoam-mesh-convergence", "Mesh convergence study (OpenFOAM)",
+         "mesh_convergence", solver="openfoam"),
     Step("build-3d", "Build the 3D model", "steady3d"),
     Step("steady-3d", "Steady 3D simulation (hydrostatic)", "steady3d"),
     Step("openfoam-sediment-build", "Build the fine sediment model", "morphodynamics",

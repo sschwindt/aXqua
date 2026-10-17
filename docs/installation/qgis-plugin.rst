@@ -180,7 +180,7 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 aXqua panel layout
 ------------------
 
-After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Hydraulic simulation*, *Mesh convergence*, *Morphodynamic simulation*, *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens this documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
+After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, and *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the online documentation at the section of the tab that is showing. The job list below the tabs is visible from every tab.
 
 .. figure:: ../img/gui-qgis-window.png
    :alt: The aXqua panel in the QGIS window
