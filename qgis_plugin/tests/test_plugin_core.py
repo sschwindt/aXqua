@@ -65,7 +65,7 @@ def test_metadata_declares_both_qgis_generations():
     assert fields["qgisMinimumVersion"].strip() == "3.44"
     assert float(fields["qgisMaximumVersion"].strip()) >= 4.0
     assert "supportsQt6" not in fields
-    # plugins.qgis.org requires all three links plus a GPL-compatible licence.
+    # plugins.qgis.org requires all three links plus a GPL-compatible license.
     for key in ("homepage", "repository", "tracker", "license", "description", "about"):
         assert fields[key].strip(), f"metadata.txt needs a {key}"
     assert "GPL" in fields["license"]

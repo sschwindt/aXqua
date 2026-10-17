@@ -48,7 +48,7 @@ def utc_now() -> str:
 
 
 class JobState(str, Enum):
-    """Where a job is. ``str``-valued so it serialises without a converter."""
+    """Where a job is. ``str``-valued so it serializes without a converter."""
 
     QUEUED = "QUEUED"
     STARTING = "STARTING"
@@ -703,7 +703,7 @@ class JobSpec:
         value = self.case.get("source_config")
         return str(value) if value else None
 
-    # -- serialisation ----------------------------------------------------------
+    # -- serialization ----------------------------------------------------------
     def as_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,

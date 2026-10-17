@@ -6,7 +6,7 @@ Until now a failure surfaced as whatever the underlying library threw - a
 person reads the sentence and knows what to do. It stops being fine the moment
 something *else* has to act on the failure:
 
-* a job record has to store a failure that survives serialisation, so "what went
+* a job record has to store a failure that survives serialization, so "what went
   wrong" cannot be a formatted string that only means something to the reader;
 * a plugin has to show an actionable message next to the field that caused it, which
   means it needs the field name as data, not embedded in prose;
@@ -139,7 +139,7 @@ class ErrorRecord:
     Any exception can become one, so a job that died on a ``KeyError`` deep in a
     third-party library still records something structured. Unknown types get the
     generic code, which is honest: it says "this was not a failure axqua
-    anticipated" rather than mislabelling it.
+    anticipated" rather than mislabeling it.
     """
 
     code: str

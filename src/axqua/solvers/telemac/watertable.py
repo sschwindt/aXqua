@@ -5,7 +5,7 @@ in at the **losing** line and returns it at the **gaining** line (see
 :mod:`axqua.solvers.telemac.fortran`). The bar's saturated zone is therefore bounded by two known
 water levels, and the surface joining them *is* the water table of that through-flow -
 its gradient is what drives the exchange in the first place. Over a bar of a hundred
-metres or so that surface is planar to within a few centimetres, so it is represented
+meters or so that surface is planar to within a few centimeters, so it is represented
 here as
 
 .. math:: z_{wt}(x, y) = c_0 + c_x (x - x_0) + c_y (y - y_0)
@@ -144,7 +144,7 @@ def _samples_from_zone(cfg, mesh, surface, overrides, *, band: float = 10.0):
     begins - which is the fuzzy part.
 
     Which end loses and which gains follows from the head: water enters the porous
-    body where the surface stands higher. Nothing assumes a digitising direction.
+    body where the surface stands higher. Nothing assumes a digitizing direction.
     """
     import numpy as np
 

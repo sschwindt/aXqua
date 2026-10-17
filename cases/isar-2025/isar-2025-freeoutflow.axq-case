@@ -75,7 +75,7 @@ boundaries:
   outflow_condition: free
   # prescribed_elevation: 0.0  # m a.s.l.; only for outflow_condition: elevation
   # outlet rating curve (Q,WSE): one Q-h pair at the steady discharge suffices.
-  # Unset: synthesised per scenario into preprocessing/rating-curve.csv. The old file
+  # Unset: synthesized per scenario into preprocessing/rating-curve.csv. The old file
   # held WSE 815.1139, 0.25 m below the reach's normal depth at this section (the
   # "trapezoid" idealisation over-states the flow area of a V-shaped section), which
   # forced a supercritical drawdown at the outlet - see isar-2025.axq-case.
@@ -109,7 +109,7 @@ initialization:
   # roughness zones - the "EXTREMLY HIGH VALUE OF FRICTION" storm - and the boundary
   # fluxes never balance within the run duration. See test-approaches.md (attempt 2).
   prewet_depth: 0.30        # ALTERNATIVE hotstart: wet the whole channel zone (needs geodata.mesh_zones)
-  # HOW that surface is built. "constant" (the old behaviour) put it at a low bed
+  # HOW that surface is built. "constant" (the old behavior) put it at a low bed
   # percentile per 5 m bin PLUS prewet_depth; on this braided reach that percentile
   # sits well above the thalweg, so the seeded surface landed a median 0.28 m ABOVE
   # the surface the run converges to (up to +0.60 m), flooding bar tops and bank
@@ -117,7 +117,7 @@ initialization:
   # 7101 m2 / 2182 m3 that actually carries flow, leaving 4694 m2 of stagnant film
   # (35 % of the wetted area, 74 % of it seeded) that had STOPPED draining - it fell
   # only 1.8 % between t=1900 s and t=5000 s, so a longer run cannot remove it.
-  # "normal-depth" instead cuts a real cross-section every prewet_bin_spacing metres
+  # "normal-depth" instead cuts a real cross-section every prewet_bin_spacing meters
   # and seeds the NORMAL-FLOW stage of that section at prescribed_flowrate
   # (rating.stage_for_discharge - the same Keulegan conveyance inversion that builds
   # the outflow rating), so the seed tracks the converged surface: median -0.004 m,
@@ -164,7 +164,7 @@ friction:
   roughness_law: 5             # law for roughness-zone rows (5 = NIKU, ks in m)
   default_law: 4               # 4 = Manning (0 NOFR, 1 HAAL, 2 CHEZ, 3 STRI, 5 NIKU, 7 COWH)
   default_coefficient: 0.03
-  # lateral (wall) boundary friction; also the roughness used to synthesise the
+  # lateral (wall) boundary friction; also the roughness used to synthesize the
   # outflow stage-discharge curve when missing.
   boundary_law: 3              # 3 = Strickler
   boundary_coefficient: 30     # Strickler Kst
@@ -248,7 +248,7 @@ percolation:
   taper_depth: 0.05          # [m] linear taper band above min_depth (fortran mode)
   # ALSO drain standing surface water off the bar itself. The patch is porous gravel:
   # water lying on top infiltrates instead of ponding, so surface water there is an
-  # artefact of a 2D model with no subsurface. With losing_region: line the prescribed
+  # artifact of a 2D model with no subsurface. With losing_region: line the prescribed
   # exchange is drawn from the channel and nothing removes water on the bar - the
   # Aug-2026 result had 807 m2 of the 2188 m2 patch wetted, 620 m2 of it perched above
   # the local water surface (88 % of that seeded by the old pre-wet). The drain is an

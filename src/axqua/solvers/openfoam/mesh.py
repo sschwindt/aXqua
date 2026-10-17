@@ -3,8 +3,8 @@
 The mesh is a **structured (i, j, k) grid, warped onto the bed**:
 
 * in plan, a uniform Cartesian lattice of spacing ``dx``, optionally rotated so its
-  axes line up with the reach (``align_to_flow``), with the columns whose centre
-  falls outside the modelled area simply left out - the survivors form a single
+  axes line up with the reach (``align_to_flow``), with the columns whose center
+  falls outside the modeled area simply left out - the survivors form a single
   4-connected block, so the mesh is structured with a hole-free footprint;
 * in the vertical, ``n_layers`` sigma layers per column running from the DEM bed to
   a **lid that follows the free surface** at a fixed clearance.
@@ -13,14 +13,14 @@ The lid is the part that matters for the air phase. A flat lid high above the
 terrain fills the domain with air that has nothing to do and every opportunity to
 misbehave: large recirculating air cells drive the Courant number, the atmosphere
 patch has to swallow the resulting in/outflow, and the time step collapses on a
-phase nobody is interested in. Clamping the lid to ``freeboard`` metres above the
+phase nobody is interested in. Clamping the lid to ``freeboard`` meters above the
 water surface (from the TELEMAC 2D result - see :mod:`axqua.solvers.openfoam.hotstart`)
 typically removes 60-90% of the air cells, keeps the atmosphere patch close to the
 interface where its ``inletOutlet``/``totalPressure`` pair behaves, and leaves the
 free surface room to move.
 
-Every vertical level is computed at the **plan vertices**, never at cell centres, so
-two neighbouring columns of different height still share their corner points exactly
+Every vertical level is computed at the **plan vertices**, never at cell centers, so
+two neighboring columns of different height still share their corner points exactly
 and the mesh is conformal by construction - no merging, no snapping, no hanging
 nodes.
 """
@@ -80,7 +80,7 @@ class PlanGrid:
     ny: int
     col_id: np.ndarray           # (ny, nx) int, -1 where the column is absent
     vert_id: np.ndarray          # (ny+1, nx+1) int, -1 where the vertex is unused
-    cell_xy: np.ndarray          # (n_columns, 2) world coords of the column centres
+    cell_xy: np.ndarray          # (n_columns, 2) world coords of the column centers
     vert_xy: np.ndarray          # (n_vertices, 2) world coords of the used vertices
 
     @property
@@ -135,7 +135,7 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
                     blocked_by_structures: bool = True) -> PlanGrid:
     """Lay a uniform lattice of spacing *dx* over *polygon* (a shapely geometry).
 
-    A column is kept when its centre lies inside the polygon; the kept set is then
+    A column is kept when its center lies inside the polygon; the kept set is then
     hole-filled and reduced to its largest 4-connected component, so the footprint
     is a single block with no interior voids (an interior void would become a
     spurious internal wall, and a detached island a disconnected mesh region that
@@ -186,17 +186,17 @@ def build_plan_grid(polygon, dx: float, *, angle: float = 0.0,
         # exactly the interior void that binary_fill_holes exists to close, so
         # blanking first would simply be undone.
         # A column is blanked when the solid INTERSECTS ITS CELL SQUARE, not when it
-        # contains the cell centre.
+        # contains the cell center.
         #
-        # Testing the centre lets a wall thinner than dx - or one that merely passes
-        # between two rows of centres - block nothing at all, and the mesh then joins
+        # Testing the center lets a wall thinner than dx - or one that merely passes
+        # between two rows of centers - block nothing at all, and the mesh then joins
         # the two sides of it. A structure is there precisely because its two sides
         # are at different levels, so such a hole carries the whole head difference:
         # on munich-vsf (3 cm lattice, sheet-steel baffles) 8,222 columns straddled a
         # baffle and the fish pass short-circuited itself.
         #
         # The first fix here dilated the solid by half a cell diagonal and tested the
-        # centre against that. It seals, but it also fattens every structure whether
+        # center against that. It seals, but it also fattens every structure whether
         # or not it was at risk, and on this geometry that was not a rounding error:
         # it cut the narrowest opening across the fish pass from 2.25 m to 0.09 m,
         # three cells, and the run built on it pressurised its upstream half to 20 m
@@ -291,12 +291,12 @@ def sigma_levels(height: np.ndarray, n_layers: int, *,
     Uniform by default. *expansion* > 1 grows the layers from the bed upwards
     (ratio of top to bed layer thickness). *bed_layer* pins the **absolute**
     thickness of the first (bed) layer - the knob that matters here, because
-    OpenFOAM's rough wall functions need the first cell centre to stand clear of the
+    OpenFOAM's rough wall functions need the first cell center to stand clear of the
     sand-grain roughness ``Ks``, and on a gravel bed ``Ks`` is a sizeable fraction of
     the flow depth. It is capped at half the local column height so a shallow column
     still gets a mesh.
 
-    Because ``s`` is evaluated per vertex, neighbouring columns still share their
+    Because ``s`` is evaluated per vertex, neighboring columns still share their
     corner points exactly: the mesh stays conformal even where the layer
     distribution differs.
     """
@@ -345,7 +345,7 @@ class OpenFoamMesh:
     cell_centres: np.ndarray       # (NC, 3)
     cell_column: np.ndarray        # (NC,) column index of each cell
     cell_layer: np.ndarray         # (NC,) 0-based layer index of each cell
-    column_bed: np.ndarray         # (n_columns,) bed at the column centres
+    column_bed: np.ndarray         # (n_columns,) bed at the column centers
     column_wse: np.ndarray | None = None      # (n_columns,) hotstart free surface
     column_depth: np.ndarray | None = None    # (n_columns,) hotstart water depth
     column_uv: np.ndarray | None = None       # (n_columns, 2) hotstart depth-averaged U
@@ -455,7 +455,7 @@ def extrude(grid: PlanGrid, bed: np.ndarray, lid: np.ndarray, n_layers: int, *,
     def pid(vert: np.ndarray, k) -> np.ndarray:
         return vert * nk + k
 
-    # ---- cell centres (mean of the eight corner points) ----------------------
+    # ---- cell centers (mean of the eight corner points) ----------------------
     kk = np.arange(n_layers)
     zc = 0.5 * (z[corners][:, :, kk] + z[corners][:, :, kk + 1])   # (nc, 4, n_layers)
     cell_centres = np.empty((nc * n_layers, 3))
@@ -525,7 +525,7 @@ def extrude(grid: PlanGrid, bed: np.ndarray, lid: np.ndarray, n_layers: int, *,
     padded = np.zeros((ny + 2, nx + 2), dtype=bool)
     padded[1:-1, 1:-1] = keep
     side_quads, side_owner, side_mid = [], [], []
-    # (neighbour offset, the two plan vertices of the exposed face)
+    # (neighbor offset, the two plan vertices of the exposed face)
     exposures = [
         ((0, -1), lambda j, i: (grid.vert_id[j, i], grid.vert_id[j + 1, i])),
         ((0, +1), lambda j, i: (grid.vert_id[j, i + 1], grid.vert_id[j + 1, i + 1])),
@@ -591,7 +591,7 @@ def split_outlet_above_tailwater(owner, cell_centres, stage, margin, *,
     its result the same way at about t=40, and the leak was at the downstream end
     where the water had backed up 28 cm above the stage it was supposed to hold.
 
-    A face is placed by its owner cell's centre, which is the only elevation a lateral
+    A face is placed by its owner cell's center, which is the only elevation a lateral
     face has here. The margin is what keeps this from becoming a weir: the surface at
     the crop face must still be free to move.
     """
@@ -742,7 +742,7 @@ def _roughness_at(cfg: Config, xy: np.ndarray) -> np.ndarray | None:
 
 def _smooth_lid(grid: PlanGrid, values: np.ndarray, *, passes: int,
                 dilate: int) -> np.ndarray:
-    """Grey-dilate then average the lid over the plan lattice.
+    """Gray-dilate then average the lid over the plan lattice.
 
     A lid taken verbatim from a 2D result is as ragged as that result: local dips
     over shallow cells would pinch the air layer to nothing and make thin, badly
@@ -973,7 +973,7 @@ def plan_spacing(cfg: Config) -> float:
 
     The factor form is relative to the **TELEMAC channel resolution**, so "three times
     coarser than the 2D mesh" is a single number that keeps meaning across cases
-    instead of a metre value that has to be recomputed per reach.
+    instead of a meter value that has to be recomputed per reach.
     """
     factor = cfg.openfoam.cell_size_factor
     if not factor:
@@ -1152,7 +1152,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
         elif step_p99 > LID_STEP_SEVERE and not of.allow_stepped_lid:
             # A refusal, not a warning: above one depth the surface steps further than
             # the water is deep, which is a weir, a drop, or the slots of a fish pass.
-            # A lid is a WALL there, and the velocity it produces is an artefact of
+            # A lid is a WALL there, and the velocity it produces is an artifact of
             # the mode. Two munich-vsf runs finished, balanced their discharge to
             # -0.000%, held Courant at 0.90 for 61 hours, and were invalid - so the
             # cost of building anyway is days, and the cost of stopping is a rebuild.
@@ -1163,7 +1163,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
                 f"is more than the water is deep. A lid is a WALL, so it cannot "
                 f"answer a drop by plunging the way a free surface does - it converts "
                 f"the head into velocity instead (sqrt(2 g dz): a 1 m step drives "
-                f"4.4 m/s), and the fastest cells in the result will be that artefact "
+                f"4.4 m/s), and the fastest cells in the result will be that artifact "
                 f"rather than the flow.\n"
                 f"  Use openfoam.mode: vof where the surface has to move; or check "
                 f"that the steps are real rather than the 2D result read across a "
@@ -1195,7 +1195,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
     if bed_layer is None and pin_bed and bed_ks is not None:
         # OpenFOAM's nutkRoughWallFunction places the first grid point on a log law
         # whose origin is displaced into the roughness; that is only meaningful with
-        # the first cell CENTRE above the roughness crests, y1 > ks. The centre sits
+        # the first cell CENTER above the roughness crests, y1 > ks. The center sits
         # at half the layer, so the layer must be ~2*ks - which is why a river mesh
         # cannot simply be refined towards the bed the way an aerofoil mesh can.
         #
@@ -1220,7 +1220,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
         else:
             notes.append(
                 f"bed layer pinned to {bed_layer:.3f} m (2x the wetted median ks, so "
-                "the first cell centre clears the roughness crests)")
+                "the first cell center clears the roughness crests)")
 
     n_layers = resolve_layers(cfg, bed_ks, np.maximum(lid - bed, floor), notes=notes)
 

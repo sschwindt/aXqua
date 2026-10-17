@@ -68,9 +68,9 @@ attenuation in the glacially turbid Inn water column - the bathymetric LiDAR
 resolves the shallow wetted areas well but loses or biases the bottom returns
 in the deeper pools. Consequences:
 
-* modelled water **levels** are excellent (model WSE matches the corrected
+* modeled water **levels** are excellent (model WSE matches the corrected
   DGPS water surface within ~1 cm in both pools at Q~47 m3/s);
-* modelled **depths** are biased low and point **velocities** biased high
+* modeled **depths** are biased low and point **velocities** biased high
   (continuity through the artificially reduced section) - raw depth/velocity
   measurements are NOT directly comparable to the model at these points.
 
@@ -251,7 +251,7 @@ as long as advertised rather than a wrong answer. Treat the printed step count a
 a lower bound until a second reach either confirms or contradicts it.
 
 Note also that this case reports `Interface Courant Number: 0` exactly, which is
-the documented single-phase rigid-lid behaviour. The coarse campaign template
+the documented single-phase rigid-lid behavior. The coarse campaign template
 reports ~0.5 instead, because alpha drifts a few percent off 1 numerically there
 (`Phase-1 volume fraction` stays exactly 1 in both, so neither develops a real
 interface).
@@ -262,14 +262,14 @@ interface).
 `profiles.csv`. **Do not read the residuals as a model-vs-measurement result.**
 Three measurements from the steady rigid-lid run at Q = 47.3 m3/s say why:
 
-| quantity | modelled | measured |
+| quantity | modeled | measured |
 |---|---|---|
 | bed elevation at the vertical | 374.90 - 376.23 m | 377.18 - 378.20 m |
 | column depth | 0.12 - 0.24 m | 0.52 - 0.74 m |
 | speed at 0.6*h | 0.001 - 0.024 m/s | 0.08 - 0.31 m/s |
 
 The surveyed bed sits a median **+2.11 m above** the model bed at the same (x, y),
-the modelled column is about a third of the measured depth, and the modelled speed
+the modeled column is about a third of the measured depth, and the modeled speed
 is two orders of magnitude too slow. A roughness error cannot produce that; it is
 the **bathymetry/datum discrepancy already known on this reach** - the same one
 that made zones 1 and 5 pin at their bounds in the August 2026 2D restart, and the
@@ -304,19 +304,19 @@ likelihood. Checked directly against the 16 completed runs:
 | observations bracketed by any of the 16 runs | **0 of 90** |
 | distance from the run-mean | median **10 sigma**, 90th pct 36, max 51 |
 | beyond 5 sigma from every run | 66 of 90 |
-| modelled range | -0.250 .. +0.571 m/s |
+| modeled range | -0.250 .. +0.571 m/s |
 | observed range | -0.614 .. +0.876 m/s |
 
 No value of `ks` or `Cmu` anywhere in the prior can reproduce these measurements.
 Bayesian active learning refines a likelihood surface; it cannot reach one that
 lies outside the model's attainable range. The remaining 32 runs (~4 h) would have
-returned a posterior pinned at whichever corner least-badly minimises an
+returned a posterior pinned at whichever corner least-badly minimizes an
 impossible misfit - the same failure as the August 2026 2D restart, where zones 1
 and 5 pinned at their bounds.
 
 **Root cause is the bathymetry, not the roughness** (see the section above): the
-surveyed bed sits +2.11 m above the model bed at the same (x, y), the modelled
-column is a third of the measured depth, and the modelled speed at 0.6*h is two
+surveyed bed sits +2.11 m above the model bed at the same (x, y), the modeled
+column is a third of the measured depth, and the modeled speed at 0.6*h is two
 orders of magnitude low. The velocity observations describe a channel the model
 does not have at those coordinates.
 
@@ -358,7 +358,7 @@ Measured effect, sampling the steady rigid-lid run at the new placements:
 
 | | before | after |
 |---|---|---|
-| modelled \|U_h\| | 0.001 - 0.024 m/s | **0.000 - 0.377** (median 0.107) |
+| modeled \|U_h\| | 0.001 - 0.024 m/s | **0.000 - 0.377** (median 0.107) |
 | measured \|U_h\| | 0.008 - 0.879 m/s | 0.040 - 0.555 (median 0.271) |
 | observations reachable | **0 of 90** | **68% at a single ks** |
 
@@ -390,7 +390,7 @@ bit-identical. That is **not** a regression, and the check that proves it is:
 So the old file was written against a **different mesh**. The anisotropic BAMG
 mesh is documented as not bit-reproducible (~0.4% node-count spread between builds
 from identical inputs), and on a 0.5 m channel mesh over a rough bed that moves the
-interpolated bed by centimetres.
+interpolated bed by centimeters.
 
 The operational consequence: `WATER DEPTH_DATA = WSE_measured - bed_model(x, y)`
 is a function of the mesh, so **these targets must be regenerated whenever the mesh
@@ -404,9 +404,9 @@ observations bracketed at 9 runs, median 6.5 sigma. The cause is physical, not
 wiring, and the number that shows it is:
 
 **25 of 30 targets sat inside the bed roughness itself.** Median target height
-0.119 m above the bed; ks = 0.155 m; modelled column 0.30 m, of which 17 of 30
+0.119 m above the bed; ks = 0.155 m; modeled column 0.30 m, of which 17 of 30
 columns are shallower than 2*ks. `nutkRoughWallFunction` clamps there, so the
-modelled velocity is a boundary condition rather than a result, and no value of ks
+modeled velocity is a boundary condition rather than a result, and no value of ks
 can reproduce a measurement. Per component: U_x 1/30 bracketed (model 0.102 vs
 measured 0.250 m/s), U_y 2/30, U_z 0/30.
 
@@ -419,7 +419,7 @@ Two consequences, both acted on:
 2. **The DEM bathymetry is corrected** (`correct_dem_bathymetry.py`). Fitting
    `correction = 0.076 + 0.332 * depth` on the 30 DGPS beds and applying it in the
    wetted channel cuts the residual from a median 0.340 m to **0.066 m** and takes
-   the modelled column from 0.30 m to ~0.64 m, i.e. column/ks from 1.9 to 4.1 - a
+   the modeled column from 0.30 m to ~0.64 m, i.e. column/ks from 1.9 to 4.1 - a
    resolvable profile. The correction is capped at the deepest surveyed vertical
    (0.99 m), because 31% of the corrected area is deeper than anything surveyed and
    the linear fit would otherwise lower the bed by up to 1.26 m on no data.
@@ -439,7 +439,7 @@ consequences that must travel with any result computed on it.
 
 **1. It invalidates the 2D roughness posterior.** `ks = 0.411` (90% CI
 0.348-0.446) was fitted against *water levels* on the OLD bed. Lowering the wetted
-channel by ~0.4 m lowers the modelled stage at a given discharge, so the roughness
+channel by ~0.4 m lowers the modeled stage at a given discharge, so the roughness
 that reproduced the measured water surface before will not reproduce it now. The
 2D calibration has to be re-run before its posterior means anything again; until
 then, treat `ks = 0.411` as belonging to the previous bathymetry.
@@ -451,7 +451,7 @@ the survey points - about half the correction. It is solved self-consistently:
 
     bed_true = (DEM - a - b*WSE) / (1 - b)
 
-anchored on the modelled water surface, which is the right anchor because stage is
+anchored on the modeled water surface, which is the right anchor because stage is
 set by the downstream control and the discharge rather than by local bed detail,
 and matched the corrected DGPS water surface to ~1 cm even with the bed wrong.
 
@@ -535,7 +535,7 @@ columns, the other 6 entering through the 2.5 m search radius. A ratio computed 
 9 of 30 points whose membership moves with the search radius is not a measurement.
 
 What it does establish: **the velocity field at these points is contaminated by a
-modelling artefact**, so the earlier 2.8x figure cannot be attributed to the
+modeling artifact**, so the earlier 2.8x figure cannot be attributed to the
 reach's hydraulics either. The honest statement is that a rigid lid cannot
 represent this reach at the measurement locations, and the velocity comparison is
 therefore uninformative about roughness in *both* directions.
@@ -551,7 +551,7 @@ The two supported routes are unchanged, and now better motivated:
 ### CORRECTION: compare DEPTH-AVERAGED velocity, not point velocity
 
 The preceding sections report the model as badly wrong on velocity (2.8x slow,
-then 0.44, then 0.84 after masking). **Those numbers are artefacts of comparing
+then 0.44, then 0.84 after masking). **Those numbers are artifacts of comparing
 mismatched quantities**, and the correct comparison is close to perfect:
 
 | comparison | model | measured | ratio |
@@ -584,7 +584,7 @@ already feeds it the USGS 3-point profile-averaged velocity
     velocity ratio 1.02   depth ratio 0.58   unit discharge u*h ratio 0.55
 
 The model carries about half the unit discharge because it is about half as deep,
-while its velocity is right. Since the modelled water *surface* matches the
+while its velocity is right. Since the modeled water *surface* matches the
 corrected DGPS surface to ~1 cm, a depth deficit means the **bed** is still too
 high - the residual bathymetry problem, now isolated cleanly from any velocity
 error.

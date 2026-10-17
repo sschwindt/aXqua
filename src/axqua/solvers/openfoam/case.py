@@ -190,7 +190,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         state = load_hotstart(cfg, hotstart)
 
     # The same shared helper the TELEMAC scripts use, so the 3D case takes its
-    # discharge and its outflow rating from one source of truth. It also synthesises
+    # discharge and its outflow rating from one source of truth. It also synthesizes
     # the rating curve when the config leaves it unset - which isar deliberately
     # does, so each scenario derives its own from that scenario's geometry.
     from axqua.workflow import prepare_steady_inputs
@@ -316,7 +316,7 @@ BUILD_RECORD = "axqua-build.json"
 
 def _write_build_record(cfg: Config, of_mesh, case_dir: Path, *,
                         velocity_cap: float) -> Path:
-    """Record the build-time judgements the finished run has to be read against.
+    """Record the build-time judgments the finished run has to be read against.
 
     Only what the run itself cannot tell you afterwards. The lid-step ratio is the
     whole point: it is measured from the *prescribed* surface, so no amount of
@@ -431,7 +431,7 @@ def terrain_slope(of_mesh) -> float:
 
 
 def reach_flush_time(of_mesh, state) -> float:
-    """Rough time [s] for water to traverse the modelled reach once.
+    """Rough time [s] for water to traverse the modeled reach once.
 
     The yardstick for "how long must this run be": a free-surface run cannot be
     called steady before the domain has been flushed at least once, and comparing
@@ -448,7 +448,7 @@ def reach_flush_time(of_mesh, state) -> float:
 def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
     """What this run will cost, stated before anyone commits to it.
 
-    A 3D VOF model of a whole river reach is expensive in a way a 2D model is not,
+    A 3D VOF model of a whole water body is expensive in a way a 2D model is not,
     and the expense is not obvious from the cell count alone: it is the cell count
     **times** the number of time steps, and the time step is set by the thinnest
     cell. Spelling both out here is the difference between choosing a resolution and
@@ -488,7 +488,7 @@ def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
             out.append(f"  ! openfoam.end_time ({of.end_time:g} s) is shorter than one "
                        f"flush ({flush:,.0f} s), so the run cannot reach a steady "
                        "state. Either accept it as a transient study of the first "
-                       f"{of.end_time:g} s, or shorten the modelled reach - raising "
+                       f"{of.end_time:g} s, or shorten the modeled reach - raising "
                        "end_time to a full flush multiplies the step count above by "
                        f"{flush / max(of.end_time, 1e-9):.0f}.")
     return out

@@ -195,7 +195,7 @@ _DEFAULT_BG_BUDGET = 40000
 # refines (small refinement zone next to a coarser floodplain), the metric field
 # gets too steep for BAMG's Delaunay insertion to satisfy. Empirically a *coarser*
 # background metric grid rescues it (its larger triangles smooth the interpolated
-# metric, so BAMG is asked to honour a gentler gradient), as does a looser
+# metric, so BAMG is asked to honor a gentler gradient), as does a looser
 # anisotropy cap. Retry ladder of (background-grid node budget, anisotropy-cap
 # relaxation), each attempt gentler than the last, before giving up.
 _BAMG_RETRY_LADDER = [(_DEFAULT_BG_BUDGET, 1.0), (20000, 1.0), (10000, 1.5),
@@ -401,7 +401,7 @@ def _size_fields(cfg: Config, breakline_curves: list[int]):
     # size information whatsoever: it falls back to its own bounding-box default and
     # mesh.default_size is silently ignored. A CAD-derived case is exactly that case -
     # it has neither breaklines nor region points - and the result is a domain meshed
-    # metres coarse with a boundary discretised at the polygon's own vertex spacing,
+    # meters coarse with a boundary discretized at the polygon's own vertex spacing,
     # which is where the sliver and zero-area cells come from.
     gmsh.option.setNumber("Mesh.MeshSizeMax", default_size)
     if m.min_size:
@@ -462,7 +462,7 @@ def _flip_sharp_edges(triangles, x, y, max_ratio, *, max_passes: int = 12):
         aspect = _tri_aspect(x, y, tri)[0]
         if aspect.max() <= max_ratio:
             break
-        # interior edges -> their two triangles (vectorised)
+        # interior edges -> their two triangles (vectorized)
         e = np.concatenate([tri[:, [0, 1]], tri[:, [1, 2]], tri[:, [2, 0]]])
         e = np.sort(e, axis=1)
         tid = np.tile(np.arange(n), 3)
@@ -474,7 +474,7 @@ def _flip_sharp_edges(triangles, x, y, max_ratio, *, max_passes: int = 12):
         t1, t2 = tid[dup], tid[dup + 1]
         pair_max = np.maximum(aspect[t1], aspect[t2])
         sel = pair_max > max_ratio
-        # worst pairs first so a flip is not pre-empted by a neighbour's flip
+        # worst pairs first so a flip is not pre-empted by a neighbor's flip
         cand = np.argsort(pair_max[sel])[::-1]
         dup_sel, t1_sel, t2_sel = dup[sel], t1[sel], t2[sel]
         dead = np.zeros(n, dtype=bool)

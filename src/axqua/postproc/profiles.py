@@ -1,7 +1,7 @@
-"""Modelled vertical velocity profiles against the measured verticals.
+"""Modeled vertical velocity profiles against the measured verticals.
 
 The scientific payoff of the 3D model, and the figure that closes the loop with
-the OpenFOAM calibration: run it once at the prior centre and once at the
+the OpenFOAM calibration: run it once at the prior center and once at the
 posterior best, and the two panels *are* the calibration result.
 
 **VisIt samples, matplotlib draws.** VisIt's ``Lineout`` produces one curve per
@@ -60,7 +60,7 @@ def _measured(cfg) -> pd.DataFrame:
 
 
 def compare(cfg, curves_dir: Path, out_dir: Path) -> list[Path]:
-    """Plot modelled profiles against the measurements; write the figure and a CSV."""
+    """Plot modeled profiles against the measurements; write the figure and a CSV."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -111,7 +111,7 @@ def compare(cfg, curves_dir: Path, out_dir: Path) -> list[Path]:
             # the global mesh bottom, not from this column's bed. VisIt returns
             # samples only where the mesh exists, so the FIRST sample is the local
             # bed and the last is the local surface: re-reference to that, or the
-            # model sits metres above the measurement on an incompatible axis.
+            # model sits meters above the measurement on an incompatible axis.
             height = distance - distance[0]
             model_depth = float(height[-1]) if height.size > 1 else depth
             ax.plot(modelled, height, lw=1.4, color="#1f77b4", label="model")

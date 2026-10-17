@@ -65,7 +65,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         with log_step("stage 0: derive geodata from the CAD surfaces"):
             produced = surface_stage.run(cfg)
             art.surfaces = produced.paths()
-    # synthesise a missing outflow rating before validating: with
+    # synthesize a missing outflow rating before validating: with
     # boundaries.rating_method set, leaving stage_discharge unset is a legitimate
     # "derive it from the geodata at the simulated Q" (see workflow.
     # synthesize_rating_if_missing), and it must land before validate() checks it.
@@ -159,7 +159,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         # the initial-conditions file that was just written. With explicit
         # percolation.water_table_levels both fits read the same numbers and are
         # identical by construction; derived from the seeded surface they can differ
-        # by a centimetre or so near the internal lines.
+        # by a centimeter or so near the internal lines.
         plane = None
         if cfg.percolation.water_table == "phreatic" and art.initial_conditions:
             import numpy as np

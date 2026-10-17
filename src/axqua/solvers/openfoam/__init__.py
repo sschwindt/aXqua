@@ -13,8 +13,8 @@ Three design points carry most of the value:
   written straight to ``constant/polyMesh`` - see
   :mod:`~axqua.solvers.openfoam.polymesh` for why that avoids snappyHexMesh's
   failure modes entirely.
-* **The lid follows the water.** Air is not modelled for its own sake, so the domain
-  carries only ``freeboard`` metres of it above the free surface. This is the single
+* **The lid follows the water.** Air is not modeled for its own sake, so the domain
+  carries only ``freeboard`` meters of it above the free surface. This is the single
   biggest lever on interFoam's cost and stability.
 * **The wall function constrains the mesh, not the other way round.** On a gravel bed
   ``ks`` is a large fraction of the depth, so the bed layer cannot be refined freely;

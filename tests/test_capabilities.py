@@ -426,7 +426,7 @@ def test_openfoam_does_not_import_the_telemac_calibration_adapter():
 
 def test_the_case_carries_how_its_results_are_drawn(tmp_path):
     """The depth below which water is not surface flow, and the top of the velocity
-    colour scale, are properties of the REACH. They used to be per-install settings of
+    color scale, are properties of the REACH. They used to be per-install settings of
     the QGIS plugin, which meant a map could be drawn to a different threshold than the
     report beside it used - munich-vsf sets wet_depth 0.005 against the 0.01 default,
     so that was not hypothetical."""

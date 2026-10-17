@@ -17,7 +17,7 @@ reports how much of each the initial condition put there.
 **A mis-set outflow stage.** A prescribed-elevation outlet that sits above the reach's
 own level backs water up over ground that should be dry; one that sits below pulls the
 flow into a drawdown and can drive it supercritical. Either shows up as an anomaly in
-the free-surface slope over the last few metres before the boundary, which
+the free-surface slope over the last few meters before the boundary, which
 :func:`outlet_profile` measures against the slope of the reach above it.
 
 Both write a CSV next to the result so successive runs can be compared directly.
@@ -345,7 +345,7 @@ def outlet_profile(cfg, results, *, geometry=None, bands=OUTLET_BANDS,
     Bins the **actively flowing** nodes by their distance from the ``outflow`` liquid
     boundary and reports, per band, the discharge-weighted free surface plus the mean
     depth, speed and Froude number. Comparing the surface slope over the last few
-    metres with the slope of the reach above it distinguishes
+    meters with the slope of the reach above it distinguishes
 
     * **backwater** - the boundary holds the level above the reach's own, the surface
       flattens or rises into it, and the extra depth floods ground near the outlet;

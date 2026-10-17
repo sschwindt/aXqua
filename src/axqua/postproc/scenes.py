@@ -35,7 +35,7 @@ class Scene:
 SCENES: tuple[Scene, ...] = (
     Scene(
         name="free-surface",
-        title="Free surface coloured by velocity magnitude",
+        title="Free surface colored by velocity magnitude",
         solvers=frozenset({"openfoam"}),
         requires=("field:alpha.water", "field:U"),
         fallbacks=(("patch:lid", "field:U"),),

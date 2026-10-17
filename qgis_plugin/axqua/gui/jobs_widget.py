@@ -27,7 +27,7 @@ from ..core.tasks import run_async
 
 COLUMNS = ["Job ID", "Case", "Solver", "Kind", "State", "Progress", "Best objective"]
 
-#: Colours chosen to survive both QGIS themes - a light wash rather than a saturated fill,
+#: Colors chosen to survive both QGIS themes - a light wash rather than a saturated fill,
 #: so the text stays readable on a dark palette too.
 STATE_COLOURS = {
     "RUNNING": "#d7ecff", "STARTING": "#d7ecff", "POSTPROCESSING": "#e6dcff",

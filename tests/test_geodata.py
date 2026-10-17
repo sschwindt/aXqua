@@ -222,7 +222,7 @@ def test_a_layer_can_be_supplied_in_memory(case, counting_reads):
 
 def test_an_in_memory_layer_is_reprojected_like_a_file(case):
     ds = Dataset(case)
-    # EPSG:4326 degrees; after reprojection to 25832 the area is in square metres
+    # EPSG:4326 degrees; after reprojection to 25832 the area is in square meters
     ds.set_layer("roi", gpd.GeoDataFrame(
         {"n": [1]},
         geometry=[Polygon([(11.0, 48.0), (11.001, 48.0), (11.001, 48.001),

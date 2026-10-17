@@ -218,9 +218,9 @@ CURATED: dict[str, dict[str, Any]] = {
              "the picture and the report agree."),
     "postproc.velocity_scale_max": _c(
         "Velocity scale maximum", "number", unit="m/s",
-        help="Upper end of the velocity colour scale in every figure of this case. "
+        help="Upper end of the velocity color scale in every figure of this case. "
              "Above about 5 m/s a depth-averaged river result is usually a "
-             "wetting/drying artefact in a nearly dry cell, and one such node sets "
+             "wetting/drying artifact in a nearly dry cell, and one such node sets "
              "the scale and flattens the whole map. A chute or a fish pass runs "
              "faster and wants a higher value."),
     "initialization.prewet_depth": _c(

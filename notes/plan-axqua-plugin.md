@@ -4,7 +4,7 @@ The objective is to integrate aXqua as a backend into a QGIS plugin as a fronten
 
 `axqua` repository is now public.
 
-**Licence: no change needed.** `axqua` is BSD-3-Clause, which is GPL-compatible - it is permissive and carries no advertising clause (unlike the old 4-clause BSD), so a GPLv2+ QGIS plugin may incorporate and link it. The plugin itself must be GPLv2+ because it links PyQGIS; `axqua` stays BSD-3 and remains usable outside the plugin. Confirm with counsel if the project needs a formal opinion, but the expected action is none. Because no OpenFOAM or TELEMAC source is redistributed and this is pre-/post-processing only, licensing is independent of those.
+**License: no change needed.** `axqua` is BSD-3-Clause, which is GPL-compatible - it is permissive and carries no advertising clause (unlike the old 4-clause BSD), so a GPLv2+ QGIS plugin may incorporate and link it. The plugin itself must be GPLv2+ because it links PyQGIS; `axqua` stays BSD-3 and remains usable outside the plugin. Confirm with counsel if the project needs a formal opinion, but the expected action is none. Because no OpenFOAM or TELEMAC source is redistributed and this is pre-/post-processing only, licensing is independent of those.
 
 The resulting system must support:
 
@@ -166,7 +166,7 @@ Nothing in this plan is outstanding. What is worth doing next, on its own merits
   link the fold was after, and it does so without pretending a per-zone anisotropic
   target edge length and a uniform Cartesian spacing are the same quantity. The
   remaining moves (Telemac2d keywords out of `hydrodynamics:` into `telemac.numerics`)
-  are pure renaming: no behaviour change, every config touched, the artifact regression
+  are pure renaming: no behavior change, every config touched, the artifact regression
   baseline invalidated. `core/schema.LEGACY_KEYS` is the mechanism for doing it later
   without breaking a single config. **The classification exists; the fields have not
   moved.**
@@ -185,7 +185,7 @@ Nothing in this plan is outstanding. What is worth doing next, on its own merits
   never open it, which is the exact failure the Job Object was introduced to prevent.
 * **§13's "MPI through the profile's launcher" does not apply to TELEMAC.** Its own
   launcher spawns `mpirun` from the systel config, so prepending one would start the run
-  twice. It applies to OpenFOAM, which now honours it instead of hard-coding `mpirun`.
+  twice. It applies to OpenFOAM, which now honors it instead of hard-coding `mpirun`.
 * **§4's `status JOB_ID` collides with the existing case status.** Resolved by a rule
   rather than a rename: an existing path means the case, a job-id-shaped argument means
   the job, and `case-status` is the explicit spelling. Both keep working.
@@ -221,7 +221,7 @@ Nothing in this plan is outstanding. What is worth doing next, on its own merits
   job that had already stopped. `jobs.procs.pid_alive` treats state `Z` as dead.
 * **A throttled status sink will skip the final write.** Fields assigned directly on the
   status object leave the sink believing it is clean, so a failed job kept its real error
-  in `runner.log` while `status.json` still said RUNNING - and the reaper then relabelled
+  in `runner.log` while `status.json` still said RUNNING - and the reaper then relabeled
   it "abandoned", losing the actual cause. The terminal write bypasses the sink.
 * **`QgsTask` does not take a Python reference.** A task whose only reference was a local
   is garbage collected before it runs, and the symptom is not a crash but a callback that

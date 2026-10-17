@@ -227,7 +227,7 @@ class SolverBackend(Protocol):
         ...
 
     def extract_objective(self, cfg, ctx) -> float | None:
-        """The single number a calibration is minimising, if this job produced one."""
+        """The single number a calibration is minimizing, if this job produced one."""
         ...
 
     def export_qgis_results(self, cfg, ctx):
@@ -240,7 +240,7 @@ class SolverBackend(Protocol):
         ...
 
     def describe_results(self, cfg) -> list:
-        """What a visualiser can open for this case, in solver-neutral terms.
+        """What a visualizer can open for this case, in solver-neutral terms.
 
         The counterpart to :meth:`export_qgis_results`: that one writes files for
         QGIS, this one *describes* what already exists so a post-processing backend

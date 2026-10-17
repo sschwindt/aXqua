@@ -4,7 +4,7 @@
 output ``r2d.slf``) into a ``<case-name>3d.cas`` for ``telemac3d.py``:
 
 * **Hotstart from the 2D run (TELEMAC v9+)** - by default ``FILE FOR 2D CONTINUATION``
-  reads the final 2D state and initialises the 3D free surface + horizontal velocities
+  reads the final 2D state and initializes the 3D free surface + horizontal velocities
   from it (vertical velocity 0; horizontal velocity copied up each column). In v9 this
   keyword alone triggers the continuation (the old ``2D CONTINUATION`` flag is gone).
   If a thin/supercritical 2D inflow makes ``telemac3d`` abort with ``DEBIMP_3D`` on the
@@ -13,7 +13,7 @@ output ``r2d.slf``) into a ``<case-name>3d.cas`` for ``telemac3d.py``:
   study uses, which over-wets the inflow so the prescribed-Q boundary stays subcritical.
   ``INITIAL GUESS FOR DEPTH`` reuses the previous depth and a ``MINIMAL VALUE FOR
   DEPTH`` floor guards the sigma transform against dry (zero-depth) columns.
-* **Vertical discretisation** - TELEMAC has **no Delft3D-style constant-dz Z-layer**
+* **Vertical discretization** - TELEMAC has **no Delft3D-style constant-dz Z-layer**
   option; the vertical mesh is **sigma planes** (``NUMBER OF HORIZONTAL LEVELS`` +
   ``MESH TRANSFORMATION : 1``), so each water column is split into equal sigma
   slices and the physical ``dz`` is proportional to the local depth. We therefore
@@ -220,7 +220,7 @@ def courant_time_step(dx: float, dz: float, u_char: float,
                       courant: float = TARGET_COURANT) -> float:
     """Fixed time step [s] giving an advective Courant ~ *courant* on the limiting
     (smallest) cell dimension. TELEMAC-3D has no DESIRED COURANT NUMBER keyword, so
-    this is how the requested Courant is honoured."""
+    this is how the requested Courant is honored."""
     length = max(min(dx, dz), 1e-6)
     dt = courant * length / max(u_char, 1e-6)
     if dt <= 0:
@@ -314,7 +314,7 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
     pre-read 2D result (``selafin.read_slf``) so several variants can be built from
     one read of a large results file.
 
-    *hotstart* selects how the 3D run is initialised from the 2D result:
+    *hotstart* selects how the 3D run is initialized from the 2D result:
 
     * ``"continuation"`` (default) - the TELEMAC v9+ true 2D->3D hotstart
       (``FILE FOR 2D CONTINUATION``): the 3D free surface + horizontal velocities are
@@ -505,7 +505,7 @@ def build_3d_cas(cfg: Config, results_2d: str | Path | None = None,
 
     if flow or elev:
         lines += ["/", "/ BOUNDARY CONDITIONS (reused from the 2D steering for the",
-                  "/ same horizontal inflow/outflow behaviour)"]
+                  "/ same horizontal inflow/outflow behavior)"]
         if flow:
             lines.append(f"PRESCRIBED FLOWRATES : {flow}")
         if elev:

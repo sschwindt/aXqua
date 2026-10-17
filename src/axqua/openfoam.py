@@ -19,6 +19,6 @@ import sys
 from axqua.solvers import openfoam as _impl
 
 # CPython's loader re-reads sys.modules[name] after executing a module body, so this
-# substitution is honoured by `import axqua.openfoam` and by
+# substitution is honored by `import axqua.openfoam` and by
 # `from axqua.openfoam import x` alike.
 sys.modules[__name__] = _impl

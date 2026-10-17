@@ -421,7 +421,7 @@ with tabs[3]:
         b.pop("prescribed_elevation", None)
     if b["outflow_condition"] == "stage_discharge":
         sd = st.text_input(
-            "stage_discharge (outlet rating curve csv Q,WSE) - blank = synthesised",
+            "stage_discharge (outlet rating curve csv Q,WSE) - blank = synthesized",
             _get(cfg, "boundaries", "stage_discharge", default="") or "")
         if sd:
             b["stage_discharge"] = sd
@@ -854,7 +854,7 @@ This editor produces the **case configuration** only. After saving (and optional
 
 **2D workflow (run in order)**
 1. **`preprocessing.py`** - build the full TELEMAC-2D case into `simulation/`
-   (mesh, `.cli`, `.tbl`, `steady2d.cas`; synthesises the inflow + rating if missing).
+   (mesh, `.cli`, `.tbl`, `steady2d.cas`; synthesizes the inflow + rating if missing).
    *Equivalent to the **Build case** button here (`axqua <config>`).*
 1b. **`initial_run.py`** - test-run that `steady2d.cas` once (produces the hotstart
    result `r2d.slf`); ends preprocessing.

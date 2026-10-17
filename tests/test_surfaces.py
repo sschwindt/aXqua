@@ -2,9 +2,9 @@
 
 The fixtures are written by the tests themselves - a ramp, a box, a vertical wall, a
 lid - because the real inputs are hundred-megabyte CAD exports and the properties worth
-pinning are geometric, not file-specific. What is pinned is the part a modeller cannot
+pinning are geometric, not file-specific. What is pinned is the part a modeler cannot
 check by eye on a million facets: that the rasterised elevation is the *surface* at the
-cell centre rather than a nearby vertex, that a wall never contaminates the bed, that
+cell center rather than a nearby vertex, that a wall never contaminates the bed, that
 the crest a footprint reports is the top of the wall, and that a multi-valued surface
 resolves the way the mode says it does.
 """
@@ -200,7 +200,7 @@ def test_a_report_flags_overhangs_as_the_geometry_a_height_field_drops():
 # rasterisation
 # --------------------------------------------------------------------------- #
 def test_the_raster_reproduces_the_analytic_plane_at_cell_centres():
-    """The value in a cell must be the surface at the cell centre - a nearest-vertex
+    """The value in a cell must be the surface at the cell center - a nearest-vertex
     or per-triangle-mean approximation would fail this by half a cell of slope."""
     surface = Surface(ramp(slope=0.1, size=4.0, z0=100.0))
     grid, transform = rasterize(surface, resolution=0.25)

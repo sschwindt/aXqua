@@ -1,6 +1,6 @@
 """The plugin profile: this computer, described in one file (``*.axq-profile``).
 
-A case describes a river reach and has to travel. Where Python is, where TELEMAC and
+A case describes a free-surface water body and has to travel. Where Python is, where TELEMAC and
 OpenFOAM are installed, which program draws the figures and which drive takes the
 results describe a *computer*, and they used to be spread over three places: the solver
 settings of :mod:`axqua.core.machine` (``solvers.yml``), the solver profiles of

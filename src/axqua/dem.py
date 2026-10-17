@@ -106,7 +106,7 @@ def clip_to_roi(dem_path, boundary_path, out_path, *, target_epsg: int | None = 
     ----------
     dem_path, boundary_path, out_path : input raster, ROI polygon, output raster.
     target_epsg : optional EPSG to reproject the raster to before clipping.
-    all_touched : include pixels touched by the polygon edge (default: centre-in).
+    all_touched : include pixels touched by the polygon edge (default: center-in).
     compress : GeoTIFF compression for the output (default ``"lzw"``).
     """
     import rasterio

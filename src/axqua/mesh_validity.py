@@ -135,7 +135,7 @@ def channel_ks(cfg: Config) -> float | None:
 
 @dataclass
 class MeshValidity:
-    """Validity of the turbulence + roughness modelling at one cell size."""
+    """Validity of the turbulence + roughness modeling at one cell size."""
 
     dx: float                       # channel cell size [m]
     depth: float                    # mean probe water depth [m]

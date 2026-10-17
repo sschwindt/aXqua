@@ -402,8 +402,14 @@ class MeasurementTable(QWidget):
         entry["discharge"].setEnabled(validation)
         entry["discharge"].setToolTip("" if validation else
                                       "The calibration uses the discharge of the case.")
-        if not quiet:
-            self.editor.changed()
+        if quiet:
+            return
+        # a validation situation is part of the calibration block: with its switch
+        # off, saving would leave the situation out
+        switch = getattr(self.editor, "switches", {}).get("calibration")
+        if validation and switch is not None and not switch.isChecked():
+            switch.setChecked(True)
+        self.editor.changed()
 
     def add_file(self) -> None:
         chosen, _ = QFileDialog.getOpenFileName(
@@ -716,7 +722,7 @@ class CaseEditor(EditorDialog):
         return block in self._base
 
     def _apply_switches(self) -> None:
-        """A block that is switched off has its settings greyed out wherever they are
+        """A block that is switched off has its settings grayed out wherever they are
         shown, the OpenFOAM lattice on the mesh page included."""
         for key, row in self.rows.items():
             block = key.split(".", 1)[0]
@@ -752,10 +758,11 @@ class CaseEditor(EditorDialog):
                    for c in meta.get("required_when") or [])
 
     def missing_required(self) -> list[str]:
-        """Required settings that are still empty."""
+        """Required settings that are still empty. A default fills a setting: the
+        purple label says that it matters, not that it has to be typed."""
         missing = []
-        for key, row in self.rows.items():
-            if self.is_required(key) and is_unset(row.peek()):
+        for key in self.rows:
+            if self.is_required(key) and is_unset(self.value_of(key)):
                 missing.append(key)
         if self.measurements is not None and self.is_required("ground_truth.sources"):
             sources, _ = self.measurements.values()

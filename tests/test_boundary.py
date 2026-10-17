@@ -334,7 +334,7 @@ def test_lines_in_the_layer_alone_do_not_switch_an_exchange_on(tmp_path, caplog)
     with caplog.at_level(logging.WARNING, logger="axqua"):
         assert boundary.exchange_regions(cfg, _internal_lines_mesh()) == []
     assert "2 internal exchange line(s)" in caplog.text
-    assert "NO exchange is modelled" in caplog.text
+    assert "NO exchange is modeled" in caplog.text
     assert "gain_lose" in caplog.text and "internal_sources" in caplog.text
 
 

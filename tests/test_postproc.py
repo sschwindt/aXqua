@@ -368,4 +368,4 @@ def test_a_dataset_is_not_assumed_hashable(tmp_path):
     import pytest as _pytest
 
     with _pytest.raises(TypeError):
-        {_vof(tmp_path)}          # noqa: B018 - the behaviour being pinned
+        {_vof(tmp_path)}          # noqa: B018 - the behavior being pinned

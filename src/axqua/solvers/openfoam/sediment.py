@@ -35,7 +35,7 @@ written (:func:`check_columns`), because the solver itself checks none of them:
 * **a positive height of the first cell center above the bed face center**, in the
   solver's own definition ``mesh.C().z() - patch.Cf().z()``. It enters a logarithm and
   ends the run with a floating point exception where it is zero or negative. On a
-  terrain-following mesh that happens wherever neighbouring verticals have layers of
+  terrain-following mesh that happens wherever neighboring verticals have layers of
   different thickness on a sloping bed, since the cell center then lies towards the
   thick side, which is the low side. The layer at the bed is therefore given **one
   thickness everywhere** (:func:`pin_bottom_layer`). A steep and twisted bed face
@@ -269,7 +269,7 @@ def bed_vectors(points: np.ndarray, bed_faces: np.ndarray, centres: np.ndarray,
                 neighbours) -> np.ndarray:
     """Unit vector normal to the bed at every bed face, as the solver computes it.
 
-    From the centers of the four neighbouring faces where a face has all four
+    From the centers of the four neighboring faces where a face has all four
     (``computevx3.h``), from its own corners otherwise (``computevx4.h``).
     """
     east, west, north, south, count = neighbours

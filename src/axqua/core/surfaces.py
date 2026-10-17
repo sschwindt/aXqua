@@ -5,7 +5,7 @@ Why this exists, given :mod:`axqua.core.structures` argues the opposite
 That module explains why a *structure* needs no STL: axqua writes its own mesh, so a
 dam only has to say where its footprint is and how high it stands. Nothing there
 changes. What this module addresses is the other direction - a case whose **terrain
-itself arrives as CAD**, because the thing being modelled was designed rather than
+itself arrives as CAD**, because the thing being modeled was designed rather than
 surveyed. A fish pass, a culvert, a flume, a spillway: there is no DEM of it, and
 there never will be, because it exists as a construction drawing.
 
@@ -36,7 +36,7 @@ pass is precisely at its walls. Hence the slope split: facets flatter than
 are walls and become footprints with a crest elevation, and what falls between the two
 is reported rather than silently assigned. Overhangs (a soffit, a cantilevered
 walkway) cannot be represented at all and are counted in the report, because a
-modeller needs to know how much of the geometry the height field dropped.
+modeler needs to know how much of the geometry the height field dropped.
 
 Reading STL
 -----------
@@ -355,8 +355,8 @@ def rasterize(surface: Surface, resolution: float, *, mode: str = "max",
               bounds=None, nodata: float = -9999.0) -> tuple[np.ndarray, object]:
     """Burn a surface into a height field.
 
-    Each triangle is scan-converted over the cell centres it covers and its plane
-    evaluated there, so the result is the exact surface elevation at the cell centre
+    Each triangle is scan-converted over the cell centers it covers and its plane
+    evaluated there, so the result is the exact surface elevation at the cell center
     rather than a nearest-vertex approximation. Where several triangles cover one cell
     - which is what a multi-valued CAD surface *means* - ``mode`` decides: ``"max"``
     takes the highest, the right answer for a bed seen from above, and ``"min"`` the
@@ -401,10 +401,10 @@ def _burn_block(triangles, grid, origin_x, origin_y, resolution, width, height,
 
     Two regimes, because a CAD export and a hand-built surface are opposite problems.
     A facet **smaller than one cell** - which is nearly every facet of a real export,
-    where triangles are centimetres and cells decimetres - is burned by its vertices in
-    one vectorised call: the vertices *are* the surface there, and the difference from
-    evaluating the plane at the cell centre is the facet's own z-range, a fraction of a
-    millimetre. A facet **spanning several cells** is scan-converted properly, so a
+    where triangles are centimeters and cells decimeters - is burned by its vertices in
+    one vectorized call: the vertices *are* the surface there, and the difference from
+    evaluating the plane at the cell center is the facet's own z-range, a fraction of a
+    millimeter. A facet **spanning several cells** is scan-converted properly, so a
     coarse surface (two triangles over a whole ramp) still reproduces the plane exactly.
     Doing only the latter costs minutes on a multi-million-facet part; doing only the
     former loses the coarse case entirely.
@@ -432,7 +432,7 @@ def _burn_block(triangles, grid, origin_x, origin_y, resolution, width, height,
     with np.errstate(divide="ignore", invalid="ignore"):
         alpha = np.where(flat, 0.0, -normals[:, 0] / np.where(flat, 1.0, normals[:, 2]))
         beta = np.where(flat, 0.0, -normals[:, 1] / np.where(flat, 1.0, normals[:, 2]))
-    # a vertical facet has no plane over the cell centres and is skipped below; keeping
+    # a vertical facet has no plane over the cell centers and is skipped below; keeping
     # its coefficients finite stops a real CAD export (which has thousands of them)
     # from filling the log with invalid-value warnings
     gamma = a[:, 2] - alpha * a[:, 0] - beta * a[:, 1]
@@ -467,7 +467,7 @@ def _burn_block(triangles, grid, origin_x, origin_y, resolution, width, height,
         l2 = ((c[i, 1] - a[i, 1]) * (gx - c[i, 0])
               + (a[i, 0] - c[i, 0]) * (gy - c[i, 1])) / denom[i]
         l3 = 1.0 - l1 - l2
-        # a small negative tolerance keeps cell centres exactly on a shared edge from
+        # a small negative tolerance keeps cell centers exactly on a shared edge from
         # falling through the crack between two triangles
         inside = (l1 >= -1e-9) & (l2 >= -1e-9) & (l3 >= -1e-9)
         if not inside.any():
@@ -561,7 +561,7 @@ def wall_footprints(surface: Surface, *, min_slope_deg: float = WALL_MIN_SLOPE_D
     # A vertical facet has no area in plan, so the scan conversion in _burn_block
     # cannot see it. Burn its three edges instead, sampled along their own length:
     # marking only the corners would leave the middle of a long wall unburned, which
-    # is exactly what a fish-pass sidewall is - two triangles spanning several metres.
+    # is exactly what a fish-pass sidewall is - two triangles spanning several meters.
     a, b, c = walls.triangles[:, 0], walls.triangles[:, 1], walls.triangles[:, 2]
     for start, end in ((a, b), (b, c), (c, a)):
         span = np.hypot(end[:, 0] - start[:, 0], end[:, 1] - start[:, 1]).max()
@@ -583,7 +583,7 @@ def wall_footprints(surface: Surface, *, min_slope_deg: float = WALL_MIN_SLOPE_D
     # face, so the burn above traces both of them and the wall's own end faces close
     # the ring; everything the ring encloses is concrete. Filling it needs nothing but
     # the traces, which is why this is a plan hole fill rather than a projection of
-    # the caps: a wall modelled as an extruded surface has no bottom cap to project.
+    # the caps: a wall modeled as an extruded surface has no bottom cap to project.
     #
     # The fill cannot swallow water. A region only counts as enclosed if no path
     # reaches the array border, and a fish-pass pool always has its slots open.
@@ -608,7 +608,7 @@ def wall_footprints(surface: Surface, *, min_slope_deg: float = WALL_MIN_SLOPE_D
                                         transform=transform, invert=True)
         heights = crest[window & np.isfinite(crest)]
         if heights.size == 0:
-            # Only reachable if the polygon covers no cell centre at all, which for a
+            # Only reachable if the polygon covers no cell center at all, which for a
             # raster polygon means it was simplified away. Say so: this used to drop
             # the footprint silently, and a part reaching the GPKG with 0 m2 and no
             # log line is how a wall goes missing without anyone noticing.
@@ -652,12 +652,12 @@ def _close(mask: np.ndarray) -> np.ndarray:
 
 
 def patch_line(surface: Surface, *, simplify: float | None = None):
-    """The centreline across a boundary patch, as a :class:`shapely.LineString`.
+    """The centerline across a boundary patch, as a :class:`shapely.LineString`.
 
     An inlet or outlet patch of a CFD geometry is a planar lid across the channel. What
     ``boundaries.liquid_boundaries`` wants is a line *along* that cross-section, so the
     footprint's minimum rotated rectangle is taken and the mid-line of its two short
-    sides returned - the line a modeller would have digitised by hand.
+    sides returned - the line a modeler would have digitized by hand.
     """
     from shapely.geometry import LineString, MultiPoint
 

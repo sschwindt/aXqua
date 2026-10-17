@@ -9,7 +9,7 @@ here rather than discovered when an upload is rejected:
 
 * the zip contains exactly **one top-level folder**, named after the plugin;
 * ``metadata.txt`` carries a name, a version, ``qgisMinimumVersion``, a description, an
-  author, a GPL-compatible licence, and working homepage / repository / tracker links;
+  author, a GPL-compatible license, and working homepage / repository / tracker links;
 * no compiled or generated files, no ``__pycache__``, no VCS directories;
 * under 25 MB.
 
@@ -102,7 +102,7 @@ def validate(plugin_dir: Path) -> tuple[dict[str, str], list[str]]:
             problems.append(f"metadata.txt is missing '{key}'")
 
     if "GPL" not in fields.get("license", ""):
-        problems.append("the licence must be GPL-compatible (the plugin links PyQGIS)")
+        problems.append("the license must be GPL-compatible (the plugin links PyQGIS)")
     if not (plugin_dir / "LICENSE").is_file():
         problems.append("no LICENSE file in the plugin folder")
     if not (plugin_dir / "__init__.py").is_file():

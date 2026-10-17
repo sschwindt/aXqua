@@ -373,8 +373,8 @@ class ResultLoader:
         if item.style == "water-depth":
             maximum, why = _dataset_maximum(layer, index)
             if maximum is None:
-                # Not silent: 1 m on a 6 m river renders the whole channel one colour,
-                # and a user who is not told will read that as a modelling result.
+                # Not silent: 1 m on a 6 m river renders the whole channel one color,
+                # and a user who is not told will read that as a modeling result.
                 self.warnings.append(
                     f"{item.name}: the depth range could not be read from the file "
                     f"({why}), so the color scale is capped at 1 m. Adjust it in "
@@ -672,7 +672,7 @@ def _dataset_maximum(layer, index: int) -> tuple[float | None, str]:
     """The dataset's own maximum, so the scale fits the data rather than a guess.
 
     Returns the reason alongside, because the fallback that used to be applied here -
-    ``or 1.0`` - is a visible, wrong answer on any river deeper than a metre, and the
+    ``or 1.0`` - is a visible, wrong answer on any river deeper than a meter, and the
     user has to be told which one they are looking at.
     """
     try:

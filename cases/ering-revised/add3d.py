@@ -12,7 +12,7 @@ horizontal mesh with ``mesh_convergence_study.py`` first). Delegates everything 
    notice unless ``boundaries.inflow`` is a varying series).
 
 All three hotstart from ``r2d.slf`` (v9 2D->3D continuation) and share the vertical
-discretisation, turbulence closure and Courant-sized time step inferred from one
+discretization, turbulence closure and Courant-sized time step inferred from one
 read of the 2D result - see ``axqua.threed`` for the how and why.
 
 Pass ``--run [hydrostatic|hydrodyn|unsteady]`` to also launch ``telemac3d.py`` on

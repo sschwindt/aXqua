@@ -2,7 +2,7 @@
 name=aXqua
 qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
-description=Set up, run and monitor TELEMAC and OpenFOAM river models from QGIS, with jobs that keep running after QGIS is closed.
+description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install git+https://github.com/sschwindt/aXqua.git', and needs a working TELEMAC and/or OpenFOAM installation.
 version=0.5.0
 author=Sebastian Schwindt
@@ -10,7 +10,7 @@ email=schwindt.water@gmail.com
 
 tracker=https://github.com/sschwindt/aXqua/issues
 repository=https://github.com/sschwindt/aXqua
-homepage=https://axqua.readthedocs.io
+homepage=https://axqua.eu
 
 # The plugin itself is GPLv2+ because it links PyQGIS. The axqua package it
 # drives stays BSD-3-Clause, which is GPL-compatible, and remains usable on its own.
@@ -18,7 +18,7 @@ license=GPL-2.0-or-later
 
 category=Plugins
 icon=resources/axqua.png
-tags=hydraulics,hydrodynamics,telemac,openfoam,cfd,river,mesh,simulation,calibration,morphodynamics
+tags=hydraulics,hydrodynamics,telemac,openfoam,cfd,river,lake,reservoir,hydraulic structures,mesh,simulation,calibration,morphodynamics
 
 # First release: flagged experimental so it is opt-in while the job runner is
 # exercised against more installations.

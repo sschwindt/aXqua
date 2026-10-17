@@ -467,7 +467,7 @@ def test_the_velocity_fill_is_transparent_where_nothing_moves(qgis_app):
 
 
 def test_the_dataset_maximum_comes_from_the_file(project, tmp_path):
-    """A silent ``or 1.0`` capped a 6 m river's colour scale at 1 m."""
+    """A silent ``or 1.0`` capped a 6 m river's color scale at 1 m."""
     from qgis.core import QgsMeshLayer
     layer = QgsMeshLayer(str(_write_mesh(tmp_path)), "reach", "mdal")
     maximum, why = result_loader._dataset_maximum(layer, 0)
@@ -1685,7 +1685,7 @@ def test_required_entries_are_purple_and_follow_the_options(qgis_app, tmp_path,
     rows["boundaries.prescribed_elevation"].widget.setText("815.3")
     assert not editor.section_list.item(1).font().bold()
 
-    # OpenFOAM is off: its entries are greyed out, required nowhere, and not written
+    # OpenFOAM is off: its entries are grayed out, required nowhere, and not written
     switch = editor.switches["openfoam"]
     assert not switch.isChecked() and not rows["openfoam.cell_size"].container.isEnabled()
     assert not _purple(rows["openfoam.end_time"].label_widget)
@@ -1725,6 +1725,21 @@ def test_measurement_files_are_used_for_calibration_or_validation(qgis_app, tmp_
     assert _purple(editor.measurement_label)                       # calibration is on
     editor.save()
     assert any("Measurement files" in f.message for f in editor.findings)
+    editor.deleteLater()
+
+
+def test_a_file_for_the_validation_switches_the_calibration_on(qgis_app, tmp_path,
+                                                               monkeypatch):
+    case = {"project": {"name": "reach"}, "boundaries": {"prescribed_flowrate": 2.4},
+            "ground_truth": {"sources": [{"category": "hydraulics", "kind": "points",
+                                          "values": "gt/nov.gpkg"}]}}
+    editor, _client = _paged(tmp_path, monkeypatch, case)
+    switch = editor.switches["calibration"]
+    assert not switch.isChecked()
+    editor.measurements.add("gt/sep.gpkg")
+    editor.measurements.set_role(1, "validation", "High flow", "5.3")
+    assert switch.isChecked()
+    assert editor.values()["calibration"]["validation"][0]["name"] == "High flow"
     editor.deleteLater()
 
 

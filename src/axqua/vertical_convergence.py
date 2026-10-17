@@ -3,7 +3,7 @@
 The 2D study (:mod:`axqua.convergence`) varies the *horizontal* cell size; this
 one varies the **number of sigma layers** (``NUMBER OF HORIZONTAL LEVELS``) on the
 *same* horizontal mesh, to demonstrate that the depth-resolved solution is
-independent of the vertical discretisation. For a sequence of layer counts
+independent of the vertical discretization. For a sequence of layer counts
 (coarse = few layers -> fine = many) it runs the hotstarted non-hydrostatic 3D case
 (:func:`axqua.threed.build_3d_cas`), samples the depth-averaged quantities of
 interest (water depth, scalar velocity, from the 3D run's ``2D RESULT FILE``) at the

@@ -4,7 +4,7 @@ The September-2025 campaign of the Isar case is such a layer. It heads its colum
 units (``v(x) [m/s]``, ``Total Depth [m]``) and holds one point per *reading*, three on
 top of each other where a vertical was sampled at 0.2, 0.6 and 0.8 of the depth. Before
 these tests existed it loaded without a word and yielded nothing: no column was
-recognised, and each vertical would have counted three times.
+recognized, and each vertical would have counted three times.
 """
 
 from __future__ import annotations
@@ -101,7 +101,7 @@ def test_a_layer_with_one_reading_per_position_comes_back_as_it_was(tmp_path):
 
 
 def test_a_named_column_decides_what_a_vertical_is(tmp_path):
-    """Two rods a few centimetres apart are two verticals unless the layer says not."""
+    """Two rods a few centimeters apart are two verticals unless the layer says not."""
     rows = [dict(_reading(100.00, 200.0, 0.10, 0.50, 1.0), Vertical="V1"),
             dict(_reading(100.30, 200.0, 0.30, 0.50, 0.8), Vertical="V1"),
             dict(_reading(105.00, 200.0, 0.12, 0.20, 0.3), Vertical="V2")]

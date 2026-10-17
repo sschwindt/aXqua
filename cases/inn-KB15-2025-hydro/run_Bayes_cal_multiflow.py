@@ -90,7 +90,7 @@ HOTSTART_SEED = "hotstart-seed.slf"   # slim one-frame extract of r2d.slf
 # 0.0029 m/s - one to two orders inside the assumed measurement error. NOTE the
 # boundary FLUX balance is still ~3.6% at t=2500 there and is NOT the right gate:
 # that residual 1.7 m3/s of storage spread over ~300000 m2 of wetted area is
-# millimetres of depth. The QoI is what the surrogate is trained on, so the QoI is
+# millimeters of depth. The QoI is what the surrogate is trained on, so the QoI is
 # what has to be converged. Interior design samples settle faster than this corner.
 HOTSTART_DURATION = 2500.0            # s (~1.8-2.4 h per run on 16 cores)
 
@@ -103,7 +103,7 @@ FLOWS = [
     FlowSpec(name="q47-8", discharge=47.8, kind="points",
              duration=HOTSTART_DURATION, hotstart_from=HOTSTART_SEED,
              values=FT / "Nov25/KB15_Nov25.gpkg", vel_err_floor=0.05),
-    # EXCLUDED (wadeable margins not comparable to modelled channel velocity):
+    # EXCLUDED (wadeable margins not comparable to modeled channel velocity):
     # FlowSpec(name="q45-8", discharge=45.8, kind="points", duration=3000.0,
     #          values=FT / "Mar26/KB15_Mar26.gpkg"),
 ]

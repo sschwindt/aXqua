@@ -163,7 +163,7 @@ def initial_velocity(of_mesh, alpha: np.ndarray, state=None) -> np.ndarray:
     """Per-cell velocity: the seed's velocity in water, zero in air.
 
     From a **2D** seed this is uniform over the depth, deliberately, rather than an
-    assumed log profile: the log profile's normalisation is only meaningful where the
+    assumed log profile: the log profile's normalization is only meaningful where the
     wall function is admissible, and on a gravel bed that is often nowhere (see
     :mod:`axqua.solvers.openfoam.quality`). The vertical structure is what the 3D
     run is *for*, so it is left to develop during the spin-up rather than invented
@@ -269,7 +269,7 @@ def _outlet_profiles(of_mesh, patch: str, stage: float, rho: float, *,
                      reference: float | None = None) -> tuple[str, str]:
     """``(alpha inletValue, p profile)`` on an outlet patch holding *stage*.
 
-    ``alpha`` is 1 on faces whose centre lies below the target water level and 0
+    ``alpha`` is 1 on faces whose center lies below the target water level and 0
     above; ``p`` is the still-water hydrostatic pressure of a column standing at that
     level, continued upwards as air at rest (:func:`outlet_pressure`). Together they
     are what ``prghPressure`` needs to hold a tailwater.
@@ -402,7 +402,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     # Under a rigid lid the domain is water only, so alpha is identically 1: no
     # interface to compress, no air to accelerate, and interFoam degenerates to a
     # single-phase solver while keeping its p_rgh + gravity treatment intact. That is
-    # the whole trick - the air phase is removed by construction rather than modelled
+    # the whole trick - the air phase is removed by construction rather than modeled
     # cheaply, and none of the pressure formulation has to be re-derived.
     alpha = (np.ones(of_mesh.n_cells) if rigid
              else initial_alpha(of_mesh, wet_depth=cfg.hydrodynamics.wet_depth))
@@ -494,7 +494,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
             # constant, but a constant equal to the free-surface elevation head, not
             # to nothing. Writing 0 puts the zero-pressure level at the mesh DATUM
             # instead of at the water surface, which on this case (z_s = 0.715 m in
-            # local CAD metres) offset every reported pressure by -7.0 kPa. Velocities
+            # local CAD meters) offset every reported pressure by -7.0 kPa. Velocities
             # are unaffected - a uniform shift of p has no gradient - but anything
             # read FROM the pressure is wrong, and correct_lid.py is exactly that: it
             # reported a 0.87 m lid error that was purely this datum.

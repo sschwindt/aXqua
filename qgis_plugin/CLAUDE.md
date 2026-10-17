@@ -93,7 +93,7 @@ id: the page key, or `page:frame title`). **Required entries are bold aXqua purp
 (`changed` -> `update_required`), mark the page in the list while one is empty, and are
 reported as `axqua.config.incomplete` findings on Save unless aXqua's own check names the
 subject. **Switches** (`SWITCHES`: telemac, openfoam, calibration) are a check box at the top
-of a page; off greys out the block's rows wherever they are (the lattice on the mesh page
+of a page; off grays out the block's rows wherever they are (the lattice on the mesh page
 too) and drops the block from `values()`, on seeds the entry the schema names (an empty block
 is never written). **The measurement table** (`MeasurementTable`) replaces the YAML rows of
 `ground_truth.sources` and `calibration.validation`: one row per file, *Use for* calibration
@@ -130,7 +130,7 @@ library source).
 **Validation** (`gui/validation_box.py`): the *Calibration & validation* tab is a
 `CalibrationPage` - the capability boxes of a `SectionPage`, and below them a box for **one
 validation situation**: a point layer (file dialog, or *From QGIS...* over the point layers
-that are open), the discharge of every inflow of the built model (each labelled with the
+that are open), the discharge of every inflow of the built model (each labeled with the
 discharge it carries in the calibrated case, from `axqua validation <case>`), and the
 outflow level where the case prescribes one. *Save* merges the entry into
 `calibration.validation` through `case read` / `case write`; *Validate* saves and submits
@@ -167,7 +167,7 @@ Results load from the manifest, referenced where they are and never copied. Wate
 m stands *inside* the grain roughness rather than flowing over it, and aXqua's own
 reports use the same filter, so the map and the report agree); velocity is capped at 5 m/s
 **with a warning**, because a depth-averaged result above that is nearly always a
-wetting/drying artefact in a nearly-dry cell and one such node would flatten the map.
+wetting/drying artifact in a nearly-dry cell and one such node would flatten the map.
 Everything else points at Layer Symbology - a plausible-looking wrong scale is harder to
 notice than an obviously default one. **Four predefined map styles** (`styles.MAP_STYLES`,
 `result_loader.apply_map_style`, one choice and one button on *Postprocessing > QGIS*,

@@ -7,7 +7,7 @@ case into ``axqua-case/simulation/`` -- the final mesh ``geometry.slf``, the
 boundary-conditions ``boundaries.cli``, the friction ``friction.tbl`` and the steering
 ``steady2d.cas`` -- plus the HydroBayesCal artifacts in ``calibration-validation/`` and
 the ground-truth / DEM-clip products in ``preprocessing/``. A constant inflow series and
-the outflow stage-discharge rating curve are synthesised if missing.
+the outflow stage-discharge rating curve are synthesized if missing.
 
 The inflow Q (m3/s) and the outflow stage (H) prescription come from THIS case's
 config, never from a value hard-coded here (see ``axqua.prepare_steady_inputs``).
@@ -41,7 +41,7 @@ def main() -> None:
     print(f"case '{cfg.name}' -> building into {cfg.model_dir}")
 
     # steady discharge + outflow rating from THIS case's config (inflow/rating
-    # synthesised only if missing); dry start left untouched (production initial run)
+    # synthesized only if missing); dry start left untouched (production initial run)
     q = prepare_steady_inputs(cfg)
     print(f"building at the configured steady discharge Q={q:g} m3/s")
 

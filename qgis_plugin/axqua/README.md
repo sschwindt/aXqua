@@ -96,7 +96,7 @@ leaving a job that can never finish. Press **Refresh**.
 **No movie was produced** — install `ffmpeg`. Without it the PNG frames are kept and the
 dialog shows the command to encode them later.
 
-## Licence
+## License
 
 GPL-2.0-or-later, because it links PyQGIS. The `axqua` package it drives is
 BSD-3-Clause and remains usable on its own.

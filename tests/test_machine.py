@@ -176,11 +176,11 @@ def test_no_tracked_source_or_test_hard_codes_a_home_directory():
 
 
 def test_a_synthesisable_outflow_rating_is_not_a_validation_error(tmp_path):
-    """`rating_method` exists to say how a MISSING rating is synthesised, so refusing
-    to validate without one contradicted the config's own documented behaviour.
+    """`rating_method` exists to say how a MISSING rating is synthesized, so refusing
+    to validate without one contradicted the config's own documented behavior.
 
     munich-vsf is the case: `preprocessing.py` runs fine because
-    `workflow.prepare_steady_inputs` synthesises the rating from the outflow line and
+    `workflow.prepare_steady_inputs` synthesizes the rating from the outflow line and
     the DEM, but a bare `load_config(...).validate()` raised.
     """
     from axqua.config import load_config
@@ -208,4 +208,4 @@ boundaries:
 
     cfg = load_config(write("  dem_initial: dem.tif\n"))
     cfg.validate()                                       # must not raise
-    assert cfg.boundaries.stage_discharge is None        # still to be synthesised
+    assert cfg.boundaries.stage_discharge is None        # still to be synthesized

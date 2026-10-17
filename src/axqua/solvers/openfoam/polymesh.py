@@ -20,7 +20,7 @@ lid gives a mesh that is:
   simply absent), so the addressing is deterministic and the cell count is known
   before anything is built;
 * **conformal by construction** - the vertical levels are computed at the *plan
-  vertices*, so neighbouring columns share their corner points exactly and no
+  vertices*, so neighboring columns share their corner points exactly and no
   matching or merging step is needed;
 * **boundary-fitted at the bed** - the bottom face of the lowest cell *is* the DEM
   surface, so the wall functions see the real bed, not a staircase.
@@ -203,18 +203,18 @@ def assemble(points: np.ndarray,
     neigh = neigh.astype(np.int64, copy=True)
     quads = quads.astype(np.int64, copy=True)
 
-    # owner < neighbour on every internal face
+    # owner < neighbor on every internal face
     flip = owner > neigh
     if flip.any():
         owner[flip], neigh[flip] = neigh[flip], owner[flip].copy()
     if (owner == neigh).any():
         raise ValueError("internal face with owner == neighbour (degenerate cell pair)")
 
-    # upper-triangular order: ascending owner, then ascending neighbour
+    # upper-triangular order: ascending owner, then ascending neighbor
     order = np.lexsort((neigh, owner))
     owner, neigh, quads = owner[order], neigh[order], quads[order]
 
-    # orient: normal points owner -> neighbour
+    # orient: normal points owner -> neighbor
     normals = _quad_normals(points, quads)
     wrong = np.einsum("ij,ij->i", normals, cell_centres[neigh] - cell_centres[owner]) < 0
     if wrong.any():
@@ -326,7 +326,7 @@ def read_patch_names(case_dir: str | Path) -> list[str]:
     """Patch names from a written ``constant/polyMesh/boundary``, in file order.
 
     Lets the dictionaries be regenerated against an existing mesh without rebuilding
-    it - which is what keeps a run honouring the config it was *launched* with rather
+    it - which is what keeps a run honoring the config it was *launched* with rather
     than the one it was built with.
     """
     path = Path(case_dir) / "constant" / "polyMesh" / "boundary"

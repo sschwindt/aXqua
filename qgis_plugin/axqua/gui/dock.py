@@ -75,7 +75,7 @@ class PluginContext:
         self.client = RunnerClient(settings["executable"] or None)
         # How results are drawn belongs to the CASE, not to this installation: the
         # depth below which water is not surface flow is `hydrodynamics.wet_depth`,
-        # which aXqua's own reports already use, and the top of the velocity colour
+        # which aXqua's own reports already use, and the top of the velocity color
         # scale is `postproc.velocity_scale_max`, which a chute and a lowland river do
         # not share. Until a case is open these are the style defaults, which match
         # the defaults of those two settings.

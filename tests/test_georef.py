@@ -1,7 +1,7 @@
 """Tests for recovering the CAD-to-map transform from a drawing.
 
-The fixture is a structure drawn twice: once as an STL in millimetres about the origin,
-once as a DXF in metres on the national grid. What is pinned is that the recovered
+The fixture is a structure drawn twice: once as an STL in millimeters about the origin,
+once as a DXF in meters on the national grid. What is pinned is that the recovered
 transform actually lands the STL on the drawing, and - just as important - that the
 cases a bounding box *cannot* resolve are reported rather than guessed: a footprint
 whose shape does not match, and the rotation ambiguity every rectangle has.
@@ -32,7 +32,7 @@ def write_dxf(path, *, x0, y0, width, height, layer="STRUCTURE"):
 
 
 def cad_block(width_mm, height_mm, z=0.0):
-    """The same rectangle as an STL, in millimetres, cornered at the origin."""
+    """The same rectangle as an STL, in millimeters, cornered at the origin."""
     return np.array([
         [(0.0, 0.0, z), (width_mm, 0.0, z), (width_mm, height_mm, z)],
         [(0.0, 0.0, z), (width_mm, height_mm, z), (0.0, height_mm, z)]])

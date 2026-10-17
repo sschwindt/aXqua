@@ -209,7 +209,7 @@ def depth_average(columns: Columns, alpha: np.ndarray, velocity: np.ndarray,
 
 
 def lattice_triangles(col_id: np.ndarray, xy: np.ndarray) -> np.ndarray:
-    """Two triangles for every square of four neighbouring column centers.
+    """Two triangles for every square of four neighboring column centers.
 
     Counter-clockwise in plan, as TELEMAC numbers its elements, whichever way the
     lattice is turned.

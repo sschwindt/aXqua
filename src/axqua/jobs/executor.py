@@ -360,7 +360,7 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
         seed = prerun.ensure_seed(cfg, enabled=enabled)
     except Exception as exc:                        # noqa: BLE001
         # A missing seed costs accuracy, not the build: the case still meshes under a
-        # flat lid, which is the documented --no-pre-run behaviour.
+        # flat lid, which is the documented --no-pre-run behavior.
         log.warning("no 2D seed for the OpenFOAM build (%s: %s); building cold",
                     type(exc).__name__, exc)
         return {}
@@ -465,7 +465,7 @@ def _postprocess(backend: Any, cfg: Any, ctx: ExecutionContext,
 
 
 def _describe(artifacts: Any) -> Any:
-    """Summarise whatever a backend verb returned, without serialising bulk data."""
+    """Summarize whatever a backend verb returned, without serializing bulk data."""
     if artifacts is None:
         return None
     if isinstance(artifacts, (str, int, float, bool)):

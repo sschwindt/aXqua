@@ -223,7 +223,7 @@ def test_error_codes_are_unique():
 
 def test_an_unexpected_exception_is_recorded_honestly():
     """A job that died on a KeyError deep in a library still records something
-    structured - labelled as unanticipated rather than mislabelled."""
+    structured - labeled as unanticipated rather than mislabeled."""
     record = errors.ErrorRecord.from_exception(KeyError("Zone Name"))
     assert record.code == "axqua.unexpected"
     assert record.details["type"] == "KeyError"

@@ -123,3 +123,46 @@ def test_the_study_is_a_job_kind_that_waits_for_the_case_and_gets_its_seed():
     assert "openfoam-mesh-convergence" in workspace.QUEUED_WITH_THE_CASE
     options = meta.options.from_dict({"n_processors": 4, "auto_extend": True})
     assert options.answers == {"resume": True, "extend": False}
+
+
+def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
+        tmp_path, monkeypatch):
+    """The MPI ranks of a job (or of a mesh study) decide the decomposition. The case
+    was built for one processor, decomposePar made one domain, and mpirun stopped:
+    "Number of processor directories = 1 is not equal to the number of ranks = 4"."""
+    from axqua.config import Hydrodynamics, OpenFoam
+    from axqua.solvers.openfoam import runtime as of_runtime
+    from axqua.solvers.openfoam.backend import BACKEND
+
+    case = tmp_path / "openfoam"
+    (case / "constant" / "polyMesh").mkdir(parents=True)
+    (case / "constant" / "polyMesh" / "faces").write_text("")
+    (case / "system").mkdir()
+    (case / "system" / "decomposeParDict").write_text("numberOfSubdomains 1;\n")
+    seen = {}
+
+    class _Runtime:
+        def __init__(self, _of):
+            pass
+
+        def check_mesh(self, _case):
+            return True, [], None
+
+        def decompose(self, case_dir):
+            seen["dict"] = (case_dir / "system" / "decomposeParDict").read_text()
+
+        def run_stage(self, *a, n_processors=None, **k):
+            seen.setdefault("ranks", []).append(n_processors)
+            return SimpleNamespace(returncode=0)
+
+        def reconstruct(self, _case):
+            seen["reconstructed"] = True
+
+    monkeypatch.setattr(of_runtime, "OpenFoamRuntime", _Runtime)
+    cfg = SimpleNamespace(openfoam=OpenFoam(n_processors=1),
+                          hydrodynamics=Hydrodynamics(), openfoam_case_dir=case,
+                          log_file="axqua.log")
+    BACKEND.run(cfg, None, n_processors=4)
+    assert "numberOfSubdomains 4;" in seen["dict"]
+    assert set(seen["ranks"]) == {4} and seen["reconstructed"]
+    assert cfg.openfoam.n_processors == 1                  # the case is not changed

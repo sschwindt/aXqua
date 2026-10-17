@@ -193,7 +193,7 @@ def extend(cfg, probe_dir: Path, level: str = "rough",
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--analyse", action="store_true",
-                    help="analyse finished probe runs instead of launching them")
+                    help="analyze finished probe runs instead of launching them")
     ap.add_argument("--extend", metavar="LEVEL", nargs="?", const="rough",
                     help="continue a finished probe further to test its DURATION")
     args = ap.parse_args()

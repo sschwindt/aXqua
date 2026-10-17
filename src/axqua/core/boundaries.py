@@ -50,7 +50,7 @@ def _flow_column(gdf) -> str | None:
     Matches a column whose name mentions flow/discharge/Q (so the Isar layer's
     ``Target flow`` is picked up), excluding the type column. Returns None when the
     layer carries no per-line discharge (then the total reach Q is split by node
-    share, the historical single-inflow behaviour).
+    share, the historical single-inflow behavior).
     """
     for c in [c for c in gdf.columns if c != gdf.geometry.name]:
         cl = c.strip().lower()

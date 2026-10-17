@@ -116,7 +116,7 @@ class AxquaProject:
         if self.active_case == stored:
             self.active_case = self.cases[0] if self.cases else ""
 
-    # -- serialisation ------------------------------------------------------------
+    # -- serialization ------------------------------------------------------------
     def as_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,

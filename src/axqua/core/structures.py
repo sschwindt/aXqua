@@ -11,7 +11,7 @@ mesher **where its footprint is** and **how high it stands**, and both are ordin
 vector attributes.
 
 So a structure layer is a plain GeoPackage or shapefile that QGIS authors natively -
-digitise the footprint, type in a crest level - with no CAD step, no triangulation,
+digitize the footprint, type in a crest level - with no CAD step, no triangulation,
 and no format QGIS cannot round-trip.
 
 Geometry
@@ -19,7 +19,7 @@ Geometry
 * **Polygons** are the footprint directly (a building, a dam body, a pier).
 * **Lines** are buffered by their width attribute to give a footprint. This is the
   natural way to draw a wall or a dam crest: you trace the crest and say how thick it
-  is, rather than digitising two parallel sides by hand.
+  is, rather than digitizing two parallel sides by hand.
 
 Two modes, and the choice is hydraulic
 --------------------------------------
@@ -71,7 +71,7 @@ def classify_structure(text: str) -> str:
 
     Same substring convention as the mesh zones (:func:`axqua.core.geodata.
     classify_zone`), so a user who has learned one has learned the other. Anything
-    unrecognised is ``overflow``: raising the bed is the conservative failure, since
+    unrecognized is ``overflow``: raising the bed is the conservative failure, since
     it keeps the domain connected and lets water pass, whereas wrongly blanking a
     footprint would silently wall off part of the reach.
     """
@@ -189,7 +189,7 @@ def load_structures(cfg) -> list[Structure]:
 
 
 def _inside(polygon, xy: np.ndarray) -> np.ndarray:
-    """Boolean mask of the points inside *polygon* (vectorised)."""
+    """Boolean mask of the points inside *polygon* (vectorized)."""
     import shapely
 
     if xy.size == 0:
@@ -366,7 +366,7 @@ def _seal_fails(polygon, xy, triangles, keep, candidates, verify) -> bool:
     if bool((shapely.get_num_geometries(rest) > 1).any()):
         return True
 
-    # widen by a ring: a sub-cell wall's opposite neighbours are not candidates
+    # widen by a ring: a sub-cell wall's opposite neighbors are not candidates
     touched_nodes = np.unique(triangles[candidates])
     near = np.isin(triangles, touched_nodes).any(axis=1)
     ring = np.flatnonzero(near)
@@ -408,7 +408,7 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
     """Nodes of every element the *polygon* crosses, not merely nodes inside it.
 
     A node test alone cannot represent a wall thinner than an element. On the Munich
-    fish pass the walls are 0.30 m and the sheet-steel baffles a few millimetres, on a
+    fish pass the walls are 0.30 m and the sheet-steel baffles a few millimeters, on a
     mesh whose edges are 0.05 m: raising only the nodes that fall inside such a
     footprint left **295 one-node spikes** - a raised node with every neighbour low,
     which no water is stopped by and which the propagation step diverges on - and
@@ -421,7 +421,7 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
     it costs at most one element of width on each side.
 
     This is the same rule the OpenFOAM mesher already applies in plan, where a column
-    is blanked when the solid intersects its cell square rather than its centre.
+    is blanked when the solid intersects its cell square rather than its center.
     """
     import shapely
 
@@ -435,7 +435,7 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
             & (tri_xy[:, :, 1].min(axis=1) <= ymax))
     mask = inside.copy()
     cand = np.flatnonzero(near)
-    # In chunks, because `shapely.polygons` materialises one GEOS polygon per
+    # In chunks, because `shapely.polygons` materializes one GEOS polygon per
     # candidate and that is where both the time and the memory of this function go.
     # The bbox filter does not help the case that matters: a wall drawn diagonally
     # across the reach has a bbox covering the whole domain, so every element is a
@@ -482,7 +482,7 @@ def _crossed(polygon, xy: np.ndarray, triangles: np.ndarray,
 
     # ONE seal check per structure, over the whole candidate set. Doing it per chunk
     # checked partial data: an element blanked in another chunk reads as open here, so
-    # a structure spanning a chunk boundary reported a leak that was an artefact of
+    # a structure spanning a chunk boundary reported a leak that was an artifact of
     # where the boundary fell. It reverted 6 of munich-vsf's 9 structures that way.
     if min_area > 0.0 and spine is not None and decided.any():
         if _seal_fails(polygon, xy, triangles, decided, cand,
@@ -550,7 +550,7 @@ def apply_to_bed(structures: list[Structure], xy: np.ndarray,
     """Raise *bed* to every ``overflow`` structure's crest.
 
     Returns ``(bed, touched)``. The bed is only ever raised, never lowered
-    (``maximum``): a structure adds material to the terrain, and a crest digitised
+    (``maximum``): a structure adds material to the terrain, and a crest digitized
     slightly below the surveyed ground should not carve a trench through it.
 
     Pass *triangles* - the ``(NELEM, 3)`` connectivity - to raise by element rather

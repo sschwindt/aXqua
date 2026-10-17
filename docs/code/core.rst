@@ -1,7 +1,7 @@
 Solver-agnostic core
 ====================
 
-``axqua.core`` contains everything that describes the river reach and the modeling task independently of a simulation code. No module of this package imports a backend.
+``axqua.core`` contains everything that describes the free-surface water body and the modeling task independently of a simulation code. No module of this package imports a backend.
 
 Geodata and rasters
 -------------------

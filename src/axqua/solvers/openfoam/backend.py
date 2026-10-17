@@ -49,7 +49,7 @@ class OpenFoamBackend(BaseBackend):
 
         *seed* is the 2D result to hotstart from, supplied by the caller. When it is
         absent the case still builds - cold, under a flat lid - which is the documented
-        ``--no-pre-run`` behaviour rather than a failure.
+        ``--no-pre-run`` behavior rather than a failure.
         """
         from axqua.solvers.openfoam import case as of_case
         from axqua.solvers.openfoam.hotstart import load_hotstart
@@ -153,8 +153,21 @@ class OpenFoamBackend(BaseBackend):
 
         nprocs = n_processors if n_processors is not None else cfg.openfoam.n_processors
         if nprocs and nprocs > 1:
-            # scotch, set in the case: the wetted corridor is sinuous, so a geometric
-            # split would hand some ranks empty space.
+            # The ranks of the job, not the number the case was built with: the
+            # decomposition has to give each rank its domain, or mpirun stops at once
+            # with "Number of processor directories = 1 is not equal to the number of
+            # ranks" (found by the mesh study of 2026-10-17, and the same for the MPI
+            # ranks option of an openfoam-run job). scotch, as the case sets it: the
+            # wetted corridor is sinuous, so a geometric split would hand some ranks
+            # empty space.
+            if int(nprocs) != int(cfg.openfoam.n_processors or 1):
+                import copy
+
+                ranks = copy.copy(cfg)
+                ranks.openfoam = copy.copy(cfg.openfoam)
+                ranks.openfoam.n_processors = int(nprocs)
+                (case_dir / "system" / "decomposeParDict").write_text(
+                    dicts.decompose_par_dict(ranks))
             runtime.decompose(case_dir)
 
         for stage in dicts.stages(cfg):
@@ -337,7 +350,7 @@ class OpenFoamBackend(BaseBackend):
         return float(value) if value is not None else None
 
     def describe_results(self, cfg) -> list:
-        """What a visualiser can open for this case.
+        """What a visualizer can open for this case.
 
         Cheap by contract: directory listings and the ``0/`` field names, no
         pyvista and no solver launch, because a caller may ask this just to decide

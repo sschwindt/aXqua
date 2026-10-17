@@ -36,7 +36,7 @@ DEFAULT_SIM_DIR = "axqua-case"
 
 
 def _resolve_sim_dir(cfg_dir: Path, configured: str | None) -> str:
-    """The artifact folder, honouring one that predates the rename.
+    """The artifact folder, honoring one that predates the rename.
 
     New cases get ``axqua-case/``. But a case built before the rename has its results in
     ``hydromate-case/`` - possibly tens of gigabytes of them - and silently pointing at a
@@ -188,14 +188,14 @@ class GroundTruthSource:
     positions: Path | None = None        # position layer (shp/gpkg) to join coords from
     join_key: str = "ID"
 
-    #: Worksheet to read the values from. ``None`` keeps the historic behaviour
+    #: Worksheet to read the values from. ``None`` keeps the historic behavior
     #: (the first sheet, one row per vertical). Name a per-reading profile sheet
     #: to use any ``profile`` rule other than ``single``.
     sheet: str | int | None = None
 
     #: Which reading of a multi-depth vertical becomes a target - see
     #: :func:`axqua.ground_truth.select_profile_rows`. ``single`` is the default
-    #: and reproduces the previous behaviour exactly.
+    #: and reproduces the previous behavior exactly.
     profile: str = "single"
 
     #: Column identifying the vertical a reading belongs to, for the profile
@@ -313,11 +313,11 @@ class Structures:
     #
     #   "touch" (default) - every element the footprint intersects at all. Safe by
     #       construction and errs CLOSED: it eats about 0.45 of a cell on each side of
-    #       an opening, so a drawn slot of w realises w - 0.9 dx.
+    #       an opening, so a drawn slot of w realizes w - 0.9 dx.
     #   "area"  - only elements the footprint covers by at least `blanking_area`.
     #       Measured on a synthetic vertical-slot flume with a 0.170 m diagonal slot
     #       (cases/slot-flume/blanking_rules.py): zero through-crossings at dx 0.10 to
-    #       0.025 m, and a realised slot of 102-104% of drawn against 74-86% for
+    #       0.025 m, and a realized slot of 102-104% of drawn against 74-86% for
     #       "touch". It errs slightly OPEN instead: a few slivers of water stand inside
     #       the concrete without passing through it.
     #
@@ -423,7 +423,7 @@ class Surfaces:
     parts: list[SurfacePart] = field(default_factory=list)
     resolution: float = 0.05           # DEM cell size [m]
     # the similarity transform onto project coordinates (see core.surfaces.Transform)
-    scale: float = 1.0                 # 0.001 for a drawing in millimetres
+    scale: float = 1.0                 # 0.001 for a drawing in millimeters
     rotation_deg: float = 0.0
     dx: float = 0.0
     dy: float = 0.0
@@ -510,7 +510,7 @@ class Boundaries:
     #   "stage_discharge" -> prescribed water level (cli 5 4 4) read from stage_discharge at Q
     #   "free"            -> Neumann / free outflow (cli 4 4 4), nothing prescribed
     outflow_condition: str = "elevation"
-    # how a MISSING stage_discharge rating is synthesised for outflow_condition
+    # how a MISSING stage_discharge rating is synthesized for outflow_condition
     # "stage_discharge":
     #   "trapezoid" -> normal depth in a trapezoid as wide as the outflow line
     #   "section"   -> conveyance of the ACTUAL DEM cross-section along that line,
@@ -664,7 +664,7 @@ class GainLose:
       saturated limit at the local head, so it responds to water level and kf is a
       physically meaningful **calibration parameter** (HydroBayesCal knows it as
       ``gainlose_kf``).
-    * ``discharge`` overrides that with a measured total [m3/s], normalised over the
+    * ``discharge`` overrides that with a measured total [m3/s], normalized over the
       losing face - available with either ``faces`` setting.
 
     ``mode`` selects the implementation and defaults to ``fortran`` when enabled:
@@ -683,7 +683,7 @@ class GainLose:
     # WHERE the exchange takes place: derived from the water table, or pinned to the
     # int-* lines. See the class docstring - "water-table" needs only `zone`.
     faces: str = "water-table"     # water-table | lines
-    # Measured total exchange [m3/s]. Overrides `conductivity` when set; normalised
+    # Measured total exchange [m3/s]. Overrides `conductivity` when set; normalized
     # over the losing face. Left None, the exchange is kf-driven and responds to
     # stage. With faces: lines and no value here, the int-* lines' own flow column is
     # used (the original spelling).
@@ -751,14 +751,14 @@ class GainLose:
     suction: float = 0.2                # hf [m], Green-Ampt wetting-front suction
     porous_depth: float = 0.5           # Lz [m] fallback when the patch layer has no field
     # [m/s] absolute ceiling on the local withdrawal rate (fortran). The routine
-    # normalises the target discharge over the currently WET part of the patch, so
+    # normalizes the target discharge over the currently WET part of the patch, so
     # a patch that is only half submerged still delivers the full Q; this ceiling
     # stops that concentration from becoming a point sink if the wet area shrinks
     # to almost nothing. 1 mm/s is ~20x the rate a fully wet Isar patch needs.
     max_rate: float = 0.001
     # Also DRAIN standing surface water off the patch itself (fortran mode). The
     # patch is a porous gravel bar: water lying on top of it infiltrates rather than
-    # ponding, so any surface water there is an artefact of the 2D model, which has
+    # ponding, so any surface water there is an artifact of the 2D model, which has
     # no subsurface to take it. With losing_region: line the prescribed exchange is
     # withdrawn from the channel at the losing line and nothing removes water that
     # stands on the bar - on isar-2025 that left 620 m2 of it perched above the
@@ -809,7 +809,7 @@ class GainLose:
         """True when a gain-lose exchange is to be built.
 
         ``enabled`` is the new switch; the deprecated ``percolation:`` block said the
-        same thing with ``mode`` other than ``off``, so both are honoured.
+        same thing with ``mode`` other than ``off``, so both are honored.
         """
         return bool(self.enabled) or self.mode != "off"
 
@@ -1076,7 +1076,7 @@ class Friction:
     default_law: int = 4               # Manning
     default_coefficient: float = 0.03
     # law for the .tbl rows derived from geodata.roughness_zones + roughness_table
-    # (5 = NIKU, Nikuradse k_s in metres - matching the ks roughness values)
+    # (5 = NIKU, Nikuradse k_s in meters - matching the ks roughness values)
     roughness_law: int = 5
     # lateral (wall) boundary friction -> TELEMAC LAW OF FRICTION ON LATERAL
     # BOUNDARIES / ROUGHNESS COEFFICIENT OF BOUNDARIES (3 = Strickler, 4 = Manning)
@@ -1138,7 +1138,7 @@ class Hydrodynamics:
     # steady march with k-epsilon on the fine channel mesh; raise it toward ~0.6-0.9
     # to reach steady state in fewer steps once a case is known to be stable.
     desired_courant: float = 0.30
-    # discretisation: the classic finite-element kernel is the DEFAULT - it supports
+    # discretization: the classic finite-element kernel is the DEFAULT - it supports
     # the k-epsilon / Spalart-Allmaras / Smagorinski turbulence closures auto-selected
     # by turbulence_model below (the solver/* and tidal-flats keywords then apply).
     # Set finite_volumes=True for the HLLC finite-volume kernel instead - robust for
@@ -1185,7 +1185,7 @@ class Hydrodynamics:
     advection_sub_iterations: int = 2       # NUMBER OF SUB-ITERATIONS FOR NON-LINEARITIES
     max_advection_iterations: int = 100     # MAXIMUM NUMBER OF ITERATIONS FOR ADVECTION SCHEMES
     # keep H unclipped (H CLIPPING : NO) so the tidal-flat / negative-depth treatment,
-    # not a hard clip, handles drying - clipping H injects mass and destabilises the
+    # not a hard clip, handles drying - clipping H injects mass and destabilizes the
     # wetting front. Set True only to hard-floor the depth as a last resort.
     h_clipping: bool = False
     # finite-element linear solver: 2 = preconditioned CG (robust where plain CG,
@@ -1575,7 +1575,7 @@ class PreRun:
 
     # THE TOGGLE. False: use an existing r2d.slf if there happens to be one, never
     # start a solver. A user who has their own 2D result, or who wants the cold-start
-    # behaviour, unchecks this.
+    # behavior, unchecks this.
     enabled: bool = True
     # A converged result from the real 2D study beats anything this block produces, so
     # it is used when present. False forces the dedicated coarse pre-run every time.
@@ -1724,8 +1724,8 @@ class OpenFoam:
     #: leaves, which is what the free surface is for.
     #:
     #: Not zero: the surface at the crop face has to be free to move, or the wall
-    #: becomes a weir and a new artefact replaces the old one. The default leaves a
-    #: quarter of a metre.
+    #: becomes a weir and a new artifact replaces the old one. The default leaves a
+    #: quarter of a meter.
     outlet_air_margin: float = 0.25
     #: What the outlets of a two-phase case hold. ``level``: the water level that
     #: ``boundaries.outflow_condition`` gives at the discharge of the case, for the
@@ -1987,11 +1987,11 @@ class PostProcessing:
     image_width: int = 1600
     image_height: int = 1000
     animation_fps: int = 10
-    #: Upper end of the velocity colour scale [m/s], for every figure of this case -
+    #: Upper end of the velocity color scale [m/s], for every figure of this case -
     #: the plugin's map styles and the generated VisIt/ParaView scenes alike.
     #:
     #: A property of the REACH, not of the computer looking at it. 5 m/s suits a
-    #: lowland river, where a faster node is usually a wetting/drying artefact in a
+    #: lowland river, where a faster node is usually a wetting/drying artifact in a
     #: nearly-dry cell and letting one such node set the scale flattens the whole map;
     #: a chute or a fish pass genuinely runs faster and wants a higher number. The
     #: lower end of the depth scale is not here because it already exists as
@@ -2246,7 +2246,7 @@ class Config:
         cond = self.boundaries.outflow_condition
         if cond == "stage_discharge" and self.boundaries.stage_discharge is None:
             # A MISSING rating is a supported state, not an error: `rating_method`
-            # exists to say how one is synthesised, and `workflow.prepare_steady_inputs`
+            # exists to say how one is synthesized, and `workflow.prepare_steady_inputs`
             # does it from the outflow liquid line and the DEM before the build. So
             # this refused cases that work - munich-vsf among them, where
             # `preprocessing.py` runs fine but a bare `load_config(...).validate()`
@@ -2255,7 +2255,7 @@ class Config:
             # required of every case and has been validated above, so there is
             # nothing left to refuse on. Say what will happen instead.
             log.info("boundaries.stage_discharge is not set; the outflow rating will "
-                     "be synthesised (rating_method: %s) from the outflow line and "
+                     "be synthesized (rating_method: %s) from the outflow line and "
                      "the DEM", self.boundaries.rating_method)
         if cond == "elevation" and self.boundaries.prescribed_elevation is None:
             raise ValueError(

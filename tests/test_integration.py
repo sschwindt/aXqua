@@ -32,7 +32,7 @@ def _write_fixtures(d: Path) -> Path:
     poly = Polygon([(x0, y0), (x0 + w, y0), (x0 + w, y0 + h), (x0, y0 + h)])
     gpd.GeoDataFrame({"id": [1]}, geometry=[poly], crs=crs).to_file(geo / "boundary.shp")
 
-    # one longitudinal breakline along the channel centreline
+    # one longitudinal breakline along the channel centerline
     mid = y0 + h / 2
     bl = LineString([(x0 + 5, mid), (x0 + w - 5, mid)])
     gpd.GeoDataFrame({"id": [1]}, geometry=[bl], crs=crs).to_file(geo / "breaklines.shp")
@@ -56,7 +56,7 @@ def _write_fixtures(d: Path) -> Path:
         geometry=[Point(s[0], s[1]) for s in seeds], crs=crs,
     ).to_file(geo / "region-points.shp")
 
-    # DEM: a plane sloping down-valley (x) with a channel low in the centre
+    # DEM: a plane sloping down-valley (x) with a channel low in the center
     res = 2.0
     nx, ny = int((w + 20) / res), int((h + 20) / res)
     transform = from_origin(x0 - 10, y0 + h + 10, res, res)  # north-up

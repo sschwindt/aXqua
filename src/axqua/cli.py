@@ -7,7 +7,7 @@ Two forms:
 * ``axqua clip <raster> -b <boundary> -o <out>`` - clip a single raster to a
   region-of-interest polygon, without needing a full configuration.
 * ``axqua rating -o <out.csv> --manning <n>|--strickler <Kst> --slope <S0>
-  --width <b> [--side-slope <m>] [--bed-elevation <z>] --q <Q...>`` - synthesise a
+  --width <b> [--side-slope <m>] [--bed-elevation <z>] --q <Q...>`` - synthesize a
   normal-flow outflow stage-discharge curve to use as ``boundaries.stage_discharge``.
 * ``axqua targets <config.yml> [-o <out.xlsx>] [--force]`` - generate the
   user-fillable ``calibration-target-data.xlsx`` template (hydraulics /
@@ -81,7 +81,7 @@ def _clip_parser() -> argparse.ArgumentParser:
                    help="reproject the raster to this EPSG before clipping "
                         "(default: keep the source CRS)")
     p.add_argument("--all-touched", action="store_true",
-                   help="keep pixels touched by the polygon edge (default: centre-in)")
+                   help="keep pixels touched by the polygon edge (default: center-in)")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 

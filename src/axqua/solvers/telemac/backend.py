@@ -429,7 +429,7 @@ class TelemacBackend(BaseBackend):
                 ctx.record(name, cfg.model_path(name), kind="table")
 
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
-        """The number this job was minimising, when there is one.
+        """The number this job was minimizing, when there is one.
 
         A steady run's is the relative flux imbalance - the thing its own convergence
         is judged on - which makes "how good was this run" answerable from the job

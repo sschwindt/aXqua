@@ -603,7 +603,7 @@ def _figure(report: ValidationReport, path: Path) -> None:
         unit = UNITS.get(quantity, "")
         unit = f" ({unit})" if unit else ""
         axis.set_xlabel(f"measured {quantity.lower()}{unit}")
-        axis.set_ylabel(f"modelled {quantity.lower()}{unit}")
+        axis.set_ylabel(f"modeled {quantity.lower()}{unit}")
         axis.set_title(f"n = {numbers['n']}, bias {numbers['bias']:+.2f} "
                        f"({100 * numbers['relative_bias']:+.0f} %), "
                        f"RMSE {numbers['rmse']:.2f}", fontsize=9)

@@ -644,7 +644,7 @@ class BatchPage(QWidget):
         return batch.ordered(kinds)
 
     def apply(self, case_view) -> None:
-        """Grey out the steps the active case does not ask for."""
+        """Gray out the steps the active case does not ask for."""
         asked, by_solver = set(), set()
         for solver in (case_view.enabled_solvers if case_view is not None else []):
             names = {c.name for c in solver.visible_capabilities if c.configured}
@@ -657,7 +657,7 @@ class BatchPage(QWidget):
             step = batch.step(entry.data(role))
             needed = step.needs
             # 3D and calibration become possible once the steps before them have run,
-            # so only what the case file itself rules out is greyed out
+            # so only what the case file itself rules out is grayed out
             wanted = ((step.solver, needed) in by_solver if step.solver
                       else needed in asked)
             usable = case_view is not None and (wanted or needed == "steady3d")

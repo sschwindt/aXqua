@@ -10,7 +10,7 @@ fail once ``checkMesh`` or ``interFoam`` had been launched on a million cells:
   read, and the failure message points at the file rather than at the bug;
 * the **sigma distribution**, in particular that pinning the bed layer never eats the
   column and always lands exactly on 1 at the top - the mesh is conformal only
-  because neighbouring columns share their vertex levels exactly;
+  because neighboring columns share their vertex levels exactly;
 * the **geometric measures**, against closed-form answers on a uniform box, since the
   whole point of computing them here is to agree with ``checkMesh``;
 * the **dictionary and field keywords**, which are the OpenFOAM 9 spellings verified
@@ -92,7 +92,7 @@ def test_upper_triangular_ordering_and_owner_less_than_neighbour():
     ni = mesh.n_internal_faces
     owner = mesh.owner[:ni]
     assert (owner < mesh.neighbour).all()
-    # ascending owner, and ascending neighbour within one owner
+    # ascending owner, and ascending neighbor within one owner
     key = owner.astype(np.int64) * (mesh.n_cells + 1) + mesh.neighbour
     assert (np.diff(key) > 0).all()
 
@@ -1241,15 +1241,15 @@ def test_a_two_phase_run_is_not_asked_the_lid_question(tmp_path):
 
 
 def test_a_wall_thinner_than_a_cell_still_blocks():
-    """A column is blanked on its CENTRE, so a baffle thinner than the lattice - or
-    one that passes between two centres - used to block nothing and the mesh joined
+    """A column is blanked on its CENTER, so a baffle thinner than the lattice - or
+    one that passes between two centers - used to block nothing and the mesh joined
     both sides of it. The structure is there precisely because the two sides are at
     different levels, so the hole carries the whole head difference."""
     import shapely
 
     polygon = shapely.geometry.box(0, 0, 1.0, 0.3)
     # A vertical-slot baffle: a 5 mm wall on a 5 cm lattice, lying between two rows of
-    # cell centres, leaving a slot along the far side. Partial, because a wall across
+    # cell centers, leaving a slot along the far side. Partial, because a wall across
     # the whole channel is a different case the builder already warns about.
     wall = shapely.geometry.box(0.4975, -0.1, 0.5025, 0.15)
 
@@ -1258,7 +1258,7 @@ def test_a_wall_thinner_than_a_cell_still_blocks():
     assert sealed.n_columns < open_grid.n_columns, "the wall blocked nothing"
 
     # Nothing spans the wall: before the seal, every row passed straight through it
-    # because no cell centre fell inside 5 mm of solid.
+    # because no cell center fell inside 5 mm of solid.
     through = ((sealed.cell_xy[:, 0] > 0.4975) & (sealed.cell_xy[:, 0] < 0.5025)
                & (sealed.cell_xy[:, 1] < 0.15))
     assert not through.any(), "the wall still leaks"

@@ -1,6 +1,6 @@
 # aXqua
 
-**Automated setup, persistent execution and calibration of river models.**
+**Automated setup, persistent execution and calibration of models of free-surface water bodies: rivers, lakes, reservoirs and hydraulic structures.**
 
 `aXqua` builds a calibration-ready **TELEMAC-2D/3D** case (optionally **+ GAIA** morphodynamics) or an **OpenFOAM `interFoam`** free-surface case from geodata, runs it as a job that outlives the shell that started it, and calibrates it with [HydroBayesCal](https://github.com/Ecohydraulics/hydrobayescal) for surrogate-assisted Bayesian calibration with quantified uncertainty. A **QGIS plugin** drives the whole workflow; everything also works from the command line with QGIS absent.
 
@@ -81,7 +81,9 @@ Case files named `case-config.yml` and the settings files of earlier versions ke
 
 ## Documentation
 
-Full docs (Sphinx) live in `docs/`, in the order you need them:
+The documentation is published at **[axqua.eu](https://axqua.eu)** (built by Read the Docs from `docs/`; [axqua.readthedocs.io](https://axqua.readthedocs.io) forwards to it). *Help* in the QGIS plugin opens it at the section of the tab that is showing.
+
+The sources (Sphinx) live in `docs/`, in the order you need them:
 
 | section | what it covers |
 |---|---|
@@ -132,7 +134,7 @@ inflow / outflow / measurements ───┤
 
 **Logging** - each script/phase writes a compound, timestamped `axqua.log` into its own output folder (the build by `preprocessing.py`/`initial_run.py` -> `axqua-case/simulation/`, the mesh-convergence study -> `axqua-case/mesh-convergence/`), capturing all actions, the elapsed time of each calculation step (`START`/`DONE ... in N.NNs`), and every warning and error. The console mirrors it; pass `-v` for DEBUG.
 
-**Workflow (run in order):** 1. `preprocessing.py` builds the complete TELEMAC case into `axqua-case/simulation/` (final mesh, `.cli`, `.tbl`, `.cas`) at the inflow Q (`boundaries.prescribed_flowrate`) and outflow stage prescription read from **this case's** config - the shared `axqua.prepare_steady_inputs` helper synthesises a constant inflow series / outflow rating only when those inputs are missing; 1b. `initial_run.py` test-runs exactly that case once to confirm it does not crash, then runs a boundary-flux convergence analysis (`axqua.flux_convergence`, reading the solver listing with `axqua.sortie`) that writes four files into `simulation/` (`extracted-fluxes.csv` + `flux-convergence.png`, `convergence-rate.csv` + `convergence-rate.png`), deletes the per-processor `*_p0000N.sortie` copies of a parallel run, and - once the absolute flux imbalance stays below 1e-3 m³/s over 10 consecutive printouts (or in the 10-printout mean on a noisy steady state) - generates `hotstart2d.cas`, a continuation of `r2d.slf` capped at that steady time with the constant Q/H prescriptions kept. Balanced fluxes say nothing about *where* the water is, so it also writes `wetting-report.csv` and `outlet-profile.csv` (`axqua.wetting`): the first splits the wetted area into actively flowing water, stagnant film and isolated puddles, says how much of each the pre-wet seed put there, and whether the film is still draining or has plateaued (water perched above the converged surface can never leave a model with no infiltration or evaporation); the second profiles the free surface approaching the outflow and reports whether the prescribed stage is backing water up, pulling it down, or neutral. This ends preprocessing; 2. `mesh_convergence_study.py` runs the grid-independence study; 3. `run_Bayes_cal.py` calibrates the built case with HydroBayesCal against the FlowTracker velocity ground truth (the velocity measured at 0.6·h ≈ depth-averaged, compared to `SCALAR VELOCITY`), writing the calibration artifacts into `axqua-case/calibration-validation/`.
+**Workflow (run in order):** 1. `preprocessing.py` builds the complete TELEMAC case into `axqua-case/simulation/` (final mesh, `.cli`, `.tbl`, `.cas`) at the inflow Q (`boundaries.prescribed_flowrate`) and outflow stage prescription read from **this case's** config - the shared `axqua.prepare_steady_inputs` helper synthesizes a constant inflow series / outflow rating only when those inputs are missing; 1b. `initial_run.py` test-runs exactly that case once to confirm it does not crash, then runs a boundary-flux convergence analysis (`axqua.flux_convergence`, reading the solver listing with `axqua.sortie`) that writes four files into `simulation/` (`extracted-fluxes.csv` + `flux-convergence.png`, `convergence-rate.csv` + `convergence-rate.png`), deletes the per-processor `*_p0000N.sortie` copies of a parallel run, and - once the absolute flux imbalance stays below 1e-3 m³/s over 10 consecutive printouts (or in the 10-printout mean on a noisy steady state) - generates `hotstart2d.cas`, a continuation of `r2d.slf` capped at that steady time with the constant Q/H prescriptions kept. Balanced fluxes say nothing about *where* the water is, so it also writes `wetting-report.csv` and `outlet-profile.csv` (`axqua.wetting`): the first splits the wetted area into actively flowing water, stagnant film and isolated puddles, says how much of each the pre-wet seed put there, and whether the film is still draining or has plateaued (water perched above the converged surface can never leave a model with no infiltration or evaporation); the second profiles the free surface approaching the outflow and reports whether the prescribed stage is backing water up, pulling it down, or neutral. This ends preprocessing; 2. `mesh_convergence_study.py` runs the grid-independence study; 3. `run_Bayes_cal.py` calibrates the built case with HydroBayesCal against the FlowTracker velocity ground truth (the velocity measured at 0.6·h ≈ depth-averaged, compared to `SCALAR VELOCITY`), writing the calibration artifacts into `axqua-case/calibration-validation/`.
 
 **Initial-run numerics** - the 2D case uses the finite-element kernel with an auto-selected turbulence model (k-epsilon / Smagorinski / Spalart-Allmaras by mesh resolution) and a CFL-adaptive time step. The steering ships **compute-stable defaults** so the wetting/drying steady march does not explode: target Courant 0.30 (`time_step: 0.25` is only the start step), `IMPLICITATION FOR DEPTH/VELOCITY 0.80`, `FREE SURFACE GRADIENT COMPATIBILITY 0.9`, `DISCRETIZATIONS IN SPACE 11;11`, `H CLIPPING : NO` and a raised k-epsilon solve budget; the graphic printout is `'U,V,S,B,H,M,Q,F'` plus `K,E` (TKE + dissipation) for k-epsilon. It is a **dry start**: only a thin water plug at the inflow line is seeded so the prescribed-Q boundary can establish (a fully dry bed makes TELEMAC's `DEBIMP` abort), and the rest of the domain wets from the inflow - set `initialization.prewet_depth` to hotstart the whole channel instead. With the variable time step the run is bounded by `DURATION` (`hydrodynamics.duration`, seconds), and **convergence is judged by the boundary-flux balance**, not by the unreliable steady-state auto-stop (off by default). All of this is emitted by `preprocessing.py` (via `pipeline.run`); the mesh-convergence study reuses the same numerics per mesh.
 
@@ -190,7 +192,7 @@ axqua-gui                 # opens a local app in your browser; nothing leaves yo
 # axqua-gui --server.port 8600   # extra args are forwarded to Streamlit
 ```
 
-The form mirrors every config section (Project, TELEMAC, Inputs, Mesh, Friction, Hydrodynamics, Morphodynamics, Calibration) plus a **Workflow** tab summarising the steps; friction zones, calibration parameters, ground-truth sources and sediment classes are edited as tables. You can load an existing YAML, preview/download the generated YAML, save it, and run **Validate** (`--check`) or **Build** (the case build = workflow step 1) directly - the later steps (test run, mesh convergence, calibration, the 3D extension) are run from the per-case scripts.
+The form mirrors every config section (Project, TELEMAC, Inputs, Mesh, Friction, Hydrodynamics, Morphodynamics, Calibration) plus a **Workflow** tab summarizing the steps; friction zones, calibration parameters, ground-truth sources and sediment classes are edited as tables. You can load an existing YAML, preview/download the generated YAML, save it, and run **Validate** (`--check`) or **Build** (the case build = workflow step 1) directly - the later steps (test run, mesh convergence, calibration, the 3D extension) are run from the per-case scripts.
 
 ## The QGIS plugin
 
@@ -263,7 +265,7 @@ Config paths resolve relative to `case-config.yml`, so `user-sources/...` points
 1. Edit `cases/example-Inn/case-config.yml` - point `telemac.pysource` at your TELEMAC env, set the input paths, mesh sizes, friction zones, and calibration parameters/ranges.
 2. Provide a **ROI boundary polygon** (`geodata.boundary`): a closed polygon (or closed polyline) delineating the maximum wetted extent, in EPSG:25832.
 3. Provide the **liquid boundaries** (`boundaries.liquid_boundaries`): a line layer in EPSG:25832 whose `Type (inflow/outflow)` field tags each line `inflow` or `outflow` (several of each are allowed). Draw them **exactly along the mesh-zone outer bounds** so contour nodes land on them. Keep the inflow and outflow lines a similar length relative to the mesh resolution so they carry comparable node counts (within ~10%), or the build logs a stability-risk warning.
-4. **Outflow water level** (`boundaries.outflow_condition`, default `elevation`): by default the downstream water level is a fixed `boundaries.prescribed_elevation` (m a.s.l.). Alternatively set `outflow_condition: stage_discharge` with a `boundaries.stage_discharge` `Q,WSE` CSV that sets the water level at the simulated discharge (one Q-h pair at the steady Q is enough); you don't have to make one - `preprocessing.py`/`mesh_convergence_study.py` **synthesise it** from the geodata if it is missing (width from the outflow boundary line, bed + reach slope from the DEM, trapezoidal banks, roughness from `friction.boundary_*`), or make your own with `axqua rating -o user-sources/geodata/rating-curve.csv --strickler 38 --slope <S0> --width <b> --side-slope 1 --bed-elevation <z> --q 47`. Or set `free` for a Neumann outflow (nothing prescribed).
+4. **Outflow water level** (`boundaries.outflow_condition`, default `elevation`): by default the downstream water level is a fixed `boundaries.prescribed_elevation` (m a.s.l.). Alternatively set `outflow_condition: stage_discharge` with a `boundaries.stage_discharge` `Q,WSE` CSV that sets the water level at the simulated discharge (one Q-h pair at the steady Q is enough); you don't have to make one - `preprocessing.py`/`mesh_convergence_study.py` **synthesize it** from the geodata if it is missing (width from the outflow boundary line, bed + reach slope from the DEM, trapezoidal banks, roughness from `friction.boundary_*`), or make your own with `axqua rating -o user-sources/geodata/rating-curve.csv --strickler 38 --slope <S0> --width <b> --side-slope 1 --bed-elevation <z> --q 47`. Or set `free` for a Neumann outflow (nothing prescribed).
 5. **Ground truth + calibration ranges** (recommended): generate the calibration-target template, fill it in, and reference it in the config:
 
 ```bash
@@ -324,7 +326,7 @@ the reach's own water speed, which water never reaches but a runaway air jet doe
 `Co` and `dt` on the progress bar: a healthy run holds `dt` near the Courant target.
 
 One caveat the build reports for you: OpenFOAM's rough wall function needs the first cell
-centre *above* the roughness crests, and on a gravel bed `ks` can be a large fraction of
+center *above* the roughness crests, and on a gravel bed `ks` can be a large fraction of
 the depth. Where it is not satisfied the solver does not fail - it clamps and carries on -
 so read such a result as bulk flow, not as a resolved bed boundary layer.
 
@@ -390,7 +392,7 @@ Two modes, chosen from the `Type` text (or an explicit `Mode` column):
 | `overflow` | dam, weir, levee, block ramp - water passes over | the **bed is raised to the crest**; identical in both solvers |
 | `solid` | wall, floodwall, building, pier - never overtopped | OpenFOAM **removes the footprint** (no-slip walls bed to lid); TELEMAC raises the bed to crest + `solid_freeboard_2d`, the standard 2D practice |
 
-Anything unrecognised is `overflow` - raising the bed keeps the domain connected and
+Anything unrecognized is `overflow` - raising the bed keeps the domain connected and
 lets water pass, whereas wrongly blanking a footprint would silently wall off part of
 the reach. A solid structure that cuts the domain in two is reported, not applied
 silently.
@@ -448,7 +450,7 @@ See `cases/example-Inn/case-config.yml` for a fully commented example. Key secti
 
 ## Coordinate system
 
-All inputs/outputs are **EPSG:25832 (ETRS89 / UTM 32N)**, metres - see `CLAUDE.md`. Inputs in another CRS are reprojected on ingest.
+All inputs/outputs are **EPSG:25832 (ETRS89 / UTM 32N)**, meters - see `CLAUDE.md`. Inputs in another CRS are reprojected on ingest.
 
 ## Cases (Backup)
 

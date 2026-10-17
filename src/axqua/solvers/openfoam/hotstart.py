@@ -205,7 +205,7 @@ class State2D:
         Sampling is **nearest-node**, deliberately, not P1 interpolation on the
         element table. A SELAFIN merged from a parallel run is not a clean
         triangulation - the isar result carries 4,393 coincident nodes and 66,759
-        zero-area triangles out of 460,314, artefacts of the subdomain interfaces
+        zero-area triangles out of 460,314, artifacts of the subdomain interfaces
         that TELEMAC ignores but that make matplotlib's ``TrapezoidMapTriFinder``
         reject the mesh outright. Repairing that into something a trifinder accepts
         is guesswork about which overlapping element is authoritative.
@@ -214,7 +214,7 @@ class State2D:
         the 2D mesh is **finer than the 3D lattice** it is being sampled onto (isar:
         0.3 m channel cells into a 0.5 m lattice): this is downsampling, and the
         residual error is the surface slope over one 2D cell - on the order of a
-        millimetre. :meth:`resolution_check` warns if that relationship ever
+        millimeter. :meth:`resolution_check` warns if that relationship ever
         reverses.
         """
         if self._tree is None:
@@ -315,7 +315,7 @@ class State2D:
 
         The cutoff is what makes "outside the 2D model" distinguishable from "at the
         edge of it" - without it a KD-tree happily reports the nearest node hundreds
-        of metres away and the lid would inherit a water level from another part of
+        of meters away and the lid would inherit a water level from another part of
         the reach.
         """
         xy = np.asarray(xy, dtype=float)
@@ -340,7 +340,7 @@ class State2D:
         """``(free surface, depth, [u v])`` at the plan points of the mesh columns.
 
         Velocity is zeroed wherever the 2D depth is below *wet_depth*: a
-        depth-averaged velocity carried by a millimetre of water is numerically
+        depth-averaged velocity carried by a millimeter of water is numerically
         large and physically meaningless, and seeding it into a 3D run puts a
         spurious jet on the bank at t = 0.
         """
@@ -360,7 +360,7 @@ class State2D:
     # ------------------------------------------------------------- footprint
     def wet_footprint(self, *, wet_depth: float = 0.01, buffer: float = 5.0,
                       resolution: float | None = None):
-        """Plan polygon of the wetted area, dilated by *buffer* metres.
+        """Plan polygon of the wetted area, dilated by *buffer* meters.
 
         Built by rasterising the wet nodes and polygonising the mask rather than by
         unioning wet triangles: this mesh has 460k of them, and a shapely union over

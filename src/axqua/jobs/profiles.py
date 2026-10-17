@@ -199,7 +199,7 @@ def save_profiles(profiles: dict[str, Profile],
 
 def resolve(name: str | None, *, solver: str | None = None, cfg: Any = None,
             path: str | os.PathLike | None = None) -> Profile:
-    """Find the profile to use, or synthesise one from the case config.
+    """Find the profile to use, or synthesize one from the case config.
 
     The fallback matters: every existing case already carries ``telemac.pysource`` (or
     ``openfoam.bashrc``), so a user who has never written a ``profiles.yml`` can still

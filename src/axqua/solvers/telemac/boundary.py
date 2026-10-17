@@ -229,7 +229,7 @@ def exchange_regions(cfg: Config, mesh: "Mesh | None" = None
                           for region in ignored)
         log.warning(
             "the liquid-boundary layer holds %d internal exchange line(s): %s. This "
-            "case has no gain_lose block, so NO exchange is modelled. Add "
+            "case has no gain_lose block, so NO exchange is modeled. Add "
             "'gain_lose: {enabled: true, zone: <porous body>}' to model it, or "
             "'boundaries.internal_sources: true' for fixed-rate source regions.",
             len(ignored), names)
@@ -267,7 +267,7 @@ def load_internal_source_regions(cfg: Config,
     # In percolation mode the LOSING exchange may spread over the patch polygon
     # (mode 'region': TELEMAC source region; mode 'fortran': USER_RAIN domain).
     # With losing_region='line' it instead stays on the buffered line strip - use
-    # that when the modelled water surface does not actually cover the patch, or
+    # that when the modeled water surface does not actually cover the patch, or
     # the withdrawal concentrates on a shrinking wet remnant (see the isar-2025
     # test-approaches.md: the patch holds only ~88 m2 of wet area at steady state,
     # against ~183 m2 for a 12 m strip along the line).
@@ -342,8 +342,8 @@ def _match_tolerance(cfg: Config, mesh: Mesh | None = None) -> float:
     boundary edges, which is what "on the line" means for a node. The configured sizes
     are only a fallback for callers without a mesh, and a poor one - taking the largest
     of them (``breakline_size`` defaults to 3 m, deliberately coarser than a fine
-    ``default_size``) yields a tolerance of metres on a centimetre mesh, which quietly
-    swallows metres of wall either side of a short inflow line and prescribes the
+    ``default_size``) yields a tolerance of meters on a centimeter mesh, which quietly
+    swallows meters of wall either side of a short inflow line and prescribes the
     discharge across all of it.
     """
     scale = cfg.mesh.size_scale
@@ -360,7 +360,7 @@ def _match_tolerance(cfg: Config, mesh: Mesh | None = None) -> float:
     # has always been matched with, and only the case where they are far coarser than
     # the mesh is a bug. Here breakline_size (3 m by default, deliberately coarse) beat
     # a 5 cm default_size and produced a 4.5 m tolerance on a 5 cm mesh, which swallowed
-    # metres of wall either side of a 0.6 m inlet.
+    # meters of wall either side of a 0.6 m inlet.
     return min(configured, 2.0 * edge)
 
 
@@ -378,9 +378,9 @@ def _solid_footprint(cfg: Config):
 def _on_solid(cfg: Config, mesh: Mesh):
     """Nodes a solid structure stands on, by the element rule the bed raise uses.
 
-    Testing a node's own centre is not enough. A wall thinner than an element raises
+    Testing a node's own center is not enough. A wall thinner than an element raises
     the bed of every node of the elements it crosses, so a node can end up standing on
-    a crest while its centre falls outside the footprint. Keeping such a node as a
+    a crest while its center falls outside the footprint. Keeping such a node as a
     liquid boundary prescribes a discharge or a stage on top of the wall.
     """
     import numpy as np
@@ -570,7 +570,7 @@ def _assign_line_discharges(cfg: Config, mesh: Mesh, liquids: list[LiquidBoundar
     """Attach each inflow boundary its own prescribed Q from the liquid-boundary
     layer's flow column, by matching the boundary's node centroid to the nearest
     inflow line. No-op (leaves ``discharge=None``) when the layer has no flow column,
-    so a single total inflow Q is split by node share (the historical behaviour).
+    so a single total inflow Q is split by node share (the historical behavior).
     """
     import numpy as np
     from shapely.geometry import Point
@@ -632,10 +632,10 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
             if d < best_dist:
                 best_kind, best_dist = kind, d
         # A node standing inside a solid structure is not a way in or out, whatever it
-        # is near: the structure is burned into the bed, so the node's bed sits a metre
+        # is near: the structure is burned into the bed, so the node's bed sits a meter
         # or more above the opening beside it, and prescribing a discharge or a stage
-        # there pours water onto the crest. It shows up as a single node metres deep at
-        # the boundary while its neighbours run at several m/s.
+        # there pours water onto the crest. It shows up as a single node meters deep at
+        # the boundary while its neighbors run at several m/s.
         if best_kind != "wall" and on_solid_node is not None and on_solid_node[node]:
             best_kind = "wall"
             on_solid += 1

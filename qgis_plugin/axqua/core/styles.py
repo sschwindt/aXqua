@@ -17,9 +17,9 @@ the brightest color of the ramp and the river was the dark thread in it. The arr
 on a grid of the map and not on the mesh nodes, so that their number does not depend on
 the mesh, and none is drawn for standing water. Capped at 5 m/s by
 default and **warned about** above it: a depth-averaged
-river result above that is nearly always a wetting/drying artefact in a nearly-dry cell
+river result above that is nearly always a wetting/drying artifact in a nearly-dry cell
 rather than real flow, and letting one such node set the scale flattens the whole map into
-a single colour.
+a single color.
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from qgis.core import (QgsColorRampShader, QgsGradientColorRamp, QgsGradientStop
 from ..compat import (SHADER_INTERPOLATED, VECTOR_ARROWS, VECTOR_COLOR_RAMP,
                       VECTOR_STREAMLINES, color)
 
-#: Above this, a depth-averaged velocity is almost certainly a wetting/drying artefact.
+#: Above this, a depth-averaged velocity is almost certainly a wetting/drying artifact.
 VELOCITY_WARN_ABOVE = 5.0
 DEFAULT_VELOCITY_MAX = 5.0
 DEFAULT_MIN_DEPTH = 0.01

@@ -4,7 +4,7 @@ axqua turns user-provided geodata and hydraulic data (DEM, ROI boundary,
 inflow/outflow, measurements) into a production-ready simulation case, plus the
 artifacts a surrogate-assisted Bayesian calibration needs. Two simulation backends
 ship with it - TELEMAC-2D/3D (+GAIA) and OpenFOAM ``interFoam`` - and both are driven
-from **one** case configuration describing the river and the modelling intent.
+from **one** case configuration describing the river and the modeling intent.
 
 Layering
 --------

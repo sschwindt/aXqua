@@ -2,7 +2,7 @@
 
 For a steady simulation the downstream (outflow) boundary needs the water-surface
 elevation at the simulated discharge. When no *measured* rating curve is
-available, this module synthesises one from a roughness coefficient and a
+available, this module synthesizes one from a roughness coefficient and a
 prismatic channel cross-section by inverting Manning's uniform- (normal-) flow
 equation::
 
@@ -308,7 +308,7 @@ def section_rating(out, discharges, *, station, bed, ks, slope, log_label=""):
     section the error is large enough to force a supercritical drawdown at a
     prescribed-elevation outflow - the boundary pulls the level below the reach's
     own normal depth and the flow accelerates through the outlet to satisfy
-    continuity. Integrating the real section removes that artefact.
+    continuity. Integrating the real section removes that artifact.
     """
     station, bed, ks = _sorted_section(station, bed, ks, slope)
 
@@ -411,7 +411,7 @@ def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=No
             zc = np.array([s[0] for s in dem.sample(zip(cx, cy))], dtype=float)
             # nodata, not just NaN: rasterio hands back the raster's fill value, and
             # -9999 is perfectly finite. Fitting a slope through it is not a small
-            # error - on munich-vsf, whose centreline crosses walls the bed rasters
+            # error - on munich-vsf, whose centerline crosses walls the bed rasters
             # leave empty, it returned 44.5 instead of 0.053, and a slope three orders
             # of magnitude too steep gives a normal depth of 29 mm at the outlet.
             good = _valid(zc, dem)

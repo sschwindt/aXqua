@@ -40,7 +40,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 ENV_VAR = "AXQUA_EXE"
-#: The pre-rename spelling. Still honoured, because a shell profile written before the
+#: The pre-rename spelling. Still honored, because a shell profile written before the
 #: rename is not something the plugin should silently ignore.
 LEGACY_ENV_VAR = "HYDROMATE_EXE"
 SETTINGS_KEY = "axqua/executable"

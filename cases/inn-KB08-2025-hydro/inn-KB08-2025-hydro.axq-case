@@ -93,7 +93,7 @@ friction:
   roughness_law: 5             # law for roughness-zone rows (5 = NIKU, ks in m)
   default_law: 4               # 4 = Manning (0 NOFR, 1 HAAL, 2 CHEZ, 3 STRI, 5 NIKU, 7 COWH)
   default_coefficient: 0.03
-  # lateral (wall) boundary friction; also the roughness used to synthesise the
+  # lateral (wall) boundary friction; also the roughness used to synthesize the
   # outflow stage-discharge curve when missing.
   boundary_law: 3              # 3 = Strickler
   boundary_coefficient: 38     # Strickler Kst
@@ -156,7 +156,7 @@ calibration:
   init_runs: 30                # initial design samples
   max_runs: 50                 # total runs (initial + active-learning iterations)
   gp_library: gpy
-  # zone1/zone2 perturb the Nikuradse ks of the two roughness zones; ranges in metres.
+  # zone1/zone2 perturb the Nikuradse ks of the two roughness zones; ranges in meters.
   parameters:
     - { name: zone1, min: 0.05, max: 0.50, comment: "channel ks [m] (Nikuradse)" }
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }

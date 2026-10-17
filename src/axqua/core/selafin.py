@@ -1,7 +1,7 @@
 """Minimal, self-contained SELAFIN (Serafin) writer for TELEMAC geometry files.
 
 Single-precision, big-endian, Fortran-record layout following the de-facto
-reference implementation (pputils ``ppSELAFIN``). Vectorised with numpy so it
+reference implementation (pputils ``ppSELAFIN``). Vectorized with numpy so it
 scales to large meshes. We only need to *write* a 2D geometry file (one frame
 holding the BOTTOM variable), which TELEMAC reads as the GEOMETRY FILE.
 
@@ -212,7 +212,7 @@ def write_geometry(
     coordinates and variables as 8-byte reals. This is **required** for fine
     meshes on real-world projected coordinates: a single-precision (R4) float has
     a ~24-bit mantissa, so at UTM northings of ~5.3e6 m the representable spacing
-    (ULP) is ~0.5 m. Storing a sub-metre mesh single precision snaps neighbouring
+    (ULP) is ~0.5 m. Storing a sub-metre mesh single precision snaps neighboring
     nodes onto identical coordinates, collapsing thin channel triangles into
     coincident / collinear / inverted cells that make TELEMAC abort with
     ``GEOELT: ... NEGATIVE DETERMINANT``. Only set ``False`` for coarse meshes
@@ -254,14 +254,14 @@ def write_initial_state(
     """Write a hotstart SELAFIN holding VELOCITY U, VELOCITY V and WATER DEPTH.
 
     TELEMAC reads this as the ``PREVIOUS COMPUTATION FILE`` (which alone triggers
-    the continuation since release 9.0) to initialise the flow field, matching
+    the continuation since release 9.0) to initialize the flow field, matching
     variables by name on the *same* mesh as the geometry. It pre-wets the domain
     (e.g. the channel) to a given *depth* so the wetting front does not have to be
     advanced from a dry bed - a large time saving for steady runs.
 
     Parameters
     ----------
-    x, y, ikle, ipobo : the geometry of the mesh this state initialises (must
+    x, y, ikle, ipobo : the geometry of the mesh this state initializes (must
         match the GEOMETRY FILE: same NPOIN/NELEM, node order and connectivity).
     depth : (NPOIN,) float array of initial water depths (m).
     velocity_u, velocity_v : optional (NPOIN,) initial velocity components (m/s);

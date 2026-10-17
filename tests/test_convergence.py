@@ -268,7 +268,7 @@ def test_extension_flow(tmp_path):
 
 def test_default_ask_timeout_assumes_yes(monkeypatch):
     """An unanswered interactive [y/N] prompt assumes 'yes' after the timeout (so an
-    unattended study keeps refining); explicit replies are still honoured."""
+    unattended study keeps refining); explicit replies are still honored."""
     import io
     import select
 

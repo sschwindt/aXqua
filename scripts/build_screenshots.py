@@ -277,8 +277,8 @@ def take_screenshots() -> None:
         shot(dock, "gui-case-setup", [
             buttons(page, "Add case", "Example case"),
             page.case_list,
-            buttons(page, "Open case settings", "Check"),
-            page.capability_label])
+            page.capability_label,
+            buttons(page, "Open case settings", "Check")])
 
     def case_editor() -> None:
         from axqua.gui.case_editor import CaseEditor

@@ -48,7 +48,7 @@ stably (where every fixed-rate sink blew up), delivers the full 0.065 m3/s, and
 | T2 | 2026-08-01 | Internal exchange as **3 m buffered source regions** | prewet 0.30 m, `percolation.mode: off` | **Blew up in 28 s** at the losing line: U = ±1113 m/s on 3 adjacent nodes | ❌ sink too concentrated |
 | T3 | 2026-08-01 | Losing exchange over the **whole percolation patch** | `percolation.mode: region` (2172 m2) | Survived 9x longer (255 s); **nothing wrong at the sink**, but 3 nodes blew up 177 m away near the ROI edge | ⚠️ sink fixed, separate local instability |
 | T4 | 2026-08-01 | **USER_RAIN** depth-limited, uniform over patch | `percolation.mode: fortran`, `losing_region: patch` | **Ran the full 4000 s and CONVERGED to -0.757 %** - but the side channel is unchanged vs T1 (29.6 % vs 29.8 % wetted): delivery decays as the patch dries | ✅ stable / ❌ no effect |
-| T5 | 2026-08-01 | **USER_RAIN** normalised over the **wet** patch area | `percolation.mode: fortran`, `losing_region: patch` | Delivers the full 0.0650 m3/s while the patch is wet, but **the patch dries out**: wet area 1044 → 8 m2, delivery decays to 0.0172 m3/s | ⚠️ stable, but the patch cannot supply it |
+| T5 | 2026-08-01 | **USER_RAIN** normalized over the **wet** patch area | `percolation.mode: fortran`, `losing_region: patch` | Delivers the full 0.0650 m3/s while the patch is wet, but **the patch dries out**: wet area 1044 → 8 m2, delivery decays to 0.0172 m3/s | ⚠️ stable, but the patch cannot supply it |
 | T6 | 2026-08-02 | **USER_RAIN** over a **12 m strip along the losing LINE** | `losing_region: line`, width 12 m | **Converged to -0.167 % over the full 4000 s, delivering 0.0650 m3/s throughout**; wet area plateaus at 178 m2; **side channel 33.9 % wetted / 0.0219 m vs the baseline's 29.8 % / 0.0160 m** | ✅ **USE THIS** |
 
 ### The two conclusions
@@ -249,7 +249,7 @@ What it does each time step (**two passes** - the second version, see T4 vs T5):
 3. sum what was *actually* extracted and reinject **exactly that amount** over the
    gaining region.
 
-Normalising by the **wet** area (step 1) rather than the whole polygon is what
+Normalizing by the **wet** area (step 1) rather than the whole polygon is what
 makes the full target reachable: on this patch **47.5 % of the polygon is drier
 than 5 cm**, so a uniform `Q/area` over the whole polygon silently throws that
 share away and delivers only ~48 % of the target (that was T4; T5 is the fix).
@@ -359,7 +359,7 @@ rather than a literature guess.
 ### Which to use
 
 * **Scenario A (prescribed)** if 0.065 m3/s is a trusted field observation for
-  *this* discharge and you want the model to honour it exactly.
+  *this* discharge and you want the model to honor it exactly.
 * **Scenario B (Green-Ampt)** if you intend to run other discharges or a
   hydrograph - percolation physically scales with stage, and a fixed 0.065 m3/s
   would be wrong at any flow other than the one it was measured at. It also gives
@@ -465,7 +465,7 @@ case (`axqua-case/simulation/`) - the ladder folders are scratch:
 
 4. **check the side channel is actually fed** - the whole point. `ladder.py
    <rung> --summary` now reports the wetted fraction and mean depth in a 40 m
-   neighbourhood of the gaining line, straight out of `r2d.slf`:
+   neighborhood of the gaining line, straight out of `r2d.slf`:
 
    ```
    side channel around the gaining line (r=40 m, 27541 nodes):
@@ -475,7 +475,7 @@ case (`axqua-case/simulation/`) - the ladder folders are scratch:
    ```
 
    **Compare a percolation rung against T1** (which carries no exchange at all): if
-   the mechanism is doing its job, the gaining neighbourhood is measurably wetter.
+   the mechanism is doing its job, the gaining neighborhood is measurably wetter.
    Confirm visually too - open `r2d.slf` in ParaView/QGIS around the gaining line
    (about 677121.6, 5268015.8 to 677162.0, 5268035.8);
 5. in `fortran` mode, also verify **how much** water is actually being moved: the
@@ -608,7 +608,7 @@ this mesh (shortest edge 0.207 m). The imbalance alternates between ~-0.1 % and
 not drift. **4000 s of simulated time is the right duration for this reach.**
 
 **Side-channel baseline (this is the number the percolation rungs must beat).**
-With no internal exchange at all, in a 40 m neighbourhood of the gaining line:
+With no internal exchange at all, in a 40 m neighborhood of the gaining line:
 
 ```
 wetted (h>1 cm): 8194 nodes (29.8 %)
@@ -715,18 +715,18 @@ only **18.4 m from the ROI edge**. Just **3 nodes** trespassed.
 **Verdict: the patch region DID fix the sink.** Nothing blew up at the losing
 line this time - T2's failure mode is gone, and the run survived 9x longer
 (255 s vs 28 s) while draining normally with a stable dt. What killed it is a
-*separate*, highly localised (3-node) instability near the domain edge.
+*separate*, highly localized (3-node) instability near the domain edge.
 
 **Attribution is not yet settled - be careful here.** Two readings fit:
 
 1. it is caused by the exchange - the gaining injection pushes water into the side
    channel, and the advancing wetting front there goes unstable ~177 m downstream;
-2. it is a generic marginal-cell / wetting-drying artefact near the ROI edge that
+2. it is a generic marginal-cell / wetting-drying artifact near the ROI edge that
    T1 simply has not hit (T1 passed T = 255 s and reached T > 1000 s cleanly, but
    T1 never wets that area because nothing feeds the side channel).
 
 T4 discriminates: it injects at the same gaining line, so **if T4 survives past
-T = 255 s, reading 1 is wrong** and the problem is a local mesh/terrain artefact
+T = 255 s, reading 1 is wrong** and the problem is a local mesh/terrain artifact
 rather than the exchange mechanism.
 
 > **Caveat on that discrimination.** It only holds if T4 is actually moving a
@@ -816,19 +816,19 @@ is inferred from the identical outcome plus T5's measured decay). **Converged,
 stable, and hydrologically inert.**
 
 **Verdict:** depth-limiting is correct and completely cures the blow-up, but
-drawing from the patch delivers nothing at steady state. → T5 (normalisation),
+drawing from the patch delivers nothing at steady state. → T5 (normalization),
 then T6 (the region itself).
 
 **This also settles the T3 attribution:** T4 injects at the same gaining line, with
 a real (non-zero) discharge, and sails past T = 255 s. So T3's 3-node blow-up near
 the ROI edge was **not** caused by the exchange mechanism - it is a local
-mesh/terrain artefact in that corner of the domain.
+mesh/terrain artifact in that corner of the domain.
 
 ---
 
-### Attempt T5 - 2026-08-01 - USER_RAIN normalised over the WET patch area
+### Attempt T5 - 2026-08-01 - USER_RAIN normalized over the WET patch area
 
-**Hypothesis:** normalising the target discharge over the *currently wet* taper-
+**Hypothesis:** normalizing the target discharge over the *currently wet* taper-
 weighted area (instead of the whole polygon) delivers the full 0.065 m3/s while
 keeping every safety property of T4.
 
@@ -899,7 +899,7 @@ At Q = 2.4 m3/s the water surface does not cover the gravel bar - **and it is no
 supposed to.** That is the entire point of this setup: the bar is **dry on top**
 while 0.065 m3/s percolates **through it, below the surface**, within the ~0.5 m
 porous depth recorded in `percolation-zone.gpkg`. The 53 % wetted patch at the
-start was pre-wet surplus draining away - an artefact of the initial condition,
+start was pre-wet surplus draining away - an artifact of the initial condition,
 not the physical state. A dry bar in the converged run is the model behaving
 correctly.
 
@@ -920,7 +920,7 @@ channel at the losing line, not on the dry bar surface. → T6.
 
 ### Side-channel comparison (the deliverable measurement)
 
-Wetted fraction and mean depth in a 40 m neighbourhood of the gaining line, all
+Wetted fraction and mean depth in a 40 m neighborhood of the gaining line, all
 from converged 4000 s runs:
 
 | rung | losing region | delivery at steady state | wetted | mean depth |
@@ -1081,7 +1081,7 @@ depth-sum**; the remaining trapped depth-sum is 48 m spread over the whole mesh
 
 ### R1.2 The outlet velocity: the prescribed stage was 0.24 m too low
 
-The outflow rating was synthesised by the **`trapezoid`** method: normal depth in a
+The outflow rating was synthesized by the **`trapezoid`** method: normal depth in a
 rectangle as wide as the outflow line (9.55 m). The real section is V-shaped, so a
 rectangle at the same stage has far more flow area than the ground does - the method
 therefore returns a stage that is **too low**. It gave `WSE 815.1139`, and the
@@ -1096,7 +1096,7 @@ boundary then held the outlet *below* the level the reach itself wants:
 | Froude number | **~1.4 - supercritical** |
 
 The flow had to accelerate through a ~1.3 m2 gap to pass 2.4 m3/s. That is a
-boundary artefact, not reach hydraulics.
+boundary artifact, not reach hydraulics.
 
 **The fix** is a new rating method, `boundaries.rating_method: section`
 (`axqua.rating.section_rating` /`synthesize_outflow_rating_from_section`): the
@@ -1107,7 +1107,7 @@ inverted for the stage by bisection. At Q = 2.4 m3/s it gives **WSE 815.347** -
 0.23 m higher, and the section then conveys the discharge at a subcritical depth.
 
 The rating is no longer read from `user-sources/geodata/rating-curve.csv` (that file
-is left untouched, and is the stale trapezoid one); each scenario now synthesises its
+is left untouched, and is the stale trapezoid one); each scenario now synthesizes its
 own into `<scenario>/preprocessing/rating-curve.csv`.
 
 ### R1.3 Roughness: zone 4 lowered as requested
@@ -1160,7 +1160,7 @@ consistency check on a field campaign gets.
 the model comes out shallower and slower than the measurements at every transect. No
 roughness value closes a factor-2.2 discharge gap.
 
-This is left as it is, because `boundaries.prescribed_flowrate: 2.4` is a modelling
+This is left as it is, because `boundaries.prescribed_flowrate: 2.4` is a modeling
 decision, not a bug to fix silently. If the intent is to reproduce the campaign, it
 is a one-line change (with the 1.6 / 0.8 split scaled to 3.57 / 1.78), and the
 outflow rating regenerates automatically from the section method at the new Q.
@@ -1230,7 +1230,7 @@ Two independent checks fall out of this table:
 
 Still shallow and slow, by about the amount the discharge deficit predicts - see
 [R1.5](#r15-the-finding-neither-fix-accounts-for-the-campaign-discharge-is-535-m3s).
-**Do not calibrate roughness against these numbers at Q = 2.4 m3/s**: the optimiser
+**Do not calibrate roughness against these numbers at Q = 2.4 m3/s**: the optimizer
 would drive `ks` to absurd values trying to make 2.4 m3/s look like 5.35 m3/s.
 
 #### Percolation exchange
@@ -1351,7 +1351,7 @@ evaporation, so the excess drains only where it can flow; on flat ground over ks
 | of that film, seeded rather than flow-spread | **75 %** | |
 | isolated puddles (not connected to the main body) | 986 m2, 690 patches | 37 m3 |
 
-And the film has **stopped draining**, which is what makes it a modelling error
+And the film has **stopped draining**, which is what makes it a modeling error
 rather than an unfinished transient:
 
 | t [s] | 390 | 923 | 1907 | 2879 | 3849 | 5000 |
@@ -1426,7 +1426,7 @@ local gradient here ranges 0.002-0.009, a factor of four).
 
 A first attempt built each "section" from the scatter of mesh nodes in a
 longitudinal bin. That is wrong and worth recording: sorting a point cloud by
-cross-channel offset makes the bed jump between neighbouring samples, the wetted
+cross-channel offset makes the bed jump between neighboring samples, the wetted
 perimeter comes out hugely too large, the hydraulic radius too small, and the
 required stage lands **+0.88 m** too high. Real perpendicular transects, sampled at
 0.5 m, fix it.
@@ -1466,7 +1466,7 @@ The area seeded above the converged surface drops by **88 %**.
 ### R2.5 The fix for the patch: drain it (`percolation.patch_drain`)
 
 The bar is porous gravel: water lying on top infiltrates rather than ponding, so
-surface water there is an artefact of a 2D model with no subsurface. `patch_drain`
+surface water there is an artifact of a 2D model with no subsurface. `patch_drain`
 adds the patch polygon as an **extra losing region** in USER_RAIN. It is emitted
 **last**, and each node joins the first region containing it, so every node of the
 prescribed losing and gaining strips keeps its own region - the calibrated
@@ -1593,7 +1593,7 @@ the bar is being cleared, which is worth knowing before reading an early printou
 
 The residual 353 m2 is a floor set by the routine's own safety limiter: the
 withdrawal tapers to zero as the depth approaches `min_depth` (0.05 m), so it cannot
-by construction remove the last few centimetres - that taper is exactly what stops a
+by construction remove the last few centimeters - that taper is exactly what stops a
 sink from drying a cell and collapsing the time step (see T2/T3).
 
 #### The outlet: unchanged, and still a drawdown
@@ -1775,7 +1775,7 @@ asks for a number nobody has.
 The polygon route is self-determining, so at kf=3e-4 it delivers ~3x the calibrated
 exchange - which is not a failure of the formulation but the reason kf is exposed for
 calibration. **This case therefore stays on `faces: lines` + the lines' flow column**,
-so its calibrated behaviour is untouched.
+so its calibrated behavior is untouched.
 
 ### Migration verified against R3
 
@@ -1803,7 +1803,7 @@ that the alias works.
   physically-based alternative would size the exchange from Darcy flow through the
   patch (hydraulic conductivity x gradient x 0.5 m x width) instead of prescribing
   0.065 m3/s. That needs a conductivity estimate for the gravel.
-* **Transient storage is not modelled.** The water withdrawn reappears at the
+* **Transient storage is not modeled.** The water withdrawn reappears at the
   gaining line in the *same* time step; there is no travel-time lag through the
   patch. For a steady run this is irrelevant; for the unsteady/hydrograph case it
   would matter and would need a small storage reservoir in `USER_RAIN`.

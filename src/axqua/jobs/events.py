@@ -11,7 +11,7 @@ extracts the Courant number and the time step from interFoam's - both hard-won a
 real output. So this module adds a **sink** those classes also emit to, and everything
 composes:
 
-* :class:`ConsoleSink` is today's behaviour, unchanged, for terminal runs;
+* :class:`ConsoleSink` is today's behavior, unchanged, for terminal runs;
 * :class:`StatusFileSink` writes ``status.json``;
 * :class:`TeeSink` does both, which is what ``axqua execute`` wants - a debugging run
   should look exactly like the old scripts *and* leave a machine-readable trail.

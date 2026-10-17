@@ -734,7 +734,7 @@ def decompose_par_dict(cfg) -> str:
 
 // 'scotch' rather than 'simple'/'hierarchical': the wetted corridor is a sinuous,
 // non-convex block, so a geometric split would hand some processors mostly empty
-// space. Scotch balances by cell count and minimises the interface.
+// space. Scotch balances by cell count and minimizes the interface.
 method          scotch;
 """
     return _dict_file("decomposeParDict", body, location="system")
@@ -829,7 +829,7 @@ def activate(case_dir: str | Path, stage: str, cfg=None, *,
     """Make one stage's dictionaries the active ``system/`` set.
 
     With *cfg* the three staged files are **regenerated from that config** before
-    being activated, so a run always honours the configuration it was launched with.
+    being activated, so a run always honors the configuration it was launched with.
     Without it they would come from the build, and changing ``end_time`` or
     ``max_courant`` and re-running ``openfoam_run.py`` would silently run the old
     values while every message reported the new ones - a trap precisely because

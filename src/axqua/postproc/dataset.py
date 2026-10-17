@@ -1,4 +1,4 @@
-"""What a visualiser can open, described without naming a solver.
+"""What a visualizer can open, described without naming a solver.
 
 Standard library only, deliberately: a solver backend has to build these to answer
 :meth:`axqua.core.registry.SolverBackend.describe_results`, and that call must stay
@@ -23,7 +23,7 @@ class Dataset:
         a ``case.foam`` handle - VisIt and ParaView both read the case directory
         natively, so nothing is converted.
     ``vtu`` / ``pvd``
-        a VTK XML file. This is the TELEMAC route, because no visualiser reads
+        a VTK XML file. This is the TELEMAC route, because no visualizer reads
         SERAFIN and there is no ``foamToVTK`` analogue for it (see
         :mod:`axqua.postproc.selafin_vtk`).
     """

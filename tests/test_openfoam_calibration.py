@@ -740,7 +740,7 @@ def test_the_compile_hook_is_wrapped(tmp_path):
 # two-phase (VOF) campaigns
 # --------------------------------------------------------------------------- #
 def test_campaign_defaults_to_a_rigid_lid(tmp_path):
-    """The historic behaviour, unchanged: no mode= means rigid-lid."""
+    """The historic behavior, unchanged: no mode= means rigid-lid."""
     cfg = _cfg(tmp_path)
     c = ofcal.campaign_config(cfg, cell_size_factor=4.0, end_time=600.0,
                               write_interval=20.0, n_processors=8)

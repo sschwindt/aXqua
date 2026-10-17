@@ -2,7 +2,7 @@
 
 The steady initial run (``preprocessing.py`` + ``initial_run.py``) establishes a
 well-converged flow field and writes it to ``r2d.slf``. This module turns that into
-a **hydrograph-driven** run - a natural flood wave discretised as a sequence of
+a **hydrograph-driven** run - a natural flood wave discretized as a sequence of
 steady discharges (see ``telemac2d-unsteady.md``) - **hotstarted from that steady
 result**, for 2D (``telemac2d``) or, with the same forcing, 3D (``telemac3d``).
 

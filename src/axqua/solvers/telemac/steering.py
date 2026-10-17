@@ -117,7 +117,7 @@ def _channel_cell_size(cfg: Config, mesh) -> float:
 def select_turbulence_model(cfg: Config, mesh=None) -> tuple[int, str]:
     """Pick the TELEMAC turbulence model from the mesh resolution and velocity guess.
 
-    An explicit ``hydrodynamics.turbulence_model`` (int or name) is honoured as-is.
+    An explicit ``hydrodynamics.turbulence_model`` (int or name) is honored as-is.
     With ``"auto"`` the choice follows the channel cell size ``dx`` relative to the
     turbulence length scale ``L`` (the flow depth) - a mesh-size/velocity criterion:
 
@@ -371,7 +371,7 @@ def _prewet_discharge(cfg: Config) -> float | None:
 def _normal_depth_prewet_depth(cfg: Config, mesh, mask, discharge):
     """Pre-wet water depth from the **normal-flow stage of the real cross-sections**.
 
-    Every ``initialization.prewet_bin_spacing`` metres along the channel centerline a
+    Every ``initialization.prewet_bin_spacing`` meters along the channel centerline a
     perpendicular transect of ``prewet_transect_half_width`` half-width is cut,
     sampled at 0.5 m, clipped to the ``*channel*`` mesh zones and given the bed and
     Nikuradse ``ks`` of the nearest mesh node. The transect's **normal stage** at the
@@ -957,7 +957,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
     regime = "unsteady" if unsteady else "steady"
     if turbulence_model is None:
         turbulence_model = select_turbulence_model(cfg, None)[0]
-    # finalise the turbulence model up front (finite volumes accept only model 1) so
+    # finalize the turbulence model up front (finite volumes accept only model 1) so
     # the graphic-printout list and every block below agree on the same model.
     turb_model = turbulence_model
     if h.finite_volumes and turb_model != 1:
@@ -1086,7 +1086,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
             "MAXIMUM NUMBER OF ITERATIONS FOR SOLVER : 200",
         ]
 
-    # constant eddy viscosity for model 1 (incl. the forced FV case): honour an
+    # constant eddy viscosity for model 1 (incl. the forced FV case): honor an
     # explicit value, else estimate it from the velocity guess (Elder closure).
     diffusivity = (h.velocity_diffusivity if h.velocity_diffusivity is not None
                    else eddy_viscosity_estimate(cfg) if turb_model == 1 else None)
@@ -1114,7 +1114,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
             "OPTION FOR THE TREATMENT OF TIDAL FLATS : 1",
             "TREATMENT OF NEGATIVE DEPTHS : 2",
             # leave H unclipped so drying is handled by the treatment above, not by a
-            # hard depth clip that would inject mass and destabilise the wetting front.
+            # hard depth clip that would inject mass and destabilize the wetting front.
             f"H CLIPPING : {'YES' if h.h_clipping else 'NO'}",
         ]
 

@@ -103,7 +103,7 @@ boundaries:
   # liquid-boundary layer) are only applied when the case asks for an exchange: with
   # the gain_lose block below (recommended, the withdrawal is limited by the water
   # depth), or with internal_sources: true for source regions with a fixed rate,
-  # which diverge where the strip runs dry. Without either, no exchange is modelled.
+  # which diverge where the strip runs dry. Without either, no exchange is modeled.
   # internal_sources: true
   # internal_source_region_width: 3.0   # [m] width of the strip around each line
   # outlet rating curve (only for outflow_condition: stage_discharge): a CSV with
@@ -127,7 +127,7 @@ initialization:
   # leave it off for a dry initial run.
   # prewet_depth: 0.5
   # HOW the seeded water surface is built:
-  #   normal-depth (default) - a real cross-section every prewet_bin_spacing metres
+  #   normal-depth (default) - a real cross-section every prewet_bin_spacing meters
   #     along the centerline, seeded at the stage that conveys prescribed_flowrate
   #     through it (the same conveyance inversion as the outflow rating).
   #   constant - the older "low bed percentile + prewet_depth" surface; also the
@@ -195,7 +195,7 @@ friction:
   default_coefficient: 0.03
   # lateral (wall) boundary friction -> TELEMAC LAW OF FRICTION ON LATERAL
   # BOUNDARIES / ROUGHNESS COEFFICIENT OF BOUNDARIES. Also the roughness used to
-  # synthesise the outflow stage-discharge curve (initial_run.py) when missing.
+  # synthesize the outflow stage-discharge curve (initial_run.py) when missing.
   boundary_law: 4              # 3 = Strickler (Kst), 4 = Manning (n)
   boundary_coefficient: 0.03
   # explicit per-MATID zones (override the roughness zones; "matid" must equal the
@@ -218,7 +218,7 @@ hydrodynamics:
   time_step: 0.25              # conservative CFL start step [s]; CFL-adapted thereafter
   duration: 5000.0             # simulated time [s] for the steady march to convergence
   n_time_steps: 15000          # only bounds a FIXED-step run (variable_timestep: false)
-  # Steady-state auto-stop is OFF by default and ONLY honoured with a fixed time
+  # Steady-state auto-stop is OFF by default and ONLY honored with a fixed time
   # step. TELEMAC's STOP CRITERIA is an ABSOLUTE per-step change; with the variable
   # (CFL) time step the per-step change is tiny, so it false-fires during a slow
   # transient (e.g. a low-Q reach still filling) long before the fluxes balance.
@@ -313,7 +313,7 @@ hydrodynamics:
 #   #     https://ngwa.onlinelibrary.wiley.com/doi/10.1111/j.1745-6584.2001.tb02343.x
 #   #     (pooled riverbed values 1e-9..1e-2 m/s, concentrated 1e-7..1e-3). Bracket:
 #   #     clean gravel 1e-2..1e-1, moderately colmated 1e-4..1e-3, silted 1e-7..1e-5.
-#   #   discharge overrides kf with a MEASURED total [m3/s], normalised over the
+#   #   discharge overrides kf with a MEASURED total [m3/s], normalized over the
 #   #     losing face. Works with either `faces` setting.
 #   conductivity: 3.0e-4
 #   # discharge: 0.065
@@ -395,7 +395,7 @@ dem_of_difference:
 #   # coordinates - the model is the same, only its position on a map is missing, and
 #   # the artifacts are then written WITHOUT a CRS rather than with a false one.
 #   # `axqua georef --dxf <drawing.dxf> --stl <part.stl>` derives these from a drawing.
-#   scale: 1.0                   # 0.001 if the CAD is in millimetres
+#   scale: 1.0                   # 0.001 if the CAD is in millimeters
 #   rotation_deg: 0.0
 #   dx: 0.0
 #   dy: 0.0
@@ -435,7 +435,7 @@ dem_of_difference:
 #               OpenFOAM REMOVES the footprint (no-slip walls from bed to lid);
 #               TELEMAC has no vertical wall to remove, so it raises the bed to
 #               crest + solid_freeboard_2d instead (standard 2D practice).
-# Unrecognised text is treated as overflow: raising the bed keeps the domain
+# Unrecognized text is treated as overflow: raising the bed keeps the domain
 # connected, whereas wrongly blanking a footprint would silently wall off the reach.
 #
 # geodata:
@@ -461,7 +461,7 @@ dem_of_difference:
 # Use it when you need the VERTICAL structure of the flow AND the water surface has
 # a gradient. The second half is why simpleFoam is not an option: a steady
 # single-phase solver cannot carry a sloping free surface, so the air-water
-# interface has to be modelled, which means a two-phase VOF solver (interFoam) and
+# interface has to be modeled, which means a two-phase VOF solver (interFoam) and
 # with it an air phase that is of no interest but tends to dominate the cost.
 #
 # Build it only AFTER preprocessing.py + initial_run.py have produced a converged
@@ -566,7 +566,7 @@ dem_of_difference:
 #   # outlet_air_margin: 0.25
 #
 #   # ---- bed --------------------------------------------------------------
-#   # nutkRoughWallFunction needs the first cell CENTRE above the roughness crests,
+#   # nutkRoughWallFunction needs the first cell CENTER above the roughness crests,
 #   # so the bed layer is pinned to 2x the wetted median ks. On a gravel bed where
 #   # ks is a large fraction of the depth this cannot always be met; the build
 #   # reports the share of wetted bed faces that fail, and OpenFOAM will NOT error
@@ -645,7 +645,7 @@ ground_truth:
   # patch narrow ones, which is the weighting a likelihood should give them.
   #   rtk-fixed 0.03 m | rtk-float 1.0 m | dgps 1.0 m | standalone 3.0 m
   # Unset (the default) means no positional term at all, so existing cases are
-  # untouched. position_sigma: <metres> overrides the lookup.
+  # untouched. position_sigma: <meters> overrides the lookup.
   # position_quality: rtk-fixed
   #
   # The calibration consumes a tidy, multi-tab "measurements" table: one tab per
@@ -727,7 +727,7 @@ calibration:
   # convention: zone<N> (friction zone N in the .tbl), gaiaCLASSES SHIELDS
   # PARAMETERS <n> (GAIA), vg_zone<N>-<p> (vegetation), or any literal TELEMAC
   # keyword. zone1/zone2 here perturb the Nikuradse ks of two roughness zones
-  # (channel / floodplain); ranges are ks bounds in metres.
+  # (channel / floodplain); ranges are ks bounds in meters.
   parameters:
     - { name: zone1, min: 0.05, max: 0.50, comment: "channel ks [m] (Nikuradse)" }
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
@@ -751,13 +751,13 @@ calibration:
 # postproc:
 #   visit: /home/IWS/public/visit/bin/visit   # [REQUIRED to render] your `visit` launcher
 #   backend: visit
-#   # free-surface  - the water surface coloured by speed. Under mode: rigid-lid
+#   # free-surface  - the water surface colored by speed. Under mode: rigid-lid
 #   #                 there is no interface to contour, so it falls back to the lid
 #   #                 patch and SAYS ON THE FIGURE that the surface was prescribed
 #   #                 by the 2D seed rather than solved.
 #   # velocity-plan - plan-view velocity, sampled at the same relative depth a
 #   #                 FlowTracker measures at, so figure and calibration agree.
-#   # profiles      - modelled vertical profiles vs the measured verticals, with
+#   # profiles      - modeled vertical profiles vs the measured verticals, with
 #   #                 error bars, plus a residual CSV. Needs ground_truth.
 #   scenes: ["free-surface", "velocity-plan", "profiles"]
 #   image_width: 1600

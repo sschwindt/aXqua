@@ -2,7 +2,7 @@
 
 HydroBayesCal is a pip dependency, so the driver comes from the **installed
 package** - there is no checkout directory to configure and no second conda
-environment to name. These tests pin that, plus the one behavioural patch axqua
+environment to name. These tests pin that, plus the one behavioral patch axqua
 applies to the stock driver.
 
 The tests that need the real package are skipped when it is not installed
@@ -41,7 +41,7 @@ def test_extraction_window_is_patched_to_the_converged_frame(tmp_path):
     original = (hbc.driver_path("bal_telemac.py")).read_text()
     staged = stage_driver(tmp_path, "bal_telemac.py").read_text()
 
-    assert original.count('output_extraction_time="mean_last"') > 0   # stock behaviour
+    assert original.count('output_extraction_time="mean_last"') > 0   # stock behavior
     assert 'output_extraction_time="mean_last"' not in staged
     assert staged.count('output_extraction_time="last"') == \
         original.count('output_extraction_time="mean_last"')

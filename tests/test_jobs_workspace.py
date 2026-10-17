@@ -117,7 +117,7 @@ def test_a_job_cancelled_while_it_waits_never_takes_the_folder(tmp_path):
 
 
 def test_a_job_that_died_does_not_block_the_case(tmp_path):
-    """Its lock names a process that is gone, which the staleness rules recognise."""
+    """Its lock names a process that is gone, which the staleness rules recognize."""
     dead = LockRecord.for_self("crashed-job").as_dict()
     dead["pid"] = 2 ** 22 + 12345             # no such process
     (tmp_path / workspace.LOCK_NAME).write_text(json.dumps(dead))

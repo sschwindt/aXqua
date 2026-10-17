@@ -1,7 +1,7 @@
 """Exporting an unsteady result as a movie.
 
 One frame per timestep of a mesh dataset, rendered through the map canvas's own layers,
-extent and colour scale, then encoded. The canvas is what supplies everything except
+extent and color scale, then encoded. The canvas is what supplies everything except
 *which* variable and *how big*: the user has already chosen the styling and the view, and
 a second set of controls for those would be a second place for them to be wrong.
 

@@ -1,4 +1,4 @@
-"""The case file: one river reach in one file that can travel (``*.axq-case``).
+"""The case file: one free-surface water body in one file that can travel (``*.axq-case``).
 
 A case file is the YAML that :func:`axqua.config.load_config` has always read. What the
 file type adds is a name a file dialog can filter on and a rule about content: a case

@@ -267,7 +267,7 @@ def test_the_failure_is_in_the_runner_log_as_well(fake_case, fake_backend):
 
 
 def test_an_unexpected_exception_is_labelled_honestly(fake_case, fake_backend):
-    """Not mislabelled as a solver error - 'axqua did not anticipate this' is the
+    """Not mislabeled as a solver error - 'axqua did not anticipate this' is the
     truthful code."""
     fake_backend.fail_with = KeyError("surprise")
     jd = _create(fake_case, JobKind.STEADY_RUN)

@@ -29,7 +29,7 @@ def test_write_initial_state_roundtrips(tmp_path):
     assert np.allclose(data["values"]["WATER DEPTH"], depth)
     assert np.allclose(data["values"]["VELOCITY U"], 0.0)
     assert np.allclose(data["values"]["VELOCITY V"], 0.0)
-    # same mesh as the geometry it initialises
+    # same mesh as the geometry it initializes
     assert np.allclose(data["x"], x) and np.allclose(data["y"], y)
     assert np.array_equal(data["ikle"], ikle - 1)
 

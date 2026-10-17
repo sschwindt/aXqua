@@ -82,7 +82,7 @@ In the plugin, go to the tab *Simulations*, sub-tab *Mesh convergence*, select t
    :alt: The sub-tab Mesh convergence of the plugin
    :width: 70%
 
-   The sub-tab *Mesh convergence* of the tab *Simulations*. (1) The options of the study. (2) *Submit* starts the study as a job. (3) *Load results* adds the results to the map.
+   The sub-tab *Mesh convergence* of the tab *Simulations*. (1) The simulation program whose mesh is studied, TELEMAC or OpenFOAM. (2) The options of the study. (3) *Submit* starts the study as a job. (4) *Load results* adds the results to the map.
 
 Plan sufficient time and disk space:
 

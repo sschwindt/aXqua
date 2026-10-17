@@ -234,7 +234,7 @@ class TelemacRuntime(ShellRuntime):
         )
         if proc.returncode != 0:
             raise RuntimeError(
-                "Could not initialise the TELEMAC environment via "
+                "Could not initialize the TELEMAC environment via "
                 f"{self.pysource}.\nstderr:\n{proc.stderr}"
             )
         return proc.stdout.strip()

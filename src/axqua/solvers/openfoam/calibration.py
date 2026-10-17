@@ -60,7 +60,7 @@ CAMPAIGN_SUBDIR = "openfoam"
 #: mounting tilt and by the probe's own beam geometry, so the raw per-point error
 #: claims a precision the measurement does not have. This keeps U_z in the
 #: likelihood as a weak constraint on the secondary circulation instead of as the
-#: loudest voice in it. It is a judgement, not a measurement - drop U_z from
+#: loudest voice in it. It is a judgment, not a measurement - drop U_z from
 #: ``calibration_quantities`` (it is still extracted) if that trade is not wanted.
 VERTICAL_ERROR_FLOOR = 0.03
 
@@ -258,7 +258,7 @@ def stage_case_template(cfg: Config, *, state=None, rebuild: bool = False,
         artifacts = built = build_case(cfg, state=state, uniform_bed_ks=True)
         # The template's nominal Ks should be representative of the reach rather
         # than the 0.05 m fallback: it is the value every run starts from and the
-        # natural centre for the ks prior.
+        # natural center for the ks prior.
         bed_ks = getattr(artifacts.mesh, "bed_ks", None)
         if bed_ks is not None:
             import numpy as np
@@ -967,9 +967,9 @@ def _assert_targets_placed(placement: pd.DataFrame, *, min_points: int = 6,
                            min_fraction: float = 0.5) -> None:
     """Refuse a campaign whose targets do not land in real water.
 
-    This is not defence in depth - it is the only defence. HydroBayesCal's
+    This is not defense in depth - it is the only defense. HydroBayesCal's
     OpenFOAM binding finds the nearest extraction point with **no distance
-    cutoff**, so a target metres from the water returns a plausible number instead
+    cutoff**, so a target meters from the water returns a plausible number instead
     of an error, and the whole campaign trains on it.
     """
     usable = placement["usable"].to_numpy(dtype=bool)
@@ -983,6 +983,6 @@ def _assert_targets_placed(placement: pd.DataFrame, *, min_points: int = 6,
         f"(need at least {max(min_points, int(np.ceil(min_fraction * n)))}).\n"
         f"unusable: {detail}\n"
         "See target-placement.csv. Either the measurement points lie outside the "
-        "modelled wetted extent, or the model is far too shallow there. Do NOT run "
+        "modeled wetted extent, or the model is far too shallow there. Do NOT run "
         "the campaign: HydroBayesCal's nearest-point search has no distance "
         "cutoff, so it will silently return values from wherever it can reach.")

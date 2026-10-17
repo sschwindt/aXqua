@@ -33,7 +33,7 @@ log = logging.getLogger("axqua.plugin")
 FONT_FAMILY = "Arial"
 FONT_SIZE_PT = 16
 
-#: A3 landscape, in millimetres.
+#: A3 landscape, in millimeters.
 PAGE_W, PAGE_H = 420.0, 297.0
 MARGIN = 12.0
 
@@ -150,8 +150,8 @@ def _add_flow_arrow(layout: QgsPrintLayout, canvas) -> None:
 
     Taken from a centerline layer when the project has one, which makes it a direction
     that was measured rather than inferred. Failing that it falls back to the extent's
-    own aspect - a river reach is longer than it is wide, so its bounding box points
-    along the flow more often than not - and that is why the arrow is labelled ``Q``
+    own aspect - a water body such as a river is often longer than it is wide, so its bounding box points
+    along the flow more often than not - and that is why the arrow is labeled ``Q``
     rather than presented as authoritative: the user can rotate it, and a wrong arrow
     they can see beats a confident one they cannot check.
     """

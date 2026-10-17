@@ -22,7 +22,7 @@ propagate.
 
 **A handle must survive the launching process.** Everything needed to query or cancel the
 job later - unit name, pid, pgid, job-object name, the recording host and boot id - is
-serialised into ``status.json``. A fresh ``axqua cancel`` days later reconstructs the
+serialized into ``status.json``. A fresh ``axqua cancel`` days later reconstructs the
 launcher from that alone.
 """
 

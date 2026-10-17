@@ -122,7 +122,7 @@ class OpenFoamRuntime(ShellRuntime):
                         'command -v ' + shlex.quote(self.of.solver), check=False)
         if proc.returncode != 0 or not proc.stdout.strip():
             raise RuntimeError(
-                f"Could not initialise the OpenFOAM environment via {self.env_script}."
+                f"Could not initialize the OpenFOAM environment via {self.env_script}."
                 f"\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
             )
         return proc.stdout.strip().splitlines()[0]
@@ -196,7 +196,7 @@ class OpenFoamRuntime(ShellRuntime):
 
         Pass *cfg* so the dictionaries are regenerated from the configuration this
         run was launched with; without it the build-time dictionaries are used and a
-        changed ``end_time`` would be reported but not honoured (see
+        changed ``end_time`` would be reported but not honored (see
         :func:`axqua.solvers.openfoam.dicts.activate`).
 
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than

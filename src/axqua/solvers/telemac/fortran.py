@@ -52,7 +52,7 @@ def patch_drain_regions(cfg: Config, used: list) -> list:
     """Percolation patches to drain, as extra :class:`InternalSourceRegion` regions.
 
     Standing surface water on a porous gravel bar infiltrates instead of ponding, so
-    it is an artefact of a 2D model that has no subsurface. With
+    it is an artifact of a 2D model that has no subsurface. With
     ``percolation.losing_region: line`` the prescribed exchange is taken from the
     channel at the losing line and nothing removes water sitting on the bar; these
     regions do (see ``percolation.patch_drain``).
@@ -296,7 +296,7 @@ def write_user_fortran(cfg: Config, regions: list, *, plane=None) -> Path:
     stmt("ENDIF")
     comment("")
     comment("PASS 1: how much taper-weighted WET area does the losing patch have?")
-    comment("Normalising by the wet area (not the whole polygon) is what lets the")
+    comment("Normalizing by the wet area (not the whole polygon) is what lets the")
     comment("full target discharge be delivered when part of the patch is dry - a")
     comment("uniform Q/area over the whole polygon silently loses the dry share.")
     stmt("HMP_WET=0.D0")
@@ -312,7 +312,7 @@ def write_user_fortran(cfg: Config, regions: list, *, plane=None) -> Path:
     stmt("ENDDO")
     stmt("IF(NCSIZE.GT.1) HMP_WET=P_SUM(HMP_WET)")
     comment("")
-    comment("PASS 2: withdraw, normalised over that wet area and capped three ways -")
+    comment("PASS 2: withdraw, normalized over that wet area and capped three ways -")
     comment("by the taper, by an absolute ceiling, and by half the water available")
     comment("above HMP_HMN this step - so a cell can never be drained dry.")
     stmt("HMP_QEX=0.D0")
@@ -451,7 +451,7 @@ def write_water_table_fortran(cfg: Config, plane) -> Path:
     So the faces move with the stage - a rising river widens the losing face, which
     is what actually happens and what a build-time mask cannot represent.
 
-    Magnitude is Green-Ampt at ``conductivity``, or ``discharge`` normalised over the
+    Magnitude is Green-Ampt at ``conductivity``, or ``discharge`` normalized over the
     taper-weighted wet losing area when a measured total is prescribed. Whatever is
     withdrawn is reinjected over the gaining face in the same step, so the routine is
     mass-exact by construction and opens no net sink in the boundary budget.

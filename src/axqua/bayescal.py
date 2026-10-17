@@ -40,7 +40,7 @@ Lessons baked in (see the module functions):
   gpytorch, so it is kept modest (``calibration.prior_samples``, default 5000) -
   ample for a low-dimensional roughness posterior and safe on a 16 GB box;
 * per-flow steering files differ only in Q, the outflow stage (from the
-  synthesised rating at that Q), ``DURATION`` and the results name.
+  synthesized rating at that Q), ``DURATION`` and the results name.
 """
 
 from __future__ import annotations
@@ -556,7 +556,7 @@ extraction = {{
     # march to steady state from a pre-wetted start, so a mean_last window folds the
     # residual transient into the values the surrogate is trained on. The multiflow
     # driver silently defaulted to 'mean_last' until HydroBayesCal 1.5 made it read
-    # this block (single-flow runs on the same config already honoured it), so the
+    # this block (single-flow runs on the same config already honored it), so the
     # two modes were fitted to different data - emit it explicitly.
     'output_extraction_time': 'last',
     'n_last': 80,

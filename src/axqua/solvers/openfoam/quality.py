@@ -15,10 +15,10 @@ remains the authority; this is the fast pre-check, exactly as
 river and the one that has no analogue in an aerodynamics workflow. OpenFOAM's
 ``nutkRoughWallFunction`` manipulates the log-law ``E`` parameter for a sand-grain
 roughness ``Ks``, and that manipulation is only meaningful while the first cell
-centre stands *clear* of the roughness elements - ``y_1 > Ks``, i.e. a bed layer at
+center stands *clear* of the roughness elements - ``y_1 > Ks``, i.e. a bed layer at
 least ``2 Ks`` thick. On the isar reach ``ks`` runs 0.085-0.22 m in 0.3-0.9 m of
-water, so a "well resolved" bed layer of a few centimetres would put the first cell
-centre *inside* the gravel and the wall function would return a confident,
+water, so a "well resolved" bed layer of a few centimeters would put the first cell
+center *inside* the gravel and the wall function would return a confident,
 meaningless answer. Refining towards the bed is therefore **not** available here,
 and the report says so per bed face instead of letting the run imply otherwise.
 """
@@ -133,7 +133,7 @@ class MeshReport:
             share = 100.0 * self.n_wall_function_invalid / max(self.n_bed_faces, 1)
             out.append(f"  wall function: {self.n_wall_function_invalid:,} of "
                        f"{self.n_bed_faces:,} wetted bed faces ({share:.1f}%) have the "
-                       f"first cell centre inside the roughness (y1 < ks)")
+                       f"first cell center inside the roughness (y1 < ks)")
         for w in self.warnings:
             out.append(f"  ! {w}")
         return out
@@ -145,12 +145,12 @@ class MeshReport:
 
 
 def face_geometry(mesh) -> tuple[np.ndarray, np.ndarray]:
-    """``(face centres, face area vectors)`` by OpenFOAM's triangle decomposition.
+    """``(face centers, face area vectors)`` by OpenFOAM's triangle decomposition.
 
     A quad on a terrain-following mesh is generally **not planar** - its four corners
     sit on four columns of different height - so its centroid is not the average of
     its corners. OpenFOAM fans the face about that average and area-weights the
-    resulting triangles; anything cruder shifts the centre by a few percent of the
+    resulting triangles; anything cruder shifts the center by a few percent of the
     cell, which is enough to move the reported non-orthogonality by several degrees.
     """
     p = mesh.points[mesh.faces]                       # (NF, 4, 3)
@@ -168,16 +168,16 @@ def face_geometry(mesh) -> tuple[np.ndarray, np.ndarray]:
 
 def cell_geometry(mesh, face_centres: np.ndarray,
                   face_normals: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """``(cell centres, cell volumes)`` by OpenFOAM's pyramid decomposition.
+    """``(cell centers, cell volumes)`` by OpenFOAM's pyramid decomposition.
 
-    Each face forms a pyramid with an estimated cell centre; the true centre is the
+    Each face forms a pyramid with an estimated cell center; the true center is the
     volume-weighted mean of the pyramid centroids. Reproducing this exactly is what
     makes the non-orthogonality reported here the same number ``checkMesh`` will
     report, rather than an optimistic approximation of it.
     """
     ni = mesh.n_internal_faces
     n_cells = mesh.n_cells
-    # first estimate: mean of the cell's own face centres
+    # first estimate: mean of the cell's own face centers
     acc = np.zeros((n_cells, 3))
     count = np.zeros(n_cells)
     np.add.at(acc, mesh.owner, face_centres)
@@ -205,7 +205,7 @@ def cell_geometry(mesh, face_centres: np.ndarray,
 def bad_face_pyramids(mesh, face_centres: np.ndarray,
                       face_normals: np.ndarray,
                       cell_centres: np.ndarray) -> np.ndarray:
-    """Faces whose pyramid to their cell centre has non-positive volume.
+    """Faces whose pyramid to their cell center has non-positive volume.
 
     checkMesh calls these "incorrectly oriented" and treats them as fatal, and rightly:
     the cell is folded even though its total volume can still come out positive - which
@@ -247,7 +247,7 @@ def skewness(mesh, face_centres: np.ndarray, face_normals: np.ndarray,
     """Face skewness, matching OpenFOAM's ``primitiveMeshTools::faceSkewness``.
 
     The skewness *vector* is the offset of the owner-neighbour line's crossing point
-    from the face centre; what matters is the normalisation. OpenFOAM divides it by
+    from the face center; what matters is the normalization. OpenFOAM divides it by
     the face's own half-width in the skew direction (floored at ``0.2 |d|`` for an
     internal face, ``0.4 |d|`` for a boundary one), **not** by the cell-to-cell
     distance. Dividing by ``|d|`` instead - the intuitive choice - understates the
@@ -292,7 +292,7 @@ def aspect_ratios(mesh, face_normals: np.ndarray, volumes: np.ndarray) -> np.nda
     ``max(component ratio, hydraulic ratio)`` where the component ratio is the
     largest over the smallest of the per-direction summed face-area magnitudes, and
     the hydraulic one is ``(1/6) sum|Sf| / V^(2/3)``. The component form dominates on
-    a terrain-following mesh - a cell a metre wide in plan and a decimetre tall has
+    a terrain-following mesh - a cell a meter wide in plan and a decimeter tall has
     ten times the horizontal face area of the vertical - and it is precisely the
     number that exposes how flat the layers are, so taking only the hydraulic form
     (which reads ~3 where OpenFOAM reads ~17) would hide it.
@@ -349,7 +349,7 @@ def assess(of_mesh, *, state=None, roughness_constant: float = 0.5) -> MeshRepor
     if report.n_bad_pyramid:
         report.warnings.append(
             f"{report.n_bad_pyramid} face(s) are incorrectly oriented (a pyramid to "
-            "the cell centre has non-positive volume). checkMesh treats this as fatal. "
+            "the cell center has non-positive volume). checkMesh treats this as fatal. "
             "On a rigid-lid mesh it comes from the waterline, where the water column "
             "thins to nothing - raise openfoam.min_water_depth (that, not "
             "min_column_height, is the floor under a rigid lid) so those columns are "
@@ -413,7 +413,7 @@ def _assess_wall_function(of_mesh, report: MeshReport, *, state,
     report.bed_layer_median = float(np.median(first[wet]))
     report.ks_min = float(np.nanmin(ks[wet]))
     report.ks_max = float(np.nanmax(ks[wet]))
-    # the first cell CENTRE sits at half the layer height; the wall function needs
+    # the first cell CENTER sits at half the layer height; the wall function needs
     # it clear of the roughness elements
     report.n_wall_function_invalid = int(((0.5 * first[wet]) < ks[wet]).sum())
     ks = ks[wet]
@@ -432,7 +432,7 @@ def _assess_wall_function(of_mesh, report: MeshReport, *, state,
     share = report.n_wall_function_invalid / max(report.n_bed_faces, 1)
     if share > 0.05:
         report.warnings.append(
-            f"{100 * share:.0f}% of WETTED bed faces have the first cell centre inside "
+            f"{100 * share:.0f}% of WETTED bed faces have the first cell center inside "
             f"the roughness (y1 < ks, ks up to {report.ks_max:.3f} m). "
             "nutkRoughWallFunction will NOT fail there - it clamps y+ to e/E and "
             "carries on - so the run completes and the near-bed velocity is simply "

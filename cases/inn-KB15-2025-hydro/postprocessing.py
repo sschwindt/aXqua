@@ -6,7 +6,7 @@ sampling and rendering; aXqua decides what to draw and writes the script.
 Scenes:
 
 ``free-surface``
-    the water surface coloured by speed. Under ``mode: rigid-lid`` there is no
+    the water surface colored by speed. Under ``mode: rigid-lid`` there is no
     interface to contour, so it falls back to the lid patch and **says on the
     figure that the surface was prescribed by the 2D seed** rather than solved.
 ``velocity-plan``
@@ -14,7 +14,7 @@ Scenes:
     FlowTracker measures at, so the figure and the calibration look at the same
     thing.
 ``profiles``
-    modelled vertical velocity profiles against the measured verticals, with
+    modeled vertical velocity profiles against the measured verticals, with
     error bars, plus a residual CSV. Run it once with the prior-centre parameters
     and once with the calibrated ones - those two panels are the calibration
     result.

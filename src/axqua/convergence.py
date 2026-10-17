@@ -612,7 +612,7 @@ def write_readme(base_dir, *, report: ConvergenceReport | None = None,
 
 
 def _rel_change(prev: np.ndarray, curr: np.ndarray) -> float:
-    """Relative L2 change between two probe vectors, normalised by the finer one."""
+    """Relative L2 change between two probe vectors, normalized by the finer one."""
     denom = np.linalg.norm(curr)
     if denom == 0:
         return float(np.linalg.norm(curr - prev))
@@ -777,7 +777,7 @@ def ratio_levels(cfg: Config, ratio: float = 1.3, n_coarser: int = 1,
 
 def _next_finer(levels: list[tuple[str, float, float]],
                 ratio: float) -> tuple[str, float, float]:
-    """The next extension level: the finest tuple refined by *ratio*, labelled by
+    """The next extension level: the finest tuple refined by *ratio*, labeled by
     its total refinement factor vs. the baseline (or coarsest) level."""
     _, ch0, fp0 = levels[-1]
     ch, fp = ch0 / ratio, fp0 / ratio
@@ -1303,7 +1303,7 @@ def run_mesh_convergence(cfg: Config, *, discharge: float, levels=None,
         try:
             res = simulate(label, ch, fp, probes, quantities)
         except Exception as exc:
-            # a finer level can outrun the mesher/solver (e.g. BAMG cannot honour
+            # a finer level can outrun the mesher/solver (e.g. BAMG cannot honor
             # the metric even after its retries, or the run diverges): treat it as
             # the practical refinement limit -- stop extending and report from the
             # levels already completed rather than crashing the whole study.
