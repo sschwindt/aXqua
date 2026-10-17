@@ -44,6 +44,20 @@ def qgis_app():
     yield app
 
 
+@pytest.fixture(autouse=True)
+def _cases_not_in_the_settings_of_qgis(monkeypatch):
+    """The panel keeps its list of cases in the settings of QGIS. In a test the list
+    starts empty and what the panel would store is kept on the dock, so that no test
+    reads or writes the settings file of the QGIS that runs the tests."""
+    from axqua_plugin.core import project as project_io
+    from axqua_plugin.gui import dock as dock_module
+
+    monkeypatch.setattr(dock_module, "_stored_cases", lambda: "")
+    monkeypatch.setattr(dock_module.AxquaDock, "_remember_cases",
+                        lambda self: setattr(self, "remembered",
+                                             project_io.as_settings(self.ctx.project)))
+
+
 @pytest.fixture
 def project(qgis_app):
     """A clean project per test - layers left behind would leak between them."""
@@ -1541,6 +1555,191 @@ def test_findings_appear_at_their_setting_at_their_block_and_in_the_list(
     editor.deleteLater()
 
 
+def _req(key, kind, label="", *, required=False, when=(), **extra):
+    item = _field(key, kind, label, True, **extra)
+    item.update(required=required, required_when=list(when))
+    return item
+
+
+#: What ``axqua schema --json`` sends since the corrections of 2026-10-16: pages with
+#: frames, switches, and what is required.
+PAGED_FIELDS = [
+    _req("project.name", "text", "Name of the case", required=True),
+    _req("boundaries.prescribed_flowrate", "number", "Discharge", required=True),
+    _req("boundaries.outflow_condition", "choice", "Water level at the outflow",
+         choices=["elevation", "stage_discharge", "free"], default="elevation"),
+    _req("boundaries.prescribed_elevation", "number", "Outflow water level",
+         when=[{"key": "boundaries.outflow_condition", "in": ["elevation"]}]),
+    _req("drying.film_infiltration", "bool", "Remove thin films"),
+    _req("openfoam.cell_size", "number", "Cell size"),
+    _req("openfoam.mode", "choice", "Free surface", choices=["vof", "rigid-lid"],
+         when=[{"block": "openfoam"}]),
+    _req("openfoam.end_time", "number", "Simulated time", when=[{"block": "openfoam"}]),
+    _req("ground_truth.sources", "yaml", "Measurement files",
+         when=[{"block": "calibration"}]),
+    _req("calibration.parameters", "yaml", "Parameters", when=[{"block": "calibration"}]),
+    _req("calibration.validation", "yaml", "Validation"),
+    _req("postproc.telemac_maps", "multichoice", "Maps",
+         choices=["depth", "velocity", "free-surface"], default=["depth", "velocity"]),
+]
+PAGED_SCHEMA = {
+    "sections": [{"block": block, "title": block, "label": "",
+                  "fields": [f for f in PAGED_FIELDS if f["block"] == block]}
+                 for block in dict.fromkeys(f["block"] for f in PAGED_FIELDS)],
+    "pages": [
+        {"key": "project", "title": "Project settings", "label": "case-project",
+         "switch": {}, "frames": [{"title": "", "info": "", "keys": ["project.name"]}]},
+        {"key": "boundaries", "title": "Liquid boundaries", "label": "case-boundaries",
+         "switch": {}, "frames": [{"title": "", "info": "", "keys": [
+             "boundaries.prescribed_flowrate", "boundaries.outflow_condition",
+             "boundaries.prescribed_elevation"]}]},
+        {"key": "initialization", "title": "Initial conditions",
+         "label": "case-initialization", "switch": {}, "frames": [
+             {"title": "Drying of thin films", "info": "On a coarse bed ...",
+              "keys": ["drying.film_infiltration"]}]},
+        {"key": "mesh", "title": "Mesh configuration", "label": "case-mesh",
+         "switch": {}, "frames": [{"title": "OpenFOAM lattice", "info": "",
+                                   "keys": ["openfoam.cell_size"]}]},
+        {"key": "openfoam", "title": "OpenFOAM", "label": "case-hydraulics",
+         "switch": {"label": "Simulate with OpenFOAM", "seed": {"mode": "vof"}},
+         "frames": [{"title": "", "info": "", "keys": ["openfoam.mode",
+                                                        "openfoam.end_time"]}]},
+        {"key": "calibration", "title": "Calibration and validation",
+         "label": "help-calibration",
+         "switch": {"label": "Calibrate and validate this case", "seed": {}},
+         "frames": [{"title": "Measurements", "info": "",
+                     "keys": ["ground_truth.sources"]},
+                    {"title": "Calibration and validation", "info": "",
+                     "keys": ["calibration.parameters", "calibration.validation"]}]},
+        {"key": "postproc", "title": "Post-processing", "label": "help-postprocessing",
+         "switch": {}, "frames": [{"title": "", "info": "",
+                                   "keys": ["postproc.telemac_maps"]}]},
+    ]}
+
+PAGED_CASE = {
+    "project": {"name": "reach"},
+    "boundaries": {"prescribed_flowrate": 2.4},
+    "ground_truth": {"sources": [{"category": "hydraulics", "kind": "points",
+                                  "values": "gt/nov.gpkg"}]},
+    "calibration": {"parameters": [{"name": "zone4", "min": 0.02, "max": 0.3}],
+                    "validation": [{"name": "High flow", "prescribed_flowrate": 5.3,
+                                    "prescribed_elevation": 815.2,
+                                    "sources": [{"category": "hydraulics",
+                                                 "kind": "points",
+                                                 "values": "gt/sep.gpkg"}]}]},
+}
+
+
+def _paged(tmp_path, monkeypatch, case=None):
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _CaseClient()
+    editor = case_editor.CaseEditor(client, tmp_path / "reach.axq-case",
+                                    case or PAGED_CASE, PAGED_SCHEMA)
+    return editor, client
+
+
+def _purple(label) -> bool:
+    return "#2e014b" in label.styleSheet() and "bold" in label.styleSheet()
+
+
+def test_the_case_settings_have_the_pages_the_user_named(qgis_app, tmp_path,
+                                                         monkeypatch):
+    from qgis.PyQt.QtWidgets import QGroupBox, QToolButton
+
+    editor, client = _paged(tmp_path, monkeypatch)
+    assert editor.windowTitle() == "Case settings: reach.axq-case"
+    assert [editor.section_list.item(i).text() for i in range(7)] == [
+        "Project settings", "Liquid boundaries", "Initial conditions",
+        "Mesh configuration", "OpenFOAM", "Calibration and validation",
+        "Post-processing"]
+    frames = [box.title() for box in editor.findChildren(QGroupBox)]
+    assert "Drying of thin films" in frames and "OpenFOAM lattice" in frames
+    # the drying frame explains why it matters
+    drying = next(b for b in editor.findChildren(QGroupBox)
+                  if b.title() == "Drying of thin films")
+    assert any(t.toolTip().startswith("On a coarse bed")
+               for t in drying.findChildren(QToolButton))
+    # nothing touched: written back as it was read
+    assert editor.values() == PAGED_CASE and not editor.dirty
+    editor.deleteLater()
+
+
+def test_required_entries_are_purple_and_follow_the_options(qgis_app, tmp_path,
+                                                           monkeypatch):
+    editor, _client = _paged(tmp_path, monkeypatch)
+    rows = editor.rows
+    assert _purple(rows["project.name"].label_widget)
+    # the outflow level is required while the outflow condition is a level (its default)
+    assert _purple(rows["boundaries.prescribed_elevation"].label_widget)
+    outflow = rows["boundaries.outflow_condition"].widget
+    outflow.setCurrentIndex(outflow.findData("free"))
+    assert not _purple(rows["boundaries.prescribed_elevation"].label_widget)
+    outflow.setCurrentIndex(outflow.findData("elevation"))
+    # the page that lacks it is marked as well
+    item = editor.section_list.item(1)
+    assert item.font().bold() and "required" in item.toolTip()
+    rows["boundaries.prescribed_elevation"].widget.setText("815.3")
+    assert not editor.section_list.item(1).font().bold()
+
+    # OpenFOAM is off: its entries are greyed out, required nowhere, and not written
+    switch = editor.switches["openfoam"]
+    assert not switch.isChecked() and not rows["openfoam.cell_size"].container.isEnabled()
+    assert not _purple(rows["openfoam.end_time"].label_widget)
+    switch.setChecked(True)                                      # switched on
+    assert rows["openfoam.mode"].widget.currentData() == "vof"   # the seed entry
+    assert _purple(rows["openfoam.end_time"].label_widget)
+    assert rows["openfoam.cell_size"].container.isEnabled()      # on the mesh page
+    assert editor.values()["openfoam"] == {"mode": "vof"}
+    rows["openfoam.cell_size"].widget.setText("1.5")
+    switch.setChecked(False)
+    assert "openfoam" not in editor.values()                     # off is off
+    editor.deleteLater()
+
+
+def test_measurement_files_are_used_for_calibration_or_validation(qgis_app, tmp_path,
+                                                                 monkeypatch):
+    editor, client = _paged(tmp_path, monkeypatch)
+    table = editor.measurements
+    assert table.table.rowCount() == 2
+    roles = [table._rows[i]["use"].currentData() for i in range(2)]
+    assert roles == ["calibration", "validation"]
+    assert table._rows[1]["situation"].text() == "High flow"
+    assert table._rows[1]["discharge"].text() == "5.3"
+    assert not table._rows[0]["discharge"].isEnabled()           # the case's discharge
+
+    table.add("gt/aug.gpkg")
+    table.set_role(2, "validation", "Summer", "54.3")
+    data = editor.values()
+    assert [s["values"] for s in data["ground_truth"]["sources"]] == ["gt/nov.gpkg"]
+    situations = {s["name"]: s for s in data["calibration"]["validation"]}
+    assert situations["High flow"]["prescribed_elevation"] == 815.2    # kept
+    assert situations["Summer"]["prescribed_flowrate"] == 54.3
+    assert [s["values"] for s in situations["Summer"]["sources"]] == ["gt/aug.gpkg"]
+
+    table.set_role(0, "validation", "Summer", "54.3")             # no calibration data
+    assert "ground_truth" not in editor.values()
+    assert _purple(editor.measurement_label)                       # calibration is on
+    editor.save()
+    assert any("Measurement files" in f.message for f in editor.findings)
+    editor.deleteLater()
+
+
+def test_a_multiple_choice_is_check_boxes_and_its_default_is_not_written(
+        qgis_app, tmp_path, monkeypatch):
+    editor, _client = _paged(tmp_path, monkeypatch)
+    row = editor.rows["postproc.telemac_maps"]
+    assert [c for c, box in row.boxes.items() if box.isChecked()] == ["depth", "velocity"]
+    assert "postproc" not in editor.values()                     # the default stays
+    row.boxes["free-surface"].setChecked(True)
+    assert editor.values()["postproc"]["telemac_maps"] == ["depth", "velocity",
+                                                           "free-surface"]
+    editor.deleteLater()
+
+
 def test_a_selected_file_is_written_relative_to_the_case_where_it_is_near(tmp_path):
     from axqua_plugin.gui.case_editor import stored_path
 
@@ -1561,6 +1760,45 @@ def test_text_is_converted_by_the_kind_of_its_setting():
     assert parse("vector", "data/lines.gpkg") == "data/lines.gpkg"
     assert parse("number", "") is None
     assert parse("number", "fast") == "fast"         # kept; the check says what is wrong
+
+
+def test_the_case_setup_tab_has_case_settings_and_no_project_file(dock, tmp_path,
+                                                                   monkeypatch):
+    """The user's correction of 2026-10-16: a project is a case. The list of cases is
+    kept in the settings of QGIS, and the box Case settings opens the active case."""
+    import json
+
+    from qgis.PyQt.QtWidgets import QGroupBox, QPushButton
+
+    from axqua_plugin.core import project as project_io
+
+    tab = dock.case_tab
+    titles = [box.title() for box in tab.findChildren(QGroupBox)]
+    assert titles == ["Cases", "Case settings"]
+    labels = [button.text() for button in tab.findChildren(QPushButton)]
+    assert "Open case settings..." in labels
+    assert not {"Open project...", "Save project", "Save as...", "Edit case..."} & set(labels)
+    assert not tab.settings_button.isEnabled()                  # no case yet
+
+    first, second = tmp_path / "a.axq-case", tmp_path / "b.axq-case"
+    for case in (first, second):
+        case.write_text("project: {name: x}\n", encoding="utf-8")
+    dock.add_case(first)
+    dock.add_case(second)
+    assert tab.settings_button.isEnabled() and str(first) in tab.case_label.text()
+    dock.set_active_case(str(second))
+    assert str(second) in tab.case_label.text()
+    stored = json.loads(dock.remembered)
+    assert stored == {"cases": [str(first), str(second)], "active_case": str(second)}
+    dock.remove_case(second)
+    assert json.loads(dock.remembered)["cases"] == [str(first)]
+
+    # a project file of an earlier version adds its cases
+    old = project_io.AxquaProject(path=tmp_path / "old.axqua-prj")
+    old.add_case(second)
+    project_io.save(old)
+    dock.import_project(tmp_path / "old.axqua-prj")
+    assert json.loads(dock.remembered)["cases"] == [str(first), str(second)]
 
 
 def test_the_case_tab_opens_the_editor_and_takes_over_what_it_found(dock, tmp_path,
@@ -2267,6 +2505,46 @@ def test_the_results_of_a_case_are_listed_exported_and_opened(program_pages):
     dock.profile_changed({"installations": {"visit": "/data/visit"},
                           "programs": {"visit": "/data/visit/bin/visit"}})
     assert visit.program_path == "/data/visit/bin/visit"
+
+
+def test_an_openfoam_case_is_opened_in_paraview_and_visit_without_export(program_pages):
+    dock, paraview, visit, started = program_pages
+    payload = dict(_export_list(), openfoam=[
+        {"label": "OpenFOAM free surface", "folder": "/c/openfoam", "run": True,
+         "paraview": "/c/openfoam/case.foam", "visit": "/c/openfoam/system/controlDict"}])
+    dock.profile_changed({"postprocessors": {"paraview": "/usr/bin/paraview",
+                                             "visit": "/opt/visit/bin/visit"}})
+    for page in (paraview, visit):
+        page.show_results(payload)
+        assert page.foam_list.count() == 1 and page.foam_button.isEnabled()
+        page.open_openfoam()
+    assert started == [("/usr/bin/paraview", ["/c/openfoam/case.foam"]),
+                       ("/opt/visit/bin/visit", ["-o", "/c/openfoam/system/controlDict"])]
+    visit.show_results(_export_list())                       # a case without OpenFOAM
+    assert visit.foam_list.count() == 0 and not visit.foam_button.isEnabled()
+
+
+def test_a_map_style_the_case_asks_for_reaches_the_loader(tmp_path):
+    import json
+
+    from axqua_plugin.core import result_loader, styles
+
+    mesh = _write_mesh(tmp_path)
+    (tmp_path / "results").mkdir(exist_ok=True)
+    (tmp_path / "results" / "results.json").write_text(json.dumps({
+        "job_id": "J", "results": [{"name": "depth", "path": str(mesh), "kind": "mesh",
+                                    "style": "water-depth", "variable": "WATER DEPTH",
+                                    "extra": {"map_style": "depth-arrows"}}]}))
+    results = result_loader.discover(tmp_path)
+    assert results.items[0].map_style == "depth-arrows"
+    # the case file names a style by the keys of this plugin: aXqua lists the same
+    import ast
+    import re
+
+    source = (Path(__file__).resolve().parents[2] / "src" / "axqua" / "config.py"
+              ).read_text(encoding="utf-8")
+    listed = re.search(r"^MAP_STYLES = (\(.*?\))$", source, re.MULTILINE | re.DOTALL)
+    assert ast.literal_eval(listed.group(1)) == tuple(styles.MAP_STYLES)
 
 
 def test_everything_is_exported_when_no_result_is_selected(program_pages):

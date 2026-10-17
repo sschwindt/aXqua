@@ -154,17 +154,17 @@ The *Check* tab of an installation wizard, the *Installation* tab of a failed in
 Check of a case
 ---------------
 
-The check of a case (*Check* on the *Case Setup* tab, *Save* in the case editor, or ``axqua check <case-file>``) reports the following errors. The plugin shows each of them as a dark red triangle next to the setting concerned. An error does not prevent saving the case, but the model cannot be built until it is corrected.
+The check of a case (*Check* on the *Case Setup* tab, *Save* in the case settings, or ``axqua check <case-file>``) reports the following errors. The plugin shows each of them as a dark red triangle next to the setting concerned. An error does not prevent saving the case, but the model cannot be built until it is corrected.
 
 .. _axqua-config-missing-value:
 
 ``... is required`` or ``... is not set``
-    A setting that every case needs is empty, for example the terrain model, the model outline, or the inflow and outflow lines. Select the file in the case editor.
+    A setting that every case needs is empty, for example the terrain model, the model outline, or the inflow and outflow lines. Select the file in the case settings (*Open case settings...* on the *Case Setup* tab).
 
 .. _axqua-config-missing-file:
 
 ``the file of ... does not exist``
-    The case file names a file that is not at the stated location. A path that does not start at the root of the drive is read relative to the folder of the case file. Select the file again in the case editor.
+    The case file names a file that is not at the stated location. A path that does not start at the root of the drive is read relative to the folder of the case file. Select the file again in the case settings.
 
 .. _axqua-config-unknown-key:
 
@@ -174,7 +174,7 @@ The check of a case (*Check* on the *Case Setup* tab, *Save* in the case editor,
 .. _axqua-config-yaml-syntax:
 
 ``the case file is not valid YAML``
-    The structure of the file is damaged, for example by a missing colon or a wrong indentation. The message names the line. Correct it with a text editor. The case editor keeps the original of a case file as ``<name>.bak`` the first time it saves.
+    The structure of the file is damaged, for example by a missing colon or a wrong indentation. The message names the line. Correct it with a text editor. The case settings keep the original of a case file as ``<name>.bak`` the first time it saves.
 
 .. _axqua-config-not-a-case:
 

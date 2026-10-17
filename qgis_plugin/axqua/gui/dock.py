@@ -81,7 +81,8 @@ class PluginContext:
         # the defaults of those two settings.
         self.min_depth = styles.DEFAULT_MIN_DEPTH
         self.velocity_cap = styles.DEFAULT_VELOCITY_MAX
-        self.project = project_io.AxquaProject()
+        # the cases the panel knows, kept in the settings of QGIS (core/project.py)
+        self.project = project_io.from_settings(_stored_cases())
         self.case_view: CaseView | None = None
         self.profile: dict | None = None
         self.actions: dict = {}             # what the plugin menu can do, by name
@@ -158,14 +159,14 @@ class PluginContext:
     def open_settings(self) -> None:
         self.dock.open_settings()
 
-    def open_project(self, path: Path) -> None:
-        self.dock.open_project(path)
-
-    def save_project(self, path: Path | None = None) -> None:
-        self.dock.save_project(path)
+    def import_project(self, path: Path) -> None:
+        self.dock.import_project(path)
 
     def add_case(self, path: Path) -> None:
         self.dock.add_case(path)
+
+    def remove_case(self, path: Path) -> None:
+        self.dock.remove_case(path)
 
     def set_active_case(self, stored: str) -> None:
         self.dock.set_active_case(stored)
@@ -325,36 +326,43 @@ class AxquaDock(QDockWidget):
         key, sub = self.current_section()
         return help_pages.open_help(key, sub)
 
-    # -- project ------------------------------------------------------------------
-    def open_project(self, path: Path) -> None:
+    # -- the list of cases --------------------------------------------------------
+    def _remember_cases(self) -> None:
+        """Keep the list of cases in the settings of QGIS, so that it survives a
+        restart without anything being saved by hand."""
+        from qgis.PyQt.QtCore import QSettings
+
+        QSettings().setValue(project_io.SETTINGS_KEY, project_io.as_settings(self.ctx.project))
+
+    def import_project(self, path: Path) -> None:
+        """Add the cases of a project file of an earlier version."""
         try:
-            self.ctx.project = project_io.load(path)
+            added = project_io.import_cases(self.ctx.project, path)
         except (OSError, ValueError) as exc:
-            self.ctx.error(f"Could not open {path.name}: {exc}")
+            self.ctx.error(f"Could not read {path.name}: {exc}")
             return
+        self._remember_cases()
         self.case_tab.refresh()
-        self.ctx.info(f"Opened {path.name} with {len(self.ctx.project.cases)} case(s).")
-        # Rediscovery: the jobs are found with whatever state they have reached while
-        # QGIS was closed.
+        self.ctx.info(f"Added {added} case(s) of {path.name}.")
         self.refresh_case()
         self.jobs_tab.refresh()
 
-    def save_project(self, path: Path | None = None) -> None:
-        try:
-            written = project_io.save(self.ctx.project, path)
-        except (OSError, ValueError) as exc:
-            self.ctx.error(f"Could not save the project: {exc}")
-            return
-        self.case_tab.refresh()
-        self.ctx.info(f"Saved {written.name}.")
-
     def add_case(self, path: Path) -> None:
         self.ctx.project.add_case(path)
+        self._remember_cases()
+        self.case_tab.refresh()
+        self.refresh_case()
+
+    def remove_case(self, path: Path) -> None:
+        self.ctx.project.remove_case(path)
+        self._remember_cases()
         self.case_tab.refresh()
         self.refresh_case()
 
     def set_active_case(self, stored: str) -> None:
         self.ctx.project.active_case = stored
+        self._remember_cases()
+        self.case_tab.refresh()
         self.refresh_case()
 
     # -- capabilities -------------------------------------------------------------
@@ -450,15 +458,12 @@ class AxquaDock(QDockWidget):
         config = self.ctx.active_case_or_warn()
         if client is None or config is None or not kinds:
             return
-        project = self.ctx.project
         kinds = list(kinds)
 
         def work():
             submitted = []
             for kind in kinds:
-                data = client.submit(config, kind, profile=project.profile or None,
-                                     job_root=project.job_root or None,
-                                     launcher=project.launcher,
+                data = client.submit(config, kind,
                                      options=options if len(kinds) == 1 else None)
                 submitted.append(str((data or {}).get("job_id") or ""))
             return submitted
@@ -495,3 +500,9 @@ class AxquaDock(QDockWidget):
 def _qt():
     from qgis.PyQt.QtCore import Qt
     return Qt
+
+
+def _stored_cases() -> str:
+    from qgis.PyQt.QtCore import QSettings
+
+    return str(QSettings().value(project_io.SETTINGS_KEY, "") or "")

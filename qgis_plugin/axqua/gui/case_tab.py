@@ -1,10 +1,15 @@
-"""The *Case Setup* tab: which river reach is worked on.
+"""The *Case Setup* tab: which free-surface water body is worked on.
 
-A case is one file (``*.axq-case``) that describes a reach: its geodata, its boundary
-conditions, its mesh and what is to be simulated. The tab lists the cases of the
-project, selects the active one, and shows what aXqua reports this case can do. Every
-other tab works on the active case. *Example case...* downloads a ready-made case with
-its data (``gui/example_dialog.py``).
+A case is one file (``*.axq-case``) that describes a water body: its geodata, its
+boundary conditions, its mesh and what is to be simulated. The tab lists the cases the
+panel knows, selects the active one, and shows what aXqua reports this case can do.
+Every other tab works on the active case. *Example case...* downloads a ready-made case
+with its data (``gui/example_dialog.py``).
+
+The box *Case settings* opens the settings of the active case in a window of their own
+(:mod:`.case_editor`), where files are selected in dialogs and fixed choices from lists.
+The panel has no project file any more: a case is the project, and the list of cases is
+kept in the settings of QGIS (:mod:`..core.project`).
 """
 
 from __future__ import annotations
@@ -20,7 +25,11 @@ from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from . import findings as fnd
 
-CASE_FILTER = "aXqua case (*.axq-case *.yml *.yaml)"
+CASE_FILTER = ("aXqua case (*.axq-case *.yml *.yaml);;"
+               "Project file of an earlier version "
+               f"(*{project_io.SUFFIX} *{project_io.LEGACY_SUFFIX})")
+
+NO_ACTIVE_CASE = "Add or select a case first."
 
 
 class CaseTab(QWidget):
@@ -40,14 +49,12 @@ class CaseTab(QWidget):
         case_layout = QVBoxLayout(case_box)
         buttons = QHBoxLayout()
         for text, slot, tip in (
-                ("New case...", self.new_case, "Create a case file and open the editor"),
+                ("New case...", self.new_case, "Create a case file and open its settings"),
                 ("Add case...", self.add_case, "Add an existing case file to the list"),
                 ("Example case...", self.get_example,
                  "Download a complete case with its data and a guide"),
-                ("Edit case...", self.edit_case, "Open the active case in the editor"),
-                ("Check", self.check_case, "Report what is wrong with the active case"),
-                ("Open folder", self.open_folder, "Open the folder of the active case"),
-                ("Refresh", self.ctx.refresh_case, "Read the case file again")):
+                ("Remove from list", self.remove_case,
+                 "Take the active case off the list; the case file stays")):
             button = QPushButton(text)
             button.setToolTip(tip)
             button.clicked.connect(slot)
@@ -61,33 +68,56 @@ class CaseTab(QWidget):
         self.capability_label = QLabel("Add a case file to begin.")
         self.capability_label.setWordWrap(True)
         case_layout.addWidget(self.capability_label)
-        self.finding_list = fnd.FindingList("")
-        case_layout.addWidget(self.finding_list)
         layout.addWidget(case_box)
 
-        project_box = QGroupBox("Project file")
-        project_layout = QVBoxLayout(project_box)
-        self.project_label = QLabel("")
-        self.project_label.setWordWrap(True)
-        project_layout.addWidget(self.project_label)
+        settings_box = QGroupBox("Case settings")
+        settings_layout = QVBoxLayout(settings_box)
+        self.case_label = QLabel(NO_ACTIVE_CASE)
+        self.case_label.setWordWrap(True)
+        settings_layout.addWidget(self.case_label)
         row = QHBoxLayout()
-        for text, slot in (("Open project...", self.open_project),
-                           ("Save project", self.save_project),
-                           ("Save as...", self.save_project_as)):
+        self.settings_button = QPushButton("Open case settings...")
+        self.settings_button.setToolTip(
+            "Set up the active case in a window: files are selected in dialogs, fixed "
+            "choices from lists, and the required entries are marked in purple")
+        self.settings_button.clicked.connect(self.edit_case)
+        row.addWidget(self.settings_button)
+        for text, slot, tip in (
+                ("Check", self.check_case, "Report what is wrong with the active case"),
+                ("Open folder", self.open_folder, "Open the folder of the active case"),
+                ("Refresh", self.ctx.refresh_case, "Read the case file again")):
             button = QPushButton(text)
+            button.setToolTip(tip)
             button.clicked.connect(slot)
             row.addWidget(button)
         row.addStretch(1)
-        project_layout.addLayout(row)
-        layout.addWidget(project_box)
+        settings_layout.addLayout(row)
+        self.finding_list = fnd.FindingList("")
+        settings_layout.addWidget(self.finding_list)
+        layout.addWidget(settings_box)
         layout.addStretch(1)
 
     # -- actions ------------------------------------------------------------------
+    def _start_folder(self) -> str:
+        case = self.ctx.project.active_case_path()
+        return str(case.parent) if case is not None else ""
+
     def add_case(self) -> None:
-        start = str(self.ctx.project.base()) if self.ctx.project.path else ""
-        chosen, _ = QFileDialog.getOpenFileName(self, "Add a case", start, CASE_FILTER)
-        if chosen:
+        chosen, _ = QFileDialog.getOpenFileName(self, "Add a case", self._start_folder(),
+                                                CASE_FILTER)
+        if not chosen:
+            return
+        if chosen.endswith((project_io.SUFFIX, project_io.LEGACY_SUFFIX)):
+            self.ctx.import_project(Path(chosen))
+        else:
             self.ctx.add_case(Path(chosen))
+
+    def remove_case(self) -> None:
+        case = self.ctx.project.active_case_path()
+        if case is None:
+            self.ctx.warn(NO_ACTIVE_CASE)
+            return
+        self.ctx.remove_case(case)
 
     def new_case(self) -> None:
         """Create a case file with the entries every case has, and open the editor."""
@@ -110,8 +140,7 @@ class CaseTab(QWidget):
         client = self.ctx.client_or_warn()
         if client is None:
             return
-        start = str(self.ctx.project.base()) if self.ctx.project.path else ""
-        exec_dialog(ExampleDialog(client, folder=start, parent=self,
+        exec_dialog(ExampleDialog(client, folder=self._start_folder(), parent=self,
                                   on_done=self.ctx.add_case))
 
     def _created(self, path: Path) -> None:
@@ -167,24 +196,6 @@ class CaseTab(QWidget):
         if case is not None:
             open_in_file_manager(case.parent)
 
-    def open_project(self) -> None:
-        chosen, _ = QFileDialog.getOpenFileName(
-            self, "Open an aXqua project", "", f"aXqua project (*{project_io.SUFFIX})")
-        if chosen:
-            self.ctx.open_project(Path(chosen))
-
-    def save_project(self) -> None:
-        if self.ctx.project.path is None:
-            self.save_project_as()
-        else:
-            self.ctx.save_project()
-
-    def save_project_as(self) -> None:
-        chosen, _ = QFileDialog.getSaveFileName(
-            self, "Save the aXqua project", "", f"aXqua project (*{project_io.SUFFIX})")
-        if chosen:
-            self.ctx.save_project(Path(chosen))
-
     def _case_selected(self, text: str) -> None:
         if text and text != self.ctx.project.active_case:
             self.show_findings([], checked=False)      # they were about another case
@@ -193,10 +204,10 @@ class CaseTab(QWidget):
     # -- rendering ----------------------------------------------------------------
     def refresh(self) -> None:
         project = self.ctx.project
-        self.project_label.setText(
-            str(project.path) if project.path else
-            "The list of cases is not saved yet. Save a project file to find the cases "
-            "again after a restart of QGIS.")
+        case = project.active_case_path()
+        self.case_label.setText(
+            f"Active case: {case}" if case is not None else NO_ACTIVE_CASE)
+        self.settings_button.setEnabled(case is not None)
         self.case_list.blockSignals(True)
         self.case_list.clear()
         for case in project.cases:

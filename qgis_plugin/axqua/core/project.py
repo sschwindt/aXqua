@@ -1,4 +1,17 @@
-"""``<name>.axqua-prj``: a thin pointer, deliberately.
+"""The list of cases in the panel, and the project file it was once kept in.
+
+**Since the user's corrections of 2026-10-16 the panel has no project file.** "With the
+current configuration, a project is a case": a case file holds everything about a
+water body, and the computer profile holds the folder for jobs and the launcher, which
+were the other entries of a project file. So the panel keeps the list of cases that it
+shows, and which of them is active, in the settings of QGIS (:data:`SETTINGS_KEY`,
+:func:`as_settings` / :func:`from_settings`), where the list survives a restart of QGIS
+without the user saving anything. A project file of an earlier version is still read:
+*Add case...* accepts it and adds the cases it lists (:func:`import_cases`).
+
+What follows describes the file as it was.
+
+``<name>.axqua-prj``: a thin pointer, deliberately.
 
 The original brief had this file hold "all user settings and simulation status". Status
 is the one thing it must **not** hold. The runner writes status while QGIS is closed, and
@@ -182,3 +195,42 @@ def save(project: AxquaProject, path: str | os.PathLike | None = None) -> Path:
     tmp.write_text(json.dumps(project.as_dict(), indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, target)
     return target
+
+
+# ---------------------------------------------------------------- the list in QGIS
+
+#: Where the plugin keeps the list of cases in the settings of QGIS.
+SETTINGS_KEY = "axqua/cases"
+
+
+def as_settings(project: AxquaProject) -> str:
+    """The list of cases and the active one, as the text the settings store."""
+    cases = [str(project.resolve(c)) for c in project.cases]
+    active = str(project.resolve(project.active_case)) if project.active_case else ""
+    return json.dumps({"cases": cases, "active_case": active})
+
+
+def from_settings(text: str | None) -> AxquaProject:
+    """The list of cases that the settings hold; an empty one for anything else."""
+    project = AxquaProject()
+    try:
+        data = json.loads(text) if text else {}
+    except (TypeError, ValueError):
+        return project
+    if not isinstance(data, dict):
+        return project
+    for case in data.get("cases") or []:
+        project.add_case(str(case))
+    active = str(data.get("active_case") or "")
+    if active and active in project.cases:
+        project.active_case = active
+    return project
+
+
+def import_cases(project: AxquaProject, path: str | os.PathLike) -> int:
+    """Add the cases that an old project file lists. Returns how many were new."""
+    old = load(path)
+    before = len(project.cases)
+    for case in old.case_paths():
+        project.add_case(case)
+    return len(project.cases) - before

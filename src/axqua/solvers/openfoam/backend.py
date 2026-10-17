@@ -241,7 +241,7 @@ class OpenFoamBackend(BaseBackend):
             log.warning("depth-averaged result skipped: %s: %s",
                         type(exc).__name__, exc)
 
-        if _wants_vtk(ctx):
+        if _wants_vtk(ctx, cfg):
             try:
                 OpenFoamRuntime(cfg.openfoam).to_vtk(case_dir, latest=False)
                 out["vtk"] = str(case_dir / "VTK")
@@ -433,10 +433,17 @@ class OpenFoamBackend(BaseBackend):
                        variable="SCALAR VELOCITY")
             written.append(plan)
 
+        # what the case asks to offer for ParaView and VisIt (postproc.openfoam_outputs)
+        outputs = set(getattr(getattr(cfg, "postproc", None), "openfoam_outputs", None)
+                      or ("paraview", "visit"))
         foam = case_dir / "case.foam"
-        if foam.exists():
+        if foam.exists() and "paraview" in outputs:
             ctx.record("OpenFOAM case (ParaView)", foam, kind="file")
             written.append(foam)
+        control = case_dir / "system" / "controlDict"
+        if control.exists() and "visit" in outputs:
+            # VisIt opens an OpenFOAM case through its controlDict, not case.foam
+            ctx.record("OpenFOAM case (VisIt)", control, kind="file")
 
         # VTK is what QGIS can actually read; the .foam file needs ParaView. Both are
         # listed, and the plugin picks what it can load.
@@ -486,13 +493,20 @@ def _is_mesh_study(ctx: Any) -> bool:
     return getattr(ctx, "capability", None) is Capability.MESH_CONVERGENCE
 
 
-def _wants_vtk(ctx: Any) -> bool:
-    """VTK conversion is opt-in: it can double the size of an already large case."""
+def _wants_vtk(ctx: Any, cfg: Any = None) -> bool:
+    """VTK conversion is opt-in: it can double the size of an already large case.
+
+    The option of the job decides; without one, the case decides
+    (``postproc.openfoam_outputs`` naming ``vtk``), and then the environment.
+    """
     if ctx is None:
         return False
     explicit = getattr(getattr(ctx, "options", None), "to_vtk", None)
     if explicit is not None:
         return bool(explicit)
+    outputs = getattr(getattr(cfg, "postproc", None), "openfoam_outputs", None) or ()
+    if "vtk" in outputs:
+        return True
     postprocess = (getattr(ctx, "spec", None) and
                    ctx.spec.environment.get("postprocess")) or []
     return "foamToVTK" in postprocess

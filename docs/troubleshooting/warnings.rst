@@ -61,17 +61,17 @@ Simulations
 Check of a case
 ---------------
 
-The check of a case (*Check* on the *Case Setup* tab, *Save* in the case editor, or ``axqua check <case-file>``) reports the following warnings. The plugin shows each of them as an orange triangle next to the setting concerned.
+The check of a case (*Check* on the *Case Setup* tab, *Save* in the case settings, or ``axqua check <case-file>``) reports the following warnings. The plugin shows each of them as an orange triangle next to the setting concerned.
 
 .. _axqua-config-no-solver:
 
 ``the case names no simulation program, so nothing can be built or run``
-    The case file contains neither a ``telemac`` nor an ``openfoam`` block. Add the block of the program to use, for example by selecting the solver in the section *TELEMAC* of the case editor.
+    The case file contains neither a ``telemac`` nor an ``openfoam`` block. Add the block of the program to use, for example with the switch *Simulate with TELEMAC* on the page *TELEMAC* of the case settings.
 
 .. _axqua-config-incomplete:
 
 ``no discharge is set, so the steady simulation has no inflow``
-    The case can be saved, but the next step of the workflow needs this setting. Enter the discharge in the section *Boundaries* of the case editor (:ref:`case-boundaries`).
+    The case can be saved, but the next step of the workflow needs this setting. Enter the discharge on the page *Liquid boundaries* of the case settings (:ref:`case-boundaries`).
 
 Profile of this computer
 ------------------------

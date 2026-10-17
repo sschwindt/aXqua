@@ -161,13 +161,76 @@ def test_a_setting_without_a_label_of_its_own_is_explained_by_its_source_comment
 
 def test_the_sections_follow_the_documentation_and_miss_no_block():
     sections = schema_meta.build()
-    assert [s["title"] for s in sections][:2] == ["Project paths", "Geodata"]
+    assert [s["title"] for s in sections][:3] == ["Project settings", "Geodata",
+                                                  "Liquid boundaries"]
     from axqua.config import load_config
 
     path = Path(__file__).resolve().parent.parent / "cases" / "example-isar" / \
         "example-isar.axq-case"
     declared = load_config(path).declared_blocks
     assert declared <= {s["block"] for s in sections}
+
+
+def test_the_editor_pages_are_the_ones_the_user_named(tmp_path):
+    """The user's corrections of 2026-10-16 to the case editor."""
+    sections = schema_meta.build()
+    pages = schema_meta.pages(sections)
+    titles = [page["title"] for page in pages]
+    assert titles == ["Project settings", "Geodata", "Liquid boundaries",
+                      "Initial conditions", "Mesh configuration", "Wall roughness",
+                      "Hydraulic simulation", "Morphodynamic simulation", "TELEMAC",
+                      "OpenFOAM", "Calibration and validation", "Post-processing"]
+    frames = {page["key"]: [frame["title"] for frame in page["frames"]] for page in pages}
+    # structures and the surfaces from CAD are frames of the OpenFOAM page, the
+    # measurements of the page of calibration and validation
+    assert frames["openfoam"] == ["", "Structures", "Surfaces from CAD"]
+    assert frames["calibration"] == ["Measurements", "Calibration and validation"]
+    # the lattice of the OpenFOAM model is set with the mesh
+    assert frames["mesh"] == ["TELEMAC mesh", "OpenFOAM lattice"]
+    mesh_keys = pages[titles.index("Mesh configuration")]["frames"][1]["keys"]
+    assert {"openfoam.cell_size", "openfoam.cell_size_factor",
+            "openfoam.n_layers"} <= set(mesh_keys)
+    openfoam_keys = pages[titles.index("OpenFOAM")]["frames"][0]["keys"]
+    assert "openfoam.cell_size" not in openfoam_keys and "openfoam.mode" in openfoam_keys
+    drying = pages[titles.index("Initial conditions")]["frames"][1]
+    assert drying["title"] == "Drying of thin films" and "grain" in drying["info"]
+    assert {page["key"] for page in pages if page["switch"]} == {
+        "telemac", "openfoam", "calibration"}
+    # every setting is on exactly one frame
+    on_frames = [key for page in pages for frame in page["frames"] for key in frame["keys"]]
+    every = [item["key"] for section in sections for item in section["fields"]]
+    assert sorted(on_frames) == sorted(every)
+
+
+def test_what_is_required_is_on_the_form_and_follows_the_options():
+    by_key = {item["key"]: item for section in schema_meta.build()
+              for item in section["fields"]}
+    for key in ("project.name", "geodata.dem_initial", "geodata.boundary",
+                "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate"):
+        assert by_key[key]["required"] and by_key[key]["essential"], key
+    for key, conditions in schema_meta.REQUIRED_WHEN.items():
+        assert key in by_key and by_key[key]["essential"], key
+        assert by_key[key]["required_when"] == conditions
+        for condition in conditions:
+            assert set(condition) in ({"key", "in"}, {"block"}), condition
+            if "key" in condition:
+                assert condition["key"] in by_key, condition
+    assert by_key["fine_sediment.grain_size"]["required_when"] == [
+        {"key": "fine_sediment.enabled", "in": [True]}]
+    assert by_key["postproc.telemac_maps"]["kind"] == "multichoice"
+
+
+def test_the_post_processing_choices_are_those_of_the_code():
+    from axqua import config
+    from axqua.postproc.scenes import available_names
+
+    assert config.VISIT_SCENES == available_names()
+    by_key = {item["key"]: item for section in schema_meta.build()
+              for item in section["fields"]}
+    assert tuple(by_key["postproc.scenes"]["choices"]) == config.VISIT_SCENES
+    assert tuple(by_key["postproc.telemac_maps"]["choices"]) == config.TELEMAC_MAPS
+    assert tuple(by_key["postproc.openfoam_outputs"]["choices"]) == config.OPENFOAM_OUTPUTS
+    assert tuple(by_key["postproc.map_style"]["choices"]) == config.MAP_STYLES
 
 
 # ------------------------------------------------------------------ the commands

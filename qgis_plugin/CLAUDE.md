@@ -14,21 +14,41 @@ old `supportsQt6` flag was removed from core and is ignored. So: `qgis.PyQt` imp
 version, and **no `.qrc`/`pyrcc`** - a compiled resource module is built against one Qt
 major version and is the most common reason a plugin loads on one QGIS and not the other.
 
-**The tabs are fixed and follow the documentation** (`gui/sections.py`, pure data):
-Configuration, Case Setup, Preprocessing, Hydraulic simulation [Telemac | OpenFOAM], Mesh
-convergence, Morphodynamic simulation [Telemac | OpenFOAM], Calibration & validation,
-Postprocessing [QGIS | ParaView | VisIt], Batch-processing - the order prescribed by
-`docs/restructuring-instructions.md` and pinned by `test_the_tabs_are_the_prescribed_ones`.
-**What a tab offers still comes from `axqua case-status --json`**: `sections.placement`
-only says *where* a capability is shown, as a box (`section_pages.SectionPage` wrapping the
-unchanged `CapabilityTab`); `n/a` hides a box (OpenFOAM has no depth-averaged mode - a
-category error, not a gap), `no` shows it disabled *with the reason*, and the buttons
-enable from `configured`/`built`/`run`. A capability nobody has placed is shown under
-Hydraulic simulation in the sub-tab of its solver, so adding a capability to aXqua still
-surfaces with no plugin change. The build of the 2D model has the Preprocessing tab to
-itself (its button is hidden in the Steady 2D box), with the capability matrix as the
-"checkup" table. **The job list is below the tabs**, not one of them: a job is submitted on
-one tab and its result is used on another.
+**The tabs are fixed** (`gui/sections.py`, pure data): Configuration, Case Setup,
+Preprocessing, Simulations [Baseline (Telemac) | OpenFOAM | Mesh convergence |
+Morphodynamics], Calibration & validation, Postprocessing [QGIS | ParaView | VisIt],
+Batch-processing - the user's corrections of 2026-10-16 merged the former tabs Hydraulic
+simulation, Mesh convergence and Morphodynamic simulation into *Simulations* (key
+`hydraulics`, kept so that labels and placements did not move) and renamed its TELEMAC
+sub-tab *Baseline (Telemac)*; pinned by `test_the_tabs_are_the_prescribed_ones_in_their_order`.
+A sub-tab with `choose_solver` (Mesh convergence, Morphodynamics) is a
+`section_pages.SolverChoicePage`: a combo box *Simulation program* (TELEMAC/OpenFOAM)
+filters the boxes to one solver, with an empty text per solver (`dock.EMPTY` keyed
+`(section, sub, solver)`). A sub-tab may name a docs page of its own (`SubSection.page`),
+so Help on *Mesh convergence* still opens `usage/mesh-convergence`. **What a tab offers
+still comes from `axqua case-status --json`**: `sections.placement` only says *where* a
+capability is shown, as a box (`section_pages.SectionPage` wrapping the unchanged
+`CapabilityTab`); `n/a` hides a box (OpenFOAM has no depth-averaged mode - a category
+error, not a gap), `no` shows it disabled *with the reason*, and the buttons enable from
+`configured`/`built`/`run`. A capability nobody has placed is shown under Simulations in the
+sub-tab of its solver, so adding a capability to aXqua still surfaces with no plugin
+change. The OpenFOAM mesh study is the kind `openfoam-mesh-convergence`
+(`capability_tabs.BY_SOLVER`, options `n_processors`, `auto_extend`, `pre_run`). The build of
+the 2D model has the Preprocessing tab to itself (its button is hidden in the Steady 2D box),
+with the capability matrix as the "checkup" table. **The job list is below the tabs**, not
+one of them: a job is submitted on one tab and its result is used on another.
+
+**No project file any more** (the user, 2026-10-16: "a project is a case"). The Case Setup
+tab has the boxes *Cases* (New, Add, Example, Remove from list; the list) and *Case
+settings* (the active case, *Open case settings...*, Check, Open folder, Refresh). The list
+of cases and the active one live in QSettings (`core/project.SETTINGS_KEY`,
+`as_settings`/`from_settings`), written by `AxquaDock._remember_cases` on every change;
+*Add case...* still accepts a `.axqua-prj`/`.hydromate-prj` and adds its cases
+(`import_cases`). The project's `profile`/`job_root`/`launcher` overrides are gone: the
+computer profile carries the job root and the launcher, so `submit` and `list` no longer
+pass them. Plugin tests never touch the settings file of the test QGIS (an autouse
+fixture stubs `_stored_cases` and `_remember_cases`; the test QgsApplication writes
+`~/.local/share/profiles/default/Unknown Organization.ini`, not a real QGIS profile).
 
 **Help opens the online docs at the section of the tab that is showing** (`gui/help.py`; the user's decision of 2026-10-16: "the Help button ... should refer to the online help on axqua.readthedocs.io (that will soon be replaced with axqua.eu)"). Each section and sub-section names its page and `help-...` label, and a test reads the `.rst` files to assert every label is on its page. The address is `https://axqua.readthedocs.io/en/latest/<page>.html#<label>`; Read the Docs forwards to `axqua.eu` once that is the canonical domain (on 2026-10-17 `https://axqua.eu` still failed the TLS handshake from lww-134 while `www.axqua.eu` answered). **No copy of the docs is built into the archive any more**: `scripts/build_plugin_zip.py` lost `build_help`, `--help-only` and `--no-help`, a leftover `help/` folder in a linked plugin folder is left out of the archive, and the `plugin_help` tag of `docs/conf.py` is gone.
 
@@ -54,22 +74,40 @@ folder. On a computer whose profile cannot be read, *Create profile...* says bef
 anything is saved that the file is kept (`UNREADABLE`), and the editor names the `.bak`
 file afterwards.
 
-**The case editor** (`gui/case_editor.py`) builds its forms from `axqua schema --json`
-(`src/axqua/core/schema_meta.py`: derived from a fully dumped default case, the dataclass
-annotations and the comments beside the fields, so it cannot miss a setting; `CURATED`
-gives the ~47 settings a modeler meets first a plain label and unit). A block's page shows
-the essential settings plus whatever the file already has; the rest is one *Add setting...*
-away. **A row that was not touched is written back exactly as it was read** - only a row
-whose text changed is converted (`Row.value`), so opening and saving cannot turn `3` into
-`"3"`; the headless run asserts `values() == data` on the real example. A list that does not
-parse keeps its previous content and gets a finding, so one typing error does not cost the
-rest of the form. Findings from `axqua check` (`core/casecheck.py`, which runs **every**
-step of `Config.checks()` instead of stopping at the first, and skips the steps about the
-computer) land on the row whose key is the `subject`, on the block in the list, and in the
-bottom list; a finding for a setting without a row adds the row. Both editors share
-`editor_base.EditorDialog` (Save / Cancel / Exit, the unsaved-changes question).
-`axqua case write` keeps `<name>.bak` once, because writing goes through the data and
-loses hand-written comments - the editor's header says so.
+**The case settings** (`gui/case_editor.py`, window title "Case settings: <file>")
+build their pages from `axqua schema --json`: `pages` (from `core/schema_meta.PAGES`:
+Project settings, Geodata, Liquid boundaries, Initial conditions, Mesh configuration, Wall
+roughness, Hydraulic simulation, Morphodynamic simulation, TELEMAC, OpenFOAM, Calibration
+and validation, Post-processing), each page with frames (`{title, info, keys}`); an older
+aXqua that sends only `sections` gets one page per block, which the original tests still
+exercise. The frames merge what the user asked merged: gain_lose on Liquid boundaries,
+drying on Initial conditions (with an info button, `DRYING_INFO`), the `# ---- mesh ----`
+group of the openfoam dataclass as *OpenFOAM lattice* on Mesh configuration
+(`schema_meta._groups` reads the headings of the dataclass source), structures and
+surfaces on OpenFOAM, ground_truth as *Measurements* on Calibration and validation. A
+frame's non-essential fields are behind its own *Add setting...* (`_adders` keyed by frame
+id: the page key, or `page:frame title`). **Required entries are bold aXqua purple**
+(`gui/style.py`, `#2e014b`, `mark_required`): `required` (minimal case) and `required_when`
+(conditions `{key, in}` evaluated against the live rows with defaults for unset ones, or
+`{block}` = the page switch) come from the schema, are re-evaluated on every widget change
+(`changed` -> `update_required`), mark the page in the list while one is empty, and are
+reported as `axqua.config.incomplete` findings on Save unless aXqua's own check names the
+subject. **Switches** (`SWITCHES`: telemac, openfoam, calibration) are a check box at the top
+of a page; off greys out the block's rows wherever they are (the lattice on the mesh page
+too) and drops the block from `values()`, on seeds the entry the schema names (an empty block
+is never written). **The measurement table** (`MeasurementTable`) replaces the YAML rows of
+`ground_truth.sources` and `calibration.validation`: one row per file, *Use for* calibration
+or validation, a situation name and its discharge for validation; keys of a situation the
+table does not show (inflows, prescribed_elevation, duration) are kept; untouched it returns
+its input exactly. A `multichoice` kind is a row of check boxes (postproc lists). **A row that
+was not touched is written back exactly as it was read** - only a row whose text changed is
+converted (`Row.value`); `Row.peek` reads without recording an error. A list that does not
+parse keeps its previous content and gets a finding. Findings from `axqua check` land on the
+row whose key is the `subject`, on the page in the list, and in the bottom list; a finding for
+a setting without a row adds the row. Both editors share `editor_base.EditorDialog` (Save /
+Cancel / Exit); the case settings add *Help* at the bottom left (the docs label of the page).
+`axqua case write` keeps `<name>.bak` once, because writing goes through the data and loses
+hand-written comments - the header says so.
 
 **The installation wizards** (`gui/install_wizard.py`) are one window with three **tabs** - Settings, Check, Installation - that can be visited in any order (the user's order of 2026-10-16; they were pages of a stacked widget), with *Back*/*Next* walking through them; opening the Check tab with settings other than those of the plan shown checks again. They decide nothing themselves: the form is a small table (`FIELDS`), the Check tab shows what `axqua install plan` answers, and the Installation tab polls `axqua install status --tail` every 2 s. The *Install* button sits at the bottom-left of the Check tab (the user's docs say so). An installation is a detached process of the library (see `axqua/install/` in the root notes), so closing the wizard or QGIS does not stop it; the Configuration tab keeps a 15 s timer while one runs and its button then reads *Show the installation...*, which reopens the wizard on the Installation tab. **The plugin never sees a password**: missing system packages are shown under the heading `REQUIRED USER ACTIONS in TERMINAL:` (bold, aXqua purple `#2e014b`, `gui/style.py`) in a box of at least 120 px with purple text; *Run fixes* runs `axqua install packages --elevate` (pkexec, the desktop's dialog) or, without a desktop dialog, opens a terminal window with the command (`terminal_argv`) and re-checks every 15 s; after a pkexec round it re-checks and repeats while the missing list shrinks (`MAX_FIX_ROUNDS` 3). When the fixes stop making progress, or the check itself fails, *Report issue* appears (also on the Installation tab of a failed installation): `gui/report_issue.py` writes a report (home folder as `~`) into an editable window with *Open on GitHub* (prefilled new-issue URL; needs a GitHub account), *Send by e-mail* (`mailto:`; no account) and *Copy report*; both addresses are read from `metadata.txt` (`tracker`, `email`). After a successful installation the cancel button reads *Installation complete* on dark gray-green (`DONE_GREEN`) and closes the window. A wizard is not a tab, so its Help target lives in `sections.WINDOWS`. **The postprocessors are one question** (`viewers`: *ParaView and VisIt (recommended)*, *ParaView only*, and for OpenFOAM *None*), which `install_flags` turns into `--no-visit` / `--no-visualization`; the recommended answer is the first and the default.
 
@@ -79,7 +117,15 @@ loses hand-written comments - the editor's header says so.
 of the active case (`axqua export <case> --list`), export the selected ones in a background
 task and start the program of the profile with the exported index file (`.pvd`; VisIt takes
 `-o file.visit`) through `QProcess.startDetached`, wrapped in `launch()` so that a test can
-replace it. One export serves both programs, so a page asks again whenever it is shown.
+replace it. One export serves both programs, so a page asks again whenever it is shown. The
+box *OpenFOAM cases of the selected case* lists what `export --list` now also returns under
+`openfoam` (`exportcli.openfoam_cases`: the free-surface and the fine-sediment case with
+`case.foam` for ParaView and `system/controlDict` for VisIt) and starts the program with it.
+**Map styles of a case**: a manifest entry may carry `extra.map_style` (TELEMAC sets it from
+`postproc.map_style` on the depth layer, and leaves out maps not in `postproc.telemac_maps`);
+`ResultItem.map_style` makes the loader call `apply_map_style` after the plain style. The
+plugin's `styles.MAP_STYLES` keys must equal `axqua.config.MAP_STYLES` (a test reads the
+library source).
 
 **Validation** (`gui/validation_box.py`): the *Calibration & validation* tab is a
 `CalibrationPage` - the capability boxes of a `SectionPage`, and below them a box for **one

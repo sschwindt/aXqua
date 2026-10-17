@@ -12,6 +12,15 @@ stands with the field in the source. On top of that, :data:`CURATED` gives the s
 a modeler meets first a plain label, a unit and, for a file, what kind of file it is.
 Those are the **essential** settings, which a form shows at once. Every other setting is
 complete but stays out of the way until it is asked for.
+
+**Pages, frames and what is required** (the user's corrections of 2026-10-16). The
+editor shows the settings on :data:`PAGES`: one page per subject, each with one or more
+frames (a block, or the part of a block that belongs to the subject: the lattice of the
+OpenFOAM model is set on the page *Mesh configuration*). :data:`REQUIRED` names what a
+minimal case cannot do without, and :data:`REQUIRED_WHEN` what an option makes
+necessary, as conditions the editor evaluates while the form is filled in: the editor
+marks both in the purple of the aXqua icon. :data:`SWITCHES` are the pages whose block
+exists only when the case asks for it (simulating with OpenFOAM, calibrating).
 """
 
 from __future__ import annotations
@@ -25,35 +34,123 @@ import typing
 from pathlib import Path
 from typing import Any
 
-__all__ = ["BLOCKS", "CURATED", "KINDS", "block_classes", "build", "field_kinds"]
+__all__ = ["BLOCKS", "CURATED", "KINDS", "PAGES", "REQUIRED", "REQUIRED_WHEN", "SWITCHES",
+           "block_classes", "build", "field_kinds", "pages"]
 
-#: What a value can be, as far as a form is concerned.
-KINDS = ("text", "int", "number", "bool", "choice", "file", "folder", "vector", "raster",
-         "table", "yaml")
+#: What a value can be, as far as a form is concerned. ``multichoice`` is a list of
+#: entries out of a fixed set, which a form shows as check boxes.
+KINDS = ("text", "int", "number", "bool", "choice", "multichoice", "file", "folder",
+         "vector", "raster", "table", "yaml")
 
 #: The blocks of a case file in the order of the workflow: ``(key, title, docs label)``.
 #: The label is the section of the page *aXqua case setup* that explains the block.
 BLOCKS: tuple[tuple[str, str, str], ...] = (
-    ("project", "Project paths", "case-project"),
+    ("project", "Project settings", "case-project"),
     ("geodata", "Geodata", "case-geodata"),
-    ("structures", "Structures", "case-geodata"),
-    ("surfaces", "Surfaces from CAD", "case-surfaces"),
-    ("boundaries", "Boundaries", "case-boundaries"),
+    ("boundaries", "Liquid boundaries", "case-boundaries"),
     ("gain_lose", "Exchange with a porous body", "case-boundaries"),
-    ("initialization", "Initialization", "case-initialization"),
+    ("initialization", "Initial conditions", "case-initialization"),
     ("drying", "Drying of thin films", "case-initialization"),
     ("mesh", "Mesh configuration", "case-mesh"),
     ("friction", "Wall roughness", "case-roughness"),
     ("hydrodynamics", "Hydraulic simulation", "case-hydraulics"),
+    ("morphodynamics", "Morphodynamic simulation", "case-morphodynamics"),
+    ("fine_sediment", "Fine sediment over a fixed bed", "case-morphodynamics"),
+    ("dem_of_difference", "DEM of difference", "case-morphodynamics"),
     ("telemac", "TELEMAC", "case-hydraulics"),
     ("openfoam", "OpenFOAM", "case-hydraulics"),
-    ("morphodynamics", "Morphodynamic simulation", "case-morphodynamics"),
-    ("dem_of_difference", "DEM of difference", "case-morphodynamics"),
-    ("fine_sediment", "Fine sediment over a fixed bed", "case-morphodynamics"),
-    ("ground_truth", "Ground truth data", "help-calibration"),
-    ("calibration", "Calibration", "help-calibration"),
-    ("postproc", "Figures", "help-postprocessing"),
+    ("structures", "Structures", "case-geodata"),
+    ("surfaces", "Surfaces from CAD", "case-surfaces"),
+    ("ground_truth", "Measurements", "help-calibration"),
+    ("calibration", "Calibration and validation", "help-calibration"),
+    ("postproc", "Post-processing", "help-postprocessing"),
 )
+
+#: Why the drying of thin films matters, shown as the information of its frame.
+DRYING_INFO = (
+    "On a coarse bed, water thinner than the grain roughness does not flow over the "
+    "bed: it stands within the grains and in nature drains into the ground. A 2D "
+    "model has no ground below the bed, so such a film stays where it is and makes the "
+    "wetted area look much larger than it is. On the Isar case, water shallower than "
+    "1 cm covered 13 % of the wetted area and held 0.16 % of the water. Removing thin "
+    "films takes away water that is both shallower than the film depth and slower than "
+    "the film velocity, and returns it where the porous body gives water back, so that "
+    "no water is lost. It needs the exchange with a porous body (page Liquid "
+    "boundaries).")
+
+#: How the lattice of the OpenFOAM model follows the mesh of the case.
+OPENFOAM_MESH_INFO = (
+    "The OpenFOAM model is built on a lattice of columns. With a factor, its cell size "
+    "follows the edge length in the channel above: 3 makes the lattice three times "
+    "coarser than the TELEMAC mesh, so a change of the TELEMAC mesh carries over. "
+    "Without a factor, the cell size is used as it is.")
+
+#: The pages of the editor, in the order of the workflow:
+#: ``(key, title, docs label, ((block or block/group, frame title, information), ...))``.
+#: ``openfoam/mesh`` is the group *mesh* of the block ``openfoam``, which belongs on
+#: the page of the mesh; the rest of the block stays on its own page.
+PAGES: tuple[tuple[str, str, str, tuple[tuple[str, str, str], ...]], ...] = (
+    ("project", "Project settings", "case-project", (("project", "", ""),)),
+    ("geodata", "Geodata", "case-geodata", (("geodata", "", ""),)),
+    ("boundaries", "Liquid boundaries", "case-boundaries", (
+        ("boundaries", "", ""), ("gain_lose", "Exchange with a porous body", ""))),
+    ("initialization", "Initial conditions", "case-initialization", (
+        ("initialization", "", ""), ("drying", "Drying of thin films", DRYING_INFO))),
+    ("mesh", "Mesh configuration", "case-mesh", (
+        ("mesh", "TELEMAC mesh", ""),
+        ("openfoam/mesh", "OpenFOAM lattice", OPENFOAM_MESH_INFO))),
+    ("friction", "Wall roughness", "case-roughness", (("friction", "", ""),)),
+    ("hydrodynamics", "Hydraulic simulation", "case-hydraulics", (
+        ("hydrodynamics", "", ""),)),
+    ("morphodynamics", "Morphodynamic simulation", "case-morphodynamics", (
+        ("morphodynamics", "Sediment transport with TELEMAC and GAIA", ""),
+        ("fine_sediment", "Fine sediment over a fixed bed with OpenFOAM", ""),
+        ("dem_of_difference", "DEM of difference", ""))),
+    ("telemac", "TELEMAC", "case-hydraulics", (("telemac", "", ""),)),
+    ("openfoam", "OpenFOAM", "case-hydraulics", (
+        ("openfoam", "", ""), ("structures", "Structures", ""),
+        ("surfaces", "Surfaces from CAD", ""))),
+    ("calibration", "Calibration and validation", "help-calibration", (
+        ("ground_truth", "Measurements", ""),
+        ("calibration", "Calibration and validation", ""))),
+    ("postproc", "Post-processing", "help-postprocessing", (("postproc", "", ""),)),
+)
+
+#: Pages whose block exists only when the case asks for it: a switch at the top of the
+#: page, and the entry written when it is switched on (an empty block is not written).
+SWITCHES: dict[str, dict[str, Any]] = {
+    "telemac": {"label": "Simulate with TELEMAC", "seed": {"solver": "telemac2d"}},
+    "openfoam": {"label": "Simulate with OpenFOAM", "seed": {"mode": "vof"}},
+    "calibration": {"label": "Calibrate and validate this case",
+                    "seed": {"calibration_quantities": ["WATER DEPTH",
+                                                        "SCALAR VELOCITY"]}},
+}
+
+#: The entries a minimal case cannot do without.
+REQUIRED = frozenset({
+    "project.name", "project.crs_epsg", "geodata.dem_initial", "geodata.boundary",
+    "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate",
+})
+
+#: Entries an option makes necessary: ``key -> conditions``, of which one suffices. A
+#: condition is ``{"key": ..., "in": [values]}`` (an unset entry counts with its
+#: default) or ``{"block": ...}`` (the block is switched on).
+REQUIRED_WHEN: dict[str, list[dict[str, Any]]] = {
+    "boundaries.prescribed_elevation": [{"key": "boundaries.outflow_condition",
+                                         "in": ["elevation"]}],
+    "boundaries.inflow": [{"key": "hydrodynamics.regime", "in": ["unsteady"]}],
+    "gain_lose.zone": [{"key": "gain_lose.enabled", "in": [True]}],
+    "geodata.dem_target": [{"key": "dem_of_difference.enabled", "in": [True]}],
+    "morphodynamics.sediment_classes": [{"key": "morphodynamics.enabled", "in": [True]}],
+    "fine_sediment.grain_size": [{"key": "fine_sediment.enabled", "in": [True]}],
+    "fine_sediment.inflow_concentration": [{"key": "fine_sediment.enabled",
+                                            "in": [True]}],
+    "openfoam.mode": [{"block": "openfoam"}],
+    "openfoam.end_time": [{"block": "openfoam"}],
+    "ground_truth.sources": [{"block": "calibration"}],
+    "calibration.parameters": [{"block": "calibration"}],
+    "calibration.calibration_quantities": [{"block": "calibration"}],
+}
 
 
 def _c(label: str, kind: str = "", unit: str = "", choices: tuple = (),
@@ -189,7 +286,44 @@ CURATED: dict[str, dict[str, Any]] = {
     "calibration.init_runs": _c("Simulations before the surrogate model", "int"),
     "calibration.max_runs": _c("Simulations in total", "int"),
     "openfoam.mode": _c("Free surface", "choice", choices=("vof", "rigid-lid")),
+    "openfoam.cell_size_factor": _c(
+        "Cell size relative to the channel edge length", "number", "-",
+        help="3 makes the lattice three times coarser than the TELEMAC mesh in the "
+             "channel. Leave empty to use the cell size below."),
     "openfoam.cell_size": _c("Cell size", "number", "m"),
+    "openfoam.n_layers": _c("Layers in the vertical", "int"),
+    "openfoam.end_time": _c("Simulated time", "number", "s",
+                            help="End of the OpenFOAM run, counted from its start."),
+    "openfoam.n_processors": _c("Processor cores", "int"),
+    "hydrodynamics.regime": _c(
+        "Steady or unsteady", "choice", choices=("steady", "unsteady"),
+        help="unsteady runs the hydrograph given on the page Liquid boundaries."),
+    "drying.film_infiltration": _c("Remove thin films", "bool"),
+    "morphodynamics.sediment_classes": _c(
+        "Sediment classes", "yaml",
+        help="One entry per grain size class, for example name, diameter (m) and "
+             "share of the bed."),
+    "postproc.telemac_maps": _c(
+        "Maps of a TELEMAC result", "multichoice",
+        choices=("depth", "velocity", "free-surface"),
+        help="The layers that Load results adds in QGIS."),
+    "postproc.map_style": _c(
+        "Map style of the water depth", "choice",
+        choices=("depth-streamlines", "depth-arrows", "velocity-streamlines",
+                 "velocity-arrows"),
+        help="Velocity arrows or streamlines that the plugin draws over the water "
+             "depth or the velocity magnitude of a loaded TELEMAC result. Empty: plain "
+             "depth and velocity maps."),
+    "postproc.openfoam_outputs": _c(
+        "OpenFOAM results for", "multichoice", choices=("paraview", "visit", "vtk"),
+        help="paraview: the file case.foam. visit: the controlDict of the case, which "
+             "VisIt opens. vtk: a conversion after every run, which QGIS can read too "
+             "and which can double the size of the case."),
+    "postproc.scenes": _c(
+        "VisIt figures", "multichoice",
+        choices=("free-surface", "velocity-plan", "profiles"),
+        help="The predefined figures of three-dimensional results that axqua postproc "
+             "renders with VisIt."),
 }
 
 #: Choices of settings that are not essential, where the code accepts a fixed set only.
@@ -270,6 +404,33 @@ def _comments(cls: type) -> dict[str, str]:
     return out
 
 
+def _groups(cls: type) -> dict[str, str]:
+    """The ``# ---- name ----`` heading each field of a dataclass stands under."""
+    try:
+        lines = inspect.getsource(cls).splitlines()
+    except (OSError, TypeError):
+        return {}
+    heading = re.compile(r"^\s*#\s*-{3,}\s*(.+?)\s*-{3,}\s*$")
+    field_line = re.compile(r"^\s{4}([a-z_][a-z0-9_]*)\s*:")
+    out: dict[str, str] = {}
+    current = ""
+    for line in lines:
+        found = heading.match(line)
+        if found:
+            current = found.group(1).strip().lower()
+            continue
+        match = field_line.match(line)
+        if match and current:
+            out[match.group(1)] = current
+    return out
+
+
+def _frames() -> dict[str, tuple[str, str]]:
+    """``{block or block/group: (page key, frame title)}``."""
+    return {block: (key, title) for key, _t, _l, frames in PAGES
+            for block, title, _info in frames}
+
+
 def _label(name: str) -> str:
     words = name.replace("_", " ").strip()
     return words[:1].upper() + words[1:]
@@ -314,6 +475,8 @@ def build() -> list[dict[str, Any]]:
         cls = type(owner) if dataclasses.is_dataclass(owner) else None
         hints = typing.get_type_hints(cls) if cls is not None else {}
         comments = _comments(cls) if cls is not None else {}
+        groups = _groups(cls) if cls is not None else {}
+        frames = _frames()
         names = list(values)
         if block == "project":
             names = ["name", "crs_epsg", "sim_dir"] + [n for n in values
@@ -329,6 +492,10 @@ def build() -> list[dict[str, Any]]:
             else:
                 kind = _kind(hints.get(name), default, name)
             kind = curated.get("kind") or ("choice" if key in CHOICES else kind)
+            page, frame = frames.get(f"{block}/{groups.get(name, '')}",
+                                     frames.get(block, (block, "")))
+            required = key in REQUIRED
+            when = [dict(condition) for condition in REQUIRED_WHEN.get(key, ())]
             fields.append({
                 "key": key, "block": block, "name": name,
                 "label": curated.get("label") or _label(name),
@@ -336,12 +503,47 @@ def build() -> list[dict[str, Any]]:
                 "unit": curated.get("unit", ""),
                 "help": curated.get("help") or comments.get(name, ""),
                 "choices": list(curated.get("choices") or CHOICES.get(key, ())),
-                "essential": key in CURATED,
+                # a required entry is always on the form
+                "essential": key in CURATED or required or bool(when),
                 "default": _json(default),
+                "required": required,
+                "required_when": when,
+                "page": page,
+                "frame": frame,
             })
         sections.append({"block": block, "title": title, "label": label,
                          "fields": fields})
     return sections
+
+
+def pages(sections: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    """The pages of the editor with their frames and, in each, the keys it shows.
+
+    *sections* is what :func:`build` returned, for a caller that has it already.
+    Every setting of :func:`build` is on exactly one frame; a block that no page names
+    gets a page of its own at the end.
+    """
+    sections = build() if sections is None else sections
+    fields = [item for section in sections for item in section["fields"]]
+    out = []
+    known = set()
+    for key, title, label, frames in PAGES:
+        page = {"key": key, "title": title, "label": label,
+                "switch": dict(SWITCHES.get(key, {})), "frames": []}
+        for _block, frame_title, info in frames:
+            keys = [item["key"] for item in fields
+                    if item["page"] == key and item["frame"] == frame_title]
+            if keys:
+                page["frames"].append({"title": frame_title, "info": info, "keys": keys})
+                known.update(keys)
+        out.append(page)
+    for section in sections:
+        rest = [item["key"] for item in section["fields"] if item["key"] not in known]
+        if rest:
+            out.append({"key": section["block"], "title": section["title"],
+                        "label": section["label"], "switch": {},
+                        "frames": [{"title": "", "info": "", "keys": rest}]})
+    return out
 
 
 def block_classes() -> dict[str, str]:

@@ -43,10 +43,10 @@ TELEMAC-GAIA Setup
 `GAIA <http://www.opentelemac.org/>`_ is the sediment transport module of TELEMAC. When ``morphodynamics.enabled`` is set in the case file, the preprocessing writes a GAIA steering file (``gaia.cas``) next to the TELEMAC model and couples it to the hydraulic simulations.
 
 .. figure:: ../img/gui-case-editor-morphodynamics.png
-   :alt: The block Morphodynamic simulation in the case editor
+   :alt: The page Morphodynamic simulation of the case settings
    :width: 85%
 
-   Sediment transport is switched on in the case editor (*Edit case...* on the *Case Setup* tab). (1) The block *Morphodynamic simulation*. (2) Its settings, of which further ones are added with *Add setting...*.
+   Sediment transport is switched on in the case settings (*Open case settings...* on the *Case Setup* tab). (1) The page *Morphodynamic simulation*. (2) Its settings, of which further ones are added with *Add setting...*.
 
 .. list-table::
    :header-rows: 1
@@ -102,7 +102,7 @@ The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of 
 
 **Requirements.** The simulation needs the steady 2D result of the case (:ref:`hydraulics-dry-runs`), because the water surface of that result is the upper limit of the three-dimensional mesh. The mesh itself is the mesh of the OpenFOAM model in the mode ``rigid-lid`` (:ref:`preprocessing-openfoam-choices`), whatever mode the hydraulic OpenFOAM simulation of the case uses. Its cell size (``openfoam.cell_size`` or ``openfoam.cell_size_factor``) decides how long the simulation takes.
 
-**Settings.** The simulation is defined in the block ``fine_sediment`` of the case file, which is the block *Fine sediment over a fixed bed* in the case editor:
+**Settings.** The simulation is defined in the block ``fine_sediment`` of the case file, which is the frame *Fine sediment over a fixed bed with OpenFOAM* on the page *Morphodynamic simulation* of the case settings:
 
 .. code-block:: yaml
 
@@ -141,10 +141,10 @@ The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of 
      - The bed layer for which the share of fines is reported: its thickness [m], the share of pores between its coarse grains, and the share of fines in its dry mass at the beginning of the period.
 
 .. figure:: ../img/gui-case-editor-fine-sediment.png
-   :alt: The block Fine sediment over a fixed bed in the case editor
+   :alt: The frame Fine sediment over a fixed bed in the case settings
    :width: 85%
 
-   The fine sediment simulation is defined in the case editor (*Edit case...* on the *Case Setup* tab). (1) The block *Fine sediment over a fixed bed*. (2) Its settings, of which further ones are added with *Add setting...*.
+   The fine sediment simulation is defined in the case settings (*Open case settings...* on the *Case Setup* tab). (1) The frame *Fine sediment over a fixed bed with OpenFOAM*. (2) Its settings, of which further ones are added with *Add setting...*.
 
 **Choice of the pick-up.** The formulas of van Rijn describe a bed of sand, from which the flow can remove as many grains as its shear stress allows. A gravel bed holds fine sediment only in its pores, so that these formulas overestimate the removal by orders of magnitude. For fine sediment over a gravel bed, set ``pick_up: off``. The result then shows where fine sediment settles and how much, and the bed shear stress in the result shows where the flow is able to remove it again.
 

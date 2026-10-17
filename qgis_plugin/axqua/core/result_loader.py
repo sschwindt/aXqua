@@ -54,6 +54,9 @@ class ResultItem:
     style: str = ""
     variable: str = ""
     description: str = ""
+    #: A predefined map style (``styles.MAP_STYLES``) the case asks for on this layer
+    #: (``postproc.map_style``), applied after the plain style.
+    map_style: str = ""
 
     @property
     def loadable(self) -> bool:
@@ -116,6 +119,7 @@ def _from_manifest(root: Path, payload: dict) -> JobResults:
             style=str(entry.get("style") or ""),
             variable=str(entry.get("variable") or ""),
             description=str(entry.get("description") or ""),
+            map_style=str((entry.get("extra") or {}).get("map_style") or ""),
         ))
     return JobResults(job_id=str(payload.get("job_id") or root.name), root=root,
                       items=items, objective=payload.get("objective"),
@@ -345,6 +349,10 @@ class ResultLoader:
         try:
             if isinstance(layer, QgsMeshLayer):
                 self._style_mesh(layer, item)
+                if item.map_style:
+                    self.warnings += apply_map_style(
+                        layer, item.map_style, min_depth=self.min_depth,
+                        velocity_cap=self.velocity_cap)
             elif isinstance(layer, QgsVectorLayer) and item.style == STYLE_GRADUATED:
                 if not color_by_attribute(layer, item.variable):
                     self.warnings.append(

@@ -459,6 +459,8 @@ class TelemacBackend(BaseBackend):
         written: list[Path] = []
         from axqua.solvers.telemac import threed
 
+        post = getattr(cfg, "postproc", None)
+
         # Results, in the order a user wants them: the thing that was computed first.
         # The last column is the dataset the velocity is styled by. A 2D result prints
         # the scalar velocity; the depth-averaged companion of a 3D run carries the
@@ -479,12 +481,21 @@ class TelemacBackend(BaseBackend):
             path = cfg.model_path(name)
             if not path.exists():
                 continue
-            ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
-                       variable="WATER DEPTH")
+            # Which maps the case asks for (postproc.telemac_maps), and the predefined
+            # map style the plugin applies to the depth layer (postproc.map_style).
+            maps = set(getattr(post, "telemac_maps", None) or ("depth", "velocity"))
+            style = str(getattr(post, "map_style", "") or "")
+            if "depth" in maps:
+                ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
+                           variable="WATER DEPTH", **({"map_style": style} if style else {}))
             # The same file carries velocity; a second entry lets the plugin add two
             # differently-styled layers over one dataset without reading it twice.
-            ctx.record(f"{label} - velocity", path, kind="mesh", style=STYLE_VELOCITY,
-                       variable=velocity)
+            if "velocity" in maps:
+                ctx.record(f"{label} - velocity", path, kind="mesh",
+                           style=STYLE_VELOCITY, variable=velocity)
+            if "free-surface" in maps:
+                ctx.record(f"{label} - free surface", path, kind="mesh",
+                           variable="FREE SURFACE")
             written.append(path)
 
         # The 3D results themselves are volumes. QGIS reads SELAFIN in 2D only, so they

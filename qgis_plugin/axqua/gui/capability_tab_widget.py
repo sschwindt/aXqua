@@ -200,12 +200,9 @@ class CapabilityTab(QWidget):
             options = {**self.options(), **self.view.fixed_options}
         else:
             options = self.options(build=True)
-        project = self.ctx.project
         run_async(
             f"aXqua: submitting {kind}",
-            lambda: client.submit(config, kind, profile=project.profile or None,
-                                  job_root=project.job_root or None,
-                                  launcher=project.launcher, options=options),
+            lambda: client.submit(config, kind, options=options),
             on_success=self._submitted,
             on_error=lambda exc: self.ctx.error(user_text(exc)), owner=self)
 

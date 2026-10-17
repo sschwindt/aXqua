@@ -653,6 +653,18 @@ def test_user_text_handles_anything_thrown_at_it():
         runner_client.RunnerError("failed", remedy="remedy"))
 
 
+def test_the_list_of_cases_round_trips_through_the_settings_of_qgis(tmp_path):
+    project = project_io.AxquaProject()
+    project.add_case(tmp_path / "a.axq-case")
+    project.add_case(tmp_path / "b.axq-case")
+    project.active_case = project.cases[1]
+    again = project_io.from_settings(project_io.as_settings(project))
+    assert again.cases == [str(tmp_path / "a.axq-case"), str(tmp_path / "b.axq-case")]
+    assert again.active_case == str(tmp_path / "b.axq-case")
+    for broken in ("", "not json", "[1, 2]", None):
+        assert project_io.from_settings(broken).cases == []
+
+
 def test_a_case_added_before_the_project_is_saved_survives_the_save(tmp_path):
     """Stored relative to QGIS's working directory, an entry resolved later against the
     project's own folder - a path that had never existed anywhere."""

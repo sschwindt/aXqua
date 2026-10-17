@@ -285,3 +285,49 @@ def test_the_result_of_the_hydrostatic_run_is_offered_to_qgis(tmp_path):
             HYDROSTATIC_RESULT_2D, "velocity", "VELOCITY") in recorded
     # QGIS cannot open the volume itself: a file, never a layer
     assert kinds["r3d.slf"] == {"file"}
+
+
+def test_the_maps_and_the_map_style_of_a_telemac_result_are_those_of_the_case(tmp_path):
+    """postproc.telemac_maps and postproc.map_style (the user's corrections of
+    2026-10-16: post-processing options for the TELEMAC depth and velocity maps)."""
+    from types import SimpleNamespace
+
+    from axqua.solvers.telemac.backend import TelemacBackend
+
+    for name in ("geometry.slf", "r2d.slf"):
+        (tmp_path / name).write_bytes(b"")
+
+    def listed(**postproc):
+        cfg = SimpleNamespace(
+            results_slf="r2d.slf", results_unsteady_slf=None, results3d_slf=None,
+            results2d_from_3d_slf=None, geometry_slf="geometry.slf",
+            model_path=lambda name: tmp_path / name,
+            postprocessing_dir=tmp_path / "post", calibration_dir=tmp_path,
+            calibration_csv="calibration.csv", postproc=SimpleNamespace(**postproc))
+        recorded = {}
+        ctx = SimpleNamespace(record=lambda name, path, **kw: recorded.setdefault(name, kw))
+        TelemacBackend().export_qgis_results(cfg, ctx)
+        return {name: kw for name, kw in recorded.items()
+                if name.startswith("TELEMAC result")}
+
+    plain = listed(telemac_maps=["depth", "velocity"], map_style="")
+    assert set(plain) == {"TELEMAC result (steady)", "TELEMAC result (steady) - velocity"}
+    assert "map_style" not in plain["TELEMAC result (steady)"]
+    styled = listed(telemac_maps=["depth", "free-surface"], map_style="depth-arrows")
+    assert set(styled) == {"TELEMAC result (steady)",
+                           "TELEMAC result (steady) - free surface"}
+    assert styled["TELEMAC result (steady)"]["map_style"] == "depth-arrows"
+    assert styled["TELEMAC result (steady) - free surface"]["variable"] == "FREE SURFACE"
+
+
+def test_unknown_post_processing_entries_are_refused():
+    import pytest
+
+    from axqua.config import PostProcessing
+
+    PostProcessing(telemac_maps=["depth"], openfoam_outputs=["vtk"],
+                   map_style="velocity-streamlines").validate()
+    for wrong in ({"telemac_maps": ["froude"]}, {"openfoam_outputs": ["tecplot"]},
+                  {"map_style": "rainbow"}, {"scenes": ["sky"]}):
+        with pytest.raises(ValueError):
+            PostProcessing(**wrong).validate()

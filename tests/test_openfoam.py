@@ -890,6 +890,42 @@ def test_the_plan_view_is_listed_for_qgis_with_the_styles_of_a_2d_result(tmp_pat
     assert ctx.records[0][1] == RESULT_NAME      # what QGIS draws comes first
 
 
+def test_what_an_openfoam_case_offers_paraview_and_visit_is_set_by_the_case(tmp_path):
+    from types import SimpleNamespace
+
+    from axqua.exportcli import openfoam_cases
+    from axqua.solvers.openfoam.backend import OpenFoamBackend, _wants_vtk
+
+    case_dir = tmp_path / "openfoam"
+    (case_dir / "system").mkdir(parents=True)
+    (case_dir / "system" / "controlDict").write_text("")
+    (case_dir / "case.foam").write_text("")
+    (case_dir / "12.5").mkdir()
+
+    def listed(outputs):
+        cfg = SimpleNamespace(openfoam_case_dir=case_dir,
+                              postproc=SimpleNamespace(openfoam_outputs=outputs))
+        records = []
+        ctx = SimpleNamespace(record=lambda name, path, **kw: records.append(
+            (name, Path(path).name)), capability=None)
+        OpenFoamBackend().export_qgis_results(cfg, ctx)
+        return records
+
+    assert ("OpenFOAM case (ParaView)", "case.foam") in listed(["paraview", "visit"])
+    assert ("OpenFOAM case (VisIt)", "controlDict") in listed(["paraview", "visit"])
+    assert ("OpenFOAM case (VisIt)", "controlDict") not in listed(["paraview"])
+    # vtk in the case asks for the conversion; an option of the job still decides
+    vtk = SimpleNamespace(postproc=SimpleNamespace(openfoam_outputs=["vtk"]))
+    job = SimpleNamespace(options=SimpleNamespace(to_vtk=None), spec=None)
+    assert _wants_vtk(job, vtk) and not _wants_vtk(job, SimpleNamespace())
+    assert not _wants_vtk(SimpleNamespace(options=SimpleNamespace(to_vtk=False)), vtk)
+    cases = openfoam_cases(SimpleNamespace(openfoam_case_dir=case_dir,
+                                           fine_sediment_case_dir=tmp_path / "none"))
+    assert cases == [{"label": "OpenFOAM free surface", "folder": str(case_dir),
+                      "paraview": str(case_dir / "case.foam"),
+                      "visit": str(case_dir / "system" / "controlDict"), "run": True}]
+
+
 # --------------------------------------------------------------------------- #
 # rigid lid: the air phase removed by construction
 # --------------------------------------------------------------------------- #

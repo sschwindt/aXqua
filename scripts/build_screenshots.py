@@ -236,7 +236,7 @@ def take_screenshots() -> None:
             shot(dock, "gui-configuration", [
                 first(tab, QGroupBox, "aXqua program"),
                 first(tab, QGroupBox, "Profile of this computer"),
-                first(tab, QGroupBox, "Simulation software"),
+                first(tab, QGroupBox, "Simulation"),
                 dock.help_button])
         finally:
             dock.resize(*PANEL)
@@ -277,7 +277,7 @@ def take_screenshots() -> None:
         shot(dock, "gui-case-setup", [
             buttons(page, "Add case", "Example case"),
             page.case_list,
-            buttons(page, "Edit case", "Check"),
+            buttons(page, "Open case settings", "Check"),
             page.capability_label])
 
     def case_editor() -> None:
@@ -298,7 +298,7 @@ def take_screenshots() -> None:
         from qgis.PyQt.QtWidgets import QComboBox
 
         select("geodata")
-        page = editor.pages.currentWidget()
+        page = editor.stack.currentWidget()
         browse = first(page, QPushButton, "...")
         adder = next(box for box in page.findChildren(QComboBox)
                      if box.isVisible() and box.itemText(0).startswith("Add setting"))
@@ -308,14 +308,22 @@ def take_screenshots() -> None:
             adder,
             [editor.save_button, editor.cancel_button, editor.exit_button]])
         try:
-            for block, name in (("morphodynamic", "gui-case-editor-morphodynamics"),
-                                ("fine sediment", "gui-case-editor-fine-sediment")):
-                select(block)
+            # both are frames of the page Morphodynamic simulation
+            from qgis.PyQt.QtWidgets import QScrollArea
+
+            for frame, name in (("Sediment transport", "gui-case-editor-morphodynamics"),
+                                ("Fine sediment", "gui-case-editor-fine-sediment")):
+                select("morphodynamic")
+                scroll = editor.stack.currentWidget()
+                box = first(scroll, QGroupBox, frame)
+                if isinstance(scroll, QScrollArea):
+                    scroll.ensureWidgetVisible(box, 0, 0)
+                    wait(200)
                 shot(editor, name, [
                     editor.section_list.visualItemRect(editor.section_list.currentItem())
                     .translated(editor.section_list.viewport().mapTo(editor,
                                                                     QPoint(0, 0))),
-                    editor.pages.currentWidget()])
+                    box])
         finally:
             editor.reject()
 
@@ -350,18 +358,23 @@ def take_screenshots() -> None:
             inner.build_button, inner.submit_button])
 
     def fine_sediment() -> None:
-        dock.show_section("morphodynamics", "openfoam")
-        page = dock.page("morphodynamics", "openfoam")
+        dock.show_section("hydraulics", "morphodynamics")
+        page = dock.page("hydraulics", "morphodynamics")
+        page.choose("openfoam")
+        wait(300)
         inner, box = capability_box(page, "openfoam", "morphodynamics")
         shot(dock, "gui-morphodynamics-openfoam", [
-            sub_tab_bar("morphodynamics"), inner.options_box, inner.build_button,
+            page.solver_choice, inner.options_box, inner.build_button,
             inner.submit_button, inner.results_button])
 
     def mesh_convergence() -> None:
-        dock.show_section("mesh")
-        inner, box = capability_box(dock.page("mesh"), "telemac", "mesh_convergence")
-        shot(dock, "gui-mesh-convergence", [inner.options_box, inner.submit_button,
-                                            inner.results_button])
+        dock.show_section("hydraulics", "mesh")
+        page = dock.page("hydraulics", "mesh")
+        page.choose("telemac")
+        wait(300)
+        inner, box = capability_box(page, "telemac", "mesh_convergence")
+        shot(dock, "gui-mesh-convergence", [page.solver_choice, inner.options_box,
+                                            inner.submit_button, inner.results_button])
 
     def calibration() -> None:
         dock.show_section("calibration")

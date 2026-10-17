@@ -94,7 +94,7 @@ The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate r
    * - Depth of a reading below the water surface in m
      - ``MeasD`` or ``Meas. Depth``
 
-The velocity magnitude that is compared with the model is computed from the horizontal components. If a layer contains several readings at one position, aXqua uses the reading that is closest to 0.6 of the water depth below the surface, which approximates the depth-averaged velocity. Points outside the model outline are left out of the calibration. In the plugin, the source is entered in the case editor (*Edit case...* on the *Case Setup* tab, block ``ground_truth``).
+The velocity magnitude that is compared with the model is computed from the horizontal components. If a layer contains several readings at one position, aXqua uses the reading that is closest to 0.6 of the water depth below the surface, which approximates the depth-averaged velocity. Points outside the model outline are left out of the calibration. In the plugin, the files are entered in the case settings (*Open case settings...* on the *Case Setup* tab), page *Calibration and validation*, in the table *Measurement files* of the frame *Measurements*. *Add file...* adds a point layer or a table, and the column *Use for* assigns each file to the calibration or to the validation. A file for the validation needs the name of its flow situation and its discharge (:ref:`validation situation <validation-setup>`).
 
 Velocity measurements with a SonTek FlowTracker2 are transferred into the ``hydraulics`` sheet with the script ``extract_flowtracker.py``, which aXqua places next to the workbook. Note that the velocity fluctuation is the standard deviation of the velocity samples. It is not the column ``VxErr`` of the instrument export, which is the standard error of the mean velocity.
 
@@ -161,7 +161,7 @@ The validation data are defined in the case file as a **situation**, with its me
    * - ``duration``
      - The simulated time in seconds, if it differs from that of the case.
 
-**In the plugin.** The tab *Calibration & validation* has the box *Validation with data of another flow situation*. Select the point layer with the validation data with *Browse...*, or with *From QGIS...* from the point layers that are open in QGIS. Enter the discharge of each inflow: the box lists the inflows of the model with the discharge of the calibrated case. *Save* writes the situation into the case file.
+**In the plugin.** The tab *Calibration & validation* has the box *Validation with data of another flow situation*. Select the point layer with the validation data with *Browse...*, or with *From QGIS...* from the point layers that are open in QGIS. Enter the discharge of each inflow: the box lists the inflows of the model with the discharge of the calibrated case. *Save* writes the situation into the case file. The same situations appear in the case settings (*Open case settings...*, page *Calibration and validation*): in the table *Measurement files*, each file whose column *Use for* says *Validation* belongs to the situation named in the column *Situation*, with the discharge of that situation. Settings of a situation that the table does not show, such as the discharge of each inflow, are kept.
 
 .. _calibration-run:
 

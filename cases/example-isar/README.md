@@ -58,7 +58,7 @@ Start QGIS and open the panel with the aXqua button in the toolbar or with *Plug
 3. Go to the tab *Case Setup*. An example that was downloaded with *Example case...* is in the list of cases already. Otherwise, click *Add case...* and select `example-isar.axq-case` in the folder of the example.
 4. The line below the list of cases now reads `telemac - environment ok`, followed by what the case can do.
 
-*Edit case...* opens the case in the case editor, which shows every setting of the reach by block: terrain model, boundaries, mesh, roughness and so on. *Check* reports what is not in order. For this example, the check finds nothing.
+*Open case settings...* in the box *Case settings* opens the settings of the case, which shows every setting of the reach by page: terrain model, liquid boundaries, mesh, roughness and so on. The required settings are written in bold dark purple. *Check* reports what is not in order. For this example, the check finds nothing.
 
 *Save project* on the same tab stores the list of cases in a small project file (`.axqua-prj`), so that the case is listed again after a restart of QGIS. This is optional.
 

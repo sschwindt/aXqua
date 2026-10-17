@@ -94,10 +94,9 @@ class JobsWidget(QWidget):
         client = self.ctx.client_or_warn()
         if client is None:
             return
-        job_root = self.ctx.project.job_root or None
-        case = None
+        # the folder for jobs is the profile's (axqua resolves it)
         run_async("aXqua: listing jobs",
-                  lambda: client.list_jobs(job_root=job_root, case=case),
+                  lambda: client.list_jobs(),
                   on_success=self._rows_arrived,
                   on_error=lambda exc: self.ctx.warn(user_text(exc)), owner=self)
 

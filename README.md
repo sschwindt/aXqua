@@ -57,8 +57,9 @@ because a mixed-case module name resolves differently on case-insensitive filesy
   cron entry or systemd unit written before the rename is not something to silently ignore.
 * `~/.config/hydromate/profiles.yml` and `~/.local/share/hydromate/` are still read while
   the `axqua` ones do not exist.
-* The QGIS plugin still opens a `.hydromate-prj` project, and saves it back as
-  `.axqua-prj`. The old file is left in place rather than deleted.
+* The QGIS plugin keeps its list of cases in the settings of QGIS and has no project
+  file any more; *Add case...* still reads a `.axqua-prj` or `.hydromate-prj` project
+  file and adds the cases it lists. The old file is left in place.
 
 Every one of those is covered by `tests/test_rename_compat.py`, so the migration path is
 tested rather than assumed.

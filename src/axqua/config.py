@@ -1931,6 +1931,15 @@ class OpenFoam:
 # --------------------------------------------------------------------------- #
 
 
+#: The entries ``postproc`` accepts (see :class:`PostProcessing`).
+TELEMAC_MAPS = ("depth", "velocity", "free-surface")
+OPENFOAM_OUTPUTS = ("paraview", "visit", "vtk")
+VISIT_SCENES = ("free-surface", "velocity-plan", "profiles")
+#: The predefined map styles of the QGIS plugin (``core/styles.MAP_STYLES`` there).
+MAP_STYLES = ("depth-streamlines", "depth-arrows", "velocity-streamlines",
+              "velocity-arrows")
+
+
 @dataclass
 class PostProcessing:
     """Visualisation: which tool draws the figures, and what to draw.
@@ -1967,8 +1976,32 @@ class PostProcessing:
     #: ``hydrodynamics.wet_depth``, which is the same threshold aXqua's own reports
     #: use - that is the point of it.
     velocity_scale_max: float = 5.0
+    #: Which maps of a TELEMAC result *Load results* adds in QGIS: ``depth``,
+    #: ``velocity`` (both styled by the plugin) and ``free-surface``.
+    telemac_maps: list[str] = field(default_factory=lambda: ["depth", "velocity"])
+    #: A predefined map style the plugin applies to the water depth layer of a loaded
+    #: TELEMAC result: velocity arrows or streamlines over the water depth or over the
+    #: velocity magnitude. Empty: the layers keep their plain depth and velocity style.
+    map_style: str = ""
+    #: What an OpenFOAM result offers for ParaView and VisIt: ``paraview`` (the file
+    #: ``case.foam``), ``visit`` (the case's ``system/controlDict``, which VisIt opens)
+    #: and ``vtk`` (a conversion with foamToVTK after every run, which QGIS can read
+    #: too and which can double the size of a case).
+    openfoam_outputs: list[str] = field(default_factory=lambda: ["paraview", "visit"])
 
     def validate(self) -> None:
+        for name, value, known in (("telemac_maps", self.telemac_maps, TELEMAC_MAPS),
+                                   ("openfoam_outputs", self.openfoam_outputs,
+                                    OPENFOAM_OUTPUTS),
+                                   ("scenes", self.scenes, VISIT_SCENES)):
+            unknown = sorted(set(value or []) - set(known))
+            if unknown:
+                raise ValueError(f"postproc.{name}: unknown entr"
+                                 f"{'ies' if len(unknown) > 1 else 'y'} "
+                                 f"{', '.join(unknown)}; known: {', '.join(known)}")
+        if self.map_style and self.map_style not in MAP_STYLES:
+            raise ValueError(f"postproc.map_style must be one of {', '.join(MAP_STYLES)} "
+                             f"or empty, got {self.map_style!r}")
         if self.backend not in ("visit",):
             raise ValueError(
                 f"postproc.backend must be 'visit', got {self.backend!r}")

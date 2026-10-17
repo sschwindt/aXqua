@@ -33,8 +33,10 @@ OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
         ("Postprocessors", "postprocessors", ["VisIt", "ParaView"]),
     ]),
     ("Usage", "usage/index", [
+        # the names of the pages of the case settings (the user's corrections of
+        # 2026-10-16: Project settings, Liquid boundaries, Initial conditions)
         ("aXqua case setup", "case-setup",
-         ["Project paths", "Geodata", "Boundaries", "Initialization",
+         ["Project settings", "Geodata", "Liquid boundaries", "Initial conditions",
           "Mesh configuration", "Wall roughness", "Hydraulic simulation",
           "Morphodynamic simulation"]),
         ("Preprocessing", "preprocessing",
