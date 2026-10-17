@@ -211,8 +211,8 @@ def _inside_the_model(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_single_flow_calibration(
-        cfg: Config, *, calibration_quantities=("SCALAR VELOCITY",),
-        extraction_quantities=("WATER DEPTH", "SCALAR VELOCITY"),
+        cfg: Config, *, calibration_quantities=None,
+        extraction_quantities=None,
         vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
         depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
         prepare_only: bool = False, checkout: Path | None = None,
@@ -227,6 +227,18 @@ def run_single_flow_calibration(
     from axqua.calibration import emit_hbc_config
 
     cfg.ensure_dirs()
+    # The case file decides what is calibrated against. Until 2026-10-17 a built-in
+    # ("SCALAR VELOCITY",) replaced it whenever the caller named nothing, which is
+    # what every job did: a case asking for depth and velocity was calibrated
+    # against velocity alone, without a word.
+    if calibration_quantities is None:
+        calibration_quantities = (cfg.calibration.calibration_quantities
+                                  or ["SCALAR VELOCITY"])
+    if extraction_quantities is None:
+        extraction_quantities = (cfg.calibration.extraction_quantities
+                                 or ["WATER DEPTH", "SCALAR VELOCITY"])
+    extraction_quantities = list(dict.fromkeys([*extraction_quantities,
+                                                *calibration_quantities]))
     cfg.calibration.calibration_quantities = list(calibration_quantities)
     cfg.calibration.extraction_quantities = list(extraction_quantities)
     print(f"calibration target(s): {list(calibration_quantities)}  "

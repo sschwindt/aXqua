@@ -240,3 +240,37 @@ def test_a_calibration_that_was_killed_is_undone_by_the_next_one(tmp_path):
         assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
         _as_the_driver_leaves_it(model)
     assert (model / "friction.tbl").read_text() == "4\tNIKU\t0.0500\tNULL\n"
+
+
+def test_the_case_file_decides_the_calibration_targets(monkeypatch):
+    """A job names no targets; the case file's must then be used. Until 2026-10-17 a
+    built-in ("SCALAR VELOCITY",) replaced them, so a case asking for depth and
+    velocity was calibrated against velocity alone."""
+    import types
+
+    from axqua import bayescal
+
+    seen = {}
+
+    class Stop(Exception):
+        pass
+
+    def capture(cfg, **_):
+        seen["calibration"] = list(cfg.calibration.calibration_quantities)
+        seen["extraction"] = list(cfg.calibration.extraction_quantities)
+        raise Stop
+
+    monkeypatch.setattr(bayescal, "build_velocity_csv", capture)
+    cfg = types.SimpleNamespace(
+        ensure_dirs=lambda: None,
+        calibration=types.SimpleNamespace(
+            calibration_quantities=["WATER DEPTH", "SCALAR VELOCITY"],
+            extraction_quantities=["SCALAR VELOCITY"], parameters=[]))
+    with pytest.raises(Stop):
+        bayescal.run_single_flow_calibration(cfg, prepare_only=True)
+    assert seen == {"calibration": ["WATER DEPTH", "SCALAR VELOCITY"],
+                    "extraction": ["SCALAR VELOCITY", "WATER DEPTH"]}
+    with pytest.raises(Stop):
+        bayescal.run_single_flow_calibration(cfg, prepare_only=True,
+                                             calibration_quantities=("SCALAR VELOCITY",))
+    assert seen["calibration"] == ["SCALAR VELOCITY"]
