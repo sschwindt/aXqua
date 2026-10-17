@@ -336,14 +336,6 @@ CONFIG_CHOICES: dict[str, str] = {
     "postproc.scenes": "VISIT_SCENES",
 }
 
-#: Fields that stand under a ``# ---- name ----`` heading of their dataclass and still
-#: belong on the page of their block: the outlets of the OpenFOAM model are boundary
-#: conditions, not settings of its lattice.
-OUTSIDE_THEIR_GROUP = frozenset({
-    "openfoam.outflow_boundary", "openfoam.outlet_stage", "openfoam.outlet_air_margin",
-    "openfoam.liquid_boundaries",
-})
-
 #: Choices of settings that are not essential, where the code accepts a fixed set only.
 CHOICES: dict[str, tuple[str, ...]] = {
     "initialization.prewet_mode": ("normal-depth", "constant"),
@@ -407,10 +399,14 @@ def _comments(cls: type) -> dict[str, str]:
     out: dict[str, str] = {}
     pending: list[str] = []
     field_line = re.compile(r"^\s{4}([a-z_][a-z0-9_]*)\s*:\s*[^=#]+(?:=[^#]*)?(?:#\s*(.*))?$")
+    heading = re.compile(r"^\s*#\s*-{3,}.*-{3,}\s*$")
     for line in lines:
         stripped = line.strip()
+        if heading.match(line):                 # a group heading, not an explanation
+            pending = []
+            continue
         if stripped.startswith("#"):
-            pending.append(stripped.lstrip("#").strip())
+            pending.append(stripped.lstrip("#").lstrip(":").strip())   # also #: lines
             continue
         match = field_line.match(line)
         if match:
@@ -512,8 +508,8 @@ def build() -> list[dict[str, Any]]:
             else:
                 kind = _kind(hints.get(name), default, name)
             kind = curated.get("kind") or ("choice" if key in CHOICES else kind)
-            group = "" if key in OUTSIDE_THEIR_GROUP else groups.get(name, "")
-            page, frame = frames.get(f"{block}/{group}", frames.get(block, (block, "")))
+            page, frame = frames.get(f"{block}/{groups.get(name, '')}",
+                                     frames.get(block, (block, "")))
             required = key in REQUIRED
             when = [dict(condition) for condition in REQUIRED_WHEN.get(key, ())]
             fields.append({
@@ -523,7 +519,8 @@ def build() -> list[dict[str, Any]]:
                 "unit": curated.get("unit", ""),
                 "help": curated.get("help") or comments.get(name, ""),
                 "choices": list(curated.get("choices")
-                                or getattr(config_module, CONFIG_CHOICES.get(key, ""), ())
+                                or (getattr(config_module, CONFIG_CHOICES[key])
+                                    if key in CONFIG_CHOICES else ())
                                 or CHOICES.get(key, ())),
                 # a required entry is always on the form
                 "essential": key in CURATED or required or bool(when),

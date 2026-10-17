@@ -68,23 +68,28 @@ def openfoam_levels(cfg, ratio: float = 1.3, n_coarser: int = 1,
 
 def make_openfoam_simulator(cfg, discharge: float | None, *, base_dir: Path,
                             seed: Any = None, n_processors: int | None = None,
-                            check_cancelled=None, backend=None, plan_view=None):
+                            check_cancelled=None, backend=None, plan_view=None,
+                            spacing: float | None = None):
     """A ``simulate(label, dx, dx, probes, quantities) -> LevelResult`` that builds
     the OpenFOAM case at the plan spacing *dx*, runs it, and samples the result seen
     from above at the probe points.
 
-    *seed* is the 2D result every level starts from. *backend* replaces the OpenFOAM
-    backend and *plan_view* the writer of the result seen from above,
-    ``(cfg, folder) -> (path, summary)`` (both for tests).
+    *seed* is the 2D result every level starts from; *spacing* is the plan spacing
+    the case asks for, against which the size scale of a level is given (read from
+    the case when not given). *backend* replaces the OpenFOAM backend and *plan_view*
+    the writer of the result seen from above, ``(cfg, folder) -> (path, summary)``
+    (both for tests).
     """
     if backend is None:
         from axqua.solvers.openfoam.backend import BACKEND as backend
     if plan_view is None:
         from axqua.solvers.openfoam.planview import write as plan_view
-    from axqua.solvers.openfoam.mesh import plan_spacing
+    if spacing is None:
+        from axqua.solvers.openfoam.mesh import plan_spacing
 
+        spacing = plan_spacing(cfg)
     # the size scale of a level is its spacing against the one the case asks for
-    base = float(plan_spacing(cfg))
+    base = float(spacing)
 
     def simulate(label, dx, _dx, probes, quantities):
         if check_cancelled is not None:
@@ -129,19 +134,27 @@ def run_openfoam_mesh_convergence(cfg, *, seed: Any = None,
                                   backend=None, plan_view=None):
     """Run the study and return its :class:`~axqua.convergence.ConvergenceReport`."""
     from axqua.solvers.openfoam import planview
+    from axqua.solvers.openfoam.mesh import plan_spacing
 
     base_dir = Path(cfg.postprocessing_dir) / FOLDER
+    spacing = float(plan_spacing(cfg))
     levels = openfoam_levels(cfg, ratio=refinement_ratio, n_coarser=n_coarser,
                              n_finer=n_finer)
     simulate = make_openfoam_simulator(cfg, discharge, base_dir=base_dir, seed=seed,
                                        n_processors=n_processors,
                                        check_cancelled=check_cancelled,
-                                       backend=backend, plan_view=plan_view)
+                                       backend=backend, plan_view=plan_view,
+                                       spacing=spacing)
     log.info("OpenFOAM mesh convergence: %d levels, plan spacing %s m",
              len(levels), ", ".join(f"{dx:.3f}" for _, dx, _ in levels))
-    return run_mesh_convergence(
+    report = run_mesh_convergence(
         cfg, discharge=float(discharge or cfg.boundaries.prescribed_flowrate or 0.0),
         levels=levels, tolerance=tolerance, simulate=simulate, base_dir=base_dir,
         extend_ratio=refinement_ratio, max_extra_levels=max_extra_levels,
         auto_extend=auto_extend, ask=ask, on_level=on_level, probes=probes,
         result_name=planview.RESULT_NAME, check_validity=False)
+    # A level taken over from an earlier study carries the scale its level.json
+    # stored, which before 2026-10-17 was relative to the first level simulated.
+    for level in report.levels:
+        level.scale = level.cell_size / spacing
+    return report

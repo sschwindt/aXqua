@@ -95,6 +95,15 @@ def normal_depth(discharge: float, *, manning: float | None = None,
     return 0.5 * (lo + hi)
 
 
+def _discharges(value) -> list[float]:
+    """One discharge or several, as a sorted list (numpy scalars included)."""
+    try:
+        values = list(value)
+    except TypeError:                     # a number, also a numpy scalar or 0-d array
+        values = [value]
+    return sorted(float(q) for q in values)
+
+
 def generate_stage_discharge(out: str | Path, discharges: Iterable[float] | float,
                              *, manning: float | None = None,
                              strickler: float | None = None, slope: float,
@@ -105,8 +114,7 @@ def generate_stage_discharge(out: str | Path, discharges: Iterable[float] | floa
     For a steady run a single discharge (the simulated Q) is enough; pass several
     to tabulate a curve. ``WSE = bed_elevation + normal_depth(Q)``.
     """
-    qs = [float(discharges)] if isinstance(discharges, (int, float)) else \
-        sorted(float(q) for q in discharges)
+    qs = _discharges(discharges)
     if not qs:
         raise ValueError("no discharges given")
 
@@ -216,8 +224,7 @@ def synthesize_outflow_rating(cfg, discharge, *, side_slope: float = 0.0,
 
     out = Path(out) if out is not None else Path(cfg.boundaries.stage_discharge)
     rough = f"Strickler Kst={strickler}" if strickler is not None else f"Manning n={manning}"
-    flows = ([float(discharge)] if isinstance(discharge, (int, float))
-             else [float(q) for q in discharge])
+    flows = _discharges(discharge)
     log.info("outflow rating from geodata: Q=%s m3/s, width=%.1f m (outflow line), "
              "bed=%.2f m (thalweg), slope=%.5f, banks %g:1, %s",
              ", ".join(f"{q:.2f}" for q in flows), width, bed_elevation, slope,

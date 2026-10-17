@@ -1699,6 +1699,8 @@ class OpenFoam:
     # prescribed Q and stage, read from the parent result at those stations rather
     # than guessed. See cases/munich-vsf/make_openfoam_roi.py.
     roi: Path | None = None
+
+    # ---- outlets ------------------------------------------------------------
     # The tailwater for that sub-model [m a.s.l.]. A crop moves the outflow to a new
     # station, where the reach does not carry the stage the case prescribes at its own
     # far end - so prescribing the case value there would impose a level the parent
@@ -1741,6 +1743,8 @@ class OpenFoam:
     # or leave - and the build stops with exactly that message. Same reasoning as
     # ``roi``: the 2D case keeps its own lines, because it is converged against them.
     liquid_boundaries: Path | None = None
+
+    # ---- mesh ---------------------------------------------------------------
     wet_margin: float = 5.0         # [m] buffer around the 2D wetted extent
     lid: str = "follow"             # follow (the 2D free surface) | flat
     lid_elevation: float | None = None      # pin the lid to this level [m a.s.l.]

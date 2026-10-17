@@ -1759,6 +1759,21 @@ def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_di
     table._rows[1]["discharge"].setText("6.1")
     assert table._rows[2]["discharge"].text() == "6.1"
     assert editor.values()["calibration"]["validation"][0]["prescribed_flowrate"] == 6.1
+    # a file renamed into the situation shows, and keeps, the situation's discharge
+    table.add("gt/low.gpkg")
+    table.set_role(3, "validation", "Low flow", "2.0")
+    entry = table._rows[3]
+    entry["situation"].setText("High flow")
+    entry["situation"].editingFinished.emit()
+    assert entry["discharge"].text() == "6.1"
+    situations = editor.values()["calibration"]["validation"]
+    assert [(s["name"], s["prescribed_flowrate"]) for s in situations] == [("High flow", 6.1)]
+    assert table.discharge_conflicts() == []
+    # what the table could not keep equal is named on Save
+    table._show(entry, "7.0")
+    assert table.discharge_conflicts() == ["High flow"]
+    editor.save()
+    assert any("different discharges" in f.message for f in editor.findings)
     editor.deleteLater()
 
 

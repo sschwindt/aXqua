@@ -152,53 +152,51 @@ class OpenFoamBackend(BaseBackend):
                 log.info("checkMesh: runnable, with marginal faces: %s", "; ".join(failed))
 
         nprocs = n_processors if n_processors is not None else cfg.openfoam.n_processors
+        previous = None
         if nprocs and nprocs > 1:
             # The ranks of the job, not the number the case was built with: the
             # decomposition has to give each rank its domain, or mpirun stops at once
             # with "Number of processor directories = 1 is not equal to the number of
             # ranks" (found by the mesh study of 2026-10-17, and the same for the MPI
-            # ranks option of an openfoam-run job). scotch, as the case sets it: the
-            # wetted corridor is sinuous, so a geometric split would hand some ranks
-            # empty space.
-            # Written for every run: a run on other ranks before this one left its
-            # own count in the file.
-            import copy
-
-            ranks = copy.copy(cfg)
-            ranks.openfoam = copy.copy(cfg.openfoam)
-            ranks.openfoam.n_processors = int(nprocs)
-            (case_dir / "system" / "decomposeParDict").write_text(
-                dicts.decompose_par_dict(ranks))
+            # ranks option of an openfoam-run job). The case's own file is put back
+            # after the run, so the next consumer of the case finds what the build
+            # (or the user) wrote.
+            previous = dicts.decompose_for(case_dir, int(nprocs))
             runtime.decompose(case_dir)
+        try:
+            for stage in dicts.stages(cfg):
+                if ctx is not None:
+                    ctx.check_cancelled()
+                    ctx.sink.step(f"openfoam:{stage.name}")
+                # start_from, not the stage name: a rigid-lid case has ONE stage and it
+                # is called "run", but it starts from t=0 like a spin-up does. Keying off
+                # the name told the progress bar the run began at spinup_time and it
+                # reported a run that was already 8 s in before the first step.
+                start = (0.0 if stage.start_from == "startTime"
+                         else cfg.openfoam.spinup_time)
+                proc = runtime.run_stage(
+                    case_dir, stage.name, end_time=stage.end_time, start_time=start,
+                    n_processors=nprocs, cfg=cfg,
+                    show_progress=ctx is None, sink=sink,
+                    should_stop=ctx.should_stop if ctx is not None else None)
+                if ctx is not None:
+                    ctx.check_cancelled()
+                if proc.returncode != 0:
+                    raise errors.SolverError(
+                        f"interFoam stage {stage.name!r} exited with code "
+                        f"{proc.returncode}",
+                        subject=str(case_dir),
+                        remedy=f"Read {case_dir / cfg.log_file} for the first error.",
+                        component="interfoam",
+                        return_code=proc.returncode,
+                        stage=stage.name,
+                    )
 
-        for stage in dicts.stages(cfg):
-            if ctx is not None:
-                ctx.check_cancelled()
-                ctx.sink.step(f"openfoam:{stage.name}")
-            # start_from, not the stage name: a rigid-lid case has ONE stage and it is
-            # called "run", but it starts from t=0 like a spin-up does. Keying off the
-            # name told the progress bar the run began at spinup_time and it reported
-            # a run that was already 8 s in before the first step.
-            start = 0.0 if stage.start_from == "startTime" else cfg.openfoam.spinup_time
-            proc = runtime.run_stage(
-                case_dir, stage.name, end_time=stage.end_time, start_time=start,
-                n_processors=nprocs, cfg=cfg,
-                show_progress=ctx is None, sink=sink,
-                should_stop=ctx.should_stop if ctx is not None else None)
-            if ctx is not None:
-                ctx.check_cancelled()
-            if proc.returncode != 0:
-                raise errors.SolverError(
-                    f"interFoam stage {stage.name!r} exited with code {proc.returncode}",
-                    subject=str(case_dir),
-                    remedy=f"Read {case_dir / cfg.log_file} for the first error.",
-                    component="interfoam",
-                    return_code=proc.returncode,
-                    stage=stage.name,
-                )
-
-        if reconstruct and nprocs and nprocs > 1:
-            runtime.reconstruct(case_dir)
+            if reconstruct and nprocs and nprocs > 1:
+                runtime.reconstruct(case_dir)
+        finally:
+            if previous is not None:
+                dicts.restore_decomposition(case_dir, previous)
         return case_dir
 
     # -- after the run ------------------------------------------------------------

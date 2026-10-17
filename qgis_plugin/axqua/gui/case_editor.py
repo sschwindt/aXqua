@@ -396,6 +396,8 @@ class MeasurementTable(QWidget):
         entry.update(kind=kind, use=use, situation=situation_edit, discharge=discharge)
         use.currentIndexChanged.connect(lambda _=0, e=entry: self._role_changed(e))
         situation_edit.textChanged.connect(lambda _="": self.editor.changed())
+        # when the name is complete, not at every letter of it
+        situation_edit.editingFinished.connect(lambda e=entry: self._joined(e))
         discharge.textChanged.connect(lambda text, e=entry: self._discharge_changed(e, text))
         self._role_changed(entry, quiet=True)
 
@@ -412,19 +414,46 @@ class MeasurementTable(QWidget):
         switch = getattr(self.editor, "switches", {}).get("calibration")
         if validation and switch is not None and not switch.isChecked():
             switch.setChecked(True)
-        self.editor.changed()
+        self._joined(entry)
+
+    @staticmethod
+    def _situation_of(entry: dict) -> str | None:
+        """The situation a row belongs to, None for a file of the calibration."""
+        if entry["use"].currentData() != "validation":
+            return None
+        return entry["situation"].text().strip() or "validation"
+
+    def _others(self, entry: dict) -> list[dict]:
+        """The other rows of the situation of *entry*."""
+        name = self._situation_of(entry)
+        return [other for other in self._rows
+                if other is not entry and name is not None
+                and self._situation_of(other) == name]
+
+    @staticmethod
+    def _show(entry: dict, text: str) -> None:
+        entry["discharge"].blockSignals(True)
+        entry["discharge"].setText(text)
+        entry["discharge"].blockSignals(False)
 
     def _discharge_changed(self, entry: dict, text: str) -> None:
         """The discharge is one of the situation: the other files of the same situation
         show it too."""
-        name = entry["situation"].text().strip()
-        for other in self._rows:
-            if (other is not entry and other["situation"].text().strip() == name
-                    and other["use"].currentData() == "validation"
-                    and other["discharge"].text() != text):
-                other["discharge"].blockSignals(True)
-                other["discharge"].setText(text)
-                other["discharge"].blockSignals(False)
+        for other in self._others(entry):
+            if other["discharge"].text() != text:
+                self._show(other, text)
+        self.editor.changed()
+
+    def _joined(self, entry: dict) -> None:
+        """A file that joins a validation situation, by its name or by its role, shows
+        the discharge of the situation; a situation without one takes the file's."""
+        given = next((o["discharge"].text() for o in self._others(entry)
+                      if o["discharge"].text().strip()), None)
+        if given is not None:
+            self._show(entry, given)
+        elif self._situation_of(entry) is not None and entry["discharge"].text().strip():
+            for other in self._others(entry):
+                self._show(other, entry["discharge"].text())
         self.editor.changed()
 
     def add_file(self) -> None:
@@ -451,9 +480,13 @@ class MeasurementTable(QWidget):
     def set_role(self, row: int, role: str, situation: str = "",
                  discharge: str = "") -> None:
         entry = self._rows[row]
-        entry["use"].setCurrentIndex(entry["use"].findData(role))
         entry["situation"].setText(situation)
-        entry["discharge"].setText(discharge)
+        if entry["use"].currentData() == role:
+            self._joined(entry)
+        else:
+            entry["use"].setCurrentIndex(entry["use"].findData(role))   # joins as well
+        if discharge:
+            entry["discharge"].setText(discharge)
 
     # -- values ---------------------------------------------------------------------
     def values(self) -> tuple[list, list]:
@@ -505,6 +538,17 @@ class MeasurementTable(QWidget):
         if (sources, situations) == (self.original[0], self.original[1]):
             return copy.deepcopy(self.original[0]), copy.deepcopy(self.original[1])
         return sources, situations
+
+    def discharge_conflicts(self) -> list[str]:
+        """Validation situations whose files show different discharges. The table keeps
+        them equal; this is the guard for what it could not."""
+        seen: dict[str, set[float]] = {}
+        for entry in self._rows:
+            name = self._situation_of(entry)
+            flow = parse("number", entry["discharge"].text())
+            if name is not None and flow is not None:
+                seen.setdefault(name, set()).add(flow)
+        return [name for name, flows in seen.items() if len(flows) > 1]
 
     def missing_discharge(self) -> list[str]:
         """Validation situations without a discharge: required for a validation."""
@@ -886,6 +930,12 @@ class CaseEditor(EditorDialog):
                 f"The validation situation {name!r} has no discharge.",
                 subject="calibration.validation")
                 for name in self.measurements.missing_discharge()]
+            unreadable += [fnd.Finding(
+                "warning", "axqua.config.incomplete",
+                f"The files of the validation situation {name!r} show different "
+                "discharges; the last one in the table was saved.",
+                subject="calibration.validation")
+                for name in self.measurements.discharge_conflicts()]
         self.save_button.setEnabled(False)
         self.status.setText("Saving and checking the case...")
         client, path = self.client, self.path

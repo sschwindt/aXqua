@@ -674,11 +674,15 @@ def _run_postproc(argv: list[str]) -> int:
         cfg = load_config(args.config)
         if args.backend:
             cfg.postproc.backend = args.backend
-        names = args.scenes if args.scenes else (cfg.postproc.scenes or None)
+        # an empty postproc.scenes (every box unchecked) is a choice, not "all"
+        names = args.scenes if args.scenes else cfg.postproc.scenes
 
         if args.list:
             for line in render_mod.plan_lines(cfg, names=names, solver=args.solver):
                 print(line)
+            return 0
+        if names is not None and not names:
+            print("postproc.scenes asks for no figure: nothing to render.")
             return 0
         return render_mod.render(cfg, names=names, solver=args.solver,
                                  out_dir=args.out, script_only=args.script_only)

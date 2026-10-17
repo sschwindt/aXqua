@@ -87,11 +87,17 @@ def test_every_level_is_built_from_the_same_seed_and_compared_from_above(tmp_pat
     assert json.loads((folder / "level.json").read_text())["channel_size"] == 1.0
 
     # a second study takes the finished levels without building anything again
+    # (a level of a study before 2026-10-17 stored its scale against the first level)
+    stored = json.loads((folder / "level.json").read_text())
+    stored["scale"] = 1 / 1.3
+    (folder / "level.json").write_text(json.dumps(stored))
     again = _Backend()
     resumed = ofc.run_openfoam_mesh_convergence(
         _cfg(tmp_path), probes=PROBES, backend=again, plan_view=_plan_view,
         ask=lambda *a, **k: True)
     assert again.built == [] and len(resumed.levels) == 4
+    np.testing.assert_allclose([level.scale for level in resumed.levels],
+                               [1.3, 1.0, 1 / 1.3, 1 / 1.69])
 
 
 def test_the_backend_runs_the_study_and_writes_its_report(tmp_path, monkeypatch):
@@ -169,7 +175,32 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
     assert set(seen["ranks"]) == {4} and seen["reconstructed"]
     assert cfg.openfoam.n_processors == 1                  # the case is not changed
 
+    # the case's file is put back after the run
+    assert (case / "system" / "decomposeParDict").read_text() == "numberOfSubdomains 1;\n"
     # the case's own ranks after a run on others: the dict is the case's again
     cfg.openfoam.n_processors = 8
     BACKEND.run(cfg, None)
     assert "numberOfSubdomains 8;" in seen["dict"]
+
+
+def test_a_decomposition_is_replaced_only_for_another_count(tmp_path):
+    from axqua.solvers.openfoam import dicts
+
+    system = tmp_path / "system"
+    system.mkdir()
+    own = "numberOfSubdomains 4;\nmethod hierarchical;\ncoeffs { n (2 2 1); }\n"
+    (system / "decomposeParDict").write_text(own)
+    assert dicts.decomposition_of(tmp_path) == 4
+    assert dicts.decompose_for(tmp_path, 4) is None             # the user's file stays
+    assert (system / "decomposeParDict").read_text() == own
+    previous = dicts.decompose_for(tmp_path, 6)
+    assert previous == own and dicts.decomposition_of(tmp_path) == 6
+    assert "scotch" in (system / "decomposeParDict").read_text()
+    dicts.restore_decomposition(tmp_path, previous)
+    assert (system / "decomposeParDict").read_text() == own
+    # a case without the file gets one, and loses it again on restore
+    (system / "decomposeParDict").unlink()
+    previous = dicts.decompose_for(tmp_path, 2)
+    assert previous == "" and dicts.decomposition_of(tmp_path) == 2
+    dicts.restore_decomposition(tmp_path, previous)
+    assert not (system / "decomposeParDict").exists()

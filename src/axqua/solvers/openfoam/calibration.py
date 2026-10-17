@@ -302,6 +302,9 @@ def stage_case_template(cfg: Config, *, state=None, rebuild: bool = False,
     # ONE solver call per run, so a two-phase case must present a single
     # full-length production stage rather than its spin-up.
     dicts.activate(dest, dicts.stages(cfg, single=True)[0].name, cfg, single=True)
+    # HydroBayesCal decomposes every copy with the template's file, for the ranks of
+    # this config: a run on other ranks in this folder may have left another count.
+    dicts.decompose_for(dest, int(cfg.openfoam.n_processors or 1))
     _assert_template(dest, cfg, parameters, n_avg_timesteps)
     return dest
 
@@ -343,6 +346,7 @@ def _prespin_template(case_dir: Path, cfg: Config) -> None:
     runtime = OpenFoamRuntime(of)
     nprocs = int(getattr(of, "n_processors", 1) or 1)
     if nprocs > 1:
+        dicts.decompose_for(case_dir, nprocs)
         runtime.decompose(case_dir)
     proc = runtime.run_stage(case_dir, "spinup", end_time=of.spinup_time, cfg=cfg)
     if getattr(proc, "returncode", 0) != 0:

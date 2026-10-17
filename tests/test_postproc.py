@@ -369,3 +369,19 @@ def test_a_dataset_is_not_assumed_hashable(tmp_path):
 
     with _pytest.raises(TypeError):
         {_vof(tmp_path)}          # noqa: B018 - the behavior being pinned
+
+
+def test_an_empty_scene_list_renders_no_figure(tmp_path, monkeypatch, capsys):
+    """Every box of *VisIt figures* unchecked writes ``scenes: []``: a choice, not
+    "every scene"."""
+    from axqua import cli
+    from axqua.postproc import render as render_mod
+
+    case = tmp_path / "case.axq-case"
+    case.write_text("project: {name: c, crs_epsg: 25832}\n"
+                    "geodata: {dem_initial: dem.tif, boundary: outline.gpkg}\n"
+                    "postproc: {scenes: []}\n", encoding="utf-8")
+    monkeypatch.setattr(render_mod, "render",
+                        lambda *a, **k: pytest.fail("rendered although none was asked"))
+    assert cli._run_postproc([str(case)]) == 0
+    assert "no figure" in capsys.readouterr().out

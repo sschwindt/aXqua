@@ -45,6 +45,7 @@ than paying for it over the whole run.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -728,8 +729,10 @@ limitU
     return _dict_file("fvOptions", body, location="system")
 
 
-def decompose_par_dict(cfg) -> str:
-    n = max(int(cfg.openfoam.n_processors), 1)
+def decompose_par_dict(cfg=None, *, n_processors: int | None = None) -> str:
+    """``system/decomposeParDict`` for *n_processors*, else for the case's own."""
+    n = max(int(n_processors if n_processors is not None
+                else cfg.openfoam.n_processors), 1)
     body = f"""numberOfSubdomains {n};
 
 // 'scotch' rather than 'simple'/'hierarchical': the wetted corridor is a sinuous,
@@ -738,6 +741,45 @@ def decompose_par_dict(cfg) -> str:
 method          scotch;
 """
     return _dict_file("decomposeParDict", body, location="system")
+
+
+def decomposition_of(case_dir: str | Path) -> int | None:
+    """``numberOfSubdomains`` of the case's ``system/decomposeParDict``, None without
+    one."""
+    path = Path(case_dir) / "system" / "decomposeParDict"
+    if not path.is_file():
+        return None
+    found = re.search(r"^\s*numberOfSubdomains\s+(\d+)\s*;", path.read_text(), re.M)
+    return int(found.group(1)) if found else None
+
+
+def decompose_for(case_dir: str | Path, n_processors: int) -> str | None:
+    """Make ``system/decomposeParDict`` split the case into *n_processors* domains.
+
+    Every consumer that runs ``decomposePar`` calls this with the ranks it starts:
+    a file left by a run on other ranks would split the case for those. A file that
+    already names the number is left as it is, with its method and coefficients,
+    which may be the user's; otherwise aXqua's scotch decomposition for the number is
+    written. Returns the previous text when the file was replaced (``""`` when there
+    was none), so a caller can put it back, and None when nothing changed.
+    """
+    path = Path(case_dir) / "system" / "decomposeParDict"
+    n = max(int(n_processors), 1)
+    if decomposition_of(case_dir) == n:
+        return None
+    previous = path.read_text() if path.is_file() else ""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(decompose_par_dict(n_processors=n))
+    return previous
+
+
+def restore_decomposition(case_dir: str | Path, previous: str) -> None:
+    """Put back what :func:`decompose_for` replaced (no file where there was none)."""
+    path = Path(case_dir) / "system" / "decomposeParDict"
+    if previous:
+        path.write_text(previous)
+    else:
+        path.unlink(missing_ok=True)
 
 
 # --------------------------------------------------------------------------- #
