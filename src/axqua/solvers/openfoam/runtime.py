@@ -167,9 +167,11 @@ class OpenFoamRuntime(ShellRuntime):
 
     # ------------------------------------------------------------- decomposition
     def decompose(self, case_dir: str | Path, *, force: bool = True,
-                  dictionary: str | Path | None = None):
-        """``decomposePar``, with *dictionary* instead of the case's ``system/decomposeParDict`` where given (:func:`dicts.decomposition_for`)."""
+                  n_processors: int | None = None):
+        """``decomposePar`` for *n_processors* ranks (the case's own count when not given). Where the case's ``system/decomposeParDict`` names another count, a dictionary of the run's own is used (:func:`dicts.decomposition_for`), so the case's file is never changed."""
         flag = " -force" if force else ""
+        n = n_processors if n_processors is not None else self.of.n_processors
+        dictionary = dicts.decomposition_for(case_dir, n) if n and n > 1 else None
         return self.run(f"decomposePar{flag}{_dictionary_option(case_dir, dictionary)}",
                         cwd=case_dir, check=True)
 
@@ -194,8 +196,7 @@ class OpenFoamRuntime(ShellRuntime):
     def run_stage(self, case_dir: str | Path, stage: str, *, end_time: float,
                   start_time: float = 0.0, n_processors: int | None = None,
                   cfg=None, show_progress: bool = True,
-                  sink=None, should_stop=None,
-                  decomposition: str | Path | None = None):
+                  sink=None, should_stop=None):
         """Activate *stage*'s dictionaries and run the solver over them.
 
         Pass *cfg* so the dictionaries are regenerated from the configuration this
@@ -206,12 +207,17 @@ class OpenFoamRuntime(ShellRuntime):
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
 
-        *decomposition* is the dictionary the case was decomposed with, where it is not the case's own; a parallel solver reads it as well and refuses one that names more domains than it has ranks.
+        A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks), and a case split for another number of ranks is split again for these: a script that sets its ranks and then calls :meth:`decompose` without them used to end in "Number of processor directories = 1 is not equal to the number of ranks".
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
         n = n_processors if n_processors is not None else self.of.n_processors
         if n and n > 1:
+            decomposition = dicts.decomposition_for(case_dir, n)
+            if processor_count(case_dir) != n:
+                log.info("the case is not split into %d domains; decomposing it for "
+                         "%d ranks", n, n)
+                self.decompose(case_dir, n_processors=n)
             # Through the environment, not a hard-coded "mpirun": MS-MPI on Windows
             # provides `mpiexec`, and a profile may point at `srun` on a cluster. The
             # launcher is a configured field, not a constant (plan §13).
@@ -253,3 +259,9 @@ def _dictionary_option(case_dir: str | Path, dictionary: str | Path | None) -> s
     except ValueError:
         pass
     return f" -decomposeParDict {shlex.quote(path.as_posix())}"
+
+
+def processor_count(case_dir: str | Path) -> int:
+    """How many ``processor<N>`` folders the case has, which is the number of domains it is split into."""
+    return sum(1 for path in Path(case_dir).glob("processor*")
+               if path.is_dir() and path.name[len("processor"):].isdigit())

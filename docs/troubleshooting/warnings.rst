@@ -75,7 +75,7 @@ The check of a case (*Check* on the *Case Setup* tab, *Save* in the case setting
 
 .. _axqua-config-discharge-conflict:
 
-``the files of the validation situation 'High flow' show different discharges``
+``The files of the validation situation 'High flow' show different discharges; the last one in the table was saved.``
     A validation situation has one discharge, and the table *Measurement files* of the case settings shows it in every row of the situation. Where the rows still show different values, the last one in the table was saved. Enter the discharge of the situation in one of its rows; the other rows follow (:ref:`validation situation <validation-setup>`).
 
 Profile of this computer

@@ -152,25 +152,20 @@ class OpenFoamBackend(BaseBackend):
                 log.info("checkMesh: runnable, with marginal faces: %s", "; ".join(failed))
 
         nprocs = n_processors if n_processors is not None else cfg.openfoam.n_processors
-        decomposition = None
         if nprocs and nprocs > 1:
-            # The ranks of the job, not the number the case was built with: the decomposition has to give each rank its domain, or mpirun stops at once with "Number of processor directories = 1 is not equal to the number of ranks" (found by the mesh study of 2026-10-17, and the same for the MPI ranks option of an openfoam-run job). A run on other ranks than the case's own file names gets a file of its own, so the case's file is never changed.
-            decomposition = dicts.decomposition_for(case_dir, int(nprocs))
-            runtime.decompose(case_dir, dictionary=decomposition)
+            # The ranks of the job, not the number the case was built with: the decomposition has to give each rank its domain, or mpirun stops at once with "Number of processor directories = 1 is not equal to the number of ranks" (found by the mesh study of 2026-10-17, and the same for the MPI ranks option of an openfoam-run job). The runtime uses a dictionary of the run's own where the case's file names another count, so the case's file is never changed.
+            runtime.decompose(case_dir, n_processors=int(nprocs))
 
         for stage in dicts.stages(cfg):
             if ctx is not None:
                 ctx.check_cancelled()
                 ctx.sink.step(f"openfoam:{stage.name}")
-            # start_from, not the stage name: a rigid-lid case has ONE stage and it
-            # is called "run", but it starts from t=0 like a spin-up does. Keying off
-            # the name told the progress bar the run began at spinup_time and it
-            # reported a run that was already 8 s in before the first step.
+            # start_from, not the stage name: a rigid-lid case has ONE stage and it is called "run", but it starts from t=0 like a spin-up does. Keying off the name told the progress bar the run began at spinup_time and it reported a run that was already 8 s in before the first step.
             start = (0.0 if stage.start_from == "startTime"
                      else cfg.openfoam.spinup_time)
             proc = runtime.run_stage(
                 case_dir, stage.name, end_time=stage.end_time, start_time=start,
-                n_processors=nprocs, cfg=cfg, decomposition=decomposition,
+                n_processors=nprocs, cfg=cfg,
                 show_progress=ctx is None, sink=sink,
                 should_stop=ctx.should_stop if ctx is not None else None)
             if ctx is not None:

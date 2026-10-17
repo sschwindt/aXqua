@@ -157,14 +157,11 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
         def check_mesh(self, _case):
             return True, [], None
 
-        def decompose(self, case_dir, dictionary=None):
-            used = dictionary or case_dir / "system" / "decomposeParDict"
-            seen["dict"] = Path(used).read_text()
-            seen["decomposed with"] = dictionary
+        def decompose(self, case_dir, n_processors=None):
+            seen["decomposed for"] = n_processors
 
-        def run_stage(self, *a, n_processors=None, decomposition=None, **k):
+        def run_stage(self, *a, n_processors=None, **k):
             seen.setdefault("ranks", []).append(n_processors)
-            seen["solver reads"] = decomposition
             return SimpleNamespace(returncode=0)
 
         def reconstruct(self, _case):
@@ -175,19 +172,44 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
                           hydrodynamics=Hydrodynamics(), openfoam_case_dir=case,
                           log_file="axqua.log")
     BACKEND.run(cfg, None, n_processors=4)
-    assert "numberOfSubdomains 4;" in seen["dict"]
+    assert seen["decomposed for"] == 4
     assert set(seen["ranks"]) == {4} and seen["reconstructed"]
-    # a file of the run's own, given to decomposePar and to the solver alike
-    assert seen["decomposed with"] == seen["solver reads"] == (
-        case / "system" / "decomposeParDict-4")
     assert cfg.openfoam.n_processors == 1                  # the case is not changed
+
+
+def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
+    """What the backend does, the per-case openfoam_run.py scripts get as well: they call decompose() without their ranks and run_stage() with them."""
+    from axqua.config import OpenFoam
+    from axqua.solvers.openfoam.runtime import OpenFoamRuntime
+
+    bashrc = tmp_path / "bashrc.sh"
+    bashrc.write_text("# stub\n")
+    case = tmp_path / "case"
+    (case / "system").mkdir(parents=True)
+    (case / "system" / "decomposeParDict").write_text("numberOfSubdomains 1;\n")
+    runtime = OpenFoamRuntime(OpenFoam(bashrc=bashrc, n_processors=1))
+    commands = []
+
+    def run(command, **kw):
+        commands.append(command)
+        if command.startswith("decomposePar"):          # what decomposePar leaves behind
+            for old in case.glob("processor*"):
+                old.rmdir()
+            n = 4 if "decomposeParDict-4" in command else 1
+            for i in range(n):
+                (case / f"processor{i}").mkdir()
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(runtime, "run", run)
+    monkeypatch.setattr("axqua.solvers.openfoam.dicts.activate", lambda *a, **k: None)
+    runtime.decompose(case)                               # as the scripts do: the case's file
+    runtime.run_stage(case, "spinup", end_time=1.0, n_processors=4, show_progress=False)
+    runtime.run_stage(case, "run", end_time=2.0, n_processors=4, show_progress=False)
+    assert commands[0] == "decomposePar -force"
+    assert commands[1] == "decomposePar -force -decomposeParDict system/decomposeParDict-4"
+    assert all(c.endswith("-parallel -decomposeParDict system/decomposeParDict-4")
+               for c in commands[2:]) and len(commands) == 4   # split once, not per stage
     assert (case / "system" / "decomposeParDict").read_text() == "numberOfSubdomains 1;\n"
-    # on the ranks the case's file names, the case's file is used
-    cfg.openfoam.n_processors = 8
-    (case / "system" / "decomposeParDict").write_text("numberOfSubdomains 8;\n")
-    BACKEND.run(cfg, None)
-    assert seen["decomposed with"] is None and seen["solver reads"] is None
-    assert seen["dict"] == "numberOfSubdomains 8;\n"
 
 
 def test_a_case_keeps_its_own_decomposition_file(tmp_path):

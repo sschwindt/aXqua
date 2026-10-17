@@ -1769,6 +1769,9 @@ def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_di
     situations = editor.values()["calibration"]["validation"]
     assert [(s["name"], s["prescribed_flowrate"]) for s in situations] == [("High flow", 6.1)]
     assert table.discharge_conflicts() == []
+    # a row set to the situation it is in keeps the discharge
+    table.set_role(1, "validation", "High flow")
+    assert table._rows[1]["discharge"].text() == "6.1"
     # what the table could not keep equal is named on Save
     table._show(entry, "7.0")
     assert table.discharge_conflicts() == ["High flow"]

@@ -761,24 +761,23 @@ def decomposition_for(case_dir: str | Path, n_processors: int) -> Path | None:
 
     None where the case's own ``system/decomposeParDict`` names that number: the run uses it, with its method and coefficients, which may be the user's. Otherwise aXqua's scotch decomposition for the number is written to ``system/decomposeParDict-<n>`` and that file is returned; ``decomposePar`` and the solver are both given it, so the case's own file is never changed (a run on other ranks, killed or not, leaves nothing behind in it).
     """
-    n = max(int(n_processors), 1)
-    if decomposition_of(case_dir) == n:
-        return None
-    path = Path(case_dir) / "system" / f"decomposeParDict-{n}"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(decomposition_dict(n))
-    return path
+    return _write_decomposition(case_dir, n_processors, f"decomposeParDict-{max(int(n_processors), 1)}")
 
 
 def write_decomposition(case_dir: str | Path, n_processors: int) -> bool:
     """Make the case's own ``system/decomposeParDict`` name *n_processors* domains, for a case that others decompose with that file (the calibration template, which HydroBayesCal copies). A file that names the number already is left as it is. Returns whether the file was written."""
+    return _write_decomposition(case_dir, n_processors, "decomposeParDict") is not None
+
+
+def _write_decomposition(case_dir: str | Path, n_processors: int, name: str) -> Path | None:
+    """aXqua's decomposition for *n_processors* into ``system/<name>``, unless the case's own file names that number already (None then)."""
     n = max(int(n_processors), 1)
     if decomposition_of(case_dir) == n:
-        return False
-    path = Path(case_dir) / "system" / "decomposeParDict"
+        return None
+    path = Path(case_dir) / "system" / name
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(decomposition_dict(n))
-    return True
+    return path
 
 
 # --------------------------------------------------------------------------- #

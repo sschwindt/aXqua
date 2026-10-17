@@ -125,14 +125,13 @@ def test_openfoam_uses_the_configured_mpi_launcher_not_a_hard_coded_mpirun(tmp_p
     runtime = OpenFoamRuntime(OpenFoam(bashrc=bashrc, n_processors=4))
     runtime.environment.mpi_launcher = "mpiexec"
 
-    seen = {}
-    monkeypatch.setattr(runtime, "run",
-                        lambda command, **kw: seen.setdefault("command", command))
+    commands = []
+    monkeypatch.setattr(runtime, "run", lambda command, **kw: commands.append(command))
     monkeypatch.setattr("axqua.solvers.openfoam.dicts.activate",
                         lambda *a, **k: None)
     runtime.run_stage(tmp_path, "run", end_time=1.0, n_processors=4,
                       show_progress=False)
-    assert seen["command"].startswith("mpiexec -np 4")
+    assert commands[-1].startswith("mpiexec -np 4")
 
 
 def test_telemac_never_prepends_an_mpi_launcher(tmp_path, monkeypatch):

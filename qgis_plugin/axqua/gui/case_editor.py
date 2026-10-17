@@ -478,8 +478,11 @@ class MeasurementTable(QWidget):
     def set_role(self, row: int, role: str, situation: str = "",
                  discharge: str = "") -> None:
         entry = self._rows[row]
+        before = self._situation_of(entry)
+        after = (situation.strip() or "validation") if role == "validation" else None
         entry["situation"].setText(situation)
-        self._show(entry, "")         # the discharge of its former situation is not this one's
+        if after != before:
+            self._show(entry, "")     # the discharge of its former situation is not this one's
         if entry["use"].currentData() == role:
             self._joined(entry)
         else:
@@ -922,9 +925,8 @@ class CaseEditor(EditorDialog):
             "warning", "axqua.config.incomplete",
             f"{(self._meta(key) or {}).get('label', key)}: required for this case and "
             "not set yet.", subject=key) for key in self.missing_required()]
-        # the validation situations are saved with the calibration block only
-        switch = self.switches.get("calibration")
-        if self.measurements is not None and (switch is None or switch.isChecked()):
+        # what is said of the validation situations is said of situations that are saved
+        if self.measurements is not None and (data.get("calibration") or {}).get("validation"):
             unreadable += [fnd.Finding(
                 "warning", "axqua.config.incomplete",
                 f"The validation situation {name!r} has no discharge.",

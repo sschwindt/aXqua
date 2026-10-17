@@ -164,10 +164,10 @@ def run_openfoam_mesh_convergence(cfg, *, seed: Any = None,
 
 
 def _correct_scale(path: Path, scale: float) -> None:
-    """Write the size scale into the ``level.json`` of a level, if it has one."""
+    """Write the size scale into the ``level.json`` of a level, if it has one. A file that cannot be read or written is left as it is: the report is right either way, and a study of hours must not end in an error over its metadata."""
     try:
         meta = json.loads(path.read_text())
-    except (OSError, ValueError):
-        return
-    meta["scale"] = scale
-    path.write_text(json.dumps(meta, indent=2))
+        meta["scale"] = scale
+        path.write_text(json.dumps(meta, indent=2) + "\n")
+    except (OSError, ValueError) as exc:
+        log.warning("could not correct the size scale in %s (%s)", path, exc)

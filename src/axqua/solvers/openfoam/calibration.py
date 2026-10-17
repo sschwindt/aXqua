@@ -137,7 +137,8 @@ def campaign_config(cfg: Config, *, cell_size_factor: float, end_time: float,
 
 def _clean_template(case_dir: Path) -> None:
     """Strip a built case down to what is worth copying once per run."""
-    for pattern in ("processor*", "VTK", "postProcessing", "log.*", "*.log"):
+    for pattern in ("processor*", "VTK", "postProcessing", "log.*", "*.log",
+                    "system/decomposeParDict-*"):         # the dictionaries of earlier runs
         for path in case_dir.glob(pattern):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
     for path in case_dir.iterdir():
