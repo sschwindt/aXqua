@@ -99,7 +99,10 @@ is never written). **The measurement table** (`MeasurementTable`) replaces the Y
 `ground_truth.sources` and `calibration.validation`: one row per file, *Use for* calibration
 or validation, a situation name and its discharge for validation; keys of a situation the
 table does not show (inflows, prescribed_elevation, duration) are kept; untouched it returns
-its input exactly. A `multichoice` kind is a row of check boxes (postproc lists). **A row that
+its input exactly. A source without `kind` is a FlowTracker source (the loader's default) and
+stays without one; the *File* and *Positions* cells are read back; the discharge is one per
+situation, so editing it in one row sets it in the other rows of that situation, and one row
+with a discharge is enough (found by the review of 2026-10-17). A `multichoice` kind is a row of check boxes (postproc lists). **A row that
 was not touched is written back exactly as it was read** - only a row whose text changed is
 converted (`Row.value`); `Row.peek` reads without recording an error. A list that does not
 parse keeps its previous content and gets a finding. Findings from `axqua check` land on the

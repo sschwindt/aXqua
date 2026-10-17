@@ -310,26 +310,39 @@ CURATED: dict[str, dict[str, Any]] = {
              "share of the bed."),
     "postproc.telemac_maps": _c(
         "Maps of a TELEMAC result", "multichoice",
-        choices=("depth", "velocity", "free-surface"),
         help="The layers that Load results adds in QGIS."),
     "postproc.map_style": _c(
         "Map style of the water depth", "choice",
-        choices=("depth-streamlines", "depth-arrows", "velocity-streamlines",
-                 "velocity-arrows"),
         help="Velocity arrows or streamlines that the plugin draws over the water "
              "depth or the velocity magnitude of a loaded TELEMAC result. Empty: plain "
              "depth and velocity maps."),
     "postproc.openfoam_outputs": _c(
-        "OpenFOAM results for", "multichoice", choices=("paraview", "visit", "vtk"),
+        "OpenFOAM results for", "multichoice",
         help="paraview: the file case.foam. visit: the controlDict of the case, which "
              "VisIt opens. vtk: a conversion after every run, which QGIS can read too "
              "and which can double the size of the case."),
     "postproc.scenes": _c(
         "VisIt figures", "multichoice",
-        choices=("free-surface", "velocity-plan", "profiles"),
         help="The predefined figures of three-dimensional results that axqua postproc "
              "renders with VisIt."),
 }
+
+#: Settings whose choices are a constant of :mod:`axqua.config` that the loader checks
+#: against, so that the form and the loader cannot disagree.
+CONFIG_CHOICES: dict[str, str] = {
+    "postproc.telemac_maps": "TELEMAC_MAPS",
+    "postproc.map_style": "MAP_STYLES",
+    "postproc.openfoam_outputs": "OPENFOAM_OUTPUTS",
+    "postproc.scenes": "VISIT_SCENES",
+}
+
+#: Fields that stand under a ``# ---- name ----`` heading of their dataclass and still
+#: belong on the page of their block: the outlets of the OpenFOAM model are boundary
+#: conditions, not settings of its lattice.
+OUTSIDE_THEIR_GROUP = frozenset({
+    "openfoam.outflow_boundary", "openfoam.outlet_stage", "openfoam.outlet_air_margin",
+    "openfoam.liquid_boundaries",
+})
 
 #: Choices of settings that are not essential, where the code accepts a fixed set only.
 CHOICES: dict[str, tuple[str, ...]] = {
@@ -467,6 +480,8 @@ def _default_case():
 
 def build() -> list[dict[str, Any]]:
     """The sections of a case file with their settings, as plain data."""
+    from axqua import config as config_module
+
     cfg, written = _default_case()
     sections = []
     listed = {block for block, _title, _label_ in BLOCKS}
@@ -497,8 +512,8 @@ def build() -> list[dict[str, Any]]:
             else:
                 kind = _kind(hints.get(name), default, name)
             kind = curated.get("kind") or ("choice" if key in CHOICES else kind)
-            page, frame = frames.get(f"{block}/{groups.get(name, '')}",
-                                     frames.get(block, (block, "")))
+            group = "" if key in OUTSIDE_THEIR_GROUP else groups.get(name, "")
+            page, frame = frames.get(f"{block}/{group}", frames.get(block, (block, "")))
             required = key in REQUIRED
             when = [dict(condition) for condition in REQUIRED_WHEN.get(key, ())]
             fields.append({
@@ -507,7 +522,9 @@ def build() -> list[dict[str, Any]]:
                 "kind": kind,
                 "unit": curated.get("unit", ""),
                 "help": curated.get("help") or comments.get(name, ""),
-                "choices": list(curated.get("choices") or CHOICES.get(key, ())),
+                "choices": list(curated.get("choices")
+                                or getattr(config_module, CONFIG_CHOICES.get(key, ""), ())
+                                or CHOICES.get(key, ())),
                 # a required entry is always on the form
                 "essential": key in CURATED or required or bool(when),
                 "default": _json(default),

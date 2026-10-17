@@ -160,14 +160,15 @@ class OpenFoamBackend(BaseBackend):
             # ranks option of an openfoam-run job). scotch, as the case sets it: the
             # wetted corridor is sinuous, so a geometric split would hand some ranks
             # empty space.
-            if int(nprocs) != int(cfg.openfoam.n_processors or 1):
-                import copy
+            # Written for every run: a run on other ranks before this one left its
+            # own count in the file.
+            import copy
 
-                ranks = copy.copy(cfg)
-                ranks.openfoam = copy.copy(cfg.openfoam)
-                ranks.openfoam.n_processors = int(nprocs)
-                (case_dir / "system" / "decomposeParDict").write_text(
-                    dicts.decompose_par_dict(ranks))
+            ranks = copy.copy(cfg)
+            ranks.openfoam = copy.copy(cfg.openfoam)
+            ranks.openfoam.n_processors = int(nprocs)
+            (case_dir / "system" / "decomposeParDict").write_text(
+                dicts.decompose_par_dict(ranks))
             runtime.decompose(case_dir)
 
         for stage in dicts.stages(cfg):
@@ -447,8 +448,9 @@ class OpenFoamBackend(BaseBackend):
             written.append(plan)
 
         # what the case asks to offer for ParaView and VisIt (postproc.openfoam_outputs)
-        outputs = set(getattr(getattr(cfg, "postproc", None), "openfoam_outputs", None)
-                      or ("paraview", "visit"))
+        # (an empty list is a choice: nothing for either program)
+        outputs = getattr(getattr(cfg, "postproc", None), "openfoam_outputs", None)
+        outputs = set(("paraview", "visit") if outputs is None else outputs)
         foam = case_dir / "case.foam"
         if foam.exists() and "paraview" in outputs:
             ctx.record("OpenFOAM case (ParaView)", foam, kind="file")

@@ -81,10 +81,12 @@ def make_openfoam_simulator(cfg, discharge: float | None, *, base_dir: Path,
         from axqua.solvers.openfoam.backend import BACKEND as backend
     if plan_view is None:
         from axqua.solvers.openfoam.planview import write as plan_view
-    base = None
+    from axqua.solvers.openfoam.mesh import plan_spacing
+
+    # the size scale of a level is its spacing against the one the case asks for
+    base = float(plan_spacing(cfg))
 
     def simulate(label, dx, _dx, probes, quantities):
-        nonlocal base
         if check_cancelled is not None:
             check_cancelled()
         level = copy.deepcopy(cfg)
@@ -104,8 +106,6 @@ def make_openfoam_simulator(cfg, discharge: float | None, *, base_dir: Path,
         data = selafin.read_slf(result, frame=-1)
         min_edge, mean_depth, mean_velocity = _geom_stats(data, probes)
         cells = getattr(getattr(artifacts, "mesh", None), "n_cells", None)
-        if base is None:
-            base = float(dx)
         out = LevelResult(
             label=label, cell_size=float(dx), n_elem=int(cells or data["ikle"].shape[0]),
             n_nodes=int(data["x"].size), min_edge=min_edge,

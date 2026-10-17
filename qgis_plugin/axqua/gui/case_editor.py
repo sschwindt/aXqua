@@ -322,6 +322,8 @@ class MeasurementTable(QWidget):
     COLUMNS = ("File", "Positions", "Kind", "Use for", "Situation", "Discharge [m3/s]")
     ROLES = (("calibration", "Calibration"), ("validation", "Validation"))
     KINDS = ("points", "flowtracker")
+    #: The kind of a source that names none (``GroundTruthSource.kind`` of aXqua).
+    DEFAULT_KIND = "flowtracker"
 
     def __init__(self, editor: "CaseEditor", sources: list, situations: list) -> None:
         super().__init__()
@@ -376,7 +378,8 @@ class MeasurementTable(QWidget):
             kind.addItem(value, value)
         if source.get("kind") and kind.findData(source["kind"]) < 0:
             kind.addItem(str(source["kind"]), source["kind"])
-        kind.setCurrentIndex(max(kind.findData(source.get("kind") or "points"), 0))
+        kind.setCurrentIndex(max(kind.findData(source.get("kind") or self.DEFAULT_KIND),
+                                 0))
         kind.currentIndexChanged.connect(lambda _=0: self.editor.changed())
         self.table.setCellWidget(index, 2, kind)
         use = QComboBox()
@@ -393,7 +396,7 @@ class MeasurementTable(QWidget):
         entry.update(kind=kind, use=use, situation=situation_edit, discharge=discharge)
         use.currentIndexChanged.connect(lambda _=0, e=entry: self._role_changed(e))
         situation_edit.textChanged.connect(lambda _="": self.editor.changed())
-        discharge.textChanged.connect(lambda _="": self.editor.changed())
+        discharge.textChanged.connect(lambda text, e=entry: self._discharge_changed(e, text))
         self._role_changed(entry, quiet=True)
 
     def _role_changed(self, entry: dict, *, quiet: bool = False) -> None:
@@ -409,6 +412,19 @@ class MeasurementTable(QWidget):
         switch = getattr(self.editor, "switches", {}).get("calibration")
         if validation and switch is not None and not switch.isChecked():
             switch.setChecked(True)
+        self.editor.changed()
+
+    def _discharge_changed(self, entry: dict, text: str) -> None:
+        """The discharge is one of the situation: the other files of the same situation
+        show it too."""
+        name = entry["situation"].text().strip()
+        for other in self._rows:
+            if (other is not entry and other["situation"].text().strip() == name
+                    and other["use"].currentData() == "validation"
+                    and other["discharge"].text() != text):
+                other["discharge"].blockSignals(True)
+                other["discharge"].setText(text)
+                other["discharge"].blockSignals(False)
         self.editor.changed()
 
     def add_file(self) -> None:
@@ -448,10 +464,19 @@ class MeasurementTable(QWidget):
         """
         sources, situations, by_name = [], [], {}
         old_situations = {str(s.get("name") or ""): s for s in self.original[1]}
-        for entry in self._rows:
+        flows: dict[str, float | None] = {}
+        for index, entry in enumerate(self._rows):
             source = dict(entry["source"])
+            for column, key in ((0, "values"), (1, "positions")):
+                item = self.table.item(index, column)
+                text = item.text().strip() if item is not None else ""
+                if text != str(source.get(key) or ""):
+                    if text:
+                        source[key] = text
+                    else:
+                        source.pop(key, None)
             kind = entry["kind"].currentData()
-            if kind and kind != source.get("kind"):
+            if kind and kind != (source.get("kind") or self.DEFAULT_KIND):
                 source["kind"] = kind
             if entry["use"].currentData() == "calibration":
                 sources.append(source)
@@ -466,9 +491,13 @@ class MeasurementTable(QWidget):
                 situation["sources"] = []
                 by_name[name] = situation
                 situations.append(situation)
-            situation = by_name[name]
-            situation["sources"].append(source)
+            by_name[name]["sources"].append(source)
+            # one file of the situation with a discharge is enough
             flow = parse("number", entry["discharge"].text())
+            if flow is not None or name not in flows:
+                flows[name] = flow if flow is not None else flows.get(name)
+        for name, flow in flows.items():
+            situation = by_name[name]
             if flow is not None:
                 situation["prescribed_flowrate"] = flow
             elif not situation.get("inflows"):
@@ -757,13 +786,14 @@ class CaseEditor(EditorDialog):
         return any(condition_met(c, self.value_of, self.block_on)
                    for c in meta.get("required_when") or [])
 
-    def missing_required(self) -> list[str]:
+    def missing_required(self, required: dict[str, bool] | None = None) -> list[str]:
         """Required settings that are still empty. A default fills a setting: the
-        purple label says that it matters, not that it has to be typed."""
-        missing = []
-        for key in self.rows:
-            if self.is_required(key) and is_unset(self.value_of(key)):
-                missing.append(key)
+        purple label says that it matters, not that it has to be typed. *required* is
+        what :meth:`is_required` said of each row, for a caller that asked already."""
+        if required is None:
+            required = {key: self.is_required(key) for key in self.rows}
+        missing = [key for key in self.rows
+                   if required.get(key) and is_unset(self.value_of(key))]
         if self.measurements is not None and self.is_required("ground_truth.sources"):
             sources, _ = self.measurements.values()
             if not sources:
@@ -778,13 +808,14 @@ class CaseEditor(EditorDialog):
         """Mark the required settings in aXqua purple, and the pages that still lack
         one of them."""
         self._apply_switches()
+        required = {key: self.is_required(key) for key in self.rows}
         for key, row in self.rows.items():
             if row.label_widget is not None:
-                mark_required(row.label_widget, self.is_required(key))
+                mark_required(row.label_widget, required[key])
         if self.measurements is not None:
             mark_required(self.measurement_label,
                           self.is_required("ground_truth.sources"))
-        missing = set(self.missing_required())
+        missing = set(self.missing_required(required))
         for index, page in enumerate(self.pages):
             keys = {key for frame in page["frames"] for key in frame["keys"]}
             item = self.section_list.item(index)

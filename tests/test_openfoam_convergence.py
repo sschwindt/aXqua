@@ -81,6 +81,8 @@ def test_every_level_is_built_from_the_same_seed_and_compared_from_above(tmp_pat
     assert report.converged
     assert all(level.validity is None for level in report.levels)   # no TELEMAC closure
     np.testing.assert_allclose(report.levels[1].qoi["WATER DEPTH"], 0.42)
+    np.testing.assert_allclose([level.scale for level in report.levels],
+                               [1.3, 1.0, 1 / 1.3, 1 / 1.69])
     folder = tmp_path / "post" / "openfoam-mesh-convergence" / "baseline"
     assert json.loads((folder / "level.json").read_text())["channel_size"] == 1.0
 
@@ -166,3 +168,8 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
     assert "numberOfSubdomains 4;" in seen["dict"]
     assert set(seen["ranks"]) == {4} and seen["reconstructed"]
     assert cfg.openfoam.n_processors == 1                  # the case is not changed
+
+    # the case's own ranks after a run on others: the dict is the case's again
+    cfg.openfoam.n_processors = 8
+    BACKEND.run(cfg, None)
+    assert "numberOfSubdomains 8;" in seen["dict"]

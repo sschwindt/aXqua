@@ -192,6 +192,9 @@ def test_the_editor_pages_are_the_ones_the_user_named(tmp_path):
             "openfoam.n_layers"} <= set(mesh_keys)
     openfoam_keys = pages[titles.index("OpenFOAM")]["frames"][0]["keys"]
     assert "openfoam.cell_size" not in openfoam_keys and "openfoam.mode" in openfoam_keys
+    # the outlets stand under the mesh heading of the dataclass and are boundaries
+    assert {"openfoam.outflow_boundary", "openfoam.outlet_stage"} <= set(openfoam_keys)
+    assert "openfoam.outflow_boundary" not in mesh_keys
     drying = pages[titles.index("Initial conditions")]["frames"][1]
     assert drying["title"] == "Drying of thin films" and "grain" in drying["info"]
     assert {page["key"] for page in pages if page["switch"]} == {

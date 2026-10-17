@@ -216,9 +216,12 @@ def synthesize_outflow_rating(cfg, discharge, *, side_slope: float = 0.0,
 
     out = Path(out) if out is not None else Path(cfg.boundaries.stage_discharge)
     rough = f"Strickler Kst={strickler}" if strickler is not None else f"Manning n={manning}"
-    log.info("outflow rating from geodata: Q=%.2f m3/s, width=%.1f m (outflow line), "
+    flows = ([float(discharge)] if isinstance(discharge, (int, float))
+             else [float(q) for q in discharge])
+    log.info("outflow rating from geodata: Q=%s m3/s, width=%.1f m (outflow line), "
              "bed=%.2f m (thalweg), slope=%.5f, banks %g:1, %s",
-             float(discharge), width, bed_elevation, slope, side_slope, rough)
+             ", ".join(f"{q:.2f}" for q in flows), width, bed_elevation, slope,
+             side_slope, rough)
     return generate_stage_discharge(out, discharge, manning=manning, strickler=strickler,
                                     slope=slope, bottom_width=width, side_slope=side_slope,
                                     bed_elevation=bed_elevation)

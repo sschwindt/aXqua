@@ -914,6 +914,11 @@ def test_what_an_openfoam_case_offers_paraview_and_visit_is_set_by_the_case(tmp_
     assert ("OpenFOAM case (ParaView)", "case.foam") in listed(["paraview", "visit"])
     assert ("OpenFOAM case (VisIt)", "controlDict") in listed(["paraview", "visit"])
     assert ("OpenFOAM case (VisIt)", "controlDict") not in listed(["paraview"])
+    # every box unchecked is a choice, not "the default"
+    def programs(outputs):
+        return [r for r in listed(outputs) if r[0].startswith("OpenFOAM case")]
+
+    assert programs([]) == [] and len(programs(None)) == 2
     # vtk in the case asks for the conversion; an option of the job still decides
     vtk = SimpleNamespace(postproc=SimpleNamespace(openfoam_outputs=["vtk"]))
     job = SimpleNamespace(options=SimpleNamespace(to_vtk=None), spec=None)

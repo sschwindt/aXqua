@@ -318,6 +318,8 @@ def test_the_maps_and_the_map_style_of_a_telemac_result_are_those_of_the_case(tm
                            "TELEMAC result (steady) - free surface"}
     assert styled["TELEMAC result (steady)"]["map_style"] == "depth-arrows"
     assert styled["TELEMAC result (steady) - free surface"]["variable"] == "FREE SURFACE"
+    # every box unchecked is a choice, not "the default"
+    assert listed(telemac_maps=[], map_style="") == {}
 
 
 def test_unknown_post_processing_entries_are_refused():

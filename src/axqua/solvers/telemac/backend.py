@@ -483,7 +483,9 @@ class TelemacBackend(BaseBackend):
                 continue
             # Which maps the case asks for (postproc.telemac_maps), and the predefined
             # map style the plugin applies to the depth layer (postproc.map_style).
-            maps = set(getattr(post, "telemac_maps", None) or ("depth", "velocity"))
+            # (an empty list is a choice: no map)
+            maps = getattr(post, "telemac_maps", None)
+            maps = set(("depth", "velocity") if maps is None else maps)
             style = str(getattr(post, "map_style", "") or "")
             if "depth" in maps:
                 ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,

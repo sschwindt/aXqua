@@ -1728,6 +1728,40 @@ def test_measurement_files_are_used_for_calibration_or_validation(qgis_app, tmp_
     editor.deleteLater()
 
 
+def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_discharge(
+        qgis_app, tmp_path, monkeypatch):
+    case = {"project": {"name": "reach"},
+            "ground_truth": {"sources": [{"category": "hydraulics",
+                                          "values": "ft/nov.ft.sum.xlsx",
+                                          "positions": "ft/nov.gpkg"}]},
+            "calibration": {"validation": [{"name": "High flow",
+                                            "prescribed_flowrate": 5.3,
+                                            "sources": [{"category": "hydraulics",
+                                                         "kind": "points",
+                                                         "values": "gt/sep.gpkg"}]}]}}
+    editor, _client = _paged(tmp_path, monkeypatch, case)
+    table = editor.measurements
+    # a source without a kind is a FlowTracker source, and is written back without one
+    assert table._rows[0]["kind"].currentData() == "flowtracker"
+    assert editor.values() == case and not editor.dirty
+    # a corrected path in the table is what is saved
+    table.table.item(0, 0).setText("ft/nov-corrected.xlsx")
+    table.table.item(0, 1).setText("")
+    source = editor.values()["ground_truth"]["sources"][0]
+    assert source["values"] == "ft/nov-corrected.xlsx" and "positions" not in source
+    assert "kind" not in source
+    # a second file of the same situation, its discharge left empty, keeps the discharge
+    table.add("gt/sep-b.gpkg")
+    table.set_role(2, "validation", "High flow")
+    situation = editor.values()["calibration"]["validation"][0]
+    assert situation["prescribed_flowrate"] == 5.3 and len(situation["sources"]) == 2
+    # the discharge is one of the situation: changed in one row, changed in all
+    table._rows[1]["discharge"].setText("6.1")
+    assert table._rows[2]["discharge"].text() == "6.1"
+    assert editor.values()["calibration"]["validation"][0]["prescribed_flowrate"] == 6.1
+    editor.deleteLater()
+
+
 def test_a_file_for_the_validation_switches_the_calibration_on(qgis_app, tmp_path,
                                                                monkeypatch):
     case = {"project": {"name": "reach"}, "boundaries": {"prescribed_flowrate": 2.4},
