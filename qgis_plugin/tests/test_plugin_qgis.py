@@ -1772,9 +1772,13 @@ def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_di
     # a row set to the situation it is in keeps the discharge
     table.set_role(1, "validation", "High flow")
     assert table._rows[1]["discharge"].text() == "6.1"
-    # a file of the calibration keeps no discharge to take into a situation later
-    table.set_role(0, "calibration")
+    # a file of the calibration keeps no discharge to take into a situation later, also when the role is changed in its combo box
+    table.set_role(0, "calibration", discharge="3")
     assert table._rows[0]["discharge"].text() == ""
+    table._rows[1]["use"].setCurrentIndex(table._rows[1]["use"].findData("calibration"))
+    assert table._rows[1]["discharge"].text() == ""
+    table._rows[1]["use"].setCurrentIndex(table._rows[1]["use"].findData("validation"))
+    assert table._rows[1]["discharge"].text() == "6.1"           # its situation's again
     # what the table could not keep equal is named on Save
     table._show(entry, "7.0")
     assert table.discharge_conflicts() == ["High flow"]

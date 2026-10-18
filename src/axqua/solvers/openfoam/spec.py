@@ -122,7 +122,8 @@ def _has_run(cfg) -> bool:
     """Any written time directory beyond ``0`` - in the case root after a serial run
     or a reconstruct, or inside ``processor0`` while a parallel run is still
     decomposed."""
-    for root in (_case(cfg), _case(cfg) / "processor0"):
+    for root in (_case(cfg), _case(cfg) / "processor0",
+                 *sorted(_case(cfg).glob("processors[0-9]*"))):
         if not root.is_dir():
             continue
         for entry in root.iterdir():

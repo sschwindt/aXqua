@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -179,7 +180,7 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
 
 
 def _runtime(tmp_path, monkeypatch, case_file_names=1):
-    """An OpenFoamRuntime whose commands are recorded, with decomposePar leaving the processor folders it would leave."""
+    """An OpenFoamRuntime whose commands are recorded. Activating a stage writes its startFrom, and decomposePar leaves what the real one leaves: one processor folder per domain with the one top-level time the active controlDict starts from (checked with v2406 on 2026-10-18)."""
     from axqua.config import OpenFoam
     from axqua.solvers.openfoam.runtime import OpenFoamRuntime
 
@@ -188,32 +189,54 @@ def _runtime(tmp_path, monkeypatch, case_file_names=1):
     bashrc.write_text("# stub\n")
     case = tmp_path / "case"
     (case / "system").mkdir(parents=True)
+    (case / "0").mkdir()
     (case / "system" / "decomposeParDict").write_text(
         f"numberOfSubdomains {case_file_names};\n")
+    (case / "system" / "controlDict").write_text("startFrom startTime;\n")   # as built
     runtime = OpenFoamRuntime(OpenFoam(bashrc=bashrc, n_processors=case_file_names))
     commands = []
+
+    def times(folder):
+        return sorted((p.name for p in folder.iterdir() if p.name[0].isdigit()), key=float)
 
     def run(command, **kw):
         commands.append(command)
         if command.startswith("decomposePar"):
             for old in case.glob("processor*"):
-                old.rmdir()
+                shutil.rmtree(old)
+            continues = "latestTime" in (case / "system" / "controlDict").read_text()
+            carried = times(case)[-1] if continues else "0"
             found = re.search(r"decomposeParDict-(\d+)", command)
             for i in range(int(found.group(1)) if found else case_file_names):
-                (case / f"processor{i}").mkdir()
+                (case / f"processor{i}" / carried).mkdir(parents=True)
         return SimpleNamespace(returncode=0)
 
+    def activate(case_dir, stage, cfg=None, **_):
+        start = "latestTime" if stage == "run" else "startTime"
+        (Path(case_dir) / "system" / "controlDict").write_text(f"startFrom {start};\n")
+
     monkeypatch.setattr(runtime, "run", run)
-    monkeypatch.setattr("axqua.solvers.openfoam.dicts.activate", lambda *a, **k: None)
+    monkeypatch.setattr("axqua.solvers.openfoam.dicts.activate", activate)
     return runtime, case, commands
+
+
+def _stage(runtime, case, stage, n):
+    return runtime.run_stage(case, stage, end_time=1.0, n_processors=n, show_progress=False)
+
+
+def _spun_up(case, time="8.5"):
+    """What a spin-up on the split case writes, without reconstructing."""
+    for folder in case.glob("processor*"):
+        (folder / time).mkdir()
 
 
 def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
     """What the backend does, the per-case openfoam_run.py scripts get as well."""
     runtime, case, commands = _runtime(tmp_path, monkeypatch)
     runtime.decompose(case, n_processors=4)                 # the tracked scripts
-    for stage in ("spinup", "run"):
-        runtime.run_stage(case, stage, end_time=1.0, n_processors=4, show_progress=False)
+    _stage(runtime, case, "spinup", 4)
+    _spun_up(case)
+    _stage(runtime, case, "run", 4)
     assert commands[0] == "decomposePar -force -decomposeParDict system/decomposeParDict-4"
     assert len(commands) == 3 and all(
         c.endswith("-parallel -decomposeParDict system/decomposeParDict-4") for c in commands[1:])
@@ -222,8 +245,9 @@ def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
     # munich-vsf's script decomposes without its ranks: split again, once, before the first stage
     runtime, case, commands = _runtime(tmp_path / "vsf", monkeypatch)
     runtime.decompose(case)
-    for stage in ("spinup", "run"):
-        runtime.run_stage(case, stage, end_time=1.0, n_processors=4, show_progress=False)
+    _stage(runtime, case, "spinup", 4)
+    _spun_up(case)
+    _stage(runtime, case, "run", 4)
     assert commands[:2] == ["decomposePar -force",
                             "decomposePar -force -decomposeParDict system/decomposeParDict-4"]
     assert len(commands) == 4
@@ -232,38 +256,58 @@ def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
 def test_a_case_whose_file_names_the_ranks_is_run_with_it(tmp_path, monkeypatch):
     runtime, case, commands = _runtime(tmp_path, monkeypatch, case_file_names=4)
     runtime.decompose(case, n_processors=4)
-    runtime.run_stage(case, "run", end_time=1.0, n_processors=4, show_progress=False)
+    _stage(runtime, case, "run", 4)
     assert commands[0] == "decomposePar -force"
     assert commands[1].endswith("interFoam -parallel")
     assert not list((case / "system").glob("decomposeParDict-*"))
 
 
-def test_results_of_an_earlier_stage_are_not_deleted_by_splitting_again(tmp_path,
+def test_a_stage_continues_from_results_only_the_processor_folders_hold(tmp_path,
                                                                         monkeypatch):
+    """The scripts allow a spin-up without reconstructing and the production stage in a second call, which decomposes before its stages: that call used to delete the spin-up."""
     import pytest
 
     from axqua.core.errors import SolverError
-    from axqua.solvers.openfoam.runtime import parallel_results, processor_count
 
     runtime, case, commands = _runtime(tmp_path, monkeypatch)
     runtime.decompose(case, n_processors=8)
-    runtime.run_stage(case, "spinup", end_time=1.0, n_processors=8, show_progress=False)
-    for i in range(8):                                       # what the spin-up wrote
-        (case / f"processor{i}" / "8.5").mkdir()
-    assert processor_count(case) == 8 and parallel_results(case) == ["8.5"]
-    with pytest.raises(SolverError, match="would delete them") as raised:
-        runtime.run_stage(case, "run", end_time=2.0, n_processors=4, show_progress=False)
+    _stage(runtime, case, "spinup", 8)
+    _spun_up(case)
+    # the second call of the script
+    assert runtime.decompose(case, n_processors=8) is None        # nothing is deleted
+    _stage(runtime, case, "run", 8)
+    assert sum(c.startswith("decomposePar") for c in commands) == 1
+    assert (case / "processor0" / "8.5").is_dir()
+    # on other ranks, or on one processor, the stage would not start from the spin-up
+    with pytest.raises(SolverError, match="would delete it") as raised:
+        _stage(runtime, case, "run", 4)
     assert "on 8 ranks" in raised.value.remedy
-    assert not any(c.startswith("decomposePar") for c in commands[2:])
+    with pytest.raises(SolverError, match="one processor does not read"):
+        _stage(runtime, case, "run", 1)
+    assert sum(c.startswith("decomposePar") for c in commands) == 1
+    # a stage that starts afresh replaces them: a later time left there would be where the next stage continues
+    _stage(runtime, case, "spinup", 8)
+    assert not (case / "processor0" / "8.5").exists()
+
+
+def test_a_reconstructed_result_is_split_again_from_its_latest_time(tmp_path, monkeypatch):
+    runtime, case, commands = _runtime(tmp_path, monkeypatch, case_file_names=4)
+    runtime.decompose(case, n_processors=4)
+    _stage(runtime, case, "spinup", 4)
+    _spun_up(case, "10")
+    (case / "10").mkdir()                                      # reconstructPar
+    _stage(runtime, case, "run", 8)                            # other ranks: nothing is lost
+    assert commands[-2] == "decomposePar -force -decomposeParDict system/decomposeParDict-8"
+    assert (case / "processor7" / "10").is_dir()
 
 
 def test_a_collated_decomposition_is_counted_by_its_folder(tmp_path):
-    from axqua.solvers.openfoam.runtime import parallel_results, processor_count
+    from axqua.solvers.openfoam.runtime import Layout, processor_count
 
     (tmp_path / "processors4" / "0").mkdir(parents=True)
-    assert processor_count(tmp_path) == 4 and parallel_results(tmp_path) == []
+    assert processor_count(tmp_path) == 4 and Layout.of(tmp_path).parallel is None
     (tmp_path / "processors4" / "1.5").mkdir()
-    assert parallel_results(tmp_path) == ["1.5"]
+    assert Layout.of(tmp_path).only_in_processor_folders
     assert processor_count(tmp_path / "missing") == 0
 
 

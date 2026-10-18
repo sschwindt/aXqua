@@ -414,6 +414,8 @@ class MeasurementTable(QWidget):
         switch = getattr(self.editor, "switches", {}).get("calibration")
         if validation and switch is not None and not switch.isChecked():
             switch.setChecked(True)
+        if not validation:
+            self._show(entry, "")     # a file of the calibration keeps no discharge to take along
         self._joined(entry)
 
     @staticmethod
@@ -481,13 +483,13 @@ class MeasurementTable(QWidget):
         before = self._situation_of(entry)
         after = (situation.strip() or "validation") if role == "validation" else None
         entry["situation"].setText(situation)
-        if after is None or after != before:
+        if after is not None and after != before:
             self._show(entry, "")     # the discharge of its former situation is not this one's
         if entry["use"].currentData() == role:
             self._joined(entry)
-        else:
-            entry["use"].setCurrentIndex(entry["use"].findData(role))   # joins as well
-        if discharge:
+        else:   # clears the discharge of a file of the calibration, joins a validation situation
+            entry["use"].setCurrentIndex(entry["use"].findData(role))
+        if discharge and role == "validation":
             entry["discharge"].setText(discharge)
 
     # -- values ---------------------------------------------------------------------

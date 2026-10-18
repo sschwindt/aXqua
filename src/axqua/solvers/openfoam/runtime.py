@@ -169,24 +169,41 @@ class OpenFoamRuntime(ShellRuntime):
     # ------------------------------------------------------------- decomposition
     def decompose(self, case_dir: str | Path, *, force: bool = True,
                   n_processors: int | None = None):
-        """``decomposePar`` for *n_processors* ranks (the case's own count when not given). Where the case's ``system/decomposeParDict`` names another count, a dictionary of the run's own is used (:func:`dicts.decomposition_for`), so the case's file is never changed."""
-        flag = " -force" if force else ""
+        """``decomposePar`` for *n_processors* ranks (the case's own count when not given). Where the case's ``system/decomposeParDict`` names another count, a dictionary of the run's own is used (:func:`dicts.decomposition_for`), so the case's file is never changed.
+
+        Where the processor folders hold results that the case itself does not (a stage run without reconstructing), nothing is split: ``decomposePar -force`` would delete them, and whether they are continued or replaced is for the next stage to decide (:meth:`run_stage`). Returns None then.
+        """
+        layout = Layout.of(case_dir)
+        if layout.only_in_processor_folders:
+            log.info("the processor folders hold results up to t = %g s that the case itself does not; not decomposing again", layout.parallel)
+            return None
         n = n_processors if n_processors is not None else self.of.n_processors
+        return self._decompose(case_dir, n, force=force)
+
+    def _decompose(self, case_dir: str | Path, n: int | None, *, force: bool = True):
+        flag = " -force" if force else ""
         dictionary = dicts.decomposition_for(case_dir, n) if n and n > 1 else None
         return self.run(f"decomposePar{flag}{_dictionary_option(case_dir, dictionary)}",
                         cwd=case_dir, check=True)
 
-    def _split_for(self, case_dir: Path, n: int) -> None:
-        """Split a case that is split into another number of domains for *n* ranks, unless that would delete results of an earlier stage."""
-        found = processor_count(case_dir)
-        kept = parallel_results(case_dir)
-        if kept:
-            raise errors.SolverError(
-                f"the case is split into {found} domains and its processor folders hold the results of an earlier stage (t = {', '.join(kept)} s); splitting it again for {n} ranks would delete them",
-                subject=str(case_dir),
-                remedy=f"Run this stage on {found} ranks, or put the result together with reconstructPar and run all stages again.")
-        log.info("the case is split into %d domains, not %d; decomposing it for %d ranks", found, n, n)
-        self.decompose(case_dir, n_processors=n)
+    def _prepare_split(self, case_dir: Path, n: int, layout: "Layout") -> None:
+        """Split the case for the *n* ranks of the stage whose controlDict is active, where it is not split for them. ``decomposePar`` carries over the one top-level time the active controlDict starts from: the start for a stage that starts afresh, the latest time for one that continues."""
+        if not layout.continues:
+            # a stage that starts afresh needs the start time and nothing of an earlier run: a later time left in the processor folders would be where the next stage continues from
+            if layout.count != n or layout.parallel is not None:
+                log.info("splitting the case for %d ranks, from the start time", n)
+                self._decompose(case_dir, n)
+            return
+        if layout.only_in_processor_folders:
+            if layout.count != n:
+                raise errors.SolverError(
+                    f"the case is split into {layout.count} domains and its processor folders hold the result of an earlier stage at t = {layout.parallel:g} s that the case itself does not; splitting it for {n} ranks would delete it",
+                    subject=str(case_dir),
+                    remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
+            return                                   # continued where the earlier stage ended
+        if layout.count != n or (layout.top or 0) > (layout.parallel or 0):
+            log.info("splitting the case for %d ranks, from its latest time (t = %g s)", n, layout.top or 0)
+            self._decompose(case_dir, n)
 
     def reconstruct(self, case_dir: str | Path, *, latest: bool = False):
         flag = " -latestTime" if latest else ""
@@ -220,14 +237,14 @@ class OpenFoamRuntime(ShellRuntime):
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
 
-        A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks). A case split for another number of ranks is split again for these where that loses nothing; where its processor folders hold results of an earlier stage, splitting again would delete them, and the stage stops with a message instead (:meth:`_split_for`).
+        A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks), and the case is split for them where it is not (:meth:`_prepare_split`). A stage that continues from results that only the processor folders hold runs on them, and stops with a message where they were split for other ranks or where it runs on one processor, which would not read them.
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
         n = n_processors if n_processors is not None else self.of.n_processors
+        layout = Layout.of(case_dir)
         if n and n > 1:
-            if processor_count(case_dir) != n:
-                self._split_for(case_dir, n)
+            self._prepare_split(case_dir, n, layout)
             decomposition = dicts.decomposition_for(case_dir, n)
             # Through the environment, not a hard-coded "mpirun": MS-MPI on Windows
             # provides `mpiexec`, and a profile may point at `srun` on a cluster. The
@@ -235,6 +252,11 @@ class OpenFoamRuntime(ShellRuntime):
             command = self.environment.mpi_command(
                 f"{self.of.solver} -parallel{_dictionary_option(case_dir, decomposition)}", n)
         else:
+            if layout.continues and layout.only_in_processor_folders:
+                raise errors.SolverError(
+                    f"the processor folders hold the result of an earlier stage at t = {layout.parallel:g} s, which a run on one processor does not read; it would start from t = {layout.top or 0:g} s",
+                    subject=str(case_dir),
+                    remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
             command = self.of.solver
 
         progress = (OpenFoamProgress(end_time, start_time=start_time,
@@ -277,36 +299,55 @@ _PROCESSOR = re.compile(r"processor(\d+)")
 _COLLATED = re.compile(r"processors(\d+)(_\d+-\d+)?")
 
 
-def _processor_folders(case_dir: str | Path) -> tuple[int, list[Path]]:
-    """``(number of domains, folders that hold them)``: the ``processor<N>`` folders, or the ``processors<N>`` folder of a collated decomposition."""
-    case_dir = Path(case_dir)
-    if not case_dir.is_dir():
-        return 0, []
-    single, collated, count = [], [], 0
-    for path in case_dir.iterdir():
-        if not path.is_dir():
-            continue
-        if _PROCESSOR.fullmatch(path.name):
-            single.append(path)
-        elif (found := _COLLATED.fullmatch(path.name)):
-            collated.append(path)
-            count = max(count, int(found.group(1)))
-    return (count, collated) if collated else (len(single), single)
+def _latest_time(folders) -> float | None:
+    """The latest time after the start among the time folders in *folders*, None without one."""
+    latest = None
+    for folder in folders:
+        for path in folder.iterdir():
+            try:
+                value = float(path.name)
+            except ValueError:
+                continue
+            if value > 0 and path.is_dir() and (latest is None or value > latest):
+                latest = value
+    return latest
+
+
+class Layout:
+    """How a case lies on disk for a parallel run, read in one pass: the number of domains it is split into (the ``processor<N>`` folders, or the ``processors<N>`` folder of a collated decomposition), the latest time in them and at the top level, and whether the active controlDict continues from the latest time."""
+
+    def __init__(self, count: int, folders: list[Path], parallel: float | None,
+                 top: float | None, continues: bool) -> None:
+        self.count, self.folders = count, folders
+        self.parallel, self.top, self.continues = parallel, top, continues
+
+    @classmethod
+    def of(cls, case_dir: str | Path) -> "Layout":
+        case_dir = Path(case_dir)
+        if not case_dir.is_dir():
+            return cls(0, [], None, None, False)
+        single, collated, count = [], [], 0
+        for path in case_dir.iterdir():
+            if not path.is_dir():
+                continue
+            if _PROCESSOR.fullmatch(path.name):
+                single.append(path)
+            elif (found := _COLLATED.fullmatch(path.name)):
+                collated.append(path)
+                count = max(count, int(found.group(1)))
+        count, folders = (count, collated) if collated else (len(single), single)
+        control = case_dir / "system" / "controlDict"
+        text = control.read_text(errors="replace") if control.is_file() else ""
+        continues = re.search(r"^\s*startFrom\s+latestTime\s*;", text, re.M) is not None
+        return cls(count, folders, _latest_time(folders), _latest_time([case_dir]),
+                   continues)
+
+    @property
+    def only_in_processor_folders(self) -> bool:
+        """The processor folders hold a later time than the case itself: results of a stage that was not reconstructed."""
+        return self.parallel is not None and self.parallel > (self.top or 0)
 
 
 def processor_count(case_dir: str | Path) -> int:
     """The number of domains the case is split into (0 when it is not split)."""
-    return _processor_folders(case_dir)[0]
-
-
-def parallel_results(case_dir: str | Path) -> list[str]:
-    """The times after the start that the processor folders hold, sorted: results that splitting the case again would delete."""
-    times = set()
-    for folder in _processor_folders(case_dir)[1]:
-        for path in folder.iterdir():
-            try:
-                if path.is_dir() and float(path.name) > 0:
-                    times.add(path.name)
-            except ValueError:
-                continue
-    return sorted(times, key=float)
+    return Layout.of(case_dir).count

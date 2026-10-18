@@ -356,7 +356,9 @@ class OpenFoamBackend(BaseBackend):
                 return []
 
         times: list[float] = []
-        for root in (case_dir, case_dir / "processor0"):
+        # the top level, else the first domain of a parallel run (also of a collated one)
+        for root in (case_dir, case_dir / "processor0",
+                     *sorted(case_dir.glob("processors[0-9]*"))):
             if not root.is_dir():
                 continue
             for entry in root.iterdir():
