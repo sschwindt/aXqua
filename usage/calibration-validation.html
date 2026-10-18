@@ -1,0 +1,599 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calibration &amp; validation &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/usage/calibration-validation.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Postprocessing" href="postprocessing.html" />
+    <link rel="prev" title="Morphodynamic simulations" href="morphodynamic-simulations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Usage</a></li>
+      <li class="breadcrumb-item active">Calibration &amp; validation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/calibration-validation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="calibration-validation">
+<span id="help-calibration"></span><h1>Calibration &amp; validation<a class="headerlink" href="#calibration-validation" title="Link to this heading"></a></h1>
+<p>A numerical model contains parameters that cannot be measured directly, most importantly the roughness of the riverbed. <strong>Calibration</strong> adjusts these parameters until the model reproduces field measurements. <strong>Validation</strong> then tests the calibrated model against measurements that were not used for the calibration. aXqua performs both with <a class="reference external" href="https://hydrobayescal.readthedocs.io">HydroBayesCal</a>.</p>
+<p>Two terms are used throughout this section. <strong>Calibration parameters</strong> are the uncertain inputs of the model that are adjusted, for example the roughness of a zone. <strong>Calibration targets</strong> are the measured quantities that the model is compared with, for example the water depth at surveyed points.</p>
+<section id="introduction-to-bayesian-calibration">
+<span id="calibration-introduction"></span><h2>Introduction to Bayesian calibration<a class="headerlink" href="#introduction-to-bayesian-calibration" title="Link to this heading"></a></h2>
+<p>A calibration by trial and error ends with one set of parameter values and no statement about how reliable these values are. Bayesian calibration answers a more useful question: which parameter values are probable, given the measurements and their errors?</p>
+<p>The user states for each calibration parameter the range in which its true value is expected. This range is the <strong>prior</strong> distribution. Bayes’ theorem combines the prior with the measurements. Parameter values with which the model reproduces the measurements become more probable, and all others become less probable. The result is the <strong>posterior</strong> distribution of each parameter. A narrow posterior indicates that the measurements determine the parameter well. A posterior that is as wide as the prior indicates that the measurements contain no information about this parameter.</p>
+<p>The direct evaluation of Bayes’ theorem requires many thousands of model runs, which is not feasible for a model that runs for hours. HydroBayesCal therefore replaces the model by a <strong>surrogate model</strong>, in the following steps:</p>
+<ol class="arabic simple">
+<li><p>The numerical model is run for a limited number of parameter combinations that are spread over the prior ranges (30 by default).</p></li>
+<li><p>A Gaussian process emulator is trained with these runs. The emulator is a statistical model that predicts the result of the numerical model for any parameter combination within a fraction of a second, together with the uncertainty of its own prediction (Rasmussen and Williams 2006).</p></li>
+<li><p>The emulator is evaluated for thousands of parameter combinations to compute the posterior distribution.</p></li>
+<li><p><strong>Bayesian active learning</strong> selects the parameter combination at which one additional run of the numerical model improves the emulator the most. The model is run for this combination, and the emulator is trained again (Oladyshkin et al. 2020).</p></li>
+<li><p>Steps 3 and 4 are repeated until the selected number of runs is reached (50 by default).</p></li>
+</ol>
+<p>In this way, a few dozen model runs are sufficient where a direct Bayesian calibration would require thousands. Applications to reservoir models are documented by Mouris et al. (2023) and Schwindt et al. (2023).</p>
+</section>
+<section id="ground-truth-data-setup">
+<span id="calibration-ground-truth"></span><h2>Ground truth data setup<a class="headerlink" href="#ground-truth-data-setup" title="Link to this heading"></a></h2>
+<p>Field measurements are called ground truth. aXqua accepts them in a workbook with a fixed structure, which is called the calibration target template. Create it for a case with:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua targets &lt;case-file&gt;
+</pre></div>
+</div>
+<p>The command writes the workbook <code class="docutils literal notranslate"><span class="pre">calibration-target-data.xlsx</span></code> into <code class="docutils literal notranslate"><span class="pre">user-sources/ground-truth/</span></code>. Its sheets are:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 24.0%" />
+<col style="width: 76.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Sheet</p></th>
+<th class="head"><p>Content</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hydraulics</span></code></p></td>
+<td><p>One row per measurement point: velocity components, their fluctuations, water depth and bed elevation. The velocity magnitude and the turbulent kinetic energy are computed by formulas in the sheet.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">morphodynamics</span></code></p></td>
+<td><p>Grain sizes (d16 to d90) and the fraction of fine sediment per sample. The measured bed change is filled in automatically from the DEM of difference (<a class="reference internal" href="case-setup.html#case-morphodynamics"><span class="std std-ref">Morphodynamic simulation</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">parameters</span></code></p></td>
+<td><p>The calibration parameters with their lower and upper limits, selected from a list of available TELEMAC and GAIA parameters.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Each row carries an ID. The positions of the measurements are read from a point layer that contains the same IDs, so that coordinates do not have to be typed in. Enter the workbook and the point layers in the case file:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ground_truth</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/ground-truth/calibration-target-data.xlsx</span>
+<span class="w">    </span><span class="nt">hydraulics_positions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/measurement-points.gpkg</span>
+<span class="w">    </span><span class="nt">sediment_positions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/sediment-samples.gpkg</span>
+<span class="w">    </span><span class="nt">join_key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ID</span>
+</pre></div>
+</div>
+<p>Then repeat the preprocessing, which compiles the measurements into the tables that the calibration reads. The IDs have to be unique within a sheet. Measurements of several survey days whose numbering restarts at zero therefore need distinct IDs.</p>
+<p>Two alternatives to the workbook exist. <code class="docutils literal notranslate"><span class="pre">ground_truth.measurements</span></code> names a table that the user compiled, with the coordinates x, y and z in the first three columns and one column per measured quantity. <code class="docutils literal notranslate"><span class="pre">ground_truth.sources</span></code> lists original instrument files together with the point layer of their positions, which aXqua compiles into such a table.</p>
+<p><strong>Measurements in one layer or table.</strong> If the measured values and their positions already exist in one file, this file is sufficient. Enter it as a source of the kind <code class="docutils literal notranslate"><span class="pre">points</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">ground_truth</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sources</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hydraulics</span>
+<span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">points</span>
+<span class="w">      </span><span class="nt">positions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/ground-truth/velocity-measurements.gpkg</span>
+</pre></div>
+</div>
+<p>The file is a point layer (GeoPackage, shapefile or GeoJSON) in any coordinate reference system, or a table (CSV file or Excel workbook) with the columns <code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> in the coordinate reference system of the case. aXqua recognizes the following column names, in upper or lower case and with or without a unit in square brackets or parentheses, for example <code class="docutils literal notranslate"><span class="pre">v(x)</span> <span class="pre">[m/s]</span></code> or <code class="docutils literal notranslate"><span class="pre">v_x</span> <span class="pre">(m/s)</span></code>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 44.0%" />
+<col style="width: 56.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Quantity</p></th>
+<th class="head"><p>Column names</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Coordinates of a table</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>, or <code class="docutils literal notranslate"><span class="pre">easting</span></code> and <code class="docutils literal notranslate"><span class="pre">northing</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Velocity components in m/s</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">u</span></code>, <code class="docutils literal notranslate"><span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">w</span></code>, or <code class="docutils literal notranslate"><span class="pre">v(x)</span></code>, <code class="docutils literal notranslate"><span class="pre">v(y)</span></code>, <code class="docutils literal notranslate"><span class="pre">v(z)</span></code>, or <code class="docutils literal notranslate"><span class="pre">v_x</span></code>, <code class="docutils literal notranslate"><span class="pre">v_y</span></code>, <code class="docutils literal notranslate"><span class="pre">v_z</span></code>, or <code class="docutils literal notranslate"><span class="pre">VelX</span></code>, <code class="docutils literal notranslate"><span class="pre">VelY</span></code>, <code class="docutils literal notranslate"><span class="pre">VelZ</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Total water depth in m</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">h</span></code>, <code class="docutils literal notranslate"><span class="pre">depth</span></code>, <code class="docutils literal notranslate"><span class="pre">water_depth</span></code> or <code class="docutils literal notranslate"><span class="pre">Total</span> <span class="pre">Depth</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Depth of a reading below the water surface in m</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MeasD</span></code> or <code class="docutils literal notranslate"><span class="pre">Meas.</span> <span class="pre">Depth</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The velocity magnitude that is compared with the model is computed from the horizontal components. If a layer contains several readings at one position, aXqua uses the reading that is closest to 0.6 of the water depth below the surface, which approximates the depth-averaged velocity. Points outside the model outline are left out of the calibration. In the plugin, the files are entered in the case settings (<em>Open case settings…</em> on the <em>Case Setup</em> tab), page <em>Calibration and validation</em>, in the table <em>Measurement files</em> of the frame <em>Measurements</em>. <em>Add file…</em> adds a point layer or a table, and the column <em>Use for</em> assigns each file to the calibration or to the validation. A file for the validation needs the name of its flow situation and its discharge (<a class="reference internal" href="#validation-setup"><span class="std std-ref">validation situation</span></a>).</p>
+<p>Velocity measurements with a SonTek FlowTracker2 are transferred into the <code class="docutils literal notranslate"><span class="pre">hydraulics</span></code> sheet with the script <code class="docutils literal notranslate"><span class="pre">extract_flowtracker.py</span></code>, which aXqua places next to the workbook. Note that the velocity fluctuation is the standard deviation of the velocity samples. It is not the column <code class="docutils literal notranslate"><span class="pre">VxErr</span></code> of the instrument export, which is the standard error of the mean velocity.</p>
+</section>
+<section id="bayesian-calibration-validation-setup">
+<span id="calibration-setup"></span><h2>Bayesian calibration &amp; validation setup<a class="headerlink" href="#bayesian-calibration-validation-setup" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">calibration</span></code> block of the case file defines what is calibrated against which measurements:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">calibration</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">calibration_quantities</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"WATER</span><span class="nv"> </span><span class="s">DEPTH"</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">extraction_quantities</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"WATER</span><span class="nv"> </span><span class="s">DEPTH"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"SCALAR</span><span class="nv"> </span><span class="s">VELOCITY"</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">measurement_error</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.10</span><span class="w">     </span><span class="c1"># used where no measured error is available</span>
+<span class="w">  </span><span class="nt">init_runs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w">               </span><span class="c1"># runs for the first training of the emulator</span>
+<span class="w">  </span><span class="nt">max_runs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50</span><span class="w">                </span><span class="c1"># total number of runs</span>
+<span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="nv">zone1</span><span class="p p-Indicator">,</span><span class="nt"> min</span><span class="p">:</span><span class="w"> </span><span class="nv">0.05</span><span class="p p-Indicator">,</span><span class="nt"> max</span><span class="p">:</span><span class="w"> </span><span class="nv">0.50</span><span class="p p-Indicator">}</span><span class="w">   </span><span class="c1"># ks of roughness zone 1 [m]</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="nv">zone2</span><span class="p p-Indicator">,</span><span class="nt"> min</span><span class="p">:</span><span class="w"> </span><span class="nv">0.10</span><span class="p p-Indicator">,</span><span class="nt"> max</span><span class="p">:</span><span class="w"> </span><span class="nv">1.00</span><span class="p p-Indicator">}</span><span class="w">   </span><span class="c1"># ks of roughness zone 2 [m]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">calibration_quantities</span></code> are the calibration targets. The names are those of the TELEMAC result variables: <code class="docutils literal notranslate"><span class="pre">WATER</span> <span class="pre">DEPTH</span></code>, <code class="docutils literal notranslate"><span class="pre">SCALAR</span> <span class="pre">VELOCITY</span></code>, <code class="docutils literal notranslate"><span class="pre">TURBULENT</span> <span class="pre">ENERG.</span></code> (requires the k-epsilon turbulence model) and <code class="docutils literal notranslate"><span class="pre">CUMUL</span> <span class="pre">BED</span> <span class="pre">EVOL</span></code> (requires GAIA).</p>
+<p><code class="docutils literal notranslate"><span class="pre">parameters</span></code> lists the calibration parameters with the limits of their prior ranges. The name <code class="docutils literal notranslate"><span class="pre">zone&lt;N&gt;</span></code> refers to the roughness of zone N. A name that starts with <code class="docutils literal notranslate"><span class="pre">gaia</span></code> refers to a GAIA keyword, for example <code class="docutils literal notranslate"><span class="pre">gaiaCLASSES</span> <span class="pre">SHIELDS</span> <span class="pre">PARAMETERS</span> <span class="pre">1</span></code> for the critical Shields parameter of the first grain size class. Parameters that are selected in the <code class="docutils literal notranslate"><span class="pre">parameters</span></code> sheet of the workbook are added to this list.</p>
+<p>Select wide but physically plausible limits. If the posterior of a parameter accumulates at one of its limits, the true value probably lies outside the range, and the calibration has to be repeated with a wider range.</p>
+<p id="validation-setup"><strong>Validation.</strong> A validation examines whether the calibrated parameters describe the reach, or only the day on which the calibration data were measured. It therefore requires measurements that the calibration has not used and that stem from <strong>another flow situation</strong>: another discharge, measured in another survey.</p>
+<p>All measurements of the <code class="docutils literal notranslate"><span class="pre">ground_truth</span></code> block are calibration data. aXqua does not withhold a part of them for a validation. The measurements of one survey are taken within a few hours in one flow field, and neighboring points are therefore not independent of each other. A model that predicts some of these points from the others (leave-one-out cross-validation, k-fold cross-validation or a random share) demonstrates that it interpolates within that flow field. It does not demonstrate that its roughness values hold at another discharge, at which other parts of the bed are wetted and other roughness elements are submerged.</p>
+<p>The validation data are defined in the case file as a <strong>situation</strong>, with its measurements and its boundary values:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">calibration</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">validation</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">September 2025</span>
+<span class="w">      </span><span class="nt">inflows</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">1</span><span class="p">:</span><span class="w"> </span><span class="nv">0.2</span><span class="p p-Indicator">,</span><span class="nt"> 3</span><span class="p">:</span><span class="w"> </span><span class="nv">5.1</span><span class="p p-Indicator">}</span><span class="w">    </span><span class="c1"># discharge [m3/s] per inflow of the model</span>
+<span class="w">      </span><span class="nt">sources</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hydraulics</span>
+<span class="w">          </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">points</span>
+<span class="w">          </span><span class="nt">positions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/ground-truth/september.gpkg</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 74.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entry</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p>A short name of the situation. It names the files of the validation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sources</span></code></p></td>
+<td><p>The measurements, in the form of the sources of the <code class="docutils literal notranslate"><span class="pre">ground_truth</span></code> block.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prescribed_flowrate</span></code></p></td>
+<td><p>The total discharge of the situation in m³/s. For a model with several inflows, the discharge is distributed among them in the proportions of the calibrated case.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">inflows</span></code></p></td>
+<td><p>The discharge of each inflow in m³/s, for a reach whose branches carried another share of the flow. The inflows are identified by the number of their liquid boundary. <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">validation</span> <span class="pre">&lt;case-file&gt;</span></code> lists the inflows of the model with the discharge that each carries in the calibrated case.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">prescribed_elevation</span></code></p></td>
+<td><p>The water level at the outflow in m, for a case with <code class="docutils literal notranslate"><span class="pre">outflow_condition:</span> <span class="pre">elevation</span></code>. With a rating curve, aXqua derives the water level from the discharge of the situation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">duration</span></code></p></td>
+<td><p>The simulated time in seconds, if it differs from that of the case.</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>In the plugin.</strong> The tab <em>Calibration &amp; validation</em> has the box <em>Validation with data of another flow situation</em>. Select the point layer with the validation data with <em>Browse…</em>, or with <em>From QGIS…</em> from the point layers that are open in QGIS. Enter the discharge of each inflow: the box lists the inflows of the model with the discharge of the calibrated case. <em>Save</em> writes the situation into the case file. The same situations appear in the case settings (<em>Open case settings…</em>, page <em>Calibration and validation</em>): in the table <em>Measurement files</em>, each file whose column <em>Use for</em> says <em>Validation</em> belongs to the situation named in the column <em>Situation</em>, with the discharge of that situation. The discharge belongs to the situation, so a change in one row changes it in every row of that situation, and a path in the columns <em>File</em> and <em>Positions</em> can be corrected in place. Settings of a situation that the table does not show, such as the discharge of each inflow, are kept.</p>
+</section>
+<section id="run-hydrobayescal">
+<span id="calibration-run"></span><h2>Run HydroBayesCal<a class="headerlink" href="#run-hydrobayescal" title="Link to this heading"></a></h2>
+<p>The calibration requires the additional package HydroBayesCal (<a class="reference internal" href="../installation/qgis-plugin.html"><span class="doc">QGIS plugin</span></a>) and a built case with a completed steady simulation. Each run of the calibration repeats this steady simulation with another set of parameter values.</p>
+<p>In the plugin, click <em>Submit</em> on the <em>Calibration &amp; validation</em> tab. The option <em>Prepare only</em> writes all input files without starting the runs, so that they can be inspected first. In a terminal:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind calibration --option prepare_only=true
+axqua submit &lt;case-file&gt; --kind calibration
+</pre></div>
+</div>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../_images/gui-calibration.png"><img alt="The Calibration &amp; validation tab of the plugin" src="../_images/gui-calibration.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The tab <em>Calibration &amp; validation</em> for a case with measurements. (1) The option <em>Prepare only</em>. (2) <em>Submit</em> starts the calibration. (3) The measurements of the validation situation, selected as a file or from the layers that are open in QGIS, and below them the discharge of each inflow in that situation. (4) <em>Save</em> stores the validation situation in the case file, and <em>Validate</em> runs it.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>The computing time is approximately the number of runs (<code class="docutils literal notranslate"><span class="pre">max_runs</span></code>) times the duration of one steady simulation. The job list shows the number of the current run, for example <code class="docutils literal notranslate"><span class="pre">iter</span> <span class="pre">5/12</span></code>.</p>
+<p>HydroBayesCal performs its runs in the folder of the built case (<code class="docutils literal notranslate"><span class="pre">axqua-case/simulation/</span></code>) and writes each tested set of parameter values into the friction table and the steering file there. aXqua restores both files when the calibration ends, so that a later simulation uses the case as it was built. For the same reason, jobs of one case run one after the other: a job that is submitted during a calibration waits until the calibration has ended. The folder <code class="docutils literal notranslate"><span class="pre">cases/example-isar/</span></code> of the repository contains a complete example with a run time of about half an hour, including a step-by-step guide for the plugin.</p>
+<p id="validation-run"><strong>Validation run.</strong> After the calibration, click <em>Validate</em> in the box <em>Validation with data of another flow situation</em>, or submit the job in a terminal:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind validation
+</pre></div>
+</div>
+<p>The validation runs the calibrated model with the boundary values of the validation situation. Its steering file is derived from that of the built case and differs only in the prescribed discharges and water levels, in the names of its own result files, and in the calibrated parameter values. The mesh and all other settings are those of the calibrated model, so that a difference between model and measurement cannot stem from a model that was built differently. The calibrated values are the most probable combination of the posterior (the joint posterior maximum) of the last calibration. The files of the built case and the result of the steady simulation are not changed.</p>
+<p>aXqua then reads the model at the validation points and writes three files into <code class="docutils literal notranslate"><span class="pre">axqua-case/calibration-validation/validation/</span></code>: a table with the measured and the modeled value at each point (<code class="docutils literal notranslate"><span class="pre">validation-&lt;name&gt;.csv</span></code>), a summary (<code class="docutils literal notranslate"><span class="pre">validation-&lt;name&gt;.json</span></code>), and a figure of the modeled against the measured values (<code class="docutils literal notranslate"><span class="pre">validation-&lt;name&gt;.png</span></code>). Measurement points outside the model are counted and excluded.</p>
+<p><strong>Several discharges.</strong> Roughness values that were calibrated at one discharge are not necessarily valid at another one. The script <code class="docutils literal notranslate"><span class="pre">run_Bayes_cal_multiflow.py</span></code> in the case folder calibrates one common set of parameters against measurements at several discharges. Run it with <code class="docutils literal notranslate"><span class="pre">--smoke</span></code> first. This short test with three runs verifies the complete chain before days of computing time are spent.</p>
+<p><strong>OpenFOAM.</strong> An OpenFOAM model can be calibrated against measured velocity components with the script <code class="docutils literal notranslate"><span class="pre">run_Bayes_cal_openfoam.py</span></code>. Because a calibration requires dozens of runs, they are performed with a coarse mesh in the mode <code class="docutils literal notranslate"><span class="pre">rigid-lid</span></code>. The script <code class="docutils literal notranslate"><span class="pre">openfoam_verify_posterior.py</span></code> then repeats the calibrated case at full resolution in the mode <code class="docutils literal notranslate"><span class="pre">vof</span></code>. The roughness of an OpenFOAM model is calibrated as one value for the entire bed. It is therefore not comparable with the roughness values per zone of a TELEMAC calibration.</p>
+</section>
+<section id="quality-analysis">
+<span id="calibration-quality"></span><h2>Quality analysis<a class="headerlink" href="#quality-analysis" title="Link to this heading"></a></h2>
+<p>HydroBayesCal writes its results into the folder <code class="docutils literal notranslate"><span class="pre">auto-saved-results-HydroBayesCal</span></code> within <code class="docutils literal notranslate"><span class="pre">axqua-case/calibration-validation/</span></code>. Assess a calibration in four steps:</p>
+<ol class="arabic simple">
+<li><p><strong>Did the active learning converge?</strong> HydroBayesCal records two indicators after every iteration. The Bayesian model evidence (BME) expresses how well the model reproduces the measurements on average over the parameter ranges. The relative entropy (RE) expresses how much information the measurements added to the prior. Both should level off toward the end of the calibration. If they still change strongly, increase <code class="docutils literal notranslate"><span class="pre">max_runs</span></code>.</p></li>
+<li><p><strong>Is the posterior narrower than the prior?</strong> Compare the two distributions of each parameter. A posterior that is clearly narrower than the prior and lies inside the range identifies the parameter. A posterior at a limit of the range calls for a wider range. A posterior that resembles the prior means that the measurements do not constrain this parameter.</p></li>
+<li><p><strong>Does the calibrated model reproduce the calibration targets?</strong> The calibrated parameter set is the most probable combination of the posterior. HydroBayesCal compares the model results for this set with the measurements. Check whether the remaining differences are of the size of the measurement errors, and whether they are distributed randomly or concentrated in one part of the reach. A systematic deviation indicates an error in the model, for example in the terrain data or the boundary conditions, that no parameter value can compensate.</p></li>
+<li><p><strong>Does the calibrated model reproduce independent data?</strong> Run the validation (<a class="reference internal" href="#validation-run"><span class="std std-ref">validation run</span></a>). The differences are typically somewhat larger than for the calibration targets. Much larger differences indicate that the calibration has compensated errors of the model structure through the parameters.</p></li>
+</ol>
+<p>The validation reports the following statistics for each quantity, for example the flow velocity and the water depth:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 74.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Statistic</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Number of points</p></td>
+<td><p>The validation points on the mesh of the model. Points outside the model, and points that are dry in the model although water was measured, are reported separately.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bias</p></td>
+<td><p>The mean of the modeled minus the measured values. A negative bias of the velocity means that the model is too slow on average. The relative bias refers to the mean measured value.</p></td>
+</tr>
+<tr class="row-even"><td><p>Root mean square error (RMSE)</p></td>
+<td><p>The typical difference between model and measurement at one point. It contains the bias and the scatter.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Mean absolute error</p></td>
+<td><p>The mean magnitude of the differences, which is less sensitive to single large differences than the RMSE.</p></td>
+</tr>
+<tr class="row-even"><td><p>Correlation</p></td>
+<td><p>The correlation coefficient between modeled and measured values. A high correlation with a large bias indicates a correct spatial pattern at a wrong level.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Share within the measurement error</p></td>
+<td><p>The share of points at which model and measurement differ by no more than the error of the measurement. The error is that of the instrument combined with the relative <code class="docutils literal notranslate"><span class="pre">measurement_error</span></code> of the calibration. About 68 % are expected for a model without systematic deviation, and about 95 % within twice the error.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The validation also states the remaining difference between inflow and outflow at the end of its run. If this difference exceeds the tolerance of the case, the run had not reached a steady state, and the <code class="docutils literal notranslate"><span class="pre">duration</span></code> of the validation situation has to be increased.</p>
+<p>The <a class="reference external" href="https://hydrobayescal.readthedocs.io">HydroBayesCal documentation</a> describes the result files and figures in detail.</p>
+<section id="references">
+<h3>References<a class="headerlink" href="#references" title="Link to this heading"></a></h3>
+<p>Mouris, K., Acuña Espinoza, E., Schwindt, S., Mohammadi, F., Haun, S., Wieprecht, S., and Oladyshkin, S. (2023). “Stability criteria for Bayesian calibration of reservoir sedimentation models.” <em>Modeling Earth Systems and Environment</em>, 9, 3643-3661. <a class="reference external" href="https://doi.org/10.1007/s40808-023-01712-7">doi:10.1007/s40808-023-01712-7</a></p>
+<p>Oladyshkin, S., Mohammadi, F., Kroeker, I., and Nowak, W. (2020). “Bayesian3 active learning for the Gaussian process emulator using information theory.” <em>Entropy</em>, 22(8), 890. <a class="reference external" href="https://doi.org/10.3390/e22080890">doi:10.3390/e22080890</a></p>
+<p>Rasmussen, C. E., and Williams, C. K. I. (2006). <em>Gaussian processes for machine learning</em>. MIT Press.</p>
+<p>Schwindt, S., Callau Medrano, S., Mouris, K., Beckers, F., Haun, S., Nowak, W., Wieprecht, S., and Oladyshkin, S. (2023). “Bayesian calibration points to misconceptions in three-dimensional hydrodynamic reservoir modeling.” <em>Water Resources Research</em>, 59(3), e2022WR033660. <a class="reference external" href="https://doi.org/10.1029/2022WR033660">doi:10.1029/2022WR033660</a></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="morphodynamic-simulations.html" class="btn btn-neutral float-left" title="Morphodynamic simulations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="postprocessing.html" class="btn btn-neutral float-right" title="Postprocessing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

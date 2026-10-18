@@ -1,0 +1,1150 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.core.surfaces &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/core/surfaces.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.core.surfaces</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.core.surfaces</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Triangulated CAD surfaces (STL) as the terrain and domain description of a case.</span>
+
+<span class="sd">Why this exists, given :mod:`axqua.core.structures` argues the opposite</span>
+<span class="sd">-----------------------------------------------------------------------</span>
+<span class="sd">That module explains why a *structure* needs no STL: axqua writes its own mesh, so a</span>
+<span class="sd">dam only has to say where its footprint is and how high it stands. Nothing there</span>
+<span class="sd">changes. What this module addresses is the other direction - a case whose **terrain</span>
+<span class="sd">itself arrives as CAD**, because the thing being modeled was designed rather than</span>
+<span class="sd">surveyed. A fish pass, a culvert, a flume, a spillway: there is no DEM of it, and</span>
+<span class="sd">there never will be, because it exists as a construction drawing.</span>
+
+<span class="sd">The design decision is therefore *not* to teach the meshers about triangles. It is to</span>
+<span class="sd">decompose a set of STL parts, once, into exactly the artifacts axqua already consumes:</span>
+
+<span class="sd">======================  ==================================================</span>
+<span class="sd">STL part                becomes</span>
+<span class="sd">======================  ==================================================</span>
+<span class="sd">bed-like surfaces       a DEM GeoTIFF, i.e. ``geodata.dem_initial``</span>
+<span class="sd">their coverage          the ROI polygon, i.e. ``geodata.boundary``</span>
+<span class="sd">near-vertical surfaces  ``geodata.structures`` footprints with a crest</span>
+<span class="sd">inlet / outlet patches  the lines of ``boundaries.liquid_boundaries``</span>
+<span class="sd">per-part materials      ``geodata.roughness_zones`` + its table</span>
+<span class="sd">======================  ==================================================</span>
+
+<span class="sd">After that stage every downstream step - the gmsh mesher, the ``.cli`` classification,</span>
+<span class="sd">the OpenFOAM lattice - runs unchanged and unaware that a CAD file was ever involved.</span>
+<span class="sd">That is the whole point: one new stage instead of a second geometry pathway through</span>
+<span class="sd">the entire package.</span>
+
+<span class="sd">A height field is not the same thing as a solid</span>
+<span class="sd">-----------------------------------------------</span>
+<span class="sd">A CAD assembly is a set of closed volumes; a DEM is a single-valued function z(x, y).</span>
+<span class="sd">The conversion is lossy wherever the geometry is not single-valued, which for a fish</span>
+<span class="sd">pass is precisely at its walls. Hence the slope split: facets flatter than</span>
+<span class="sd">``max_slope_deg`` are bed and are rasterised, facets steeper than ``min_slope_deg``</span>
+<span class="sd">are walls and become footprints with a crest elevation, and what falls between the two</span>
+<span class="sd">is reported rather than silently assigned. Overhangs (a soffit, a cantilevered</span>
+<span class="sd">walkway) cannot be represented at all and are counted in the report, because a</span>
+<span class="sd">modeler needs to know how much of the geometry the height field dropped.</span>
+
+<span class="sd">Reading STL</span>
+<span class="sd">-----------</span>
+<span class="sd">Binary STL is a fixed 84-byte header followed by 50 bytes per triangle, so it reads in</span>
+<span class="sd">one ``numpy`` call with a structured dtype - no dependency, and fast enough that the</span>
+<span class="sd">550 MB parts of a real CAD export are limited by disk rather than by parsing. ASCII</span>
+<span class="sd">STL is parsed by streaming the ``vertex`` lines. ``pyvista`` and ``meshio`` would both</span>
+<span class="sd">do this, but neither is worth a hard dependency in :mod:`axqua.core`, which the QGIS</span>
+<span class="sd">plugin's capability queries import.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1">#: bytes per triangle in a binary STL: 12 floats (normal + 3 vertices) + 2 attribute</span>
+<span class="n">BINARY_TRIANGLE_BYTES</span> <span class="o">=</span> <span class="mi">50</span>
+<span class="c1">#: bytes of header before the triangle count</span>
+<span class="n">BINARY_HEADER_BYTES</span> <span class="o">=</span> <span class="mi">80</span>
+<span class="c1">#: triangles read per chunk, keeping peak memory near 100 MB for any file size</span>
+<span class="n">CHUNK_TRIANGLES</span> <span class="o">=</span> <span class="mi">1_000_000</span>
+
+<span class="c1">#: a facet flatter than this (degrees from horizontal) is bed</span>
+<span class="n">BED_MAX_SLOPE_DEG</span> <span class="o">=</span> <span class="mf">45.0</span>
+<span class="c1">#: a facet steeper than this is a wall</span>
+<span class="n">WALL_MIN_SLOPE_DEG</span> <span class="o">=</span> <span class="mf">70.0</span>
+
+
+<div class="viewcode-block" id="Surface">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Surface">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Surface</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A triangulated surface: ``triangles`` is ``(n, 3, 3)`` of xyz per corner.</span>
+
+<span class="sd">    Normals are recomputed from the vertex winding rather than trusted from the file.</span>
+<span class="sd">    Exporters disagree about winding and some write zero normals, and every decision</span>
+<span class="sd">    here - bed or wall, up or down - hangs on the normal, so it is not something to</span>
+<span class="sd">    take on faith from a header field.</span>
+<span class="sd">    """</span>
+
+    <span class="n">triangles</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"triangles must have shape (n, 3, 3), got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">normals</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unit normals from the vertex winding; degenerate facets give a zero normal."""</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">good</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="p">[</span><span class="n">good</span><span class="p">]</span> <span class="o">/</span> <span class="n">length</span><span class="p">[</span><span class="n">good</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""``(xmin, ymin, zmin, xmax, ymax, zmax)``."""</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="n">pts</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="o">*</span><span class="n">pts</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+<div class="viewcode-block" id="Surface.slope_deg">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Surface.slope_deg">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">slope_deg</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Angle of each facet from horizontal, 0 = flat, 90 = vertical."""</span>
+        <span class="n">nz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">normals</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">nz</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="Surface.select">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Surface.select">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Surface</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Surface</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)],</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Surface.transformed">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Surface.transformed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transformed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transform</span><span class="p">:</span> <span class="n">Transform</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Surface</span><span class="p">:</span>
+        <span class="n">flat</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Surface</span><span class="p">(</span><span class="n">flat</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Transform">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Transform">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transform</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Similarity transform from CAD-local to project coordinates.</span>
+
+<span class="sd">    Scale, then rotation about the vertical axis, then translation - the only degrees</span>
+<span class="sd">    of freedom a georeferencing job actually has when the CAD and the map agree about</span>
+<span class="sd">    which way is up. A general 3D rotation is deliberately not offered: a drawing that</span>
+<span class="sd">    needs one is a drawing whose vertical axis is wrong, and that should be fixed in</span>
+<span class="sd">    the CAD rather than papered over here.</span>
+<span class="sd">    """</span>
+
+    <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">rotation_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">dy</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">dz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_identity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">==</span> <span class="mf">1.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation_deg</span> <span class="o">==</span> <span class="mf">0.0</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span> <span class="o">==</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Transform.apply">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Transform.apply">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation_deg</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_deg</span><span class="p">)</span>
+            <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cos</span> <span class="o">*</span> <span class="n">x</span> <span class="o">-</span> <span class="n">sin</span> <span class="o">*</span> <span class="n">y</span>
+            <span class="n">out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sin</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">cos</span> <span class="o">*</span> <span class="n">y</span>
+        <span class="n">out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span>
+        <span class="n">out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span>
+        <span class="n">out</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="Transform.from_control_points">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Transform.from_control_points">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_control_points</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cad</span><span class="p">,</span> <span class="n">world</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dz</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Transform"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Fit scale, rotation and translation to matched point pairs.</span>
+
+<span class="sd">        Two pairs determine a similarity transform exactly; more are fitted by least</span>
+<span class="sd">        squares (the Umeyama solution, restricted to a similarity). This is how a</span>
+<span class="sd">        georeference is normally established when bounding boxes cannot be matched -</span>
+<span class="sd">        a construction sheet carries plans, sections and a title block, so its extent</span>
+<span class="sd">        is not the structure's - and it needs only two features a person can identify</span>
+<span class="sd">        in both the CAD and the drawing: a corner, a slot, an axis intersection.</span>
+<span class="sd">        """</span>
+        <span class="n">cad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cad</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">world</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">cad</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">world</span><span class="o">.</span><span class="n">shape</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cad</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"need at least two matching point pairs of equal count"</span><span class="p">)</span>
+
+        <span class="n">cad_mean</span><span class="p">,</span> <span class="n">world_mean</span> <span class="o">=</span> <span class="n">cad</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">world</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">cad</span> <span class="o">-</span> <span class="n">cad_mean</span><span class="p">,</span> <span class="n">world</span> <span class="o">-</span> <span class="n">world_mean</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">a</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cad</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">variance</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"the CAD control points coincide; they must be distinct"</span><span class="p">)</span>
+        <span class="n">covariance</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">a</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">cad</span><span class="p">)</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">singular</span><span class="p">,</span> <span class="n">vt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span><span class="n">covariance</span><span class="p">)</span>
+        <span class="n">correction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">vt</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>     <span class="c1"># forbid a mirror</span>
+            <span class="n">correction</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span>
+        <span class="n">rotation</span> <span class="o">=</span> <span class="n">u</span> <span class="o">@</span> <span class="n">correction</span> <span class="o">@</span> <span class="n">vt</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">singular</span><span class="p">)</span> <span class="o">@</span> <span class="n">correction</span><span class="p">))</span> <span class="o">/</span> <span class="n">variance</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">world_mean</span> <span class="o">-</span> <span class="n">scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">rotation</span> <span class="o">@</span> <span class="n">cad_mean</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">,</span>
+                   <span class="n">rotation_deg</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">rotation</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">rotation</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])),</span>
+                   <span class="n">dx</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">offset</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">dy</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">offset</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dz</span><span class="o">=</span><span class="n">dz</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transform.residuals">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Transform.residuals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cad</span><span class="p">,</span> <span class="n">world</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Distance between each transformed CAD point and its world counterpart."""</span>
+        <span class="n">cad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cad</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">padded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">cad</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cad</span><span class="p">))])</span>
+        <span class="n">moved</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">padded</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">moved</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">world</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Transform.inverse">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.Transform.inverse">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Transform</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The transform that undoes this one, for reporting a point back in CAD space."""</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_deg</span><span class="p">)</span>
+        <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">cos</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">-</span> <span class="n">sin</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">sin</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">+</span> <span class="n">cos</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dy</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span>
+        <span class="k">return</span> <span class="n">Transform</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span> <span class="n">rotation_deg</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation_deg</span><span class="p">,</span>
+                         <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">dz</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="is_binary_stl">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.is_binary_stl">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_binary_stl</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether *path* is a binary STL.</span>
+
+<span class="sd">    The ``solid`` magic word is not decisive: binary writers put arbitrary text in the</span>
+<span class="sd">    84-byte header and several of them start it with ``solid``. What is decisive is</span>
+<span class="sd">    whether the triangle count at offset 80 accounts for the file size exactly.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="n">BINARY_HEADER_BYTES</span> <span class="o">+</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">BINARY_HEADER_BYTES</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"&lt;u4"</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">size</span> <span class="o">==</span> <span class="n">BINARY_HEADER_BYTES</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">+</span> <span class="n">count</span> <span class="o">*</span> <span class="n">BINARY_TRIANGLE_BYTES</span></div>
+
+
+
+<div class="viewcode-block" id="stl_triangle_count">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.stl_triangle_count">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stl_triangle_count</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Triangle count without reading the vertices (binary only; ASCII returns -1)."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_binary_stl</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">with</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">BINARY_HEADER_BYTES</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"&lt;u4"</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span></div>
+
+
+
+<div class="viewcode-block" id="read_stl">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.read_stl">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_stl</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">max_triangles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Surface</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read an STL file, binary or ASCII, into a :class:`Surface`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : Path</span>
+<span class="sd">        The ``.stl`` file.</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Label carried on the surface; defaults to the file stem.</span>
+<span class="sd">    max_triangles : int, optional</span>
+<span class="sd">        Raise rather than read beyond this many triangles. A guard for the callers</span>
+<span class="sd">        that hold several parts in memory at once: a CAD export of a real structure</span>
+<span class="sd">        runs to millions of facets per part, and finding that out through the OOM</span>
+<span class="sd">        killer halfway into a build is the failure this prevents.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span>
+    <span class="k">if</span> <span class="n">is_binary_stl</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="n">_read_binary_stl</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">max_triangles</span><span class="o">=</span><span class="n">max_triangles</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">triangles</span> <span class="o">=</span> <span class="n">_read_ascii_stl</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">max_triangles</span><span class="o">=</span><span class="n">max_triangles</span><span class="p">)</span>
+    <span class="n">surface</span> <span class="o">=</span> <span class="n">Surface</span><span class="p">(</span><span class="n">triangles</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"read </span><span class="si">%s</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> triangles, bounds </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="p">),</span>
+              <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">bounds</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">surface</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_binary_stl</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_triangles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">stl_triangle_count</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_triangles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">max_triangles</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> triangles, over the </span><span class="si">{</span><span class="n">max_triangles</span><span class="si">}</span><span class="s2"> limit; "</span>
+            <span class="sa">f</span><span class="s2">"decimate the part in the CAD export or raise max_triangles"</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s2">"normal"</span><span class="p">,</span> <span class="s2">"&lt;f4"</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="s2">"v"</span><span class="p">,</span> <span class="s2">"&lt;f4"</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span> <span class="p">(</span><span class="s2">"attr"</span><span class="p">,</span> <span class="s2">"&lt;u2"</span><span class="p">)])</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">count</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">handle</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">BINARY_HEADER_BYTES</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">done</span> <span class="o">&lt;</span> <span class="n">count</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">CHUNK_TRIANGLES</span><span class="p">,</span> <span class="n">count</span> <span class="o">-</span> <span class="n">done</span><span class="p">)</span>
+            <span class="n">raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frombuffer</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">block</span> <span class="o">*</span> <span class="n">BINARY_TRIANGLE_BYTES</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                                <span class="n">count</span><span class="o">=</span><span class="n">block</span><span class="p">)</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">done</span><span class="p">:</span><span class="n">done</span> <span class="o">+</span> <span class="n">block</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw</span><span class="p">[</span><span class="s2">"v"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">done</span> <span class="o">+=</span> <span class="n">block</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="n">_VERTEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s2">"vertex\s+(\S+)\s+(\S+)\s+(\S+)"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_ascii_stl</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">max_triangles</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="n">path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_VERTEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
+                               <span class="nb">float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">%</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="si">}</span><span class="s2"> vertices is not a whole number "</span>
+                         <span class="sa">f</span><span class="s2">"of triangles - the file is truncated or malformed"</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">//</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="n">max_triangles</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">max_triangles</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s2"> triangles, over the </span><span class="si">{</span><span class="n">max_triangles</span><span class="si">}</span><span class="s2"> limit"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="split_by_slope">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.split_by_slope">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_by_slope</span><span class="p">(</span><span class="n">surface</span><span class="p">:</span> <span class="n">Surface</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bed_max_slope_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">BED_MAX_SLOPE_DEG</span><span class="p">,</span>
+                   <span class="n">min_slope_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">WALL_MIN_SLOPE_DEG</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Classify facets into bed, wall, overhang and the unclassified remainder.</span>
+
+<span class="sd">    ``bed`` is upward-facing and flatter than *bed_max_slope_deg*; ``wall`` is steeper</span>
+<span class="sd">    than *min_slope_deg*; ``overhang`` is downward-facing and flat enough to be a</span>
+<span class="sd">    soffit, which a height field cannot represent at all. Whatever sits between the bed</span>
+<span class="sd">    and wall thresholds is returned as ``other`` so a caller can report it instead of</span>
+<span class="sd">    guessing.</span>
+<span class="sd">    """</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">slope_deg</span><span class="p">()</span>
+    <span class="n">up</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">normals</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">horizontal</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">&lt;=</span> <span class="n">bed_max_slope_deg</span>
+    <span class="n">bed</span> <span class="o">=</span> <span class="n">up</span> <span class="o">&amp;</span> <span class="n">horizontal</span>
+    <span class="n">wall</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">&gt;=</span> <span class="n">min_slope_deg</span>
+    <span class="n">overhang</span> <span class="o">=</span> <span class="o">~</span><span class="n">up</span> <span class="o">&amp;</span> <span class="n">horizontal</span>
+    <span class="n">other</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">horizontal</span> <span class="o">|</span> <span class="n">wall</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"bed"</span><span class="p">:</span> <span class="n">bed</span><span class="p">,</span> <span class="s2">"wall"</span><span class="p">:</span> <span class="n">wall</span><span class="p">,</span> <span class="s2">"overhang"</span><span class="p">:</span> <span class="n">overhang</span><span class="p">,</span> <span class="s2">"other"</span><span class="p">:</span> <span class="n">other</span><span class="p">,</span>
+            <span class="c1"># Every near-horizontal facet, whichever way it faces. This is what a DEM</span>
+            <span class="c1"># is actually built from, because winding is not to be trusted: exporters</span>
+            <span class="c1"># write closed solids inside-out often enough that a whole part arrives</span>
+            <span class="c1"># with its top surface classified as overhang, contributes nothing, and</span>
+            <span class="c1"># only warns. Taking the maximum over all horizontal facets recovers the</span>
+            <span class="c1"># upper surface either way, and walls are already excluded by slope.</span>
+            <span class="s2">"horizontal"</span><span class="p">:</span> <span class="n">horizontal</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="grid_from_bounds">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.grid_from_bounds">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">grid_from_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raster transform, width and height covering *bounds* at *resolution*.</span>
+
+<span class="sd">    Bounds are snapped outwards to whole multiples of the resolution, so two parts</span>
+<span class="sd">    rasterised separately share a grid and can be combined cell by cell.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.transform</span><span class="w"> </span><span class="kn">import</span> <span class="n">from_origin</span>
+
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">=</span> <span class="n">bounds</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">xmin</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="n">resolution</span>
+    <span class="n">ymin</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">ymin</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="n">resolution</span>
+    <span class="n">xmax</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">xmax</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="n">resolution</span>
+    <span class="n">ymax</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">ymax</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">*</span> <span class="n">resolution</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)))</span>
+    <span class="n">height</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">from_origin</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">resolution</span><span class="p">),</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span></div>
+
+
+
+<div class="viewcode-block" id="rasterize">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.rasterize">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rasterize</span><span class="p">(</span><span class="n">surface</span><span class="p">:</span> <span class="n">Surface</span><span class="p">,</span> <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"max"</span><span class="p">,</span>
+              <span class="n">bounds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">object</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Burn a surface into a height field.</span>
+
+<span class="sd">    Each triangle is scan-converted over the cell centers it covers and its plane</span>
+<span class="sd">    evaluated there, so the result is the exact surface elevation at the cell center</span>
+<span class="sd">    rather than a nearest-vertex approximation. Where several triangles cover one cell</span>
+<span class="sd">    - which is what a multi-valued CAD surface *means* - ``mode`` decides: ``"max"``</span>
+<span class="sd">    takes the highest, the right answer for a bed seen from above, and ``"min"`` the</span>
+<span class="sd">    lowest, for a soffit seen from below.</span>
+
+<span class="sd">    Returns the array (with *nodata* where no facet covered the cell) and the affine</span>
+<span class="sd">    transform. Writing it out is :func:`write_dem`, kept separate so callers can</span>
+<span class="sd">    combine several parts before touching the disk.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"max"</span><span class="p">,</span> <span class="s2">"min"</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"mode must be 'max' or 'min', got </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">bounds</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">)</span>
+    <span class="n">transform</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">grid_from_bounds</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">resolution</span><span class="p">)</span>
+
+    <span class="n">fill</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"max"</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">fill</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">nodata</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span> <span class="n">transform</span>
+
+    <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">transform</span><span class="o">.</span><span class="n">f</span>
+    <span class="n">tri</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">triangles</span>
+    <span class="n">reducer</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"max"</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span>
+
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="p">),</span> <span class="mi">50_000</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">tri</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="mi">50_000</span><span class="p">]</span>
+        <span class="n">_burn_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">reducer</span><span class="p">)</span>
+
+    <span class="n">empty</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+    <span class="n">grid</span><span class="p">[</span><span class="n">empty</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodata</span>
+    <span class="n">covered</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">empty</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">covered</span> <span class="o">&lt;</span> <span class="mf">0.999</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> covers </span><span class="si">%.1f%%</span><span class="s2"> of its own bounding box"</span><span class="p">,</span> <span class="n">surface</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                  <span class="n">covered</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grid</span><span class="p">,</span> <span class="n">transform</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_burn_block</span><span class="p">(</span><span class="n">triangles</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span>
+                <span class="n">reducer</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Burn one block of triangles into *grid* in place.</span>
+
+<span class="sd">    Two regimes, because a CAD export and a hand-built surface are opposite problems.</span>
+<span class="sd">    A facet **smaller than one cell** - which is nearly every facet of a real export,</span>
+<span class="sd">    where triangles are centimeters and cells decimeters - is burned by its vertices in</span>
+<span class="sd">    one vectorized call: the vertices *are* the surface there, and the difference from</span>
+<span class="sd">    evaluating the plane at the cell center is the facet's own z-range, a fraction of a</span>
+<span class="sd">    millimeter. A facet **spanning several cells** is scan-converted properly, so a</span>
+<span class="sd">    coarse surface (two triangles over a whole ramp) still reproduces the plane exactly.</span>
+<span class="sd">    Doing only the latter costs minutes on a multi-million-facet part; doing only the</span>
+<span class="sd">    former loses the coarse case entirely.</span>
+<span class="sd">    """</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">spans_cells</span> <span class="o">=</span> <span class="p">((</span><span class="n">xs</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">xs</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">resolution</span><span class="p">)</span> <span class="o">|</span> \
+                  <span class="p">((</span><span class="n">ys</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">ys</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">resolution</span><span class="p">)</span>
+
+    <span class="n">small</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[</span><span class="o">~</span><span class="n">spans_cells</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">small</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="n">small</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(((</span><span class="n">pts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">origin_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(((</span><span class="n">origin_y</span> <span class="o">-</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">reducer</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">),</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">triangles</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[</span><span class="n">spans_cells</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">triangles</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="c1"># the plane through each triangle: z = alpha*x + beta*y + gamma</span>
+    <span class="n">normals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">,</span> <span class="n">c</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+    <span class="n">flat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">normals</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mf">1e-12</span>          <span class="c1"># vertical facets cover no cell area</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flat</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">normals</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flat</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">normals</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]))</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flat</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="n">normals</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">flat</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">normals</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]))</span>
+    <span class="c1"># a vertical facet has no plane over the cell centers and is skipped below; keeping</span>
+    <span class="c1"># its coefficients finite stops a real CAD export (which has thousands of them)</span>
+    <span class="c1"># from filling the log with invalid-value warnings</span>
+    <span class="n">gamma</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">a</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">triangles</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">col_lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">xs</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">col_hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">xs</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">origin_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">row_lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">origin_y</span> <span class="o">-</span> <span class="n">ys</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">row_hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">origin_y</span> <span class="o">-</span> <span class="n">ys</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="c1"># barycentric denominators, for the point-in-triangle test below</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="p">((</span><span class="n">b</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+             <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="n">degenerate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">denom</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-15</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">triangles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">flat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">or</span> <span class="n">degenerate</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">c0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">col_lo</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">col_hi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+        <span class="n">r0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">row_lo</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">r1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">row_hi</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c0</span> <span class="o">&gt;=</span> <span class="n">c1</span> <span class="ow">or</span> <span class="n">r0</span> <span class="o">&gt;=</span> <span class="n">r1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">cx</span> <span class="o">=</span> <span class="n">origin_x</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">c0</span><span class="p">,</span> <span class="n">c1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">resolution</span>
+        <span class="n">cy</span> <span class="o">=</span> <span class="n">origin_y</span> <span class="o">-</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">r0</span><span class="p">,</span> <span class="n">r1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">resolution</span>
+        <span class="n">gx</span><span class="p">,</span> <span class="n">gy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">)</span>
+
+        <span class="n">l1</span> <span class="o">=</span> <span class="p">((</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gx</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+              <span class="o">+</span> <span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gy</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">/</span> <span class="n">denom</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">l2</span> <span class="o">=</span> <span class="p">((</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gx</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+              <span class="o">+</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">gy</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span> <span class="o">/</span> <span class="n">denom</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">l3</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">l1</span> <span class="o">-</span> <span class="n">l2</span>
+        <span class="c1"># a small negative tolerance keeps cell centers exactly on a shared edge from</span>
+        <span class="c1"># falling through the crack between two triangles</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="p">(</span><span class="n">l1</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">1e-9</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">l2</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">1e-9</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">l3</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">1e-9</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inside</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">gx</span> <span class="o">+</span> <span class="n">beta</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">gy</span> <span class="o">+</span> <span class="n">gamma</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">grid</span><span class="p">[</span><span class="n">r0</span><span class="p">:</span><span class="n">r1</span><span class="p">,</span> <span class="n">c0</span><span class="p">:</span><span class="n">c1</span><span class="p">]</span>
+        <span class="n">reducer</span><span class="p">(</span><span class="n">window</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">inside</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="k">if</span> <span class="n">reducer</span> <span class="ow">is</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">),</span>
+                <span class="n">out</span><span class="o">=</span><span class="n">window</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="write_dem">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.write_dem">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_dem</span><span class="p">(</span><span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+              <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write a height field as a single-band float32 GeoTIFF."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">"GTiff"</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                       <span class="n">width</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"float32"</span><span class="p">,</span>
+                       <span class="n">crs</span><span class="o">=</span><span class="n">crs</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="n">nodata</span><span class="p">,</span>
+                       <span class="n">compress</span><span class="o">=</span><span class="s2">"deflate"</span><span class="p">)</span> <span class="k">as</span> <span class="n">dst</span><span class="p">:</span>
+        <span class="n">dst</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"float32"</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<div class="viewcode-block" id="coverage_polygon">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.coverage_polygon">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coverage_polygon</span><span class="p">(</span><span class="n">grid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">nodata</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">9999.0</span><span class="p">,</span>
+                     <span class="n">simplify</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The polygon of the cells that carry data, as the ROI of a CAD-defined case."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">features</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">shape</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">grid</span> <span class="o">!=</span> <span class="n">nodata</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"the rasterised surface has no valid cells at all"</span><span class="p">)</span>
+    <span class="n">shapes</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span> <span class="k">for</span> <span class="n">geom</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span>
+              <span class="n">features</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"uint8"</span><span class="p">),</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">)</span>
+              <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">polygon</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">shapes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">simplify</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">polygon</span></div>
+
+
+
+<div class="viewcode-block" id="wall_footprints">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.wall_footprints">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wall_footprints</span><span class="p">(</span><span class="n">surface</span><span class="p">:</span> <span class="n">Surface</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">min_slope_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">WALL_MIN_SLOPE_DEG</span><span class="p">,</span>
+                    <span class="n">resolution</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">,</span> <span class="n">simplify</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">min_area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">object</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Footprints of the near-vertical parts of a surface, with their crest elevations.</span>
+
+<span class="sd">    Each connected footprint is returned with the highest elevation of the facets that</span>
+<span class="sd">    produced it, which is what ``geodata.structures`` means by a crest. Rasterising the</span>
+<span class="sd">    wall facets rather than unioning their 2D projections directly is deliberate: a CAD</span>
+<span class="sd">    wall is thousands of slivers, and a raster union at the mesh's own resolution is</span>
+<span class="sd">    both faster and free of the invalid-geometry problems that a shapely union of</span>
+<span class="sd">    slivers reliably produces.</span>
+
+<span class="sd">    The footprint is the union of two burns, because neither alone is the solid:</span>
+
+<span class="sd">    * the **edges** of the near-vertical facets, which is the only way to see a wall</span>
+<span class="sd">      that is thinner than a cell (a few-mm steel sheet), and</span>
+<span class="sd">    * the **body** those traces enclose, recovered as a plan hole fill, which is what</span>
+<span class="sd">      makes a wall with thickness solid rather than hollow.</span>
+
+<span class="sd">    Burning the edges alone was the original rule and it is wrong for any wall with a</span>
+<span class="sd">    thickness: a closed CAD solid has a vertical facet on each face, so a 0.30 m</span>
+<span class="sd">    concrete wall arrived as two ribbons 3-4 cm wide with its 0.24 m core left open.</span>
+<span class="sd">    Measured on the Munich fish pass, that put 2.9 m of stagnant water *inside* the</span>
+<span class="sd">    walls (a free surface 2 m above the channel one cell away, which is what a rigid</span>
+<span class="sd">    lid cannot carry) and opened a phantom conduit beside the pass carrying 15-57% of</span>
+<span class="sd">    the discharge. Casting rays across the 14 baffles, the old rule found three</span>
+<span class="sd">    openings per baffle with the widest, 0.71 m, straight through solid concrete; the</span>
+<span class="sd">    union finds one, at the slot, 0.353 m against a CAD truth of 0.380 m.</span>
+
+<span class="sd">    The remaining bias is one cell of rasterisation per side, uniform over walls and</span>
+<span class="sd">    openings alike, and it shrinks with *resolution*.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio</span><span class="w"> </span><span class="kn">import</span> <span class="n">features</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">ndimage</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">shape</span>
+
+    <span class="n">walls</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">split_by_slope</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">min_slope_deg</span><span class="o">=</span><span class="n">min_slope_deg</span><span class="p">)[</span><span class="s2">"wall"</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">walls</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># the whole part, not just its wall facets: the area burn below needs the caps</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">transform</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="n">grid_from_bounds</span><span class="p">((</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">),</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">crest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+    <span class="n">origin_x</span><span class="p">,</span> <span class="n">origin_y</span> <span class="o">=</span> <span class="n">transform</span><span class="o">.</span><span class="n">c</span><span class="p">,</span> <span class="n">transform</span><span class="o">.</span><span class="n">f</span>
+
+    <span class="c1"># A vertical facet has no area in plan, so the scan conversion in _burn_block</span>
+    <span class="c1"># cannot see it. Burn its three edges instead, sampled along their own length:</span>
+    <span class="c1"># marking only the corners would leave the middle of a long wall unburned, which</span>
+    <span class="c1"># is exactly what a fish-pass sidewall is - two triangles spanning several meters.</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">walls</span><span class="o">.</span><span class="n">triangles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">walls</span><span class="o">.</span><span class="n">triangles</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">walls</span><span class="o">.</span><span class="n">triangles</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="ow">in</span> <span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">a</span><span class="p">)):</span>
+        <span class="n">span</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">end</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">end</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">start</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">span</span> <span class="o">/</span> <span class="p">(</span><span class="n">resolution</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)),</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4096</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">pts</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(((</span><span class="n">pts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">origin_x</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                           <span class="mi">0</span><span class="p">,</span> <span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(((</span><span class="n">origin_y</span> <span class="o">-</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">resolution</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                           <span class="mi">0</span><span class="p">,</span> <span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">crest</span><span class="p">,</span> <span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">),</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="c1"># Close the one-cell gaps between the projected corners of a long thin facet.</span>
+    <span class="c1"># A closing, not a dilation: both fill the gap, but a dilation also grows the</span>
+    <span class="c1"># outline by a cell on every side, and it grows the walls into the openings</span>
+    <span class="c1"># between them. On the Munich baffles that alone cost 0.04 m of a 0.38 m slot.</span>
+    <span class="n">filled</span> <span class="o">=</span> <span class="n">_close</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">crest</span><span class="p">))</span>
+
+    <span class="c1"># Fill the body of the wall. A wall with thickness has a vertical facet on each</span>
+    <span class="c1"># face, so the burn above traces both of them and the wall's own end faces close</span>
+    <span class="c1"># the ring; everything the ring encloses is concrete. Filling it needs nothing but</span>
+    <span class="c1"># the traces, which is why this is a plan hole fill rather than a projection of</span>
+    <span class="c1"># the caps: a wall modeled as an extruded surface has no bottom cap to project.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The fill cannot swallow water. A region only counts as enclosed if no path</span>
+    <span class="c1"># reaches the array border, and a fish-pass pool always has its slots open.</span>
+    <span class="n">core</span> <span class="o">=</span> <span class="n">ndimage</span><span class="o">.</span><span class="n">binary_fill_holes</span><span class="p">(</span><span class="n">filled</span><span class="p">)</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">filled</span>
+    <span class="k">if</span> <span class="n">core</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: filled </span><span class="si">%.3g</span><span class="s2"> m2 of wall body enclosed by its own faces"</span><span class="p">,</span>
+                  <span class="n">surface</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="n">resolution</span> <span class="o">*</span> <span class="n">resolution</span><span class="p">)</span>
+    <span class="n">filled</span> <span class="o">|=</span> <span class="n">core</span>
+    <span class="n">crest</span><span class="p">[</span><span class="o">~</span><span class="n">filled</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">object</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">filled</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"uint8"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">geom</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">filled</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">shape</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">simplify</span><span class="p">:</span>
+            <span class="n">polygon</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">simplify</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">polygon</span><span class="o">.</span><span class="n">area</span> <span class="o">&lt;</span> <span class="n">min_area</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">window</span> <span class="o">=</span> <span class="n">features</span><span class="o">.</span><span class="n">geometry_mask</span><span class="p">([</span><span class="n">polygon</span><span class="p">],</span> <span class="n">out_shape</span><span class="o">=</span><span class="n">crest</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                        <span class="n">transform</span><span class="o">=</span><span class="n">transform</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">heights</span> <span class="o">=</span> <span class="n">crest</span><span class="p">[</span><span class="n">window</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">crest</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">heights</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Only reachable if the polygon covers no cell center at all, which for a</span>
+            <span class="c1"># raster polygon means it was simplified away. Say so: this used to drop</span>
+            <span class="c1"># the footprint silently, and a part reaching the GPKG with 0 m2 and no</span>
+            <span class="c1"># log line is how a wall goes missing without anyone noticing.</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: a </span><span class="si">%.3g</span><span class="s2"> m2 footprint carries no elevation and is dropped; "</span>
+                        <span class="s2">"lower surfaces.simplify (</span><span class="si">%s</span><span class="s2">) or raise surfaces.resolution"</span><span class="p">,</span>
+                        <span class="n">surface</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">polygon</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="n">simplify</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">polygon</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">heights</span><span class="o">.</span><span class="n">max</span><span class="p">())))</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dilate</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One-cell binary dilation, without pulling in scipy.ndimage for four lines."""</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">|=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">|=</span> <span class="n">mask</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">out</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">|=</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="n">out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">|=</span> <span class="n">mask</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_erode</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One-cell binary erosion, the counterpart of :func:`_dilate`."""</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">out</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&amp;=</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span>
+    <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">&amp;=</span> <span class="n">mask</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">out</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;=</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+    <span class="n">out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">&amp;=</span> <span class="n">mask</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_close</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One-cell binary closing: fill gaps a cell wide without growing the outline.</span>
+
+<span class="sd">    A dilation fills the same gaps but also fattens every wall by a cell on each side,</span>
+<span class="sd">    which on a fish pass is taken straight out of the slot between two walls. The</span>
+<span class="sd">    union with *mask* keeps the operation extensive at the array border, where the</span>
+<span class="sd">    erosion would otherwise eat the outermost row.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">mask</span> <span class="o">|</span> <span class="n">_erode</span><span class="p">(</span><span class="n">_dilate</span><span class="p">(</span><span class="n">mask</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="patch_line">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.patch_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_line</span><span class="p">(</span><span class="n">surface</span><span class="p">:</span> <span class="n">Surface</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">simplify</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The centerline across a boundary patch, as a :class:`shapely.LineString`.</span>
+
+<span class="sd">    An inlet or outlet patch of a CFD geometry is a planar lid across the channel. What</span>
+<span class="sd">    ``boundaries.liquid_boundaries`` wants is a line *along* that cross-section, so the</span>
+<span class="sd">    footprint's minimum rotated rectangle is taken and the mid-line of its two short</span>
+<span class="sd">    sides returned - the line a modeler would have digitized by hand.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">MultiPoint</span>
+
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">rect</span> <span class="o">=</span> <span class="n">MultiPoint</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">])</span><span class="o">.</span><span class="n">minimum_rotated_rectangle</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="s2">"exterior"</span><span class="p">):</span>
+        <span class="c1"># The patch is vertical, so its footprint is already a line rather than a</span>
+        <span class="c1"># rectangle - the normal case for an inlet or outlet lid across a channel.</span>
+        <span class="c1"># Its two extreme points are the line we want.</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])])</span>
+        <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">simplify</span><span class="p">)</span> <span class="k">if</span> <span class="n">simplify</span> <span class="k">else</span> <span class="n">line</span>
+    <span class="n">corners</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rect</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">corners</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">corners</span><span class="p">[(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+    <span class="n">lengths</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">]</span>
+    <span class="n">short</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">lengths</span><span class="p">))</span>
+    <span class="n">opposite</span> <span class="o">=</span> <span class="p">(</span><span class="n">short</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">short</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[</span><span class="n">short</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">opposite</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">edges</span><span class="p">[</span><span class="n">opposite</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">end</span><span class="p">)])</span>
+    <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">simplify</span><span class="p">)</span> <span class="k">if</span> <span class="n">simplify</span> <span class="k">else</span> <span class="n">line</span></div>
+
+
+
+<div class="viewcode-block" id="report">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.report">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="n">surface</span><span class="p">:</span> <span class="n">Surface</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bed_max_slope_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">BED_MAX_SLOPE_DEG</span><span class="p">,</span>
+           <span class="n">min_slope_deg</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">WALL_MIN_SLOPE_DEG</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What a part contains, for logging before anything is written.</span>
+
+<span class="sd">    Report-only, in the convention of the rest of the package: it returns counts and a</span>
+<span class="sd">    message and decides nothing. The fraction of facets that are overhangs is the</span>
+<span class="sd">    number worth reading - it is exactly the geometry a height field will drop.</span>
+<span class="sd">    """</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">split_by_slope</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">bed_max_slope_deg</span><span class="o">=</span><span class="n">bed_max_slope_deg</span><span class="p">,</span>
+                            <span class="n">min_slope_deg</span><span class="o">=</span><span class="n">min_slope_deg</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="n">surface</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="s2">"triangles"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="p">),</span>
+        <span class="s2">"bounds"</span><span class="p">:</span> <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span><span class="p">),</span>
+        <span class="s2">"size"</span><span class="p">:</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">,</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">-</span> <span class="n">zmin</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">counts</span><span class="p">,</span>
+        <span class="s2">"overhang_fraction"</span><span class="p">:</span> <span class="n">counts</span><span class="p">[</span><span class="s2">"overhang"</span><span class="p">]</span> <span class="o">/</span> <span class="n">total</span><span class="p">,</span>
+        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">result</span><span class="p">[</span><span class="s2">"message"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">surface</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span><span class="si">}</span><span class="s2"> triangles, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">xmax</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">xmin</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="p">(</span><span class="n">ymax</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">ymin</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="p">(</span><span class="n">zmax</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">zmin</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'bed'</span><span class="p">]</span><span class="si">}</span><span class="s2"> bed / </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'wall'</span><span class="p">]</span><span class="si">}</span><span class="s2"> wall / </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'overhang'</span><span class="p">]</span><span class="si">}</span><span class="s2"> overhang "</span>
+        <span class="sa">f</span><span class="s2">"/ </span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="s1">'other'</span><span class="p">]</span><span class="si">}</span><span class="s2"> between the thresholds"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="log_report">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.surfaces.log_report">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_report</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">logger_obj</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Log a :func:`report` at the right level; returns it so it can be chained."""</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logger_obj</span> <span class="ow">or</span> <span class="n">log</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"message"</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">"overhang_fraction"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%.0f%%</span><span class="s2"> of the facets face downwards and cannot be represented by a "</span>
+            <span class="s2">"height field (a soffit, a cantilever, or an inverted winding). They are "</span>
+            <span class="s2">"dropped from the DEM - check that this part is really terrain."</span><span class="p">,</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s2">"overhang_fraction"</span><span class="p">]</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s2">"other"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"triangles"</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> facets fall between the bed and wall slope thresholds and are "</span>
+            <span class="s2">"neither rasterised nor turned into a footprint. Widen "</span>
+            <span class="s2">"surfaces.bed_max_slope_deg or lower surfaces.wall_min_slope_deg."</span><span class="p">,</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s2">"other"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

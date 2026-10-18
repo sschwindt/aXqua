@@ -1,0 +1,1001 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.sortie &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/telemac/sortie.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.sortie</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.solvers.telemac.sortie</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Reader for the TELEMAC ``.sortie`` listing (the solver's printed output).</span>
+
+<span class="sd">A steady TELEMAC-2D/3D run prints a *water-volume balance* block at every listing</span>
+<span class="sd">printout::</span>
+
+<span class="sd">                           BALANCE OF WATER VOLUME</span>
+<span class="sd">         VOLUME IN THE DOMAIN :    6317.532     M3</span>
+<span class="sd">         FLUX BOUNDARY    1:    0.8000116     M3/S  ( &gt;0 : ENTERING  &lt;0 : EXITING )</span>
+<span class="sd">         FLUX BOUNDARY    2:   -7.3518840     M3/S  ( &gt;0 : ENTERING  &lt;0 : EXITING )</span>
+<span class="sd">         RELATIVE ERROR IN VOLUME AT T =        28.57     S :   -0.1008281E-14</span>
+
+<span class="sd">which is everything needed to judge whether a steady run has converged: at steady</span>
+<span class="sd">state the boundary fluxes balance (total inflow = total outflow) and the domain</span>
+<span class="sd">volume stops changing. This module turns that listing into arrays.</span>
+
+<span class="sd">**TELEMAC-3D prints a different block** (``telemac3d/bil3d.f``), and it has to be read</span>
+<span class="sd">too - a 3D pre-run seeds OpenFOAM exactly as a 2D one does, and until this was handled</span>
+<span class="sd">its flux balance could not be judged at all::</span>
+
+<span class="sd">                    MASS BALANCE</span>
+
+<span class="sd">      WATER</span>
+<span class="sd">    VOLUME AT THE PREVIOUS TIME STEP              :     105.4575</span>
+<span class="sd">    VOLUME AT THE PRESENT TIME STEP               :     105.4497</span>
+<span class="sd">    VOLUME LEAVING DOMAIN DURING THIS TIME STEP   :    0.7793448E-02</span>
+<span class="sd">    ERROR ON THE VOLUME DURING THIS TIME STEP     :   -0.1874828E-12</span>
+<span class="sd">      BOUNDARY FLUXES FOR WATER IN M3/S ( &gt;0 : ENTERING )</span>
+<span class="sd">    FLUX BOUNDARY      1                          :    0.1350000</span>
+<span class="sd">    FLUX BOUNDARY      2                          :   -0.4133374</span>
+
+<span class="sd">Three things differ and each is handled explicitly. (1) There is no</span>
+<span class="sd">``VOLUME IN THE DOMAIN`` line; the domain volume is ``VOLUME AT THE PRESENT TIME</span>
+<span class="sd">STEP``. (2) **The block carries no time.** TELEMAC-3D prints it only in the</span>
+<span class="sd">``ITERATION ... TIME ... ( N S)`` header that immediately precedes the block, so that</span>
+<span class="sd">header's time is attached to the block that follows it - still a single-pass</span>
+<span class="sd">association made while reading, not two sequences zipped afterwards, so it cannot</span>
+<span class="sd">slip. (3) The error line is the *absolute* volume error of one time step, where</span>
+<span class="sd">TELEMAC-2D prints a *relative* one; :attr:`Sortie.dimension` says which listing a</span>
+<span class="sd">result came from, and ``volume_error`` must be read accordingly. The fluxes - the only</span>
+<span class="sd">thing convergence is actually judged on - mean the same in both.</span>
+
+<span class="sd">**Why axqua parses this itself.** The obvious alternative is TELEMAC's own</span>
+<span class="sd">``postel.parser_output`` (and the ``pythomac`` package that adapts it), but both are</span>
+<span class="sd">GPL-3 while axqua is BSD-3, so neither can be vendored here. The file *format*</span>
+<span class="sd">is not the licensed part, so this is an independent reader written against the</span>
+<span class="sd">listing itself - which also lets it be stricter and simpler than a general-purpose</span>
+<span class="sd">one, because axqua needs exactly one thing from the listing:</span>
+
+<span class="sd">* **Each balance block is parsed as a unit**, and its simulation time is taken from</span>
+<span class="sd">  the ``RELATIVE ERROR IN VOLUME AT T = ...`` line *inside the block*. The general</span>
+<span class="sd">  parser instead collects times from the separate ``ITERATION ... TIME:`` lines and</span>
+<span class="sd">  zips the two sequences afterwards, which needs a synthetic zero-flux sample</span>
+<span class="sd">  prepended to make the lengths match - so the first sample is fabricated and every</span>
+<span class="sd">  later sample can slip by one if the listing has an extra ``ITERATION`` line</span>
+<span class="sd">  (``PRINTING CUMULATED FLOWRATES`` and the listing printout period do not have to</span>
+<span class="sd">  agree). Reading the time from inside the block makes misalignment impossible.</span>
+<span class="sd">* Nothing is fabricated: what the run printed is what is returned.</span>
+<span class="sd">* Blocks are only accepted when complete (volume + every boundary flux + the time),</span>
+<span class="sd">  so a listing truncated mid-block by a crash or a still-running job yields the</span>
+<span class="sd">  blocks written so far instead of raising.</span>
+
+<span class="sd">Parallel runs write one main listing plus a ``*_p0000N.sortie`` per processor; only</span>
+<span class="sd">the main one carries the merged balance. :func:`latest_sortie` returns it.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># A number as TELEMAC prints it: 1234, 12.34, -0.1008281E-14, 1.2D+3</span>
+<span class="n">_NUM</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"[-+]?(?:\d+\.?\d*|\.\d+)(?:[dDeE][-+]?\d+)?"</span>
+
+<span class="n">_RE_VOLUME</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"\s*VOLUME IN THE DOMAIN\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_FLUX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*FLUX BOUNDARY\s+(?P&lt;index&gt;\d+)\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_ERROR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*RELATIVE ERROR IN VOLUME AT T\s*=\s*(?P&lt;time&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)\s*S\s*:\s*"</span>
+    <span class="sa">rf</span><span class="s2">"(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_ITERATION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"\s*ITERATION\s+(?P&lt;iteration&gt;\d+)\s+TIME\b(?P&lt;rest&gt;.*)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+<span class="c1"># --- TELEMAC-3D (telemac3d/bil3d.f) ---------------------------------------- #</span>
+<span class="c1"># The whole line is the header, so 'GAIA MASS-BALANCE OF SEDIMENTS' (hyphenated and</span>
+<span class="c1"># followed by more text) cannot be mistaken for it. 'FINAL MASS BALANCE' is the</span>
+<span class="c1"># end-of-run summary and starts no per-printout block.</span>
+<span class="n">_RE_BALANCE_3D</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*(?P&lt;final&gt;FINAL\s+)?MASS BALANCE\s*\Z"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_VOLUME_3D</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*VOLUME AT THE PRESENT TIME STEP\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_ERROR_3D</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*ERROR ON THE VOLUME DURING THIS TIME STEP\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="c1"># '( 250.0000 S)' - the cumulated time TELEMAC prints after the D/H/MN breakdown</span>
+<span class="n">_RE_ITER_TOTAL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"\(\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)\s*S\s*\)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_ITER_PARTS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)\s*(?P&lt;unit&gt;D|H|MN|S)\b"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_STUDY</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*.*NAME OF THE STUDY\s*:?\s*$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_EXEC</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"\A\s*(?:(?P&lt;days&gt;\d+)\s*DAYS|(?P&lt;hours&gt;\d+)\s*HOURS"</span>
+    <span class="sa">r</span><span class="s2">"|(?P&lt;minutes&gt;\d+)\s*MINUTES|(?P&lt;seconds&gt;\d+)\s*SECONDS)\s*\Z"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_float</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"D"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iteration_time</span><span class="p">(</span><span class="n">rest</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simulated time [s] out of the tail of an ``ITERATION ... TIME`` header.</span>
+
+<span class="sd">    TELEMAC-3D is the only caller that needs this: its balance block carries no time</span>
+<span class="sd">    of its own. Both printed forms are read - the cumulated ``( 250.0000 S)`` that</span>
+<span class="sd">    follows the breakdown, and the ``0 D  0 H  4 MN  10.0000 S`` breakdown itself as a</span>
+<span class="sd">    fallback for a listing that omits the total. Returns ``None`` rather than a guess</span>
+<span class="sd">    when neither is there, so the block is dropped as incomplete instead of being</span>
+<span class="sd">    committed at the wrong instant.</span>
+<span class="sd">    """</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">_RE_ITER_TOTAL</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">total</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+    <span class="n">factors</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"D"</span><span class="p">:</span> <span class="mf">86400.0</span><span class="p">,</span> <span class="s2">"H"</span><span class="p">:</span> <span class="mf">3600.0</span><span class="p">,</span> <span class="s2">"MN"</span><span class="p">:</span> <span class="mf">60.0</span><span class="p">,</span> <span class="s2">"S"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="n">seconds</span><span class="p">,</span> <span class="n">seen</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">_RE_ITER_PARTS</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">rest</span><span class="p">):</span>
+        <span class="n">seconds</span> <span class="o">+=</span> <span class="n">factors</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"unit"</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">*</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">seconds</span> <span class="k">if</span> <span class="n">seen</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="Sortie">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.Sortie">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Sortie</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The water-volume balance history of one TELEMAC listing.</span>
+
+<span class="sd">    All arrays are one entry per listing printout and share the same ordering, so</span>
+<span class="sd">    ``time[i]``, ``volume[i]`` and ``fluxes[i]`` describe the same instant.</span>
+<span class="sd">    """</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">study</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">exec_seconds</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">iteration</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>          <span class="c1"># solver time-step number at each printout</span>
+    <span class="n">time</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>               <span class="c1"># simulated time [s]</span>
+    <span class="n">volume</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>             <span class="c1"># water volume in the domain [m3]</span>
+    <span class="n">fluxes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>             <span class="c1"># (n_printouts, n_boundaries) signed [m3/s]</span>
+    <span class="n">volume_error</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>       <span class="c1"># volume error as TELEMAC printed it - see below</span>
+    <span class="c1">#: which listing shape this came from: ``"2d"`` (TELEMAC-2D) or ``"3d"``</span>
+    <span class="c1">#: (TELEMAC-3D). It matters for ``volume_error`` alone, which TELEMAC-2D prints</span>
+    <span class="c1">#: relative and TELEMAC-3D prints as an absolute per-step volume; the value is</span>
+    <span class="c1">#: passed through as printed rather than converted, so the two are not silently</span>
+    <span class="c1">#: made to look alike. Everything else means the same in both.</span>
+    <span class="n">dimension</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"2d"</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">n_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gross_in</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Total inflow [m3/s]: the sum of the positive boundary fluxes.</span>
+
+<span class="sd">        Summing by sign rather than by boundary index means any number of inflow /</span>
+<span class="sd">        outflow boundaries works, and a boundary that momentarily reverses is</span>
+<span class="sd">        counted on the side it is actually flowing.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">gross_out</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Total outflow magnitude [m3/s]: the sum of the negative fluxes, positive."""</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">printout_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Median simulated time between listing printouts [s].</span>
+
+<span class="sd">        Taken from the times actually printed, because a CFL-adaptive run has no</span>
+<span class="sd">        fixed time step: ``LISTING PRINTOUT PERIOD x TIME STEP`` is meaningless there.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)))</span>
+
+<div class="viewcode-block" id="Sortie.to_frame">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.Sortie.to_frame">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""The balance history as a pandas DataFrame indexed by simulated time."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"iteration"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">,</span> <span class="s2">"volume (m3)"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span>
+                <span class="s2">"volume error (-)"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">volume_error</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_boundaries</span><span class="p">):</span>
+            <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">"flux boundary </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> (m3/s)"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"gross inflow (m3/s)"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gross_in</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"gross outflow (m3/s)"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gross_out</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"time (s)"</span>
+        <span class="k">return</span> <span class="n">frame</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="read_sortie">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.read_sortie">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_sortie</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sortie</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Parse the water-volume balance history out of a ``.sortie`` listing.</span>
+
+<span class="sd">    Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module</span>
+<span class="sd">    docstring); which one a listing carried is reported as :attr:`Sortie.dimension`.</span>
+
+<span class="sd">    Raises :class:`ValueError` when the listing holds no complete balance block -</span>
+<span class="sd">    normally because the run was launched without ``-s`` or without</span>
+<span class="sd">    ``PRINTING CUMULATED FLOWRATES : YES``.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">study</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
+    <span class="n">exec_seconds</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">iter_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">want_study</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">dimension</span> <span class="o">=</span> <span class="s2">"2d"</span>
+
+    <span class="n">iterations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">times</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">volumes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">flux_rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pending</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># A TELEMAC-3D block has no closing line, so it is committed when the next one</span>
+    <span class="c1"># starts (or at end of file). `block_3d` holds the one being collected.</span>
+    <span class="n">block_3d</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">close_3d</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Commit the 3D block being collected, if it is complete.</span>
+
+<span class="sd">        Complete means volume + error + at least one boundary flux + a time from the</span>
+<span class="sd">        header above it. An incomplete one - the ``INITIAL VOLUME OF WATER IN THE</span>
+<span class="sd">        DOMAIN`` block that opens the run, or a tail truncated by a crash - is</span>
+<span class="sd">        dropped rather than padded, exactly as for 2D.</span>
+<span class="sd">        """</span>
+        <span class="k">nonlocal</span> <span class="n">block_3d</span><span class="p">,</span> <span class="n">dimension</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">block_3d</span>
+        <span class="n">block_3d</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">block</span><span class="p">[</span><span class="s2">"fluxes"</span><span class="p">]:</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">[</span><span class="s2">"volume"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">block</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">block</span><span class="p">[</span><span class="s2">"time"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s2">"iteration"</span><span class="p">])</span>
+        <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s2">"time"</span><span class="p">])</span>
+        <span class="n">volumes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s2">"volume"</span><span class="p">])</span>
+        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s2">"error"</span><span class="p">])</span>
+        <span class="n">flux_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s2">"fluxes"</span><span class="p">])</span>
+        <span class="n">dimension</span> <span class="o">=</span> <span class="s2">"3d"</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">want_study</span><span class="p">:</span>
+                <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">study</span> <span class="o">=</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="s2">"NO NAME OF STUDY"</span>
+                <span class="n">want_study</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s2">"NAME OF THE STUDY"</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_RE_STUDY</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">want_study</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">continue</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_ITERATION</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">iteration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"iteration"</span><span class="p">))</span>
+                <span class="n">iter_time</span> <span class="o">=</span> <span class="n">_iteration_time</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"rest"</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_BALANCE_3D</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">close_3d</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"final"</span><span class="p">):</span>
+                    <span class="n">block_3d</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"volume"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"error"</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">"fluxes"</span><span class="p">:</span> <span class="p">{},</span>
+                                <span class="s2">"iteration"</span><span class="p">:</span> <span class="n">iteration</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="n">iter_time</span><span class="p">}</span>
+                <span class="k">continue</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_VOLUME</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="c1"># a new block starts here; anything half-collected is incomplete</span>
+                <span class="n">volume</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+                <span class="n">pending</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">block_3d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_VOLUME_3D</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">block_3d</span><span class="p">[</span><span class="s2">"volume"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_ERROR_3D</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">block_3d</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_FLUX</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">block_3d</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">block_3d</span><span class="p">[</span><span class="s2">"fluxes"</span><span class="p">][</span><span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"index"</span><span class="p">))]</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span>
+                        <span class="k">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">volume</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">pending</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"index"</span><span class="p">))]</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_ERROR</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="ow">and</span> <span class="n">volume</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iteration</span><span class="p">)</span>
+                <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"time"</span><span class="p">)))</span>
+                <span class="n">volumes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+                <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)))</span>
+                <span class="n">flux_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
+                <span class="n">volume</span><span class="p">,</span> <span class="n">pending</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="p">{}</span>
+                <span class="k">continue</span>
+
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_EXEC</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">unit</span><span class="p">,</span> <span class="n">factor</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"days"</span><span class="p">,</span> <span class="mi">86400</span><span class="p">),</span> <span class="p">(</span><span class="s2">"hours"</span><span class="p">,</span> <span class="mi">3600</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s2">"minutes"</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="p">(</span><span class="s2">"seconds"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">exec_seconds</span> <span class="o">+=</span> <span class="n">factor</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">unit</span><span class="p">))</span>
+    <span class="n">close_3d</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flux_rows</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: no complete 'BALANCE OF WATER VOLUME' block found. Run the "</span>
+            <span class="s2">"solver with the -s flag and set 'PRINTING CUMULATED FLOWRATES : YES' in "</span>
+            <span class="s2">"the steering file."</span>
+        <span class="p">)</span>
+
+    <span class="n">n_bnd</span> <span class="o">=</span> <span class="nb">max</span><span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">flux_rows</span> <span class="k">if</span> <span class="n">row</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">fluxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">flux_rows</span><span class="p">),</span> <span class="n">n_bnd</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flux_rows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">fluxes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># drop any block whose fluxes were not all printed (a truncated tail)</span>
+    <span class="n">complete</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">n_bnd</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flux_rows</span><span class="p">),</span> <span class="nb">bool</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">complete</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: balance blocks carry no boundary fluxes; "</span>
+                         <span class="s2">"set 'PRINTING CUMULATED FLOWRATES : YES'."</span><span class="p">)</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">complete</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Sortie</span><span class="p">(</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">study</span><span class="o">=</span><span class="n">study</span><span class="p">,</span> <span class="n">exec_seconds</span><span class="o">=</span><span class="n">exec_seconds</span><span class="p">,</span>
+        <span class="n">iteration</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)[</span><span class="n">keep</span><span class="p">],</span>
+        <span class="n">time</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">keep</span><span class="p">],</span>
+        <span class="n">volume</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">volumes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">keep</span><span class="p">],</span>
+        <span class="n">fluxes</span><span class="o">=</span><span class="n">fluxes</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span>
+        <span class="n">volume_error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">keep</span><span class="p">],</span>
+        <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="latest_sortie">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.latest_sortie">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">latest_sortie</span><span class="p">(</span><span class="n">model_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Newest **main** listing for *cas_name* in *model_dir*.</span>
+
+<span class="sd">    TELEMAC names it ``&lt;cas&gt;_&lt;YYYY-MM-DD-HHhMMminSSs&gt;.sortie``; a parallel run adds a</span>
+<span class="sd">    ``_p0000N`` copy per processor, which carries only that subdomain's balance and</span>
+<span class="sd">    is skipped here.</span>
+<span class="sd">    """</span>
+    <span class="n">model_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cas_name</span><span class="si">}</span><span class="s2">_*.sortie"</span><span class="p">)</span>
+                  <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"_p\d+\.sortie$"</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="processor_sorties">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.processor_sorties">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">processor_sorties</span><span class="p">(</span><span class="n">model_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The per-processor ``*_p0000N.sortie`` copies of a parallel run."""</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cas_name</span><span class="si">}</span><span class="s2">_*.sortie"</span><span class="p">)</span>
+                  <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"_p\d+\.sortie$"</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># a run that TELEMAC-2D stopped itself</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="c1">#: What TELEMAC-2D prints when ``CONTROL OF LIMITS`` ends a run.</span>
+<span class="c1">#:</span>
+<span class="c1">#: ``telemac2d.F`` calls this a "neat (programmed) stop": the solver returns from its</span>
+<span class="c1">#: time loop, prints ``CORRECT END OF RUN`` and exits with code 0. The exit code can</span>
+<span class="c1">#: therefore not tell a run that blew up at the first time step from one that finished,</span>
+<span class="c1">#: and a job that trusted it reported the first as completed.</span>
+<span class="n">LIMIT_STOP</span> <span class="o">=</span> <span class="s2">"LIMIT VALUES TRESPASSED"</span>
+
+<span class="c1">#: The three lines ``isitok.f`` writes per offending node (its FORMAT 101).</span>
+<span class="n">_LIMIT_REPORT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"(LOWER|UPPER) LIMIT ON (\w) REACHED AT POINT\s+(\S+)\s+"</span>
+    <span class="sa">r</span><span class="s2">"WITH COORDINATES\s*(\S+)\s+AND\s+(\S+)\s+"</span>
+    <span class="sa">r</span><span class="s2">"THE VALUE OF \w IS\s*(\S+)\s+THE LIMIT IS:\s*(\S+)"</span><span class="p">)</span>
+
+<span class="n">_LIMIT_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"H"</span><span class="p">:</span> <span class="s2">"water depth"</span><span class="p">,</span> <span class="s2">"U"</span><span class="p">:</span> <span class="s2">"velocity U"</span><span class="p">,</span> <span class="s2">"V"</span><span class="p">:</span> <span class="s2">"velocity V"</span><span class="p">,</span> <span class="s2">"T"</span><span class="p">:</span> <span class="s2">"tracer"</span><span class="p">}</span>
+<span class="n">_LIMIT_UNITS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"H"</span><span class="p">:</span> <span class="s2">"m"</span><span class="p">,</span> <span class="s2">"U"</span><span class="p">:</span> <span class="s2">"m/s"</span><span class="p">,</span> <span class="s2">"V"</span><span class="p">:</span> <span class="s2">"m/s"</span><span class="p">,</span> <span class="s2">"T"</span><span class="p">:</span> <span class="s2">""</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="LimitStop">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.LimitStop">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LimitStop</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One node at which a value left the range ``LIMIT VALUES`` allows."""</span>
+
+    <span class="n">bound</span><span class="p">:</span> <span class="nb">str</span>          <span class="c1"># LOWER | UPPER</span>
+    <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span>       <span class="c1"># H | U | V | T</span>
+    <span class="n">x</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">y</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span>
+
+<div class="viewcode-block" id="LimitStop.describe">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.LimitStop.describe">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_LIMIT_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="p">)</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="n">_LIMIT_UNITS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variable</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">" at x = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, y = </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">" (the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bound</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2"> limit is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fortran_float</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A number as Fortran's G format prints it; ``nan`` for a field of asterisks."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="read_limit_stops">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.read_limit_stops">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_limit_stops</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LimitStop</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The nodes a listing names as having left their limits, in listing order.</span>
+
+<span class="sd">    The node number is not kept: in a parallel run it counts within one subdomain and</span>
+<span class="sd">    means nothing on the mesh the user sees. The coordinates do.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">LimitStop</span><span class="p">(</span><span class="n">bound</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">_fortran_float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">_fortran_float</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+                      <span class="n">_fortran_float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">_fortran_float</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">bound</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">_point</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">limit</span>
+            <span class="ow">in</span> <span class="n">_LIMIT_REPORT</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">text</span><span class="p">)]</span></div>
+
+
+
+<div class="viewcode-block" id="find_limit_stops">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.find_limit_stops">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_limit_stops</span><span class="p">(</span><span class="n">model_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LimitStop</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Where the newest run of *cas_name* left its limits; empty when it did not.</span>
+
+<span class="sd">    In a parallel run only the subdomain that owns the node reports it, into its own</span>
+<span class="sd">    ``_p0000N`` listing, so those are read as well as the main one.</span>
+<span class="sd">    """</span>
+    <span class="n">main</span> <span class="o">=</span> <span class="n">latest_sortie</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">main</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">stem</span> <span class="o">=</span> <span class="n">main</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">".sortie"</span><span class="p">)]</span>
+    <span class="n">found</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LimitStop</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="n">main</span><span class="p">,</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">model_dir</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">stem</span><span class="si">}</span><span class="s2">_p*.sortie"</span><span class="p">))]:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">+=</span> <span class="n">read_limit_stops</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">found</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># GAIA / tracer mass balances</span>
+<span class="c1">#</span>
+<span class="c1"># Adopted from the `pythomac` package (Sebastian Schwindt, hydro-informatics.com),</span>
+<span class="c1"># whose flux/convergence post-processing axqua used to call out to. The field</span>
+<span class="c1"># lists below were re-derived from TELEMAC v9.1.1's own FORTRAN FORMAT statements</span>
+<span class="c1"># (gaia/mass_balance.f, telemac3d/bil3d.f) rather than transcribed, which is why</span>
+<span class="c1"># they carry more than the four sediment quantities pythomac exposes - the erosion /</span>
+<span class="c1"># deposition fluxes and the per-boundary bedload fluxes are what a morphodynamic run</span>
+<span class="c1"># actually needs to be checked against.</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="c1">#: GAIA per-class mass-balance quantities, as printed by ``gaia/mass_balance.f``</span>
+<span class="n">_SEDIMENT_FIELDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"total_mass"</span><span class="p">:</span> <span class="s2">"TOTAL MASS"</span><span class="p">,</span>
+    <span class="s2">"initial_mass"</span><span class="p">:</span> <span class="s2">"INITIAL MASS"</span><span class="p">,</span>
+    <span class="s2">"initial_mass_active_layer"</span><span class="p">:</span> <span class="s2">"INITIAL MASS ACTIVE LAYER"</span><span class="p">,</span>
+    <span class="s2">"lost_mass"</span><span class="p">:</span> <span class="s2">"LOST MASS"</span><span class="p">,</span>
+    <span class="s2">"cumulated_lost_mass"</span><span class="p">:</span> <span class="s2">"CUMULATED LOST MASS"</span><span class="p">,</span>
+    <span class="s2">"total_bed_evolutions"</span><span class="p">:</span> <span class="s2">"TOTAL BED EVOLUTIONS"</span><span class="p">,</span>
+    <span class="s2">"cumulated_bed_evolutions"</span><span class="p">:</span> <span class="s2">"CUMULATED BED EVOLUTIONS"</span><span class="p">,</span>
+    <span class="s2">"erosion_flux"</span><span class="p">:</span> <span class="s2">"EROSION FLUX"</span><span class="p">,</span>
+    <span class="s2">"deposition_flux"</span><span class="p">:</span> <span class="s2">"DEPOSITION FLUX"</span><span class="p">,</span>
+    <span class="s2">"cumulated_erosion"</span><span class="p">:</span> <span class="s2">"CUMULATED EROSION"</span><span class="p">,</span>
+    <span class="s2">"cumulated_deposition"</span><span class="p">:</span> <span class="s2">"CUMULATED DEPOSITION"</span><span class="p">,</span>
+    <span class="s2">"relative_error_active_layer"</span><span class="p">:</span> <span class="s2">"RELATIVE ERROR TO INITIAL ACT LAYER MASS"</span><span class="p">,</span>
+    <span class="s2">"relative_error_total"</span><span class="p">:</span> <span class="s2">"RELATIVE ERROR TO TOTAL INITIAL MASS"</span><span class="p">,</span>
+    <span class="s2">"boundaries_bedload_flux"</span><span class="p">:</span> <span class="s2">"BOUNDARIES BEDLOAD FLUX"</span><span class="p">,</span>
+    <span class="s2">"cumulated_boundaries_bedload_mass"</span><span class="p">:</span> <span class="s2">"CUMULATED BOUNDARIES BEDLOAD MASS"</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">_RE_SED_CLASS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*SEDIMENT CLASS NUMBER\s*=\s*(?P&lt;klass&gt;\d+)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_SED_ALL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*GAIA MASS-BALANCE OF SEDIMENTS OVER ALL CLASSES"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_SED_PER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*GAIA MASS-BALANCE OF SEDIMENTS PER CLASS"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_BEDLOAD_BND</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*(?P&lt;cum&gt;CUMULATED )?BEDLOAD (?:FLUX )?BOUNDARY\s+(?P&lt;index&gt;\d+)\s*=\s*"</span>
+    <span class="sa">rf</span><span class="s2">"(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_field_pattern</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">re</span><span class="o">.</span><span class="n">Pattern</span><span class="p">:</span>
+    <span class="c1"># GAIA pads the label out to a fixed column before the '='</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"\s*</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">label</span><span class="p">)</span><span class="si">}</span><span class="s2">\s*=\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+
+<span class="n">_SEDIMENT_PATTERNS</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">_field_pattern</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">_SEDIMENT_FIELDS</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="c1"># longest label first so 'CUMULATED LOST MASS' is never eaten by 'LOST MASS'</span>
+<span class="n">_SEDIMENT_ORDER</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_SEDIMENT_FIELDS</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">k</span><span class="p">:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">_SEDIMENT_FIELDS</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+
+
+<div class="viewcode-block" id="sediment_mass_profile">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.sediment_mass_profile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sediment_mass_profile</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""GAIA sediment mass balance per class over the run.</span>
+
+<span class="sd">    Returns ``{class_number: {quantity: array}}`` with one entry per listing</span>
+<span class="sd">    printout; class ``0`` holds the "OVER ALL CLASSES" summary block. Quantities are</span>
+<span class="sd">    the keys of :data:`_SEDIMENT_FIELDS` (total/lost/cumulated mass, erosion and</span>
+<span class="sd">    deposition fluxes, bed evolutions, the relative mass errors, ...). An empty dict</span>
+<span class="sd">    means the run was not coupled to GAIA.</span>
+
+<span class="sd">    The mass balance is the morphodynamic counterpart of the water-volume balance:</span>
+<span class="sd">    ``relative_error_active_layer`` and ``cumulated_lost_mass`` are what tell you a</span>
+<span class="sd">    GAIA run stayed mass-conservative.</span>
+<span class="sd">    """</span>
+    <span class="n">per_class</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">current</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_RE_SED_ALL</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">per_class</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">_RE_SED_PER</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>           <span class="c1"># the class number follows on the next line</span>
+                <span class="k">continue</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_SED_CLASS</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"klass"</span><span class="p">))</span>
+                <span class="n">per_class</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_SEDIMENT_ORDER</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">_SEDIMENT_PATTERNS</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">per_class</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_BEDLOAD_BND</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">prefix</span> <span class="o">=</span> <span class="s2">"cumulated_bedload_boundary"</span> <span class="k">if</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"cum"</span><span class="p">)</span> \
+                        <span class="k">else</span> <span class="s2">"bedload_flux_boundary"</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">'index'</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="n">per_class</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">klass</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="k">for</span> <span class="n">klass</span><span class="p">,</span> <span class="n">fields</span> <span class="ow">in</span> <span class="n">per_class</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">fields</span><span class="p">}</span></div>
+
+
+
+<span class="n">_RE_TRACER</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*TRACER\s+(?P&lt;index&gt;\d+)\s*:"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_TRACER_NOW</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*QUANTITY AT THE PRESENT TIME STEP\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_TRACER_ERR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">rf</span><span class="s2">"\s*ERROR ON THE QUANTITY DURING THIS TIME STEP\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+    <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_WATER_BLOCK</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*WATER\s*:?\s*$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="tracer_mass_profile">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.tracer_mass_profile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">tracer_mass_profile</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Tracer mass balance per tracer over the run.</span>
+
+<span class="sd">    Returns ``{tracer_number: {"total": array, "error": array}}``, one entry per</span>
+<span class="sd">    listing printout. GAIA carries suspended sediment as TELEMAC tracers, so this is</span>
+<span class="sd">    how a suspended-load run is mass-checked. The listing's ``WATER`` balance block</span>
+<span class="sd">    uses the same wording and is skipped.</span>
+<span class="sd">    """</span>
+    <span class="n">per_tracer</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">current</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_RE_WATER_BLOCK</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">continue</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_TRACER</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"index"</span><span class="p">))</span>
+                <span class="n">per_tracer</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="p">{})</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_TRACER_NOW</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">per_tracer</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"total"</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)))</span>
+                <span class="k">continue</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_TRACER_ERR</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">per_tracer</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"error"</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">_to_float</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"value"</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">idx</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">fields</span> <span class="ow">in</span> <span class="n">per_tracer</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">fields</span><span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="find_lines">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.sortie.find_lines">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_lines</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">with_line_numbers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Every listing line matching *pattern* (a regular expression).</span>
+
+<span class="sd">    The escape hatch for anything this module does not model - a user-Fortran</span>
+<span class="sd">    printout, a solver warning, a keyword echo. ``USER_RAIN`` percolation diagnostics</span>
+<span class="sd">    in the isar-2025 case are read this way, for instance.</span>
+<span class="sd">    """</span>
+    <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="n">hits</span><span class="p">,</span> <span class="n">numbers</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fh</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">regex</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="n">numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">hits</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span> <span class="k">if</span> <span class="n">with_line_numbers</span> <span class="k">else</span> <span class="n">hits</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

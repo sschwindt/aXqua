@@ -1,0 +1,383 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building the documentation &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/code/build-docs.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Troubleshooting" href="../troubleshooting/index.html" />
+    <link rel="prev" title="QGIS plugin" href="plugin.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code documentation</a></li>
+      <li class="breadcrumb-item active">Building the documentation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/build-docs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-the-documentation">
+<h1>Building the documentation<a class="headerlink" href="#building-the-documentation" title="Link to this heading"></a></h1>
+<p>The documentation is written in reStructuredText and built with <a class="reference external" href="https://www.sphinx-doc.org">Sphinx</a>. The build requires only Sphinx and the theme. The packages that aXqua needs at run time are replaced by placeholders during the build (<code class="docutils literal notranslate"><span class="pre">autodoc_mock_imports</span></code> in <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code>).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>docs/requirements-docs.txt
+sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>docs<span class="w"> </span>docs/_build/html
+</pre></div>
+</div>
+<p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code> in a web browser to read the result. The output folder <code class="docutils literal notranslate"><span class="pre">docs/_build/</span></code> is excluded from version control.</p>
+<section id="rules-for-the-structure">
+<h2>Rules for the structure<a class="headerlink" href="#rules-for-the-structure" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The outline of sections and subsections is fixed and verified by the test <code class="docutils literal notranslate"><span class="pre">tests/test_docs_outline.py</span></code>. Change the test together with the outline.</p></li>
+<li><p>Each subsection is one file. Subsubsections are headings within that file.</p></li>
+<li><p>The navigation menu shows the sections, which are set in bold capital letters. The subsections of a section are folded. They open when the section is opened with its fold button or when one of its pages is shown, and the subsubsections of a subsection open in the same way. This behavior is defined by <code class="docutils literal notranslate"><span class="pre">html_theme_options</span></code> in <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> and by <code class="docutils literal notranslate"><span class="pre">docs/_static/axqua.css</span></code>.</p></li>
+<li><p>Labels that start with <code class="docutils literal notranslate"><span class="pre">help-</span></code> mark the targets that the plugin opens from its tabs. Keep them when a page is reorganized.</p></li>
+<li><p>The screenshots of the plugin (<code class="docutils literal notranslate"><span class="pre">docs/img/gui-*.png</span></code>) are taken by <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">scripts/build_screenshots.py</span> <span class="pre">--case</span> <span class="pre">&lt;case-file&gt;</span></code>, which starts QGIS without a window, frames and numbers the places that a caption explains, and replaces the folders of the computer by neutral ones. The case has to be built and to have a completed steady job. The script ends with an error and names the figure if a place that a caption explains is not on the screen, and it records the number of marks of each figure in <code class="docutils literal notranslate"><span class="pre">docs/img/gui-screenshots.json</span></code>, which the test compares with the captions. Run the script again after a change to the plugin that a picture shows.</p></li>
+<li><p>The UML diagrams (<code class="docutils literal notranslate"><span class="pre">docs/img/uml-*.svg</span></code>) are generated from the source code with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">scripts/build_uml.py</span></code>, which requires <a class="reference external" href="https://graphviz.org">Graphviz</a>. The same test fails if a diagram no longer agrees with the code. Run the script again in that case.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plugin.html" class="btn btn-neutral float-left" title="QGIS plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../troubleshooting/index.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

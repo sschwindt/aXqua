@@ -1,0 +1,1066 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.fortran &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/telemac/fortran.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.fortran</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.solvers.telemac.fortran</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Generated TELEMAC user-Fortran for percolation (``percolation.mode: fortran``).</span>
+
+<span class="sd">Emits a ``USER_RAIN`` routine (the TELEMAC-2D hook for spatialised rain /</span>
+<span class="sd">infiltration, called from ``prosou.f`` whenever ``RAIN OR EVAPORATION : YES``)</span>
+<span class="sd">that models the losing-gaining exchange of a porous patch **depth-limited**:</span>
+
+<span class="sd">* over each *losing* region (the percolation patch polygon) it withdraws the</span>
+<span class="sd">  target discharge as a uniform depth rate ``Q/area``, tapered linearly to zero</span>
+<span class="sd">  as the local depth approaches ``percolation.min_depth`` and additionally capped</span>
+<span class="sd">  at half the water available above that floor per time step - so the sink can</span>
+<span class="sd">  **never dry a cell** (TELEMAC's own source terms have no such guard, which is</span>
+<span class="sd">  what collapses the CFL-adaptive time step when a sink node dries);</span>
+<span class="sd">* the discharge **actually** extracted (which may be less than the target while</span>
+<span class="sd">  the patch is still shallow) is summed - in parallel via ``P_SUM``, using the</span>
+<span class="sd">  same partial-``VOLU2D`` idiom as ``telemac2d_init.F`` - and reinjected exactly</span>
+<span class="sd">  over the *gaining* region(s), so the exchange is mass-exact by construction;</span>
+<span class="sd">* ``PLUIE`` is *assigned*, not accumulated, so the double ``CALL USER_RAIN`` in</span>
+<span class="sd">  ``prosou.f`` (once inside the RAIN block, once unconditionally) is harmless.</span>
+
+<span class="sd">The generated file lands in ``&lt;model_dir&gt;/&lt;user_fortran_dir&gt;/user_rain.f`` and is</span>
+<span class="sd">referenced by ``FORTRAN FILE`` in the ``.cas`` (see :func:`steering.write_cas`);</span>
+<span class="sd">TELEMAC compiles it into the executable at run time.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">FIXED_FORM_LIMIT</span> <span class="o">=</span> <span class="mi">72</span>   <span class="c1"># fixed-form Fortran statement field ends at column 72</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dbl</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Format a double-precision Fortran literal (D exponent)."""</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.10G</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="s2">"E"</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"E"</span><span class="p">,</span> <span class="s2">"D"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span> <span class="o">+</span> <span class="s2">"D0"</span>
+
+
+<span class="c1">#: region kinds dispatched inside the generated routine</span>
+<span class="n">KIND_PRESCRIBED</span> <span class="o">=</span> <span class="mi">1</span>   <span class="c1"># losing: deliver the target discharge over the wet region</span>
+<span class="n">KIND_DRAIN</span> <span class="o">=</span> <span class="mi">2</span>        <span class="c1"># losing: drain whatever stands here, no target discharge</span>
+<span class="n">KIND_GAINING</span> <span class="o">=</span> <span class="mi">3</span>      <span class="c1"># inject the total that was extracted</span>
+
+
+<div class="viewcode-block" id="patch_drain_regions">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.fortran.patch_drain_regions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">patch_drain_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">used</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Percolation patches to drain, as extra :class:`InternalSourceRegion` regions.</span>
+
+<span class="sd">    Standing surface water on a porous gravel bar infiltrates instead of ponding, so</span>
+<span class="sd">    it is an artifact of a 2D model that has no subsurface. With</span>
+<span class="sd">    ``percolation.losing_region: line`` the prescribed exchange is taken from the</span>
+<span class="sd">    channel at the losing line and nothing removes water sitting on the bar; these</span>
+<span class="sd">    regions do (see ``percolation.patch_drain``).</span>
+
+<span class="sd">    Returns an empty list when the drain is off, or when the patch is already the</span>
+<span class="sd">    losing region (``losing_region: patch``), where the prescribed withdrawal</span>
+<span class="sd">    already covers it.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">InternalSourceRegion</span><span class="p">,</span> <span class="n">_percolation_patches</span><span class="p">,</span> <span class="n">_simplify_region</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">patch_drain</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">losing_region</span> <span class="o">==</span> <span class="s2">"patch"</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  percolation.patch_drain ignored: the patch is already the "</span>
+                 <span class="s2">"losing region, so the prescribed withdrawal covers it"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">drains</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">_percolation_patches</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="n">polygon</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_simplify_region</span><span class="p">(</span><span class="n">patch</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">])</span>
+        <span class="n">drains</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InternalSourceRegion</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">"drain:</span><span class="si">{</span><span class="n">patch</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">discharge</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>          <span class="c1"># a drain has no target - it takes what is there</span>
+            <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+            <span class="n">area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">area</span><span class="p">),</span>
+            <span class="n">porous_depth</span><span class="o">=</span><span class="n">patch</span><span class="p">[</span><span class="s2">"porous_depth"</span><span class="p">],</span>
+        <span class="p">))</span>
+    <span class="k">if</span> <span class="n">drains</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  percolation patch drain: </span><span class="si">%d</span><span class="s2"> patch(es), </span><span class="si">%.0f</span><span class="s2"> m2 total - standing "</span>
+                 <span class="s2">"surface water is infiltrated and reinjected at the gaining line"</span><span class="p">,</span>
+                 <span class="nb">len</span><span class="p">(</span><span class="n">drains</span><span class="p">),</span> <span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">area</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">drains</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">drains</span></div>
+
+
+
+<div class="viewcode-block" id="write_user_fortran">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.fortran.write_user_fortran">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_user_fortran</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">regions</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">plane</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Generate ``user_fortran/user_rain.f`` for the given source regions.</span>
+
+<span class="sd">    *regions* is the :func:`axqua.boundary.load_internal_source_regions` list</span>
+<span class="sd">    (signed discharges; in fortran mode the losing region polygon is the</span>
+<span class="sd">    percolation patch). *plane* is an optional</span>
+<span class="sd">    :class:`axqua.watertable.PhreaticPlane`: when given, the patch drain tapers</span>
+<span class="sd">    to zero at the water table instead of at ``percolation.min_depth``, so it cannot</span>
+<span class="sd">    empty a pool that cuts below the bar's saturated zone. A plane is five numbers,</span>
+<span class="sd">    so it is baked in as coefficients - no per-node array is needed.</span>
+
+<span class="sd">    Returns the user-fortran directory (the ``FORTRAN FILE`` target).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.steering</span><span class="w"> </span><span class="kn">import</span> <span class="n">_region_coords</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">faces</span> <span class="o">==</span> <span class="s2">"water-table"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">write_water_table_fortran</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">plane</span><span class="p">)</span>
+
+    <span class="n">losing</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regions</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">discharge</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">gaining</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regions</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">discharge</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">film</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_infiltration</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">losing</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">gaining</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"percolation.mode: fortran needs at least one losing and one gaining "</span>
+            <span class="sa">f</span><span class="s2">"internal line (got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">losing</span><span class="p">)</span><span class="si">}</span><span class="s2"> losing / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">gaining</span><span class="p">)</span><span class="si">}</span><span class="s2"> gaining)."</span>
+        <span class="p">)</span>
+    <span class="c1"># ORDER MATTERS: each node is assigned to the FIRST region that contains it, and</span>
+    <span class="c1"># the patch overlaps both the losing strip and the gaining strip. Putting the</span>
+    <span class="c1"># drain last therefore leaves the prescribed exchange untouched and drains only</span>
+    <span class="c1"># the rest of the patch - no double counting.</span>
+    <span class="n">drains</span> <span class="o">=</span> <span class="n">patch_drain_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">losing</span><span class="p">)</span>
+    <span class="n">ordered</span> <span class="o">=</span> <span class="n">losing</span> <span class="o">+</span> <span class="n">gaining</span> <span class="o">+</span> <span class="n">drains</span>
+    <span class="n">kinds</span> <span class="o">=</span> <span class="p">([</span><span class="n">KIND_PRESCRIBED</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">losing</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">KIND_GAINING</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaining</span><span class="p">)</span>
+             <span class="o">+</span> <span class="p">[</span><span class="n">KIND_DRAIN</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">drains</span><span class="p">))</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="p">[</span><span class="n">_region_coords</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ordered</span><span class="p">]</span>
+    <span class="n">n_reg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ordered</span><span class="p">)</span>
+    <span class="n">max_v</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">)</span>
+    <span class="n">hmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">min_depth</span><span class="p">)</span>
+    <span class="n">htap</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">taper_depth</span><span class="p">),</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">rmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">max_rate</span><span class="p">)</span>
+    <span class="n">drain_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">patch_drain_max_rate</span>
+                       <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">patch_drain_max_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">rmax</span><span class="p">)</span>
+    <span class="n">diag_every</span> <span class="o">=</span> <span class="mi">500</span>   <span class="c1"># report the delivered discharge every N calls</span>
+    <span class="n">conductivity</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">conductivity</span>
+    <span class="n">suction</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">suction</span><span class="p">)</span>
+    <span class="c1"># porous layer thickness: the losing patch's own attribute, else a drained</span>
+    <span class="c1"># patch's, else the config fallback</span>
+    <span class="n">porous_depth</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">r</span><span class="o">.</span><span class="n">porous_depth</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">regions</span>
+                         <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">discharge</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">r</span><span class="o">.</span><span class="n">porous_depth</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">porous_depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">porous_depth</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">r</span><span class="o">.</span><span class="n">porous_depth</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">drains</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">porous_depth</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">porous_depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">porous_depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">porous_depth</span><span class="p">)</span>
+    <span class="n">use_table</span> <span class="o">=</span> <span class="n">plane</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="n">drains</span><span class="p">)</span>
+    <span class="n">film_depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_depth</span><span class="p">)</span>
+    <span class="n">film_velocity</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_velocity</span><span class="p">)</span>
+    <span class="n">film_rate</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_rate</span><span class="p">)</span>
+
+    <span class="n">body</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stmt</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="s2">"      "</span> <span class="o">+</span> <span class="n">text</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">FIXED_FORM_LIMIT</span><span class="p">:</span>   <span class="c1"># pragma: no cover - guarded by tests</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"generated Fortran line exceeds 72 columns: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">comment</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"!     </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">text</span> <span class="k">else</span> <span class="s2">"!"</span><span class="p">)</span>
+
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"axqua-generated USER_RAIN: percolation through a porous patch"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conductivity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  exchange: PRESCRIBED discharge (from the int-* flow column)"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  exchange: COMPUTED from Green-Ampt's saturated limit"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    f = kf*(h + Lz + hf)/Lz  with kf=</span><span class="si">{</span><span class="n">conductivity</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m/s,"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Lz=</span><span class="si">{</span><span class="n">porous_depth</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m (porous depth), hf=</span><span class="si">{</span><span class="n">suction</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m (suction)"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"    -&gt; the exchange RESPONDS to water level; it is not fixed."</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="n">KIND_PRESCRIBED</span><span class="p">:</span> <span class="s2">"losing"</span><span class="p">,</span> <span class="n">KIND_DRAIN</span><span class="p">:</span> <span class="s2">"drain"</span><span class="p">,</span> <span class="n">KIND_GAINING</span><span class="p">:</span> <span class="s2">"gaining"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">kind</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ordered</span><span class="p">,</span> <span class="n">kinds</span><span class="p">):</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"drains standing water"</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">KIND_DRAIN</span>
+                  <span class="k">else</span> <span class="sa">f</span><span class="s2">"target </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">discharge</span><span class="si">:</span><span class="s2">+g</span><span class="si">}</span><span class="s2"> m3/s"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  region </span><span class="si">{</span><span class="n">labels</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">  ~</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">area</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> m2"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drains</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  the drain region is LAST, so nodes of the prescribed losing and"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  gaining strips keep their own region: no double counting."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">conductivity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    drain rate: capped at </span><span class="si">{</span><span class="n">drain_rate</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m/s (no conductivity)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_table</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  WATER TABLE (phreatic plane through the two channel levels):"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> line at </span><span class="si">{</span><span class="n">level</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    gradient </span><span class="si">{</span><span class="mi">1000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">plane</span><span class="o">.</span><span class="n">gradient</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> permille, "</span>
+                <span class="sa">f</span><span class="s2">"fit residual </span><span class="si">{</span><span class="n">plane</span><span class="o">.</span><span class="n">residual</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"    the drain tapers to zero AT THE TABLE, so a pool cutting below"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"    the bar's saturated zone keeps its water."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  FILM INFILTRATION: water shallower than "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">film_depth</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m AND slower than"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">film_velocity</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m/s infiltrates at </span><span class="si">{</span><span class="n">film_rate</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m/s. Such"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"    water sits inside the grain roughness, not over the bed. What"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"    it takes is reinjected at the gaining line (mass-exact), so no"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"    net sink puts a floor under the boundary flux imbalance."</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"depth-limited withdrawal over the losing region(s); the extracted"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"total is reinjected exactly over the gaining region(s) (mass-exact)."</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PLUIE is ASSIGNED (not accumulated): prosou.f calls USER_RAIN twice."</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"      SUBROUTINE USER_RAIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE BIEF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE DECLARATIONS_TELEMAC2D"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE INTERFACE_PARALLEL, ONLY : P_SUM"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE DECLARATIONS_SPECIAL"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IMPLICIT NONE"</span><span class="p">)</span>
+    <span class="c1"># every local carries the HMP_ prefix: USE DECLARATIONS_TELEMAC2D pulls in a</span>
+    <span class="c1"># very large namespace, and plain names collide with it (NREG is TELEMAC's own</span>
+    <span class="c1"># source-region count, MAXV a derived type, and F/HMIN/DEJA are module</span>
+    <span class="c1"># variables) - such a clash is a hard compile error, so do not shorten these.</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"INTEGER, PARAMETER :: HMP_NRG = </span><span class="si">{</span><span class="n">n_reg</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"INTEGER, PARAMETER :: HMP_MXV = </span><span class="si">{</span><span class="n">max_v</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_HMN = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">hmin</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_TAP = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">htap</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_RMX = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">rmax</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_DRN = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">drain_rate</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_table</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WC0 = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">c0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WCX = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">cx</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WCY = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">cy</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WX0 = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WY0 = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">y0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_FLD = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">film_depth</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_FLV = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">film_velocity</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_FLR = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">film_rate</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conductivity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># kf is a VARIABLE assigned at run time, not a PARAMETER, so that</span>
+        <span class="c1"># HydroBayesCal can calibrate it: its `f.` mechanism rewrites the line whose</span>
+        <span class="c1"># text left of "=" matches the parameter name, which a</span>
+        <span class="c1"># "DOUBLE PRECISION, PARAMETER :: HMP_KF = ..." declaration would not expose</span>
+        <span class="c1"># (its first ":" sits in the "::"). See targets.PARAMETER_CATALOG.</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_KF"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_LZ = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">porous_depth</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_HF = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">suction</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER, SAVE :: HMP_NV(HMP_NRG)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION, SAVE :: HMP_XV(HMP_MXV,HMP_NRG)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION, SAVE :: HMP_YV(HMP_MXV,HMP_NRG)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION, SAVE :: HMP_QTG(HMP_NRG),HMP_ARE(HMP_NRG)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER, SAVE :: HMP_KND(HMP_NRG)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER, ALLOCATABLE, SAVE :: HMP_IRG(:)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"LOGICAL, SAVE :: HMP_DEJA = .FALSE."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER, SAVE :: HMP_CNT = 0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER HMP_I,HMP_R"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_QEX,HMP_QGS,HMP_RAT,HMP_F,HMP_QA,HMP_WET"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_QDR,HMP_FLO"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_table</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_ZWT"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_QFI,HMP_SPD"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conductivity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"calibratable: HydroBayesCal rewrites this line for `f.HMP_KF`"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HMP_KF = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">conductivity</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"one-off setup: region vertices, node-&gt;region map, region areas"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(.NOT.HMP_DEJA) THEN"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">region</span><span class="p">,</span> <span class="n">verts</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">ordered</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">kinds</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_NV(</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">verts</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_QTG(</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">discharge</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_KND(</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_XV(</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_YV(</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ALLOCATE(HMP_IRG(NPOIN))"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_IRG(HMP_I)=0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    DO HMP_R=1,HMP_NRG"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      IF(INPOLY(X(HMP_I),Y(HMP_I),"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   HMP_XV(1:HMP_NV(HMP_R),HMP_R),"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   HMP_YV(1:HMP_NV(HMP_R),HMP_R),HMP_NV(HMP_R))) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"        HMP_IRG(HMP_I)=HMP_R"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"        EXIT"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"  region areas: partial VOLU2D summed across subdomains (the"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"  telemac2d_init.F source-region idiom, exact at interface nodes)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_R=1,HMP_NRG"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_ARE(HMP_R)=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HMP_IRG(HMP_I).GT.0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_ARE(HMP_IRG(HMP_I))=HMP_ARE(HMP_IRG(HMP_I))"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;     +VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  IF(NCSIZE.GT.1) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    DO HMP_R=1,HMP_NRG"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_ARE(HMP_R)=P_SUM(HMP_ARE(HMP_R))"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_R=1,HMP_NRG"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HMP_ARE(HMP_R).LE.0.D0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      WRITE(LU,*) 'USER_RAIN: EMPTY PERCOLATION REGION',HMP_R"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      CALL PLANTE(1)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      STOP"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  HMP_DEJA=.TRUE."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDIF"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PASS 1: how much taper-weighted WET area does the losing patch have?"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"Normalizing by the wet area (not the whole polygon) is what lets the"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"full target discharge be delivered when part of the patch is dry - a"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"uniform Q/area over the whole polygon silently loses the dry share."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_WET=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  HMP_R=HMP_IRG(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  IF(HMP_R.GT.0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    IF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_PRESCRIBED</span><span class="si">}</span><span class="s2">) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_F=MIN(1.D0,MAX(0.D0,"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   (HN%R(HMP_I)-HMP_HMN)/HMP_TAP))"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_WET=HMP_WET+HMP_F*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_WET=P_SUM(HMP_WET)"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PASS 2: withdraw, normalized over that wet area and capped three ways -"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"by the taper, by an absolute ceiling, and by half the water available"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"above HMP_HMN this step - so a cell can never be drained dry."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_QEX=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_QDR=0.D0"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_QFI=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  HMP_R=HMP_IRG(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  IF(HMP_R.GT.0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_QA=-1.D0"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"    taper floor: min_depth, or the WATER TABLE where it stands higher,"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"    so the drain clears the bar top but cannot empty a pool whose bed"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"    cuts below the bar's saturated zone."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_FLO=HMP_HMN"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">use_table</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    IF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_DRAIN</span><span class="si">}</span><span class="s2">) THEN"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_ZWT=HMP_WC0+HMP_WCX*(X(HMP_I)-HMP_WX0)"</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;       +HMP_WCY*(Y(HMP_I)-HMP_WY0)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_FLO=MAX(HMP_HMN,HMP_ZWT-ZF%R(HMP_I))"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_F=MIN(1.D0,MAX(0.D0,"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   (HN%R(HMP_I)-HMP_FLO)/HMP_TAP))"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    IF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_PRESCRIBED</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;     .AND.HMP_WET.GT.0.D0) THEN"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conductivity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=-HMP_QTG(HMP_R)*HMP_F/HMP_WET"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Green-Ampt saturated limit: the wetting front sits at the base of the</span>
+        <span class="c1"># porous layer (thickness HMP_LZ), ponded depth h above it and suction</span>
+        <span class="c1"># HMP_HF at the front, so the Darcy gradient is (h + Lz + hf)/Lz.</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=HMP_KF*(HN%R(HMP_I)+HMP_LZ+HMP_HF)/HMP_LZ"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=HMP_QA*HMP_F"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    ELSEIF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_DRAIN</span><span class="si">}</span><span class="s2">) THEN"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"      drain: no target discharge, just infiltrate what stands here,"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"      capped at HMP_DRN (percolation.patch_drain_max_rate) - the"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"      Green-Ampt rate applies over the whole WET patch, so without a"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"      cap the drain keeps drawing from the patch toe (which is real"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"      channel) and not only from the standing water on the bar."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conductivity</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=HMP_DRN*HMP_F"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=HMP_KF*(HN%R(HMP_I)+HMP_LZ+HMP_HF)/HMP_LZ"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=MIN(HMP_QA,HMP_DRN)*HMP_F"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HMP_QA.GE.0.D0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_RAT=MIN(HMP_QA,HMP_RMX,"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   0.5D0*MAX(HN%R(HMP_I)-HMP_FLO,0.D0)/DT)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      PLUIE%R(HMP_I)=-HMP_RAT"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QEX=HMP_QEX+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"      IF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_DRAIN</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;     HMP_QDR=HMP_QDR+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  outside every exchange region: FILM INFILTRATION. Water thinner"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  than HMP_FLD and slower than HMP_FLV is not flowing over the bed,"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  it is standing within the grain roughness, and physically it"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  drains into the substrate. The velocity gate is what keeps this"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  off the active wet/dry margin, where flow delivers water."</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ELSE"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_SPD=SQRT(UN%R(HMP_I)**2+VN%R(HMP_I)**2)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HN%R(HMP_I).GT.0.D0.AND.HN%R(HMP_I).LT.HMP_FLD"</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;     .AND.HMP_SPD.LT.HMP_FLV) THEN"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"      no floor here - the point is to take it to zero; the"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"      half-the-available-water cap still forbids drying in one step"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_RAT=MIN(HMP_FLR,0.5D0*HN%R(HMP_I)/DT)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      PLUIE%R(HMP_I)=-HMP_RAT"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QEX=HMP_QEX+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QFI=HMP_QFI+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_QEX=P_SUM(HMP_QEX)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_QDR=P_SUM(HMP_QDR)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_QFI=P_SUM(HMP_QFI)"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"gaining region(s): reinject exactly what was extracted (mass-exact)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_QGS=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DO HMP_R=1,HMP_NRG"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  IF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_GAINING</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   HMP_QGS=HMP_QGS+HMP_QTG(HMP_R)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(HMP_QGS.GT.0.D0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_R=HMP_IRG(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HMP_R.GT.0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"      IF(HMP_KND(HMP_R).EQ.</span><span class="si">{</span><span class="n">KIND_GAINING</span><span class="si">}</span><span class="s2">) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"        PLUIE%R(HMP_I)=HMP_QEX*(HMP_QTG(HMP_R)/HMP_QGS)"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;       /HMP_ARE(HMP_R)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDIF"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"Report the DELIVERED discharge periodically. The taper means this is"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"less than the target while the patch is shallow, so it MUST be checked -"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"a silently-zero exchange would look perfectly stable and move no water."</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"Throttled by an own SAVEd counter rather than LT/LISPRD: this routine is"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"called from prosou.f, where those did not reliably line up with the"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"listing printouts (an earlier LT-based guard never fired at all)."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_CNT=HMP_CNT+1"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IF(HMP_CNT.EQ.1.OR.MOD(HMP_CNT,</span><span class="si">{</span><span class="n">diag_every</span><span class="si">}</span><span class="s2">).EQ.0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  WRITE(LU,*) 'USER_RAIN PERCOLATION: CALL ',HMP_CNT,"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   ' DELIVERED ',HMP_QEX,' M3/S OF TARGET ',"</span><span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   -HMP_QTG(1),' M3/S  WET AREA ',HMP_WET,' M2'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drains</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"  WRITE(LU,*) 'USER_RAIN PATCH DRAIN: ',HMP_QDR,"</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   ' M3/S OFF THE POROUS PATCH (INCLUDED ABOVE)'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"  WRITE(LU,*) 'USER_RAIN FILM INFILTRATION: ',HMP_QFI,"</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;   ' M3/S (INCLUDED ABOVE; SHOULD DECAY TOWARDS 0)'"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"RETURN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"END"</span><span class="p">)</span>
+
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">user_fortran_dir</span><span class="p">)</span>
+    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">"user_rain.f"</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  wrote USER_RAIN percolation routine -&gt; </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%d</span><span class="s2"> regions, "</span>
+             <span class="s2">"HMIN=</span><span class="si">%.3g</span><span class="s2"> m)"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">n_reg</span><span class="p">,</span> <span class="n">hmin</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_dir</span></div>
+
+
+
+<div class="viewcode-block" id="write_water_table_fortran">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.fortran.write_water_table_fortran">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_water_table_fortran</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">plane</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Generate ``user_rain.f`` for a gain-lose reach whose faces come from the</span>
+<span class="sd">    **water table** (``gain_lose.faces: water-table``).</span>
+
+<span class="sd">    Unlike the ``lines`` route, nothing about *where* the exchange happens is baked</span>
+<span class="sd">    in. Only the zone polygon and the five plane coefficients are; each call then</span>
+<span class="sd">    classifies every zone node from its own head:</span>
+
+<span class="sd">    * free surface above the table -&gt; **losing** (head pushes water into the body);</span>
+<span class="sd">    * table above the bed -&gt; **gaining** (the saturated zone cuts the ground).</span>
+
+<span class="sd">    So the faces move with the stage - a rising river widens the losing face, which</span>
+<span class="sd">    is what actually happens and what a build-time mask cannot represent.</span>
+
+<span class="sd">    Magnitude is Green-Ampt at ``conductivity``, or ``discharge`` normalized over the</span>
+<span class="sd">    taper-weighted wet losing area when a measured total is prescribed. Whatever is</span>
+<span class="sd">    withdrawn is reinjected over the gaining face in the same step, so the routine is</span>
+<span class="sd">    mass-exact by construction and opens no net sink in the boundary budget.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">_percolation_patches</span><span class="p">,</span> <span class="n">_simplify_region</span>
+
+    <span class="k">if</span> <span class="n">plane</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"gain_lose.faces: water-table needs a water table, but none could be "</span>
+            <span class="s2">"fitted. Set gain_lose.water_table_levels, give the case a "</span>
+            <span class="s2">"geodata.channel_centerline, or switch to faces: lines."</span>
+        <span class="p">)</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">_percolation_patches</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"gain_lose.faces: water-table needs gain_lose.zone "</span>
+                         <span class="s2">"(the porous body polygon)"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">([</span><span class="n">p</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">])</span>
+    <span class="n">buffer</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">zone_buffer</span>
+    <span class="k">if</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">channel_size</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">buffer</span><span class="p">:</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">buffer</span><span class="p">))</span>
+    <span class="n">poly</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_simplify_region</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+    <span class="n">verts</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+
+    <span class="n">gl</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span>
+    <span class="n">hmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">min_depth</span><span class="p">)</span>
+    <span class="n">htap</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">taper_depth</span><span class="p">),</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">rmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">max_rate</span><span class="p">)</span>
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">conductivity</span>
+    <span class="n">lz</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">p</span><span class="p">[</span><span class="s2">"porous_depth"</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">"porous_depth"</span><span class="p">]),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">lz</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lz</span> <span class="k">if</span> <span class="n">lz</span> <span class="k">else</span> <span class="n">gl</span><span class="o">.</span><span class="n">porous_depth</span><span class="p">)</span>
+    <span class="n">hf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">gl</span><span class="o">.</span><span class="n">suction</span><span class="p">)</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">gl</span><span class="o">.</span><span class="n">discharge</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">kf</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"gain_lose.faces: water-table needs a magnitude - set `conductivity` "</span>
+            <span class="s2">"(kf) or `discharge`"</span>
+        <span class="p">)</span>
+    <span class="n">film</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_infiltration</span>
+    <span class="n">diag_every</span> <span class="o">=</span> <span class="mi">500</span>
+
+    <span class="n">body</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">stmt</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="s2">"      "</span> <span class="o">+</span> <span class="n">text</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">FIXED_FORM_LIMIT</span><span class="p">:</span>   <span class="c1"># pragma: no cover - guarded by tests</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"generated Fortran line exceeds 72 columns: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">cont</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     &amp;"</span> <span class="o">+</span> <span class="n">text</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">comment</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"!     </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">text</span> <span class="k">else</span> <span class="s2">"!"</span><span class="p">)</span>
+
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"axqua-generated USER_RAIN: gain-lose reach, faces from the"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"WATER TABLE (no exchange lines are drawn anywhere)."</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  porous body: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">patches</span><span class="p">)</span><span class="si">}</span><span class="s2"> polygon(s), </span><span class="si">{</span><span class="n">poly</span><span class="o">.</span><span class="n">area</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> m2 "</span>
+            <span class="sa">f</span><span class="s2">"(buffered </span><span class="si">{</span><span class="n">buffer</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m)"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">levels</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> end at </span><span class="si">{</span><span class="n">level</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  water table gradient </span><span class="si">{</span><span class="mi">1000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">plane</span><span class="o">.</span><span class="n">gradient</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> permille, "</span>
+            <span class="sa">f</span><span class="s2">"residual </span><span class="si">{</span><span class="n">plane</span><span class="o">.</span><span class="n">residual</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"  each call classifies every zone node from its own head:"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"    surface above the table -&gt; LOSING;  table above bed -&gt; GAINING"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  magnitude: PRESCRIBED </span><span class="si">{</span><span class="n">target</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m3/s over the wet losing face"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  magnitude: Green-Ampt at kf=</span><span class="si">{</span><span class="n">kf</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m/s, Lz=</span><span class="si">{</span><span class="n">lz</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m, hf=</span><span class="si">{</span><span class="n">hf</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"  what is withdrawn is reinjected over the gaining face in the SAME"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"  step: mass-exact, so no net sink appears in the boundary budget."</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PLUIE is ASSIGNED (not accumulated): prosou.f calls USER_RAIN twice."</span><span class="p">)</span>
+
+    <span class="n">body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"      SUBROUTINE USER_RAIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE BIEF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE DECLARATIONS_TELEMAC2D"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE INTERFACE_PARALLEL, ONLY : P_SUM"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"USE DECLARATIONS_SPECIAL"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IMPLICIT NONE"</span><span class="p">)</span>
+    <span class="c1"># every local carries the HMP_ prefix - DECLARATIONS_TELEMAC2D pulls in a very</span>
+    <span class="c1"># large namespace and plain names collide with it (a hard compile error)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"INTEGER, PARAMETER :: HMP_NV = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">verts</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_HMN = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">hmin</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_TAP = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">htap</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_RMX = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">rmax</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_TOL = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WC0 = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">c0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WCX = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">cx</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WCY = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">cy</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WX0 = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">x0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_WY0 = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">plane</span><span class="o">.</span><span class="n">y0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_QTG = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">target</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># a VARIABLE, not a PARAMETER - see the note in write_user_fortran: this is</span>
+        <span class="c1"># what lets HydroBayesCal calibrate kf through its `f.` mechanism</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_KF"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_LZ = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">lz</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_HF = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">hf</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_FLD = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_depth</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_FLV = "</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_velocity</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"DOUBLE PRECISION, PARAMETER :: HMP_FLR = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">drying</span><span class="o">.</span><span class="n">film_rate</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION, SAVE :: HMP_XV(HMP_NV),HMP_YV(HMP_NV)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"LOGICAL, ALLOCATABLE, SAVE :: HMP_INZ(:)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"LOGICAL, SAVE :: HMP_DEJA = .FALSE."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER, SAVE :: HMP_CNT = 0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"INTEGER HMP_I"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_ZWT,HMP_ZS,HMP_F,HMP_QA,HMP_RAT"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_QEX,HMP_ALO,HMP_AGA,HMP_HED"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"DOUBLE PRECISION HMP_QFI,HMP_SPD"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"calibratable: HydroBayesCal rewrites this line for `f.HMP_KF`"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"HMP_KF = </span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">kf</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"one-off: which nodes lie inside the porous body"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(.NOT.HMP_DEJA) THEN"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="p">(</span><span class="n">vx</span><span class="p">,</span> <span class="n">vy</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_XV(</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">vx</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  HMP_YV(</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">)=</span><span class="si">{</span><span class="n">_dbl</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">vy</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ALLOCATE(HMP_INZ(NPOIN))"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_INZ(HMP_I)=INPOLY(X(HMP_I),Y(HMP_I),"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"     HMP_XV,HMP_YV,HMP_NV)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  HMP_DEJA=.TRUE."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDIF"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PASS 1: classify at the CURRENT water level and measure both faces."</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"The taper-weighted wet losing area is what a prescribed discharge is"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"spread over; the gaining area is what the extraction is returned to."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_ALO=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_AGA=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  IF(HMP_INZ(HMP_I)) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_ZWT=HMP_WC0+HMP_WCX*(X(HMP_I)-HMP_WX0)"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       +HMP_WCY*(Y(HMP_I)-HMP_WY0)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_ZS=ZF%R(HMP_I)+HN%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HN%R(HMP_I).GT.HMP_TOL.AND."</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       HMP_ZS.GT.HMP_ZWT+HMP_TOL) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_F=MIN(1.D0,MAX(0.D0,"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       (HN%R(HMP_I)-HMP_HMN)/HMP_TAP))"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_ALO=HMP_ALO+HMP_F*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ELSEIF(HMP_ZWT.GT.ZF%R(HMP_I)+HMP_TOL) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_AGA=HMP_AGA+VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_ALO=P_SUM(HMP_ALO)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_AGA=P_SUM(HMP_AGA)"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PASS 2: withdraw over the losing face, capped by the taper, an"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"absolute ceiling and half the water available above HMP_HMN this"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"step - so a cell can never be drained dry."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_QEX=0.D0"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_QFI=0.D0"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  IF(HMP_INZ(HMP_I)) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_ZWT=HMP_WC0+HMP_WCX*(X(HMP_I)-HMP_WX0)"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       +HMP_WCY*(Y(HMP_I)-HMP_WY0)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_ZS=ZF%R(HMP_I)+HN%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HN%R(HMP_I).GT.HMP_TOL.AND."</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       HMP_ZS.GT.HMP_ZWT+HMP_TOL) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_HED=HMP_ZS-HMP_ZWT"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_F=MIN(1.D0,MAX(0.D0,"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       (HN%R(HMP_I)-HMP_HMN)/HMP_TAP))"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      IF(HMP_ALO.GT.0.D0) THEN"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"        HMP_QA=HMP_QTG*HMP_F/HMP_ALO"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      ELSE"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"        HMP_QA=0.D0"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      ENDIF"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"      Green-Ampt saturated limit at the local head"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=HMP_KF*(HMP_HED+HMP_LZ+HMP_HF)/HMP_LZ"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QA=HMP_QA*HMP_F"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_RAT=MIN(HMP_QA,HMP_RMX,"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"       0.5D0*MAX(HN%R(HMP_I)-HMP_HMN,0.D0)/DT)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      PLUIE%R(HMP_I)=-HMP_RAT"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QEX=HMP_QEX+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDIF"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  outside the porous body: FILM INFILTRATION. Water thinner than"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  HMP_FLD and slower than HMP_FLV stands within the grain"</span><span class="p">)</span>
+        <span class="n">comment</span><span class="p">(</span><span class="s2">"  roughness, not over the bed; it joins the same reinjected total."</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"  IF(.NOT.HMP_INZ(HMP_I)) THEN"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    HMP_SPD=SQRT(UN%R(HMP_I)**2+VN%R(HMP_I)**2)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HN%R(HMP_I).GT.0.D0.AND.HN%R(HMP_I).LT.HMP_FLD"</span><span class="p">)</span>
+        <span class="n">cont</span><span class="p">(</span><span class="s2">"       .AND.HMP_SPD.LT.HMP_FLV) THEN"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_RAT=MIN(HMP_FLR,0.5D0*HN%R(HMP_I)/DT)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      PLUIE%R(HMP_I)=-HMP_RAT"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QEX=HMP_QEX+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_QFI=HMP_QFI+HMP_RAT*VOLU2D%R(HMP_I)"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_QEX=P_SUM(HMP_QEX)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(NCSIZE.GT.1) HMP_QFI=P_SUM(HMP_QFI)"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"PASS 3: return exactly what was taken, spread over the gaining face"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"IF(HMP_AGA.GT.0.D0.AND.HMP_QEX.GT.0.D0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  DO HMP_I=1,NPOIN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    IF(HMP_INZ(HMP_I)) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_ZWT=HMP_WC0+HMP_WCX*(X(HMP_I)-HMP_WX0)"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"         +HMP_WCY*(Y(HMP_I)-HMP_WY0)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      HMP_ZS=ZF%R(HMP_I)+HN%R(HMP_I)"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      IF(.NOT.(HN%R(HMP_I).GT.HMP_TOL.AND."</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"         HMP_ZS.GT.HMP_ZWT+HMP_TOL).AND."</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"         HMP_ZWT.GT.ZF%R(HMP_I)+HMP_TOL) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"        PLUIE%R(HMP_I)=HMP_QEX/HMP_AGA"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"      ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"    ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  ENDDO"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDIF"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"Report what is actually delivered. The taper means this is less than"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"any target while the faces are shallow, so it MUST be checked - a"</span><span class="p">)</span>
+    <span class="n">comment</span><span class="p">(</span><span class="s2">"silently-zero exchange looks perfectly stable and moves no water."</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"HMP_CNT=HMP_CNT+1"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IF(HMP_CNT.EQ.1.OR.MOD(HMP_CNT,</span><span class="si">{</span><span class="n">diag_every</span><span class="si">}</span><span class="s2">).EQ.0) THEN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"  WRITE(LU,*) 'USER_RAIN GAIN-LOSE: CALL ',HMP_CNT,"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"     ' EXCHANGE ',HMP_QEX,' M3/S  LOSING AREA ',HMP_ALO,"</span><span class="p">)</span>
+    <span class="n">cont</span><span class="p">(</span><span class="s2">"     ' M2  GAINING AREA ',HMP_AGA,' M2'"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">film</span><span class="p">:</span>
+        <span class="n">stmt</span><span class="p">(</span><span class="s2">"  WRITE(LU,*) 'USER_RAIN FILM INFILTRATION: ',HMP_QFI,"</span><span class="p">)</span>
+        <span class="n">cont</span><span class="p">(</span><span class="s2">"     ' M3/S (INCLUDED ABOVE; SHOULD DECAY TOWARDS 0)'"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"ENDIF"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"RETURN"</span><span class="p">)</span>
+    <span class="n">stmt</span><span class="p">(</span><span class="s2">"END"</span><span class="p">)</span>
+
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">user_fortran_dir</span><span class="p">)</span>
+    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">"user_rain.f"</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  wrote USER_RAIN gain-lose routine (water-table faces) -&gt; </span><span class="si">%s</span><span class="s2"> "</span>
+             <span class="s2">"(</span><span class="si">%d</span><span class="s2"> zone vertices, HMIN=</span><span class="si">%.3g</span><span class="s2"> m)"</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">verts</span><span class="p">),</span> <span class="n">hmin</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out_dir</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

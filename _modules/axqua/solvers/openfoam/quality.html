@@ -1,0 +1,830 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.openfoam.quality &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/openfoam/quality.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.openfoam.quality</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.solvers.openfoam.quality</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Mesh quality and physical validity for the OpenFOAM case, before OpenFOAM runs.</span>
+
+<span class="sd">Two separate questions, both answered here because both must be answered *before*</span>
+<span class="sd">committing solver hours:</span>
+
+<span class="sd">**Is the mesh numerically sound?** Non-orthogonality, skewness, aspect ratio, cell</span>
+<span class="sd">volume - the same measures ``checkMesh`` reports, computed in numpy so the answer</span>
+<span class="sd">arrives while the mesh is still in memory and a bad ``cell_size`` / ``n_layers``</span>
+<span class="sd">combination can be corrected in seconds rather than after a decomposition and a</span>
+<span class="sd">failed run. ``checkMesh`` is still run by :mod:`axqua.solvers.openfoam.runtime` and</span>
+<span class="sd">remains the authority; this is the fast pre-check, exactly as</span>
+<span class="sd">:mod:`axqua.mesh_quality` is for the TELEMAC mesh.</span>
+
+<span class="sd">**Is the wall treatment admissible?** This is the check that matters on a gravel-bed</span>
+<span class="sd">river and the one that has no analogue in an aerodynamics workflow. OpenFOAM's</span>
+<span class="sd">``nutkRoughWallFunction`` manipulates the log-law ``E`` parameter for a sand-grain</span>
+<span class="sd">roughness ``Ks``, and that manipulation is only meaningful while the first cell</span>
+<span class="sd">center stands *clear* of the roughness elements - ``y_1 &gt; Ks``, i.e. a bed layer at</span>
+<span class="sd">least ``2 Ks`` thick. On the isar reach ``ks`` runs 0.085-0.22 m in 0.3-0.9 m of</span>
+<span class="sd">water, so a "well resolved" bed layer of a few centimeters would put the first cell</span>
+<span class="sd">center *inside* the gravel and the wall function would return a confident,</span>
+<span class="sd">meaningless answer. Refining towards the bed is therefore **not** available here,</span>
+<span class="sd">and the report says so per bed face instead of letting the run imply otherwise.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.mesh_validity</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">KS_PLUS_ROUGH</span><span class="p">,</span> <span class="n">KS_PLUS_SMOOTH</span><span class="p">,</span> <span class="n">NU_WATER</span><span class="p">,</span> <span class="n">roughness_reynolds</span><span class="p">,</span>
+    <span class="n">shear_velocity_loglaw</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># checkMesh's own thresholds, so the two reports agree on what "bad" means</span>
+<span class="n">MAX_NON_ORTHO</span> <span class="o">=</span> <span class="mf">70.0</span>        <span class="c1"># deg; above this checkMesh calls the mesh severely non-orthogonal</span>
+<span class="n">WARN_NON_ORTHO</span> <span class="o">=</span> <span class="mf">65.0</span>       <span class="c1"># deg; above this it warns</span>
+<span class="n">MAX_SKEWNESS</span> <span class="o">=</span> <span class="mf">4.0</span>          <span class="c1"># internal faces</span>
+<span class="n">MAX_ASPECT_RATIO</span> <span class="o">=</span> <span class="mf">1000.0</span>
+
+
+<div class="viewcode-block" id="MeshReport">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.MeshReport">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeshReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Everything measurable about the mesh without launching OpenFOAM."""</span>
+
+    <span class="n">n_cells</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_faces</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">n_internal_faces</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">patches</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="n">min_volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">max_volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">total_volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">max_non_ortho</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">mean_non_ortho</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">n_non_ortho_severe</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_skewness</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">n_skew</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n_bad_pyramid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_aspect_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">n_bad_volume</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># wall-function admissibility on the bed</span>
+    <span class="n">bed_layer_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">bed_layer_median</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">ks_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ks_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">n_bed_faces</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n_wall_function_invalid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ks_plus</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">regime</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"unknown"</span>
+
+    <span class="n">warnings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">usable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""True when the mesh is structurally sound enough to run on.</span>
+
+<span class="sd">        Deliberately **not** the same as passing every ``checkMesh`` check. A mesh</span>
+<span class="sd">        derived from a real DEM will occasionally carry a handful of marginal faces</span>
+<span class="sd">        where the survey has a seam or a step - the isar reach produces exactly one</span>
+<span class="sd">        skew face over the limit in 4.9 million, and no amount of lid smoothing moves</span>
+<span class="sd">        it because it comes from the bathymetry, not from the meshing. Refusing to</span>
+<span class="sd">        run on that would be refusing to run on the terrain. What genuinely stops a</span>
+<span class="sd">        run is a cell with no volume or an unclosed cell, and those are what this</span>
+<span class="sd">        reports.</span>
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_volume</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bad_volume</span> <span class="o">==</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bad_pyramid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ok</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""True when the mesh would pass every ``checkMesh`` check."""</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">usable</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_non_ortho</span> <span class="o">&lt;</span> <span class="n">MAX_NON_ORTHO</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_skewness</span> <span class="o">&lt;</span> <span class="n">MAX_SKEWNESS</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_aspect_ratio</span> <span class="o">&lt;</span> <span class="n">MAX_ASPECT_RATIO</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marginal_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Faces that exceed a ``checkMesh`` limit without breaking the mesh."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_non_ortho_severe</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_skew</span>
+
+<div class="viewcode-block" id="MeshReport.lines">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.MeshReport.lines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"mesh: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_cells</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> cells, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_faces</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> faces, "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> points (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_internal_faces</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> internal)"</span><span class="p">,</span>
+            <span class="s2">"  patches      : "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">patches</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span>
+            <span class="sa">f</span><span class="s2">"  cell volume  : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">min_volume</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2"> .. </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_volume</span><span class="si">:</span><span class="s2">.3e</span><span class="si">}</span><span class="s2"> m3 "</span>
+            <span class="sa">f</span><span class="s2">"(total </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total_volume</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m3)"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"  non-ortho    : mean </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean_non_ortho</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> deg, "</span>
+            <span class="sa">f</span><span class="s2">"max </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_non_ortho</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> deg "</span>
+            <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_non_ortho_severe</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> faces over </span><span class="si">{</span><span class="n">MAX_NON_ORTHO</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> deg)"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"  skewness     : max </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_skewness</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_skew</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> faces over </span><span class="si">{</span><span class="n">MAX_SKEWNESS</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"  aspect ratio : max </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">max_aspect_ratio</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"  face pyramids: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bad_pyramid</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> incorrectly oriented"</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_bed_faces</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  bed layer    : min </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bed_layer_min</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m, "</span>
+                       <span class="sa">f</span><span class="s2">"median </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bed_layer_median</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m "</span>
+                       <span class="sa">f</span><span class="s2">"(over </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bed_faces</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> wetted bed faces)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ks_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  bed ks       : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ks_min</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> .. </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ks_max</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m"</span>
+                       <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"  (ks+ ~ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ks_plus</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">regime</span><span class="si">}</span><span class="s2">)"</span>
+                          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ks_plus</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
+            <span class="n">share</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_wall_function_invalid</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bed_faces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  wall function: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_wall_function_invalid</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> of "</span>
+                       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_bed_faces</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> wetted bed faces (</span><span class="si">{</span><span class="n">share</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%) have the "</span>
+                       <span class="sa">f</span><span class="s2">"first cell center inside the roughness (y1 &lt; ks)"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">warnings</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ! </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># geometry</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<div class="viewcode-block" id="face_geometry">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.face_geometry">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">face_geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(face centers, face area vectors)`` by OpenFOAM's triangle decomposition.</span>
+
+<span class="sd">    A quad on a terrain-following mesh is generally **not planar** - its four corners</span>
+<span class="sd">    sit on four columns of different height - so its centroid is not the average of</span>
+<span class="sd">    its corners. OpenFOAM fans the face about that average and area-weights the</span>
+<span class="sd">    resulting triangles; anything cruder shifts the center by a few percent of the</span>
+<span class="sd">    cell, which is enough to move the reported non-orthogonality by several degrees.</span>
+<span class="sd">    """</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">]</span>                       <span class="c1"># (NF, 4, 3)</span>
+    <span class="n">centre_est</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">nxt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">tri_centroid</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">nxt</span> <span class="o">+</span> <span class="n">centre_est</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>    <span class="c1"># 3x the triangle centroid</span>
+    <span class="n">tri_normal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">nxt</span> <span class="o">-</span> <span class="n">p</span><span class="p">,</span> <span class="n">centre_est</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">tri_area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tri_normal</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">tri_area</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">safe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">centres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ijk-&gt;ik"</span><span class="p">,</span> <span class="n">tri_area</span><span class="p">,</span> <span class="n">tri_centroid</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">safe</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span>
+    <span class="n">centres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">total</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">centres</span><span class="p">,</span> <span class="n">centre_est</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">centres</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">tri_normal</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cell_geometry">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.cell_geometry">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cell_geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">face_centres</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                  <span class="n">face_normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(cell centers, cell volumes)`` by OpenFOAM's pyramid decomposition.</span>
+
+<span class="sd">    Each face forms a pyramid with an estimated cell center; the true center is the</span>
+<span class="sd">    volume-weighted mean of the pyramid centroids. Reproducing this exactly is what</span>
+<span class="sd">    makes the non-orthogonality reported here the same number ``checkMesh`` will</span>
+<span class="sd">    report, rather than an optimistic approximation of it.</span>
+<span class="sd">    """</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">n_internal_faces</span>
+    <span class="n">n_cells</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">n_cells</span>
+    <span class="c1"># first estimate: mean of the cell's own face centers</span>
+    <span class="n">acc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_cells</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cells</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">,</span> <span class="n">face_centres</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">acc</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">,</span> <span class="n">face_centres</span><span class="p">[:</span><span class="n">ni</span><span class="p">])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">estimate</span> <span class="o">=</span> <span class="n">acc</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">centres</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_cells</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">volumes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_cells</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">accumulate</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="n">sign</span><span class="p">,</span> <span class="n">sl</span><span class="p">):</span>
+        <span class="n">pyr3</span> <span class="o">=</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span>
+            <span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">[</span><span class="n">sl</span><span class="p">],</span> <span class="n">face_centres</span><span class="p">[</span><span class="n">sl</span><span class="p">]</span> <span class="o">-</span> <span class="n">estimate</span><span class="p">[</span><span class="n">cells</span><span class="p">])</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="n">face_centres</span><span class="p">[</span><span class="n">sl</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">estimate</span><span class="p">[</span><span class="n">cells</span><span class="p">]</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">centres</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">pyr3</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">centroid</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">volumes</span><span class="p">,</span> <span class="n">cells</span><span class="p">,</span> <span class="n">pyr3</span><span class="p">)</span>
+
+    <span class="n">accumulate</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+    <span class="n">accumulate</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ni</span><span class="p">))</span>
+    <span class="n">safe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">volumes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-300</span><span class="p">,</span> <span class="n">volumes</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">centres</span> <span class="o">/</span> <span class="n">safe</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">volumes</span> <span class="o">/</span> <span class="mf">3.0</span></div>
+
+
+
+<div class="viewcode-block" id="bad_face_pyramids">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.bad_face_pyramids">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">bad_face_pyramids</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">face_centres</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">face_normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">cell_centres</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Faces whose pyramid to their cell center has non-positive volume.</span>
+
+<span class="sd">    checkMesh calls these "incorrectly oriented" and treats them as fatal, and rightly:</span>
+<span class="sd">    the cell is folded even though its total volume can still come out positive - which</span>
+<span class="sd">    is exactly how a first version of this report passed a mesh checkMesh rejected.</span>
+<span class="sd">    A rigid-lid mesh produces them at the waterline, where the water column thins to</span>
+<span class="sd">    nothing and the cells collapse.</span>
+<span class="sd">    """</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">n_internal_faces</span>
+    <span class="n">owner_pyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">,</span>
+                          <span class="n">face_centres</span> <span class="o">-</span> <span class="n">cell_centres</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">])</span>
+    <span class="n">bad</span> <span class="o">=</span> <span class="n">owner_pyr</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+    <span class="n">neigh_pyr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="o">-</span><span class="n">face_normals</span><span class="p">[:</span><span class="n">ni</span><span class="p">],</span>
+                          <span class="n">face_centres</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span> <span class="o">-</span> <span class="n">cell_centres</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">])</span>
+    <span class="n">bad</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span> <span class="o">|=</span> <span class="n">neigh_pyr</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">bad</span></div>
+
+
+
+<div class="viewcode-block" id="non_orthogonality">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.non_orthogonality">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">non_orthogonality</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+                      <span class="n">cell_centres</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(per-face angle [deg], mean [deg])`` for the internal faces.</span>
+
+<span class="sd">    The mean is ``checkMesh``'s: it averages the *cosines* and takes the arccosine</span>
+<span class="sd">    of that, not the mean of the angles - the two differ by a couple of degrees on a</span>
+<span class="sd">    mesh like this, and quoting the second while calling it the first would make two</span>
+<span class="sd">    reports of the same mesh disagree for no reason.</span>
+<span class="sd">    """</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">n_internal_faces</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">cell_centres</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">]</span> <span class="o">-</span> <span class="n">cell_centres</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">[:</span><span class="n">ni</span><span class="p">]]</span>
+    <span class="n">sf</span> <span class="o">=</span> <span class="n">face_normals</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">sf</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sf</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-300</span><span class="p">)</span>
+    <span class="n">cos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">cos</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos</span><span class="o">.</span><span class="n">mean</span><span class="p">())))</span> <span class="k">if</span> <span class="n">cos</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">cos</span><span class="p">)),</span> <span class="n">mean</span></div>
+
+
+
+<div class="viewcode-block" id="skewness">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.skewness">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">skewness</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">face_centres</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+             <span class="n">cell_centres</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Face skewness, matching OpenFOAM's ``primitiveMeshTools::faceSkewness``.</span>
+
+<span class="sd">    The skewness *vector* is the offset of the owner-neighbour line's crossing point</span>
+<span class="sd">    from the face center; what matters is the normalization. OpenFOAM divides it by</span>
+<span class="sd">    the face's own half-width in the skew direction (floored at ``0.2 |d|`` for an</span>
+<span class="sd">    internal face, ``0.4 |d|`` for a boundary one), **not** by the cell-to-cell</span>
+<span class="sd">    distance. Dividing by ``|d|`` instead - the intuitive choice - understates the</span>
+<span class="sd">    result by roughly the face aspect ratio, which on this mesh is a factor of ~7:</span>
+<span class="sd">    the number would look reassuring while sitting near ``checkMesh``'s limit.</span>
+
+<span class="sd">    Boundary faces are included, as ``checkMesh`` includes them, by mirroring the</span>
+<span class="sd">    owner cell across the face.</span>
+<span class="sd">    """</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">n_internal_faces</span>
+    <span class="n">own</span> <span class="o">=</span> <span class="n">cell_centres</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">own</span><span class="p">)</span>
+    <span class="n">d</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_centres</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">]</span> <span class="o">-</span> <span class="n">own</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span>
+    <span class="c1"># boundary: mirror the owner across the face along the face normal</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="n">face_normals</span><span class="p">[</span><span class="n">ni</span><span class="p">:]</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">face_normals</span><span class="p">[</span><span class="n">ni</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                             <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-300</span><span class="p">)</span>
+    <span class="n">cpf_b</span> <span class="o">=</span> <span class="n">face_centres</span><span class="p">[</span><span class="n">ni</span><span class="p">:]</span> <span class="o">-</span> <span class="n">own</span><span class="p">[</span><span class="n">ni</span><span class="p">:]</span>
+    <span class="n">d</span><span class="p">[</span><span class="n">ni</span><span class="p">:]</span> <span class="o">=</span> <span class="n">nb</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">nb</span><span class="p">,</span> <span class="n">cpf_b</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+    <span class="n">cpf</span> <span class="o">=</span> <span class="n">face_centres</span> <span class="o">-</span> <span class="n">own</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+    <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">denom</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-300</span><span class="p">,</span> <span class="mf">1e-300</span><span class="p">,</span> <span class="n">denom</span><span class="p">)</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ij,ij-&gt;i"</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">,</span> <span class="n">cpf</span><span class="p">)</span> <span class="o">/</span> <span class="n">denom</span>
+    <span class="n">sv</span> <span class="o">=</span> <span class="n">cpf</span> <span class="o">-</span> <span class="n">scale</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">d</span>
+    <span class="n">sv_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">sv</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sv_hat</span> <span class="o">=</span> <span class="n">sv</span> <span class="o">/</span> <span class="p">(</span><span class="n">sv_mag</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1e-300</span><span class="p">)</span>
+
+    <span class="n">floor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">n_faces</span><span class="p">)</span>
+    <span class="n">d_mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">floor</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">d_mag</span><span class="p">[:</span><span class="n">ni</span><span class="p">]</span>
+    <span class="n">floor</span><span class="p">[</span><span class="n">ni</span><span class="p">:]</span> <span class="o">=</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">d_mag</span><span class="p">[</span><span class="n">ni</span><span class="p">:]</span>
+    <span class="c1"># half-width of the face in the skew direction</span>
+    <span class="n">offsets</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">mesh</span><span class="o">.</span><span class="n">faces</span><span class="p">]</span> <span class="o">-</span> <span class="n">face_centres</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">reach</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">"ijk,ik-&gt;ij"</span><span class="p">,</span> <span class="n">offsets</span><span class="p">,</span> <span class="n">sv_hat</span><span class="p">))</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">floor</span><span class="p">,</span> <span class="n">reach</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-300</span>
+    <span class="k">return</span> <span class="n">sv_mag</span> <span class="o">/</span> <span class="n">fd</span></div>
+
+
+
+<div class="viewcode-block" id="aspect_ratios">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.aspect_ratios">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aspect_ratios</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">face_normals</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">volumes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Cell aspect ratio, matching OpenFOAM's ``primitiveMeshTools::cellClosedness``.</span>
+
+<span class="sd">    ``max(component ratio, hydraulic ratio)`` where the component ratio is the</span>
+<span class="sd">    largest over the smallest of the per-direction summed face-area magnitudes, and</span>
+<span class="sd">    the hydraulic one is ``(1/6) sum|Sf| / V^(2/3)``. The component form dominates on</span>
+<span class="sd">    a terrain-following mesh - a cell a meter wide in plan and a decimeter tall has</span>
+<span class="sd">    ten times the horizontal face area of the vertical - and it is precisely the</span>
+<span class="sd">    number that exposes how flat the layers are, so taking only the hydraulic form</span>
+<span class="sd">    (which reads ~3 where OpenFOAM reads ~17) would hide it.</span>
+<span class="sd">    """</span>
+    <span class="n">ni</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">n_internal_faces</span>
+    <span class="n">per_dir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">volumes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">magnitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">face_normals</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">per_dir</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">owner</span><span class="p">,</span> <span class="n">magnitudes</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">per_dir</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">neighbour</span><span class="p">,</span> <span class="n">magnitudes</span><span class="p">[:</span><span class="n">ni</span><span class="p">])</span>
+    <span class="n">component</span> <span class="o">=</span> <span class="n">per_dir</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">per_dir</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1e-300</span><span class="p">)</span>
+    <span class="n">safe</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">volumes</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">volumes</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">hydraulic</span> <span class="o">=</span> <span class="n">per_dir</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">6.0</span> <span class="o">*</span> <span class="n">safe</span> <span class="o">**</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">hydraulic</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the report</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<div class="viewcode-block" id="assess">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.quality.assess">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">assess</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">roughness_constant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MeshReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Measure *of_mesh* (an :class:`~axqua.solvers.openfoam.mesh.OpenFoamMesh`).</span>
+
+<span class="sd">    *state* is the optional 2D hotstart; with one, the roughness regime (``ks+``) is</span>
+<span class="sd">    evaluated at the reach's own depth and velocity rather than guessed.</span>
+<span class="sd">    """</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span>
+    <span class="c1"># computed the way OpenFOAM computes them, so the numbers below are the ones</span>
+    <span class="c1"># checkMesh will print rather than an approximation of them</span>
+    <span class="n">fc</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">face_geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="n">cc</span><span class="p">,</span> <span class="n">vol</span> <span class="o">=</span> <span class="n">cell_geometry</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+
+    <span class="n">nonortho</span><span class="p">,</span> <span class="n">nonortho_mean</span> <span class="o">=</span> <span class="n">non_orthogonality</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">cc</span><span class="p">)</span>
+    <span class="n">bad_pyr</span> <span class="o">=</span> <span class="n">bad_face_pyramids</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">cc</span><span class="p">)</span>
+    <span class="n">skew</span> <span class="o">=</span> <span class="n">skewness</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fc</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">cc</span><span class="p">)</span>
+    <span class="n">ar</span> <span class="o">=</span> <span class="n">aspect_ratios</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">vol</span><span class="p">)</span>
+
+    <span class="n">report</span> <span class="o">=</span> <span class="n">MeshReport</span><span class="p">(</span>
+        <span class="n">n_cells</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="p">,</span> <span class="n">n_faces</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">n_faces</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">n_points</span><span class="p">,</span>
+        <span class="n">n_internal_faces</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">n_internal_faces</span><span class="p">,</span>
+        <span class="n">patches</span><span class="o">=</span><span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">n_faces</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">patches</span><span class="p">},</span>
+        <span class="n">min_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="n">max_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span>
+        <span class="n">total_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">vol</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">max_non_ortho</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">nonortho</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)),</span>
+        <span class="n">mean_non_ortho</span><span class="o">=</span><span class="n">nonortho_mean</span><span class="p">,</span>
+        <span class="n">n_non_ortho_severe</span><span class="o">=</span><span class="nb">int</span><span class="p">((</span><span class="n">nonortho</span> <span class="o">&gt;</span> <span class="n">MAX_NON_ORTHO</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">max_skewness</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">skew</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">initial</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)),</span>
+        <span class="n">n_skew</span><span class="o">=</span><span class="nb">int</span><span class="p">((</span><span class="n">skew</span> <span class="o">&gt;</span> <span class="n">MAX_SKEWNESS</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">n_bad_volume</span><span class="o">=</span><span class="nb">int</span><span class="p">((</span><span class="n">vol</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">n_bad_pyramid</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">bad_pyr</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">max_aspect_ratio</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">ar</span><span class="p">))</span> <span class="k">if</span> <span class="n">ar</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">n_bad_pyramid</span><span class="p">:</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">n_bad_pyramid</span><span class="si">}</span><span class="s2"> face(s) are incorrectly oriented (a pyramid to "</span>
+            <span class="s2">"the cell center has non-positive volume). checkMesh treats this as fatal. "</span>
+            <span class="s2">"On a rigid-lid mesh it comes from the waterline, where the water column "</span>
+            <span class="s2">"thins to nothing - raise openfoam.min_water_depth (that, not "</span>
+            <span class="s2">"min_column_height, is the floor under a rigid lid) so those columns are "</span>
+            <span class="s2">"left out, or drop openfoam.n_layers so the ones that remain are thicker."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">min_volume</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">int</span><span class="p">((</span><span class="n">vol</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2"> cells have zero or negative volume - the mesh "</span>
+            <span class="s2">"is inverted somewhere. Coarsen openfoam.cell_size or raise "</span>
+            <span class="s2">"openfoam.min_column_height."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">max_non_ortho</span> <span class="o">&gt;=</span> <span class="n">MAX_NON_ORTHO</span><span class="p">:</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"max non-orthogonality </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">max_non_ortho</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> deg exceeds "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">MAX_NON_ORTHO</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> deg; raise nNonOrthogonalCorrectors, or coarsen the "</span>
+            <span class="s2">"plan grid so the bed slope is spread over fewer, wider cells."</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">report</span><span class="o">.</span><span class="n">max_non_ortho</span> <span class="o">&gt;=</span> <span class="n">WARN_NON_ORTHO</span><span class="p">:</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"max non-orthogonality </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">max_non_ortho</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> deg is high (steep bed); "</span>
+            <span class="s2">"the emitted fvSolution already carries nNonOrthogonalCorrectors 2."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">n_skew</span><span class="p">:</span>
+        <span class="n">share</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">n_skew</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">n_faces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">n_skew</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">n_faces</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> faces (</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">share</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">%) exceed "</span>
+            <span class="sa">f</span><span class="s2">"skewness </span><span class="si">{</span><span class="n">MAX_SKEWNESS</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> (max </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">max_skewness</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">); checkMesh will "</span>
+            <span class="s2">"report this as a failed check. A handful usually traces to a step or a "</span>
+            <span class="s2">"survey seam in the DEM rather than to the meshing - raise "</span>
+            <span class="s2">"openfoam.lid_smoothing if they sit at the surface, otherwise this is the "</span>
+            <span class="s2">"terrain and the run is unaffected."</span><span class="p">)</span>
+
+    <span class="n">_assess_wall_function</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">report</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+                          <span class="n">roughness_constant</span><span class="o">=</span><span class="n">roughness_constant</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">lines</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">report</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_assess_wall_function</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">report</span><span class="p">:</span> <span class="n">MeshReport</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span>
+                          <span class="n">roughness_constant</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Is the rough wall function admissible on the bed layer as built?"""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">column_corner_vertices</span>
+
+    <span class="n">corners</span> <span class="o">=</span> <span class="n">column_corner_vertices</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">first_layer_height</span><span class="p">[</span><span class="n">corners</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># per column [m]</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">n_bed_faces</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">bed_layer_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">bed_layer_median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">first</span><span class="p">))</span>
+
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">bed_ks</span>
+    <span class="k">if</span> <span class="n">ks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ks</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="c1"># Only the WETTED bed is judged. A dry gravel bar carries the floodplain /</span>
+    <span class="c1"># vegetation ks (isar: 0.5 m) under no water at all; counting it would report a</span>
+    <span class="c1"># wall-function failure that has no bearing on the flow, and would drown the</span>
+    <span class="c1"># places where it does matter.</span>
+    <span class="n">wet</span> <span class="o">=</span> <span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">column_depth</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">)</span> <span class="k">if</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">column_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+        <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">wet</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">wet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ks</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">n_bed_faces</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">wet</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">bed_layer_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">first</span><span class="p">[</span><span class="n">wet</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">bed_layer_median</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">first</span><span class="p">[</span><span class="n">wet</span><span class="p">]))</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">ks_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="n">wet</span><span class="p">]))</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">ks_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="n">wet</span><span class="p">]))</span>
+    <span class="c1"># the first cell CENTER sits at half the layer height; the wall function needs</span>
+    <span class="c1"># it clear of the roughness elements</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">n_wall_function_invalid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(((</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">first</span><span class="p">[</span><span class="n">wet</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">ks</span><span class="p">[</span><span class="n">wet</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">ks</span><span class="p">[</span><span class="n">wet</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">depth</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">depth_scale</span><span class="p">()</span>
+        <span class="n">velocity</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">velocity_scale</span><span class="p">()</span>
+        <span class="n">u_star</span> <span class="o">=</span> <span class="n">shear_velocity_loglaw</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">ks</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">u_star</span><span class="p">):</span>
+            <span class="n">ks_plus</span> <span class="o">=</span> <span class="n">roughness_reynolds</span><span class="p">(</span><span class="n">u_star</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">ks</span><span class="p">)),</span> <span class="n">NU_WATER</span><span class="p">)</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">ks_plus</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ks_plus</span><span class="p">)</span>
+            <span class="n">report</span><span class="o">.</span><span class="n">regime</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"fully rough"</span> <span class="k">if</span> <span class="n">ks_plus</span> <span class="o">&gt;=</span> <span class="n">KS_PLUS_ROUGH</span> <span class="k">else</span>
+                             <span class="s2">"transitional"</span> <span class="k">if</span> <span class="n">ks_plus</span> <span class="o">&gt;=</span> <span class="n">KS_PLUS_SMOOTH</span> <span class="k">else</span>
+                             <span class="s2">"hydraulically smooth"</span><span class="p">)</span>
+
+    <span class="n">share</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">n_wall_function_invalid</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">n_bed_faces</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">share</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">share</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">% of WETTED bed faces have the first cell center inside "</span>
+            <span class="sa">f</span><span class="s2">"the roughness (y1 &lt; ks, ks up to </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">ks_max</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m). "</span>
+            <span class="s2">"nutkRoughWallFunction will NOT fail there - it clamps y+ to e/E and "</span>
+            <span class="s2">"carries on - so the run completes and the near-bed velocity is simply "</span>
+            <span class="s2">"not physical. Either raise openfoam.bed_layer_height towards 2*ks (fewer, "</span>
+            <span class="s2">"thicker near-bed layers) or accept that this reach's roughness is "</span>
+            <span class="s2">"macro-scale and read the result as bulk flow, not as a bed boundary "</span>
+            <span class="s2">"layer."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">regime</span> <span class="o">==</span> <span class="s2">"hydraulically smooth"</span><span class="p">:</span>
+        <span class="n">report</span><span class="o">.</span><span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">"ks+ places the bed in the hydraulically smooth regime; a rough wall "</span>
+            <span class="s2">"function adds nothing there."</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

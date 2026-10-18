@@ -1,0 +1,606 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morphodynamic simulations &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/usage/morphodynamic-simulations.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Calibration &amp; validation" href="calibration-validation.html" />
+    <link rel="prev" title="Mesh convergence" href="mesh-convergence.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Usage</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Usage</a></li>
+      <li class="breadcrumb-item active">Morphodynamic simulations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/morphodynamic-simulations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="morphodynamic-simulations">
+<span id="help-morphodynamics"></span><h1>Morphodynamic simulations<a class="headerlink" href="#morphodynamic-simulations" title="Link to this heading"></a></h1>
+<p>A morphodynamic simulation computes how flowing water moves sediment and how the riverbed changes as a result. It extends a hydraulic simulation: in every time step, the flow moves sediment, the bed elevation is updated, and the changed bed in turn alters the flow.</p>
+<p>aXqua offers two simulations, which answer different questions. The coupled simulation with TELEMAC and GAIA computes a riverbed that moves (<a class="reference internal" href="#help-morphodynamics-telemac"><span class="std std-ref">TELEMAC-GAIA Setup</span></a>). The simulation with OpenFOAM computes fine sediment that passes over a riverbed which stays in place (<a class="reference internal" href="#help-morphodynamics-openfoam"><span class="std std-ref">OpenFOAM Setup</span></a>).</p>
+<section id="concept">
+<span id="morphodynamics-concept"></span><h2>Concept<a class="headerlink" href="#concept" title="Link to this heading"></a></h2>
+<p><strong>Transport modes.</strong> Flowing water moves sediment in two ways. <strong>Bedload</strong> consists of grains that roll, slide or jump along the bed. It is the dominant mode for gravel and coarser material. <strong>Suspended load</strong> consists of finer grains that turbulence keeps afloat in the water column. Simulating both modes is computationally expensive, so that only the dominant mode should be activated:</p>
+<ul class="simple">
+<li><p>a gravel or cobble bed with less than about 5 to 10 % sand: bedload only;</p></li>
+<li><p>sediment that is generally finer than 1 mm, as in reservoirs: suspended load only;</p></li>
+<li><p>mixtures with a substantial sand content: both modes;</p></li>
+<li><p>cohesive sediment (finer than 0.06 mm): suspended load is required.</p></li>
+</ul>
+<p><strong>Start of motion.</strong> A grain starts to move when the shear stress that the flow exerts on the bed exceeds a critical value. This threshold is expressed by the dimensionless critical Shields parameter, which has to be defined for each grain size class. Because it is uncertain, it is a typical calibration parameter.</p>
+<p><strong>Bed change.</strong> The bed elevation changes wherever the sediment transport rate changes along the flow path. If more sediment enters a location than leaves it, sediment deposits and the bed rises. In the opposite case, the bed erodes. This sediment mass balance is called the Exner equation (Exner 1925).</p>
+<p><strong>Active layer.</strong> Only the uppermost layer of the riverbed takes part in sediment transport at a given moment. This layer is called the active layer. It supplies the sediment that is eroded and receives the sediment that is deposited. Its thickness is a multiple of the characteristic grain diameter. The layers below form the substratum, which is only reached when the active layer is eroded. The distinction matters in rivers with an armored bed, where a coarse surface layer protects finer sediment underneath (Hirano 1971): as long as the armor layer is intact, little sediment moves, and once it breaks, the finer substratum is rapidly eroded.</p>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../_images/active-layer.jpg"><img alt="Active layer at the surface of the riverbed and substratum layers below" src="../_images/active-layer.jpg" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The active layer at the surface of the riverbed is in contact with the flow. The substratum layers below can have different grain size compositions. Figure by Schwindt (<a class="reference external" href="https://hydro-informatics.com">hydro-informatics.com</a>, CC BY-NC-ND), conceptually after du Boys (1879) and Church and Haschenburger (2017).</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Fine sediment in a stable bed.</strong> Between floods, the gravel of a riverbed does not move, and two terrain surveys show no bed change. The bed nevertheless changes: sand and silt that the flow carries settle onto it and into its pores, and faster flow removes them again. The quantity that describes this change is the share of fine sediment in the bed material, not the bed elevation.</p>
+<p><strong>Reference data.</strong> A model of a moving bed is assessed against measured bed changes, which are obtained as the difference of two terrain surveys (<a class="reference internal" href="case-setup.html#case-morphodynamics"><span class="std std-ref">Morphodynamic simulation</span></a>). A model of fine sediment over a stable bed is assessed against the share of fines in bed samples that were taken at two dates.</p>
+</section>
+<section id="telemac-gaia-setup">
+<span id="help-morphodynamics-telemac"></span><h2>TELEMAC-GAIA Setup<a class="headerlink" href="#telemac-gaia-setup" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="http://www.opentelemac.org/">GAIA</a> is the sediment transport module of TELEMAC. When <code class="docutils literal notranslate"><span class="pre">morphodynamics.enabled</span></code> is set in the case file, the preprocessing writes a GAIA steering file (<code class="docutils literal notranslate"><span class="pre">gaia.cas</span></code>) next to the TELEMAC model and couples it to the hydraulic simulations.</p>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/gui-case-editor-morphodynamics.png"><img alt="The page Morphodynamic simulation of the case settings" src="../_images/gui-case-editor-morphodynamics.png" style="width: 85%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Sediment transport is switched on in the case settings (<em>Open case settings…</em> on the <em>Case Setup</em> tab). (1) The page <em>Morphodynamic simulation</em>. (2) Its settings, of which further ones are added with <em>Add setting…</em>.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 34.0%" />
+<col style="width: 66.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entry in <code class="docutils literal notranslate"><span class="pre">morphodynamics</span></code></p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bedload</span></code>, <code class="docutils literal notranslate"><span class="pre">suspended_load</span></code></p></td>
+<td><p>Transport modes to be simulated.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sediment_classes</span></code></p></td>
+<td><p>One entry per grain size class with <code class="docutils literal notranslate"><span class="pre">diameter</span></code> [m], <code class="docutils literal notranslate"><span class="pre">density</span></code> [kg/m³] and the critical Shields parameter <code class="docutils literal notranslate"><span class="pre">shields</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bedload_formula</span></code></p></td>
+<td><p>Number of the bedload transport formula in GAIA (1 is the formula of Meyer-Peter and Müller).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">active_layer_thickness</span></code></p></td>
+<td><p>Thickness of the active layer [m]. A common choice is three times the diameter of the coarse grains.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bed_layers</span></code></p></td>
+<td><p>Number of substratum layers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">slope_effect</span></code>, <code class="docutils literal notranslate"><span class="pre">friction_angle</span></code></p></td>
+<td><p>Deflection of the bedload on a laterally inclined bed, and the angle of repose of the sediment [degrees].</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">secondary_currents</span></code></p></td>
+<td><p>Deflection of the bedload by the spiral flow in river bends.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">prescribed_solid_discharges</span></code></p></td>
+<td><p>Sediment supply at each open boundary.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">morphological_factor</span></code></p></td>
+<td><p>Factor by which the bed change is accelerated relative to the flow. A value of 10 means that one simulated hour represents ten hours of bed change. Use values above 1 with care, and only for slowly varying discharges.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Significant bed changes occur during floods. A morphodynamic simulation is therefore usually run with a discharge time series. Define the time series under <code class="docutils literal notranslate"><span class="pre">boundaries.inflow</span></code>, enable <code class="docutils literal notranslate"><span class="pre">morphodynamics</span></code>, repeat the preprocessing and start the unsteady run (<a class="reference internal" href="hydraulic-simulations.html#hydraulics-hotstarts"><span class="std std-ref">TELEMAC hotstarts</span></a>):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua &lt;case-file&gt;
+axqua submit &lt;case-file&gt; --kind unsteady
+</pre></div>
+</div>
+<p>The GAIA results are written next to the hydraulic results. The variable for the bed change is the cumulated bed evolution.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The grain size classes are entered by hand. The automatic derivation of the classes from measured grain size distributions is not yet available in this version.</p>
+</div>
+</section>
+<section id="openfoam-setup">
+<span id="help-morphodynamics-openfoam"></span><h2>OpenFOAM Setup<a class="headerlink" href="#openfoam-setup" title="Link to this heading"></a></h2>
+<p>With OpenFOAM, aXqua simulates <strong>fine sediment over a riverbed that stays in place</strong>. The simulation shows where sand or silt that the flow carries settles onto the bed, and where the flow picks it up again. The bed elevation does not change. Use this simulation where surveys show no measurable bed change while the share of fine sediment in the bed differs from one sampling date to the next. Use TELEMAC and GAIA where the bed moves.</p>
+<p>The simulation uses the solver <code class="docutils literal notranslate"><span class="pre">sediDriftFoam2</span></code> of Nils Reidar B. Olsen (<a class="reference external" href="https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/">documentation</a>). The solver computes a steady, three-dimensional flow below a fixed water surface, and the concentration of one grain size in that flow. The grains travel with the water, sink with their settling velocity and are mixed by turbulence. At the bed, two processes exchange sediment:</p>
+<ul class="simple">
+<li><p><strong>Settling.</strong> Grains reach the bed at the rate <em>settling velocity × concentration in the cell at the bed</em>.</p></li>
+<li><p><strong>Pick-up.</strong> The flow removes grains at a rate that follows from the bed shear stress, with the formulas of van Rijn (1984a, 1984b). The critical shear stress, at which grains start to move, is corrected for the slope of the bed (Dey 2003).</p></li>
+</ul>
+<p>The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of aXqua (<a class="reference internal" href="../installation/simulation-software.html#install-openfoam"><span class="std std-ref">OpenFOAM</span></a>), and it runs in one process.</p>
+<p><strong>Requirements.</strong> The simulation needs the steady 2D result of the case (<a class="reference internal" href="hydraulic-simulations.html#hydraulics-dry-runs"><span class="std std-ref">TELEMAC dry runs 2D/3D</span></a>), because the water surface of that result is the upper limit of the three-dimensional mesh. The mesh itself is the mesh of the OpenFOAM model in the mode <code class="docutils literal notranslate"><span class="pre">rigid-lid</span></code> (<a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">OpenFOAM choices</span></a>), whatever mode the hydraulic OpenFOAM simulation of the case uses. Its cell size (<code class="docutils literal notranslate"><span class="pre">openfoam.cell_size</span></code> or <code class="docutils literal notranslate"><span class="pre">openfoam.cell_size_factor</span></code>) decides how long the simulation takes.</p>
+<p><strong>Settings.</strong> The simulation is defined in the block <code class="docutils literal notranslate"><span class="pre">fine_sediment</span></code> of the case file, which is the frame <em>Fine sediment over a fixed bed with OpenFOAM</em> on the page <em>Morphodynamic simulation</em> of the case settings:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">fine_sediment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">grain_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00003</span><span class="w">          </span><span class="c1"># [m], coarse silt</span>
+<span class="w">  </span><span class="nt">inflow_concentration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.02</span><span class="w">   </span><span class="c1"># [kg/m3], which is 20 mg/l</span>
+<span class="w">  </span><span class="nt">pick_up</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">off</span>
+<span class="w">  </span><span class="nt">period</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2592000</span><span class="w">              </span><span class="c1"># [s], 30 days</span>
+<span class="w">  </span><span class="nt">layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">         </span><span class="c1"># [m]</span>
+<span class="w">  </span><span class="nt">initial_fraction</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.15</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 70.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entry in <code class="docutils literal notranslate"><span class="pre">fine_sediment</span></code></p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">grain_size</span></code></p></td>
+<td><p>Diameter of the grains [m]. The simulation carries one grain size, up to 0.002 m.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fall_velocity</span></code></p></td>
+<td><p>Settling velocity of the grains in still water [m/s]. If empty, it is computed from the grain size (Ferguson and Church 2004).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">inflow_concentration</span></code></p></td>
+<td><p>Sediment concentration of the water that enters the model [kg/m³]. One number applies to all inflow lines. To give each line its own value, name the lines, for example <code class="docutils literal notranslate"><span class="pre">{inlet-1:</span> <span class="pre">0.02,</span> <span class="pre">inlet-2:</span> <span class="pre">0}</span></code>. The build lists the names of the inflow lines with their discharges in its log.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pick_up</span></code></p></td>
+<td><p>What the bed returns to the flow. <code class="docutils literal notranslate"><span class="pre">suspended</span></code> uses the reference concentration of van Rijn (1984b) and <code class="docutils literal notranslate"><span class="pre">bedload</span></code> his bedload formula (1984a). Both assume a bed that consists of the fine sediment. <code class="docutils literal notranslate"><span class="pre">off</span></code> means that the bed only takes sediment up.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">roughness</span></code></p></td>
+<td><p>Roughness height with which the bed shear stress is computed [m]. If empty, the median roughness of the wetted bed is used (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_table</span></code>). The simulation uses one roughness for the whole bed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bottom_layer</span></code></p></td>
+<td><p>Thickness of the cells at the bed [m]. If empty, it is the smallest water depth of the model divided by the number of layers.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">iterations</span></code></p></td>
+<td><p>Largest number of iterations. The simulation ends earlier when it has converged.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">period</span></code></p></td>
+<td><p>Time over which the computed rates act [s]. If empty, the result contains rates only.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">layer_thickness</span></code>, <code class="docutils literal notranslate"><span class="pre">porosity</span></code>, <code class="docutils literal notranslate"><span class="pre">initial_fraction</span></code></p></td>
+<td><p>The bed layer for which the share of fines is reported: its thickness [m], the share of pores between its coarse grains, and the share of fines in its dry mass at the beginning of the period.</p></td>
+</tr>
+</tbody>
+</table>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/gui-case-editor-fine-sediment.png"><img alt="The frame Fine sediment over a fixed bed in the case settings" src="../_images/gui-case-editor-fine-sediment.png" style="width: 85%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The fine sediment simulation is defined in the case settings (<em>Open case settings…</em> on the <em>Case Setup</em> tab). (1) The frame <em>Fine sediment over a fixed bed with OpenFOAM</em>. (2) Its settings, of which further ones are added with <em>Add setting…</em>.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Choice of the pick-up.</strong> The formulas of van Rijn describe a bed of sand, from which the flow can remove as many grains as its shear stress allows. A gravel bed holds fine sediment only in its pores, so that these formulas overestimate the removal by orders of magnitude. For fine sediment over a gravel bed, set <code class="docutils literal notranslate"><span class="pre">pick_up:</span> <span class="pre">off</span></code>. The result then shows where fine sediment settles and how much, and the bed shear stress in the result shows where the flow is able to remove it again.</p>
+<p><strong>Simulation.</strong> Go to the tab <em>Simulations</em>, sub-tab <em>Morphodynamics</em>, and select the simulation program <em>OpenFOAM</em>. Click <em>Build</em> in the box <em>Fine sediment over a fixed bed</em>, then <em>Submit</em>. Both can be clicked one after the other, because the simulation waits for its build, and the build waits for a steady 2D simulation that is still running. The progress display counts iterations. On a mesh of 11,000 cells, the simulation takes less than one minute. In a terminal, the commands are:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind openfoam-sediment-build
+axqua submit &lt;case-file&gt; --kind openfoam-sediment
+</pre></div>
+</div>
+<figure class="align-default" id="id4">
+<a class="reference internal image-reference" href="../_images/gui-morphodynamics-openfoam.png"><img alt="The sub-tab Morphodynamics of the tab Simulations" src="../_images/gui-morphodynamics-openfoam.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The sub-tab <em>Morphodynamics</em> of the tab <em>Simulations</em> with the simulation program <em>OpenFOAM</em>. (1) The choice of the simulation program. (2) The options: the warm-up for the build, and the largest number of iterations for the simulation. (3) <em>Build</em> creates the model. (4) <em>Submit</em> starts the simulation. (5) <em>Load results</em> adds the bed with its fine sediment to the map.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Results.</strong> <em>Load results</em> adds the layer <em>Fine sediment at the bed</em> to the map. It holds one polygon for every column of cells, with the attributes listed below, and is colored by the change of the share of fines, or by the net rate if the case defines no period. The file is <code class="docutils literal notranslate"><span class="pre">axqua-case/openfoam-sediment/fine-sediment-bed.gpkg</span></code>. The three-dimensional fields of velocity and concentration can be opened in ParaView through <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> in the same folder.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 18.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Unit</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">depth</span></code></p></td>
+<td><p>m</p></td>
+<td><p>Water depth.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">velocity</span></code></p></td>
+<td><p>m/s</p></td>
+<td><p>Flow velocity in the cell at the bed.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">shear</span></code>, <code class="docutils literal notranslate"><span class="pre">shear_crit</span></code></p></td>
+<td><p>N/m²</p></td>
+<td><p>Bed shear stress and its critical value for the grain size, as the solver computes them.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">transport</span></code></p></td>
+<td><p>-</p></td>
+<td><p>Transport parameter of van Rijn: the excess of the shear stress over its critical value, divided by the critical value. Zero where the flow cannot move the grains.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">conc_bed</span></code></p></td>
+<td><p>kg/m³</p></td>
+<td><p>Sediment concentration in the cell at the bed.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">settling</span></code>, <code class="docutils literal notranslate"><span class="pre">pick_up</span></code>, <code class="docutils literal notranslate"><span class="pre">net</span></code></p></td>
+<td><p>kg/(m² day)</p></td>
+<td><p>Mass that settles onto the bed, mass that the flow picks up, and their difference, per bed area and day. A positive <code class="docutils literal notranslate"><span class="pre">net</span></code> means that the bed takes up fine sediment.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mass</span></code></p></td>
+<td><p>kg/m²</p></td>
+<td><p>Mass of fine sediment that the bed takes up during the period.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fraction</span></code>, <code class="docutils literal notranslate"><span class="pre">change</span></code></p></td>
+<td><p>-</p></td>
+<td><p>Share of fines in the dry mass of the bed layer at the end of the period, and its change since the beginning.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">limit</span></code></p></td>
+<td><p>-</p></td>
+<td><p>-1 where the bed layer has given off all its fines, 1 where its fines no longer fit into its pores.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The last four attributes are only present if the case defines a <code class="docutils literal notranslate"><span class="pre">period</span></code>. They follow from a mass balance of the bed layer. The layer holds coarse grains with a mass of 2650 kg/m³ × <code class="docutils literal notranslate"><span class="pre">layer_thickness</span></code> × (1 − <code class="docutils literal notranslate"><span class="pre">porosity</span></code>) per bed area, which stay in place. All fine sediment that the bed takes up is added to the layer, and the layer cannot give off more fines than it holds. The density of the grains is 2650 kg/m³ throughout, because the formulas of the solver contain this value.</p>
+<p>Together with the layer, aXqua writes a sediment budget (<code class="docutils literal notranslate"><span class="pre">fine-sediment-budget.json</span></code>) and prints it in the log of the job: the mass of sediment that enters the model per second, the mass that leaves it, and the masses that settle and are picked up over the whole bed. In a converged simulation, what enters equals what leaves plus what the bed takes up. If more than 2 % remain unexplained, the result says so, and <code class="docutils literal notranslate"><span class="pre">iterations</span></code> has to be increased.</p>
+<p><strong>Limits.</strong> The following limits result from the solver and from the fixed water surface. They are part of every result:</p>
+<ul class="simple">
+<li><p><em>The water surface is fixed.</em> It is the water surface of the 2D result and cannot respond to the three-dimensional flow. Where it steps by more than the local water depth within two cells, as at a riffle of a shallow reach, the flow below it becomes too fast, and the build refuses the case. With <code class="docutils literal notranslate"><span class="pre">openfoam.allow_stepped_lid:</span> <span class="pre">true</span></code>, the case is built nevertheless, and the result states how large the steps are and how fast the fastest cell is. Read the bed near such steps with care.</p></li>
+<li><p><em>The bed does not move.</em> The solver can also lower and raise the bed. aXqua does not use this function, because the solver then enforces a minimum water depth by lowering the bed and treats the ends of the model as the ends of a laboratory flume.</p></li>
+<li><p><em>One grain size and one roughness.</em> Sediment mixtures and roughness zones are not represented.</p></li>
+<li><p><em>Steep bed.</em> Where the bed rises steeply within one cell, the solver computes a bed shear stress that is too high. The build reports the share of such cells and refuses a mesh on which the computation would fail. Smaller cells reduce the share.</p></li>
+<li><p><em>Steady flow in one process.</em> A discharge time series cannot be simulated, and the simulation does not run in parallel.</p></li>
+</ul>
+<section id="references">
+<h3>References<a class="headerlink" href="#references" title="Link to this heading"></a></h3>
+<p>Church, M., and Haschenburger, J. K. (2017). “What is the ‘active layer’?” <em>Water Resources Research</em>, 53, 5-10. <a class="reference external" href="https://doi.org/10.1002/2016WR019675">doi:10.1002/2016WR019675</a></p>
+<p>Dey, S. (2003). “Threshold of sediment motion on combined transverse and longitudinal sloping beds.” <em>Journal of Hydraulic Research</em>, 41(4), 405-415. <a class="reference external" href="https://doi.org/10.1080/00221680309499985">doi:10.1080/00221680309499985</a></p>
+<p>Du Boys, P. (1879). “Etudes du régime du Rhône et l’action exercée par les eaux sur un lit à fond de graviers indéfiniment affouillable.” <em>Annales des Ponts et Chaussées</em>, 5(18), 141-195.</p>
+<p>Exner, F. M. (1925). “Über die Wechselwirkung zwischen Wasser und Geschiebe in Flüssen.” <em>Akademie der Wissenschaften in Wien, math.-naturw. Klasse, Sitzungsberichte, Abt. IIa</em>, 134, 165-203.</p>
+<p>Ferguson, R. I., and Church, M. (2004). “A simple universal equation for grain settling velocity.” <em>Journal of Sedimentary Research</em>, 74(6), 933-937. <a class="reference external" href="https://doi.org/10.1306/051204740933">doi:10.1306/051204740933</a></p>
+<p>Hirano, M. (1971). “River-bed degradation with armoring.” <em>Proceedings of the Japan Society of Civil Engineers</em>, 1971(195), 55-65. <a class="reference external" href="https://doi.org/10.2208/jscej1969.1971.195_55">doi:10.2208/jscej1969.1971.195_55</a></p>
+<p>Van Rijn, L. C. (1984a). “Sediment transport, part I: Bed load transport.” <em>Journal of Hydraulic Engineering</em>, 110(10), 1431-1456. <a class="reference external" href="https://doi.org/10.1061/(ASCE)0733-9429(1984)110:10(1431)">doi:10.1061/(ASCE)0733-9429(1984)110:10(1431)</a></p>
+<p>Van Rijn, L. C. (1984b). “Sediment transport, part II: Suspended load transport.” <em>Journal of Hydraulic Engineering</em>, 110(11), 1613-1641. <a class="reference external" href="https://doi.org/10.1061/(ASCE)0733-9429(1984)110:11(1613)">doi:10.1061/(ASCE)0733-9429(1984)110:11(1613)</a></p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mesh-convergence.html" class="btn btn-neutral float-left" title="Mesh convergence" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="calibration-validation.html" class="btn btn-neutral float-right" title="Calibration &amp; validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

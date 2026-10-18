@@ -1,0 +1,1345 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.openfoam.dicts &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/openfoam/dicts.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.openfoam.dicts</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.solvers.openfoam.dicts</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""``constant/`` and ``system/`` dictionaries for the interFoam case.</span>
+
+<span class="sd">This module is where the air phase is dealt with. ``interFoam`` in OpenFOAM 9 is</span>
+<span class="sd">already a PIMPLE solver, so the question is never "which solver" but "which</span>
+<span class="sd">settings", and the settings that matter are these four:</span>
+
+<span class="sd">1. **``MULESCorr yes`` (semi-implicit MULES).** With the default explicit MULES the</span>
+<span class="sd">   phase-fraction equation carries its own Courant limit and the tutorials run at</span>
+<span class="sd">   ``maxAlphaCo 0.2``. The semi-implicit limiter removes that constraint, so the</span>
+<span class="sd">   time step is set by the flow rather than by the interface and ``maxCo`` /</span>
+<span class="sd">   ``maxAlphaCo`` can go to ~0.9 - a three- to four-fold larger step for the same</span>
+<span class="sd">   physics.</span>
+<span class="sd">2. **``limitVelocity`` in ``system/fvOptions``.** Air is a thousand times</span>
+<span class="sd">   lighter than water, so a small pressure error accelerates it enormously; the</span>
+<span class="sd">   resulting air jet then sets the Courant number and the time step collapses on a</span>
+<span class="sd">   phase nobody is interested in. Capping ``|U|`` at a few times the expected water</span>
+<span class="sd">   velocity stops that dead. Water never reaches the cap, so the water solution is</span>
+<span class="sd">   untouched.</span>
+<span class="sd">3. **``momentumPredictor no``.** Standard for gravity-driven free-surface flow: the</span>
+<span class="sd">   momentum predictor buys nothing when buoyancy dominates and costs an extra solve.</span>
+<span class="sd">4. **``nNonOrthogonalCorrectors 2``.** A terrain-following mesh *is* non-orthogonal</span>
+<span class="sd">   wherever the bed slopes; without the correctors the pressure solution leaks that</span>
+<span class="sd">   as spurious velocity near the bed. Together with ``nCorrectors 3`` and the outer</span>
+<span class="sd">   correctors this is 18 pressure solutions per time step, which is most of what a</span>
+<span class="sd">   step costs. Both counts are settings of the case</span>
+<span class="sd">   (``openfoam.pressure_correctors``, ``non_orthogonal_correctors``): on the Isar</span>
+<span class="sd">   example, whose worst face is 57 degrees off, 2 and 1 gave the same depths,</span>
+<span class="sd">   velocities and discharges to three digits after 40 s at 0.6 of the cost.</span>
+
+<span class="sd">The lid clamping that removes most air cells altogether is in</span>
+<span class="sd">:mod:`axqua.solvers.openfoam.mesh`, and matters more than all four.</span>
+
+<span class="sd">Staging</span>
+<span class="sd">-------</span>
+<span class="sd">Two dict sets are written, under ``system/stage1-spinup/`` and</span>
+<span class="sd">``system/stage2-run/``; :mod:`axqua.solvers.openfoam.runtime` copies one into</span>
+<span class="sd">``system/`` to select it. Stage 1 settles the interface from the 2D hotstart at a</span>
+<span class="sd">tight Courant number with diffusive schemes; stage 2 restarts from it and runs the</span>
+<span class="sd">production settings. The split exists because the first seconds after a hotstart are</span>
+<span class="sd">the least like the converged flow - the 2D state is depth-averaged, so there is no</span>
+<span class="sd">vertical structure at all at t = 0 - and paying for robustness there is far cheaper</span>
+<span class="sd">than paying for it over the whole run.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ATMOSPHERE_PATCH</span><span class="p">,</span> <span class="n">BANKS_PATCH</span><span class="p">,</span> <span class="n">LID_PATCH</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.polymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">foam_footer</span><span class="p">,</span> <span class="n">foam_header</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">STAGE_DIRS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"spinup"</span><span class="p">:</span> <span class="s2">"stage1-spinup"</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">:</span> <span class="s2">"stage2-run"</span><span class="p">}</span>
+<span class="c1"># system/ files that differ between the two stages and are therefore staged</span>
+<span class="n">STAGED_FILES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"controlDict"</span><span class="p">,</span> <span class="s2">"fvSchemes"</span><span class="p">,</span> <span class="s2">"fvSolution"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Stage">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.Stage">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Stage</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One run stage's numerics."""</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">start_from</span><span class="p">:</span> <span class="nb">str</span>          <span class="c1"># startTime | latestTime</span>
+    <span class="n">end_time</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">max_courant</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">alpha_scheme</span><span class="p">:</span> <span class="nb">str</span>        <span class="c1"># the div(phi,alpha) scheme</span>
+    <span class="n">c_alpha</span><span class="p">:</span> <span class="nb">float</span>           <span class="c1"># interface compression; ESI puts it in fvSolution</span>
+    <span class="n">velocity_scheme</span><span class="p">:</span> <span class="nb">str</span>     <span class="c1"># the div(rhoPhi,U) scheme</span>
+    <span class="n">n_outer_correctors</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">purpose</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+
+<div class="viewcode-block" id="stages">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.stages">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stages</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">single</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Stage</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The run's stages, in order.</span>
+
+<span class="sd">    *single* collapses a two-phase case to ONE full-length production stage. It</span>
+<span class="sd">    exists for the Bayesian campaign: HydroBayesCal copies a case template and</span>
+<span class="sd">    makes a single solver call, so a two-stage case would run only its spin-up -</span>
+<span class="sd">    30 s at half interface compression and upwinded momentum - while the config</span>
+<span class="sd">    claimed the full ``end_time``. The interface is settled once up front instead</span>
+<span class="sd">    (``calibration._prespin_template``) and promoted into the template's ``0/``.</span>
+<span class="sd">    """</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">compression</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="s2">"interface_compression"</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">single</span> <span class="ow">and</span> <span class="n">of</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"rigid-lid"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Stage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"run"</span><span class="p">,</span> <span class="n">start_from</span><span class="o">=</span><span class="s2">"startTime"</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span>
+                      <span class="n">max_courant</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">max_courant</span><span class="p">,</span>
+                      <span class="n">alpha_scheme</span><span class="o">=</span><span class="s2">"Gauss vanLeer"</span><span class="p">,</span> <span class="n">c_alpha</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+                      <span class="n">velocity_scheme</span><span class="o">=</span><span class="s2">"Gauss limitedLinearV 1"</span><span class="p">,</span>
+                      <span class="n">n_outer_correctors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                      <span class="n">purpose</span><span class="o">=</span><span class="s2">"production run from a pre-spun interface "</span>
+                              <span class="s2">"(the spin-up was run once into 0/)"</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">of</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"rigid-lid"</span><span class="p">:</span>
+        <span class="c1"># No interface and no air, so the two-stage split has nothing to settle: the</span>
+        <span class="c1"># spin-up exists to let a depth-averaged hotstart grow a vertical profile</span>
+        <span class="c1"># without the interface sharpening into an instability, and here there is no</span>
+        <span class="c1"># interface. One stage, at the full Courant number.</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Stage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"run"</span><span class="p">,</span> <span class="n">start_from</span><span class="o">=</span><span class="s2">"startTime"</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span>
+                      <span class="n">max_courant</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">max_courant</span><span class="p">,</span>
+                      <span class="n">alpha_scheme</span><span class="o">=</span><span class="s2">"Gauss vanLeer"</span><span class="p">,</span> <span class="n">c_alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                      <span class="n">velocity_scheme</span><span class="o">=</span><span class="s2">"Gauss limitedLinearV 1"</span><span class="p">,</span>
+                      <span class="n">n_outer_correctors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                      <span class="n">purpose</span><span class="o">=</span><span class="s2">"single-phase run under a rigid lid"</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="n">Stage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"spinup"</span><span class="p">,</span> <span class="n">start_from</span><span class="o">=</span><span class="s2">"startTime"</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">spinup_time</span><span class="p">,</span>
+              <span class="n">max_courant</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">spinup_courant</span><span class="p">,</span>
+              <span class="c1"># HALF the interface compression of the production stage. Compressing</span>
+              <span class="c1"># hard while the hotstart still has no vertical velocity structure</span>
+              <span class="c1"># sharpens the interface into an instability; dropping compression</span>
+              <span class="c1"># altogether instead smears it over 30 s of spin-up, which is just as</span>
+              <span class="c1"># unhelpful. ESI carries the coefficient as `cAlpha` in fvSolution,</span>
+              <span class="c1"># not as a trailing number on the scheme the way Foundation did.</span>
+              <span class="n">alpha_scheme</span><span class="o">=</span><span class="s2">"Gauss vanLeer"</span><span class="p">,</span> <span class="n">c_alpha</span><span class="o">=</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">compression</span><span class="p">,</span>
+              <span class="n">velocity_scheme</span><span class="o">=</span><span class="s2">"Gauss upwind"</span><span class="p">,</span>
+              <span class="n">n_outer_correctors</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+              <span class="n">purpose</span><span class="o">=</span><span class="s2">"settle the interface and the vertical profile from the "</span>
+                      <span class="s2">"depth-averaged 2D hotstart"</span><span class="p">),</span>
+        <span class="n">Stage</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"run"</span><span class="p">,</span> <span class="n">start_from</span><span class="o">=</span><span class="s2">"latestTime"</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span>
+              <span class="n">max_courant</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">max_courant</span><span class="p">,</span>
+              <span class="n">alpha_scheme</span><span class="o">=</span><span class="s2">"Gauss vanLeer"</span><span class="p">,</span> <span class="n">c_alpha</span><span class="o">=</span><span class="n">compression</span><span class="p">,</span>
+              <span class="n">velocity_scheme</span><span class="o">=</span><span class="s2">"Gauss limitedLinearV 1"</span><span class="p">,</span>
+              <span class="n">n_outer_correctors</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+              <span class="n">purpose</span><span class="o">=</span><span class="s2">"production run at the full Courant number"</span><span class="p">),</span>
+    <span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dict_file</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"dictionary"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">foam_header</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span> <span class="o">+</span> <span class="n">body</span> <span class="o">+</span> <span class="n">foam_footer</span><span class="p">()</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># constant/</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<div class="viewcode-block" id="transport_properties">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.transport_properties">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transport_properties</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""phases (water air);</span>
+
+<span class="s2">water</span>
+<span class="se">{{</span>
+<span class="s2">    transportModel  Newtonian;</span>
+<span class="s2">    nu              </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">water_viscosity</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">    rho             </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">water_density</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="se">}}</span>
+
+<span class="s2">air</span>
+<span class="se">{{</span>
+<span class="s2">    transportModel  Newtonian;</span>
+<span class="s2">    nu              </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">air_viscosity</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">    rho             </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">air_density</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="se">}}</span>
+
+<span class="s2">sigma           </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">surface_tension</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"transportProperties"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="turbulence_properties">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.turbulence_properties">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">turbulence_properties</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``constant/turbulenceProperties`` - the ESI name for the RAS settings.</span>
+
+<span class="sd">    Foundation 8+ called this ``momentumTransport`` and keyed the model as ``model``;</span>
+<span class="sd">    ESI v2406 knows neither, so a Foundation-shaped file is read as an empty</span>
+<span class="sd">    dictionary and the run silently falls back to the built-in defaults.</span>
+
+<span class="sd">    Under ``kEpsilon`` the closure coefficients are written **explicitly**, at the</span>
+<span class="sd">    model's own defaults. Two reasons, both about calibration: OpenFOAM falls back</span>
+<span class="sd">    to built-in values for any coefficient it does not find in the file, so a</span>
+<span class="sd">    calibration that perturbs one which is absent would leave every run using the</span>
+<span class="sd">    same value and never say so; and HydroBayesCal's ``update_dictionary_entry``</span>
+<span class="sd">    requires the key to exist, raising ``Key 'Cmu' not found`` otherwise. Other</span>
+<span class="sd">    models (kOmegaSST, the default) are written exactly as before.</span>
+<span class="sd">    """</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="k">if</span> <span class="n">of</span><span class="o">.</span><span class="n">turbulence</span> <span class="o">==</span> <span class="s2">"laminar"</span><span class="p">:</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="s2">"simulationType  laminar;</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">coeffs</span> <span class="o">=</span> <span class="s2">""</span>
+        <span class="k">if</span> <span class="n">of</span><span class="o">.</span><span class="n">turbulence</span> <span class="o">==</span> <span class="s2">"kEpsilon"</span><span class="p">:</span>
+            <span class="n">coeffs</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">"</span><span class="se">\n</span><span class="s2">    kEpsilonCoeffs</span><span class="se">\n</span><span class="s2">    {</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"        Cmu             </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">kepsilon_cmu</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"        C1              </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">kepsilon_c1</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"        C2              </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">kepsilon_c2</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"        sigmak          </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">kepsilon_sigmak</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"        sigmaEps        </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">kepsilon_sigma_eps</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    }</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""simulationType  RAS;</span>
+
+<span class="s2">RAS</span>
+<span class="se">{{</span>
+<span class="s2">    RASModel        </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">turbulence</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">    turbulence      on;</span>
+
+<span class="s2">    printCoeffs     on;</span>
+<span class="si">{</span><span class="n">coeffs</span><span class="si">}</span><span class="se">}}</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"turbulenceProperties"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="gravity">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.gravity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gravity</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``constant/g``. z is up: the mesh is in a projected CRS with real elevations."""</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="s2">"dimensions      [0 1 -2 0 0 0 0];</span><span class="se">\n</span><span class="s2">value           (0 0 -9.81);</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"g"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">,</span>
+                      <span class="bp">cls</span><span class="o">=</span><span class="s2">"uniformDimensionedVectorField"</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># system/</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<span class="c1">#: The library of the boundary conditions of the BAW that the OpenFOAM installation of</span>
+<span class="c1">#: aXqua builds (``BAW_LIBRARY`` of its installer), with ``waterLevel_alpha_prgh``.</span>
+<span class="n">BAW_LIBRARY</span> <span class="o">=</span> <span class="s2">"lib_BAW_public_BCs_v2412_20260813.so"</span>
+
+
+<div class="viewcode-block" id="uses_rating_outlet">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.uses_rating_outlet">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">uses_rating_outlet</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the outlets follow a stage-discharge relation (needs a free surface)."""</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="s2">"outflow_boundary"</span><span class="p">,</span> <span class="s2">"level"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"rating-curve"</span> \
+        <span class="ow">and</span> <span class="n">of</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"rigid-lid"</span></div>
+
+
+
+<div class="viewcode-block" id="control_dict">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.control_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">control_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">boundary_patches</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">libs</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'libs            ("</span><span class="si">{</span><span class="n">BAW_LIBRARY</span><span class="si">}</span><span class="s1">");</span><span class="se">\n\n</span><span class="s1">'</span> <span class="k">if</span> <span class="n">uses_rating_outlet</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+            <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""</span><span class="si">{</span><span class="n">libs</span><span class="si">}</span><span class="s2">application     </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">startFrom       </span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">start_from</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">startTime       0;</span>
+
+<span class="s2">stopAt          endTime;</span>
+
+<span class="s2">endTime         </span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">end_time</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">deltaT          </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">initial_time_step</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">writeControl    adjustableRunTime;</span>
+
+<span class="s2">writeInterval   </span><span class="si">{</span><span class="n">stage_write_interval</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="w"> </span><span class="n">stage</span><span class="p">)</span><span class="si">:</span><span class="s2">.10g</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">purgeWrite      </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">purge_write</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">// binary keeps a multi-million-cell case's output and the decomposed meshes</span>
+<span class="s2">// compact; only the hand-written polyMesh is ASCII</span>
+<span class="s2">writeFormat     binary;</span>
+
+<span class="s2">writePrecision  8;</span>
+
+<span class="s2">writeCompression off;</span>
+
+<span class="s2">timeFormat      general;</span>
+
+<span class="s2">timePrecision   6;</span>
+
+<span class="s2">runTimeModifiable yes;</span>
+
+<span class="s2">adjustTimeStep  yes;</span>
+
+<span class="s2">// with MULESCorr the alpha equation is no longer explicitly Courant-limited, so</span>
+<span class="s2">// maxAlphaCo can match maxCo instead of the tutorials' 0.2. maxCo is the limit of</span>
+<span class="s2">// every cell; where it is the larger of the two, it is air that reaches it.</span>
+<span class="s2">maxCo           </span><span class="si">{</span><span class="n">_max_flow_courant</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="w"> </span><span class="n">stage</span><span class="p">)</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">maxAlphaCo      </span><span class="si">{</span><span class="n">_max_alpha_courant</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="w"> </span><span class="n">stage</span><span class="p">)</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">maxDeltaT       </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">max_time_step</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">functions</span>
+<span class="se">{{</span>
+<span class="si">{</span><span class="n">_flux_functions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">patches</span><span class="p">,</span><span class="w"> </span><span class="n">monitor_interval</span><span class="p">(</span><span class="n">of</span><span class="p">))</span><span class="si">}</span>
+
+<span class="si">{</span><span class="n">_freedom_functions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">boundary_patches</span><span class="p">,</span><span class="w"> </span><span class="n">monitor_interval</span><span class="p">(</span><span class="n">of</span><span class="p">))</span><span class="si">}</span>
+<span class="se">}}</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"controlDict"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_freedom_functions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">boundary_patches</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Monitors that say whether the run was ever *boxed in* by the 2D seed.</span>
+
+<span class="sd">    The seed decides two things the flow does not get a vote on: how high the lid</span>
+<span class="sd">    stands, and how far the plan footprint reaches. Both are sized from a TELEMAC</span>
+<span class="sd">    result, and TELEMAC can be wrong - so if the 3D surface rises into the lid, or</span>
+<span class="sd">    reaches the lateral wall, the answer is being set by a mesh decision rather than</span>
+<span class="sd">    by the hydraulics, and the result still looks perfectly plausible.</span>
+
+<span class="sd">    Rather than parse the run's binary fields, this asks OpenFOAM for the water area</span>
+<span class="sd">    on each of those two patches, through the same ``surfaceFieldValue`` machinery</span>
+<span class="sd">    that already reports the discharge - so</span>
+<span class="sd">    :func:`axqua.solvers.openfoam.report.surface_freedom` reads it back with the</span>
+<span class="sd">    existing reader. Zero throughout is the answer you want.</span>
+
+<span class="sd">    Emitted only for a two-phase run: under a rigid lid the surface is prescribed by</span>
+<span class="sd">    construction, so "did it touch the lid" is not a question with an answer.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">potential</span>
+
+    <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="c1"># No alpha to integrate, and nothing to find: flow THROUGH the top patch is</span>
+        <span class="c1"># how the surface moves in this formulation, so a "leak" there is the</span>
+        <span class="c1"># kinematics rather than a defect. The question leg C has to answer instead</span>
+        <span class="c1"># is whether zeta stayed small against the depth, which measure_pool_levels</span>
+        <span class="c1"># reads off zeta itself.</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">"    // single phase: the free surface is a boundary condition, so</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    // there is no alpha to integrate and no lid to breach"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"rigid-lid"</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">boundary_patches</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"    // rigid lid: the free surface is prescribed, not solved"</span>
+    <span class="n">top</span><span class="p">,</span> <span class="n">walls</span> <span class="o">=</span> <span class="n">boundary_patches</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">patch</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"lidContact"</span><span class="p">,</span> <span class="n">top</span><span class="p">),</span> <span class="p">(</span><span class="s2">"wallContact"</span><span class="p">,</span> <span class="n">walls</span><span class="p">)):</span>
+        <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""    </span><span class="si">{</span><span class="n">label</span><span class="si">}</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        type            surfaceFieldValue;</span>
+<span class="s2">        libs            ("libfieldFunctionObjects.so");</span>
+<span class="s2">        writeControl    runTime;</span>
+<span class="s2">        writeInterval   </span><span class="si">{</span><span class="n">interval</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        log             no;</span>
+<span class="s2">        writeFields     no;</span>
+<span class="s2">        regionType      patch;</span>
+<span class="s2">        name            </span><span class="si">{</span><span class="n">patch</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        operation       areaIntegrate;</span>
+<span class="s2">        fields          (alpha.water);</span>
+<span class="s2">    </span><span class="se">}}</span><span class="s2">"""</span><span class="p">)</span>
+
+    <span class="c1"># WETTED AREA IS THE WRONG SCALE FOR HOW BAD A LID BREACH IS, so measure the</span>
+    <span class="c1"># flux through it as well. Measured on munich-vsf: 0.47% of the lid patch ever</span>
+    <span class="c1"># wet - a figure that reads like rounding error - while that same 0.47% vented</span>
+    <span class="c1"># 1.67 m3/s against a 0.111 m3/s pass. The leak is replaced through the</span>
+    <span class="c1"># pressure outlet, so the domain carries a steady spurious circulation at</span>
+    <span class="c1"># fifteen times the discharge and every other diagnostic still looks healthy:</span>
+    <span class="c1"># the balance closes, the surface is stepped and monotonic, the run converges.</span>
+    <span class="c1"># Area says how much of the lid is touched; only the flux says whether the</span>
+    <span class="c1"># result is ruined.</span>
+    <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""    lidLeak</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        type            surfaceFieldValue;</span>
+<span class="s2">        libs            ("libfieldFunctionObjects.so");</span>
+<span class="s2">        writeControl    runTime;</span>
+<span class="s2">        writeInterval   </span><span class="si">{</span><span class="n">interval</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        log             no;</span>
+<span class="s2">        writeFields     no;</span>
+<span class="s2">        regionType      patch;</span>
+<span class="s2">        name            </span><span class="si">{</span><span class="n">top</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        // weightedSum, not sum: ESI treats weighting as a separate operation, so</span>
+<span class="s2">        // plain sum would report the AIR leaving the lid. That is how a 0.054 m3/s</span>
+<span class="s2">        // water leak first read as 7.7 m3/s.</span>
+<span class="s2">        operation       weightedSum;</span>
+<span class="s2">        weightField     alpha.water;</span>
+<span class="s2">        fields          (phi);</span>
+<span class="s2">    </span><span class="se">}}</span><span class="s2">"""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_boundary_patches</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``(top, walls)`` for the surface-freedom monitors, or ``None``.</span>
+
+<span class="sd">    ``getattr`` rather than attribute access: the monitors are a diagnostic, and a</span>
+<span class="sd">    mesh object that cannot say which patch is its top simply does not get them.</span>
+<span class="sd">    """</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="s2">"top_patch"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">BANKS_PATCH</span><span class="p">)</span> <span class="k">if</span> <span class="n">top</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="stage_write_interval">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.stage_write_interval">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stage_write_interval</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simulated time between two saved results of *stage* [s].</span>
+
+<span class="sd">    ``write_interval``, adjusted so that the end of the stage is a write time. The</span>
+<span class="sd">    solver saves at whole intervals **counted from the start of its run** and at no</span>
+<span class="sd">    other time, also not at its end. A first stage of 2 s with results every 50 s</span>
+<span class="sd">    therefore ended without a result, the second stage started from the latest one</span>
+<span class="sd">    it found, which was the start, and the first stage had been computed for</span>
+<span class="sd">    nothing: seen on the Isar example, where nothing but the time in the listing</span>
+<span class="sd">    said so. With the defaults (30 s and 10 s) the end happened to be a write time.</span>
+<span class="sd">    The same holds for the end of the run. The second stage starts at</span>
+<span class="sd">    ``spinup_time``, so its results come at ``spinup_time`` plus whole intervals:</span>
+<span class="sd">    with 2 s, 3000 s and 100 s the last one would be at 2902 s and the rest of the</span>
+<span class="sd">    run would not be saved. The interval becomes 99.93 s.</span>
+<span class="sd">    """</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">of</span><span class="o">.</span><span class="n">write_interval</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="k">if</span> <span class="n">stage</span><span class="o">.</span><span class="n">start_from</span> <span class="o">==</span> <span class="s2">"startTime"</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">of</span><span class="o">.</span><span class="n">spinup_time</span><span class="p">)</span>
+    <span class="n">span</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">end_time</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span>
+    <span class="k">if</span> <span class="n">wanted</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">span</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wanted</span>
+    <span class="k">return</span> <span class="n">span</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">span</span> <span class="o">/</span> <span class="n">wanted</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_max_flow_courant</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Courant limit of the flow in every cell (``maxCo``).</span>
+
+<span class="sd">    In a two-phase run the cells that reach it first are air: next to the water it</span>
+<span class="sd">    moves about as fast as the water does, and it crosses layers a few centimeters</span>
+<span class="sd">    thick where the water crosses cells a meter long. ``openfoam.max_flow_courant``</span>
+<span class="sd">    lets those cells pass more than one cell per step in the production stage, while</span>
+<span class="sd">    the water surface keeps ``max_courant``. Measured on the Isar example at 1 m</span>
+<span class="sd">    cells: 0.026 s with 0.9 for both, 0.049 s with 3 for the flow, at which the</span>
+<span class="sd">    surface is the limit again (0.91) and the largest Courant number of a water cell</span>
+<span class="sd">    is 0.13. The stage that settles the surface keeps its own limit for both.</span>
+<span class="sd">    """</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="s2">"max_flow_courant"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wanted</span> <span class="ow">and</span> <span class="n">of</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"rigid-lid"</span> <span class="ow">and</span> <span class="n">stage</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"run"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">),</span> <span class="n">stage</span><span class="o">.</span><span class="n">max_courant</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stage</span><span class="o">.</span><span class="n">max_courant</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_max_alpha_courant</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Interface Courant limit.</span>
+
+<span class="sd">    Under a rigid lid ``alpha`` is identically 1, so there is no interface to</span>
+<span class="sd">    resolve and the limit would only hold the time step back for nothing - it is</span>
+<span class="sd">    relaxed far above ``maxCo`` so the flow Courant number alone drives ``dt``.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="mf">10.0</span> <span class="k">if</span> <span class="n">of</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"rigid-lid"</span> <span class="k">else</span> <span class="n">stage</span><span class="o">.</span><span class="n">max_courant</span>
+
+
+<div class="viewcode-block" id="monitor_interval">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.monitor_interval">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">monitor_interval</span><span class="p">(</span><span class="n">of</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simulated-time spacing of the discharge monitors [s].</span>
+
+<span class="sd">    A tenth of the field write interval, so a run writing ten result frames leaves a</span>
+<span class="sd">    hundred discharge samples - enough for the ten-sample steady window</span>
+<span class="sd">    :mod:`axqua.solvers.openfoam.report` looks for, without a line per time step.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">of</span><span class="o">.</span><span class="n">write_interval</span> <span class="o">/</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_flux_functions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">patches</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``surfaceFieldValue`` monitors giving the WATER discharge through each patch.</span>
+
+<span class="sd">    ``phi`` is the total volumetric flux, water and air together; weighting it by</span>
+<span class="sd">    ``alpha.water`` (a documented ``surfaceFieldValue`` option in OpenFOAM 9) gives</span>
+<span class="sd">    the water discharge alone. That is the quantity the run has to converge on, and</span>
+<span class="sd">    the one :mod:`axqua.solvers.openfoam.report` reads back - the direct analogue of the</span>
+<span class="sd">    boundary-flux balance :mod:`axqua.flux_convergence` reads out of a TELEMAC</span>
+<span class="sd">    listing.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">potential</span>
+
+    <span class="c1"># SINGLE PHASE: phi IS the water flux, so weighting it by a phase fraction</span>
+    <span class="c1"># that does not exist would abort the run on a missing field. The monitor is</span>
+    <span class="c1"># also exact here rather than alpha-weighted, which is the point of leg C.</span>
+    <span class="c1"># weightedSum, NOT sum, for a two-phase case. ESI treats weighting as a</span>
+    <span class="c1"># SEPARATE OPERATION (typeWeighted is a bitmask on the enum and opSum is not in</span>
+    <span class="c1"># it), so `operation sum` silently ignores weightField and reports the MIXTURE</span>
+    <span class="c1"># flux. Foundation v9 applied the weight to plain sum, so the v9 -&gt; v2406 move</span>
+    <span class="c1"># changed what every discharge monitor meant without changing a line of any</span>
+    <span class="c1"># case. Caught by an impossibility: a lid "leaking" 7.69 m3/s of water through</span>
+    <span class="c1"># 0.1 m2 of wetted area, which needs 77 m/s against a 6 m/s cap.</span>
+    <span class="n">weight</span> <span class="o">=</span> <span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+              <span class="k">else</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">        weightField     alpha.water;"</span><span class="p">)</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="s2">"sum"</span> <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"weightedSum"</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">patch</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"""    Q_</span><span class="si">{</span><span class="n">patch</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span><span class="w"> </span><span class="s1">'_'</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        type            surfaceFieldValue;</span>
+<span class="s2">        libs            ("libfieldFunctionObjects.so");</span>
+<span class="s2">        // runTime, NOT timeStep: with an adaptive dt a per-step interval samples</span>
+<span class="s2">        // the history unevenly in time - dense during the stiff opening, sparse</span>
+<span class="s2">        // once the run speeds up - which is the opposite of what a convergence</span>
+<span class="s2">        // history needs. 'runTime' writes at the first step past each interval and,</span>
+<span class="s2">        // unlike 'adjustableRunTime', does not constrain dt to land on it.</span>
+<span class="s2">        writeControl    runTime;</span>
+<span class="s2">        writeInterval   </span><span class="si">{</span><span class="n">interval</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        log             no;</span>
+<span class="s2">        writeFields     no;</span>
+<span class="s2">        regionType      patch;</span>
+<span class="s2">        name            </span><span class="si">{</span><span class="n">patch</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        operation       </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s2">;</span><span class="si">{</span><span class="n">weight</span><span class="si">}</span>
+<span class="s2">        fields          (phi);</span>
+<span class="s2">    </span><span class="se">}}</span><span class="s2">"""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="fv_schemes">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.fv_schemes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fv_schemes</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""ddtSchemes</span>
+<span class="se">{{</span>
+<span class="s2">    default         Euler;</span>
+<span class="se">}}</span>
+
+<span class="s2">gradSchemes</span>
+<span class="se">{{</span>
+<span class="s2">    default         Gauss linear;</span>
+<span class="se">}}</span>
+
+<span class="s2">divSchemes</span>
+<span class="se">{{</span>
+<span class="s2">    div(rhoPhi,U)   </span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">velocity_scheme</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">    div(phi,alpha)  </span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">alpha_scheme</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">    // the compression flux term. Foundation folded this into an</span>
+<span class="s2">    // `interfaceCompression` scheme on div(phi,alpha); ESI keeps it a separate</span>
+<span class="s2">    // divergence with its strength set by cAlpha in fvSolution.</span>
+<span class="s2">    div(phirb,alpha) Gauss linear;</span>
+<span class="s2">    div(phi,k)      Gauss upwind;</span>
+<span class="s2">    div(phi,omega)  Gauss upwind;</span>
+<span class="s2">    div(phi,epsilon) Gauss upwind;</span>
+<span class="s2">    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;</span>
+<span class="se">}}</span>
+
+<span class="s2">laplacianSchemes</span>
+<span class="se">{{</span>
+<span class="s2">    // 'limited corrected 0.33' rather than plain 'corrected': the terrain-following</span>
+<span class="s2">    // mesh is non-orthogonal wherever the bed slopes, and the limiter keeps the</span>
+<span class="s2">    // explicit correction from over-shooting there</span>
+<span class="s2">    default         Gauss linear limited corrected 0.33;</span>
+<span class="se">}}</span>
+
+<span class="s2">interpolationSchemes</span>
+<span class="se">{{</span>
+<span class="s2">    default         linear;</span>
+<span class="se">}}</span>
+
+<span class="s2">snGradSchemes</span>
+<span class="se">{{</span>
+<span class="s2">    default         limited corrected 0.33;</span>
+<span class="se">}}</span>
+
+<span class="s2">// kOmegaSST needs the distance to the nearest wall. 'meshWave' is the exact</span>
+<span class="s2">// (front-marching) method; on a bed-following mesh the cheap 'Poisson'</span>
+<span class="s2">// approximation is noticeably wrong in the thin near-bed layers, which is exactly</span>
+<span class="s2">// where the blending function it feeds decides between k-omega and k-epsilon.</span>
+<span class="s2">wallDist</span>
+<span class="se">{{</span>
+<span class="s2">    method          meshWave;</span>
+<span class="se">}}</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"fvSchemes"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_alpha_mules</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the alpha equation is solved implicitly (MULESCorr) or explicitly.</span>
+
+<span class="sd">    For the two-phase case ``yes`` is the whole reason the time step is usable: it</span>
+<span class="sd">    decouples dt from the interface Courant number.</span>
+
+<span class="sd">    Under a rigid lid it is the opposite. ``alpha`` is identically 1 - there is no</span>
+<span class="sd">    interface, and nothing to advect - so the implicit correction solves a linear</span>
+<span class="sd">    system whose answer is already known. Measured on isar-2025 (5x coarse,</span>
+<span class="sd">    14,632 cells): 60 s of river took **88 s** with MULESCorr and **21 s** without,</span>
+<span class="sd">    for the same time step (0.363 vs 0.369 s) and the same ``alpha`` (1 to 8</span>
+<span class="sd">    significant figures). Four fifths of the cost was a correction with nothing to</span>
+<span class="sd">    correct.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"rigid-lid"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">"// alpha is identically 1 under the rigid lid: nothing to advect, so</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"        // the implicit correction is pure overhead (measured 4x)</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"        MULESCorr       no;"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s2">"// semi-implicit MULES: this is what decouples the time step from the</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"        // interface Courant number and lets maxAlphaCo run at "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">max_courant</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"        MULESCorr       yes;"</span><span class="p">)</span>
+
+
+<span class="c1">#: isoAdvector reconstruction schemes ESI v2406 ships, in increasing order of</span>
+<span class="c1">#: fidelity. `isoAlpha` is the original isosurface cut; the two PLIC schemes fit a</span>
+<span class="c1">#: plane per interface cell, `plicRDF` iterating it against a reconstructed distance</span>
+<span class="c1">#: function. On aXqua's own structured hex lattice - isoAdvector's best case - PLIC</span>
+<span class="c1">#: is the one worth having.</span>
+<span class="n">ISO_RECONSTRUCTION</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"isoAlpha"</span><span class="p">,</span> <span class="s2">"gradAlpha"</span><span class="p">,</span> <span class="s2">"plicRDF"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_alpha_iso</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``alpha.water`` entries for ``interIsoFoam``, in place of MULES.</span>
+
+<span class="sd">    isoAdvector advects the interface GEOMETRICALLY - it reconstructs a surface in</span>
+<span class="sd">    each interface cell and fluxes the volume that crosses each face - rather than</span>
+<span class="sd">    solving a transport equation and fighting the resulting smearing with a</span>
+<span class="sd">    compression term. Two things follow that this case needs.</span>
+
+<span class="sd">    **The discharge stops being wrong.** The inflow condition controls the MIXTURE</span>
+<span class="sd">    flux, so the water entering is `Q*&lt;alpha^2&gt;/&lt;alpha&gt;`, which equals Q only for a</span>
+<span class="sd">    sharp interface. Under MULES on munich-vsf that ratio was 0.821, steady: the</span>
+<span class="sd">    case believed 0.135 m3/s and delivered 0.111, and the discharge balance could</span>
+<span class="sd">    not see it because inflow and outflow were short by the same amount. Measured on</span>
+<span class="sd">    the v2406 tutorial, isoAdvector holds `min(alpha) = 0, max(alpha) = 1 + 8e-10`,</span>
+<span class="sd">    against this case's `-1.3e-08 .. 1.0001118` under MULES.</span>
+
+<span class="sd">    **The interface stops setting the time step.** There is no compression flux to</span>
+<span class="sd">    resolve, so the Interface Courant number is not a separate limit - the one that</span>
+<span class="sd">    climbed to 93% of the flow Courant on the 0.045 m run and became the limiter.</span>
+
+<span class="sd">    `cAlpha` is written although isoAdvector ignores it: `interfaceProperties` reads</span>
+<span class="sd">    it when it is constructed, and the run aborts without it.</span>
+<span class="sd">    """</span>
+    <span class="n">scheme</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="p">,</span> <span class="s2">"iso_reconstruction"</span><span class="p">,</span> <span class="s2">"plicRDF"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ISO_RECONSTRUCTION</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"openfoam.iso_reconstruction </span><span class="si">{</span><span class="n">scheme</span><span class="si">!r}</span><span class="s2"> is not one of "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ISO_RECONSTRUCTION</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""        // GEOMETRIC interface advection: no compression flux, so no</span>
+<span class="s2">        // interface Courant limit and no smearing for the inlet to lose</span>
+<span class="s2">        // discharge to. See axqua.solvers.openfoam.dicts._alpha_iso.</span>
+<span class="s2">        reconstructionScheme </span><span class="si">{</span><span class="n">scheme</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">        isoFaceTol      1e-6;</span>
+<span class="s2">        surfCellTol     1e-6;</span>
+<span class="s2">        nAlphaBounds    3;</span>
+<span class="s2">        snapTol         1e-12;</span>
+<span class="s2">        clip            true;</span>
+<span class="s2">        writeFields     false;</span>
+
+<span class="s2">        nAlphaSubCycles 1;</span>
+<span class="s2">        // ignored by isoAdvector, but interfaceProperties reads it on construction</span>
+<span class="s2">        cAlpha          1;"""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_alpha_block</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="s2">"interIsoFoam"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_alpha_iso</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"""        nAlphaCorr      2;</span>
+<span class="s2">        nAlphaSubCycles 1;</span>
+<span class="s2">        // interface compression strength. Foundation carried this as a trailing</span>
+<span class="s2">        // number on the div(phi,alpha) scheme; ESI reads it here.</span>
+<span class="s2">        cAlpha          </span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">c_alpha</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">        </span><span class="si">{</span><span class="n">_alpha_mules</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">stage</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">        nLimiterIter    5;</span>
+<span class="s2">        alphaApplyPrevCorr yes;"""</span>
+
+
+<div class="viewcode-block" id="fv_solution">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.fv_solution">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fv_solution</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="n">Stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""solvers</span>
+<span class="se">{{</span>
+<span class="s2">    "alpha.water.*"</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="si">{</span><span class="n">_alpha_block</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">stage</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s2">        solver          smoothSolver;</span>
+<span class="s2">        smoother        symGaussSeidel;</span>
+<span class="s2">        tolerance       1e-9;</span>
+<span class="s2">        relTol          0;</span>
+<span class="s2">    </span><span class="se">}}</span>
+
+<span class="s2">    "pcorr.*"</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        solver          PCG;</span>
+<span class="s2">        preconditioner  DIC;</span>
+<span class="s2">        tolerance       1e-5;</span>
+<span class="s2">        relTol          0;</span>
+<span class="s2">    </span><span class="se">}}</span>
+
+<span class="s2">    p_rgh</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        // GAMG, not PCG: on a multi-million-cell mesh the pressure solve dominates</span>
+<span class="s2">        // and a geometric-algebraic multigrid is several times faster</span>
+<span class="s2">        solver          GAMG;</span>
+<span class="s2">        tolerance       1e-7;</span>
+<span class="s2">        relTol          0.01;</span>
+<span class="s2">        smoother        DIC;</span>
+<span class="s2">    </span><span class="se">}}</span>
+
+<span class="s2">    p_rghFinal</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        $p_rgh;</span>
+<span class="s2">        tolerance       1e-8;</span>
+<span class="s2">        relTol          0;</span>
+<span class="s2">    </span><span class="se">}}</span>
+
+<span class="s2">    "(U|k|omega|epsilon).*"</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        solver          smoothSolver;</span>
+<span class="s2">        smoother        symGaussSeidel;</span>
+<span class="s2">        tolerance       1e-7;</span>
+<span class="s2">        relTol          0.1;</span>
+<span class="s2">    </span><span class="se">}}</span>
+
+<span class="s2">    "(U|k|omega|epsilon)Final"</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        $U;</span>
+<span class="s2">        relTol          0;</span>
+<span class="s2">    </span><span class="se">}}</span>
+<span class="se">}}</span>
+
+<span class="s2">PIMPLE</span>
+<span class="se">{{</span>
+<span class="s2">    // buoyancy dominates in a free-surface flow: the momentum predictor costs an</span>
+<span class="s2">    // extra solve and buys nothing</span>
+<span class="s2">    momentumPredictor no;</span>
+
+<span class="s2">    nOuterCorrectors </span><span class="si">{</span><span class="n">stage</span><span class="o">.</span><span class="n">n_outer_correctors</span><span class="si">}</span><span class="s2">;</span>
+<span class="s2">    nCorrectors     </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="w"> </span><span class="s2">"pressure_correctors"</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">))</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">    // the bed-following mesh is non-orthogonal where the bed is steep; without</span>
+<span class="s2">    // these the pressure solution leaks that as spurious near-bed velocity</span>
+<span class="s2">    nNonOrthogonalCorrectors </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span><span class="w"> </span><span class="s2">"non_orthogonal_correctors"</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">))</span><span class="si">}</span><span class="s2">;</span>
+<span class="se">}}</span>
+
+<span class="s2">relaxationFactors</span>
+<span class="se">{{</span>
+<span class="s2">    equations</span>
+<span class="s2">    </span><span class="se">{{</span>
+<span class="s2">        ".*"            1;</span>
+<span class="s2">    </span><span class="se">}}</span>
+<span class="se">}}</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"fvSolution"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fv_options">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.fv_options">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fv_options</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""// Cap on the velocity magnitude. In the two-phase case this is the single most</span>
+<span class="s2">// effective stop on the AIR phase destroying the time step; under a rigid lid there</span>
+<span class="s2">// is no air, and it remains only as a cheap divergence guard. Air is ~1000x lighter than water, so a small pressure</span>
+<span class="s2">// error accelerates it enormously; the resulting jet then sets the Courant number</span>
+<span class="s2">// and the step collapses on a phase this model does not care about.</span>
+<span class="s2">//</span>
+<span class="s2">// </span><span class="si">{</span><span class="n">velocity_cap</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s is several times the water velocity this reach carries, so</span>
+<span class="s2">// the water solution never reaches the cap and is untouched by it. Raise it if a</span>
+<span class="s2">// legitimate jet (a steep chute, a weir nappe) is being clipped - the run log</span>
+<span class="s2">// reports how often the constraint bites.</span>
+<span class="s2">limitU</span>
+<span class="se">{{</span>
+<span class="s2">    type            limitVelocity;</span>
+
+<span class="s2">    selectionMode   all;</span>
+
+<span class="s2">    max             </span><span class="si">{</span><span class="n">velocity_cap</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">;</span>
+<span class="se">}}</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"fvOptions"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="decompose_par_dict">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.decompose_par_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decompose_par_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``system/decomposeParDict`` for the processor count of the case."""</span>
+    <span class="k">return</span> <span class="n">decomposition_dict</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">n_processors</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="decomposition_dict">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.decomposition_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decomposition_dict</span><span class="p">(</span><span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A ``decomposeParDict`` that splits a case into *n_processors* domains."""</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_processors</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""numberOfSubdomains </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">;</span>
+
+<span class="s2">// 'scotch' rather than 'simple'/'hierarchical': the wetted corridor is a sinuous,</span>
+<span class="s2">// non-convex block, so a geometric split would hand some processors mostly empty</span>
+<span class="s2">// space. Scotch balances by cell count and minimizes the interface.</span>
+<span class="s2">method          scotch;</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"decomposeParDict"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="decomposition_of">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.decomposition_of">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decomposition_of</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``numberOfSubdomains`` of the case's ``system/decomposeParDict``, None without one."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"system"</span> <span class="o">/</span> <span class="s2">"decomposeParDict"</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\s*numberOfSubdomains\s+(\d+)\s*;"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="decomposition_for">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.decomposition_for">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">decomposition_for</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The decomposition dictionary of a run on *n_processors* ranks, for ``-decomposeParDict``.</span>
+
+<span class="sd">    None where the case's own ``system/decomposeParDict`` names that number: the run uses it, with its method and coefficients, which may be the user's. Otherwise aXqua's scotch decomposition for the number is written to ``system/decomposeParDict-&lt;n&gt;`` and that file is returned; ``decomposePar`` and the solver are both given it, so the case's own file is never changed (a run on other ranks, killed or not, leaves nothing behind in it).</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_write_decomposition</span><span class="p">(</span><span class="n">case_dir</span><span class="p">,</span> <span class="n">n_processors</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"decomposeParDict-</span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_processors</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_decomposition">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.write_decomposition">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_decomposition</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make the case's own ``system/decomposeParDict`` name *n_processors* domains, for a case that others decompose with that file (the calibration template, which HydroBayesCal copies). A file that names the number already is left as it is. Returns whether the file was written."""</span>
+    <span class="k">return</span> <span class="n">_write_decomposition</span><span class="p">(</span><span class="n">case_dir</span><span class="p">,</span> <span class="n">n_processors</span><span class="p">,</span> <span class="s2">"decomposeParDict"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_decomposition</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""aXqua's decomposition for *n_processors* into ``system/&lt;name&gt;``, unless the case's own file names that number already (None then)."""</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n_processors</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">decomposition_of</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"system"</span> <span class="o">/</span> <span class="n">name</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">decomposition_dict</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="o">==</span> <span class="n">text</span><span class="p">):</span>    <span class="c1"># each stage asks again</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># writing</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<div class="viewcode-block" id="write_dicts">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.write_dicts">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_dicts</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Write ``constant/`` and ``system/`` (both staged dict sets)."""</span>
+    <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="n">constant</span> <span class="o">=</span> <span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"constant"</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"system"</span>
+    <span class="n">constant</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">system</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">written</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">potential</span>
+
+    <span class="n">leg_c</span> <span class="o">=</span> <span class="n">potential</span><span class="o">.</span><span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"transportProperties"</span><span class="p">,</span>
+                        <span class="n">potential</span><span class="o">.</span><span class="n">transport_properties</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">leg_c</span>
+                        <span class="k">else</span> <span class="n">transport_properties</span><span class="p">(</span><span class="n">cfg</span><span class="p">)),</span>
+                       <span class="p">(</span><span class="s2">"turbulenceProperties"</span><span class="p">,</span> <span class="n">turbulence_properties</span><span class="p">(</span><span class="n">cfg</span><span class="p">)),</span>
+                       <span class="p">(</span><span class="s2">"g"</span><span class="p">,</span> <span class="n">gravity</span><span class="p">())):</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_write</span><span class="p">(</span><span class="n">constant</span> <span class="o">/</span> <span class="n">name</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+
+    <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_write</span><span class="p">(</span><span class="n">system</span> <span class="o">/</span> <span class="s2">"decomposeParDict"</span><span class="p">,</span> <span class="n">decompose_par_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">)))</span>
+    <span class="c1"># limitVelocity is kept for leg C too, and dropping it was a mistake worth</span>
+    <span class="c1"># recording. The argument for dropping it was that the cap exists to keep the</span>
+    <span class="c1"># AIR off the time step and leg C has no air - true, but it is also the only</span>
+    <span class="c1"># thing bounding a bad seed, and this case's 3D pre-run has not reached flux</span>
+    <span class="c1"># balance (imbalance 0.58, and one node carrying a 14.9 km free surface).</span>
+    <span class="c1"># Without the cap, leg C went from Courant 0.65 to 2.54 in a single step and</span>
+    <span class="c1"># died with SIGFPE inside kOmegaSST::correct(). Here the cap bounds WATER, so</span>
+    <span class="c1"># it is a startup safeguard rather than a phase trick, and the run reports how</span>
+    <span class="c1"># many cells it touched - if that number is not ~0 once settled, the result is</span>
+    <span class="c1"># not to be read.</span>
+    <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_write</span><span class="p">(</span><span class="n">system</span> <span class="o">/</span> <span class="s2">"fvOptions"</span><span class="p">,</span> <span class="n">fv_options</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">)))</span>
+
+    <span class="c1"># A case built by an older aXqua against Foundation OpenFOAM carries</span>
+    <span class="c1"># constant/momentumTransport and system/fvConstraints. ESI reads neither, so</span>
+    <span class="c1"># leaving them is worse than clutter: the run proceeds on built-in turbulence</span>
+    <span class="c1"># defaults and with no velocity cap, and nothing in the log says the files were</span>
+    <span class="c1"># ignored. Same class as a stale reconstructed time directory.</span>
+    <span class="k">for</span> <span class="n">stale</span> <span class="ow">in</span> <span class="p">(</span><span class="n">constant</span> <span class="o">/</span> <span class="s2">"momentumTransport"</span><span class="p">,</span> <span class="n">system</span> <span class="o">/</span> <span class="s2">"fvConstraints"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">stale</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">stale</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"removed </span><span class="si">%s</span><span class="s2">, which only Foundation OpenFOAM reads"</span><span class="p">,</span> <span class="n">stale</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">inlet_patches</span> <span class="o">+</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="p">{</span><span class="n">STAGE_DIRS</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">(</span><span class="n">cfg</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">STAGE_DIRS</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="n">wanted</span><span class="p">:</span>
+        <span class="c1"># A rebuild that changes the mode changes which stages exist, and a stage</span>
+        <span class="c1"># directory left behind by the previous one is not merely clutter: activate()</span>
+        <span class="c1"># would happily copy a two-phase stage1-spinup (MULESCorr yes, maxCo 0.3) into</span>
+        <span class="c1"># a rigid-lid case, and the case would run - just not as the config describes.</span>
+        <span class="n">stale</span> <span class="o">=</span> <span class="n">system</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">stale</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">stale</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+            <span class="n">stale</span><span class="o">.</span><span class="n">rmdir</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"removed the stale </span><span class="si">%s</span><span class="s2"> stage directory (this mode does not use it)"</span><span class="p">,</span>
+                     <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">stage</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="n">stage_dir</span> <span class="o">=</span> <span class="n">system</span> <span class="o">/</span> <span class="n">STAGE_DIRS</span><span class="p">[</span><span class="n">stage</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">stage_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_write</span><span class="p">(</span><span class="n">stage_dir</span> <span class="o">/</span> <span class="s2">"controlDict"</span><span class="p">,</span>
+                              <span class="n">control_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">,</span> <span class="n">patches</span><span class="o">=</span><span class="n">patches</span><span class="p">,</span>
+                                           <span class="n">boundary_patches</span><span class="o">=</span><span class="n">_boundary_patches</span><span class="p">(</span>
+                                               <span class="n">of_mesh</span><span class="p">))))</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_write</span><span class="p">(</span><span class="n">stage_dir</span> <span class="o">/</span> <span class="s2">"fvSchemes"</span><span class="p">,</span>
+                              <span class="n">potential</span><span class="o">.</span><span class="n">fv_schemes</span><span class="p">()</span> <span class="k">if</span> <span class="n">leg_c</span>
+                              <span class="k">else</span> <span class="n">fv_schemes</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">)))</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_write</span><span class="p">(</span><span class="n">stage_dir</span> <span class="o">/</span> <span class="s2">"fvSolution"</span><span class="p">,</span>
+                              <span class="n">potential</span><span class="o">.</span><span class="n">fv_solution</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">leg_c</span>
+                              <span class="k">else</span> <span class="n">fv_solution</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">stage</span><span class="p">)))</span>
+
+    <span class="c1"># activate the first stage so the case is runnable straight out of the build.</span>
+    <span class="c1"># Named rather than hardcoded: a rigid-lid case has one stage ("run"), because</span>
+    <span class="c1"># with no interface there is nothing for a spin-up to settle.</span>
+    <span class="n">activate</span><span class="p">(</span><span class="n">case_dir</span><span class="p">,</span> <span class="n">stages</span><span class="p">(</span><span class="n">cfg</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">written</span></div>
+
+
+
+<div class="viewcode-block" id="activate">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.dicts.activate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+             <span class="n">single</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Make one stage's dictionaries the active ``system/`` set.</span>
+
+<span class="sd">    With *cfg* the three staged files are **regenerated from that config** before</span>
+<span class="sd">    being activated, so a run always honors the configuration it was launched with.</span>
+<span class="sd">    Without it they would come from the build, and changing ``end_time`` or</span>
+<span class="sd">    ``max_courant`` and re-running ``openfoam_run.py`` would silently run the old</span>
+<span class="sd">    values while every message reported the new ones - a trap precisely because</span>
+<span class="sd">    nothing about it looks wrong.</span>
+
+<span class="sd">    The patch names are read back from the written mesh</span>
+<span class="sd">    (:func:`axqua.solvers.openfoam.polymesh.read_patch_names`), so regenerating needs no</span>
+<span class="sd">    remeshing and no state carried over from the build.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.polymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_patch_names</span>
+
+    <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"system"</span>
+    <span class="n">src</span> <span class="o">=</span> <span class="n">system</span> <span class="o">/</span> <span class="n">STAGE_DIRS</span><span class="p">[</span><span class="n">stage</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">stages</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">single</span><span class="o">=</span><span class="n">single</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">stage</span><span class="p">),</span>
+                      <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown stage </span><span class="si">{</span><span class="n">stage</span><span class="si">!r}</span><span class="s2">; expected one of "</span>
+                             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">STAGE_DIRS</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">patches</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">read_patch_names</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+                   <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"inlet"</span><span class="p">,</span> <span class="s2">"outlet"</span><span class="p">))]</span>
+        <span class="n">src</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">read_patch_names</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ATMOSPHERE_PATCH</span><span class="p">,</span> <span class="n">LID_PATCH</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">BANKS_PATCH</span><span class="p">)</span> <span class="k">if</span> <span class="n">top</span> <span class="ow">and</span> <span class="n">BANKS_PATCH</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="s2">"controlDict"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+            <span class="n">control_dict</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">patches</span><span class="o">=</span><span class="n">patches</span><span class="p">,</span> <span class="n">boundary_patches</span><span class="o">=</span><span class="n">bounds</span><span class="p">))</span>
+        <span class="c1"># Leg C has its own single-phase numerics. This branch matters more than</span>
+        <span class="c1"># the one in write_dicts: activate() REGENERATES from the config on every</span>
+        <span class="c1"># run, so without it a correctly built leg C case is overwritten with</span>
+        <span class="c1"># two-phase dictionaries at launch - which is exactly how it first failed,</span>
+        <span class="c1"># on `div(phi,alpha)` in a case that has no alpha.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">potential</span>
+
+        <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+            <span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="s2">"fvSchemes"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">potential</span><span class="o">.</span><span class="n">fv_schemes</span><span class="p">())</span>
+            <span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="s2">"fvSolution"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">potential</span><span class="o">.</span><span class="n">fv_solution</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="s2">"fvSchemes"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">fv_schemes</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+            <span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="s2">"fvSolution"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">fv_solution</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no </span><span class="si">{</span><span class="n">stage</span><span class="si">!r}</span><span class="s2"> stage in </span><span class="si">{</span><span class="n">src</span><span class="si">}</span><span class="s2">; rebuild the case with "</span>
+            <span class="s2">"openfoam_preprocessing.py"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">STAGED_FILES</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">src</span> <span class="o">/</span> <span class="n">name</span><span class="p">,</span> <span class="n">system</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"activated the </span><span class="si">%s</span><span class="s2"> stage (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">stage</span><span class="p">,</span> <span class="n">STAGE_DIRS</span><span class="p">[</span><span class="n">stage</span><span class="p">])</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

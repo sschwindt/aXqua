@@ -1,0 +1,605 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.jobs.launchers.windows &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/jobs/launchers/windows.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.jobs.launchers.windows</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.jobs.launchers.windows</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Windows: detached processes inside a named Job Object.</span>
+
+<span class="sd">Windows has no process groups in the POSIX sense, so ``killpg`` has no equivalent and the</span>
+<span class="sd">naive ``proc.terminate()`` kills only the process you named - leaving every MPI rank it</span>
+<span class="sd">started running at full tilt. A **Job Object** is the actual equivalent: a kernel object</span>
+<span class="sd">that owns a set of processes and can terminate all of them at once.</span>
+
+<span class="sd">Two flags decide whether this works, and the plan's sketch gets one of them subtly wrong:</span>
+
+<span class="sd">``JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`` must be **cleared**</span>
+<span class="sd">    Otherwise the job dies when the last handle to the object closes - i.e. when</span>
+<span class="sd">    ``axqua submit`` exits, which is the opposite of detached.</span>
+
+<span class="sd">The object must be **named**</span>
+<span class="sd">    An unnamed Job Object is reachable only through the handle that created it, and that</span>
+<span class="sd">    handle dies with the submitting process. A later ``axqua cancel``, in a different</span>
+<span class="sd">    process, then has nothing to open - so cancellation would be impossible, which is</span>
+<span class="sd">    exactly the failure the Job Object was introduced to prevent. Hence</span>
+<span class="sd">    ``Local\\axqua-&lt;job_id&gt;`` plus ``OpenJobObjectW`` at cancel time.</span>
+
+<span class="sd">**Never executed against a real Windows install.** The argv and flag construction are</span>
+<span class="sd">unit-tested because they are host-independent; the ``kernel32`` calls are not, and this</span>
+<span class="sd">module says so rather than implying a coverage it does not have.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">AxquaEnvironmentError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs</span><span class="w"> </span><span class="kn">import</span> <span class="n">procs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.launcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchHandle</span><span class="p">,</span> <span class="n">LaunchState</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua.jobs.launchers.windows"</span><span class="p">)</span>
+
+<span class="c1"># CreateProcess flags. DETACHED_PROCESS gives the child no console at all, so closing</span>
+<span class="c1"># the launching terminal cannot deliver CTRL_CLOSE_EVENT to the solver.</span>
+<span class="n">CREATE_NEW_PROCESS_GROUP</span> <span class="o">=</span> <span class="mh">0x00000200</span>
+<span class="n">DETACHED_PROCESS</span> <span class="o">=</span> <span class="mh">0x00000008</span>
+<span class="n">CREATE_BREAKAWAY_FROM_JOB</span> <span class="o">=</span> <span class="mh">0x01000000</span>
+
+<span class="c1"># SetInformationJobObject / JOBOBJECT_EXTENDED_LIMIT_INFORMATION</span>
+<span class="n">JobObjectExtendedLimitInformation</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</span> <span class="o">=</span> <span class="mh">0x00002000</span>
+<span class="n">JOB_OBJECT_ALL_ACCESS</span> <span class="o">=</span> <span class="mh">0x1F001F</span>
+
+
+<div class="viewcode-block" id="job_object_name">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.job_object_name">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">job_object_name</span><span class="p">(</span><span class="n">job_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Session-local, so two users on one machine cannot collide."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Local</span><span class="se">\\</span><span class="s2">axqua-</span><span class="si">{</span><span class="n">job_id</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+
+<div class="viewcode-block" id="WindowsJobObjectLauncher">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WindowsJobObjectLauncher</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Detached ``CreateProcess`` assigned to a named Job Object."""</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">"windows"</span>
+
+<div class="viewcode-block" id="WindowsJobObjectLauncher.available">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher.available">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">available</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span></div>
+
+
+    <span class="c1"># -- submit -------------------------------------------------------------------</span>
+<div class="viewcode-block" id="WindowsJobObjectLauncher.submit">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher.submit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_dir</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">env</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+               <span class="n">cwd</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LaunchHandle</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">job_dir</span><span class="p">,</span> <span class="s2">"root"</span><span class="p">,</span> <span class="n">job_dir</span><span class="p">))</span>
+        <span class="n">stdout_path</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"solver"</span> <span class="o">/</span> <span class="s2">"stdout.log"</span>
+        <span class="n">stdout_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">job_object_name</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_job_object</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">creationflags</span> <span class="o">=</span> <span class="n">CREATE_NEW_PROCESS_GROUP</span> <span class="o">|</span> <span class="n">DETACHED_PROCESS</span>
+        <span class="n">handle_out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">stdout_path</span><span class="p">,</span> <span class="s2">"ab"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">creationflags</span><span class="p">,</span> <span class="n">handle_out</span><span class="p">)</span>
+            <span class="n">assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assign</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">assigned</span><span class="p">:</span>
+                <span class="c1"># The submitter is itself inside a job that forbids nesting (some CI</span>
+                <span class="c1"># runners and terminals do this). Retry breaking away, and if that also</span>
+                <span class="c1"># fails, run detached without a job object and say so - a job that runs</span>
+                <span class="c1"># and is awkward to cancel beats a job that will not start.</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+                <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span>
+                                   <span class="n">creationflags</span> <span class="o">|</span> <span class="n">CREATE_BREAKAWAY_FROM_JOB</span><span class="p">,</span> <span class="n">handle_out</span><span class="p">)</span>
+                <span class="n">assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assign</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">handle_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">assigned</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"could not assign the job to a Job Object; cancellation will "</span>
+                        <span class="s2">"fall back to taskkill /T, which is less reliable"</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"launched pid </span><span class="si">%s</span><span class="s2"> detached</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span>
+                 <span class="sa">f</span><span class="s2">" in job object </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LaunchHandle</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pid</span><span class="o">=</span><span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">job_object</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                            <span class="n">proc_started</span><span class="o">=</span><span class="n">procs</span><span class="o">.</span><span class="n">process_start_time</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span>
+                            <span class="n">log_path</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">stdout_path</span><span class="p">))</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_spawn</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">creationflags</span><span class="p">,</span> <span class="n">stdout</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+                <span class="n">argv</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">),</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">STDOUT</span><span class="p">,</span> <span class="n">close_fds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">creationflags</span><span class="o">=</span><span class="n">creationflags</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AxquaEnvironmentError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"could not start the job runner: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="s2">"launcher"</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"Check that axqua is on PATH inside the solver environment."</span><span class="p">,</span>
+                <span class="n">argv</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+    <span class="c1"># -- kernel32 -----------------------------------------------------------------</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_kernel32</span><span class="p">():</span>  <span class="c1"># pragma: no cover - Windows only</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+        <span class="k">return</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">WinDLL</span><span class="p">(</span><span class="s2">"kernel32"</span><span class="p">,</span> <span class="n">use_last_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_create_job_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># pragma: no cover - Windows only</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">IO_COUNTERS</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">Structure</span><span class="p">):</span>
+            <span class="n">_fields_</span> <span class="o">=</span> <span class="p">[(</span><span class="n">n</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_ulonglong</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span>
+                        <span class="p">(</span><span class="s2">"ReadOperationCount"</span><span class="p">,</span> <span class="s2">"WriteOperationCount"</span><span class="p">,</span>
+                         <span class="s2">"OtherOperationCount"</span><span class="p">,</span> <span class="s2">"ReadTransferCount"</span><span class="p">,</span>
+                         <span class="s2">"WriteTransferCount"</span><span class="p">,</span> <span class="s2">"OtherTransferCount"</span><span class="p">)]</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">JOBOBJECT_BASIC_LIMIT_INFORMATION</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">Structure</span><span class="p">):</span>
+            <span class="n">_fields_</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">"PerProcessUserTimeLimit"</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">LARGE_INTEGER</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"PerJobUserTimeLimit"</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">LARGE_INTEGER</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"LimitFlags"</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"MinimumWorkingSetSize"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"MaximumWorkingSetSize"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"ActiveProcessLimit"</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"Affinity"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">POINTER</span><span class="p">(</span><span class="n">wintypes</span><span class="o">.</span><span class="n">ULONG</span><span class="p">)),</span>
+                        <span class="p">(</span><span class="s2">"PriorityClass"</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"SchedulingClass"</span><span class="p">,</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">DWORD</span><span class="p">)]</span>
+
+        <span class="k">class</span><span class="w"> </span><span class="nc">JOBOBJECT_EXTENDED_LIMIT_INFORMATION</span><span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">Structure</span><span class="p">):</span>
+            <span class="n">_fields_</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">"BasicLimitInformation"</span><span class="p">,</span> <span class="n">JOBOBJECT_BASIC_LIMIT_INFORMATION</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"IoInfo"</span><span class="p">,</span> <span class="n">IO_COUNTERS</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"ProcessMemoryLimit"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"JobMemoryLimit"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"PeakProcessMemoryUsed"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s2">"PeakJobMemoryUsed"</span><span class="p">,</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_size_t</span><span class="p">)]</span>
+
+        <span class="n">kernel32</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel32</span><span class="p">()</span>
+        <span class="n">kernel32</span><span class="o">.</span><span class="n">CreateJobObjectW</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">kernel32</span><span class="o">.</span><span class="n">CreateJobObjectW</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">job</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"CreateJobObject(</span><span class="si">%s</span><span class="s2">) failed (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                        <span class="n">ctypes</span><span class="o">.</span><span class="n">get_last_error</span><span class="p">())</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">JOBOBJECT_EXTENDED_LIMIT_INFORMATION</span><span class="p">()</span>
+        <span class="c1"># Explicitly clear the kill-on-close bit: the whole point is that the tree</span>
+        <span class="c1"># outlives the process that created the object.</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">BasicLimitInformation</span><span class="o">.</span><span class="n">LimitFlags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE</span>
+        <span class="n">kernel32</span><span class="o">.</span><span class="n">SetInformationJobObject</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">JobObjectExtendedLimitInformation</span><span class="p">,</span>
+                                         <span class="n">ctypes</span><span class="o">.</span><span class="n">byref</span><span class="p">(</span><span class="n">info</span><span class="p">),</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">sizeof</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">job</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_assign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">,</span> <span class="n">proc</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Windows only</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">job</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+        <span class="n">kernel32</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel32</span><span class="p">()</span>
+        <span class="n">kernel32</span><span class="o">.</span><span class="n">OpenProcess</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span>
+        <span class="n">handle</span> <span class="o">=</span> <span class="n">kernel32</span><span class="o">.</span><span class="n">OpenProcess</span><span class="p">(</span><span class="mh">0x1F0FFF</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>   <span class="c1"># PROCESS_ALL_ACCESS</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">handle</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">kernel32</span><span class="o">.</span><span class="n">AssignProcessToJobObject</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="n">handle</span><span class="p">))</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+
+    <span class="c1"># -- inspection ---------------------------------------------------------------</span>
+<div class="viewcode-block" id="WindowsJobObjectLauncher.status">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher.status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">:</span> <span class="n">LaunchHandle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LaunchState</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">UNKNOWN</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">procs</span><span class="o">.</span><span class="n">pid_alive</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">GONE</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">procs</span><span class="o">.</span><span class="n">process_start_time</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">proc_started</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">now</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="n">handle</span><span class="o">.</span><span class="n">proc_started</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">GONE</span>
+        <span class="k">return</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">RUNNING</span></div>
+
+
+<div class="viewcode-block" id="WindowsJobObjectLauncher.cancel">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher.cancel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">:</span> <span class="n">LaunchHandle</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">grace</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""``TerminateJobObject`` on the named object, with ``taskkill /T`` as fallback."""</span>
+        <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">job_object</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_terminate_job</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">job_object</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">RUNNING</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"falling back to taskkill for pid </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># /T is the tree, /F is force. Weaker than a Job Object because it walks</span>
+            <span class="c1"># parent-child links, which a re-parented rank has already lost.</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">"taskkill"</span><span class="p">,</span> <span class="s2">"/PID"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span> <span class="s2">"/T"</span><span class="p">,</span> <span class="s2">"/F"</span><span class="p">],</span>
+                           <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">grace</span><span class="p">))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">SubprocessError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"taskkill failed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">RUNNING</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_terminate_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Windows only</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">ctypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">wintypes</span>
+            <span class="n">kernel32</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_kernel32</span><span class="p">()</span>
+            <span class="n">kernel32</span><span class="o">.</span><span class="n">OpenJobObjectW</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">wintypes</span><span class="o">.</span><span class="n">HANDLE</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">kernel32</span><span class="o">.</span><span class="n">OpenJobObjectW</span><span class="p">(</span><span class="n">JOB_OBJECT_ALL_ACCESS</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">job</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">kernel32</span><span class="o">.</span><span class="n">TerminateJobObject</span><span class="p">(</span><span class="n">job</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">kernel32</span><span class="o">.</span><span class="n">CloseHandle</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"TerminateJobObject(</span><span class="si">%s</span><span class="s2">) failed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="WindowsJobObjectLauncher.logs">
+<a class="viewcode-back" href="../../../../code/jobs.html#axqua.jobs.launchers.windows.WindowsJobObjectLauncher.logs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">logs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handle</span><span class="p">:</span> <span class="n">LaunchHandle</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">handle</span><span class="o">.</span><span class="n">log_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">log_path</span> <span class="k">else</span> <span class="kc">None</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

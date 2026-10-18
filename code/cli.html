@@ -1,0 +1,754 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command line &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/code/cli.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="QGIS plugin" href="plugin.html" />
+    <link rel="prev" title="Postprocessing" href="postprocessing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Code documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code documentation</a></li>
+      <li class="breadcrumb-item active">Command line</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/cli.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="command-line">
+<h1>Command line<a class="headerlink" href="#command-line" title="Link to this heading"></a></h1>
+<p>The program <code class="docutils literal notranslate"><span class="pre">axqua</span></code>. <code class="docutils literal notranslate"><span class="pre">axqua.cli</span></code> contains the commands that prepare and inspect a case, and <code class="docutils literal notranslate"><span class="pre">axqua.jobcli</span></code> the commands of the job system. <a class="reference internal" href="../automation/terminal-syntax.html"><span class="doc">Terminal syntax</span></a> lists the commands from the perspective of a user.</p>
+<section id="module-axqua.cli">
+<span id="case-commands"></span><h2>Case commands<a class="headerlink" href="#module-axqua.cli" title="Link to this heading"></a></h2>
+<p>Command-line entry point: <code class="docutils literal notranslate"><span class="pre">axqua</span></code>.</p>
+<p>Two forms:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">&lt;config.yml&gt;</span> <span class="pre">[--check|--dry-run]</span></code> - build a full TELEMAC case
+(default; the configuration path is positional).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">clip</span> <span class="pre">&lt;raster&gt;</span> <span class="pre">-b</span> <span class="pre">&lt;boundary&gt;</span> <span class="pre">-o</span> <span class="pre">&lt;out&gt;</span></code> - clip a single raster to a
+region-of-interest polygon, without needing a full configuration.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">rating</span> <span class="pre">-o</span> <span class="pre">&lt;out.csv&gt;</span> <span class="pre">--manning</span> <span class="pre">&lt;n&gt;|--strickler</span> <span class="pre">&lt;Kst&gt;</span> <span class="pre">--slope</span> <span class="pre">&lt;S0&gt;</span>
+<span class="pre">--width</span> <span class="pre">&lt;b&gt;</span> <span class="pre">[--side-slope</span> <span class="pre">&lt;m&gt;]</span> <span class="pre">[--bed-elevation</span> <span class="pre">&lt;z&gt;]</span> <span class="pre">--q</span> <span class="pre">&lt;Q...&gt;</span></code> - synthesize a
+normal-flow outflow stage-discharge curve to use as <code class="docutils literal notranslate"><span class="pre">boundaries.stage_discharge</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">targets</span> <span class="pre">&lt;config.yml&gt;</span> <span class="pre">[-o</span> <span class="pre">&lt;out.xlsx&gt;]</span> <span class="pre">[--force]</span></code> - generate the
+user-fillable <code class="docutils literal notranslate"><span class="pre">calibration-target-data.xlsx</span></code> template (hydraulics /
+morphodynamics ground truth + calibration-parameter ranges) for a case.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">openfoam</span> <span class="pre">&lt;config.yml&gt;</span> <span class="pre">[--check]</span> <span class="pre">[--cell-size</span> <span class="pre">&lt;m&gt;]</span> <span class="pre">[--layers</span> <span class="pre">&lt;n&gt;]</span></code> -
+build the OpenFOAM (interFoam) free-surface case: a terrain-following
+all-hexahedral mesh, fields seeded from the converged TELEMAC 2D result, and both
+staged dictionary sets. <code class="docutils literal notranslate"><span class="pre">--check</span></code> only reports the cell count.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">case-status</span> <span class="pre">&lt;config.yml&gt;</span> <span class="pre">[--check-env]</span> <span class="pre">[--full]</span> <span class="pre">[--json]</span></code> - report what
+the case can do (implemented / configured / built / run, per solver) and refresh its
+<code class="docutils literal notranslate"><span class="pre">MODEL=&lt;SOLVER&gt;_&lt;ENABLED|DISABLED&gt;</span></code> marker files. <code class="docutils literal notranslate"><span class="pre">--json</span></code> is what a QGIS plugin
+reads to decide which tabs to show.</p></li>
+</ul>
+<p>Job verbs (see <a class="reference internal" href="#module-axqua.jobcli" title="axqua.jobcli"><code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.jobcli</span></code></a>), which run work that outlives this shell:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">submit</span> <span class="pre">&lt;config.yml&gt;</span> <span class="pre">--kind</span> <span class="pre">&lt;kind&gt;</span></code> - create a persistent job and start
+it detached; prints the job id.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">execute</span> <span class="pre">&lt;job&gt;</span></code> - run a job synchronously here (the debugging path).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">status</span> <span class="pre">&lt;JOB_ID&gt;</span></code> / <code class="docutils literal notranslate"><span class="pre">cancel</span></code> / <code class="docutils literal notranslate"><span class="pre">logs</span></code> / <code class="docutils literal notranslate"><span class="pre">list</span></code> / <code class="docutils literal notranslate"><span class="pre">profiles</span></code>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">status</span></code> is overloaded, and the argument decides: an existing <strong>path</strong> means the case
+(the historic meaning, kept working), while an argument matching the job-id grammar means
+the job. The two cannot collide - a job id is never a path.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.cli.main">
+<span class="sig-prename descclassname"><span class="pre">axqua.cli.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/cli.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.cli.main" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.jobcli">
+<span id="job-commands"></span><h2>Job commands<a class="headerlink" href="#module-axqua.jobcli" title="Link to this heading"></a></h2>
+<p>The job verbs: <code class="docutils literal notranslate"><span class="pre">submit</span></code>, <code class="docutils literal notranslate"><span class="pre">execute</span></code>, <code class="docutils literal notranslate"><span class="pre">status</span></code>, <code class="docutils literal notranslate"><span class="pre">cancel</span></code>, <code class="docutils literal notranslate"><span class="pre">logs</span></code>, <code class="docutils literal notranslate"><span class="pre">list</span></code>.</p>
+<p>Kept out of <code class="docutils literal notranslate"><span class="pre">cli.py</span></code> so the build commands and the job commands stay legible apart, and
+because a QGIS plugin’s entire view of axqua is this file’s output. Two properties
+matter more than the exact spelling of any flag:</p>
+<p><strong>Machine-readable output.</strong> Every verb takes <code class="docutils literal notranslate"><span class="pre">--json</span></code> and emits one envelope shape:
+<code class="docutils literal notranslate"><span class="pre">{&quot;ok&quot;,</span> <span class="pre">&quot;command&quot;,</span> <span class="pre">&quot;axqua&quot;,</span> <span class="pre">&quot;data&quot;,</span> <span class="pre">&quot;error&quot;}</span></code>. The document goes to <strong>stdout</strong> and
+all narration to stderr, so a caller can parse stdout unconditionally. Plan §11 is
+explicit that QGIS must never parse human-readable console logs to obtain state, and this
+is what makes that possible.</p>
+<p><strong>Exit codes that mean something.</strong> A uniform <code class="docutils literal notranslate"><span class="pre">1</span></code> forces a GUI to parse text to find
+out what went wrong. The <code class="docutils literal notranslate"><span class="pre">AxquaError</span></code> categories already carry stable codes, so they
+map onto distinct exit codes here.</p>
+<section id="the-status-collision-resolved-by-a-rule">
+<h3>The <code class="docutils literal notranslate"><span class="pre">status</span></code> collision, resolved by a rule<a class="headerlink" href="#the-status-collision-resolved-by-a-rule" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">status</span> <span class="pre">&lt;config&gt;</span></code> has always meant <em>case</em> status. The job verb wants the same
+word. Rather than break the existing spelling or guess, the argument decides:</p>
+<ul class="simple">
+<li><p>an existing <strong>path</strong> -&gt; case status (with a deprecation notice pointing at
+<code class="docutils literal notranslate"><span class="pre">case-status</span></code>);</p></li>
+<li><p>something matching <code class="docutils literal notranslate"><span class="pre">JOB_ID_RE</span></code> -&gt; job status.</p></li>
+</ul>
+<p>A job id is never a path and a path never matches the job-id grammar, so the two cannot be
+confused - and the rule is tested in both directions.</p>
+</section>
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.jobcli.EXIT_OK">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">EXIT_OK</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#axqua.jobcli.EXIT_OK" title="Link to this definition"></a></dt>
+<dd><p>Exit codes by error category, so a caller can branch without parsing a message.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.emit">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_json</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#emit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.emit" title="Link to this definition"></a></dt>
+<dd><p>Print a success result in whichever form was asked for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><em>Any</em></a>)</p></li>
+<li><p><strong>as_json</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>lines</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.fail">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_json</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#fail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.fail" title="Link to this definition"></a></dt>
+<dd><p>Report a failure and choose the exit code from its category.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>command</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>exc</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#BaseException" title="(in Python v3.15)"><em>BaseException</em></a>)</p></li>
+<li><p><strong>as_json</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.parse_args">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.parse_args" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">parser.parse_args</span></code>, but a usage error still leaves an envelope behind.</p>
+<p>argparse prints its usage to stderr and exits 2 with <strong>empty stdout</strong>. For a shell
+that is exactly right, but the plugin’s whole boundary is “run it and read the JSON
+on stdout”, so a mistyped flag arrives there as “axqua returned something that is
+not JSON” - a message about the protocol, for what is really a typo. Writing the
+envelope first costs nothing, and argparse’s own message still goes to stderr where
+it always did. The exit code is unchanged, because shell callers branch on it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parser</strong> (<a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.15)"><em>ArgumentParser</em></a>)</p></li>
+<li><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>command</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_submit">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_submit" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_execute">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_execute" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_job_status">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_job_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_job_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_job_status" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_cancel">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_cancel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_cancel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_cancel" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_logs">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_logs" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_list">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_list" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.jobcli.run_profiles">
+<span class="sig-prename descclassname"><span class="pre">axqua.jobcli.</span></span><span class="sig-name descname"><span class="pre">run_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/jobcli.html#run_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.jobcli.run_profiles" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.profilecli">
+<span id="profile-commands"></span><h2>Profile commands<a class="headerlink" href="#module-axqua.profilecli" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">profile</span></code>: inspect, create and check the profile of this computer.</p>
+<p>The profile (<a class="reference internal" href="configuration.html#module-axqua.core.profile" title="axqua.core.profile"><code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.core.profile</span></code></a>) is what the <em>Configuration</em> tab of the QGIS
+plugin edits. These commands are the same operations for a terminal, and they are how
+the plugin performs them: it never imports aXqua, so reading, writing and checking a
+profile all go through here and come back as one JSON document.</p>
+<p><code class="docutils literal notranslate"><span class="pre">path</span></code>     where the active profile is, or would be
+<code class="docutils literal notranslate"><span class="pre">show</span></code>     print it
+<code class="docutils literal notranslate"><span class="pre">detect</span></code>   what a profile for this computer would contain; writes nothing
+<code class="docutils literal notranslate"><span class="pre">init</span></code>     <code class="docutils literal notranslate"><span class="pre">detect</span></code>, written to the default location (refuses to overwrite)
+<code class="docutils literal notranslate"><span class="pre">check</span></code>    everything that is wrong with it, as findings; never fails on a finding
+<code class="docutils literal notranslate"><span class="pre">write</span></code>    replace it with a JSON document read from standard input
+<code class="docutils literal notranslate"><span class="pre">locate</span></code>   <code class="docutils literal notranslate"><span class="pre">locate</span> <span class="pre">&lt;program&gt;</span> <span class="pre">&lt;folder&gt;</span></code>: what aXqua runs of a program in that folder</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.profilecli.run_profile">
+<span class="sig-prename descclassname"><span class="pre">axqua.profilecli.</span></span><span class="sig-name descname"><span class="pre">run_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/profilecli.html#run_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.profilecli.run_profile" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.installcli">
+<span id="installation-commands"></span><h2>Installation commands<a class="headerlink" href="#module-axqua.installcli" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span></code>: install TELEMAC, OpenFOAM and the postprocessors.</p>
+<p><code class="docutils literal notranslate"><span class="pre">overview</span></code>   what this computer is, and what is installed, running or was tried
+<code class="docutils literal notranslate"><span class="pre">plan</span></code>       what an installation would do and what is missing; changes nothing
+<code class="docutils literal notranslate"><span class="pre">packages</span></code>   the system packages an installation needs; <code class="docutils literal notranslate"><span class="pre">--elevate</span></code> installs them
+<code class="docutils literal notranslate"><span class="pre">start</span></code>      run an installation, detached unless <code class="docutils literal notranslate"><span class="pre">--foreground</span></code>
+<code class="docutils literal notranslate"><span class="pre">status</span></code>     how far an installation is, with the end of its log (<code class="docutils literal notranslate"><span class="pre">--tail</span></code>)
+<code class="docutils literal notranslate"><span class="pre">cancel</span></code>     stop an installation; what is already built stays
+<code class="docutils literal notranslate"><span class="pre">list</span></code>       every installation on record
+<code class="docutils literal notranslate"><span class="pre">telemac-examples</span></code>  download the files that TELEMAC’s own example cases read</p>
+<p>The installation wizards of the QGIS plugin are these commands with a window around
+them. <code class="docutils literal notranslate"><span class="pre">run</span></code> is what a detached installation executes and is not meant to be typed.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.installcli.run_install">
+<span class="sig-prename descclassname"><span class="pre">axqua.installcli.</span></span><span class="sig-name descname"><span class="pre">run_install</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/installcli.html#run_install"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.installcli.run_install" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.exportcli">
+<span id="export-commands"></span><h2>Export commands<a class="headerlink" href="#module-axqua.exportcli" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">export</span></code>: TELEMAC results for ParaView and VisIt.</p>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">export</span> <span class="pre">&lt;case-file&gt;</span></code>            convert every result of the case
+<code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">export</span> <span class="pre">&lt;case-file&gt;</span> <span class="pre">--list</span></code>     what the case has, and what is exported already
+<code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">export</span> <span class="pre">&lt;result.slf&gt;</span></code>           convert one file, without a case</p>
+<p>QGIS reads the result format of TELEMAC directly; ParaView and VisIt do not. The
+conversion (<a class="reference internal" href="postprocessing.html#module-axqua.postproc.selafin_vtk" title="axqua.postproc.selafin_vtk"><code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.postproc.selafin_vtk</span></code></a>) writes one folder per result with a
+<code class="docutils literal notranslate"><span class="pre">.pvd</span></code> file for ParaView and a <code class="docutils literal notranslate"><span class="pre">.visit</span></code> file for VisIt, into the folder <code class="docutils literal notranslate"><span class="pre">vtk</span></code> of
+the postprocessing folder of the case. An OpenFOAM result needs no conversion: both
+programs open the case folder.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.exportcli.run_export">
+<span class="sig-prename descclassname"><span class="pre">axqua.exportcli.</span></span><span class="sig-name descname"><span class="pre">run_export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/exportcli.html#run_export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.exportcli.run_export" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.casecli">
+<span id="case-file-commands"></span><h2>Case file commands<a class="headerlink" href="#module-axqua.casecli" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">schema</span></code>, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">case</span></code> and <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span></code>: what an editor of a case needs.</p>
+<p>The case editor of the QGIS plugin never imports aXqua, so everything it does to a case
+file goes through here and comes back as one JSON document:</p>
+<p><code class="docutils literal notranslate"><span class="pre">schema</span></code>        every setting of a case file: label, kind, unit, explanation
+<code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">read</span></code>     the case file as it is written
+<code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">write</span></code>    replace it with a JSON document read from standard input
+<code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">new</span></code>      a new case file with the entries every case has
+<code class="docutils literal notranslate"><span class="pre">check</span></code>         everything that is wrong with a case, as findings</p>
+<p><code class="docutils literal notranslate"><span class="pre">case</span> <span class="pre">write</span></code> writes what it is given and <em>then</em> checks it. A case is incomplete while
+it is being filled in, and an editor that refused to save an incomplete case would lose
+the work. The original file is kept as <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.bak</span></code> the first time it is replaced,
+because writing goes through the data and the comments of a hand-written file are not
+kept.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.casecli.run_schema">
+<span class="sig-prename descclassname"><span class="pre">axqua.casecli.</span></span><span class="sig-name descname"><span class="pre">run_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/casecli.html#run_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.casecli.run_schema" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.casecli.run_check">
+<span class="sig-prename descclassname"><span class="pre">axqua.casecli.</span></span><span class="sig-name descname"><span class="pre">run_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/casecli.html#run_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.casecli.run_check" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.casecli.run_case">
+<span class="sig-prename descclassname"><span class="pre">axqua.casecli.</span></span><span class="sig-name descname"><span class="pre">run_case</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/casecli.html#run_case"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.casecli.run_case" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.examplecli">
+<span id="example-case-commands"></span><h2>Example case commands<a class="headerlink" href="#module-axqua.examplecli" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">example</span></code>: get an example case onto this computer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">list</span></code>   the example cases there are, with their size
+<code class="docutils literal notranslate"><span class="pre">get</span></code>    put one into a folder, ready to be opened in the plugin or run in a terminal</p>
+<p>An example is a folder that works on its own: the case file, a guide and the input
+data. See <a class="reference internal" href="core.html#module-axqua.core.examples" title="axqua.core.examples"><code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.core.examples</span></code></a> for where the examples are read from.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.examplecli.run_example">
+<span class="sig-prename descclassname"><span class="pre">axqua.examplecli.</span></span><span class="sig-name descname"><span class="pre">run_example</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/examplecli.html#run_example"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.examplecli.run_example" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>argv</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="postprocessing.html" class="btn btn-neutral float-left" title="Postprocessing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plugin.html" class="btn btn-neutral float-right" title="QGIS plugin" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

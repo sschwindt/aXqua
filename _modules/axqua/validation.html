@@ -1,0 +1,1016 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.validation &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/validation.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.validation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.validation</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Validation: the calibrated model against measurements of another flow situation.</span>
+
+<span class="sd">A calibration finds the parameters with which the model reproduces one set of</span>
+<span class="sd">measurements. Whether those parameters describe the reach, or only that one day, shows</span>
+<span class="sd">when the model is run for **another situation** - another discharge, measured in</span>
+<span class="sd">another survey - and compared with what was measured then. That is what this module</span>
+<span class="sd">does, and it is the only kind of validation aXqua offers: the measurements of one</span>
+<span class="sd">survey are taken within hours in one flow field, so holding some of them back</span>
+<span class="sd">(leave-one-out, k-fold, a random share) tests how well the model interpolates within</span>
+<span class="sd">that flow field and says nothing about another discharge.</span>
+
+<span class="sd">The validation run is **the calibrated model with other boundary values**. Its steering</span>
+<span class="sd">file is derived from the built steady case and differs in exactly these lines: the</span>
+<span class="sd">prescribed discharges and water levels of the situation, the names of its own result</span>
+<span class="sd">and friction files, and the calibrated values. Mesh, bed, numerical settings and</span>
+<span class="sd">initial state are untouched, so a difference between model and measurement cannot come</span>
+<span class="sd">from a model that was built differently.</span>
+
+<span class="sd">The calibrated values are the **joint posterior maximum** of the newest calibration</span>
+<span class="sd">(:func:`calibrated_parameters`), read from what HydroBayesCal saved. They are written</span>
+<span class="sd">into copies of the files HydroBayesCal changed during the calibration, by the same</span>
+<span class="sd">rules: ``zone&lt;N&gt;`` is the coefficient of friction zone N in the friction table,</span>
+<span class="sd">``f.&lt;NAME&gt;`` a constant in the user Fortran file, and any other name a keyword of the</span>
+<span class="sd">steering file.</span>
+
+<span class="sd">The model is read at the measurement points on the **geometry file** of the model</span>
+<span class="sd">(see :mod:`axqua.postproc.selafin_vtk` for why not on the result), with the mesh's</span>
+<span class="sd">own triangles. A point outside the mesh has no model value; it is counted and left out</span>
+<span class="sd">of the statistics.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CalibratedSet"</span><span class="p">,</span> <span class="s2">"ValidationReport"</span><span class="p">,</span> <span class="s2">"ValidationSetup"</span><span class="p">,</span> <span class="s2">"boundaries_of"</span><span class="p">,</span>
+           <span class="s2">"build"</span><span class="p">,</span> <span class="s2">"calibrated_parameters"</span><span class="p">,</span> <span class="s2">"compare"</span><span class="p">,</span> <span class="s2">"evaluate"</span><span class="p">,</span> <span class="s2">"inside_model"</span><span class="p">,</span>
+           <span class="s2">"situation_named"</span><span class="p">,</span> <span class="s2">"slug"</span><span class="p">,</span> <span class="s2">"statistics"</span><span class="p">]</span>
+
+<span class="n">RESULTS</span> <span class="o">=</span> <span class="s2">"auto-saved-results-HydroBayesCal"</span>
+<span class="n">FOLDER</span> <span class="o">=</span> <span class="s2">"validation"</span>
+
+<span class="c1">#: Units of the quantities a hydraulic validation compares, for the figure.</span>
+<span class="n">UNITS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"SCALAR VELOCITY"</span><span class="p">:</span> <span class="s2">"m/s"</span><span class="p">,</span> <span class="s2">"WATER DEPTH"</span><span class="p">:</span> <span class="s2">"m"</span><span class="p">,</span> <span class="s2">"FREE SURFACE"</span><span class="p">:</span> <span class="s2">"m"</span><span class="p">,</span>
+         <span class="s2">"VELOCITY U"</span><span class="p">:</span> <span class="s2">"m/s"</span><span class="p">,</span> <span class="s2">"VELOCITY V"</span><span class="p">:</span> <span class="s2">"m/s"</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="slug">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.slug">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">slug</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A name that can be part of a file name."""</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^A-Za-z0-9]+"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"validation"</span></div>
+
+
+
+<div class="viewcode-block" id="situation_named">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.situation_named">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">situation_named</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The validation situation called *name*; the only one when no name is given."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">situations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">validation</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">situations</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"the case names no validation data"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.validation"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter a point layer with measurements of another flow situation "</span>
+                   <span class="s2">"and the discharge of that situation."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">situation</span> <span class="ow">in</span> <span class="n">situations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="n">slug</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">situation</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the case has no validation situation </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.validation"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"It has: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">situations</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">situations</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"the case has several validation situations; name one"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.validation"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"They are: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">situations</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">situations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------ calibrated values</span>
+
+
+<div class="viewcode-block" id="CalibratedSet">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.CalibratedSet">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalibratedSet</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The parameter values a calibration ended with."""</span>
+
+    <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">estimate</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"joint posterior maximum"</span>
+
+<div class="viewcode-block" id="CalibratedSet.as_dict">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.CalibratedSet.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="calibrated_parameters">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.calibrated_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calibrated_parameters</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CalibratedSet</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The joint posterior maximum of the newest calibration of this case.</span>
+
+<span class="sd">    HydroBayesCal saves one dictionary per calibration quantity; the newest is read.</span>
+<span class="sd">    An older HydroBayesCal that did not save the joint maximum gives the mean of the</span>
+<span class="sd">    posterior sample instead, and :attr:`CalibratedSet.estimate` says so.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">RESULTS</span> <span class="o">/</span> <span class="s2">"calibration-data"</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*/BAL_dictionary.pkl"</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no finished calibration in </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the calibration first; the validation uses its result."</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">found</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"rb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>          <span class="c1"># nosec B301 - written by the calibration</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"calibration_parameters"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]]</span>
+    <span class="n">optimum</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"joint_optimum"</span><span class="p">)</span>
+    <span class="n">optimum</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">optimum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">optimum</span>
+    <span class="n">estimate</span> <span class="o">=</span> <span class="s2">"joint posterior maximum"</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">optimum</span><span class="p">)</span> <span class="ow">and</span> <span class="n">optimum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">optimum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="c1"># HydroBayesCal writes NaN as the joint maximum when too few prior samples survive</span>
+    <span class="c1"># the likelihood to estimate a density (one, on the example of 2026-10-15, whose</span>
+    <span class="c1"># model was 37 % too slow at every point). A NaN would be written into the</span>
+    <span class="c1"># friction table of the validation run and wreck it, so the mean of the</span>
+    <span class="c1"># posterior sample stands in, and the estimate says how many samples it rests on.</span>
+    <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="n">posterior</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"posterior"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">posterior</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">posterior</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> holds no posterior"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration"</span><span class="p">,</span>
+                              <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the calibration again."</span><span class="p">)</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">posterior</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="n">estimate</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"posterior mean"</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span>
+                    <span class="s2">"the only posterior sample (no joint maximum could be estimated)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> holds no finite calibrated values"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration"</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run the calibration again."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2"> does not name its parameters"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CalibratedSet</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">],</span> <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+                         <span class="n">estimate</span><span class="o">=</span><span class="n">estimate</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------- the situation</span>
+
+
+<div class="viewcode-block" id="boundaries_of">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.boundaries_of">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">boundaries_of</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The liquid boundaries of the built case, as a person needs them to state the</span>
+<span class="sd">    discharges of another situation: number, inflow or outflow, calibrated discharge."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">boundary</span>
+
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">liquid_boundaries_json</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">meta</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">return</span> <span class="p">[{</span><span class="s2">"index"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="s2">"discharge"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="p">,</span>
+             <span class="s2">"n_nodes"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">boundary</span><span class="o">.</span><span class="n">load_liquid_boundaries</span><span class="p">(</span><span class="n">meta</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The liquid boundaries with the discharges of *situation*, and their total."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">boundary</span>
+
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">liquid_boundaries_json</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">meta</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is missing in </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"preprocessing"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Build the case first (tab Preprocessing)."</span><span class="p">)</span>
+    <span class="n">liquids</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">load_liquid_boundaries</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+    <span class="n">inflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">]</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="s2">"calibration.validation"</span>
+    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">:</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">lb</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">}</span>
+        <span class="n">wrong</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">)</span> <span class="o">-</span> <span class="n">known</span><span class="p">)</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">known</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">wrong</span> <span class="ow">or</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="s2">"the discharges of the validation situation do not match the inflows "</span>
+                <span class="s2">"of the model, which are the liquid boundaries "</span>
+                <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">known</span><span class="p">))</span>
+                <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"; not an inflow: </span><span class="si">{</span><span class="n">wrong</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">wrong</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+                <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"; without a discharge: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">missing</span> <span class="k">else</span> <span class="s2">""</span><span class="p">),</span>
+                <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.inflows"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">:</span>
+            <span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="p">[</span><span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">liquids</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">inflows</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the validation situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names no discharge"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">.prescribed_flowrate"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the discharge at which the validation data were measured."</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">inflows</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">):</span>
+        <span class="n">before</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">:</span>                      <span class="c1"># the same split, at another total</span>
+            <span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="p">)</span> <span class="o">*</span> <span class="n">total</span> <span class="o">/</span> <span class="n">before</span> <span class="k">if</span> <span class="n">before</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span>
+
+
+<span class="c1"># --------------------------------------------------------------------- applying values</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_friction_rows</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">zones</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The friction table with the coefficients of *zones* replaced."""</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)[</span><span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">zones</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">done</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">:</span>
+            <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">wanted</span><span class="p">[</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span>
+            <span class="n">done</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">,</span> <span class="n">done</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_keyword</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"^</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2">\s*:\s*(.*)$"</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">found</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"'</span><span class="se">\"</span><span class="s2">"</span><span class="p">)</span> <span class="k">if</span> <span class="n">found</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="ValidationSetup">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.ValidationSetup">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ValidationSetup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The files of one validation run."""</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">cas</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">flowrate</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">flowrates</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">elevations</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">friction</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ValidationSetup.as_dict">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.ValidationSetup.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"cas"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cas</span><span class="p">),</span> <span class="s2">"results"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">),</span>
+                <span class="s2">"parameters"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span> <span class="s2">"flowrate"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flowrate</span><span class="p">,</span>
+                <span class="s2">"prescribed_flowrates"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flowrates</span><span class="p">,</span>
+                <span class="s2">"prescribed_elevations"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">elevations</span><span class="p">,</span>
+                <span class="s2">"friction"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">friction</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="k">else</span> <span class="s2">""</span><span class="p">,</span>
+                <span class="s2">"notes"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">)}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="build">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.build">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ValidationSetup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the steering file of the validation run into the model folder."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">bayescal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">steering</span>
+
+    <span class="n">bayescal</span><span class="o">.</span><span class="n">restore_as_built</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>              <span class="c1"># a killed calibration restores nothing</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">base</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is missing in </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="s2">"preprocessing"</span><span class="p">,</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Build the case first (tab Preprocessing)."</span><span class="p">)</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># ---- the boundary values of the situation --------------------------------------</span>
+    <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">)</span>
+    <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">total</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
+    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">condition</span> <span class="o">!=</span> <span class="s2">"elevation"</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"The outflow water level of the validation situation is not "</span>
+                         <span class="sa">f</span><span class="s2">"used: the case computes it (</span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">)."</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">condition</span> <span class="o">==</span> <span class="s2">"elevation"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"the case prescribes the water level at the outflow, and the validation "</span>
+            <span class="sa">f</span><span class="s2">"situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names none"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.validation.prescribed_elevation"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the outflow water level at which the validation data were "</span>
+                   <span class="s2">"measured. The level of the calibration belongs to its discharge."</span><span class="p">)</span>
+    <span class="n">given</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span>
+    <span class="k">if</span> <span class="n">condition</span> <span class="o">==</span> <span class="s2">"stage_discharge"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">given</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+        <span class="c1"># The case has no measured rating curve: its outflow level was derived from</span>
+        <span class="c1"># the channel geometry for the calibrated discharge. The level of this</span>
+        <span class="c1"># situation is derived the same way, for its own discharge.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_rating_if_missing</span>
+
+        <span class="n">own</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"rating-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span>
+        <span class="n">own</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">own</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="o">=</span> <span class="n">own</span>
+        <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+    <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">condition</span> <span class="o">==</span> <span class="s2">"free"</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">))</span>
+    <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">_profiles</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">_prescribed_arrays</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">stage</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED FLOWRATES"</span><span class="p">,</span> <span class="n">flow</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED ELEVATIONS"</span><span class="p">,</span> <span class="n">elev</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"TITLE"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> validation </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.slf"</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"RESULTS FILE"</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"DURATION"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="c1"># ---- the calibrated values -----------------------------------------------------</span>
+    <span class="n">zones</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+             <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"zone"</span><span class="p">)}</span>
+    <span class="n">constants</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                 <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"f."</span><span class="p">)}</span>
+    <span class="n">unsupported</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"gaia"</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">unsupported</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"the validation run cannot yet set the calibrated sediment transport "</span>
+            <span class="s2">"parameters: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unsupported</span><span class="p">),</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.parameters"</span><span class="p">)</span>
+    <span class="n">keywords</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">zones</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"f."</span><span class="p">)}</span>
+
+    <span class="n">friction_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">zones</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">_keyword</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FRICTION DATA FILE"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">table</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"the steering file names no friction table, but the "</span>
+                              <span class="s2">"calibration ended with values for friction zones"</span><span class="p">,</span>
+                              <span class="n">subject</span><span class="o">=</span><span class="s2">"friction"</span><span class="p">)</span>
+        <span class="n">new_table</span><span class="p">,</span> <span class="n">done</span> <span class="o">=</span> <span class="n">_friction_rows</span><span class="p">((</span><span class="n">model</span> <span class="o">/</span> <span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">),</span>
+                                         <span class="n">zones</span><span class="p">)</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">zones</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">done</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"the friction table has no zone "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">),</span>
+                              <span class="n">subject</span><span class="o">=</span><span class="s2">"friction"</span><span class="p">)</span>
+        <span class="n">friction_path</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.tbl"</span>
+        <span class="n">friction_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">new_table</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FRICTION DATA FILE"</span><span class="p">,</span> <span class="n">friction_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">constants</span><span class="p">:</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">_keyword</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FORTRAN FILE"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">folder</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"the steering file names no Fortran folder, but the "</span>
+                              <span class="s2">"calibration ended with values for constants in it"</span><span class="p">,</span>
+                              <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.parameters"</span><span class="p">)</span>
+        <span class="n">copied</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">copied</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="n">folder</span><span class="p">,</span> <span class="n">copied</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">constants</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">hit</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">copied</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.[fF]*"</span><span class="p">)):</span>
+                <span class="n">code</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+                <span class="n">new</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">subn</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"^(\s*)</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">\s*=.*$"</span><span class="p">,</span>
+                                     <span class="sa">rf</span><span class="s2">"\g&lt;1&gt;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.8g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">count</span><span class="p">:</span>
+                    <span class="n">source</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+                    <span class="n">hit</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">hit</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no line '</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = ...' in </span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                                  <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.parameters"</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"FORTRAN FILE"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">copied</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">keywords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_set_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.8g</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="n">cas</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.cas"</span>
+    <span class="n">cas</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"validation </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> at </span><span class="si">%.4g</span><span class="s2"> m3/s (PRESCRIBED FLOWRATES </span><span class="si">%s</span><span class="s2">; ELEVATIONS </span><span class="si">%s</span><span class="s2">), "</span>
+             <span class="s2">"calibrated values </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span>
+             <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="n">ValidationSetup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cas</span><span class="o">=</span><span class="n">cas</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n">model</span> <span class="o">/</span> <span class="n">results</span><span class="p">,</span>
+                           <span class="n">parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span> <span class="n">flowrate</span><span class="o">=</span><span class="n">total</span><span class="p">,</span> <span class="n">flowrates</span><span class="o">=</span><span class="n">flow</span><span class="p">,</span>
+                           <span class="n">elevations</span><span class="o">=</span><span class="n">elev</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="n">friction_path</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------- measured values</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">measurements</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The measurements of *situation* as calibration points are written:</span>
+<span class="sd">    ``id, x, y, z, &lt;QUANTITY&gt;_DATA, &lt;QUANTITY&gt;_ERROR``. Returns ``(path, table)``.</span>
+
+<span class="sd">    Compiled by the same code as the calibration data, so that a velocity means the</span>
+<span class="sd">    same in both, into files of their own in the calibration folder.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">bayescal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">situation</span><span class="o">.</span><span class="n">sources</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the validation situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names no measurements"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"calibration.validation.sources"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the point layer with the validation data."</span><span class="p">)</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span>
+    <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">sources</span><span class="p">)</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">measurements</span> <span class="o">=</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"ground-truth-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.xlsx"</span>
+    <span class="n">there</span><span class="o">.</span><span class="n">calibration_csv</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">FOLDER</span><span class="si">}</span><span class="s2">/measurements-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span>
+    <span class="k">return</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">build_velocity_csv</span><span class="p">(</span><span class="n">there</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="inside_model">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.inside_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inside_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether each point lies on the mesh of the built model."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.tri</span><span class="w"> </span><span class="kn">import</span> <span class="n">Triangulation</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelafinFile</span>
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">))</span>
+    <span class="n">finder</span> <span class="o">=</span> <span class="n">Triangulation</span><span class="p">(</span><span class="n">geometry</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">geometry</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">geometry</span><span class="o">.</span><span class="n">ikle</span><span class="p">)</span><span class="o">.</span><span class="n">get_trifinder</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">finder</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">float</span><span class="p">)))</span> <span class="o">&gt;=</span> <span class="mi">0</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------------ comparison</span>
+
+
+<div class="viewcode-block" id="ValidationReport">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.ValidationReport">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ValidationReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Model against measurement, point by point and in summary."""</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">table</span><span class="p">:</span> <span class="n">Any</span>                                   <span class="c1"># pandas DataFrame, one row per point</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span>         <span class="c1"># per quantity</span>
+    <span class="n">n_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n_outside</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ValidationReport.as_dict">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.ValidationReport.as_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"n_points"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_points</span><span class="p">,</span>
+                <span class="s2">"n_outside"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_outside</span><span class="p">,</span> <span class="s2">"time"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+                <span class="s2">"summary"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">,</span> <span class="s2">"notes"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">)}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="statistics">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.statistics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">statistics</span><span class="p">(</span><span class="n">measured</span><span class="p">,</span> <span class="n">modelled</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The numbers a validation is judged by.</span>
+
+<span class="sd">    ``bias`` is the mean of model minus measurement, so a negative bias is a model</span>
+<span class="sd">    that is too slow or too shallow. ``within_error`` is the share of points at which</span>
+<span class="sd">    the two differ by no more than the error of the measurement, and</span>
+<span class="sd">    ``within_two_errors`` by no more than twice that; for a model without systematic</span>
+<span class="sd">    deviation and a correctly stated error they are about 0.68 and 0.95.</span>
+<span class="sd">    """</span>
+    <span class="n">measured</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">measured</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">modelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">modelled</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">measured</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">modelled</span><span class="p">)</span>
+    <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="n">measured</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">modelled</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"n"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">s</span> <span class="o">-</span> <span class="n">m</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"n"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">size</span><span class="p">),</span>
+        <span class="s2">"mean_measured"</span><span class="p">:</span> <span class="n">mean</span><span class="p">,</span>
+        <span class="s2">"mean_modelled"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+        <span class="s2">"bias"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+        <span class="s2">"relative_bias"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">diff</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">mean</span><span class="p">)</span> <span class="k">if</span> <span class="n">mean</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">),</span>
+        <span class="s2">"mae"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+        <span class="s2">"rmse"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">diff</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())),</span>
+        <span class="s2">"correlation"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">error</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">keep</span><span class="p">]</span>
+        <span class="n">usable</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">usable</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">diff</span><span class="p">[</span><span class="n">usable</span><span class="p">])</span> <span class="o">/</span> <span class="n">sigma</span><span class="p">[</span><span class="n">usable</span><span class="p">]</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"within_error"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">ratio</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"within_two_errors"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">ratio</span> <span class="o">&lt;=</span> <span class="mf">2.0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="compare">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.compare">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compare</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"validation"</span><span class="p">,</span>
+            <span class="n">measurement_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.10</span><span class="p">,</span> <span class="n">wet_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the model at *points* and compare it with what was measured there.</span>
+
+<span class="sd">    *points* is a table in the form of the calibration points. The error of a</span>
+<span class="sd">    measurement is its own (``&lt;QUANTITY&gt;_ERROR``) combined with *measurement_error*</span>
+<span class="sd">    times the measured value, which is how the calibration weighs a measurement.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.tri</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearTriInterpolator</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">SelafinFile</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.model_column</span><span class="w"> </span><span class="kn">import</span> <span class="n">safe_triangulation</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">SelafinFile</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">npoin2</span> <span class="o">!=</span> <span class="n">model</span><span class="o">.</span><span class="n">npoin2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">npoin2</span><span class="si">}</span><span class="s2"> nodes and "</span>
+                         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">npoin2</span><span class="si">}</span><span class="s2">; they are not the "</span>
+                         <span class="s2">"same mesh"</span><span class="p">)</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">tri</span> <span class="o">=</span> <span class="n">safe_triangulation</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">ikle</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">points</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">inside</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">tri</span><span class="o">.</span><span class="n">get_trifinder</span><span class="p">()(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">points</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span> <span class="k">if</span> <span class="s2">"id"</span> <span class="ow">in</span> <span class="n">points</span> <span class="k">else</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                          <span class="s2">"x"</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s2">"inside_model"</span><span class="p">:</span> <span class="n">inside</span><span class="p">})</span>
+    <span class="n">summary</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">quantities</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span><span class="p">[:</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">points</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_DATA"</span><span class="p">)]</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WATER DEPTH"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">quantity</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The result has no </span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">; it was not compared."</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">field_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">quantity</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:</span><span class="n">model</span><span class="o">.</span><span class="n">npoin2</span><span class="p">]</span>
+        <span class="n">modelled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">LinearTriInterpolator</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">field_values</span><span class="p">)(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                              <span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">measured</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_DATA"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">own</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> \
+            <span class="k">if</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">quantity</span><span class="si">}</span><span class="s2">_ERROR"</span> <span class="ow">in</span> <span class="n">points</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">measured</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">own</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">measurement_error</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">measured</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">)</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_measured"</span><span class="p">]</span> <span class="o">=</span> <span class="n">measured</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_error"</span><span class="p">]</span> <span class="o">=</span> <span class="n">error</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_modelled"</span><span class="p">]</span> <span class="o">=</span> <span class="n">modelled</span>
+        <span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_difference"</span><span class="p">]</span> <span class="o">=</span> <span class="n">modelled</span> <span class="o">-</span> <span class="n">measured</span>
+        <span class="n">summary</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span> <span class="o">=</span> <span class="n">statistics</span><span class="p">(</span><span class="n">measured</span><span class="p">[</span><span class="n">inside</span><span class="p">],</span> <span class="n">modelled</span><span class="p">[</span><span class="n">inside</span><span class="p">],</span> <span class="n">error</span><span class="p">[</span><span class="n">inside</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">wet</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">LinearTriInterpolator</span><span class="p">(</span>
+            <span class="n">tri</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">depth</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:</span><span class="n">model</span><span class="o">.</span><span class="n">npoin2</span><span class="p">])(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">))</span>
+        <span class="n">table</span><span class="p">[</span><span class="s2">"dry_in_model"</span><span class="p">]</span> <span class="o">=</span> <span class="n">inside</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">wet</span> <span class="o">&lt;=</span> <span class="n">wet_depth</span><span class="p">)</span>
+        <span class="n">dry</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">table</span><span class="p">[</span><span class="s2">"dry_in_model"</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">dry</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">dry</span><span class="si">}</span><span class="s2"> of the </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">inside</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2"> points on the mesh are dry "</span>
+                         <span class="s2">"in the model, although water was measured there."</span><span class="p">)</span>
+    <span class="n">outside</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">inside</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">outside</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">outside</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="si">}</span><span class="s2"> points lie outside the model and are not "</span>
+                     <span class="s2">"part of the statistics."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ValidationReport</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">table</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="n">summary</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+                            <span class="n">n_outside</span><span class="o">=</span><span class="n">outside</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="evaluate">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.validation.evaluate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">setup</span><span class="p">:</span> <span class="n">ValidationSetup</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ValidationReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Compare the validation result of *situation* with its measurements and write</span>
+<span class="sd">    the report: a table per point, a summary, and a figure of model against</span>
+<span class="sd">    measurement. Everything goes into ``calibration-validation/validation/``."""</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">slug</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">results</span> <span class="k">if</span> <span class="n">setup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> \
+        <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.slf"</span>
+    <span class="n">_path</span><span class="p">,</span> <span class="n">points</span> <span class="o">=</span> <span class="n">measurements</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">)</span>
+    <span class="n">report</span> <span class="o">=</span> <span class="n">compare</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">),</span> <span class="n">result</span><span class="p">,</span>
+                     <span class="n">name</span><span class="o">=</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                     <span class="n">measurement_error</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">measurement_error</span><span class="p">),</span>
+                     <span class="n">wet_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">))</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span>
+    <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">report</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">document</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">setup</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">document</span><span class="p">[</span><span class="s2">"run"</span><span class="p">]</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+    <span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.json"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">document</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="nb">str</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">_figure</span><span class="p">(</span><span class="n">report</span><span class="p">,</span> <span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.png"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                    <span class="c1"># noqa: BLE001 - the numbers are written</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the validation figure could not be drawn: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">numbers</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">numbers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"n"</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"validation </span><span class="si">%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: n = </span><span class="si">%d</span><span class="s2">, bias </span><span class="si">%+.3f</span><span class="s2"> (</span><span class="si">%+.0f</span><span class="s2"> </span><span class="si">%%</span><span class="s2">), RMSE </span><span class="si">%.3f</span><span class="s2">, "</span>
+                     <span class="s2">"within the measurement error </span><span class="si">%.0f</span><span class="s2"> </span><span class="si">%%</span><span class="s2">"</span><span class="p">,</span> <span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span>
+                     <span class="n">numbers</span><span class="p">[</span><span class="s2">"n"</span><span class="p">],</span> <span class="n">numbers</span><span class="p">[</span><span class="s2">"bias"</span><span class="p">],</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">numbers</span><span class="p">[</span><span class="s2">"relative_bias"</span><span class="p">],</span>
+                     <span class="n">numbers</span><span class="p">[</span><span class="s2">"rmse"</span><span class="p">],</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">numbers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"within_error"</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"nan"</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">report</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_figure</span><span class="p">(</span><span class="n">report</span><span class="p">:</span> <span class="n">ValidationReport</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Model against measurement, one panel per quantity, with the line of equality."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="n">quantities</span> <span class="o">=</span> <span class="p">[</span><span class="n">q</span> <span class="k">for</span> <span class="n">q</span><span class="p">,</span> <span class="n">numbers</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">numbers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"n"</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">quantities</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">quantities</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">quantities</span><span class="p">),</span> <span class="mf">4.8</span><span class="p">),</span>
+                             <span class="n">squeeze</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">inside</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="s2">"inside_model"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">axis</span><span class="p">,</span> <span class="n">quantity</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">quantities</span><span class="p">):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"_"</span><span class="p">)</span>
+        <span class="n">measured</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_measured"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)[</span><span class="n">inside</span><span class="p">]</span>
+        <span class="n">modelled</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_modelled"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)[</span><span class="n">inside</span><span class="p">]</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_error"</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">)[</span><span class="n">inside</span><span class="p">]</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">measured</span> <span class="o">+</span> <span class="n">error</span><span class="p">,</span> <span class="n">modelled</span><span class="p">])))</span> <span class="o">*</span> <span class="mf">1.05</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">measured</span><span class="p">,</span> <span class="n">modelled</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                      <span class="n">color</span><span class="o">=</span><span class="s2">"#1f4e79"</span><span class="p">,</span> <span class="n">ecolor</span><span class="o">=</span><span class="s2">"#9db7d1"</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">top</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">top</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"0.3"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">report</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="n">quantity</span><span class="p">]</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">top</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">top</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">"equal"</span><span class="p">)</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="n">UNITS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">quantity</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" (</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">unit</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"measured </span><span class="si">{</span><span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"modeled </span><span class="si">{</span><span class="n">quantity</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"n = </span><span class="si">{</span><span class="n">numbers</span><span class="p">[</span><span class="s1">'n'</span><span class="p">]</span><span class="si">}</span><span class="s2">, bias </span><span class="si">{</span><span class="n">numbers</span><span class="p">[</span><span class="s1">'bias'</span><span class="p">]</span><span class="si">:</span><span class="s2">+.2f</span><span class="si">}</span><span class="s2"> "</span>
+                       <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">numbers</span><span class="p">[</span><span class="s1">'relative_bias'</span><span class="p">]</span><span class="si">:</span><span class="s2">+.0f</span><span class="si">}</span><span class="s2"> %), "</span>
+                       <span class="sa">f</span><span class="s2">"RMSE </span><span class="si">{</span><span class="n">numbers</span><span class="p">[</span><span class="s1">'rmse'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+        <span class="n">axis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Validation: </span><span class="si">{</span><span class="n">report</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">160</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

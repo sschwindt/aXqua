@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.surface_stage &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/surface_stage.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.surface_stage</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.surface_stage</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Stage 0: turn a CAD assembly into the geodata a case is normally given.</span>
+
+<span class="sd">This is the bridge between :mod:`axqua.core.surfaces`, which knows about triangles,</span>
+<span class="sd">and the rest of the package, which knows about DEMs and vector layers. It runs before</span>
+<span class="sd">the five numbered pipeline stages, writes its artifacts into ``preprocessing_dir``, and</span>
+<span class="sd">after it the case is indistinguishable from one built on a surveyed DEM.</span>
+
+<span class="sd">It is deliberately re-runnable and lazy: the outputs are checked against the STL</span>
+<span class="sd">modification times, and a build that changed nothing does not spend minutes rasterising</span>
+<span class="sd">several million facets again. Pass ``force=True`` to rebuild anyway.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">surfaces</span> <span class="k">as</span> <span class="n">surf</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SurfaceArtifacts">
+<a class="viewcode-back" href="../../code/core.html#axqua.surface_stage.SurfaceArtifacts">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SurfaceArtifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What the stage wrote, in the order the pipeline needs them."""</span>
+
+    <span class="n">dem</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">roi</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">liquid_boundaries</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">structures</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">roughness_zones</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">roughness_table</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reports</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">skipped</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="SurfaceArtifacts.paths">
+<a class="viewcode-back" href="../../code/core.html#axqua.surface_stage.SurfaceArtifacts.paths">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">roi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">roughness_table</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="is_stale">
+<a class="viewcode-back" href="../../code/core.html#axqua.surface_stage.is_stale">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_stale</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether the artifacts are missing or older than any STL part."""</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">dem_name</span><span class="p">),</span>
+               <span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">roi_name</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">by_role</span><span class="p">(</span><span class="s2">"inflow"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">by_role</span><span class="p">(</span><span class="s2">"outflow"</span><span class="p">):</span>
+        <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">boundaries_name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">by_role</span><span class="p">(</span><span class="s2">"wall"</span><span class="p">):</span>
+        <span class="n">outputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">structures_name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="n">newest_input</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">file</span><span class="p">)</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">newest_input</span> <span class="o">&gt;</span> <span class="nb">min</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run">
+<a class="viewcode-back" href="../../code/core.html#axqua.surface_stage.run">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SurfaceArtifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build the DEM, ROI, boundary lines, structures and roughness zones from CAD."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SurfaceArtifacts</span><span class="p">(</span><span class="n">skipped</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_stale</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: artifacts are newer than the CAD parts, skipping "</span>
+                 <span class="s2">"(use --force to rebuild)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SurfaceArtifacts</span><span class="p">(</span>
+            <span class="n">dem</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">dem_name</span><span class="p">),</span>
+            <span class="n">roi</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">roi_name</span><span class="p">),</span> <span class="n">skipped</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">block</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_dir</span><span class="p">)</span>
+    <span class="n">out_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">artifacts</span> <span class="o">=</span> <span class="n">SurfaceArtifacts</span><span class="p">()</span>
+
+    <span class="n">loaded</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span><span class="n">role</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"bed"</span><span class="p">,</span> <span class="s2">"wall"</span><span class="p">,</span> <span class="s2">"inflow"</span><span class="p">,</span>
+                                                            <span class="s2">"outflow"</span><span class="p">,</span> <span class="s2">"roi"</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">"ignore"</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: ignoring </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">())</span>
+            <span class="k">continue</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">read_stl</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">file</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span>
+                                <span class="n">max_triangles</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">max_triangles</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">transform</span><span class="o">.</span><span class="n">is_identity</span><span class="p">:</span>
+            <span class="n">surface</span> <span class="o">=</span> <span class="n">surface</span><span class="o">.</span><span class="n">transformed</span><span class="p">(</span><span class="n">transform</span><span class="p">)</span>
+        <span class="n">artifacts</span><span class="o">.</span><span class="n">reports</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">log_report</span><span class="p">(</span>
+            <span class="n">surf</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">bed_max_slope_deg</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">bed_max_slope_deg</span><span class="p">,</span>
+                        <span class="n">min_slope_deg</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">wall_min_slope_deg</span><span class="p">)))</span>
+        <span class="n">loaded</span><span class="p">[</span><span class="n">part</span><span class="o">.</span><span class="n">role</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">part</span><span class="p">,</span> <span class="n">surface</span><span class="p">))</span>
+
+    <span class="n">bounds</span> <span class="o">=</span> <span class="n">_common_bounds</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">parts</span> <span class="ow">in</span> <span class="n">loaded</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">])</span>
+    <span class="n">artifacts</span><span class="o">.</span><span class="n">dem</span> <span class="o">=</span> <span class="n">_write_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"bed"</span><span class="p">],</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">)</span>
+    <span class="n">artifacts</span><span class="o">.</span><span class="n">roi</span> <span class="o">=</span> <span class="n">_write_roi</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">)</span>
+    <span class="c1"># walls first: where they are decides where a boundary line may be placed</span>
+    <span class="k">if</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"wall"</span><span class="p">]:</span>
+        <span class="n">artifacts</span><span class="o">.</span><span class="n">structures</span> <span class="o">=</span> <span class="n">_write_structures</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"wall"</span><span class="p">],</span> <span class="n">out_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"inflow"</span><span class="p">]</span> <span class="ow">or</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"outflow"</span><span class="p">]:</span>
+        <span class="n">artifacts</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="o">=</span> <span class="n">_write_liquid_boundaries</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">roi</span><span class="o">=</span><span class="n">_read_polygon</span><span class="p">(</span><span class="n">artifacts</span><span class="o">.</span><span class="n">roi</span><span class="p">),</span>
+            <span class="n">dem</span><span class="o">=</span><span class="n">artifacts</span><span class="o">.</span><span class="n">dem</span><span class="p">,</span> <span class="n">walls</span><span class="o">=</span><span class="n">_wall_union</span><span class="p">(</span><span class="n">artifacts</span><span class="o">.</span><span class="n">structures</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">has_roughness_zones</span><span class="p">:</span>
+        <span class="n">zones</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="n">_write_roughness</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"bed"</span><span class="p">],</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">)</span>
+        <span class="n">artifacts</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">,</span> <span class="n">artifacts</span><span class="o">.</span><span class="n">roughness_table</span> <span class="o">=</span> <span class="n">zones</span><span class="p">,</span> <span class="n">table</span>
+
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">artifacts</span><span class="o">.</span><span class="n">paths</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: wrote </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">artifacts</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_common_bounds</span><span class="p">(</span><span class="n">surfaces_list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""One grid for every part, so their rasters can be combined cell by cell."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">surfaces_list</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no CAD parts to build from"</span><span class="p">)</span>
+    <span class="n">boxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">s</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+                      <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">surfaces_list</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()),</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">boxes</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_bed_grid</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bed_parts</span><span class="p">,</span> <span class="n">bounds</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The merged bed height field of every part that plays the bed role."""</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">transform</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">part</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">bed_parts</span><span class="p">:</span>
+        <span class="c1"># every near-horizontal facet, not only the upward-facing ones: 'max' takes the</span>
+        <span class="c1"># top surface of a closed solid regardless of which way its normals were wound,</span>
+        <span class="c1"># and a part exported inside-out would otherwise contribute nothing at all</span>
+        <span class="n">horizontal</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">split_by_slope</span><span class="p">(</span>
+            <span class="n">surface</span><span class="p">,</span> <span class="n">bed_max_slope_deg</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">bed_max_slope_deg</span><span class="p">,</span>
+            <span class="n">min_slope_deg</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">wall_min_slope_deg</span><span class="p">)[</span><span class="s2">"horizontal"</span><span class="p">]</span>
+        <span class="n">one</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">horizontal</span><span class="p">),</span> <span class="n">block</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                                        <span class="n">mode</span><span class="o">=</span><span class="s2">"max"</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">one</span> <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">one</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">9999.0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">((</span><span class="n">grid</span> <span class="o">==</span> <span class="o">-</span><span class="mf">9999.0</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">one</span> <span class="o">&gt;</span> <span class="n">grid</span><span class="p">)),</span> <span class="n">one</span><span class="p">,</span> <span class="n">grid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"surfaces: no part has role: bed"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">grid</span><span class="p">,</span> <span class="n">transform</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bed_parts</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">grid</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">_bed_grid</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bed_parts</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+    <span class="n">covered</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">grid</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">9999.0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: DEM </span><span class="si">%d</span><span class="s2"> x </span><span class="si">%d</span><span class="s2"> at </span><span class="si">%.3f</span><span class="s2"> m, </span><span class="si">%.1f%%</span><span class="s2"> of the bounding box covered"</span><span class="p">,</span>
+             <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">covered</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">covered</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"surfaces: only </span><span class="si">%.0f%%</span><span class="s2"> of the DEM's bounding box carries bed elevations. "</span>
+            <span class="s2">"The gaps become nodata and the mesher will interpolate across them - "</span>
+            <span class="s2">"check that every bed part is declared and that the parts overlap in plan."</span><span class="p">,</span>
+            <span class="n">covered</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">surf</span><span class="o">.</span><span class="n">write_dem</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">dem_name</span><span class="p">,</span>
+                          <span class="n">crs</span><span class="o">=</span><span class="n">_crs</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_roi</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="k">if</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"roi"</span><span class="p">]:</span>
+        <span class="n">polygons</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"roi"</span><span class="p">]:</span>
+            <span class="n">grid</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                                             <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+            <span class="n">polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surf</span><span class="o">.</span><span class="n">coverage_polygon</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span>
+                                                  <span class="n">simplify</span><span class="o">=</span><span class="n">_roi_simplify</span><span class="p">(</span><span class="n">cfg</span><span class="p">)))</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">grid</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">_bed_grid</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">[</span><span class="s2">"bed"</span><span class="p">],</span> <span class="n">bounds</span><span class="p">)</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">coverage_polygon</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="n">_roi_simplify</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+    <span class="c1"># the ROI has to be one closed polygon: the mesher walks a single boundary</span>
+    <span class="n">polygon</span> <span class="o">=</span> <span class="n">_largest_part</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">roi_name</span>
+    <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">({</span><span class="s2">"name"</span><span class="p">:</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">]},</span> <span class="n">geometry</span><span class="o">=</span><span class="p">[</span><span class="n">polygon</span><span class="p">],</span>
+                     <span class="n">crs</span><span class="o">=</span><span class="n">_crs</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">"GPKG"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_roi_simplify</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simplification tolerance for the domain outline.</span>
+
+<span class="sd">    The outline comes from a raster mask, so it is a staircase of cell-sized steps. A</span>
+<span class="sd">    mesher handed that produces slivers and zero-area cells along every step, because</span>
+<span class="sd">    the boundary segments are finer than the cells it is being asked to build. At least</span>
+<span class="sd">    two cells of tolerance turns the staircase into a line; a configured value wins,</span>
+<span class="sd">    but is raised to that floor with a notice rather than quietly kept.</span>
+<span class="sd">    """</span>
+    <span class="n">floor</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">resolution</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">simplify</span>
+    <span class="k">if</span> <span class="n">wanted</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">floor</span>
+    <span class="k">if</span> <span class="n">wanted</span> <span class="o">&lt;</span> <span class="n">floor</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: raising the outline simplification from </span><span class="si">%.3f</span><span class="s2"> to </span><span class="si">%.3f</span><span class="s2"> m "</span>
+                 <span class="s2">"(two raster cells) - a finer tolerance keeps the raster staircase, "</span>
+                 <span class="s2">"which meshes into slivers"</span><span class="p">,</span> <span class="n">wanted</span><span class="p">,</span> <span class="n">floor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">floor</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_largest_part</span><span class="p">(</span><span class="n">polygon</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The biggest piece of a possibly-multipart footprint, with its holes closed."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Polygon</span>
+
+    <span class="k">if</span> <span class="n">polygon</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"MultiPolygon"</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dropped</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">area</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">if</span> <span class="n">dropped</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"surfaces: the CAD footprint falls into </span><span class="si">%d</span><span class="s2"> disconnected pieces; "</span>
+                <span class="s2">"keeping the largest (</span><span class="si">%.1f</span><span class="s2"> m2) and dropping </span><span class="si">%.1f</span><span class="s2"> m2. A domain has to "</span>
+                <span class="s2">"be one polygon - if the dropped pieces matter, they belong in a "</span>
+                <span class="s2">"separate case."</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">),</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="n">dropped</span><span class="p">)</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">exterior</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_liquid_boundaries</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">loaded</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">roi</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">walls</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="n">rows</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"inflow"</span><span class="p">,</span> <span class="s2">"outflow"</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">surface</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">loaded</span><span class="p">[</span><span class="n">role</span><span class="p">],</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">patch_line</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">simplify</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">roi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">_snap_to_domain</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span> <span class="n">dem</span><span class="o">=</span><span class="n">dem</span><span class="p">,</span> <span class="n">walls</span><span class="o">=</span><span class="n">walls</span><span class="p">)</span>
+            <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"Name"</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span> <span class="s2">"Type (inflow/outflow)"</span><span class="p">:</span> <span class="n">role</span><span class="p">})</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">boundaries_name</span>
+    <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geoms</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">_crs</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">"GPKG"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"Type (inflow/outflow)"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"inflow"</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"surfaces: no part has role: inflow - the case has no upstream "</span>
+                    <span class="s2">"boundary and the build will fail at the .cli stage"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"Type (inflow/outflow)"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"outflow"</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"surfaces: no part has role: outflow - water would have nowhere "</span>
+                    <span class="s2">"to leave"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_wall_union</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The wall footprints as one geometry, or None when the case has no walls."""</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_polygon</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_snap_to_domain</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">roi</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dem</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">walls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">6.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Put a boundary line on the domain edge, at the invert, keeping its width.</span>
+
+<span class="sd">    A CFD inlet or outlet patch is a lid across the flow, and it need not sit exactly</span>
+<span class="sd">    where the *wetted* domain ends: this fish pass has its inlet plate 2.5 m upstream of</span>
+<span class="sd">    where the bed parts stop. A line floating off the edge matches no contour node, so</span>
+<span class="sd">    the boundary silently disappears and the case is built with no inflow at all.</span>
+
+<span class="sd">    Projecting onto the *nearest* stretch of the outline is not enough either. Near the</span>
+<span class="sd">    end of a channel the outline runs across walls as well as bed, and a discharge</span>
+<span class="sd">    prescribed over a segment whose bed stands a meter above its neighbours piles water</span>
+<span class="sd">    onto the wall instead of into the channel - which shows up as a meters-deep spike at</span>
+<span class="sd">    the boundary and nowhere else. So the line is placed at the **lowest** stretch of</span>
+<span class="sd">    outline within a few meters of the patch: the invert, which is where the opening is.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+
+    <span class="n">exterior</span> <span class="o">=</span> <span class="n">roi</span><span class="o">.</span><span class="n">exterior</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">exterior</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="o">&lt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">line</span>
+    <span class="n">midpoint</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">nearest</span> <span class="o">=</span> <span class="n">exterior</span><span class="o">.</span><span class="n">project</span><span class="p">(</span><span class="n">midpoint</span><span class="p">)</span>
+    <span class="n">half</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">length</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+
+    <span class="n">best</span><span class="p">,</span> <span class="n">best_bed</span><span class="p">,</span> <span class="n">blocked</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">dem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">_BedSampler</span><span class="p">(</span><span class="n">dem</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">search</span><span class="p">,</span> <span class="n">search</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">):</span>
+            <span class="n">centre</span> <span class="o">=</span> <span class="n">nearest</span> <span class="o">+</span> <span class="n">shift</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">half</span> <span class="o">&lt;=</span> <span class="n">centre</span> <span class="o">&lt;=</span> <span class="n">exterior</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">half</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">_substring</span><span class="p">(</span><span class="n">exterior</span><span class="p">,</span> <span class="n">centre</span> <span class="o">-</span> <span class="n">half</span><span class="p">,</span> <span class="n">centre</span> <span class="o">+</span> <span class="n">half</span><span class="p">)</span>
+            <span class="c1"># The wall is burned into the bed later, at the mesh stage, so a boundary</span>
+            <span class="c1"># node sitting on one is a node whose bed stands a meter above its</span>
+            <span class="c1"># neighbors - and prescribing a discharge over it piles water onto the</span>
+            <span class="c1"># crest. The opening itself is *between* walls, though, so rejecting every</span>
+            <span class="c1"># stretch that touches one would reject the inlet as well: clip instead,</span>
+            <span class="c1"># and keep the widest open gap.</span>
+            <span class="k">if</span> <span class="n">walls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="n">_widest_open_part</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">walls</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">candidate</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">candidate</span><span class="o">.</span><span class="n">length</span> <span class="o">&lt;</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                    <span class="n">blocked</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+            <span class="n">points</span> <span class="o">=</span> <span class="p">[</span><span class="n">candidate</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">normalized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">9</span><span class="p">)]</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="n">sampler</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>          <span class="c1"># entirely off the bed: not a boundary position</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">best_bed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="n">best_bed</span><span class="p">:</span>
+                <span class="n">best</span><span class="p">,</span> <span class="n">best_bed</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">level</span>
+    <span class="k">if</span> <span class="n">blocked</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%d</span><span class="s2"> candidate positions rejected as mostly wall"</span><span class="p">,</span>
+                 <span class="n">label</span><span class="p">,</span> <span class="n">blocked</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">best</span> <span class="o">=</span> <span class="n">_substring</span><span class="p">(</span><span class="n">exterior</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">nearest</span> <span class="o">-</span> <span class="n">half</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+                          <span class="nb">min</span><span class="p">(</span><span class="n">nearest</span> <span class="o">+</span> <span class="n">half</span><span class="p">,</span> <span class="n">exterior</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: </span><span class="si">%s</span><span class="s2"> sits </span><span class="si">%.2f</span><span class="s2"> m off the domain edge; placed on it at the "</span>
+             <span class="s2">"invert (</span><span class="si">%.2f</span><span class="s2"> m wide</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">best</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+             <span class="sa">f</span><span class="s2">", mean bed </span><span class="si">{</span><span class="n">best_bed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m"</span> <span class="k">if</span> <span class="n">best_bed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">LineString</span><span class="p">(</span><span class="n">best</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_BedSampler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bed elevation at points, with nodata reported rather than raised.</span>
+
+<span class="sd">    :func:`axqua.core.raster.sample_raster_at` raises when *every* sampled point falls</span>
+<span class="sd">    on nodata, which is right for a mesh - a mesh off the DEM is a broken case - but</span>
+<span class="sd">    wrong here: searching for the lowest stretch of outline deliberately probes</span>
+<span class="sd">    positions that may lie past the end of the bed, and one of those must skip, not</span>
+<span class="sd">    abort the whole stage.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+
+        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">as</span> <span class="n">src</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_band</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">masked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">filled</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">=</span> <span class="o">~</span><span class="n">src</span><span class="o">.</span><span class="n">transform</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_band</span><span class="o">.</span><span class="n">shape</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="o">=</span> <span class="n">src</span><span class="o">.</span><span class="n">nodata</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cols</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="nb">float</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">inside</span> <span class="o">=</span> <span class="p">((</span><span class="n">rows</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">rows</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                  <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">cols</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inside</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_band</span><span class="p">[</span><span class="n">rows</span><span class="p">[</span><span class="n">inside</span><span class="p">],</span> <span class="n">cols</span><span class="p">[</span><span class="n">inside</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">values</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="k">if</span> <span class="n">values</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_widest_open_part</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">walls</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The longest piece of *line* that no wall footprint covers."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+
+    <span class="n">open_part</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">walls</span><span class="p">)</span>
+    <span class="n">pieces</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">open_part</span><span class="p">,</span> <span class="s2">"geoms"</span><span class="p">,</span> <span class="p">[</span><span class="n">open_part</span><span class="p">])</span>
+              <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">LineString</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">is_empty</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">pieces</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="k">if</span> <span class="n">pieces</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_substring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The piece of *line* between two distances along it."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">LineString</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">substring</span>
+
+    <span class="n">piece</span> <span class="o">=</span> <span class="n">substring</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">piece</span> <span class="k">if</span> <span class="n">piece</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">LineString</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">start</span><span class="p">),</span> <span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">end</span> <span class="o">+</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">))])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_structures</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">wall_parts</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="n">rows</span><span class="p">,</span> <span class="n">geoms</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">part</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">wall_parts</span><span class="p">:</span>
+        <span class="n">footprints</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">wall_footprints</span><span class="p">(</span>
+            <span class="n">surface</span><span class="p">,</span> <span class="n">min_slope_deg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">wall_min_slope_deg</span><span class="p">,</span>
+            <span class="n">resolution</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">simplify</span><span class="p">,</span>
+            <span class="n">min_area</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">min_wall_area</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: </span><span class="si">%s</span><span class="s2"> gives </span><span class="si">%d</span><span class="s2"> wall footprint(s)"</span><span class="p">,</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">(),</span>
+                 <span class="nb">len</span><span class="p">(</span><span class="n">footprints</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">crest</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">footprints</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"Name"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">()</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"Type"</span><span class="p">:</span> <span class="s2">"wall"</span><span class="p">,</span>
+                         <span class="s2">"Mode"</span><span class="p">:</span> <span class="s2">"solid"</span><span class="p">,</span> <span class="s2">"Crest (m)"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">crest</span><span class="p">,</span> <span class="mi">4</span><span class="p">)})</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">structures_name</span>
+    <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geoms</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">_crs</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">driver</span><span class="o">=</span><span class="s2">"GPKG"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_roughness</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">bed_parts</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+    <span class="n">rows</span><span class="p">,</span> <span class="n">geoms</span><span class="p">,</span> <span class="n">table</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">part</span><span class="p">,</span> <span class="n">surface</span> <span class="ow">in</span> <span class="n">bed_parts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">zone_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">grid</span><span class="p">,</span> <span class="n">transform</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">rasterize</span><span class="p">(</span><span class="n">surface</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">resolution</span><span class="p">,</span>
+                                         <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">surf</span><span class="o">.</span><span class="n">coverage_polygon</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">transform</span><span class="p">,</span> <span class="n">simplify</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">simplify</span><span class="p">)</span>
+        <span class="n">geoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"Zone ID"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">zone_id</span><span class="p">),</span> <span class="s2">"Name"</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">()})</span>
+        <span class="n">table</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">zone_id</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">ks</span><span class="p">)</span>
+
+    <span class="n">zones_path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">roughness_zones_name</span>
+    <span class="n">gpd</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geoms</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">_crs</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">zones_path</span><span class="p">,</span>
+                                                                  <span class="n">driver</span><span class="o">=</span><span class="s2">"GPKG"</span><span class="p">)</span>
+    <span class="n">table_path</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">roughness_table_name</span>
+    <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"zone_id"</span><span class="p">,</span> <span class="s2">"ks"</span><span class="p">])</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+        <span class="n">table_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">zones_path</span><span class="p">,</span> <span class="n">table_path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_crs</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The project CRS, or None when the case runs in local CAD coordinates.</span>
+
+<span class="sd">    A case whose transform is the identity has not been georeferenced, and stamping a</span>
+<span class="sd">    UTM code onto meters that start at the corner of a drawing would be a lie that QGIS</span>
+<span class="sd">    would then act on. Local coordinates are a supported way to run: the model is the</span>
+<span class="sd">    same, only its place on the map is missing.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span><span class="o">.</span><span class="n">is_identity</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"surfaces: no georeferencing transform, writing artifacts in local "</span>
+                 <span class="s2">"CAD coordinates without a CRS"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"EPSG:</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="si">}</span><span class="s2">"</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

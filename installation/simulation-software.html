@@ -1,0 +1,517 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulation Software &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/installation/simulation-software.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Plugin setup" href="plugin-setup.html" />
+    <link rel="prev" title="QGIS plugin" href="qgis-plugin.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Purpose</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Installation &amp; Configuration</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Installation &amp; Configuration</a></li>
+      <li class="breadcrumb-item active">Simulation Software</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/installation/simulation-software.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simulation-software">
+<h1>Simulation Software<a class="headerlink" href="#simulation-software" title="Link to this heading"></a></h1>
+<p>aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin installs them with one wizard per program. Install TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2). The wizards of a QGIS that runs in Windows do not install into WSL. Install a distribution with <code class="docutils literal notranslate"><span class="pre">wsl</span> <span class="pre">--install</span> <span class="pre">-d</span> <span class="pre">Ubuntu-24.04</span></code> in a <strong>PowerShell</strong> (similar to Linux <strong>terminal</strong>) with administrator rights, install aXqua inside the distribution, and run <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">start</span> <span class="pre">telemac</span></code> in its terminal. Select an installation folder in the Linux file system: a build in a Windows folder (<code class="docutils literal notranslate"><span class="pre">/mnt/c/...</span></code>) is slower by an order of magnitude. This route has not yet been tested on a real Windows installation.</p>
+</div>
+<section id="installation-wizards-short-version">
+<h2>Installation wizards (short version)<a class="headerlink" href="#installation-wizards-short-version" title="Link to this heading"></a></h2>
+<p>The wizards are opened on the <strong>Configuration</strong> tab, in the box <strong>Simulation &amp; postprocessing software</strong> showing the operating system that the aXqua <em>Check</em> button detected.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the aXqua program <em>Check</em> identified existing TELEMAC, OpenFOAM or postprocessor software installation, the box states for each program where it is installed or that it was not found.</p>
+</div>
+<p>To start the installation of each software, click <strong>Install &lt;software-name&gt;…</strong> and an installation wizard opens. Each wizard has three intuitive tabs in which users make choices according to their needs:</p>
+<ol class="arabic simple">
+<li><p><strong>Settings:</strong> Installation folder and installer choices. Every folder and file is selected in a dialog, so nothing has to be typed. Details on software-specific settings are provided below on this page.</p></li>
+<li><dl class="simple">
+<dt><strong>Check:</strong> aXqua examines the computer and lists the commands that it is about to run, expected duration, and everything that is not in order. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error. To proceed with the installation:</dt><dd><ul class="simple">
+<li><p>Complete the prompts in <strong>the dialog frame that shows required user actions to be executed in terminal.</strong></p></li>
+<li><p>Then click on the <strong>INSTALL button on the bottom-left.</strong></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p><strong>Installation:</strong> Run and show the current step and the end of the installation log. The installation is a process of its own: the wizard and QGIS can be closed while it runs. The <em>Configuration</em> tab reports that an installation is running, and the wizard shows it again when it is reopened.</p></li>
+</ol>
+<p>The tabs can be visited in any order, and <em>Back</em> and <em>Next</em> at the bottom of the wizard walk through them. Changed settings are checked again when the <em>Check</em> tab is opened.</p>
+<p>At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the computer profile (<a class="reference internal" href="plugin-setup.html#plugin-profile"><span class="std std-ref">Plugin profile</span></a>), and starts it once. After a successful installation, the button <em>Cancel the installation</em> turns dark gray-green and reads <em>Installation complete</em>; a click closes the wizard. No further configuration is required.</p>
+<p>In the box <strong>Simulation &amp; postprocessing software</strong>, the path of a program that was found is written in dark green, and <em>Not found on this computer.</em> in bold dark purple. Clicking <em>Install &lt;software-name&gt;…</em> for a program that is installed already first asks <em>Software already installed. Continue with re-installation?</em> <em>No</em> returns to the <em>Configuration</em> tab. <em>Yes</em> opens the wizard, whose <em>Settings</em> tab then starts with the setting <em>Existing installation</em>:</p>
+<ul class="simple">
+<li><p><em>Remove the existing installation and install it again in its folder</em> deletes the earlier installation before the new one is built. aXqua removes only an installation that one of its installers made: the subfolder <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> of TELEMAC, a folder of the OpenFOAM installer, or the VisIt folders of the postprocessors.</p></li>
+<li><p><em>Continue in the existing folder</em> keeps what is downloaded and built and repeats the remaining steps. The OpenFOAM installer refuses to continue a folder that another version of it started; the <em>Check</em> tab says so before anything runs.</p></li>
+<li><p><em>Install it again in a new folder</em> leaves the existing installation untouched.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The wizards run installer scripts of the <a class="reference external" href="https://github.com/Ecohydraulics/numerical-software-installers">installer repository</a>, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen’s sediment solvers, so that installing OpenFOAM does not depend on the website where Nils Reidar Olsen publishes them (the repo was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under <em>Further settings</em> on the <em>Settings</em> tab.</p>
+</div>
+</section>
+<section id="user-rights">
+<h2>User rights<a class="headerlink" href="#user-rights" title="Link to this heading"></a></h2>
+<p><strong>System packages and administrator rights:</strong> Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The <em>Check</em> tab states how many of the required packages are missing and shows the one command that installs them in a box below the heading <strong>REQUIRED USER ACTIONS in TERMINAL:</strong>, both in dark purple. The command can be run in two ways:</p>
+<ul class="simple">
+<li><p><em>Run fixes</em> runs the command. On a desktop, the password dialog of the desktop asks for the password; otherwise a terminal window opens and asks for it. The password does not pass through the plugin. aXqua then checks the computer again and repeats the fixes as long as they make progress.</p></li>
+<li><p><em>Copy the command</em> places the command in the clipboard, to be pasted into a terminal. On a computer that is managed by an institution, send the command to the administrator.</p></li>
+</ul>
+<p>If the fixes do not solve the problem, for instance because the same packages remain missing, the button <em>Report issue</em> appears. It opens a window with a report of the computer, the command, and what the check found, in which your home folder is written as <code class="docutils literal notranslate"><span class="pre">~</span></code>. The report can be read and changed before it is sent: <em>Open on GitHub</em> opens a new issue in the <a class="reference external" href="https://github.com/sschwindt/aXqua/issues">issue tracker</a> (a free GitHub account is required), <em>Send by e-mail</em> opens the mail program with the report (no account is required), and <em>Copy report</em> places it in the clipboard. A failed installation offers the same button on the <em>Installation</em> tab, with the end of the installation log in the report.</p>
+<p><strong>For me only, or for all users:</strong> The first setting of each wizard, <em>Install for</em>, decides who can use the program:</p>
+<ul class="simple">
+<li><p><em>Me only</em> (the default) installs into a folder in your home folder: <code class="docutils literal notranslate"><span class="pre">~/opt</span></code> for TELEMAC, <code class="docutils literal notranslate"><span class="pre">~/.local/openfoam-sediment-v2406</span></code> for OpenFOAM, and <code class="docutils literal notranslate"><span class="pre">~/.local/axqua-postprocessors</span></code> for VisIt. The installation itself requires no administrator rights; only missing system packages do, as described above.</p></li>
+<li><p><em>All users of this computer</em> installs into a folder below <code class="docutils literal notranslate"><span class="pre">/opt</span></code>: <code class="docutils literal notranslate"><span class="pre">/opt/telemac</span></code>, <code class="docutils literal notranslate"><span class="pre">/opt/openfoam-sediment-v2406</span></code>, or <code class="docutils literal notranslate"><span class="pre">/opt/axqua-postprocessors</span></code>. The build still runs under your user account, because the installers refuse to compile as the administrator. The password of an administrator is asked twice: before the build, to create the folder for you, and at its end, to hand the folder over to the administrator, readable for every user and writable for nobody else. The aXqua of every other user finds the programs in these folders without any entry in their profile. Changing the folder later, for example to add the example cases of TELEMAC, again requires an administrator.</p></li>
+</ul>
+<p>On the desktop, the password dialog of the desktop asks for the password. In a terminal, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">start</span> <span class="pre">openfoam</span> <span class="pre">--for-all-users</span> <span class="pre">--foreground</span></code> lets <code class="docutils literal notranslate"><span class="pre">sudo</span></code> ask for it; a detached installation without a desktop cannot ask and stops before it builds anything.</p>
+<p>Click <em>Check again</em> afterwards. The installation itself runs with the rights of the ordinary user and writes into the installation folder only.</p>
+<p><strong>From a terminal.</strong> Each wizard corresponds to one command, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span></code>, which does the same without QGIS (<a class="reference internal" href="../automation/terminal-syntax.html"><span class="doc">Terminal syntax</span></a>).</p>
+</section>
+<section id="telemac">
+<span id="install-telemac"></span><h2>TELEMAC<a class="headerlink" href="#telemac" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="http://www.opentelemac.org/">TELEMAC</a> solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC). Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1.</p>
+<p>Click <strong>Install TELEMAC…</strong> on the <strong>Configuration</strong> tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its <em>Settings</em> tab has four settings besides <em>Install for</em>:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 74.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Installation folder</p></td>
+<td><p>TELEMAC is installed in the subfolder <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> of this folder. The default is the folder <code class="docutils literal notranslate"><span class="pre">opt</span></code> in the home folder. If the subfolder exists already, the installer keeps its source code and builds TELEMAC in it again.</p></td>
+</tr>
+<tr class="row-odd"><td><p>TELEMAC version</p></td>
+<td><p>Leave the field empty for v9.1.1.</p></td>
+</tr>
+<tr class="row-even"><td><p>Example cases of TELEMAC</p></td>
+<td><p>TELEMAC is distributed with about 830 example cases. Their steering files are always installed with the source code. The setting selects how many of their large files are downloaded in addition. <em>Input files of examples only</em> (the default) downloads what a run of an example reads, which is mainly its mesh: about 360 files and 460 MB. <em>Everything</em> also downloads the reference results, with which TELEMAC validates itself, and the manuals: 1,500 files and 1.65 GB, which takes about one hour. <em>Steering files only</em> downloads none of the large example files. aXqua itself requires none of these files.</p></td>
+</tr>
+<tr class="row-odd"><td><p>SALOME archive</p></td>
+<td><p>Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua uses <a class="reference external" href="https://gmsh.info/">Gmsh</a> (Geuzaine and Remacle 2009) and does not require SALOME, because it generates the mesh and the input files itself.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The installation downloads the source code of TELEMAC and compiles it for parallel computation with the system libraries MPI, MUMPS, METIS and MED. It requires about 2.5 GB of free space with the input files of the example cases and about 5 GB with everything. On a workstation with 32 processor cores, the installation with the default setting took 11 minutes, of which the input files of the example cases took 7 minutes.</p>
+<p>The large files of the example cases are stored separately from the source code, and the download server delivers them one at a time when all of them are requested. For this reason, the default setting requests only the files that a run reads. aXqua determines these files from TELEMAC itself: the keyword dictionaries of TELEMAC state for every file whether a run reads or writes it. The missing files can be downloaded at any time afterwards: <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">telemac-examples</span> <span class="pre">&lt;folder&gt;</span></code> downloads the input files that are still missing, and <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">lfs</span> <span class="pre">pull</span></code> in the folder <code class="docutils literal notranslate"><span class="pre">telemac-mascaret</span></code> downloads everything.</p>
+<p>The result is the file <code class="docutils literal notranslate"><span class="pre">telemac-mascaret/configs/pysource.&lt;system&gt;.sh</span></code> in the installation folder. This file is the <strong>environment script</strong> of TELEMAC: it sets all variables that TELEMAC requires. The wizard enters it in the profile as the solver binding of TELEMAC (<a class="reference internal" href="plugin-setup.html#solver-bindings"><span class="std std-ref">Define solver bindings</span></a>).</p>
+<p>If the installation fails, the wizard shows the last lines of the installation log and the location of the complete log. After the cause is corrected, start the wizard again with the same folder. The installer continues with what is already downloaded.</p>
+<p>A manual installation is described in the <a class="reference external" href="https://hydro-informatics.com/get-started/install-telemac-autoinstaller.html">TELEMAC installation tutorial</a>. Enter the environment script of a manual installation in the profile editor.</p>
+</section>
+<section id="openfoam">
+<span id="install-openfoam"></span><h2>OpenFOAM<a class="headerlink" href="#openfoam" title="Link to this heading"></a></h2>
+<p><a class="reference external" href="https://www.openfoam.com/">OpenFOAM</a> enables a better resolution of flow in 3D, which is particularly important for the simulation of hydraulic structures such as weirs or vertical slot fishways. aXqua is designed to function with <strong>OpenFOAM v2406</strong> as distributed by OpenCFD (<code class="docutils literal notranslate"><span class="pre">openfoam.com</span></code>), which is compatible with the sediment transport solvers <strong>sediDriftFoam</strong> (<a class="reference external" href="https://doi.org/10.2166/hydro.2023.309">Olsen et al. 2023</a>) and <strong>sediDriftFoam2</strong> (<a class="reference external" href="https://doi.org/10.2166/hydro.2025.059">Olsen 2025</a>). The releases of the OpenFOAM Foundation (<code class="docutils literal notranslate"><span class="pre">openfoam.org</span></code>) use different file formats and do not read the input files that aXqua writes.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Install TELEMAC also when OpenFOAM is the code of interest. aXqua starts every OpenFOAM simulation from the result of a short TELEMAC run, which is called the warm-up (<a class="reference internal" href="../usage/hydraulic-simulations.html#warm-up-concept"><span class="std std-ref">aXqua warm-up concept</span></a>). Without it, OpenFOAM has to fill a dry riverbed with water on its own, which multiplies the computing time.</p>
+</div>
+<p>Click <em>Install OpenFOAM…</em> on the <em>Configuration</em> tab. The wizard is available on Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, on computers with an x86-64 processor. It installs the following components into one folder:</p>
+<ul class="simple">
+<li><p><strong>OpenFOAM v2406</strong>, unless an installation of this version exists already (see the settings below).</p></li>
+<li><p>The sediment transport solvers <strong>sediDriftFoam</strong> (<a class="reference external" href="https://doi.org/10.2166/hydro.2023.309">Olsen et al. 2023</a>) and <strong>sediDriftFoam2</strong> (<a class="reference external" href="https://doi.org/10.2166/hydro.2025.059">Olsen 2025</a>), and a variant of the latter with a stage-discharge outflow, <code class="docutils literal notranslate"><span class="pre">sediDriftFoam2Rating</span></code>, which the installer marks as not validated.</p></li>
+<li><p>The <strong>stage-discharge outflow boundary</strong> of the Federal Waterways Engineering and Research Institute (BAW) for the solver <code class="docutils literal notranslate"><span class="pre">interFoam</span></code> (<a class="reference external" href="https://doi.org/10.3929/ethz-b-000675949">Thorenz 2024</a>).</p></li>
+<li><p>The postprocessors <strong>ParaView</strong> and <strong>VisIt</strong> (<a class="reference internal" href="postprocessors.html#help-postprocessors"><span class="std std-ref">Postprocessors</span></a>), unless they are deselected.</p></li>
+</ul>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 74.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Setting</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Installation folder</p></td>
+<td><p>A folder that does not exist yet, or an empty one. The installer installs into a new folder or continues an installation of its own, and refuses any other folder.</p></td>
+</tr>
+<tr class="row-odd"><td><p>OpenFOAM v2406</p></td>
+<td><p><em>Use the OpenFOAM v2406 that is installed on this computer</em> builds the solvers on an existing installation, which takes a few minutes. aXqua enters the installation that it found. Select the file <code class="docutils literal notranslate"><span class="pre">etc/bashrc</span></code> of another one with <em>Browse…</em>. <em>Compile OpenFOAM v2406 from its source code</em> is the choice for a computer without OpenFOAM. It takes several hours and requires about 20 GB of free space.</p></td>
+</tr>
+<tr class="row-even"><td><p>Processes for compiling</p></td>
+<td><p>The number of processor cores used for compiling. Each process requires about 2 GB of memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Postprocessors</p></td>
+<td><p><em>ParaView and VisIt</em> is the default and the recommended choice, because aXqua renders its predefined three-dimensional figures with VisIt. <em>ParaView only</em> leaves VisIt out, which saves a download of 600 MB. <em>None</em> installs neither program, for a computer on which both are installed already. A program that was left out can be installed at any time afterwards (<a class="reference internal" href="postprocessors.html#help-postprocessors"><span class="std std-ref">Postprocessors</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p>Download the example case of the sediment solver</p></td>
+<td><p>Adds the example case that is published with sediDriftFoam.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Run a short test at the end</p></td>
+<td><p>Runs <code class="docutils literal notranslate"><span class="pre">interFoam</span></code> for a few time steps with the outflow boundary of the BAW, which verifies that the compiled library can be loaded.</p></td>
+</tr>
+</tbody>
+</table>
+<figure class="align-default" id="id5">
+<a class="reference internal image-reference" href="../_images/gui-install-wizard.png"><img alt="The Settings tab of the OpenFOAM installation wizard" src="../_images/gui-install-wizard.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">The <em>Settings</em> tab of the OpenFOAM wizard. (1) For whom the program is installed: for you alone, or for all users of the computer. (2) The installation folder. (3) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (4) The selection of the postprocessors. (5) <em>Next</em> leads to the tab <em>Check</em>.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the <a class="reference external" href="https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian">installation instructions of OpenCFD</a>, which creates the file <code class="docutils literal notranslate"><span class="pre">/usr/lib/openfoam/openfoam2406/etc/bashrc</span></code>. The wizard finds this installation by itself.</p>
+<p>The result is the file <code class="docutils literal notranslate"><span class="pre">shell-rc.sh</span></code> in the installation folder. It is the <strong>environment script</strong> of this installation: it loads OpenFOAM v2406 and adds the compiled solvers and the boundary library. The wizard enters it in the profile as the solver binding of OpenFOAM, and enters the selected postprocessors. No existing OpenFOAM installation and no startup file of the user account is changed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>aXqua sets up simulations with the sediment transport solver sediDriftFoam2, for fine sediment over a bed that stays in place (<em>Simulations &gt; Morphodynamics</em> with the simulation program <em>OpenFOAM</em>, <a class="reference internal" href="../usage/morphodynamic-simulations.html#help-morphodynamics-openfoam"><span class="std std-ref">OpenFOAM Setup</span></a>), and OpenFOAM simulations with the stage-discharge outflow boundary of the BAW (<code class="docutils literal notranslate"><span class="pre">openfoam.outflow_boundary:</span> <span class="pre">rating-curve</span></code>, <a class="reference internal" href="../usage/preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">OpenFOAM choices</span></a>). The variant <code class="docutils literal notranslate"><span class="pre">sediDriftFoam2Rating</span></code>, which moves the bed and the water surface, is installed but not set up by aXqua, because aXqua keeps the bed and the surface of a sediment simulation in place.</p>
+</div>
+<p class="rubric">References</p>
+<p>Geuzaine, C., Remacle, J.-F., 2009. Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering 79, 1309–1331. <a class="reference external" href="https://doi.org/10.1002/nme.2579">https://doi.org/10.1002/nme.2579</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qgis-plugin.html" class="btn btn-neutral float-left" title="QGIS plugin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plugin-setup.html" class="btn btn-neutral float-right" title="Plugin setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

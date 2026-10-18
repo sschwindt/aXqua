@@ -1,0 +1,936 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.openfoam.case &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/openfoam/case.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Purpose</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Install QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulation Software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installation wizards (short version)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">User rights</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin profile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Define solver bindings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Job execution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprocessors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua case setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Project settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodata</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Liquid boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Initial conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Meshing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Pre-processing checkup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choices</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM choices</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua warm-up concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC dry runs 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Mesh convergence</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Mesh study setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Run mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Study report</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamic simulations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction to Bayesian calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Ground truth data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayesian calibration &amp; validation setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Run HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Quality analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS map generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visual automation)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">A sequence of steps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: jobs continue without QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequences with the QGIS model designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automation &amp; Terminal Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminal syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Open a terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options for scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts in the case folder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (headless)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Monitor and control jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequences of jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">How jobs are detached</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Code documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">General structure &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Design rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capabilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licenses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Case description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Case file type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification of settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Table of settings for forms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profile of the computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Findings of checks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Error types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Location of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environments of the simulation codes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-agnostic core</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodata and rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Boundaries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain from CAD surfaces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN file format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Example cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capabilities and backend registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Build sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Mesh and mesh quality</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Boundary conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Steering and friction files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Evaluation of runs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Varying discharge</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Exchange with a porous body</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Initial state from a TELEMAC result</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionaries and case assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Runs and evaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Single-phase free surface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Fine sediment over a fixed bed</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, studies and calibration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Discharge data and rating curves</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Field measurements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Shared steps of the case scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Mesh convergence study</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Study of the vertical layers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calibration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Progress display and logging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Job system</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Job description and storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processes and state reconciliation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Solver profiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progress events and logs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Submission and execution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Detached launchers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation of the simulation software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Operating system</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installation plans</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Example cases of TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Running an installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Result description</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Figures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export of TELEMAC results</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Command line</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Case commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Job commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profile commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installation commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Export commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Case file commands</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Example case commands</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warning messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Error messages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Jobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License and disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Third-party software</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.openfoam.case</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for axqua.solvers.openfoam.case</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Assemble the complete OpenFOAM case: mesh, fields, dictionaries.</span>
+
+<span class="sd">The counterpart of :func:`axqua.pipeline.run` for the 3D free-surface path. It</span>
+<span class="sd">draws on exactly the same configuration the TELEMAC case was built from - the same</span>
+<span class="sd">ROI, the same liquid boundaries, the same roughness zones, the same discharge and</span>
+<span class="sd">the same outflow rating - so the two models are driven identically and their results</span>
+<span class="sd">can be compared without arguing about the forcing.</span>
+
+<span class="sd">What it produces, under ``&lt;sim_dir&gt;/openfoam/``::</span>
+
+<span class="sd">    0/                alpha.water, U, p_rgh, nut, k, omega   (seeded from r2d.slf)</span>
+<span class="sd">    constant/</span>
+<span class="sd">      polyMesh/       points, faces, owner, neighbour, boundary</span>
+<span class="sd">      g, transportProperties, turbulenceProperties</span>
+<span class="sd">    system/</span>
+<span class="sd">      controlDict, fvSchemes, fvSolution                     (the ACTIVE stage)</span>
+<span class="sd">      fvOptions, decomposeParDict</span>
+<span class="sd">      stage1-spinup/, stage2-run/                            (both dict sets)</span>
+<span class="sd">    case.foam                                                (ParaView marker)</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">refresh_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">dicts</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">mesh</span> <span class="k">as</span> <span class="n">ofmesh</span><span class="p">,</span>
+                                    <span class="n">planview</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">quality</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.hotstart</span><span class="w"> </span><span class="kn">import</span> <span class="n">State2D</span><span class="p">,</span> <span class="n">load_hotstart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.polymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_polymesh</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># multiple of the water velocity at which the limitVelocity constraint bites</span>
+<span class="n">DEFAULT_VELOCITY_CAP_FACTOR</span> <span class="o">=</span> <span class="mf">5.0</span>
+
+<span class="c1"># The time step of a two-phase run, measured on the Isar example after the corrections</span>
+<span class="c1"># of 2026-10-13 (1 m cells with 14 layers, thinnest layer 0.031 m, and 2 m cells with</span>
+<span class="c1"># 8 layers, thinnest layer 0.057 m; water speed 0.80 m/s at the 95th percentile). Two</span>
+<span class="c1"># limits, and both scale with the thinnest layer: the air next to the water reaches a</span>
+<span class="c1"># Courant number of 0.9 at 0.026 s and 0.060 s, the water surface at 0.051 s and</span>
+<span class="c1"># 0.100 s. Written as Courant x thinnest layer / (factor x water speed), the factor</span>
+<span class="c1"># is 1.3 and 1.1 for the air and 0.68 and 0.64 for the surface.</span>
+<span class="n">AIR_SPEED_FACTOR</span> <span class="o">=</span> <span class="mf">1.2</span>
+<span class="n">SURFACE_SPEED_FACTOR</span> <span class="o">=</span> <span class="mf">0.65</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_describe_outflow</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One line for the outlet prescription, scalar or per-patch.</span>
+
+<span class="sd">    A crop with several open faces carries a different level on each, and the</span>
+<span class="sd">    SPREAD is the number worth seeing: it is what says whether one scalar would</span>
+<span class="sd">    have been an acceptable approximation.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+
+    <span class="k">if</span> <span class="n">stage</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"free outfall"</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stage</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">"stage held at </span><span class="si">{</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m a.s.l. on every outlet"</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">stage</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">" m a.s.l. (spread </span><span class="si">{</span><span class="n">levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"stage held at </span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">stage</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m a.s.l."</span>
+
+
+<div class="viewcode-block" id="OpenFoamArtifacts">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.OpenFoamArtifacts">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamArtifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Everything the build produced, mirroring :class:`axqua.pipeline.Artifacts`."""</span>
+
+    <span class="n">case_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">polymesh_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">field_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">dict_files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">mesh</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span>                 <span class="c1"># openfoam.mesh.OpenFoamMesh</span>
+    <span class="n">report</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span>               <span class="c1"># openfoam.quality.MeshReport</span>
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">inlet_discharges</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">outflow_stage</span><span class="p">:</span> <span class="s2">"float | dict[str, float] | None"</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">hotstart</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span>                  <span class="c1"># the Config the case was built from</span>
+    <span class="n">state</span><span class="p">:</span> <span class="nb">object</span> <span class="o">=</span> <span class="kc">None</span>                <span class="c1"># the 2D hotstart it was seeded from</span>
+
+<div class="viewcode-block" id="OpenFoamArtifacts.lines">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.OpenFoamArtifacts.lines">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hotstart</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hotstart</span> <span class="k">else</span> <span class="s2">"none (cold start, flat lid)"</span>
+        <span class="n">inflow</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m3/s"</span>
+                           <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inlet_discharges</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">outflow</span> <span class="o">=</span> <span class="n">_describe_outflow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outflow_stage</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"OpenFOAM case built in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">case_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  hotstart    : </span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  inflow      : </span><span class="si">{</span><span class="n">inflow</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  outflow     : </span><span class="si">{</span><span class="n">outflow</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  velocity cap: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">velocity_cap</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s "</span>
+                   <span class="s2">"(limitVelocity, keeps the air phase off the time step)"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  note        : </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_inlet_discharges</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Discharge per inlet patch.</span>
+
+<span class="sd">    Each inflow line's own ``Target flow`` when the layer carries one (isar: 1.6 and</span>
+<span class="sd">    0.8 m3/s on the two upstream branches); otherwise the total reach discharge split</span>
+<span class="sd">    by patch face count - a width proxy, and the same rule</span>
+<span class="sd">    :func:`axqua.steering._prescribed_arrays` applies to the TELEMAC boundaries,</span>
+<span class="sd">    so the two models feed the branches identically.</span>
+<span class="sd">    """</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">inlet_patches</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">patches</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"the mesh has no inlet patch: no line of boundaries.liquid_boundaries "</span>
+            <span class="s2">"tagged 'inflow' came within the matching tolerance of the domain edge. "</span>
+            <span class="s2">"Check that the liquid lines lie on the wetted-corridor boundary, or "</span>
+            <span class="s2">"raise openfoam.boundary_tolerance."</span><span class="p">)</span>
+    <span class="n">per_line</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">inlet_discharge</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">inlet_discharge</span><span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">per_line</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">patches</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">per_line</span>
+    <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">n_faces</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">}</span>
+    <span class="n">n_total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="ow">or</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">total</span> <span class="o">*</span> <span class="n">counts</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">/</span> <span class="n">n_total</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span><span class="p">}</span>
+
+
+<span class="c1">#: Discharges, as shares of the case's own, at which a derived rating curve is</span>
+<span class="c1">#: tabulated for an outlet that follows it (``openfoam.outflow_boundary:</span>
+<span class="c1">#: rating-curve``). The outlet of the BAW refuses to extrapolate, so the range has to</span>
+<span class="c1">#: cover what the outflow does while the run settles.</span>
+<span class="n">RATING_SHARES</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_derive_rating</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharges</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">out</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A rating curve from the terrain at the outflow, by the case's own method."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">rating</span>
+
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="p">,</span> <span class="s2">"rating_method"</span><span class="p">,</span> <span class="s2">"trapezoid"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"section"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">rating</span><span class="o">.</span><span class="n">synthesize_outflow_rating_from_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharges</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rating</span><span class="o">.</span><span class="n">synthesize_outflow_rating</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharges</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="rating_table">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.rating_table">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rating_table</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">derive</span><span class="o">=</span><span class="kc">None</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""The stage-discharge relation an outlet follows: ``[(Q, h), ...]`` sorted by Q.</span>
+
+<span class="sd">    ``boundaries.stage_discharge`` where it has at least two discharges; otherwise a</span>
+<span class="sd">    curve derived from the terrain over :data:`RATING_SHARES` of *discharge*, written</span>
+<span class="sd">    to *folder* (one pair is enough for a fixed level, not for a relation).</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_rating_pairs</span>
+
+    <span class="n">given</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="p">,</span> <span class="s2">"stage_discharge"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">given</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">read_rating_pairs</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">h</span><span class="p">)]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"rating-curve-openfoam.csv"</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">derive</span> <span class="ow">or</span> <span class="n">_derive_rating</span><span class="p">)(</span><span class="n">cfg</span><span class="p">,</span> <span class="p">[</span><span class="n">discharge</span> <span class="o">*</span> <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">RATING_SHARES</span><span class="p">],</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">q</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">read_rating_pairs</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">h</span><span class="p">)]</span></div>
+
+
+
+<div class="viewcode-block" id="build_case">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.build_case">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">State2D</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="n">uniform_bed_ks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OpenFoamArtifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build the OpenFOAM case for *cfg*.</span>
+
+<span class="sd">    *state* short-circuits reading the 2D result (used by tests); *hotstart* points</span>
+<span class="sd">    at a different ``r2d.slf`` than the config's own; *discharge* overrides</span>
+<span class="sd">    ``boundaries.prescribed_flowrate``. *uniform_bed_ks* writes one global bed</span>
+<span class="sd">    roughness rather than the per-face list, which is what a calibration template</span>
+<span class="sd">    needs (see :func:`axqua.solvers.openfoam.fields._wall_entries`).</span>
+<span class="sd">    """</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">of</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">case_dir</span> <span class="k">else</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam_case_dir</span>
+    <span class="n">case_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">load_hotstart</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">hotstart</span><span class="p">)</span>
+
+    <span class="c1"># The same shared helper the TELEMAC scripts use, so the 3D case takes its</span>
+    <span class="c1"># discharge and its outflow rating from one source of truth. It also synthesizes</span>
+    <span class="c1"># the rating curve when the config leaves it unset - which isar deliberately</span>
+    <span class="c1"># does, so each scenario derives its own from that scenario's geometry.</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">prepare_steady_inputs</span>
+
+    <span class="n">q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">prepare_steady_inputs</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">q</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"no steady discharge for the OpenFOAM build: set "</span>
+            <span class="s2">"boundaries.prescribed_flowrate (m3/s) in case-config.yml."</span><span class="p">)</span>
+
+    <span class="c1"># The level of the outflow is needed before the mesh, which walls an outlet above</span>
+    <span class="c1"># it; a stage per outlet patch (openfoam.outlet_stage) is read by the mesher.</span>
+    <span class="n">tailwater</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rating</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">dicts</span><span class="o">.</span><span class="n">uses_rating_outlet</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="c1"># the outlet follows a stage-discharge relation; the run starts from its level</span>
+        <span class="c1"># at the discharge of the case, and the mesher walls the outlet above that</span>
+        <span class="n">rating</span> <span class="o">=</span> <span class="n">rating_table</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">)</span>
+        <span class="n">tailwater</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rating</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rating</span><span class="p">]))</span>
+    <span class="k">elif</span> <span class="n">of</span><span class="o">.</span><span class="n">outlet_stage</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">!=</span> <span class="s2">"free"</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>
+
+        <span class="n">tailwater</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
+    <span class="n">of_mesh</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">build_mesh</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span> <span class="n">tailwater</span><span class="o">=</span><span class="n">tailwater</span><span class="p">)</span>
+    <span class="n">notes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">notes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warning</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">resolution_check</span><span class="p">(</span><span class="n">ofmesh</span><span class="o">.</span><span class="n">plan_spacing</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">warning</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">warning</span><span class="p">)</span>
+
+    <span class="n">inlets</span> <span class="o">=</span> <span class="n">_inlet_discharges</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"the mesh has no outlet patch: no 'outflow' line of "</span>
+            <span class="s2">"boundaries.liquid_boundaries reached the domain edge. Without one the "</span>
+            <span class="s2">"water has nowhere to leave and the run will simply fill up."</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">of</span><span class="o">.</span><span class="n">outlet_stage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stage</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">outlet_stages</span><span class="p">(</span><span class="n">of</span><span class="o">.</span><span class="n">outlet_stage</span><span class="p">,</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span><span class="p">)</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">stage</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="n">where</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"this domain is a sub-model, so its tailwater is the parent's "</span>
+                 <span class="s2">"level at the crop face, not the case's own far-end prescription"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">levels</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">"outlet stages "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">stage</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+                <span class="o">+</span> <span class="sa">f</span><span class="s2">" m a.s.l. from openfoam.outlet_stage, spanning "</span>
+                  <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m - "</span> <span class="o">+</span> <span class="n">where</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"outlet stage </span><span class="si">{</span><span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m a.s.l. from "</span>
+                         <span class="sa">f</span><span class="s2">"openfoam.outlet_stage - </span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">rating</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stage</span> <span class="o">=</span> <span class="n">tailwater</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"outlet follows a stage-discharge relation of </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rating</span><span class="p">)</span><span class="si">}</span><span class="s2"> pairs "</span>
+            <span class="sa">f</span><span class="s2">"(Q </span><span class="si">{</span><span class="n">rating</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">rating</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> m3/s) with the boundary "</span>
+            <span class="sa">f</span><span class="s2">"condition waterLevel_alpha_prgh of the BAW; it starts at </span><span class="si">{</span><span class="n">stage</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m "</span>
+            <span class="s2">"a.s.l., the level at the discharge of the case. The library "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">dicts</span><span class="o">.</span><span class="n">BAW_LIBRARY</span><span class="si">}</span><span class="s2"> has to be in the OpenFOAM installation (the one aXqua "</span>
+            <span class="s2">"installs has it)."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span><span class="p">)</span><span class="si">}</span><span class="s2"> outlets each follow the same relation "</span>
+                <span class="s2">"with the discharge through their own patch, which is right only where "</span>
+                <span class="s2">"each outlet has a rating curve of that shape"</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
+        <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"free (Neumann) outfall: the model chooses its own tailwater"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stage</span> <span class="o">=</span> <span class="n">tailwater</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"outlet stage </span><span class="si">{</span><span class="n">stage</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m a.s.l. from "</span>
+                     <span class="sa">f</span><span class="s2">"boundaries.outflow_condition: </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span><span class="si">}</span><span class="s2">"</span>
+                     <span class="s2">" - the same prescription the TELEMAC case uses"</span><span class="p">)</span>
+
+    <span class="n">cap</span> <span class="o">=</span> <span class="n">of</span><span class="o">.</span><span class="n">air_velocity_cap</span>
+    <span class="k">if</span> <span class="n">cap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">reference</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">velocity_scale</span><span class="p">()</span> <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">initial_velocity_guess</span>
+        <span class="n">cap</span> <span class="o">=</span> <span class="n">DEFAULT_VELOCITY_CAP_FACTOR</span> <span class="o">*</span> <span class="n">reference</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"limitVelocity cap </span><span class="si">{</span><span class="n">cap</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s "</span>
+                     <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">DEFAULT_VELOCITY_CAP_FACTOR</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">x the reach's p95 water speed)"</span><span class="p">)</span>
+
+    <span class="c1"># the results of an earlier build cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would otherwise go on</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_runs</span>
+
+    <span class="n">removed</span> <span class="o">=</span> <span class="n">clear_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">removed</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"removed the results of the earlier build: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">removed</span><span class="p">))</span>
+    <span class="n">polymesh_dir</span> <span class="o">=</span> <span class="n">write_polymesh</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">)</span>
+    <span class="c1"># which column each cell is in and how thick it is: what a view of the result</span>
+    <span class="c1"># from above needs, saved here so that it never depends on a second build</span>
+    <span class="n">planview</span><span class="o">.</span><span class="n">Columns</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">potential</span><span class="o">.</span><span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="c1"># Leg C: single phase, the free surface carried as `zeta` on the top</span>
+        <span class="c1"># boundary rather than resolved as an interface. Different field set</span>
+        <span class="c1"># (p/p_gh/U/zeta, no alpha) on the same water-only mesh the rigid lid uses.</span>
+        <span class="n">field_files</span> <span class="o">=</span> <span class="n">potential</span><span class="o">.</span><span class="n">write_potential_fields</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span>
+                                                      <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">write_reference_level</span><span class="p">(</span><span class="n">case_dir</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>    <span class="c1"># left by a two-phase build</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">field_files</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">write_fields</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+                                          <span class="n">outflow_stage</span><span class="o">=</span><span class="n">stage</span><span class="p">,</span> <span class="n">discharges</span><span class="o">=</span><span class="n">inlets</span><span class="p">,</span>
+                                          <span class="n">uniform_bed_ks</span><span class="o">=</span><span class="n">uniform_bed_ks</span><span class="p">,</span> <span class="n">rating</span><span class="o">=</span><span class="n">rating</span><span class="p">)</span>
+    <span class="n">dict_files</span> <span class="o">=</span> <span class="n">dicts</span><span class="o">.</span><span class="n">write_dicts</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="n">cap</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"case.foam"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>     <span class="c1"># so ParaView can open the folder</span>
+    <span class="n">_write_build_record</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">of_mesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cap</span><span class="p">))</span>
+
+    <span class="n">report</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">assess</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+                            <span class="n">roughness_constant</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">roughness_constant</span><span class="p">)</span>
+
+    <span class="n">art</span> <span class="o">=</span> <span class="n">OpenFoamArtifacts</span><span class="p">(</span>
+        <span class="n">case_dir</span><span class="o">=</span><span class="n">case_dir</span><span class="p">,</span> <span class="n">polymesh_dir</span><span class="o">=</span><span class="n">polymesh_dir</span><span class="p">,</span> <span class="n">field_files</span><span class="o">=</span><span class="n">field_files</span><span class="p">,</span>
+        <span class="n">dict_files</span><span class="o">=</span><span class="n">dict_files</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">report</span><span class="o">=</span><span class="n">report</span><span class="p">,</span> <span class="n">discharge</span><span class="o">=</span><span class="n">q</span><span class="p">,</span>
+        <span class="n">inlet_discharges</span><span class="o">=</span><span class="n">inlets</span><span class="p">,</span> <span class="n">outflow_stage</span><span class="o">=</span><span class="n">stage</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cap</span><span class="p">),</span>
+        <span class="n">hotstart</span><span class="o">=</span><span class="n">state</span><span class="o">.</span><span class="n">source</span> <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">,</span>
+        <span class="n">cfg</span><span class="o">=</span><span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">refresh_markers</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>      <span class="c1"># the case folder now has an OpenFOAM mesh; say so</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">art</span><span class="o">.</span><span class="n">lines</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">art</span></div>
+
+
+
+<span class="c1">#: Written beside ``case.foam`` so the build's own findings survive the terminal.</span>
+<span class="c1">#: A build-time warning that only reaches a log is the failure this exists to stop:</span>
+<span class="c1">#: munich-vsf ran 61 hours, balanced its discharge to -0.000%, held Courant at 0.90,</span>
+<span class="c1">#: and carried no trace of the warning that said the answer could not be trusted.</span>
+<span class="n">BUILD_RECORD</span> <span class="o">=</span> <span class="s2">"axqua-build.json"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_build_record</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">of_mesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Record the build-time judgments the finished run has to be read against.</span>
+
+<span class="sd">    Only what the run itself cannot tell you afterwards. The lid-step ratio is the</span>
+<span class="sd">    whole point: it is measured from the *prescribed* surface, so no amount of</span>
+<span class="sd">    looking at the result recovers it - and it is the number that decides whether a</span>
+<span class="sd">    rigid-lid answer is usable at all.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="n">record</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"mode"</span><span class="p">:</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span>
+        <span class="s2">"rigid_lid"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">rigid_lid</span><span class="p">),</span>
+        <span class="s2">"velocity_cap"</span><span class="p">:</span> <span class="n">velocity_cap</span><span class="p">,</span>
+        <span class="s2">"n_cells"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">lid_step_p99</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">record</span><span class="p">[</span><span class="s2">"lid_step_median"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">lid_step_median</span><span class="p">)</span>
+        <span class="n">record</span><span class="p">[</span><span class="s2">"lid_step_p99"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">lid_step_p99</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">case_dir</span> <span class="o">/</span> <span class="n">BUILD_RECORD</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<div class="viewcode-block" id="water_speed">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.water_speed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">water_speed</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The reach's own water speed [m/s]: the 95th percentile of the 2D result."""</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">velocity_scale</span><span class="p">()),</span> <span class="mf">1e-3</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="s2">"column_uv"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">column_uv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">column_uv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">speed</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="mi">95</span><span class="p">)),</span> <span class="mf">1e-3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">initial_velocity_guess</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="limiting_velocity">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.limiting_velocity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">limiting_velocity</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The velocity that sets the Courant number of the flow.</span>
+
+<span class="sd">    Under a rigid lid that is the water's own speed. In the two-phase case it is the</span>
+<span class="sd">    air next to the water, which moves a little faster than the water does</span>
+<span class="sd">    (:data:`AIR_SPEED_FACTOR`) and never faster than the ``limitVelocity`` cap.</span>
+<span class="sd">    **It is not the cap**, although this function said so until October 2026: the</span>
+<span class="sd">    runs it was calibrated on had air at the cap because the outflow drove it there</span>
+<span class="sd">    (see :func:`axqua.solvers.openfoam.fields.outlet_pressure`), and the estimate</span>
+<span class="sd">    built on them was eight times too small once that was corrected.</span>
+<span class="sd">    """</span>
+    <span class="n">water</span> <span class="o">=</span> <span class="n">water_speed</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="s2">"rigid_lid"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">water</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">AIR_SPEED_FACTOR</span> <span class="o">*</span> <span class="n">water</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">velocity_cap</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="flow_courant">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.flow_courant">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">flow_courant</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">courant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The Courant limit of the flow in the production stage (``maxCo``)."""</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">courant</span> <span class="o">=</span> <span class="n">courant</span> <span class="k">if</span> <span class="n">courant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">of</span><span class="o">.</span><span class="n">max_courant</span>
+    <span class="n">wanted</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of</span><span class="p">,</span> <span class="s2">"max_flow_courant"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wanted</span> <span class="ow">and</span> <span class="n">of</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"rigid-lid"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">),</span> <span class="n">courant</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">courant</span></div>
+
+
+
+<div class="viewcode-block" id="estimate_time_step">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.estimate_time_step">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_time_step</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">courant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Time step [s] the Courant target will settle on.</span>
+
+<span class="sd">    **Two phases.** The limiting **length** is the *thinnest* layer in the mesh, not</span>
+<span class="sd">    the bed layer and not ``cell_size``: the bed layer is pinned thick enough to clear</span>
+<span class="sd">    the roughness, so the layers above it are thinner wherever a column is shallow,</span>
+<span class="sd">    and what crosses a layer is the vertical motion at the waterline. Two limits</span>
+<span class="sd">    apply, the Courant number of the flow, which the air next to the water reaches</span>
+<span class="sd">    first, and that of the water surface; the smaller step is the estimate. Within</span>
+<span class="sd">    12 % of the four measured steps the factors come from.</span>
+
+<span class="sd">    **Rigid lid.** No air, and taking the two-phase model across gave an estimate</span>
+<span class="sd">    nineteen times too pessimistic (0.019 s against a measured 0.369 s). There the</span>
+<span class="sd">    water moves horizontally across the full plan spacing, and only its *vertical*</span>
+<span class="sd">    component - which a terrain-following mesh gets from the bed slope, w ~ u.S -</span>
+<span class="sd">    crosses a thin layer. So the two directions are summed on their own terms</span>
+<span class="sd">    instead of the worst one being applied to both.</span>
+<span class="sd">    """</span>
+    <span class="n">courant</span> <span class="o">=</span> <span class="n">courant</span> <span class="k">if</span> <span class="n">courant</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">max_courant</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">plan_spacing</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">plan_spacing</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">limiting_velocity</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="s2">"rigid_lid"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">slope</span> <span class="o">=</span> <span class="n">terrain_slope</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">speed</span> <span class="o">/</span> <span class="n">dx</span> <span class="o">+</span> <span class="n">speed</span> <span class="o">*</span> <span class="n">slope</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">min_layer_height</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">courant</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">min_layer_height</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
+    <span class="n">air</span> <span class="o">=</span> <span class="n">flow_courant</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">courant</span><span class="p">)</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+    <span class="n">surface</span> <span class="o">=</span> <span class="n">courant</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="p">(</span><span class="n">SURFACE_SPEED_FACTOR</span> <span class="o">*</span> <span class="n">water_speed</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">air</span><span class="p">,</span> <span class="n">surface</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="terrain_slope">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.terrain_slope">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">terrain_slope</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Median bed slope [-] across one plan cell, over the meshed columns.</span>
+
+<span class="sd">    On a terrain-following mesh this is what turns horizontal flow into vertical</span>
+<span class="sd">    flux: water running along a bed that falls by ``S`` per cell crosses the layers</span>
+<span class="sd">    at roughly ``u.S``. It is read off the structured lattice rather than assumed,</span>
+<span class="sd">    because it varies by an order of magnitude between a smooth sand reach and the</span>
+<span class="sd">    bar-and-pool bed here (isar-2025: ~0.08).</span>
+<span class="sd">    """</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">grid</span>
+    <span class="n">bed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">col_id</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">inside</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">col_id</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="n">bed</span><span class="p">[</span><span class="n">inside</span><span class="p">]</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">column_bed</span><span class="p">[</span><span class="n">grid</span><span class="o">.</span><span class="n">col_id</span><span class="p">[</span><span class="n">inside</span><span class="p">]]</span>
+    <span class="n">dj</span><span class="p">,</span> <span class="n">di</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">bed</span><span class="p">,</span> <span class="n">grid</span><span class="o">.</span><span class="n">dx</span><span class="p">)</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">dj</span><span class="p">)[</span><span class="n">inside</span><span class="p">]</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">slope</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">slope</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">slope</span><span class="p">))</span> <span class="k">if</span> <span class="n">slope</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+
+
+
+<div class="viewcode-block" id="reach_flush_time">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.reach_flush_time">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reach_flush_time</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rough time [s] for water to traverse the modeled reach once.</span>
+
+<span class="sd">    The yardstick for "how long must this run be": a free-surface run cannot be</span>
+<span class="sd">    called steady before the domain has been flushed at least once, and comparing</span>
+<span class="sd">    that against the configured ``end_time`` is the difference between a run that</span>
+<span class="sd">    means something and one that merely finished.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">grid</span><span class="o">.</span><span class="n">cell_xy</span>
+    <span class="n">span</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">xy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))))</span>
+    <span class="k">return</span> <span class="n">span</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">velocity_scale</span><span class="p">(),</span> <span class="mf">1e-3</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cost_lines">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.cost_lines">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cost_lines</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""What this run will cost, stated before anyone commits to it.</span>
+
+<span class="sd">    A 3D VOF model of a whole water body is expensive in a way a 2D model is not,</span>
+<span class="sd">    and the expense is not obvious from the cell count alone: it is the cell count</span>
+<span class="sd">    **times** the number of time steps, and the time step is set by the thinnest</span>
+<span class="sd">    cell. Spelling both out here is the difference between choosing a resolution and</span>
+<span class="sd">    discovering one.</span>
+<span class="sd">    """</span>
+    <span class="n">of</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">estimate_time_step</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">of</span><span class="o">.</span><span class="n">end_time</span> <span class="o">/</span> <span class="n">dt</span> <span class="k">if</span> <span class="n">dt</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="s2">"inf"</span><span class="p">)</span>
+    <span class="n">flush</span> <span class="o">=</span> <span class="n">reach_flush_time</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="n">speed</span> <span class="o">=</span> <span class="n">limiting_velocity</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span>
+    <span class="n">courants</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Courant </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">max_courant</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">"</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">plan_spacing</span>
+
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="s2">"rigid_lid"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">basis</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">speed</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s - the water's own speed, there is no air phase - "</span>
+                 <span class="sa">f</span><span class="s2">"across </span><span class="si">{</span><span class="n">plan_spacing</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m cells, dropping through the "</span>
+                 <span class="sa">f</span><span class="s2">"thinnest </span><span class="si">{</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">min_layer_height</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m layer on a "</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">terrain_slope</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span><span class="si">:</span><span class="s2">.1%</span><span class="si">}</span><span class="s2"> bed slope)"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">flow</span> <span class="o">=</span> <span class="n">flow_courant</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">air</span> <span class="o">=</span> <span class="n">flow</span> <span class="o">*</span> <span class="nb">min</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">min_layer_height</span><span class="p">,</span> <span class="n">plan_spacing</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">speed</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">flow</span> <span class="o">&gt;</span> <span class="n">of</span><span class="o">.</span><span class="n">max_courant</span><span class="p">:</span>
+            <span class="n">courants</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Courant </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">max_courant</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> at the water surface and "</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">flow</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> in the air"</span><span class="p">)</span>
+        <span class="n">what</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"the air next to the water"</span> <span class="k">if</span> <span class="n">air</span> <span class="o">&lt;=</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">1e-9</span><span class="p">)</span>
+                <span class="k">else</span> <span class="s2">"the water surface"</span><span class="p">)</span>
+        <span class="n">basis</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"(set by </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> in the thinnest </span><span class="si">{</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">min_layer_height</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m "</span>
+                 <span class="sa">f</span><span class="s2">"layer; the water moves at </span><span class="si">{</span><span class="n">water_speed</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span><span class="w"> </span><span class="n">cfg</span><span class="p">,</span><span class="w"> </span><span class="n">state</span><span class="p">)</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> "</span>
+                 <span class="s2">"m/s)"</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  time step   : ~</span><span class="si">{</span><span class="n">dt</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> s at </span><span class="si">{</span><span class="n">courants</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">basis</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+           <span class="sa">f</span><span class="s2">"  run length  : </span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> s needs ~</span><span class="si">{</span><span class="n">steps</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> time steps "</span>
+           <span class="sa">f</span><span class="s2">"on </span><span class="si">{</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> cells"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">flush</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  reach flush : ~</span><span class="si">{</span><span class="n">flush</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> s for water to cross the domain "</span>
+                   <span class="s2">"once at the reach's own speed"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">of</span><span class="o">.</span><span class="n">end_time</span> <span class="o">&lt;</span> <span class="n">flush</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  ! openfoam.end_time (</span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> s) is shorter than one "</span>
+                       <span class="sa">f</span><span class="s2">"flush (</span><span class="si">{</span><span class="n">flush</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> s), so the run cannot reach a steady "</span>
+                       <span class="s2">"state. Either accept it as a transient study of the first "</span>
+                       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> s, or shorten the modeled reach - raising "</span>
+                       <span class="s2">"end_time to a full flush multiplies the step count above by "</span>
+                       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">flush</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">max</span><span class="p">(</span><span class="n">of</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span><span class="w"> </span><span class="mf">1e-9</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="estimate_cells">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.estimate_cells">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">estimate_cells</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="p">:</span> <span class="n">State2D</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Cell count a build would produce, without building it.</span>
+
+<span class="sd">    Cheap enough to call before committing to a resolution: it lays the plan lattice</span>
+<span class="sd">    and multiplies by the layer count, skipping the DEM sampling and the extrusion.</span>
+<span class="sd">    """</span>
+    <span class="n">polygon</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">_domain_polygon</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">wet_margin</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">wet_margin</span><span class="p">,</span>
+        <span class="n">wet_depth</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span>
+    <span class="n">angle</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">flow_angle</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">align_to_flow</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">build_plan_grid</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">cell_size</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
+                                  <span class="n">max_columns</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">max_plan_columns</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">n_columns</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="summarise">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.case.summarise">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">summarise</span><span class="p">(</span><span class="n">art</span><span class="p">:</span> <span class="n">OpenFoamArtifacts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Printable build summary: what was made, and what to run next."""</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">lines</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">report</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">art</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">lines</span><span class="p">()</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">report</span><span class="o">.</span><span class="n">n_cells</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">report</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">mesh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">total</span><span class="p">:</span>
+        <span class="c1"># Under a rigid lid alpha is set to 1 outright (fields.write_fields), so</span>
+        <span class="c1"># re-deriving it from the seed here would report a water fraction the case</span>
+        <span class="c1"># does not have - and reporting 96.8% for a domain that is water by</span>
+        <span class="c1"># construction is exactly the kind of contradiction this line exists to catch.</span>
+        <span class="n">wet_depth</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.01</span>
+        <span class="n">water</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"rigid_lid"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                 <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">initial_alpha</span><span class="p">(</span>
+                     <span class="n">art</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">wet_depth</span><span class="o">=</span><span class="n">wet_depth</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)))</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  water at t=0 : </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">water</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% of cells "</span>
+                   <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> total)"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">mesh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"cost:"</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="n">cost_lines</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">velocity_cap</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
