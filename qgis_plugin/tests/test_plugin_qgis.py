@@ -2052,8 +2052,7 @@ CLEANUP = {
 
 
 def test_clean_up_sits_left_of_help_and_removes_what_was_ticked(dock, monkeypatch, tmp_path):
-    """The user's order of 2026-10-18: a Clean Up button left of Help that removes, case by
-    case, files the simulations no longer need."""
+    """The user's order of 2026-10-18: a Clean Up button left of Help that removes, case by case, files the simulations no longer need."""
     from qgis.PyQt.QtWidgets import QMessageBox
 
     from axqua_plugin.gui import cleanup_dialog
@@ -2122,6 +2121,73 @@ def test_clean_up_removes_nothing_while_a_job_of_the_case_runs(qgis_app, monkeyp
         assert not window.remove_button.isEnabled()
     finally:
         window.deleteLater()
+
+
+def test_a_listing_that_arrives_for_a_case_no_longer_chosen_is_dropped(qgis_app, monkeypatch, tmp_path):
+    """Review of 2026-10-18: a slow listing of case A that arrived after case B was chosen replaced the tree, and Remove sent A's identifiers for case B."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    from axqua_plugin.gui import cleanup_dialog
+
+    pending, applied = [], []
+
+    class Client:
+        def cleanup_list(self, case):
+            return {**CLEANUP, "case": case}
+
+        def cleanup_apply(self, case, ids, keep="last"):
+            applied.append((case, list(ids)))
+            return {"removed": list(ids), "failed": [], "freed_bytes": 1}
+
+    def later(title, call, on_success=None, on_error=None, owner=None):
+        pending.append((call, on_success, on_error))
+    monkeypatch.setattr(cleanup_dialog, "run_async", later)
+    first, second = tmp_path / "a" / "a.axq-case", tmp_path / "b" / "b.axq-case"
+    window = cleanup_dialog.CleanupDialog(Client(), [first, second])
+    try:
+        window.case.setCurrentIndex(1)                     # B chosen while A is still listed
+        listing_a, listing_b = pending[0], pending[1]
+        _now(*listing_b)
+        assert window.listed == str(second) and window.tree.topLevelItemCount() == 2
+        window.tree.topLevelItem(1).child(0).setCheckState(0, cleanup_dialog.CHECKED)
+        _now(*listing_a)                                   # A's answer comes last
+        assert window.listed == str(second) and window.found["case"] == str(second)
+        assert window.tree.topLevelItem(1).child(0).checkState(0) == cleanup_dialog.CHECKED
+        monkeypatch.setattr(cleanup_dialog.QMessageBox, "question",
+                            lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+        window.remove()
+        _now(*pending[-1])
+        assert [case for case, _ in applied] == [str(second)]
+    finally:
+        window.deleteLater()
+
+
+def test_help_asks_the_axqua_of_the_settings_in_the_background(qgis_app, monkeypatch, tmp_path):
+    """Review of 2026-10-18: Help built a client of its own, which ignored the program of the plugin settings, and ran it on the thread of the window."""
+    from axqua_plugin.core import runner_client, tasks
+    from axqua_plugin.gui import help as help_pages
+
+    def no_client(*args, **kwargs):
+        raise AssertionError("Help must not start an axqua of its own")
+    monkeypatch.setattr(runner_client, "RunnerClient", no_client)
+    monkeypatch.setattr(help_pages, "_location", None)
+    assert help_pages.url_for("case").startswith("https://axqua.eu/usage/")   # not known yet
+
+    site = tmp_path / "site"
+    asked = []
+
+    class Client:
+        def docs(self):
+            asked.append(1)
+            return {"local": str(site), "languages": ["en"], "readable": True}
+
+    monkeypatch.setattr(tasks, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        _now(call, on_success, on_error))
+    help_pages.ask(Client())
+    assert help_pages.url_for("case").startswith(site.as_uri())
+    help_pages.ask(Client())                               # once per session
+    assert asked == [1]
 
 
 def test_the_space_a_result_keeps_of_its_time_steps():

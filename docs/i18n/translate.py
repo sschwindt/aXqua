@@ -1,29 +1,13 @@
 #!/usr/bin/env python3
 """Translate the documentation into German and French.
 
-``sphinx-build -b gettext`` writes one message template (``.pot``) per page. This script keeps one
-catalog (``.po``) per page and language under ``docs/locale/<lang>/LC_MESSAGES/`` and fills in what
-is missing with a machine translation. Sphinx reads these catalogs when it builds with
-``-D language=de`` or ``fr``, on this computer as on Read the Docs.
+``sphinx-build -b gettext`` writes one message template (``.pot``) per page. This script keeps one catalog (``.po``) per page and language under ``docs/locale/<lang>/LC_MESSAGES/`` and fills in what is missing with a machine translation. Sphinx reads these catalogs when it builds with ``-D language=de`` or ``fr``, on this computer as on Read the Docs.
 
-The catalogs are also the translation memory. A machine translation carries the translator comment
-``machine translation: <engine> <hash>``, where the hash identifies exactly what was sent to the
-engine. An entry is translated again only when it is new, when its English text changed, or when a
-change to the glossary or to the term repairs changes what would be sent for it. An entry without
-that comment was reviewed by a person and is kept as long as its English text stays the same.
+The catalogs are also the translation memory. A machine translation carries the translator comment ``machine translation: <engine> <hash>``, where the hash identifies exactly what was sent to the engine. An entry is translated again only when it is new, when its English text changed, or when a change to the glossary or to the term repairs changes what would be sent for it. An entry without that comment was reviewed by a person and is kept as long as its English text stays the same.
 
-What is never translated: inline literals, roles and cross-references, hyperlink targets,
-substitutions, footnote references, URLs, the names in ``keep.txt``, and text in single asterisks,
-which these pages use for the labels of the plugin (the plugin itself is in English, so a German
-page has to name the button the reader will see). Bold text is translated in its sentence, the
-visible text of a link or of a cross-reference with an explicit title on its own.
+What is never translated: inline literals, roles and cross-references, hyperlink targets, substitutions, footnote references, URLs, the names in ``keep.txt``, and text in single asterisks, which these pages use for the labels of the plugin (the plugin itself is in English, so a German page has to name the button the reader will see). Bold text is translated in its sentence, the visible text of a link or of a cross-reference with an explicit title on its own.
 
-The glossary (``glossary.<lang>.tsv``) is applied before the translation: the target term replaces
-the English term in the sentence that is sent to the engine, which then declines it and chooses
-the article itself. German nouns are capitalized anyway and the engine copies them. A French term is
-sent in title case (``Courbe De Tarage``), because the engine copies a capitalized term like a name
-and otherwise translates rare French words a second time (``tarage`` came back as ``goudron``); the
-case is restored afterwards. ``termfix.<lang>.tsv`` repairs what the engine still gets wrong.
+The glossary (``glossary.<lang>.tsv``) is applied before the translation: the target term replaces the English term in the sentence that is sent to the engine, which then declines it and chooses the article itself. German nouns are capitalized anyway and the engine copies them. A French term is sent in title case (``Courbe De Tarage``), because the engine copies a capitalized term like a name and otherwise translates rare French words a second time (``tarage`` came back as ``goudron``); the case is restored afterwards. ``termfix.<lang>.tsv`` repairs what the engine still gets wrong.
 
 Usage::
 
@@ -54,9 +38,7 @@ LOCALE = DOCS / "locale"
 LANGS = ("de", "fr")
 LANGUAGE_NAMES = {"de": "German", "fr": "French"}
 
-#: Bump to translate every machine entry again after a change to how a message is prepared for the
-#: engine (masking, injection). A change to the glossary or to the term repairs needs no bump: it
-#: changes the hash of the entries it concerns, and only of those.
+#: Bump to translate every machine entry again after a change to how a message is prepared for the engine (masking, injection). A change to the glossary or to the term repairs needs no bump: it changes the hash of the entries it concerns, and only of those.
 PREPARATION_VERSION = 1
 
 #: How a glossary term enters the sentence that is sent to the engine (see the module docstring).
@@ -64,9 +46,7 @@ INJECTION = {"de": "plain", "fr": "title"}
 
 MACHINE_RE = re.compile(r"^machine translation: (\S+) ([0-9a-f]{12})$")
 
-# Argos builds its sentence splitter with logging_level="WARNING" and Stanza then logs "Language en
-# package default expects mwt, which has been added" once per worker. A filter rather than a level,
-# because Stanza resets the level whenever a pipeline is created.
+# Argos builds its sentence splitter with logging_level="WARNING" and Stanza then logs "Language en package default expects mwt, which has been added" once per worker. A filter rather than a level, because Stanza resets the level whenever a pipeline is created.
 logging.getLogger("stanza").addFilter(lambda record: "expects mwt" not in record.getMessage())
 
 
@@ -299,8 +279,7 @@ class TermFix:
 def load_termfix(lang: str, folder: Path = I18N) -> list[TermFix]:
     """``termfix.<lang>.tsv``: ``<english term> TAB <regex> TAB <replacement>``.
 
-    A rule runs only on a message whose English text contains its term, so that a generic word of
-    the translation can be repaired without touching other messages.
+    A rule runs only on a message whose English text contains its term, so that a generic word of the translation can be repaired without touching other messages.
     """
     rules = []
     for where, *parts in _rows(folder / f"termfix.{lang}.tsv"):
@@ -310,8 +289,7 @@ def load_termfix(lang: str, folder: Path = I18N) -> list[TermFix]:
             pattern = re.compile(parts[1])
         except re.error as error:
             sys.exit(f"{where}: {parts[1]!r} is no regular expression: {error}")
-        # the term triggers the rule in its plural and as the first part of a compound too
-        # ("solvers", "Solver-agnostic")
+        # the term triggers the rule in its plural and as the first part of a compound too ("solvers", "Solver-agnostic")
         words = re.split(r"[\s-]+", parts[0].strip())
         trigger = (r"(?<!\w)" + r"[\s-]+".join(re.escape(word) for word in words)
                    + r"(?:s|es)?(?!\w)")
@@ -335,13 +313,10 @@ def load_keep(folder: Path = I18N) -> list[str]:
 # ----------------------------------------------------------------------------------------------
 
 SENTINEL = "@@{}@@"
-# Argos spaces a sentinel out ("@ @ 2 @ @"), drops an "@" ("@1@@") or doubles one, which must all
-# still restore. The trailing "@" are taken only while they do not open the next sentinel
-# ("@@3@@ @@4@@"). What is left of a sentinel that lost its number fails the check in assemble.
+# Argos spaces a sentinel out ("@ @ 2 @ @"), drops an "@" ("@1@@") or doubles one, which must all still restore. The trailing "@" are taken only while they do not open the next sentinel ("@@3@@ @@4@@"). What is left of a sentinel that lost its number fails the check in assemble.
 SENTINEL_RE = re.compile(r"@(?:\s?@)*\s?(\d+)\s?@(?:\s?@(?!\s?@?\s?\d+\s?@))*")
 
-# Order matters: an inline literal can hold anything, so it goes first; a role or link with an
-# explicit title before the generic forms of the same markup.
+# Order matters: an inline literal can hold anything, so it goes first; a role or link with an explicit title before the generic forms of the same markup.
 LITERAL = re.compile(r"``.+?``(?!`)")
 ESCAPE = re.compile(r"\\.")
 TITLED_ROLE = re.compile(r"(:(?:[\w.-]+:)*(?:ref|doc|term):`)([^`<]*?\S)(\s*<[^`>]+>`)")
@@ -396,8 +371,7 @@ def needs_engine(text: str) -> bool:
     return re.search(r"[A-Za-z]{2,}", SENTINEL_RE.sub(" ", text)) is not None
 
 
-#: Messages that are masked parts joined by these words are put together without the engine, which
-#: invents a sentence around them ("``a`` or ``b``" came back "À l'adresse suivante:").
+#: Messages that are masked parts joined by these words are put together without the engine, which invents a sentence around them ("``a`` or ``b``" came back "À l'adresse suivante:").
 CONNECTORS = {
     "de": {"or": "oder", "and": "und", "to": "bis", "with": "mit", "per": "pro", "of": "von"},
     "fr": {"or": "ou", "and": "et", "to": "à", "with": "avec", "per": "par", "of": "de"},
@@ -428,9 +402,7 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
             translate_titles: bool = True, terms_masked: bool = False) -> Prepared:
     """Mask what is not translated and put the glossary terms into the sentence.
 
-    ``terms_masked`` masks the glossary terms too, for a message in which the engine lost one that
-    was put into its sentence: the term then comes through for certain, while the engine guesses
-    the article in front of it (and for French the gender in the glossary corrects that guess).
+    ``terms_masked`` masks the glossary terms too, for a message in which the engine lost one that was put into its sentence: the term then comes through for certain, while the engine guesses the article in front of it (and for French the gender in the glossary corrects that guess).
     """
     prepared = Prepared(source=source, text=source, lang=glossary.lang)
 
@@ -474,8 +446,7 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
         if terms_masked or " " in name:
             text = re.sub(pattern, lambda m: sentinel(Span(m.group(0))), text)
         elif re.search(pattern, text):
-            # a single word goes as it is: one placeholder less, and the engine sees a subject; its
-            # spelling is restored afterwards ("AXqua") and it has to come back
+            # a single word goes as it is: one placeholder less, and the engine sees a subject; its spelling is restored afterwards ("AXqua") and it has to come back
             prepared.names.append(name)
 
     inserted: list[tuple[str, str]] = []   # (as sent to the engine, as it is to be shown)
@@ -504,9 +475,7 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
 
         text = glossary.pattern.sub(inject, text)
 
-    # Only glossary terms and connecting words: put together without the engine, which garbles a
-    # lone term ("Maillage" as a heading came back "Mèche", "Convergence En Maillage" as
-    # "Convergence en courrier").
+    # Only glossary terms and connecting words: put together without the engine, which garbles a lone term ("Maillage" as a heading came back "Mèche", "Convergence En Maillage" as "Convergence en courrier").
     connectors = CONNECTORS.get(glossary.lang, {})
     outside = SENTINEL_RE.sub(" ", re.sub(r"\ue000\d+\ue001", " ", text))
     words = re.findall(r"[A-Za-z]+", outside)
@@ -517,8 +486,7 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
         return prepared
     text = re.sub(r"\ue000(\d+)\ue001", lambda m: inserted[int(m.group(1))][0], text)
 
-    # only markup (a label in italics, a DOI) is set aside; a name kept in English at the start is
-    # the subject of the sentence ("aXqua builds ...") and goes to the engine with it
+    # only markup (a label in italics, a DOI) is set aside; a name kept in English at the start is the subject of the sentence ("aXqua builds ...") and goes to the engine with it
     def markup_only(found: str) -> bool:
         return all(prepared.spans[int(m.group(1))].markup for m in SENTINEL_RE.finditer(found))
 
@@ -567,8 +535,7 @@ def _untitle(text: str, injected: list[str]) -> str:
     return text
 
 
-# The words in front of a French noun that show its gender, masculine -> feminine, for a noun that
-# starts with a consonant. Before a vowel or a mute h the elided forms are the same for both.
+# The words in front of a French noun that show its gender, masculine -> feminine, for a noun that starts with a consonant. Before a vowel or a mute h the elided forms are the same for both.
 _FR_GENDERED = {"un": "une", "le": "la", "du": "de la", "au": "à la", "ce": "cette", "son": "sa",
                 "mon": "ma", "aucun": "aucune", "quel": "quelle", "nouveau": "nouvelle",
                 "premier": "première", "dernier": "dernière", "seul": "seule", "petit": "petite"}
@@ -580,8 +547,7 @@ _FR_BEFORE_VOWEL = {"le": "l'", "la": "l'", "du": "de l'", "de la": "de l'", "au
 def _french_articles(text: str, genders: dict[str, str]) -> str:
     """Make the article in front of a glossary term agree with its gender.
 
-    Sent in title case, a term is copied like a name, and the engine sometimes picks the article of
-    the English word's usual translation ("un tâche").
+    Sent in title case, a term is copied like a name, and the engine sometimes picks the article of the English word's usual translation ("un tâche").
     """
     for term, gender in sorted(genders.items(), key=lambda item: len(item[0]), reverse=True):
         # a mute h elides like a vowel (l'hydrogramme), an aspirated one does not (la hauteur)
@@ -609,8 +575,7 @@ def _french_articles(text: str, genders: dict[str, str]) -> str:
     return text
 
 
-# In front of a feminine German noun in the singular, these forms of the article belong to a
-# masculine or neuter noun and are wrong in every case ("des Steuerdatei", "einem Rauheitszone").
+# In front of a feminine German noun in the singular, these forms of the article belong to a masculine or neuter noun and are wrong in every case ("des Steuerdatei", "einem Rauheitszone").
 _DE_FEMININE = {"des": "der", "dem": "der", "eines": "einer", "einem": "einer", "keines": "keiner",
                 "keinem": "keiner", "jedes": "jeder", "jedem": "jeder", "dieses": "dieser",
                 "diesem": "dieser", "seines": "seiner", "seinem": "seiner", "ihres": "ihrer",
@@ -681,9 +646,7 @@ def assemble(prepared: Prepared, results: dict[str, str], rules: list[TermFix], 
              strict: bool = True) -> str | None:
     """The translation of a message, or None when the engine lost or doubled a masked part.
 
-    *strict* also requires every glossary term put into the sentence to come back; the last resort
-    of :func:`translate_language` relaxes that, since a term the engine reworded in a long paragraph
-    is a smaller loss than the whole paragraph in English.
+    *strict* also requires every glossary term put into the sentence to come back; the last resort of :func:`translate_language` relaxes that, since a term the engine reworded in a long paragraph is a smaller loss than the whole paragraph in English.
     """
     if prepared.words is not None:
         text = re.sub(r"[A-Za-z]+", lambda m: prepared.words.get(m.group(0).lower(), m.group(0)),
@@ -765,8 +728,7 @@ def assemble(prepared: Prepared, results: dict[str, str], rules: list[TermFix], 
     # spaces are tidied before the masked parts go back in, so that a literal keeps its own
     text = re.sub(r"[ \t]{2,}", " ", text).strip()
     text = SENTINEL_RE.sub(replace, text)
-    # the term repairs see the whole sentence, the parts that were translated on their own included,
-    # but never the inside of a literal
+    # the term repairs see the whole sentence, the parts that were translated on their own included, but never the inside of a literal
     parts = LITERAL.split(text)
     literals = LITERAL.findall(text)
     out = [apply_termfix(prepared.source, part, rules) for part in parts]
@@ -787,18 +749,26 @@ def german_nouns(entries) -> set[str]:
     return {word for word, n in upper.items() if n >= 2 and n > 3 * lower[word]}
 
 
+#: What a translation carries over from the English unchanged: inline literals, roles, links and GUI labels (single asterisks)
+_PROTECTED = re.compile(r"(``.*?``|:\w+:`[^`]*`|`[^`]*`_{0,2}|(?<!\*)\*[^*\s][^*]*(?<!\s)\*(?!\*))")
+
+
 def recapitalize(text: str, nouns: set[str]) -> str:
     """Capitalize the nouns of a German sentence that came back all in lower case.
 
-    Argos writes a German sentence entirely in lower case now and then ("bei dem eintrag um einen
-    tippfehler"). A sentence of eight words or more without a single capital is taken for one.
+    Argos writes a German sentence entirely in lower case now and then ("bei dem eintrag um einen tippfehler"). A sentence of eight words or more without a single capital is taken for one.
     """
+    def capitalize(part: str) -> str:
+        return _GERMAN_WORD.sub(lambda m: m.group(1).capitalize() if m.group(1).lower() in nouns
+                                else m.group(1), part)
+
     def fix(sentence: str) -> str:
-        words = _GERMAN_WORD.findall(re.sub(r"``.*?``|`[^`]*`_*|:\w+:`[^`]*`|\*[^*]+\*", " ", sentence))
+        # literals, roles, links and GUI labels are not German text: they decide nothing and are never changed
+        parts = _PROTECTED.split(sentence)
+        words = _GERMAN_WORD.findall(" ".join(parts[0::2]))
         if len(words) < 8 or any(w[:1].isupper() for w in words[1:]):
             return sentence
-        return _GERMAN_WORD.sub(lambda m: m.group(1).capitalize() if m.group(1).lower() in nouns
-                                else m.group(1), sentence)
+        return "".join(part if index % 2 else capitalize(part) for index, part in enumerate(parts))
     return "".join(fix(part) for part in re.split(r"((?<=[.!?:])\s+)", text))
 
 
@@ -961,8 +931,7 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
     out_dir = locale / lang / "LC_MESSAGES"
     pages = templates(pot_dir)
 
-    # everything translated so far, from every page: a message moved to another page keeps its
-    # translation
+    # everything translated so far, from every page: a message moved to another page keeps its translation
     memory: dict[tuple[str | None, str], Entry] = {}
     for path in sorted(out_dir.rglob("*.po")) if out_dir.exists() else []:
         for entry in read_catalog(path):
@@ -977,11 +946,15 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
     for page, path in pages.items():
         plan = []
         for template in read_catalog(path):
+            old = memory.get(template.key)
             if template.from_docstring and not docstrings:
+                # not translated in this run, but what the catalog has is kept as it is: a reviewed entry would be lost otherwise
+                if old is not None:
+                    counts["kept"] += 1
+                    plan.append((template, None, old.msgstr))
                 continue
             prepared = prepare(template.msgid, glossary, keep)
             digest = entry_hash(prepared, rules)
-            old = memory.get(template.key)
             if old is not None and old.machine is None:
                 counts["reviewed"] += 1
                 plan.append((template, None, old.msgstr))
@@ -1005,9 +978,7 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
 
     results = run(sorted(wanted), engine, lang, jobs) if wanted else {}
 
-    # what failed in its sentence goes again with the bold parts translated on their own, and then
-    # sentence by sentence
-    # and then with the glossary terms masked
+    # what failed in its sentence goes again with the bold parts translated on their own, then with the glossary terms masked, and then sentence by sentence
     retry: dict[str, list[Prepared]] = {}
     for plan in plans.values():
         for template, prepared, _ in plan:
@@ -1048,6 +1019,13 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
                     if text is not None:
                         counts["a term reworded"] += 1
                         break
+                if text is None and template.key in memory:
+                    # the new translation failed: the earlier one stays, with its old hash, so that the next run tries again
+                    old = memory[template.key]
+                    entry.msgstr, entry.comments = old.msgstr, list(old.comments)
+                    counts["failed, earlier translation kept"] += 1
+                    entries.append(entry)
+                    continue
                 if text is None:
                     failed.append(template.msgid)
                     counts["failed"] += 1

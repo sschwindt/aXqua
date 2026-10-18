@@ -1,15 +1,8 @@
 """Clean Up: remove the files of a case that nothing needs any more, to free disk space.
 
-*Clean Up* sits left of *Help* above the tabs (the user's order of 2026-10-18). The window lists,
-for one case at a time, what ``axqua cleanup <case> --json`` offers, by category and with sizes:
-the working folders of interrupted TELEMAC runs, the listings of the single processors, the
-processor folders of reconstructed OpenFOAM runs, exports for ParaView and VisIt, and the time
-steps of results, of which the last is always kept. The categories that are safe without a second
-thought are ticked; the time steps are not, because an animation of a run loses them.
+*Clean Up* sits left of *Help* above the tabs (the user's order of 2026-10-18). The window lists, for one case at a time, what ``axqua cleanup <case> --json`` offers, by category and with sizes: the working folders of interrupted TELEMAC runs, the listings of the single processors, the processor folders of reconstructed OpenFOAM runs, exports for ParaView and VisIt, and the time steps of results, of which the last is always kept. The categories that are safe without a second thought are ticked; the time steps are not, because an animation of a run loses them.
 
-Nothing is decided here: what may go is the answer of the aXqua program, which never lists the
-inputs of a case, the case file, the built model or the last time step of a result, removes only
-what a new listing still offers, and refuses while a job of the case is waiting or running.
+Nothing is decided here: what may go is the answer of the aXqua program, which never lists the inputs of a case, the case file, the built model or the last time step of a result, removes only what a new listing still offers, and refuses while a job of the case is waiting or running.
 """
 
 from __future__ import annotations
@@ -82,6 +75,7 @@ class CleanupDialog(QDialog):
         super().__init__(parent)
         self.client = client
         self.found: dict = {}
+        self.listed = ""           # the case the tree shows; Remove acts on this one
         self.pending = ""          # what the last removal did, shown above the new listing
         self.setWindowTitle("aXqua - Clean Up")
         self.resize(860, 560)
@@ -168,13 +162,19 @@ class CleanupDialog(QDialog):
         if not case:
             return
         self.tree.clear()
+        self.found, self.listed = {}, ""
         self.remove_button.setEnabled(False)
         self.status.setText("Looking for files that can go...")
+        # an answer for a case that is no longer chosen is dropped: its identifiers are paths relative to its folder, and Remove would send them for the case chosen now
         run_async("aXqua: clean up", lambda: self.client.cleanup_list(case),
-                  on_success=self.show_found, on_error=self._failed, owner=self)
+                  on_success=lambda found: self.show_found(found, case),
+                  on_error=lambda exc: self._failed(exc, case), owner=self)
 
-    def show_found(self, found: dict) -> None:
-        self.found = found or {}
+    def show_found(self, found: dict, case: str | None = None) -> None:
+        case = case or self.current_case()
+        if case != self.current_case():
+            return
+        self.found, self.listed = found or {}, case
         self.tree.blockSignals(True)
         self.tree.clear()
         for category in self.found.get("categories") or []:
@@ -233,6 +233,11 @@ class CleanupDialog(QDialog):
         else:
             self.status.setText(f"Selected: {items(len(selected))}, {human(frees)} "
                                 f"(of {human(total)} that can go).")
+        busy = self.found.get("in_use") or []
+        if busy and not blocked:
+            self.status.setText(f"{self.status.text()} Not offered while a run may still use "
+                                f"{'it' if len(busy) == 1 else 'them'}: "
+                                + "; ".join(f"{b['path']} ({b['reason']})" for b in busy))
         self.remove_button.setEnabled(bool(selected) and not blocked)
 
     # -- removing -----------------------------------------------------------------
@@ -242,7 +247,10 @@ class CleanupDialog(QDialog):
             return
         keep = self.keep.currentData() or "last"
         frees = sum(saving(item, keep) for item in selected)
-        name = Path(self.current_case()).name
+        case = self.listed
+        if not case or case != self.current_case():
+            return
+        name = Path(case).name
         answer = QMessageBox.question(
             self, "aXqua - Clean Up",
             f"Remove {items(len(selected))} of the case {name} and free {human(frees)}?\n\n"
@@ -253,15 +261,16 @@ class CleanupDialog(QDialog):
         self.refresh_button.setEnabled(False)
         self.status.setText("Removing... Results whose time steps are removed are rewritten, "
                             "which takes a while for large files.")
-        case = self.current_case()
         ids = [item["id"] for item in selected]
         run_async("aXqua: clean up", lambda: self.client.cleanup_apply(case, ids, keep=keep),
-                  on_success=self._removed, on_error=self._failed, owner=self)
+                  on_success=lambda done: self._removed(done, case), on_error=self._failed,
+                  owner=self)
 
-    def _removed(self, done: dict) -> None:
+    def _removed(self, done: dict, case: str = "") -> None:
         done = done or {}
         self.refresh_button.setEnabled(True)
-        message = (f"Removed {items(len(done.get('removed') or []))} and freed "
+        of = f" of {Path(case).name}" if case else ""
+        message = (f"Removed {items(len(done.get('removed') or []))}{of} and freed "
                    f"{human(done.get('freed_bytes', 0))}.")
         failed = done.get("failed") or []
         if failed:
@@ -269,7 +278,9 @@ class CleanupDialog(QDialog):
         self.pending = message
         self.load()
 
-    def _failed(self, exc: Exception) -> None:
+    def _failed(self, exc: Exception, case: str | None = None) -> None:
+        if case is not None and case != self.current_case():
+            return
         self.refresh_button.setEnabled(True)
         self.status.setText(user_text(exc))
 

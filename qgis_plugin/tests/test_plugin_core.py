@@ -913,8 +913,7 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 7 tabs, 7 sub-tabs, 3 installation wizards and the windows of the example case and of
-    # Clean Up
+    # 7 tabs, 7 sub-tabs, 3 installation wizards and the windows of the example case and of Clean Up
     assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 2
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
@@ -955,8 +954,7 @@ def test_a_capability_nobody_placed_still_gets_shown():
 
 
 def test_help_opens_the_published_documentation_at_the_section_of_the_tab():
-    """Without a copy built on this computer, Help opens the published documentation (no copy
-    is built into the plugin)."""
+    """Without a copy built on this computer, Help opens the published documentation (no copy is built into the plugin)."""
     from axqua_plugin.gui import help as help_pages
 
     assert help_pages.url_for("hydraulics", "mesh") == (

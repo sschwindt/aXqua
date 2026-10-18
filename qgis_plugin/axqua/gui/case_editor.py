@@ -777,7 +777,7 @@ class CaseEditor(EditorDialog):
             index = max(self.section_list.currentRow(), 0)
             label = self.pages[index].get("label") or label
         page = HELP_PAGES.get(label, "usage/case-setup")
-        help_pages.open_url(f"{help_pages.PUBLISHED}{page}.html#{label}")
+        help_pages.open_url(f"{help_pages.base()}{page}.html#{label}")
 
     # -- switches -------------------------------------------------------------------
     def _switched(self, page: dict, on: bool) -> None:

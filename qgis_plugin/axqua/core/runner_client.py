@@ -418,8 +418,7 @@ class RunnerClient:
         return self.call(["docs"], timeout=20).data or {}
 
     def cleanup_list(self, case: str | os.PathLike) -> dict:
-        """``{case, folders, categories: [{key, title, explanation, default, bytes, items}],
-        bytes, blocked}``: what of a case can go."""
+        """``{case, folders, categories: [{key, title, explanation, default, bytes, items}], bytes, blocked}``: what of a case can go."""
         return self.call(["cleanup", str(case)], timeout=600).data or {}
 
     def cleanup_apply(self, case: str | os.PathLike, ids: Sequence[str], *,

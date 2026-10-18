@@ -505,6 +505,37 @@ def test_a_new_build_removes_the_result_of_the_old_one(built):
     assert (case / "notes-of-the-user.txt").read_text() == "keep"
 
 
+def test_a_free_surface_build_sets_earlier_results_aside_before_it_writes(tmp_path, monkeypatch):
+    """Review of 2026-10-18: set aside once the new case was written, a build that failed while writing left the old later times and processor folders beside the new mesh, where a stage that continues from the latest time would have gone on with them."""
+    from axqua.solvers.openfoam import case as ofcase
+
+    class State(_State):
+        def resolution_check(self, spacing):
+            return ""
+
+    monkeypatch.setattr(ofmesh, "build_mesh", lambda cfg, state=None, tailwater=None: _channel())
+    monkeypatch.setattr("axqua.workflow.prepare_steady_inputs", lambda cfg, q=None: 0.6)
+    monkeypatch.setattr(ofcase, "_inlet_discharges", lambda mesh, cfg, q: {"inlet-1": q})
+
+    def write_fails(polymesh, case_dir):
+        raise OSError("no space left on device")
+    monkeypatch.setattr(ofcase, "write_polymesh", write_fails)
+    cfg = load_config(_case(tmp_path))
+    cfg.boundaries.outflow_condition = "free"
+    case = Path(cfg.openfoam_case_dir)
+    for old in (case / "40", case / "processor0" / "40"):
+        old.mkdir(parents=True)
+        (old / "U").write_text("old")
+    with pytest.raises(OSError, match="no space"):
+        ofcase.build_case(cfg, state=State())
+    assert not (case / "40").exists() and not (case / "processor0").exists()
+    assert (case / "previous-run" / "40" / "U").read_text() == "old"
+    assert (case / "previous-run" / "processor0" / "40" / "U").read_text() == "old"
+    with pytest.raises(OSError):                       # a second attempt keeps what was set aside
+        ofcase.build_case(cfg, state=State())
+    assert (case / "previous-run" / "processor0" / "40").is_dir()
+
+
 # --------------------------------------------------------------------------- #
 # shear stress and pick-up, as the solver computes them
 # --------------------------------------------------------------------------- #

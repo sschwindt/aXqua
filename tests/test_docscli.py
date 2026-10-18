@@ -18,8 +18,25 @@ from axqua import docscli
     ("debian-sensible-browser.desktop", False),
     ("", False),
 ])
-def test_a_browser_in_a_snap_or_flatpak_sandbox_is_recognized(browser, expected):
-    assert docscli.sandboxed(browser) is expected
+def test_a_browser_whose_desktop_file_is_not_found_is_judged_by_its_name(browser, expected):
+    assert docscli.sandboxed(browser, folders=[]) is expected
+
+
+def test_the_folder_of_the_desktop_file_tells_a_sandboxed_browser_from_one_of_the_system(tmp_path):
+    """Review of 2026-10-18: GNOME Web of the operating system is org.gnome.Epiphany.desktop, a name like the one of a Flatpak, and was taken for a sandbox."""
+    system = tmp_path / "usr" / "share" / "applications"
+    flatpak = tmp_path / "var" / "lib" / "flatpak" / "exports" / "share" / "applications"
+    snap = tmp_path / "var" / "lib" / "snapd" / "desktop" / "applications"
+    for folder, name in [(system, "org.gnome.Epiphany.desktop"),
+                         (flatpak, "org.chromium.Chromium.desktop"),
+                         (snap, "firefox_firefox.desktop"), (system, "firefox-esr.desktop")]:
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / name).write_text("[Desktop Entry]\n")
+    folders = [system, flatpak, snap]
+    assert not docscli.sandboxed("org.gnome.Epiphany.desktop", folders)
+    assert docscli.sandboxed("org.chromium.Chromium.desktop", folders)
+    assert docscli.sandboxed("firefox_firefox.desktop", folders)
+    assert not docscli.sandboxed("firefox-esr.desktop", folders)
 
 
 def test_a_sandboxed_browser_reads_the_home_folder_but_no_hidden_folder_in_it(tmp_path):

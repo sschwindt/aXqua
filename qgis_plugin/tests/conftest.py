@@ -46,9 +46,7 @@ _load_alias()
 def _published_documentation(monkeypatch):
     """Help opens the published English documentation in a test.
 
-    Help asks ``axqua docs`` where a local copy is, which would run the aXqua of the computer
-    the tests run on and give each computer other addresses. A test of the local copy or of
-    the language sets them itself.
+    Help asks ``axqua docs`` where a local copy is, which would run the aXqua of the computer the tests run on and give each computer other addresses. A test of the local copy or of the language sets them itself.
     """
     from axqua_plugin.gui import help as help_pages
 

@@ -49,6 +49,8 @@ def _lines(found: dict) -> list[str]:
             lines.append(f"  {human(item['saves']):>9}  {item['id']}"
                          + (f"  ({item['detail']})" if item["detail"] else ""))
     lines.append(f"\nin all: {human(found['bytes'])} (time steps: keeping the last one)")
+    for busy in found.get("in_use") or []:
+        lines.append(f"not offered: {busy['path']}: {busy['reason']}")
     return lines
 
 

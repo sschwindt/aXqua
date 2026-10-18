@@ -26,8 +26,7 @@ extensions = [
 ]
 
 templates_path = ["_templates"]
-# _incoming/ is a drop folder for text that still has to be folded into the tree. i18n/ holds the
-# tools of the translations and locale/ their catalogs; neither has pages.
+# _incoming/ is a drop folder for text that still has to be folded into the tree. i18n/ holds the tools of the translations and locale/ their catalogs; neither has pages.
 exclude_patterns = ["_build", "_incoming", "i18n", "locale", "Thumbs.db", ".DS_Store"]
 
 # -- Autodoc ------------------------------------------------------------------
@@ -75,10 +74,7 @@ def setup(app):
 
 
 # -- Translations -------------------------------------------------------------
-# The German and French pages are built from the catalogs in docs/locale/<lang>/LC_MESSAGES, one per
-# page, which docs/i18n/translate.py keeps up to date (docs/i18n/README.md). Sphinx reads them when
-# it builds with -D language=de or fr; Read the Docs does the same for a translation project. The
-# English build does not read them.
+# The German and French pages are built from the catalogs in docs/locale/<lang>/LC_MESSAGES, one per page, which docs/i18n/translate.py keeps up to date (docs/i18n/README.md). Sphinx reads them when it builds with -D language=de or fr; Read the Docs does the same for a translation project. The English build does not read them.
 locale_dirs = ["locale/"]
 gettext_compact = False
 gettext_uuid = False

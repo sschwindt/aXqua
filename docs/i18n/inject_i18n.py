@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Connect the English, German and French builds of the documentation into one site.
 
-Runs over the assembled site (``docs/_build/site``: English at the top, German in ``de/``, French in
-``fr/``) and adds to every page:
+Runs over the assembled site (``docs/_build/site``: English at the top, German in ``de/``, French in ``fr/``) and adds to every page:
 
 * ``hreflang`` links to the same page in the other languages, for search engines;
 * a language button in the top right corner of the window, with a menu of the three languages;
@@ -11,8 +10,7 @@ Runs over the assembled site (``docs/_build/site``: English at the top, German i
 * on a German or French page, a note that the page is a machine translation, with a link to the
   English original.
 
-It also writes ``404.html``, which GitHub Pages shows for an address that does not exist. Only the
-build for GitHub Pages runs this script; Read the Docs serves its own builds and language menu.
+It also writes ``404.html``, which GitHub Pages shows for an address that does not exist. Only the build for GitHub Pages runs this script; Read the Docs serves its own builds and language menu.
 
 Pages that carry the marker already are left alone, so the script can run twice.
 
@@ -119,8 +117,7 @@ GLOBE = ('<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fil
 def switcher(lang: str, page: Path, root: str) -> str:
     """The language button in the top right corner: the current language, and a menu of all three.
 
-    A ``<details>`` element, so it opens and closes without JavaScript; ``lang.js`` only closes it
-    on a click elsewhere and remembers the choice.
+    A ``<details>`` element, so it opens and closes without JavaScript; ``lang.js`` only closes it on a click elsewhere and remembers the choice.
     """
     items = []
     for other in LANGS:

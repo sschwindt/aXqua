@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 import struct
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -17,8 +19,7 @@ def _record(handle, payload: bytes) -> None:
 
 
 def write_result(path: Path, frames: int, *, npoin: int = 4, partial: bool = False) -> list[np.ndarray]:
-    """A SELAFIN result of two variables written the way TELEMAC writes one (big-endian, single
-    precision); returns the values of each time step."""
+    """A SELAFIN result of two variables written the way TELEMAC writes one (big-endian, single precision); returns the values of each time step."""
     values = []
     with path.open("wb") as handle:
         _record(handle, b"test result".ljust(80))
@@ -118,19 +119,28 @@ def _case(tmp_path: Path):
     foam = out / "openfoam"
     (foam / "system").mkdir(parents=True)
     (foam / "system" / "controlDict").write_text("startFrom latestTime;\n")
-    for time in ("0", "1", "2"):
-        (foam / time).mkdir()
-        (foam / time / "U").write_text("u" * 100)
+    for value in ("0", "1", "2"):
+        (foam / value).mkdir()
+        (foam / value / "U").write_text("u" * 100)
     for rank in ("processor0", "processor1"):
-        for time in ("0", "2"):
-            (foam / rank / time).mkdir(parents=True)
-            (foam / rank / time / "U").write_text("u" * 50)
+        for value in ("0", "2"):
+            (foam / rank / value).mkdir(parents=True)
+            (foam / rank / value / "U").write_text("u" * 50)
     (foam / "previous-run" / "5").mkdir(parents=True)
     (foam / "previous-run" / "5" / "U").write_text("u" * 10)
     cfg = SimpleNamespace(preprocessing_dir=out / "preprocessing", model_dir=sim,
                           postprocessing_dir=post, calibration_dir=out / "calibration-validation",
                           openfoam_case_dir=foam, fine_sediment_case_dir=out / "openfoam-sediment")
+    _age(tmp_path)
     return cfg, case_file
+
+
+def _age(folder: Path, seconds: float = 3600) -> None:
+    """Date every file back: what was written in the last minutes is not offered (a run may be using it)."""
+    then = time.time() - seconds
+    for root, dirs, files in os.walk(folder):
+        for name in files + dirs:
+            os.utime(os.path.join(root, name), (then, then))
 
 
 def _items(found):
@@ -192,7 +202,7 @@ def test_nothing_is_removed_while_a_job_of_the_case_runs(tmp_path, monkeypatch):
     from axqua.core.errors import ConfigError
 
     cfg, case_file = _case(tmp_path)
-    monkeypatch.setattr(cleanup, "active_jobs", lambda case: "a job of this case is running")
+    monkeypatch.setattr(cleanup, "active_jobs", lambda case, cfg=None: "a job of this case is running")
     with pytest.raises(ConfigError, match="running"):
         cleanup.apply(cfg, case_file, categories=["exports"])
     assert (cfg.postprocessing_dir / "vtk").exists()
@@ -212,6 +222,106 @@ def test_a_job_of_the_case_that_has_not_ended_blocks_the_removal(tmp_path, monke
     monkeypatch.setattr(index, "list_jobs", lambda **kw: rows)
     reason = cleanup.active_jobs(case_file)
     assert "J1" in reason and "J2" not in reason and "J3" not in reason
+
+
+def test_what_a_run_outside_the_job_system_still_uses_is_not_offered(tmp_path, monkeypatch):
+    """Review of 2026-10-18: a run started from a terminal is no job, and its working folder was offered (ticked) and its result thinned under it."""
+    cfg, case_file = _case(tmp_path)
+    sim = cfg.model_dir
+    run = sim / "steady2d.cas_2026-01-01-10h00min00s"
+    # a process works in the folder of the run; the result was written a minute ago
+    monkeypatch.setattr(cleanup, "open_paths", lambda: {str(run.resolve())})
+    os.utime(sim / "r2d.slf", (time.time() - 60, time.time() - 60))
+    found = cleanup.inventory(cfg, case_file)
+    offered = " ".join(_items(found))
+    assert "steady2d.cas_2026-01-01" not in offered and "r2d.slf" not in offered
+    reasons = {b["path"]: b["reason"] for b in found["in_use"]}
+    assert "works in it" in reasons["axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s"]
+    assert "min ago" in reasons["axqua-case/simulation/r2d.slf"]
+    done = cleanup.apply(cfg, case_file, ids=["thin:axqua-case/simulation/r2d.slf"],
+                         categories=["telemac-run-folders"])
+    assert done["removed"] == [] and done["unknown"] == ["thin:axqua-case/simulation/r2d.slf"]
+    assert run.is_dir() and len(cleanup.read_layout(sim / "r2d.slf").frames) == 8
+
+
+def test_the_processes_of_this_computer_are_read_from_proc():
+    if not Path("/proc/self/cwd").exists():
+        pytest.skip("no /proc")
+    with open(__file__, "rb"):
+        seen = cleanup.open_paths()
+        assert os.getcwd() in seen and str(Path(__file__).resolve()) in seen
+
+
+def test_the_inputs_are_never_walked_into_even_where_an_output_folder_contains_them(tmp_path):
+    """Review of 2026-10-18: with the case folder itself as an output folder, an input result of five time steps in user-sources was offered for thinning."""
+    cfg, case_file = _case(tmp_path)
+    cfg.model_dir = tmp_path                          # results beside the case file
+    (tmp_path / "user-sources" / "old.cas_2026-01-01-10h00min00s").mkdir()
+    _age(tmp_path)
+    found = cleanup.inventory(cfg, case_file)
+    assert not any("user-sources" in item_id for item_id in _items(found))
+    assert "thin:axqua-case/simulation/r2d.slf" in _items(found)
+
+
+def test_an_output_folder_that_contains_the_case_folder_is_not_looked_at(tmp_path):
+    (tmp_path / "isar").mkdir()
+    cfg, case_file = _case(tmp_path / "isar")
+    other = tmp_path / "inn" / "axqua-case" / "simulation"
+    other.mkdir(parents=True)
+    write_result(other / "r2d.slf", 6)
+    _age(tmp_path)
+    cfg.calibration_dir = tmp_path                    # the folder of all cases
+    found = cleanup.inventory(cfg, case_file)
+    assert str(tmp_path.resolve()) not in found["folders"]
+    assert not any("inn" in item["path"] for item in _items(found).values())
+
+
+def test_a_job_submitted_with_a_relative_path_or_holding_the_folder_blocks_the_removal(tmp_path, monkeypatch):
+    """Review of 2026-10-18: a job submitted as ``axqua submit cases/isar/isar.axq-case`` recorded the relative path, which the cleanup resolved in its own working folder and did not match."""
+    from axqua.jobs import index, workspace
+
+    cfg, case_file = _case(tmp_path)
+    rows = [index.JobRow(job_id="J1", root=str(tmp_path), kind="steady", state="RUNNING",
+                         source_config="cases/somewhere/reach.axq-case")]
+    monkeypatch.setattr(index, "list_jobs", lambda **kw: rows)
+    assert "J1" in cleanup.active_jobs(case_file, cfg)
+    rows.clear()
+    assert cleanup.active_jobs(case_file, cfg) == ""
+    monkeypatch.setattr(workspace, "holder_of", lambda folder: "J7")
+    monkeypatch.setattr(workspace, "waiting_in", lambda folder: ["J7", "J8"])
+    reason = cleanup.active_jobs(case_file, cfg)
+    assert "J7 (works in simulation)" in reason and "J8 (waits for simulation)" in reason
+
+
+def test_a_list_of_jobs_that_cannot_be_read_blocks_the_removal(tmp_path, monkeypatch):
+    from axqua.core.errors import ConfigError
+    from axqua.jobs import index
+
+    cfg, case_file = _case(tmp_path)
+
+    def broken(**kw):
+        raise RuntimeError("database disk image is malformed")
+    monkeypatch.setattr(index, "list_jobs", broken)
+    assert "could not be read" in cleanup.active_jobs(case_file, cfg)
+    with pytest.raises(ConfigError, match="could not be read"):
+        cleanup.apply(cfg, case_file, categories=["exports"])
+    assert (cfg.postprocessing_dir / "vtk").exists()
+
+
+def test_a_job_records_the_full_path_of_its_case_file(tmp_path, monkeypatch):
+    from axqua import jobcli
+    from axqua.jobs import submit
+
+    seen = {}
+
+    def record(cfg, kind, **kw):
+        seen.update(kw)
+        raise RuntimeError("stop here")
+    monkeypatch.setattr(submit, "submit_job", record)
+    monkeypatch.setattr("axqua.config.load_config", lambda path: SimpleNamespace(name="reach"))
+    monkeypatch.chdir(tmp_path)
+    jobcli.run_submit(["reach.axq-case", "--kind", "steady", "--json"])
+    assert seen["source_config"] == str((tmp_path / "reach.axq-case").resolve())
 
 
 def test_the_command_lists_as_json_and_removes_by_identifier(tmp_path, monkeypatch, capsys):

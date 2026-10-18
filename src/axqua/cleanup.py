@@ -1,24 +1,12 @@
 """What a case leaves on disk that can go, and removing it (``axqua cleanup``, *Clean Up* in the plugin).
 
-A case collects files that nothing needs any more: the working folders that TELEMAC leaves when a
-run is stopped, the listings of each processor of a parallel run, the processor folders of an
-OpenFOAM run that was reconstructed, the results an OpenFOAM run set aside, exports for ParaView and
-VisIt. And it collects results with every time step: a steady TELEMAC run of the Isar writes a
-result of 1 GB, of which aXqua reads the last time step only. :func:`inventory` lists these per
-category, with their size; :func:`apply` removes what was chosen.
+A case collects files that nothing needs any more: the working folders that TELEMAC leaves when a run is stopped, the listings of each processor of a parallel run, the processor folders of an OpenFOAM run that was reconstructed, the results an OpenFOAM run set aside, exports for ParaView and VisIt. And it collects results with every time step: a steady TELEMAC run of the Isar writes a result of 1 GB, of which aXqua reads the last time step only. :func:`inventory` lists these per category, with their size; :func:`apply` removes what was chosen.
 
-**What is never offered:** the input files of a case (``user-sources``), the case file, the built
-model (geometry, boundary conditions, steering and friction files, initial conditions), the last
-time step of a result, and the processor folders of an OpenFOAM run that was not reconstructed,
-which hold the only copy of its results. Only files below the output folders of the case are looked
-at, and :func:`apply` acts only on what a new inventory still lists, so an identifier cannot name
-another file. Nothing is removed while a job of the case is waiting or running.
+**What is never offered:** the input files of a case (``user-sources``, also where an output folder contains it), the case file, the built model (geometry, boundary conditions, steering and friction files, initial conditions), the last time step of a result, and the processor folders of an OpenFOAM run that was not reconstructed, which hold the only copy of its results. Only files below the output folders of the case are looked at (an output folder that contains the folder of the case file, and with it other cases, is left out), and :func:`apply` acts only on what a new inventory still lists, so an identifier cannot name another file.
 
-**Fewer time steps** rewrites a TELEMAC result (SELAFIN) with the records of the time steps that are
-kept, copied byte for byte: the values are not converted, the last time step is the one the file
-had. aXqua reads the last time step (the convergence study, the validation, the seed of OpenFOAM),
-a hotstart continues from it and QGIS shows it, so all of them keep working; an animation of the
-run and the wetting report's look back at earlier time steps lose what was removed.
+**Nothing is removed while a run may still use it.** A job of the case that is waiting or running blocks the removal; so does a list of jobs that cannot be read, because then nobody knows. A run started from a terminal (``initial_run.py``, ``telemac2d.py``) is no job, so a working folder or a result is also not offered while a process of this computer works in it or has it open, or when it was written to in the last :data:`RECENT_MINUTES` minutes (a run of another user or on another computer has no process here to look at); such items are listed under ``in_use`` with the reason.
+
+**Fewer time steps** rewrites a TELEMAC result (SELAFIN) with the records of the time steps that are kept, copied byte for byte: the values are not converted, the last time step is the one the file had. aXqua reads the last time step (the convergence study, the validation, the seed of OpenFOAM), a hotstart continues from it and QGIS shows it, so all of them keep working; an animation of the run and the wetting report's look back at earlier time steps lose what was removed.
 """
 
 from __future__ import annotations
@@ -27,6 +15,7 @@ import os
 import re
 import shutil
 import struct
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -75,6 +64,10 @@ _LISTING = re.compile(r"(?P<cas>.+\.cas)_(?P<time>\d{4}-\d{2}-\d{2}-\d{2}h\d{2}m
 _RESULT_SUFFIXES = (".slf", ".srf", ".res", ".sel")
 #: SELAFIN files that are inputs and hold one time step anyway; never rewritten.
 _INPUT_NAMES = re.compile(r"(geometry|initial-conditions)[^/]*\.slf", re.IGNORECASE)
+#: The folder of the inputs of a case, never walked into.
+SOURCES = "user-sources"
+#: A working folder or a result written to in the last minutes may belong to a run that is still going.
+RECENT_MINUTES = 15
 
 
 @dataclass
@@ -186,8 +179,7 @@ def kept_frames(count: int, keep: str) -> list[int]:
 def thin(path: str | Path, keep: str = "last") -> int:
     """Rewrite a SELAFIN result with the time steps *keep* names; returns the bytes freed.
 
-    The new file is written beside the old one and takes its place only when it is complete, so an
-    interruption leaves the result as it was.
+    The new file is written beside the old one and takes its place only when it is complete, so an interruption leaves the result as it was.
     """
     path = Path(path)
     layout = read_layout(path)
@@ -227,6 +219,73 @@ def _copy(source, target, length: int, block: int = 1 << 22) -> None:
 # ----------------------------------------------------------------------------------------------
 # Inventory
 # ----------------------------------------------------------------------------------------------
+
+def open_paths() -> set[str]:
+    """The working folders and the open files of the processes this user may look at.
+
+    Read from ``/proc`` (Linux and WSL); empty where there is none, which leaves the time of the last write as the only sign of a run that is still going.
+    """
+    found: set[str] = set()
+    proc = Path("/proc")
+    try:
+        entries = [e for e in proc.iterdir() if e.name.isdigit()]
+    except OSError:
+        return found
+    for entry in entries:
+        try:
+            found.add(os.readlink(entry / "cwd"))
+        except OSError:
+            pass
+        try:
+            descriptors = list((entry / "fd").iterdir())
+        except OSError:
+            continue
+        for descriptor in descriptors:
+            try:
+                target = os.readlink(descriptor)
+            except OSError:
+                continue
+            if target.startswith("/"):
+                found.add(target.removesuffix(" (deleted)"))
+    return found
+
+
+def last_written(path: Path) -> float:
+    """When *path*, or for a folder the newest file in it, was written last (seconds since the epoch)."""
+    try:
+        newest = path.lstat().st_mtime
+    except OSError:
+        return 0.0
+    if path.is_dir() and not path.is_symlink():
+        for root, _dirs, files in os.walk(path, followlinks=False):
+            for name in files:
+                try:
+                    newest = max(newest, os.lstat(os.path.join(root, name)).st_mtime)
+                except OSError:
+                    pass
+    return newest
+
+
+class InUse:
+    """Whether a run may still use a folder or a file: a process works in it or has it open, or it was written to a short while ago."""
+
+    def __init__(self, now: float | None = None) -> None:
+        self.now = time.time() if now is None else now
+        self._open: set[str] | None = None
+
+    def reason(self, path: Path) -> str:
+        if self._open is None:
+            self._open = open_paths()
+        here = str(path.resolve())
+        inside = here + os.sep
+        if any(p == here or p.startswith(inside) for p in self._open):
+            return "a program of this computer works in it or has it open"
+        minutes = (self.now - last_written(path)) / 60
+        if minutes < RECENT_MINUTES:
+            return (f"written to {max(minutes, 0):.0f} min ago, so a run may still be using it "
+                    f"(offered once it is {RECENT_MINUTES} min old)")
+        return ""
+
 
 def size_of(path: Path) -> int:
     """Bytes in a file, or in a folder and below it (links are not followed)."""
@@ -302,7 +361,7 @@ def _openfoam_items(base: Path, case: Path) -> list[Item]:
     return items
 
 
-def _result_item(base: Path, path: Path) -> Item | None:
+def _result_item(base: Path, path: Path, in_use: InUse, busy: list[dict]) -> Item | None:
     if _INPUT_NAMES.fullmatch(path.name):
         return None
     try:
@@ -311,6 +370,10 @@ def _result_item(base: Path, path: Path) -> Item | None:
         return None
     count = len(layout.frames)
     if count < 3 or not layout.complete:
+        return None
+    reason = in_use.reason(path)
+    if reason:
+        busy.append({"path": os.path.relpath(path, base), "reason": reason})
         return None
     size = path.stat().st_size
     saves = (count - 1) * layout.frame_bytes
@@ -323,9 +386,10 @@ def inventory(cfg, case_file: str | Path) -> dict:
     """Everything of a case that can go, by category. Reads nothing but sizes and record markers."""
     case_file = Path(case_file).resolve()
     base = case_file.parent
-    sources = (base / "user-sources").resolve()
-    roots = [root for root in output_folders(cfg) if not root.is_relative_to(sources)]
+    roots = case_roots(cfg, base)
     items: list[Item] = []
+    busy: list[dict] = []
+    in_use = InUse()
     listings: dict[tuple[Path, str], list[Path]] = {}
     processor_listings: dict[Path, list[Path]] = {}
 
@@ -338,11 +402,17 @@ def inventory(cfg, case_file: str | Path) -> dict:
                 continue
             for name in list(dirs):
                 path = here / name
-                if _RUN_FOLDER.fullmatch(name):
+                if _is_sources(path, base):
+                    dirs.remove(name)
+                elif _RUN_FOLDER.fullmatch(name):
+                    dirs.remove(name)
+                    reason = in_use.reason(path)
+                    if reason:
+                        busy.append({"path": os.path.relpath(path, base), "reason": reason})
+                        continue
                     size = size_of(path)
                     items.append(_item(base, "telemac-run-folders", "delete", path, size, size,
                                        "left by a run that did not end"))
-                    dirs.remove(name)
                 elif name == "vtk" and here.resolve() == Path(cfg.postprocessing_dir).resolve():
                     size = size_of(path)
                     items.append(_item(base, "exports", "delete", path, size, size,
@@ -359,7 +429,7 @@ def inventory(cfg, case_file: str | Path) -> dict:
                 elif (match := _LISTING.fullmatch(name)):
                     listings.setdefault((here, match.group("cas")), []).append(path)
                 elif path.suffix.lower() in _RESULT_SUFFIXES:
-                    item = _result_item(base, path)
+                    item = _result_item(base, path, in_use, busy)
                     if item is not None:
                         items.append(item)
 
@@ -386,27 +456,75 @@ def inventory(cfg, case_file: str | Path) -> dict:
                                "items": [i.as_dict() for i in mine]})
     return {"case": str(case_file), "folders": [str(r) for r in roots],
             "categories": categories, "bytes": sum(i.saves for i in items),
-            "blocked": active_jobs(case_file)}
+            "in_use": sorted(busy, key=lambda b: b["path"]),
+            "blocked": active_jobs(case_file, cfg)}
 
 
-def active_jobs(case_file: Path) -> str:
-    """Why nothing may be removed now ('' when it may): a job of the case is waiting or running."""
+def case_roots(cfg, base: Path) -> list[Path]:
+    """The output folders that are looked at: none inside the inputs, and none that contains the folder of the case file (it would contain other cases as well)."""
+    sources = (base / SOURCES).resolve()
+    return [root for root in output_folders(cfg)
+            if not root.is_relative_to(sources) and not (root != base and base.is_relative_to(root))]
+
+
+def _is_sources(path: Path, base: Path) -> bool:
+    """Whether *path* is the folder of the inputs of this case, or of any case."""
+    return path.name == SOURCES or path.resolve() == (base / SOURCES).resolve()
+
+
+def _same_case(source: str | None, case_file: Path) -> bool:
+    """Whether a job was submitted for *case_file*. A relative path, which a job submitted from the terminal before 2026-10-18 recorded, says nothing about the folder it was given in, so its file name decides: a wrong match only makes the cleanup wait."""
+    if not source:
+        return False
+    path = Path(source).expanduser()
+    if not path.is_absolute():
+        return path.name == case_file.name
+    try:
+        return path.resolve() == case_file
+    except OSError:
+        return False
+
+
+def active_jobs(case_file: Path, cfg=None) -> str:
+    """Why nothing may be removed now ('' when it may): a job of the case is waiting or running, or nobody can tell.
+
+    A job is found by the case file it was submitted for, and a TELEMAC job also by the lock and the queue in the simulation folder of the case (``jobs.workspace``), which do not depend on how the case file was named.
+    """
+    case_file = Path(case_file).resolve()
     try:
         from axqua.jobs.index import list_jobs
         from axqua.jobs.model import JobState
 
         rows = list_jobs()
-    except Exception:  # noqa: BLE001 - no job index is no job
-        return ""
-    busy = []
+    except Exception as exc:  # noqa: BLE001 - not knowing is not "no job"
+        return (f"the list of jobs could not be read ({exc}), so nobody can tell whether a job "
+                "of this case is running; nothing is removed while that is unknown.")
+    busy, seen = [], set()
     for row in rows:
-        try:
-            same = row.source_config and Path(row.source_config).resolve() == case_file.resolve()
-            terminal = JobState(row.state).is_terminal if row.state else True
-        except (ValueError, OSError):
+        if not _same_case(row.source_config, case_file):
             continue
-        if same and not terminal:
+        try:
+            terminal = JobState(row.state).is_terminal if row.state else True
+        except ValueError:
+            terminal = False          # a state this version does not know: take it for one that runs
+        if not terminal:
             busy.append(f"{row.job_id} ({row.kind}, {row.state})")
+            seen.add(row.job_id)
+    folder = getattr(cfg, "model_dir", None) if cfg is not None else None
+    if folder and Path(folder).is_dir():
+        try:
+            from axqua.jobs import workspace
+
+            holder = workspace.holder_of(folder)
+            waiting = workspace.waiting_in(folder)
+        except Exception as exc:  # noqa: BLE001
+            return (f"the lock of the simulation folder could not be read ({exc}); nothing is "
+                    "removed while it is unknown whether a job works there.")
+        name = Path(folder).name
+        for job, what in [(holder, f"works in {name}"), *((w, f"waits for {name}") for w in waiting)]:
+            if job and job not in seen:
+                busy.append(f"{job} ({what})")
+                seen.add(job)
     if not busy:
         return ""
     return ("jobs of this case are waiting or running, whose files would be removed under them: "
@@ -427,21 +545,27 @@ def apply(cfg, case_file: str | Path, ids: list[str] = (), categories: list[str]
         raise ConfigError(found["blocked"], subject=str(case_file),
                           remedy="Wait until the jobs of the case have ended, or cancel them.")
     roots = [Path(r) for r in found["folders"]]
+    sources = (Path(case_file).resolve().parent / SOURCES).resolve()
     by_id = {item["id"]: item for cat in found["categories"] for item in cat["items"]}
     unknown = [i for i in ids if i not in by_id]
     chosen = [by_id[i] for i in ids if i in by_id]
     chosen += [item for cat in found["categories"] if cat["key"] in categories
                for item in cat["items"] if item not in chosen]
+    def check(target: Path) -> None:
+        where = target.resolve()
+        if not any(where.is_relative_to(root) for root in roots) or where.is_relative_to(sources):
+            raise ValueError(f"{target} is not in an output folder of the case")
+
     done, failed, freed = [], [], 0
     for item in chosen:
         try:
             if item["action"] == "thin":
+                check(Path(item["path"]))
                 freed += thin(item["path"], keep)
             else:
                 targets = item["paths"] or [item["path"]]
                 for target in map(Path, targets):
-                    if not any(target.resolve().is_relative_to(root) for root in roots):
-                        raise ValueError(f"{target} is not in an output folder of the case")
+                    check(target)
                     freed += size_of(target)
                     if target.is_dir() and not target.is_symlink():
                         shutil.rmtree(target)
@@ -466,5 +590,5 @@ def thinned_size(item: dict, keep: str) -> int:
         item.get("frame_bytes", 0))
 
 
-__all__ = ["CATEGORIES", "Item", "apply", "human", "inventory", "kept_frames", "read_layout",
-           "thin", "thinned_size"]
+__all__ = ["CATEGORIES", "InUse", "Item", "RECENT_MINUTES", "apply", "human", "inventory",
+           "kept_frames", "open_paths", "read_layout", "thin", "thinned_size"]

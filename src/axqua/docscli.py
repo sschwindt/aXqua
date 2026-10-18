@@ -3,18 +3,9 @@
 ``axqua docs``           the local copy, if there is one, and the published address
 ``axqua docs --json``    the same for the plugin
 
-*Help* opens a copy of the documentation that was built on this computer when there is one (the
-user's decision of 2026-10-18), because it matches the installed version of aXqua, and the
-published documentation at ``https://axqua.eu`` otherwise. A local copy is the folder named by
-``$AXQUA_DOCS``, else the build of the source checkout that aXqua runs from:
-``docs/_build/site`` (English, German and French, ``docs/i18n/build_i18n.sh``) before
-``docs/_build/html`` (English, ``sphinx-build``).
+*Help* opens a copy of the documentation that was built on this computer when there is one (the user's decision of 2026-10-18), because it matches the installed version of aXqua, and the published documentation at ``https://axqua.eu`` otherwise. A local copy is the folder named by ``$AXQUA_DOCS``, else the build of the source checkout that aXqua runs from: ``docs/_build/site`` (English, German and French, ``docs/i18n/build_i18n.sh``) before ``docs/_build/html`` (English, ``sphinx-build``).
 
-**A browser in a sandbox cannot open every local file.** Firefox and Chromium as snap packages
-(the default on Ubuntu) and browsers installed with Flatpak read files in the home folder only, and
-none in a hidden folder there (``~/.local``) or in ``/tmp``. Where the default browser of a Linux
-desktop is one of them and the copy lies outside of what it may read, the copy is reported as
-unreadable and *Help* opens the published documentation instead.
+**A browser in a sandbox cannot open every local file.** Firefox and Chromium as snap packages (the default on Ubuntu) and browsers installed with Flatpak read files in the home folder only, and none in a hidden folder there (``~/.local``) or in ``/tmp``. Where the default browser of a Linux desktop is one of them and the copy lies outside of what it may read, the copy is reported as unreadable and *Help* opens the published documentation instead. Which kind of package a browser is, is told by the folder its desktop file lies in (snap and Flatpak keep them in folders of their own); only where that file cannot be found does its name decide, and a name that may be one of a sandbox counts as one, because a published page always opens and a local one the browser may not read does not.
 """
 
 from __future__ import annotations
@@ -33,10 +24,12 @@ ENV_VAR = "AXQUA_DOCS"
 PUBLISHED = "https://axqua.eu/"
 LANGUAGES = ("en", "de", "fr")
 
-#: Desktop files of browsers installed with Flatpak (their names are reverse domain names).
+#: Desktop files of browsers installed with Flatpak have reverse domain names, but so have some of the operating system (org.gnome.Epiphany.desktop); used only where the file is not found.
 _FLATPAK = re.compile(r"^(org|com|io|net)\.[\w.-]+\.desktop$")
 #: Desktop files of snap packages are named <snap>_<app>.desktop.
 _SNAP = re.compile(r"^[a-z0-9-]+_[\w-]+\.desktop$")
+#: Folders in the path of a desktop file that a snap or a Flatpak exports.
+_SANDBOX_FOLDERS = {"flatpak", "snapd"}
 
 
 def checkout() -> Path | None:
@@ -78,14 +71,41 @@ def default_browser() -> str:
     return done.stdout.strip() if done.returncode == 0 else ""
 
 
-def sandboxed(browser: str) -> bool:
+def application_folders() -> list[Path]:
+    """Where desktop files are looked for, in the order of the XDG specification, then the export folders of Flatpak and snap (QGIS may run without them in ``XDG_DATA_DIRS``)."""
+    home = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share")
+    data = [Path(p) for p in (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":") if p]
+    exports = [home / "flatpak" / "exports" / "share", Path("/var/lib/flatpak/exports/share"),
+               Path("/var/lib/snapd/desktop")]
+    return [folder / "applications" for folder in [home, *data, *exports]]
+
+
+def desktop_file(browser: str, folders: list[Path] | None = None) -> Path | None:
+    """The desktop file named *browser*, the first one found; None where there is none."""
+    for folder in application_folders() if folders is None else folders:
+        candidate = folder / browser
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def sandboxed(browser: str, folders: list[Path] | None = None) -> bool:
     """Whether a browser (its desktop file) runs in a snap or Flatpak sandbox."""
-    return bool(browser) and bool(_SNAP.match(browser) or _FLATPAK.match(browser))
+    if not browser:
+        return False
+    found = desktop_file(browser, folders)
+    if found is not None:
+        parts = set(found.parts)
+        try:
+            parts |= set(found.resolve().parts)
+        except OSError:
+            pass
+        return bool(parts & _SANDBOX_FOLDERS)
+    return bool(_SNAP.match(browser) or _FLATPAK.match(browser))
 
 
 def readable_by_sandbox(folder: Path, home: Path | None = None) -> bool:
-    """Whether a snap or Flatpak browser may read files in *folder*: in the home folder, and in
-    no hidden folder there."""
+    """Whether a snap or Flatpak browser may read files in *folder*: in the home folder, and in no hidden folder there."""
     home = (home or Path.home()).resolve()
     try:
         inside = folder.resolve().relative_to(home)

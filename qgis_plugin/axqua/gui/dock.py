@@ -467,6 +467,7 @@ class AxquaDock(QDockWidget):
         if exec_dialog(dialog):
             values = dialog.values()
             self.ctx.client = RunnerClient(values["executable"] or None)
+            help_pages.configure(None)      # asked again with the new program
             self.configuration_tab.check_runner()
 
     def submit(self, kinds, options: dict | None = None) -> None:

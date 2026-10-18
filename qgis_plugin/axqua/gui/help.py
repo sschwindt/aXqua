@@ -1,21 +1,10 @@
 """Help: the documentation, opened at the section of the active tab.
 
-*Help* opens a copy of the documentation built on this computer when there is one (the user's
-decision of 2026-10-18), because it describes the installed version of aXqua, and the published
-documentation at ``https://axqua.eu`` otherwise (the decision of 2026-10-16 had been the published
-one alone, then at ``axqua.readthedocs.io``). Where the copy is, and whether the default browser
-may read it, is the answer of ``axqua docs`` (a browser in a snap or Flatpak sandbox reads no file
-outside the home folder); it is asked once per session.
+*Help* opens a copy of the documentation built on this computer when there is one (the user's decision of 2026-10-18), because it describes the installed version of aXqua, and the published documentation at ``https://axqua.eu`` otherwise (the decision of 2026-10-16 had been the published one alone, then at ``axqua.readthedocs.io``). Where the copy is, and whether the default browser may read it, is the answer of ``axqua docs`` (a browser in a snap or Flatpak sandbox reads no file outside the home folder). The panel asks it once per session, in the background and with the axqua program of the plugin settings, as soon as that program has answered (:func:`ask`); until the answer is there, *Help* opens the published documentation.
 
-The language follows QGIS: German and French pages where QGIS is set to German or French and the
-documentation has them (the published one has both, at ``/de/`` and ``/fr/``).
+The language follows QGIS: German and French pages where QGIS is set to German or French and the documentation has them (the published one has both, at ``/de/`` and ``/fr/``).
 
-**A local page is opened through a small page that forwards to it.** On Linux, ``xdg-open`` drops
-the part after ``#`` of a ``file://`` address before the browser sees it, and Chromium and Chrome
-do so on Windows as well, so the page opened at its top instead of at the section of the tab. The
-forwarding page has no ``#`` in its own address and carries the whole address inside. It is written
-beside the documentation (``_help/open.html``), where a browser that may read the documentation may
-read it too; ``/tmp`` would be out of reach of a snap browser.
+**A local page is opened through a small page that forwards to it.** On Linux, ``xdg-open`` drops the part after ``#`` of a ``file://`` address before the browser sees it, and Chromium and Chrome do so on Windows as well, so the page opened at its top instead of at the section of the tab. The forwarding page has no ``#`` in its own address and carries the whole address inside. It is written beside the documentation (``_help/open.html``), where a browser that may read the documentation may read it too; ``/tmp`` would be out of reach of a snap browser.
 """
 
 from __future__ import annotations
@@ -42,16 +31,22 @@ def configure(location: dict | None) -> None:
 
 
 def location() -> dict:
-    """``{local, languages, readable, published, ...}``; an empty dict when aXqua cannot be asked."""
-    global _location
-    if _location is None:
-        try:
-            from ..core.runner_client import RunnerClient
+    """``{local, languages, readable, published, ...}``; an empty dict until :func:`ask` has an answer, or when aXqua could not give one. Runs nothing: *Help* is clicked on the thread of the window."""
+    return _location or {}
 
-            _location = RunnerClient().docs() or {}
-        except Exception:  # noqa: BLE001 - no answer: the published documentation is opened
-            _location = {}
-    return _location
+
+def ask(client, *, owner=None) -> None:
+    """Ask ``axqua docs`` where the documentation is, in the background, unless the answer is known.
+
+    *client* is the client of the panel, which runs the axqua program of the plugin settings; a client of its own would look on ``PATH`` only. A failed answer counts as "no local copy" for the rest of the session, until :func:`configure` forgets it (the panel does so when the settings change).
+    """
+    if _location is not None:
+        return
+    from ..core.tasks import run_async
+
+    run_async("aXqua: looking for the documentation", client.docs,
+              on_success=lambda answer: configure(answer or {}),
+              on_error=lambda _exc: configure({}), owner=owner)
 
 
 def language() -> str:

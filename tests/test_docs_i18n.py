@@ -1,7 +1,6 @@
 """The German and French documentation: docs/i18n/translate.py and docs/i18n/inject_i18n.py.
 
-No translation engine is needed: the engine is replaced by functions that answer the way Argos
-Translate was seen to answer, including the ways it damages masked text.
+No translation engine is needed: the engine is replaced by functions that answer the way Argos Translate was seen to answer, including the ways it damages masked text.
 """
 from __future__ import annotations
 
@@ -112,8 +111,7 @@ def test_german_terms_go_into_the_sentence_in_singular_and_plural(tmp_path):
     assert prepared.text.startswith("A Netzkonvergenzstudie refines the Rechennetz of both "
                                     "Flussabschnitte and the DGM")
     assert "dem stays" in prepared.text
-    # a term that is the same in German is kept as it is, not sent; per form, since the German plural
-    # of Layer is Layer and the English one is layers
+    # a term that is the same in German is kept as it is, not sent; per form, since the German plural of Layer is Layer and the English one is layers
     kept = tr.prepare("Each layer is loaded.", glossary, [])
     assert kept.text == "Each @@0@@ is loaded."
     assert tr.assemble(kept, {kept.text: "Jeder @@0@@ wird geladen."}, []) == "Jeder Layer wird geladen."
@@ -211,6 +209,16 @@ def test_a_german_sentence_in_lower_case_gets_its_nouns_back():
     # a sentence that has a capital is left as it is
     assert tr.recapitalize("Der eintrag ist da, und die Nachricht auch, sagt man hier.", nouns) == \
         "Der eintrag ist da, und die Nachricht auch, sagt man hier."
+
+
+def test_recapitalizing_leaves_literals_links_and_gui_labels_as_they_are():
+    """Review of 2026-10-18: the nouns were capitalized in the whole sentence, also inside a literal that is a command."""
+    nouns = {"status", "eintrag", "ergebnisse", "seite", "tippfehler"}
+    text = ("mit ``axqua status <config>`` zeigt der eintrag den status, und *load results* "
+            "lädt die ergebnisse, siehe `seite <https://axqua.eu/status>`_ zum tippfehler.")
+    assert tr.recapitalize(text, nouns) == (
+        "mit ``axqua status <config>`` zeigt der Eintrag den Status, und *load results* "
+        "lädt die Ergebnisse, siehe `seite <https://axqua.eu/status>`_ zum Tippfehler.")
 
 
 def test_a_catalog_reads_back_what_was_written(tmp_path):
@@ -312,6 +320,45 @@ def test_the_catalogs_translate_only_what_changed_and_keep_what_was_reviewed(tmp
     tr.translate_language("de", pot, engine="none", locale=locale, folder=folder, run=engine)
     assert not po.exists()
     assert (locale / "de" / "LC_MESSAGES" / "other.po").exists()
+
+
+def test_a_reviewed_docstring_survives_a_run_that_does_not_translate_docstrings(tmp_path):
+    """Review of 2026-10-18: a run without --docstrings, which every deploy is, wrote the catalogs without the entries of the API reference, so a reviewed one was lost."""
+    folder, pot, locale = _setup(tmp_path, [])
+    po = locale / "de" / "LC_MESSAGES" / "usage" / "page.po"
+    engine = FakeEngine()
+    tr.translate_language("de", pot, engine="argos", locale=locale, folder=folder, run=engine,
+                          docstrings=True)
+    text = re.sub(r"# machine translation: argos \w+\n(msgid \"Build the mesh)", r"\1",
+                  po.read_text(encoding="utf-8"))
+    po.write_text(text.replace('"DE[Build the mesh.]"', '"Das Netz bauen."'), encoding="utf-8")
+    counts = tr.translate_language("de", pot, engine="argos", locale=locale, folder=folder,
+                                   run=engine)
+    assert counts == {"kept": 3}
+    entries = {e.msgid: e for e in tr.read_catalog(po)}
+    assert entries["Build the mesh."].msgstr == "Das Netz bauen."
+    assert entries["Build the mesh."].machine is None
+
+
+def test_a_translation_that_fails_again_keeps_the_earlier_one(tmp_path):
+    """Review of 2026-10-18: a paragraph whose new translation failed lost its earlier one and was published in English."""
+    folder, pot, locale = _setup(tmp_path, [])
+    (pot / "usage" / "page.pot").write_text(
+        POT + '\n#: ../../docs/usage/page.rst:7\nmsgid "Run ``axqua build`` first."\nmsgstr ""\n',
+        encoding="utf-8")
+    po = locale / "de" / "LC_MESSAGES" / "usage" / "page.po"
+    tr.translate_language("de", pot, engine="argos", locale=locale, folder=folder, run=FakeEngine())
+    before = {e.msgid: e for e in tr.read_catalog(po)}["Run ``axqua build`` first."]
+    assert before.msgstr.startswith("DE[")
+
+    def loses_the_placeholders(pieces, engine, lang, jobs):
+        return {piece: "kaputt" for piece in pieces}
+
+    counts = tr.translate_language("de", pot, engine="argos", locale=locale, folder=folder,
+                                   run=loses_the_placeholders, retranslate=True)
+    assert counts.get("failed, earlier translation kept") == 1 and "failed" not in counts
+    after = {e.msgid: e for e in tr.read_catalog(po)}["Run ``axqua build`` first."]
+    assert (after.msgstr, after.comments) == (before.msgstr, before.comments)
 
 
 def test_without_an_engine_the_catalogs_are_updated_and_nothing_is_translated(tmp_path):

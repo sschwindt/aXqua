@@ -21,6 +21,7 @@ from ..compat import enum_value, exec_dialog
 from ..core.runner_client import RunnerError, user_text
 from ..core.tasks import run_async
 from . import findings as fnd
+from . import help as help_pages
 from .install_wizard import InstallWizard
 from .profile_editor import ProfileEditor, get
 from .style import FOUND_STYLE, MISSING_STYLE
@@ -196,6 +197,7 @@ class ConfigurationTab(QWidget):
     def _runner_checked(self, info) -> None:
         self.runner_label.setText(info.describe())
         self.ctx.set_runner_ok(True)
+        help_pages.ask(self.ctx.client, owner=self)
         self.load_kinds()
         self.load_profile()
         self.load_software()
