@@ -24,8 +24,8 @@ TRANSLATED = ("de", "fr")
 _location: dict | None = None
 #: Counts the calls of :func:`configure`; an answer to a question asked before the last one is dropped.
 _generation = 0
-#: The generation a question is on its way for, None when none is.
-_asking: int | None = None
+#: (generation, task) of the question on its way, None when none is.
+_asking: tuple | None = None
 
 
 def configure(location: dict | None) -> None:
@@ -41,25 +41,30 @@ def location() -> dict:
     return _location or {}
 
 
-def ask(client, *, owner=None) -> None:
+def ask(client) -> None:
     """Ask ``axqua docs`` where the documentation is, in the background, unless the answer is known.
 
     *client* is the client of the panel, which runs the axqua program of the plugin settings; a client of its own would look on ``PATH`` only. A failed answer counts as "no local copy" for the rest of the session, until :func:`configure` forgets it (the panel does so when the settings change).
     """
     global _asking
-    if _location is not None or _asking == _generation:
-        return                  # known, or a question for the same program is on its way
-    from ..core.tasks import run_async
+    from ..core import tasks
 
-    mine = _asking = _generation
+    if _location is not None:
+        return
+    if _asking is not None and _asking[0] == _generation and _asking[1] in tasks._IN_FLIGHT:
+        return                  # a question for the same program is on its way
+    mine = _generation
 
     def answered(answer) -> None:
         # the program may have changed while the question was on its way (open_settings forgets the answer): then the answer is of the old program
         if mine == _generation:
             configure(answer or {})
 
-    run_async("aXqua: looking for the documentation", client.docs,
-              on_success=answered, on_error=lambda _exc: answered({}), owner=owner)
+    # No owner: the answer touches nothing but this module, and a task whose owner was closed would drop it. A question that ends without an answer (cancelled in the task bar) leaves the in-flight list, so the next ask asks again.
+    task = tasks.run_async("aXqua: looking for the documentation", client.docs,
+                           on_success=answered, on_error=lambda _exc: answered({}))
+    if mine == _generation and _location is None:
+        _asking = (mine, task)
 
 
 def language() -> str:

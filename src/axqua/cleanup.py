@@ -222,14 +222,17 @@ def _copy(source, target, length: int, block: int = 1 << 22) -> None:
 
 def _ancestors() -> set[int]:
     """This process and the processes it was started from: the QGIS that runs Clean Up, a shell."""
-    pids, pid = set(), os.getpid()
-    while pid > 1 and pid not in pids:
-        pids.add(pid)
+    pid = os.getpid()
+    pids = {pid}                # also where this process is the first one (a container)
+    while pid > 1:
         try:
             # "<pid> (<name>) <state> <parent pid> ...": the name may hold spaces and parentheses
             pid = int(Path(f"/proc/{pid}/stat").read_text().rsplit(")", 1)[1].split()[1])
         except (OSError, ValueError, IndexError):
             break
+        if pid in pids or pid < 1:
+            break
+        pids.add(pid)
     return pids
 
 
@@ -366,34 +369,33 @@ def _item(base: Path, category: str, action: str, path: Path, size: int, saves: 
 def _openfoam_items(base: Path, case: Path, survey: InUse) -> list[Item]:
     from axqua.solvers.openfoam.layout import PREVIOUS_RUN, Layout, time_folders
 
-    size_of = survey.size
     items = []
     layout = Layout.of(case)
     if layout.folders and not layout.only_in_processor_folders:
-        size = sum(size_of(f) for f in layout.folders)
+        size = sum(survey.size(f) for f in layout.folders)
         items.append(_item(base, "openfoam-processors", "delete", case / "processor*", size, size,
                            f"{len(layout.folders)} folders in {case.name}",
                            paths=[str(f) for f in layout.folders]))
     times = [path for value, path in time_folders(case) if value > 0]
     if len(times) > 1:
         earlier = times[:-1]
-        size = sum(size_of(p) for p in earlier)
+        size = sum(survey.size(p) for p in earlier)
         items.append(_item(base, "openfoam-times", "delete", case / "<times>", size, size,
                            f"{len(earlier)} of {len(times)} times in {case.name}, "
                            f"{times[-1].name} is kept", paths=[str(p) for p in earlier]))
     previous = case / PREVIOUS_RUN
     if previous.is_dir():
-        size = size_of(previous)
+        size = survey.size(previous)
         items.append(_item(base, "openfoam-previous", "delete", previous, size, size,
                            f"in {case.name}"))
     vtk = case / "VTK"
     if vtk.is_dir():
-        size = size_of(vtk)
+        size = survey.size(vtk)
         items.append(_item(base, "exports", "delete", vtk, size, size, f"in {case.name}"))
     return items
 
 
-def _result_item(base: Path, path: Path) -> Item | None:
+def _result_item(base: Path, path: Path, busy: list[dict]) -> Item | None:
     if _INPUT_NAMES.fullmatch(path.name):
         return None
     try:
@@ -401,6 +403,12 @@ def _result_item(base: Path, path: Path) -> Item | None:
     except (OSError, ValueError, struct.error, IndexError):
         return None
     count = len(layout.frames)
+    if not layout.complete and count >= 2:
+        # a result whose last time step is incomplete: a run is writing it (or stopped while writing); said, so that its absence from the list is not a riddle
+        busy.append({"path": os.path.relpath(path, base),
+                     "reason": "its last time step is incomplete: a run is writing it, or "
+                               "stopped while writing"})
+        return None
     if count < 3 or not layout.complete:
         return None
     size = path.stat().st_size
@@ -413,7 +421,7 @@ def _result_item(base: Path, path: Path) -> Item | None:
 def inventory(cfg, case_file: str | Path) -> dict:
     """Everything of a case that can go, by category.
 
-    Changes nothing: it reads sizes and times of files, the record markers of results, the processes of this computer and the list of jobs.
+    Changes nothing in the case: it reads sizes and times of files, the record markers of results, the processes of this computer and the list of jobs. Asking the list of jobs lets it correct jobs whose process is gone, as ``axqua list`` does, because only that tells a running job from one whose runner died.
     """
     case_file = Path(case_file).resolve()
     base = case_file.parent
@@ -421,7 +429,6 @@ def inventory(cfg, case_file: str | Path) -> dict:
     items: list[Item] = []
     busy: list[dict] = []
     survey = InUse()
-    size_of = survey.size
     listings: dict[tuple[Path, str], list[Path]] = {}
     processor_listings: dict[Path, list[Path]] = {}
 
@@ -442,11 +449,14 @@ def inventory(cfg, case_file: str | Path) -> dict:
                     dirs.remove(name)
                 elif _RUN_FOLDER.fullmatch(name):
                     dirs.remove(name)
-                    size = size_of(path)
+                    if survey.by_process(path):          # asked first: a live run folder is not walked
+                        busy.append({"path": os.path.relpath(path, base), "reason": BUSY_PROCESS})
+                        continue
+                    size = survey.size(path)
                     items.append(_item(base, "telemac-run-folders", "delete", path, size, size,
                                        "left by a run that did not end"))
                 elif name == "vtk" and here.resolve() == Path(cfg.postprocessing_dir).resolve():
-                    size = size_of(path)
+                    size = survey.size(path)
                     items.append(_item(base, "exports", "delete", path, size, size,
                                        "the export of the TELEMAC results"))
                     dirs.remove(name)
@@ -461,13 +471,13 @@ def inventory(cfg, case_file: str | Path) -> dict:
                 elif (match := _LISTING.fullmatch(name)):
                     listings.setdefault((here, match.group("cas")), []).append(path)
                 elif path.suffix.lower() in _RESULT_SUFFIXES:
-                    item = _result_item(base, path)
+                    item = _result_item(base, path, busy)
                     if item is not None:
                         items.append(item)
 
     # listings go by folder: one row per run folder, not one per file
     for folder, paths in processor_listings.items():
-        size = sum(size_of(p) for p in paths)
+        size = sum(survey.size(p) for p in paths)
         items.append(_item(base, "processor-listings", "delete", folder / "*_p*.sortie", size, size,
                            f"{len(paths)} files", paths=[str(p) for p in sorted(paths)]))
     older: dict[Path, list[Path]] = {}
@@ -475,7 +485,7 @@ def inventory(cfg, case_file: str | Path) -> dict:
         older.setdefault(folder, []).extend(sorted(paths)[:-1])   # the name sorts by time
     for folder, paths in older.items():
         if paths:
-            size = sum(size_of(p) for p in paths)
+            size = sum(survey.size(p) for p in paths)
             items.append(_item(base, "old-listings", "delete", folder / "*.sortie", size, size,
                                f"{len(paths)} files", paths=[str(p) for p in sorted(paths)]))
 
@@ -516,19 +526,35 @@ def permitted(path: str | Path, roots: list[Path]) -> bool:
                for root in roots)
 
 
-def _same_case(row, case_file: Path, cfg=None) -> bool:
+def _submitted_from(job_dir: str | None) -> Path | None:
+    """The folder ``axqua submit`` was run in, from the environment the launcher saved with the job (``launch.env``); None where it is not there."""
+    if not job_dir:
+        return None
+    try:
+        text = (Path(job_dir) / "launch.env").read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    for line in text.splitlines():
+        if line.startswith("PWD="):
+            folder = line[4:].strip().strip("'\"")
+            return Path(folder) if folder.startswith("/") else None
+    return None
+
+
+def _same_case(row, case_file: Path) -> bool:
     """Whether the job of *row* was submitted for *case_file*.
 
-    A relative path, which a job submitted from the terminal before 2026-10-18 recorded, says nothing about the folder it was given in. Its file name and the name of the project (``project.name``, which the job list keeps) decide then; many cases share the file name ``case-config.yml``, few also their project name, and a wrong match only makes the cleanup wait.
+    A relative path, which a job submitted from the terminal before 2026-10-18 recorded, is resolved in the folder it was typed in, which the environment saved with the job names (``PWD``). Where that is not there, the file name decides alone: many cases share ``case-config.yml``, and a wrong match only makes the cleanup wait, where a missed one would remove files under a running job.
     """
     source = row.source_config
     if not source:
         return False
     path = Path(source).expanduser()
     if not path.is_absolute():
-        name = getattr(cfg, "name", None) if cfg is not None else None
-        return path.name == case_file.name and (not name or not row.case_name
-                                                or row.case_name == name)
+        folder = _submitted_from(row.root)
+        if folder is None:
+            return path.name == case_file.name
+        path = folder / path
     try:
         return path.resolve() == case_file
     except OSError:
@@ -551,7 +577,7 @@ def active_jobs(case_file: Path, cfg=None) -> str:
                 "of this case is running; nothing is removed while that is unknown.")
     busy, seen = [], set()
     for row in rows:
-        if not _same_case(row, case_file, cfg):
+        if not _same_case(row, case_file):
             continue
         try:
             terminal = JobState(row.state).is_terminal if row.state else True

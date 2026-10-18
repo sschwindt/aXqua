@@ -225,6 +225,12 @@ def test_recapitalizing_leaves_literals_links_and_gui_labels_as_they_are():
     assert tr.recapitalize(text, nouns) == (
         "nach `celik et al. 2008 status <https://doi.org/x>`_ zeigt der Eintrag mit ``a. status`` "
         "den Status und die Ergebnisse.")
+    # a stray backtick must not hide the sentences up to the next one (review of f75110e)
+    text = ("der eintrag mit ` geht so. dann zeigt der eintrag hier den status und die ergebnisse "
+            "an. dort steht ``axqua status`` im eintrag mit den ergebnissen zum status.")
+    out = tr.recapitalize(text, nouns)
+    assert "dann zeigt der Eintrag hier den Status und die Ergebnisse an." in out
+    assert "``axqua status``" in out
 
 
 def test_a_catalog_reads_back_what_was_written(tmp_path):

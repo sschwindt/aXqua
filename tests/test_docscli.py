@@ -82,6 +82,33 @@ def test_a_copy_a_sandboxed_browser_cannot_read_is_reported_with_the_reason(tmp_
     assert "sandbox" in answer["reason"]
 
 
+def test_the_command_of_a_desktop_file_is_followed_to_the_program_it_starts(tmp_path, monkeypatch):
+    """Review of f75110e: ``Exec=firefox %u`` that is the snap through PATH, ``snap run``, ``Exec = ...`` with spaces and a group before [Desktop Entry] were taken for browsers of the system."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    snap = bin_dir / "snap"
+    snap.write_bytes(b"\x7fELF the snap launcher")
+    snap.chmod(0o755)
+    (bin_dir / "firefox").symlink_to(snap)                          # as /snap/bin/firefox is
+    for name, body in [("chromium", "#!/bin/sh\nexec /snap/bin/chromium \"$@\"\n"),   # Ubuntu's wrapper
+                       ("firefox-esr", "#!/bin/sh\nexec firefox-esr.real \"$@\"\n")]:  # Debian's
+        (bin_dir / name).write_text(body)
+        (bin_dir / name).chmod(0o755)
+    monkeypatch.setenv("PATH", str(bin_dir))
+    apps = tmp_path / "applications"
+    apps.mkdir()
+    for name, entry in [
+            ("firefox.desktop", "[Desktop Entry]\nExec=firefox %u\n"),
+            ("snaprun.desktop", "[Desktop Entry]\nExec=snap run firefox %u\n"),
+            ("spaced.desktop", "[Desktop Action new]\nExec=/usr/bin/true\n\n[Desktop Entry]\nExec = /snap/bin/x %U\n"),
+            ("chromium.desktop", "[Desktop Entry]\nExec=env GDK_BACKEND=x11 chromium %U\n"),
+            ("esr.desktop", "[Desktop Entry]\nExec=firefox-esr %u\n")]:
+        (apps / name).write_text(entry)
+    for name in ("firefox.desktop", "snaprun.desktop", "spaced.desktop", "chromium.desktop"):
+        assert docscli.sandboxed(name, [apps]), name
+    assert not docscli.sandboxed("esr.desktop", [apps])
+
+
 def test_without_a_built_copy_only_the_published_address_is_given(tmp_path, monkeypatch):
     monkeypatch.setenv(docscli.ENV_VAR, str(tmp_path / "nothing"))
     monkeypatch.setattr(docscli, "checkout", lambda: None)

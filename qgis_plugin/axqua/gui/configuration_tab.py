@@ -197,7 +197,7 @@ class ConfigurationTab(QWidget):
     def _runner_checked(self, info) -> None:
         self.runner_label.setText(info.describe())
         self.ctx.set_runner_ok(True)
-        help_pages.ask(self.ctx.client, owner=self)
+        help_pages.ask(self.ctx.client)
         self.load_kinds()
         self.load_profile()
         self.load_software()

@@ -280,6 +280,34 @@ def test_an_openfoam_case_a_solver_works_in_is_not_offered(tmp_path, monkeypatch
     assert "thin:axqua-case/simulation/r2d.slf" in _items(found)     # the rest of the case is offered
 
 
+def test_a_result_that_is_being_written_is_named(tmp_path):
+    """Review of f75110e: a result whose last time step is incomplete was left out without a word."""
+    cfg, case_file = _case(tmp_path)
+    write_result(cfg.model_dir / "r2d-running.slf", 5, partial=True)
+    _age(tmp_path)
+    found = cleanup.inventory(cfg, case_file)
+    assert "thin:axqua-case/simulation/r2d-running.slf" not in _items(found)
+    reasons = {b["path"]: b["reason"] for b in found["in_use"]}
+    assert "incomplete" in reasons["axqua-case/simulation/r2d-running.slf"]
+
+
+def test_a_run_folder_a_process_works_in_is_not_walked(tmp_path, monkeypatch):
+    cfg, case_file = _case(tmp_path)
+    run = cfg.model_dir / "steady2d.cas_2026-01-01-10h00min00s"
+    monkeypatch.setattr(cleanup, "open_paths", lambda: {str(run.resolve())})
+    walked = []
+    real = cleanup._stats
+    monkeypatch.setattr(cleanup, "_stats", lambda path: walked.append(Path(path)) or real(path))
+    cleanup.inventory(cfg, case_file)
+    assert run not in walked
+
+
+def test_this_process_is_left_out_also_where_it_is_the_first_one(monkeypatch):
+    """Review of f75110e: run as process 1 (a container started in the case folder), the cleanup counted its own working folder as a run."""
+    monkeypatch.setattr(cleanup.os, "getpid", lambda: 1)
+    assert cleanup._ancestors() == {1}
+
+
 def test_every_kind_of_item_is_held_back_while_it_is_written_to(tmp_path):
     cfg, case_file = _case(tmp_path)
     vtk = cfg.postprocessing_dir / "vtk" / "r2d.pvd"
@@ -326,15 +354,21 @@ def test_a_job_submitted_with_a_relative_path_or_holding_the_folder_blocks_the_r
     from axqua.jobs import index, workspace
 
     cfg, case_file = _case(tmp_path)
-    cfg.name = "isar"
-    rows = [index.JobRow(job_id="J1", root=str(tmp_path), kind="steady", state="RUNNING",
-                         case_name="isar", source_config="cases/somewhere/reach.axq-case"),
-            # the same file name, another project (case-config.yml of another case)
-            index.JobRow(job_id="J2", root=str(tmp_path), kind="steady", state="RUNNING",
-                         case_name="inn", source_config="reach.axq-case")]
+    # J1: no record of the folder it was submitted in, so its file name decides (and blocks);
+    # J2 and J3 were submitted in a folder the launcher saved: this case's, and another one's
+    jobs = tmp_path / "jobs"
+    for job, folder in (("J2", tmp_path), ("J3", tmp_path / "other")):
+        (jobs / job).mkdir(parents=True)
+        (jobs / job / "launch.env").write_text(f"HOME=/home/x\nPWD={folder}\n")
+    rows = [index.JobRow(job_id="J1", root=str(jobs / "J1"), kind="steady", state="RUNNING",
+                         case_name="renamed since", source_config="cases/somewhere/reach.axq-case"),
+            index.JobRow(job_id="J2", root=str(jobs / "J2"), kind="openfoam-run", state="RUNNING",
+                         case_name="renamed since", source_config="reach.axq-case"),
+            index.JobRow(job_id="J3", root=str(jobs / "J3"), kind="steady", state="RUNNING",
+                         source_config="reach.axq-case")]
     monkeypatch.setattr(index, "list_jobs", lambda **kw: rows)
     reason = cleanup.active_jobs(case_file, cfg)
-    assert "J1" in reason and "J2" not in reason
+    assert "J1" in reason and "J2" in reason and "J3" not in reason
     rows.clear()
     assert cleanup.active_jobs(case_file, cfg) == ""
     monkeypatch.setattr(workspace, "holder_of", lambda folder: "J7")

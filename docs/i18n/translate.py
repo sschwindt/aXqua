@@ -772,9 +772,31 @@ def recapitalize(text: str, nouns: set[str]) -> str:
         return _GERMAN_WORD.sub(lambda m: m.group(1).capitalize() if m.group(1).lower() in nouns
                                 else m.group(1), sentence)
 
+    def sentences(part: str) -> str:
+        return "".join(fix(piece) for piece in re.split(r"((?<=[.!?:])\s+)", part))
+
+    if not _balanced(text):
+        # a stray backtick or asterisk would let one protected span reach over whole sentences: protected per sentence then, as far as each sentence goes
+        return "".join(sentences_protected(piece, sentences)
+                       for piece in re.split(r"((?<=[.!?:])\s+)", text))
     masked = _PROTECTED.sub(aside, text)
-    done = "".join(fix(part) for part in re.split(r"((?<=[.!?:])\s+)", masked))
-    return re.sub("\x00(\\d+)\x01", lambda m: kept[int(m.group(1))], done)
+    return re.sub("\x00(\\d+)\x01", lambda m: kept[int(m.group(1))], sentences(masked))
+
+
+def _balanced(text: str) -> bool:
+    """Whether the inline markup of a translation pairs up: an even number of single backticks outside double ones, and of single asterisks outside double ones."""
+    rest = re.sub(r"``.*?``", " ", text)
+    return rest.count("`") % 2 == 0 and re.sub(r"\*\*", " ", rest).count("*") % 2 == 0
+
+
+def sentences_protected(sentence: str, fix) -> str:
+    """*fix* applied to the parts of one sentence outside its protected markup."""
+    parts = _PROTECTED.split(sentence)
+    if len(parts) == 1:
+        return fix(sentence)
+    kept = parts[1::2]
+    masked = "".join(part if index % 2 == 0 else f"\x00{index // 2}\x01" for index, part in enumerate(parts))
+    return re.sub("\x00(\\d+)\x01", lambda m: kept[int(m.group(1))], fix(masked))
 
 
 def _sentences(text: str) -> list[str]:

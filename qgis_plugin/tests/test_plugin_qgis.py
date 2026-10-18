@@ -2196,9 +2196,20 @@ def test_an_answer_of_the_program_set_before_the_settings_changed_is_dropped(qgi
     from axqua_plugin.gui import help as help_pages
 
     pending = []
-    monkeypatch.setattr(tasks, "run_async",
-                        lambda title, call, on_success=None, on_error=None, owner=None:
-                        pending.append((call, on_success, on_error)))
+
+    def later(title, call, on_success=None, on_error=None, owner=None):
+        task = object()                          # a task of the task manager, still running
+        tasks._IN_FLIGHT.add(task)
+        pending.append((task, call, on_success, on_error))
+        return task
+
+    def deliver(index, cancelled=False):
+        task, call, on_success, on_error = pending[index]
+        tasks._IN_FLIGHT.discard(task)
+        if not cancelled:
+            _now(call, on_success, on_error)
+
+    monkeypatch.setattr(tasks, "run_async", later)
 
     class Client:
         def __init__(self, folder):
@@ -2215,10 +2226,41 @@ def test_an_answer_of_the_program_set_before_the_settings_changed_is_dropped(qgi
     help_pages.configure(None)                             # the settings changed
     help_pages.ask(Client(new))
     assert len(pending) == 2
-    _now(*pending[0])                                      # the old program answers after the change
+    deliver(0)                                             # the old program answers after the change
     assert help_pages.location() == {}
-    _now(*pending[1])
+    deliver(1)
     assert help_pages.url_for("case").startswith(new.as_uri())
+
+
+def test_a_question_for_the_documentation_that_was_cancelled_is_asked_again(qgis_app, monkeypatch, tmp_path):
+    """Review of f75110e: a question cancelled in the task bar, or whose window was closed, left the panel waiting for an answer that never came, so Help opened the published docs for the rest of the session."""
+    from axqua_plugin.core import tasks
+    from axqua_plugin.gui import help as help_pages
+
+    started = []
+
+    def later(title, call, on_success=None, on_error=None, owner=None):
+        assert owner is None
+        task = object()
+        tasks._IN_FLIGHT.add(task)
+        started.append((task, call, on_success, on_error))
+        return task
+
+    monkeypatch.setattr(tasks, "run_async", later)
+
+    class Client:
+        def docs(self):
+            return {"local": str(tmp_path), "languages": ["en"], "readable": True}
+
+    help_pages.configure(None)
+    help_pages.ask(Client())
+    tasks._IN_FLIGHT.discard(started[0][0])                # cancelled: no callback, out of the list
+    help_pages.ask(Client())
+    assert len(started) == 2
+    task, call, on_success, on_error = started[1]
+    tasks._IN_FLIGHT.discard(task)
+    _now(call, on_success, on_error)
+    assert help_pages.url_for("case").startswith(tmp_path.as_uri())
 
 
 def test_the_space_a_result_keeps_of_its_time_steps():

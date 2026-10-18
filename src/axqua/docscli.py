@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shlex
 import shutil
 import subprocess  # nosec B404
 import sys
@@ -30,8 +31,10 @@ _FLATPAK = re.compile(r"^(org|com|io|net)\.[\w.-]+\.desktop$")
 _SNAP = re.compile(r"^[a-z0-9-]+_[\w-]+\.desktop$")
 #: Folders in the path of a desktop file that a snap or a Flatpak exports.
 _SANDBOX_FOLDERS = {"flatpak", "snapd"}
-#: How a desktop file starts a snap (/snap/bin/firefox) or a Flatpak (flatpak run org.chromium.Chromium).
-_SANDBOX_EXEC = re.compile(r"/snap/bin/|\bflatpak\s+run\b")
+#: How a desktop file or a launcher script starts a snap (/snap/bin/firefox, snap run firefox) or a Flatpak (flatpak run org.chromium.Chromium).
+_SANDBOX_EXEC = re.compile(r"/snap/bin/|\b(?:flatpak|snap)\s+run\b")
+#: A launcher script is read up to this many bytes; a program is not.
+_SCRIPT_BYTES = 65536
 
 
 def checkout() -> Path | None:
@@ -79,7 +82,7 @@ def application_folders() -> list[Path]:
     data = [Path(p) for p in (os.environ.get("XDG_DATA_DIRS") or "/usr/local/share:/usr/share").split(":") if p]
     exports = [home / "flatpak" / "exports" / "share", Path("/var/lib/flatpak/exports/share"),
                Path("/var/lib/snapd/desktop")]
-    return [folder / "applications" for folder in [home, *data, *exports]]
+    return list(dict.fromkeys(folder / "applications" for folder in [home, *data, *exports]))
 
 
 def desktop_files(browser: str, folders: list[Path] | None = None) -> list[Path]:
@@ -89,12 +92,47 @@ def desktop_files(browser: str, folders: list[Path] | None = None) -> list[Path]
 
 
 def _exec_line(path: Path) -> str:
-    """The command a desktop file starts, '' where it cannot be read."""
+    """The command a desktop file starts (``Exec`` of its group ``[Desktop Entry]``, where the key may have spaces around ``=``), '' where it cannot be read."""
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return ""
-    return next((line[5:] for line in text.splitlines() if line.startswith("Exec=")), "")
+    group = ""
+    for line in text.splitlines():
+        line = line.strip()
+        if line.startswith("[") and line.endswith("]"):
+            group = line[1:-1]
+        elif group == "Desktop Entry":
+            key, sep, value = line.partition("=")
+            if sep and key.strip() == "Exec":
+                return value.strip()
+    return ""
+
+
+def _starts_sandbox(command: str) -> bool:
+    """Whether a command of a desktop file starts a snap or a Flatpak: named so, or its program found on ``PATH`` is the snap launcher (``/snap/bin/firefox`` is a link to ``/usr/bin/snap``), lies in a Flatpak folder, or is a launcher script that starts one (Ubuntu's ``/usr/bin/firefox``)."""
+    if _SANDBOX_EXEC.search(command):
+        return True
+    try:
+        words = shlex.split(command)
+    except ValueError:
+        words = command.split()
+    while words and (Path(words[0]).name == "env" or re.fullmatch(r"\w+=.*", words[0])):
+        words = words[1:]           # env VAR=value ... program
+    if not words:
+        return False
+    found = words[0] if words[0].startswith("/") else shutil.which(words[0])
+    if not found:
+        return False
+    real = Path(os.path.realpath(found))
+    if real.name in ("snap", "flatpak") or "flatpak" in real.parts or real.parts[1:2] == ("snap",):
+        return True
+    try:
+        with real.open("rb") as handle:
+            head = handle.read(_SCRIPT_BYTES)
+    except OSError:
+        return False
+    return head.startswith(b"#!") and bool(_SANDBOX_EXEC.search(head.decode("utf-8", "replace")))
 
 
 def sandboxed(browser: str, folders: list[Path] | None = None) -> bool:
@@ -115,7 +153,7 @@ def sandboxed(browser: str, folders: list[Path] | None = None) -> bool:
             pass
         if parts & _SANDBOX_FOLDERS:
             return True
-    return bool(_SANDBOX_EXEC.search(_exec_line(found[0])))
+    return _starts_sandbox(_exec_line(found[0]))
 
 
 def readable_by_sandbox(folder: Path, home: Path | None = None) -> bool:
