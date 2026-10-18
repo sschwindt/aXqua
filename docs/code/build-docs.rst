@@ -13,7 +13,7 @@ Open ``docs/_build/html/index.html`` in a web browser to read the result. The ou
 Languages and publication
 -------------------------
 
-The documentation is published twice. `Read the Docs <https://axqua.readthedocs.io>`_ builds the English pages from the branch ``main`` by itself, with the commands above, and serves them at ``axqua.readthedocs.io`` and ``axqua.ch``. `GitHub Pages <https://axqua.eu>`_ serves the English pages at ``axqua.eu`` together with a German translation at ``axqua.eu/de/`` and a French one at ``axqua.eu/fr/``; ``axqua.de`` and ``axqua.fr`` forward there. The German and French pages are machine translations, and every page says so.
+The documentation is published twice. `Read the Docs <https://axqua.readthedocs.io>`_ builds the English pages from the branch ``main`` by itself, with the commands above, and serves them at ``axqua.readthedocs.io``. `GitHub Pages <https://axqua.eu>`_ serves the English pages at ``axqua.eu`` together with a German translation at ``axqua.eu/de/`` and a French one at ``axqua.eu/fr/``; ``axqua.de`` and ``axqua.ch`` forward to the German pages and ``axqua.fr`` to the French ones. A button in the top right corner of every page switches the language. The German and French pages are machine translations, and every page says so.
 
 The translations are kept per page in ``docs/locale/<language>/LC_MESSAGES/``, in the gettext format that Sphinx reads. They require a separate environment with the offline translation engine Argos Translate, and they are published with one script in the root folder of the repository:
 

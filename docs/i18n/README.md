@@ -5,9 +5,11 @@ The documentation is written in English. German and French pages are machine tra
 | Address | Language | Source |
 |---|---|---|
 | `https://axqua.eu/` | English | the `.rst` files in `docs/` |
-| `https://axqua.eu/de/` (`axqua.de` forwards here) | German | `docs/locale/de/LC_MESSAGES/**.po` |
+| `https://axqua.eu/de/` (`axqua.de` and `axqua.ch` forward here) | German | `docs/locale/de/LC_MESSAGES/**.po` |
 | `https://axqua.eu/fr/` (`axqua.fr` forwards here) | French | `docs/locale/fr/LC_MESSAGES/**.po` |
-| `https://axqua.readthedocs.io` (`axqua.ch`) | English | built by Read the Docs from `main` |
+| `https://axqua.readthedocs.io` | English | built by Read the Docs from `main` |
+
+How the domains are set up at the registrars is in the [README of the repository](../../README.md#domains).
 
 ## Publishing
 
@@ -29,11 +31,11 @@ The `gh-pages` branch is checked out in its own worktree, `../aXqua-gh-pages` be
 2. extracts one message template per page (`sphinx-build -b gettext`, into `docs/_build/i18n/gettext/`);
 3. updates the catalogs and translates what is missing (`translate.py`);
 4. builds the German and French pages into `docs/_build/site/de/` and `fr/` (`-D language=de|fr`), with their warnings in `docs/_build/i18n/warnings-<lang>.log`;
-5. adds the language links EN | DE | FR, `hreflang` links, the note on machine translation and a `404.html` (`inject_i18n.py`, `assets/`).
+5. adds the language button in the top right corner, `hreflang` links, the note on machine translation and a `404.html` (`inject_i18n.py`, `assets/`).
 
 `ENGINE=none bash docs/i18n/build_i18n.sh` builds with the translations that are there and translates nothing: new text then shows in English on the German and French pages.
 
-**Which language a reader sees** (`assets/lang.js`): the address always wins, so a German or French page is never redirected. A reader who arrives from outside the site on an English page is sent to the language chosen before, or else to the language of the browser if that is German or French. Choosing EN, DE or FR is remembered. Following links within the site redirects nothing.
+**Which language a reader sees** (`assets/lang.js`): the address always wins, so a German or French page is never redirected. A reader who arrives from outside the site on an English page is sent to the language chosen before, or else to the language of the browser if that is German or French. A language chosen with the button in the top right corner is remembered. Following links within the site redirects nothing.
 
 ## The catalogs are the translation memory
 
@@ -89,7 +91,7 @@ Things Argos does that `translate.py` repairs or catches, each found in the firs
 
 ## Read the Docs in German and French (optional)
 
-Read the Docs serves translations as separate projects. To offer German and French on `axqua.ch` too: create two projects from the same repository with the language set to German and French (for example `axqua-de` and `axqua-fr`), and add them under *Admin > Translations* of the `axqua` project. Read the Docs then builds them with `-D language=de|fr` from the catalogs on `main` (`locale_dirs` in `docs/conf.py`) and shows its own language menu. Nothing in this repository has to change for that.
+Read the Docs serves translations as separate projects. To offer German and French on `axqua.readthedocs.io` too: create two projects from the same repository with the language set to German and French (for example `axqua-de` and `axqua-fr`), and add them under *Admin > Translations* of the `axqua` project. Read the Docs then builds them with `-D language=de|fr` from the catalogs on `main` (`locale_dirs` in `docs/conf.py`) and shows its own language menu. Nothing in this repository has to change for that.
 
 ## Files
 
@@ -98,7 +100,7 @@ Read the Docs serves translations as separate projects. To offer German and Fren
 | `../../deploy.sh` | builds, then publishes `main` and `gh-pages` |
 | `build_i18n.sh` | builds the three languages into `docs/_build/site/` |
 | `translate.py` | updates the catalogs and translates what is missing; `--check` tests the masking without an engine |
-| `inject_i18n.py`, `assets/` | language links, `hreflang`, note on machine translation, `404.html` |
+| `inject_i18n.py`, `assets/` | language button, `hreflang`, note on machine translation, `404.html` |
 | `glossary.<lang>.tsv`, `termfix.<lang>.tsv`, `keep.txt` | terms |
 | `environment.yml` | the `axqua-docs` environment |
 | `../locale/<lang>/LC_MESSAGES/` | the catalogs, one per page (tracked; the `.mo` files Sphinx compiles from them are not) |

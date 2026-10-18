@@ -1,11 +1,95 @@
 /* aXqua documentation: the language links and the note on machine translation (inject_i18n.py). */
+/* The language button, fixed in the top right corner of the window. */
 .axqua-lang {
-  margin-right: 1.2em;
-  white-space: nowrap;
+  position: fixed;
+  top: 10px;
+  right: 16px;
+  z-index: 400;
+  font-size: 14px;
+  line-height: 1.2;
 }
-.axqua-lang a,
-.axqua-lang strong {
-  padding: 0 0.15em;
+.axqua-lang summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.4em 0.85em;
+  border: 1px solid #2e014b;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #2e014b;
+  font-weight: 700;
+  list-style: none;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+  user-select: none;
+}
+.axqua-lang summary::-webkit-details-marker {
+  display: none;
+}
+.axqua-lang summary::after {
+  content: "";
+  width: 0.35em;
+  height: 0.35em;
+  margin: -0.2em 0 0 0.15em;
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.axqua-lang summary:hover,
+.axqua-lang summary:focus-visible,
+.axqua-lang[open] summary {
+  background: #2e014b;
+  color: #ffffff;
+  outline: none;
+}
+.axqua-lang ul {
+  position: absolute;
+  right: 0;
+  min-width: 9.5em;
+  margin: 0.4em 0 0;
+  padding: 0.3em 0;
+  list-style: none;
+  border: 1px solid #2e014b;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+.axqua-lang li {
+  margin: 0;
+  list-style: none;
+}
+.axqua-lang li a,
+.axqua-lang li strong {
+  display: block;
+  padding: 0.4em 1em;
+  color: #2e014b;
+  text-decoration: none;
+}
+.axqua-lang li a:hover,
+.axqua-lang li a:focus-visible {
+  background: #f3eef8;
+}
+.axqua-lang li strong {
+  background: #f3eef8;
+}
+/* Where the content column reaches the right edge, keep "View page source" clear of the button. */
+@media (max-width: 1260px) {
+  .wy-breadcrumbs-aside {
+    margin-right: 6.5em;
+  }
+}
+@media (max-width: 768px) {
+  .axqua-lang {
+    top: 7px;
+    right: 10px;
+    font-size: 13px;
+  }
+}
+@media print {
+  .axqua-lang,
+  .axqua-mt-note {
+    display: none;
+  }
 }
 .axqua-mt-note {
   position: relative;

@@ -5,7 +5,7 @@ Runs over the assembled site (``docs/_build/site``: English at the top, German i
 ``fr/``) and adds to every page:
 
 * ``hreflang`` links to the same page in the other languages, for search engines;
-* the language links EN | DE | FR at the top right of the page, next to "View page source";
+* a language button in the top right corner of the window, with a menu of the three languages;
 * ``_i18n/lang.js``, which remembers the language a reader chose and, on a first visit to an
   English page, opens the page in the language of the browser (see the comments in the script);
 * on a German or French page, a note that the page is a machine translation, with a link to the
@@ -110,17 +110,30 @@ def head_block(lang: str, page: Path, root: str, site_url: str) -> str:
             + f'data-page="{html.escape(page.as_posix())}"></script>')
 
 
+GLOBE = ('<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" '
+         'stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/>'
+         '<path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9'
+         's1.3-6.4 3.8-9z"/></svg>')
+
+
 def switcher(lang: str, page: Path, root: str) -> str:
+    """The language button in the top right corner: the current language, and a menu of all three.
+
+    A ``<details>`` element, so it opens and closes without JavaScript; ``lang.js`` only closes it
+    on a click elsewhere and remembers the choice.
+    """
     items = []
     for other in LANGS:
-        label = other.upper()
         if other == lang:
-            items.append(f'<strong title="{LABELS[other]}">{label}</strong>')
+            items.append(f'<li><strong aria-current="true" lang="{other}">{LABELS[other]}</strong></li>')
         else:
             href = root + ("" if other == "en" else f"{other}/") + page.as_posix()
-            items.append(f'<a href="{html.escape(href)}" hreflang="{other}" lang="{other}" '
-                         f'title="{LABELS[other]}" data-axqua-lang="{other}">{label}</a>')
-    return '<span class="axqua-lang" role="navigation" aria-label="Language">' + " | ".join(items) + "</span>"
+            items.append(f'<li><a href="{html.escape(href)}" hreflang="{other}" lang="{other}" '
+                         f'data-axqua-lang="{other}">{LABELS[other]}</a></li>')
+    return ('<details class="axqua-lang">'
+            '<summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue">'
+            f'{GLOBE}<span>{lang.upper()}</span></summary>'
+            f'<ul role="menu">{"".join(items)}</ul></details>')
 
 
 def note(lang: str, page: Path, root: str) -> str:
@@ -140,8 +153,8 @@ def inject(path: Path, site: Path, site_url: str) -> bool:
     root = "../" * (len(rel.parts) - 1)
     text = re.sub(r"</head>", lambda m: head_block(lang, page, root, site_url) + m.group(0), text,
                   count=1, flags=re.IGNORECASE)
-    text = re.sub(r'(<li class="wy-breadcrumbs-aside">)',
-                  lambda m: m.group(1) + switcher(lang, page, root), text, count=1)
+    text = re.sub(r"(<body[^>]*>)", lambda m: m.group(1) + switcher(lang, page, root), text,
+                  count=1, flags=re.IGNORECASE)
     if lang != "en":
         text = re.sub(r'(<div itemprop="articleBody">)',
                       lambda m: m.group(1) + note(lang, page, root), text, count=1)

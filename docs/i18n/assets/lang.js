@@ -55,8 +55,20 @@
 
   if (read(NOTE) === "1") document.documentElement.className += " axqua-mt-closed";
 
+  // the menu of the language button closes on a click elsewhere and on Escape
+  function closeMenus(except) {
+    var open = document.querySelectorAll("details.axqua-lang[open]");
+    for (var i = 0; i < open.length; i++) {
+      if (open[i] !== except) open[i].removeAttribute("open");
+    }
+  }
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape") closeMenus(null);
+  });
+
   document.addEventListener("click", function (event) {
     var target = event.target;
+    closeMenus(target && target.closest ? target.closest("details.axqua-lang") : null);
     var link = target && target.closest ? target.closest("a[data-axqua-lang]") : null;
     if (link) store(KEY, link.getAttribute("data-axqua-lang"));
     var close = target && target.closest ? target.closest(".axqua-mt-note button") : null;

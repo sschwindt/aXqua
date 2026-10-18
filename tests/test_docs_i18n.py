@@ -345,8 +345,12 @@ def test_the_three_builds_are_connected_into_one_site(tmp_path):
     assert '<link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/usage/x.html">' in german
     assert '<link rel="alternate" hreflang="x-default" href="https://axqua.eu/usage/x.html">' in german
     assert 'href="../../_i18n/lang.js"' not in german and 'src="../../_i18n/lang.js"' in german
-    assert '<a href="../../usage/x.html" hreflang="en"' in german           # the switcher
+    # the language button, first in the body, with the other two languages in its menu
+    assert re.search(r'<body>\s*<details class="axqua-lang">', german)
+    assert '<summary title="Language / Sprache / Langue"' in german and "<span>DE</span>" in german
+    assert '<a href="../../usage/x.html" hreflang="en"' in german
     assert '<a href="../../fr/usage/x.html" hreflang="fr"' in german
+    assert '<strong aria-current="true" lang="de">Deutsch</strong>' in german
     assert "maschinell aus dem Englischen" in german
     english = (site / "usage" / "x.html").read_text(encoding="utf-8")
     assert "axqua-mt-note" not in english and '<a href="../de/usage/x.html" hreflang="de"' in english
