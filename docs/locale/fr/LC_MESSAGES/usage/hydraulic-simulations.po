@@ -1,0 +1,200 @@
+# French translation of the aXqua documentation, page usage/hydraulic-simulations.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos 79734a4209c6
+msgid "Hydraulic simulations"
+msgstr "Simulations hydrauliques"
+
+# machine translation: argos 3a6b1b1c3eb8
+msgid "A hydraulic simulation computes water depths and flow velocities for the discharge of the case. aXqua runs hydraulic simulations in a fixed order, from the fastest model to the most detailed one, and each model starts from the result of the previous one."
+msgstr "Une simulation hydraulique calcule hauteurs d'eau et vitesses d'écoulement pour le débit du cas. aXqua effectue des simulations hydrauliques dans un ordre fixe, du modèle le plus rapide au modèle le plus détaillé, et chaque modèle part du résultat du précédent."
+
+# machine translation: argos fec4e2f54b90
+msgid "aXqua warm-up concept"
+msgstr "AXqua concept d'échauffement"
+
+# machine translation: argos 273f87708f99
+msgid "At the beginning of a simulation, nothing is known about the flow: the riverbed is dry, and the model first has to fill the reach with water until the outflow equals the inflow. This filling is of no interest in itself, but it consumes computing time. The more detailed a model is, the more expensive the filling becomes."
+msgstr "Au début d'une simulation, on ne sait rien de l'écoulement : le lit de la rivière est sèche, et le modèle doit d'abord remplir le tronçon d'eau jusqu'à ce que l'écoulement soit égal à l'écoulement. Ce remplissage n'a aucun intérêt en soi, mais il consomme du temps de calcul. Plus un modèle est détaillé, plus le remplissage devient coûteux."
+
+# machine translation: argos f9c01687c6d0
+msgid "aXqua therefore lets the cheapest model do this work. The sequence is:"
+msgstr "aXqua permet donc au modèle le moins cher de faire ce travail. La séquence est :"
+
+# machine translation: argos ad1e563cf0e5
+msgid "**TELEMAC-2D dry run.** The depth-averaged model starts on the dry riverbed and runs until the flow is steady. It typically takes minutes to a few hours."
+msgstr "**TELEMAC-2D à sec.** Le modèle moyen de profondeur commence sur le lit de la rivière sèche et court jusqu'à ce que le débit soit stable. Cela prend généralement quelques minutes à quelques heures."
+
+# machine translation: argos b6d0791e07c0
+msgid "**TELEMAC-3D (optional).** The 3D model starts from the 2D result. The reach is already filled, and only the vertical distribution of the velocity has to develop."
+msgstr "**TELEMAC-3D (facultatif)** Le modèle 3D commence à partir du résultat 2D. Le tronçon est déjà rempli, et seule la distribution verticale de la vitesse doit se développer."
+
+# machine translation: argos 4316baf51ab4
+msgid "**OpenFOAM (optional).** The OpenFOAM model starts from the TELEMAC result. The position of the water surface, the wetted area and the velocities are taken from it."
+msgstr "**OpenFAM (facultatif)** Le modèle OpenFOAM commence par le résultat TELEMAC. La position de la surface libre, la zone mouillée et les vitesses en sont tirées."
+
+# machine translation: argos fa5565927493
+msgid "The TELEMAC run that precedes an OpenFOAM simulation is called the **warm-up**. It has three effects on the OpenFOAM model: the cells below the water surface start filled with moving water, the top of the mesh is placed shortly above the water surface so that few cells contain only air, and the mesh is limited to the wetted part of the reach. If the case has no steady 2D result yet, aXqua runs a coarse TELEMAC simulation on its own for this purpose, which takes about one minute for a small reach."
+msgstr "L'exécution TELEMAC qui précède une simulation OpenFOAM s'appelle **warm-up**. Elle a trois effets sur le modèle OpenFOAM : les cellules sous la surface libre commencent à être remplies d'eau mobile, le haut du maillage est placé peu au-dessus de la surface libre de sorte que peu de cellules ne contiennent que de l'air, et le maillage est limité à la partie mouillée du tronçon. Si le cas n'a pas encore de résultat 2D stable, aXqua réalise une simulation TELEMAC grossière à cette fin, ce qui prend environ une minute pour un petit tronçon."
+
+# machine translation: argos cb609fd33f9c
+msgid "The warm-up is active by default and should not be disabled. Without it, OpenFOAM starts with a flat lid high above the terrain, the mesh contains many times more air cells, and the filling of the reach has to be computed by the most expensive model. In the plugin, the warm-up is the check box *Use TELEMAC warm-up* on the sub-tab *OpenFOAM* of the tab *Simulations* (:ref:`help-hydraulics-openfoam`). In the case file, it is the setting ``openfoam.pre_run.enabled``, which is enabled by default."
+msgstr "L'échauffement est actif par défaut et ne devrait pas être désactivé. Sans cela, OpenFOAM commence avec un couvercle plat haut au-dessus du terrain, le maillage contient plusieurs fois plus de cellules d'air, et le remplissage du tronçon doit être calculé par le modèle le plus cher. Dans le extension, l'échauffement est le case à cocher *Use TELEMAC warm-up* sur le sous-tab *OpenFOAM* de l'onglet *Simulations* (:ref:`help-hydraulics-openfoam`). Dans le fichier de cas, c'est le paramètre ``openfoam.pre_run.enabled``, qui est activé par défaut."
+
+# machine translation: argos 697f03f64f38
+msgid "TELEMAC dry runs 2D/3D"
+msgstr "TELEMAC à sec 2D/3D"
+
+# machine translation: argos 8f42248e0f95
+msgid "A **dry run** is a simulation that starts from a dry riverbed (:ref:`case-initialization`)."
+msgstr "A **dry run** est une simulation qui part d'un lit de la rivière sèche (:ref:`case-initialization`)."
+
+# machine translation: argos 3a0be3ee826a
+msgid "**2D.** After preprocessing, click *Submit* in the box *Steady 2D* on the tab *Simulations > Baseline (Telemac)* of the plugin. The run appears in the job list below the tabs with its progress. In a terminal, the command is:"
+msgstr "**2D.** Après prétraitement, cliquez sur *Submit* dans la boîte *Steady 2D* sur l'onglet *Simulations > Baseline (Telemac)* de la extension. La course apparaît dans la liste tâche ci-dessous les onglets avec ses progrès. Dans un terminal, la commande est :"
+
+# machine translation: argos 4f616990fd0e
+msgid "The sub-tab Baseline (Telemac) of the tab Simulations"
+msgstr "Le sous-onglet Baseline (Telemac) de l'onglet Simulations"
+
+# machine translation: argos 8c08427612e1
+msgid "The tab *Simulations*, sub-tab *Baseline (Telemac)*. (1) The sub-tabs of the tab *Simulations*. (2) The box *Steady 2D* with its state. (3) *Submit* starts the simulation. (4) *Load results* adds the result to the map. (5) The job list with the state and the progress of every job."
+msgstr "L'onglet *Simulations*, sous-tab *Baseline (Telemac)*. (1) Les sous-tabs de l'onglet *Simulations*. (2) La boîte *Steady 2D* avec son état. (3) *Submit* commence la simulation. (4) *Load results* ajoute le résultat à la carte. (5) La liste tâche avec l'état et le progrès de chaque tâche."
+
+# machine translation: argos e9772787c723
+msgid "When the run has finished, aXqua evaluates whether the flow is steady. It reads the discharge through every open boundary from the output of TELEMAC and writes the following files into ``axqua-case/simulation/``:"
+msgstr "Lorsque l'exécution est terminée, aXqua évalue si le débit est stable. Il lit le débit à travers chaque frontière ouverte à partir de la sortie de TELEMAC et écrit les fichiers suivants dans ``axqua-case/simulation/``:"
+
+# machine translation: argos 87d616a4ba25
+msgid "File"
+msgstr "Fichier"
+
+# machine translation: argos 494ee59b268b
+msgid "Content"
+msgstr "Contenu"
+
+# machine translation: argos 36becef9d259
+msgid "Discharge through each open boundary over the simulated time."
+msgstr "Débit à travers chaque ouvert frontière pendant le temps simulé."
+
+# machine translation: argos be7e8d6aa032
+msgid "Relative difference between inflow and outflow over the simulated time."
+msgstr "Différence relative entre l'écoulement et l'écoulement au cours du temps simulé."
+
+# machine translation: argos d6f23a4183e1
+msgid "Wetted area, divided into flowing water, stagnant thin water films and isolated puddles."
+msgstr "Zone humide, divisée en eau courante, films d'eau mince stagnante et flaques isolées."
+
+# machine translation: argos 8536f1a31539
+msgid "Water surface near the outflow boundary, with a note whether the prescribed water level dams up the flow or draws it down."
+msgstr "Surface libre près de la frontière de sortie, avec une note indiquant si le niveau d'eau prescrit digue le débit ou le descend."
+
+# machine translation: argos 5fbe307e421f
+msgid "The run is steady when the relative difference between inflow and outflow stays below ``hydrodynamics.flux_tolerance``. If this is not the case at the end of the run, increase ``hydrodynamics.duration`` and repeat the run. The wetting report complements this criterion: a simulation can have balanced discharges and still show water in places where the real reach is dry. Large areas of stagnant film usually indicate a start with too much water or a downstream water level that is too high."
+msgstr "La course est stable lorsque la différence relative entre l'entrée et la sortie reste inférieure à ``hydrodynamics.flux_tolerance``. Si ce n'est pas le cas à la fin de la course, augmentez ``hydrodynamics.duration`` et répétez la course. Le rapport de mouillage complète ce critère : une simulation peut avoir des débits équilibrés et encore montrer de l'eau dans des endroits où le vrai tronçon est sec. De grandes zones de film stagnant indiquent généralement un début avec trop d'eau ou un niveau d'eau en aval trop élevé."
+
+# machine translation: argos 3f44b2285889
+msgid "*Load results* adds the result (``r2d.slf``) to the QGIS project as water depth and flow velocity layers."
+msgstr "*Load results* ajoute le résultat (``r2d.slf``) au projet QGIS sous les noms de hauteur d'eau et vitesse d'écoulement couches."
+
+# machine translation: argos 4fed31db99d0
+msgid "**3D.** A TELEMAC-3D simulation requires the steady 2D result. In the box *Steady 3D* on the same tab, *Build* writes the 3D steering files and *Submit* starts the run. aXqua determines the number of vertical layers from the water depth and the cell size. The build provides two variants. The **hydrostatic** variant is faster and is run first, to verify that inflow and outflow balance in 3D as well. The **non-hydrostatic** variant (``hydrodyn``) additionally resolves vertical accelerations, which matter at steep changes of the bed. The option *Variant* of the box selects which of the two *Submit* starts, and *Load results* adds the depth-averaged result to the map. In a terminal:"
+msgstr "**3D.** Une simulation TELEMAC-3D nécessite un résultat 2D stable. Dans la boîte *Steady 3D* sur le même onglet, *Build* écrit le 3D fichiers de paramètres et *Submit* commence la course. aXqua détermine le nombre de verticales couches à partir de hauteur d'eau et taille de maille. La construction fournit deux variantes. La variante **hydrostatique** est plus rapide et est exécutée en premier, pour vérifier que l'entrée et le solde de sortie en 3D aussi bien. La variante **non hydrostatique** (``hydrodyn``) résout en outre les accélérations verticales, qui comptent à des changements abrupts du lit. L'option *Variant* de la boîte sélectionne laquelle des deux *Submit* commence, et *Load results* ajoute le résultat moyen de profondeur à la carte. Dans une terminal:"
+
+# machine translation: argos 60c8369bed6a
+msgid "The number of vertical layers is a choice of its own, which is examined with a separate study (*Vertical convergence* tab). In a shallow reach with a fine mesh, only few layers fit over the water depth, and a 3D TELEMAC simulation then adds little information to the 2D result."
+msgstr "Le nombre de verticales couches est un choix propre, qui est examiné avec une étude séparée (*Vertical convergence* onglet). Dans un tronçon peu profond avec une fine maillage, seulement quelques couches se placent sur le hauteur d'eau, et une simulation TELEMAC 3D ajoute alors peu d'informations au résultat 2D."
+
+# machine translation: argos d2c51a582267
+msgid "TELEMAC hotstarts"
+msgstr "TELEMAC hotstarts"
+
+# machine translation: argos 691a20bfd2d2
+msgid "A **hotstart** is a simulation that continues from the final state of a previous simulation instead of starting dry. The reach is then already filled, which saves the filling time in every subsequent run."
+msgstr "Un **hotstart** est une simulation qui se poursuit à partir de l'état final d'une simulation précédente au lieu de commencer à sécher. Le tronçon est alors déjà rempli, ce qui permet d'économiser le temps de remplissage dans chaque course ultérieure."
+
+# machine translation: argos 14d84d4aa414
+msgid "**Steady hotstart.** When the dry run has reached a steady state, aXqua writes the steering file ``hotstart2d.cas`` next to the model. It continues from the result of the dry run with unchanged boundary conditions. The calibration uses this file: each of its many runs changes a parameter slightly and starts from the steady state (:doc:`calibration-validation`)."
+msgstr "**C'est pas grave.** Lorsque la course sèche a atteint un régime permanent, aXqua écrit le fichier de paramètres ``hotstart2d.cas`` à côté du modèle. Il continue à partir du résultat de la course à sec avec inchangé conditions aux limites. Le calage utilise ce fichier : chacun de ses nombreux tirages modifie légèrement un paramètre et commence par le régime permanent (:doc:`calibration-validation`)."
+
+# machine translation: argos 8f063153a4a9
+msgid "**Unsteady hotstart (varying discharge).** To simulate a flood wave, enter a discharge time series under ``boundaries.inflow`` (:ref:`case-boundaries`) and repeat the preprocessing. aXqua then additionally writes the steering file ``unsteady2d.cas``. The unsteady run starts from the steady result, so that the reach is filled when the flood wave arrives. The steady discharge of the case (``boundaries.prescribed_flowrate``) should therefore equal the first value of the time series. Start the run with *Submit* on the *Unsteady 2D* tab, where the option *Run in 3D* selects the 3D model, or in a terminal:"
+msgstr "**Démarrage à chaud instable (diversité du débit).** Pour simuler une vague d'inondation, entrez une série chronologique débit sous ``boundaries.inflow`` (:ref:`case-boundaries`) et répétez le prétraitement. aXqua écrit ensuite le fichier de paramètres ``unsteady2d.cas``. La course instable commence à partir du résultat stable, de sorte que le tronçon est rempli quand la vague d'inondation arrive. Le débit stable du cas (``boundaries.prescribed_flowrate``) doit donc égaler la première valeur de la série chronologique. Commencez la course avec *Submit* sur l'onglet *Unsteady 2D*, où l'option *Run in 3D* sélectionne le modèle 3D, ou dans un terminal:"
+
+# machine translation: argos b19b19415aae
+msgid "The duration of the unsteady run follows from the time series. With the outflow condition ``stage_discharge``, the downstream water level follows the rating curve during the flood wave."
+msgstr "La durée de la course instable découle des séries chronologiques. Avec l'état de sortie ``stage_discharge``, le niveau d'eau en aval suit la courbe de tarage pendant la vague d'inondation."
+
+# machine translation: argos 6fb1de154d09
+msgid "OpenFOAM"
+msgstr "Ouvrir"
+
+# machine translation: argos 370bdb7c2c36
+msgid "An OpenFOAM simulation resolves the flow in three dimensions together with the water surface. It is required where the vertical structure of the flow matters, for example at structures or in a fish pass. The settings are described in :ref:`preprocessing-openfoam-choices`."
+msgstr "Une simulation OpenFOAM résout le flux en trois dimensions avec la surface libre. Elle est requise lorsque la structure verticale du débit est importante, par exemple dans les structures ou dans un passe-poissons. Les paramètres sont décrits dans :ref:`preprocessing-openfoam-choices`."
+
+# machine translation: argos af5fe884ca9f
+msgid "**Build.** Go to the tab *Simulations*, sub-tab *OpenFOAM*. The box *Free surface (VOF)* contains the check box *Use TELEMAC warm-up*. As long as the check box is not changed, the case file decides, in which the warm-up is enabled by default. Leave it unchanged or ticked (:ref:`warm-up-concept`) and click *Build*. aXqua runs the warm-up if the case has no steady 2D result yet, creates the mesh and writes the OpenFOAM case into ``axqua-case/openfoam/``. With the box cleared, the model is built without a TELEMAC result, and OpenFOAM has to fill the dry riverbed itself."
+msgstr "**Construire.** Allez à l'onglet *Simulations*, sous-tab *OpenFOAM*. La boîte *Free surface (VOF)* contient la case à cocher *Use TELEMAC warm-up*. Tant que le cas À Cocher n'est pas changé, le fichier de cas décide, dans lequel l'échauffement est activé par défaut. Laissez-le inchangé ou coché (:ref:`warm-up-concept`) et cliquez sur *Build*. aXqua exécute l'échauffement si le cas n'a pas encore de résultat 2D stable, crée le maillage et écrit le cas OpenFOAM dans ``axqua-case/openfoam/``. Avec la boîte nettoyée, le modèle est construit sans résultat TELEMAC, et OpenFOAM doit remplir le lit de la rivière elle-même."
+
+# machine translation: argos d46b432878d9
+msgid "**Run.** Click *Submit*. The run has two stages: a short first stage with a small time step, in which the water surface settles, and the main stage. The progress display shows the Courant number (``Co``) and the time step (``dt``). In a healthy run, the time step stays near a constant value. A time step that falls by orders of magnitude indicates a problem, typically air that is accelerated to unrealistic velocities."
+msgstr "**Cours.** Cliquez sur *Submit*. La course comporte deux étapes : une première étape courte avec un petit pas de temps, dans lequel s'installe la surface libre, et l'étape principale. L'affichage de progression indique le numéro du Courant (``Co``) et le pas de temps (``dt``). En bonne santé, le pas de temps reste près d'une valeur constante. Un pas de temps qui tombe par ordre de grandeur indique un problème, généralement de l'air qui est accéléré à des vitesses irréalistes."
+
+# machine translation: argos 85a33a7f1f2a
+msgid "**Evaluate.** After the run, aXqua reports the discharge of water at the inflow and the outflow and compares their relative difference with ``hydrodynamics.flux_tolerance``, which is the same criterion as for TELEMAC. Water that leaves the model through its top is part of this balance and is reported as a share of the discharge. aXqua also reports whether water reached the lid or the lateral limits of the mesh. In that case, the mesh has constrained the flow, and ``openfoam.freeboard`` or ``openfoam.wet_margin`` has to be increased. Water can also leave through the top while the water surface stays well below it, as traces of water that the air carries away from a smeared surface (:ref:`preprocessing-openfoam-choices`)."
+msgstr "**Évaluation.** Après la course, aXqua rapporte le débit d'eau à l'entrée et la sortie et compare leur différence relative avec ``hydrodynamics.flux_tolerance``, qui est le même critère que pour TELEMAC. L'eau qui laisse le modèle à travers son sommet fait partie de cet équilibre et est déclarée comme une part du débit. aXqua indique également si l'eau a atteint le couvercle ou les limites latérales du maillage. Dans ce cas, le maillage a limité le flux, et ``openfoam.freeboard`` ou ``openfoam.wet_margin`` doit être augmenté. L'eau peut aussi passer par le haut pendant que la surface libre reste bien en dessous, comme des traces d'eau que l'air transporte loin d'une surface sapée (:ref:`preprocessing-openfoam-choices`)."
+
+# machine translation: argos 5d7cb7e1c538
+msgid "The sub-tab OpenFOAM of the tab Simulations"
+msgstr "Le sous-onglet OpenFOAM de l'onglet Simulations"
+
+# machine translation: argos 51b979b353e1
+msgid "The tab *Simulations*, sub-tab *OpenFOAM*. (1) The check box *Use TELEMAC warm-up*. In the state shown, the case file decides, in which the warm-up is enabled by default. (2) *Build* creates the OpenFOAM model. (3) *Submit* starts the simulation."
+msgstr "L'onglet *Simulations*, sous-tab *OpenFOAM*. (1) L'onglet case à cocher *Use TELEMAC warm-up*. Dans l'état affiché, le fichier de cas décide, dans lequel le réchauffement est activé par défaut. (2) *Build* crée le modèle OpenFOAM. (3) *Submit* commence la simulation."
+
+# machine translation: argos 71a862f0887e
+msgid "In a terminal, the commands are:"
+msgstr "Dans un terminal, les commandes sont :"
+
+# machine translation: argos b8ab2ff7a6d9
+msgid "Before the first ``vof`` run of a new case, run the model once in the mode ``rigid-lid`` with a coarse mesh (``cell_size_factor`` of 3 to 5). This run takes minutes and reveals most setup errors."
+msgstr "Avant la première sortie ``vof`` d'un nouveau cas, exécutez le modèle une fois en mode ``rigid-lid`` avec un gros maillage (``cell_size_factor`` de 3 à 5). Cette exécution prend des minutes et révèle la plupart des erreurs de configuration."
+
+# machine translation: argos c57b5026b71f
+msgid "**A new run or a new build replaces the earlier results.** A run starts from the initial state. Before it starts, aXqua therefore moves the results of the earlier run into the folder ``previous-run/`` in the folder of the OpenFOAM model: the time folders, the processor folders of a parallel run, ``postProcessing/`` with the discharge records, ``VTK/``, ``depth-averaged.slf`` and the reports. A new build does the same, because a result cannot be continued on another mesh. Only one earlier run is kept, and the next run or build replaces the folder, so copy a result that is to be kept to another place first. A parallel run that was not reconstructed keeps its result in the processor folders. The predefined figures read it from there, and ParaView reads it with the case type *Decomposed Case*."
+msgstr "**Une nouvelle course ou une nouvelle construction remplace les résultats antérieurs.** Une course commence à partir de l'état initial. Avant de commencer, aXqua déplace donc les résultats de l'exécution antérieure dans le dossier ``previous-run/`` dans le dossier du modèle OpenFOAM : le temps dossiers, le processeur dossiers d'une exécution parallèle, ``postProcessing/`` avec les enregistrements débit, ``VTK/``, ``depth-averaged.slf`` et les rapports. Une nouvelle construction fait la même chose, car un résultat ne peut pas être poursuivi sur un autre maillage. Une seule sortie antérieure est conservée, et la prochaine sortie ou construction remplace le dossier, alors copiez un résultat qui doit être conservé à une autre place en premier. Un parcours parallèle qui n'a pas été reconstruit conserve son résultat dans le processeur dossiers. Les chiffres prédéfinis le lisent de là, et ParaView le lit avec le type cas *Decomposed Case*."
+
+# machine translation: argos ed60eea36d27
+msgid "**The result seen from above.** After a run, aXqua sums the water of each column of the mesh and writes the water depth and the depth-averaged velocity of the last time step into the file ``depth-averaged.slf`` in the folder of the OpenFOAM model. The file has the same variables as a TELEMAC result. *Load results* on the sub-tab *OpenFOAM* adds it to the map with the same styles as a 2D result, so that the two models can be compared directly. The complete three-dimensional result is opened in ParaView with the file ``case.foam`` in the same folder."
+msgstr "**Le résultat vu d'en haut.** Après une course, aXqua résume l'eau de chaque colonne du maillage et écrit la hauteur d'eau et la vitesse moyenne en profondeur du dernier pas de temps dans le fichier ``depth-averaged.slf`` dans le dossier du modèle OpenFOAM. Le fichier a les mêmes variables qu'un résultat TELEMAC. *Load results* sur le sous-tab *OpenFOAM* l'ajoute à la carte avec les mêmes styles qu'un résultat 2D, afin que les deux modèles puissent être comparés directement. Le résultat complet en trois dimensions est ouvert dans ParaView avec le fichier ``case.foam`` dans le même dossier."
+
+# machine translation: argos d004aa8ca3c1
+msgid "**Starting a fine model from a coarse one.** A three-dimensional model often has a lower or higher resistance than the 2D model it starts from, so that the water level of the whole reach has to adjust. That takes thousands of seconds of simulated time, and on a fine mesh, this costs days. It is faster to let a coarse model reach the steady state first and to start the fine model from its result:"
+msgstr "**Démarrer un modèle fin à partir d'un modèle grossier.** Un modèle à trois dimensions a souvent une résistance inférieure ou supérieure au modèle 2D qu'il commence, de sorte que le niveau d'eau de l'ensemble tronçon doit s'ajuster. Cela prend des milliers de secondes de temps simulé, et sur un beau maillage, cela coûte des jours. Il est plus rapide de laisser un modèle grossier tronçon le régime permanent d'abord et de commencer le modèle fin de son résultat :"
+
+# machine translation: argos 5893b53328ae
+msgid "Build and run the model with a large ``cell_size``, for example 2 m with 8 layers, and a long ``end_time``. Check in the report that inflow and outflow agree."
+msgstr "Construire et exécuter le modèle avec un grand ``cell_size``, par exemple 2 m avec 8 couches, et un long ``end_time``. Vérifiez dans le rapport que les entrées et sorties sont d'accord."
+
+# machine translation: argos 5f385996f559
+msgid "Build the fine model with the option ``hotstart`` set to the file ``depth-averaged.slf`` of the coarse model, and run it. In a terminal:"
+msgstr "Construisez le modèle fin avec l'option ``hotstart`` définie au fichier ``depth-averaged.slf`` du modèle grossier, et exécutez-le. Dans une terminal:"
+
+# machine translation: argos 95b88f0e0a14
+msgid "The coarse and the fine model need different folders. The entry ``project.openfoam_dir`` in the case file of the coarse model gives it its own folder, while both case files share the TELEMAC model."
+msgstr "Le modèle grossier et fin a besoin de différents dossiers. L'entrée ``project.openfoam_dir`` dans le fichier de cas du modèle grossier lui donne son propre dossier, tandis que les deux fichiers de cas partagent le modèle TELEMAC."
+
+# machine translation: argos 211c6ca9c402
+msgid "On the Isar example, the model with 2 m cells and 8 layers (56,000 cells) computed 3000 s of simulated time in 2.3 hours on 8 processor cores. The model with 1 m cells and 14 layers (290,000 cells) started from its result computed 1500 s in 9.1 hours on 16 cores; its outflow stayed within 1 % of the inflow after 500 s. Both ran while another simulation used the other half of the computer."
+msgstr "Sur l'exemple d'Isar, le modèle avec 2 m de cellules et 8 couches (56 000 cellules) a calculé 3000 s de temps simulé en 2,3 heures sur 8 cœurs de processeur. Le modèle avec 1 m de cellules et 14 couches (290 000 cellules) a commencé à partir de son résultat calculé 1500 s en 9,1 heures sur 16 carottes ; sa sortie est restée à moins de 1 % de l'entrée après 500 s. Les deux ont couru tandis qu'une autre simulation utilisait l'autre moitié de l'ordinateur."

@@ -931,7 +931,7 @@ def test_help_opens_the_section_of_the_tab_that_is_showing(dock, monkeypatch):
     dock.open_help()
     dock.show_section("postprocessing", "paraview")
     dock.open_help()
-    assert [url.split("/latest/")[1] for url in opened] == [
+    assert [url.split("axqua.eu/")[1] for url in opened] == [
         "usage/case-setup.html#help-case-setup",
         "usage/hydraulic-simulations.html#help-hydraulics-openfoam",
         "usage/postprocessing.html#help-postprocessing-paraview"]
@@ -2030,6 +2030,109 @@ def _now(call, on_success, on_error):
         on_success(answer)
 
 
+CLEANUP = {
+    "case": "/cases/reach.axq-case", "folders": ["/cases/axqua-case"], "bytes": 3_100_000_000,
+    "blocked": "",
+    "categories": [
+        {"key": "telemac-run-folders", "title": "Working folders of interrupted TELEMAC runs",
+         "explanation": "left by a stopped run", "default": True, "bytes": 100_000_000,
+         "items": [{"id": "delete:axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s",
+                    "category": "telemac-run-folders", "action": "delete",
+                    "path": "/cases/axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s",
+                    "bytes": 100_000_000, "saves": 100_000_000, "detail": "", "frames": 0,
+                    "header_bytes": 0, "frame_bytes": 0, "paths": []}]},
+        {"key": "time-steps", "title": "Time steps of TELEMAC results", "explanation": "",
+         "default": False, "bytes": 3_000_000_000,
+         "items": [{"id": "thin:axqua-case/simulation/r2d.slf", "category": "time-steps",
+                    "action": "thin", "path": "/cases/axqua-case/simulation/r2d.slf",
+                    "bytes": 3_110_000_000, "saves": 3_000_000_000, "detail": "31 time steps",
+                    "frames": 31, "header_bytes": 10_000_000, "frame_bytes": 100_000_000,
+                    "paths": []}]},
+    ]}
+
+
+def test_clean_up_sits_left_of_help_and_removes_what_was_ticked(dock, monkeypatch, tmp_path):
+    """The user's order of 2026-10-18: a Clean Up button left of Help that removes, case by
+    case, files the simulations no longer need."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    from axqua_plugin.gui import cleanup_dialog
+
+    corner = dock.tabs.cornerWidget()
+    buttons = [corner.layout().itemAt(i).widget().text() for i in range(corner.layout().count())]
+    assert buttons == ["Clean Up", "Help"]
+
+    asked = []
+
+    class Client:
+        def cleanup_list(self, case):
+            asked.append(("list", case))
+            return CLEANUP
+
+        def cleanup_apply(self, case, ids, keep="last"):
+            asked.append(("apply", case, list(ids), keep))
+            return {"removed": list(ids), "failed": [], "freed_bytes": 2_800_000_000}
+
+    case = tmp_path / "reach.axq-case"
+    case.write_text("project: {}\n", encoding="utf-8")
+    dock.ctx.project.add_case(case)
+    dock.ctx.client = Client()
+    now = lambda title, call, on_success=None, on_error=None, owner=None: _now(  # noqa: E731
+        call, on_success, on_error)
+    monkeypatch.setattr(cleanup_dialog, "run_async", now)
+    window = dock.open_cleanup()
+    try:
+        assert asked == [("list", str(case.resolve()))] or asked[0][0] == "list"
+        assert window.tree.topLevelItemCount() == 2
+        # the safe category is ticked, the time steps are not
+        assert [item["id"] for item in window.chosen()] == [
+            "delete:axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s"]
+        assert "100.0 MB" in window.status.text()
+        steps = window.tree.topLevelItem(1).child(0)
+        steps.setCheckState(0, cleanup_dialog.CHECKED)
+        # keeping the last of 31 time steps frees 30 of them; every 10th keeps 0, 10, 20, 30
+        assert "3.1 GB" in window.status.text()
+        window.keep.setCurrentIndex(1)
+        assert steps.text(1) == "2.7 GB"
+        monkeypatch.setattr(cleanup_dialog.QMessageBox, "question",
+                            lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+        window.remove()
+        apply = [a for a in asked if a[0] == "apply"]
+        assert apply == [("apply", window.current_case(),
+                          ["delete:axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s",
+                           "thin:axqua-case/simulation/r2d.slf"], "every:10")]
+        assert "freed 2.8 GB" in window.status.text()
+    finally:
+        window.deleteLater()
+
+
+def test_clean_up_removes_nothing_while_a_job_of_the_case_runs(qgis_app, monkeypatch, tmp_path):
+    from axqua_plugin.gui import cleanup_dialog
+
+    class Client:
+        def cleanup_list(self, case):
+            return {**CLEANUP, "blocked": "jobs of this case are waiting or running: J1"}
+
+    now = lambda title, call, on_success=None, on_error=None, owner=None: _now(  # noqa: E731
+        call, on_success, on_error)
+    monkeypatch.setattr(cleanup_dialog, "run_async", now)
+    window = cleanup_dialog.CleanupDialog(Client(), [tmp_path / "reach.axq-case"])
+    try:
+        assert "waiting or running" in window.status.text()
+        assert not window.remove_button.isEnabled()
+    finally:
+        window.deleteLater()
+
+
+def test_the_space_a_result_keeps_of_its_time_steps():
+    from axqua_plugin.gui import cleanup_dialog
+
+    assert cleanup_dialog.kept(31, "last") == 1 and cleanup_dialog.kept(31, "every:10") == 4
+    item = CLEANUP["categories"][1]["items"][0]
+    assert cleanup_dialog.saving(item, "last") == 3_000_000_000
+    assert cleanup_dialog.human(2_700_000_000) == "2.7 GB"
+
+
 def test_no_example_is_said_so(qgis_app, monkeypatch):
     from axqua_plugin.gui import example_dialog
 
@@ -2327,7 +2430,7 @@ def test_the_help_of_a_wizard_opens_the_section_on_its_program(qgis_app, monkeyp
         wizard = install_wizard.InstallWizard(_InstallClient(), target, _overview())
         wizard.open_help()
         wizard.deleteLater()
-    assert [url.split("/latest/")[1] for url in opened] == [
+    assert [url.split("axqua.eu/")[1] for url in opened] == [
         "installation/simulation-software.html#install-telemac",
         "installation/simulation-software.html#install-openfoam",
         "installation/postprocessors.html#help-postprocessors"]

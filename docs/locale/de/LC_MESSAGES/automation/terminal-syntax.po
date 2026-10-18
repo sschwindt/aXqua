@@ -1,0 +1,292 @@
+# German translation of the aXqua documentation, page automation/terminal-syntax.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos 6f0e1ddd305f
+msgid "Terminal syntax"
+msgstr "Terminal Syntax"
+
+# machine translation: argos a7c104ccf3a8
+msgid "The QGIS plugin and the terminal use the same program. A simulation that is started from a terminal therefore produces the same files as one that is started from the plugin, and both appear in the job list of the other."
+msgstr "Das QGIS-Plugin und das Terminal verwenden das gleiche Programm. Eine Simulation, die von einem Terminal gestartet wird, erzeugt daher die gleichen Dateien wie eine, die vom Plugin gestartet wird, und beide erscheinen in der Jobliste des anderen."
+
+# machine translation: argos d95fb759ae0c
+msgid "A terminal shows neither the input layers nor the results. Open the geodata in QGIS before the first run to verify that the layers fit together (:ref:`case-geodata`), and inspect the results of each step on a map before the next step is started. A model can run without any error message and still be wrong, for example because an inflow line lies at the wrong place."
+msgstr "Ein Terminal zeigt weder die Eingabe Layer noch die Ergebnisse an. Öffnen Sie die Geodaten in QGIS vor dem ersten Durchlauf, um zu überprüfen, ob die Layer zusammenpassen (:ref:`case-geodata`), und überprüfen Sie die Ergebnisse jedes Schritts auf einer Karte, bevor der nächste Schritt gestartet wird. Ein Modell kann ohne Fehlermeldung laufen und trotzdem falsch liegen, zum Beispiel weil eine Zufluss-Zeile an der falschen Stelle liegt."
+
+# machine translation: argos 96df77f46d1d
+msgid "Open a terminal"
+msgstr "Öffnen a Terminal"
+
+# machine translation: argos 42660af7cda2
+msgid "On **Linux**, open a terminal and activate the Python environment in which aXqua is installed:"
+msgstr "Öffnen Sie bei **Linux** ein Terminal und aktivieren Sie die Python-Umgebung, in der aXqua installiert ist:"
+
+# machine translation: argos 41b3b509da89
+msgid "On **Windows**, open the *Miniforge Prompt* from the start menu and enter the same two commands. If the simulation software is installed in the Windows Subsystem for Linux, open the terminal of the Linux distribution instead and proceed as on Linux."
+msgstr "Öffnen Sie bei **Windows** das *Miniforge Prompt* aus dem Startmenü und geben Sie die gleichen zwei Befehle ein. Wenn die Simulationssoftware im Windows-Subsystem für Linux installiert ist, öffnen Sie stattdessen die Terminal der Linux-Distribution und fahren Sie wie unter Linux fort."
+
+# machine translation: argos 3047aa28bee2
+msgid "Commands"
+msgstr "Befehle"
+
+# machine translation: argos 9f9dfb3fe904
+msgid "A command consists of the program name, an action and, for most actions, the case file:"
+msgstr "Ein Befehl besteht aus dem Programmnamen, einer Aktion und für die meisten Aktionen der Fall-Datei:"
+
+# machine translation: argos e67e6fe141d8
+msgid "Setting up the computer (:doc:`../installation/plugin-setup`):"
+msgstr "Einrichten des Computers (:doc:`../installation/plugin-setup`):"
+
+# machine translation: argos ec918dafd150
+msgid "Command"
+msgstr "Kommando"
+
+# machine translation: argos 405089c38856
+msgid "Function"
+msgstr "Funktion"
+
+# machine translation: argos 1ff211fff744
+msgid "Create the profile of the computer from the software that is found on it."
+msgstr "Erstellen Sie das Profil des Computers aus der darauf befindlichen Software."
+
+# machine translation: argos f24b8bf2b87b
+msgid "Verify the profile, including whether TELEMAC and OpenFOAM can be started."
+msgstr "Überprüfen Sie das Profil, einschließlich, ob TELEMAC und OpenFOAM gestartet werden können."
+
+# machine translation: argos e116db6e35e7
+msgid "Print the profile in use."
+msgstr "Drucken Sie das verwendete Profil aus."
+
+# machine translation: argos 1da97b801f1b
+msgid "Print the environment script that aXqua finds in the installation folder of TELEMAC. The other programs are ``openfoam``, ``paraview`` and ``visit``. Enter the folder in the block ``installations`` of the profile."
+msgstr "Drucken Sie das Umgebungsskript, das aXqua im Installationsordner von TELEMAC findet. Die anderen Programme sind ``openfoam``, ``paraview`` und ``visit``. Geben Sie den Ordner im Block ``installations`` des Profils ein."
+
+# machine translation: argos 8afefc94cded
+msgid "Installing the simulation software (:doc:`../installation/simulation-software`):"
+msgstr "Installation der Simulationssoftware (:doc:`../installation/simulation-software`):"
+
+# machine translation: argos 99d002924db8
+msgid "Show the detected operating system and, for TELEMAC, OpenFOAM and the postprocessors, where each is installed."
+msgstr "Zeigen Sie das erkannte Betriebssystem und für TELEMAC OpenFOAM und die Postprozessoren an, wo jeder installiert ist."
+
+# machine translation: argos a1413ec807f2
+msgid "Show what the installation would do, which system packages are missing, and the command that installs them. Nothing is changed. The other programs are ``openfoam`` and ``postprocessors``."
+msgstr "Zeigen Sie, was die Installation tun würde, welche Systempakete fehlen und den Befehl, der sie installiert. Nichts wird geändert. Die anderen Programme sind ``openfoam`` und ``postprocessors``."
+
+# machine translation: argos 2c85c5a11847
+msgid "Start the installation as a process of its own and enter the result in the profile. Add ``--foreground`` to follow the installation in the terminal. ``--folder`` selects the installation folder. For ``openfoam`` and ``postprocessors``, ``--no-visit`` leaves VisIt out."
+msgstr "Starten Sie die Installation als eigenen Prozess und geben Sie das Ergebnis im Profil ein. Fügen Sie ``--foreground`` hinzu, um der Installation im Terminal zu folgen. ``--folder`` wählt den Installationsordner aus. Für ``openfoam`` und ``postprocessors`` lässt ``--no-visit`` VisIt raus."
+
+# machine translation: argos 4e623455f1ff
+msgid "Show the state of the installation and the last lines of its log."
+msgstr "Zeigen Sie den Zustand der Installation und die letzten Zeilen des Logs an."
+
+# machine translation: argos c18ca57da9d2
+msgid "Stop the installation. What is already downloaded and built is kept."
+msgstr "Stoppen Sie die Installation. Was bereits heruntergeladen und gebaut wurde, wird beibehalten."
+
+# machine translation: argos 1f2e5b447b86
+msgid "Download the input files of the example cases of an installed TELEMAC that are still missing. ``<folder>`` is the folder ``telemac-mascaret`` of the installation."
+msgstr "Laden Sie die Eingabedateien des Beispiels Fälle eines installierten TELEMAC herunter, die noch fehlen. ``<folder>`` ist der Ordner ``telemac-mascaret`` der Installation."
+
+# machine translation: argos 511a62f7fdd5
+msgid "Preparing and checking a case:"
+msgstr "Vorbereitung und Überprüfung eines Falls:"
+
+# machine translation: argos 28602dc05fb6
+msgid "Report everything in the case file that is not in order: missing files, unknown or impossible settings, and settings that are still empty. The command lists all problems at once."
+msgstr "Melden Sie alles in der Fall-Datei, das nicht in Ordnung ist: fehlende Dateien, unbekannte oder unmögliche Einstellungen und Einstellungen, die noch leer sind. Der Befehl listet alle Probleme auf einmal auf."
+
+# machine translation: argos d14535d94a7c
+msgid "Check the case file, the input files and the simulation software, and stop at the first problem."
+msgstr "Überprüfen Sie die Fall-Datei, die Eingabedateien und die Simulationssoftware und stoppen Sie beim ersten Problem."
+
+# machine translation: argos 347be0796a58
+msgid "Create a case file with the entries that every case has."
+msgstr "Erstellen Sie eine Fall-Datei mit den Einträgen, die jeder Fall hat."
+
+# machine translation: argos e01d1a05ffeb
+msgid "List the example cases with their size (:ref:`Example case <help-example-case>`)."
+msgstr "Listen Sie das Beispiel Fälle mit ihrer Größe (:ref:`Beispielfall <help-example-case>`)."
+
+# machine translation: argos 69e39d617211
+msgid "Download the example case into ``<folder>``: the case file, the input data and a guide. With several examples, name the example before ``--folder``."
+msgstr "Laden Sie das Beispiel Fall in ``<folder>`` herunter: die Fall-Datei, die Eingabedaten und ein Handbuch. Mit mehreren Beispielen, benennen Sie das Beispiel vor ``--folder``."
+
+# machine translation: argos 0eea9b49acd6
+msgid "Run the preprocessing and write the TELEMAC model."
+msgstr "Führen Sie Preprocessing aus und schreiben Sie das TELEMAC-Modell."
+
+# machine translation: argos 399195056626
+msgid "Run the preprocessing and start TELEMAC once, to verify that it accepts the model."
+msgstr "Führen Sie Preprocessing aus und starten Sie TELEMAC einmal, um zu überprüfen, ob es das Modell akzeptiert."
+
+# machine translation: argos 58f56f610a33
+msgid "Convert CAD files into the terrain and the layers of a case."
+msgstr "Konvertieren Sie CAD-Dateien in Gelände und Layer eines Fall."
+
+# machine translation: argos 3e5f6ea67478
+msgid "Show which simulations are configured, built and run."
+msgstr "Zeigen Sie, welche Simulationen konfiguriert, erstellt und ausgeführt werden."
+
+# machine translation: argos d059db2ecafe
+msgid "Show the number of cells of the OpenFOAM mesh without building it."
+msgstr "Zeigen Sie die Anzahl der Zellen des OpenFOAM Rechennetzes an, ohne es zu erstellen."
+
+# machine translation: argos 253bd770db91
+msgid "Create the workbook for field measurements."
+msgstr "Erstellen Sie die Arbeitsmappe für Feldmessungen."
+
+# machine translation: argos 8f584d867e98
+msgid "Compare the elevations of the measurement points with the terrain model."
+msgstr "Vergleichen Sie die Höhen der Messpunkte mit dem Gelände-Modell."
+
+# machine translation: argos 7ae3b9ebc933
+msgid "Render the predefined figures with VisIt."
+msgstr "Rendern Sie die vordefinierten Zahlen mit VisIt."
+
+# machine translation: argos df02cd314649
+msgid "Results for ParaView and VisIt (:doc:`../usage/postprocessing`):"
+msgstr "Ergebnisse für ParaView und VisIt (:doc:`../usage/postprocessing`):"
+
+# machine translation: argos 1ae0467d2b53
+msgid "List the TELEMAC results of the case with their time steps, and state which of them are exported."
+msgstr "Listen Sie die TELEMAC-Ergebnisse des Falls mit ihren Zeitschritten auf und geben Sie an, welche von ihnen exportiert werden."
+
+# machine translation: argos 10c714cfb177
+msgid "Convert the TELEMAC results of the case into files that ParaView (``.pvd``) and VisIt (``.visit``) open. ``--result r2d.slf`` selects one result, and ``--frames last`` only its last time step."
+msgstr "Konvertieren Sie die TELEMAC-Ergebnisse des Falls in Dateien, die ParaView (``.pvd``) und VisIt (``.visit``) öffnen. ``--result r2d.slf`` wählt ein Ergebnis aus und ``--frames last`` nur seinen letzten Zeitschritt."
+
+# machine translation: argos 868dcfb73a7b
+msgid "Convert one result file without a case. The geometry file of the model provides the exact node coordinates."
+msgstr "Konvertieren Sie eine Ergebnisdatei ohne Fall. Die Geometriedatei des Modells liefert die genauen Knoten-Koordinaten."
+
+# machine translation: argos e59f9eabab2a
+msgid "Tools for input data:"
+msgstr "Instrumente für Eingabedaten:"
+
+# machine translation: argos b99b79d52817
+msgid "Cut a raster, for example a DEM, to a polygon."
+msgstr "Schneiden Sie ein Raster, zum Beispiel ein DGM, zu einem Polygon."
+
+# machine translation: argos 5ecc55864e6f
+msgid "Estimate a rating curve from channel width, bed slope and roughness."
+msgstr "Schätzen Sie eine Abflusskurve von Gerinne Breite, Betthang und Rauheit."
+
+# machine translation: argos 3a3b5c178ec6
+msgid "Write a case file of the current type (``.axq-case``) next to a case file of an older aXqua version."
+msgstr "Schreiben Sie eine Fall-Datei des aktuellen Typs (``.axq-case``) neben eine Fall-Datei einer älteren aXqua-Version."
+
+# machine translation: argos c7a85e5b619c
+msgid "Disk space and documentation:"
+msgstr "Speicherplatz und Dokumentation:"
+
+# machine translation: argos 8dc5a3e558ae
+msgid "List the files of a case that nothing needs any more, by category and with their size. Nothing is removed (:ref:`help-cleanup`)."
+msgstr "Listen Sie die Dateien eines Falls auf, die nichts mehr braucht, nach Kategorie und mit ihrer Größe. Nichts wird entfernt (:ref:`help-cleanup`)."
+
+# machine translation: argos 05cd96c3a6cb
+msgid "Remove the listed items with these identifiers. ``--category <key>`` removes all items of a category, ``--keep every:10`` keeps every tenth time step of a result instead of the last one only."
+msgstr "Entfernen Sie die aufgeführten Elemente mit diesen Identifikatoren. ``--category <key>`` entfernt alle Elemente einer Kategorie, ``--keep every:10`` behält jeden zehnten Zeitschritt eines Ergebnisses statt nur des letzten."
+
+# machine translation: argos 2234c42be0a3
+msgid "Name the copy of this documentation built on this computer, which *Help* in the plugin opens, and the published address."
+msgstr "Benennen Sie die Kopie dieser Dokumentation auf diesem Computer, die *Help* im Plugin geöffnet wird, und die veröffentlichte Adresse."
+
+# machine translation: argos 32c5dcc55818
+msgid "Running simulations as jobs (:doc:`batch-headless`):"
+msgstr "Simulationen als Jobs ausführen (:doc:`batch-headless`):"
+
+# machine translation: argos ac37ec213b3e
+msgid "Start a simulation as a job and print its ID."
+msgstr "Starten Sie eine Simulation als Job und drucken Sie ihre ID aus."
+
+# machine translation: argos 901fd7f0852b
+msgid "Run the calibrated model for the validation situation of the case and compare it with the validation data (:ref:`validation run <validation-run>`). ``axqua validation <case-file>`` lists the validation situations, the inflows of the model and the results of earlier validations."
+msgstr "Führen Sie das kalibrierte Modell für die Validierungssituation des Falls aus und vergleichen Sie es mit den Validierungsdaten (:ref:`Validierungslauf <validation-run>`). ``axqua validation <case-file>`` listet die Validierungssituationen, die Zuflüsse des Modells und die Ergebnisse früherer Validierungen auf."
+
+# machine translation: argos 0185e94271f0
+msgid "List all jobs."
+msgstr "Liste alle Jobs auf."
+
+# machine translation: argos 3b33a5237bf3
+msgid "Show the state and the progress of a job."
+msgstr "Zeigen Sie den Zustand und den Fortschritt eines Jobs."
+
+# machine translation: argos fa3ce6751f16
+msgid "Show the log of a job while it runs."
+msgstr "Zeigen Sie das Protokoll eines Jobs, während er läuft."
+
+# machine translation: argos 940c915d98c1
+msgid "Stop a job and all processes that it started."
+msgstr "Beenden Sie einen Job und alle Prozesse, die er gestartet hat."
+
+# machine translation: argos 61e13bd86dfd
+msgid "Each command explains its options with ``--help``, for example ``axqua submit --help``."
+msgstr "Jeder Befehl erklärt seine Optionen mit ``--help``, zum Beispiel ``axqua submit --help``."
+
+# machine translation: argos f2fd7a07a7b0
+msgid "Options for scripts"
+msgstr "Optionen für Skripte"
+
+# machine translation: argos 3a7223432e89
+msgid "With the option ``--json``, every command prints its result as one JSON document, which other programs can read reliably. If a command fails, its exit code indicates the cause, so that a script can react without reading the message:"
+msgstr "Mit der Option ``--json`` druckt jeder Befehl sein Ergebnis als ein JSON-Dokument aus, das andere Programme zuverlässig lesen können. Wenn ein Befehl fehlschlägt, zeigt der Exit-Code die Ursache an, so dass ein Skript reagieren kann, ohne die Nachricht zu lesen:"
+
+# machine translation: argos 777123b1282f
+msgid "Exit code"
+msgstr "Ausstiegscode"
+
+# machine translation: argos 1b615dd60a3e
+msgid "Cause"
+msgstr "Ursache"
+
+# machine translation: argos fb3ad3b9c167
+msgid "Success"
+msgstr "Erfolgreich"
+
+# machine translation: argos 0440029fecdf
+msgid "Error in the case file"
+msgstr "Fehler in der Fall-Datei"
+
+# machine translation: argos e8d07d4321c9
+msgid "Error in the geodata"
+msgstr "Fehler in den Geodaten"
+
+# machine translation: argos 2cbc9f817f5c
+msgid "Simulation software not reachable"
+msgstr "Simulationssoftware nicht erreichbar"
+
+# machine translation: argos 6f2baf73daf9
+msgid "The simulation failed"
+msgstr "Die Simulation scheiterte"
+
+# machine translation: argos 7707c446b051
+msgid "The mesh could not be created"
+msgstr "Das Rechennetz konnte nicht geschaffen werden"
+
+# machine translation: argos 4c31599c8bbf
+msgid "Any other error"
+msgstr "Sonstige Fehler"
+
+# machine translation: argos cac1f21cd62a
+msgid "Cancelled by the user"
+msgstr "Vom Benutzer storniert"
+
+# machine translation: argos 5c10d7636bc3
+msgid "Scripts in the case folder"
+msgstr "Skripte im Fall Ordner"
+
+# machine translation: argos 0e1025c51f2c
+msgid "The template folder ``cases/case-template/`` contains one Python script per working step, for example ``preprocessing.py``, ``initial_run.py`` and ``mesh_convergence_study.py``. They perform the same steps as the commands above and run in the foreground, so that the output of the simulation code appears directly in the terminal. Settings that apply to one step only are listed at the top of each script."
+msgstr "Der Vorlagenordner ``cases/case-template/`` enthält pro Arbeitsschritt ein Python-Skript, beispielsweise ``preprocessing.py``, ``initial_run.py`` und ``mesh_convergence_study.py``. Sie führen die gleichen Schritte wie die obigen Befehle aus und laufen im Vordergrund, so dass die Ausgabe des Simulationscodes direkt im Terminal erscheint. Einstellungen, die nur für einen Schritt gelten, werden oben in jedem Skript aufgeführt."

@@ -1,0 +1,428 @@
+# French translation of the aXqua documentation, page usage/case-setup.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos 8f6a34fc1e6b
+msgid "aXqua case setup"
+msgstr "Configuration de aXqua cas"
+
+# machine translation: argos 7dba2120d98d
+msgid "An **aXqua case** is the complete description of one free-surface water body for one modeling task, such as a river reach, a lake, a reservoir, or the surroundings of a hydraulic structure: the terrain, the boundaries of the model, the roughness of the bed, the settings of the simulation, and the field measurements for the calibration. The description is stored in one **case file**, whose name ends with ``.axq-case``. All simulation steps read this file, so that a 2D TELEMAC model and a 3D OpenFOAM model of the same water body use the same input."
+msgstr "Un **aXqua cas** est la description complète d'un plan d'eau surface libre pour une tâche de modélisation, comme une rivière tronçon, un lac, un réservoir, ou les environs d'un ouvrage hydraulique : le terrain, les frontières du modèle, la rugosité du lit, les paramètres de la simulation, et les mesures de terrain pour le calage. La description est stockée dans un **fichier de cas**, dont le nom se termine par ``.axq-case``. Toutes les étapes de simulation lisent ce fichier, de sorte qu'un modèle 2D TELEMAC et un modèle 3D OpenFOAM du même plan d'eau utilisent la même entrée."
+
+# machine translation: argos 8c7608da6fd9
+msgid "A case file contains nothing that is specific to a computer. Where the simulation software is installed is stored in the profile of the computer (:ref:`plugin-profile`). A case folder can therefore be copied to another computer, or published together with a study, and used there without changes."
+msgstr "Un fichier de cas ne contient rien qui soit spécifique à un ordinateur. Où le logiciel de simulation est installé est stocké dans le profil de l'ordinateur (:ref:`plugin-profile`). Un dossier cas peut donc être copié sur un autre ordinateur, ou publié avec une étude, et utilisé là sans changement."
+
+# machine translation: argos 089306ff64a1
+msgid "**Example case.** A complete case is available for trying out every step before a case of one's own is set up. It describes a braided reach of the Isar River of 6.6 ha at a discharge of 2.4 m³/s, with a coarse mesh, so that the model is built in one minute and a steady simulation takes about two minutes. The example is a folder that contains the case file, the input data in the subfolder ``user-sources/``, and a guide (``README.md``) that explains every step from the build to the loading of the result in QGIS. The folder has a size of about 6 MB. Its terrain model is cut to the outline of the model, which is all that aXqua reads of a terrain model. The example includes the velocity and depth measurements of two field campaigns at two discharges, so that the calibration and the validation can be tried as well."
+msgstr "**Exemple cas.** Un cas complet est disponible pour essayer chaque étape avant qu'un cas propre soit mis en place. Il décrit un tronçon tressé de la rivière Isar de 6,6 ha à un débit de 2,4 m3/s, avec un maillage grossier, de sorte que le modèle est construit en une minute et une simulation en régime permanent prend environ deux minutes. L'exemple est un dossier qui contient le fichier de cas, les données d'entrée dans le sous-dossier ``user-sources/``, et un guide (``README.md``) qui explique chaque étape de la construction au chargement du résultat dans QGIS. Le dossier a une taille d'environ 6 Mo. Son modèle de terrain est découpé dans le contour du modèle, ce qui est tout ce qu'aXqua lit d'un modèle de terrain. L'exemple comprend les mesures de vitesse et de profondeur de deux campagnes sur le terrain à deux débits, afin que le calage et la validation puissent également être essayés."
+
+# machine translation: argos bab1ba7b56a1
+msgid "On the *Case Setup* tab, *Example case...* opens a window that lists the available examples. Select the folder in which the folder of the example is to be created and click *Download*. The example is then added to the list of cases, and the next step is *Build* on the *Preprocessing* tab. In a terminal, the following command does the same:"
+msgstr "Sur l'onglet *Case Setup*, *Example case...* ouvre une fenêtre qui énumère les exemples disponibles. Sélectionnez le dossier dans lequel le dossier de l'exemple doit être créé et cliquez sur *Download*. L'exemple est ensuite ajouté à la liste de cas, et l'étape suivante est *Build* sur l'onglet *Preprocessing*. Dans un terminal, la commande suivante fait la même chose :"
+
+# machine translation: argos 64760efb81cc
+msgid "The example is not part of the installed program. It is downloaded from the aXqua repository on GitHub. Its input data may be reused and adapted for any purpose, provided that aXqua is cited (Creative Commons Attribution 4.0 International License). The file ``LICENSE.md`` in the folder of the example states the terms and the citation. A folder with the name of the example that already exists is never overwritten, because it may contain results. Delete the folder, or select another one, to download the example again."
+msgstr "L'exemple ne fait pas partie du programme installé. Il est téléchargé depuis le dépôt aXqua sur GitHub. Ses données d'entrée peuvent être réutilisées et adaptées à n'importe quelle fin, à condition que aXqua soit cité (Creative Commons Attribution 4.0 International License). Le fichier ``LICENSE.md`` dans le dossier de l'exemple indique les termes et la citation. Un dossier avec le nom de l'exemple qui existe déjà n'est jamais écrasé, car il peut contenir des résultats. Supprimer le dossier, ou sélectionner un autre, pour télécharger l'exemple à nouveau."
+
+# machine translation: argos 5204418682da
+msgid "**In the plugin.** The *Case Setup* tab has two boxes. The box *Cases* lists the cases that the plugin knows. *New case...* creates a case file and opens its settings, *Add case...* adds an existing case file, *Example case...* downloads the example, and *Remove from list* takes the active case off the list without deleting its file. The selected case is the active one, to which all other tabs refer. The plugin remembers the list when QGIS is closed; there is no separate project file, because a case is the project. A project file of an earlier version (``.axqua-prj``) can still be selected with *Add case...*, which adds the cases that it lists."
+msgstr "**Dans le prolongement.** L'onglet *Case Setup* a deux boîtes. La boîte *Cases* liste le cas que l'extension connaît. *New case...* crée un fichier de cas et ouvre ses paramètres, *Add case...* ajoute un fichier de cas existant, *Example case...* télécharge l'exemple, et *Remove from list* retire le cas actif de la liste sans supprimer son fichier. Le cas sélectionné est le cas actif auquel tous les autres onglets se réfèrent. L'extension se souvient de la liste lorsque QGIS est fermé ; il n'y a pas de fichier de projet distinct, car un cas est le projet. Un fichier de projet d'une version antérieure (``.axqua-prj``) peut encore être sélectionné avec *Add case...*, ce qui ajoute le cas qu'il énumère."
+
+# machine translation: argos f35bb77e4b17
+msgid "The box *Case settings* shows the file of the active case. *Open case settings...* opens the settings of the active case in a window of their own, and *Check* examines the case without opening the window. The window shows the settings on pages, which are listed on the left in the order of the subsections below: *Project settings*, *Geodata*, *Liquid boundaries*, *Initial conditions*, *Mesh configuration*, *Wall roughness*, *Hydraulic simulation*, *Morphodynamic simulation*, *TELEMAC*, *OpenFOAM*, *Calibration and validation*, and *Post-processing*. A page can hold several frames: the exchange with a porous body is a frame of the page *Liquid boundaries*, the drying of thin films a frame of *Initial conditions*, the lattice of the OpenFOAM model a frame of *Mesh configuration*, and the structures and the surfaces from CAD are frames of *OpenFOAM*. On each page, the window shows the settings that every case needs and all settings that the case file already contains. Every other setting of a frame is added with *Add setting...*. A tooltip explains each setting, and a frame whose purpose is not obvious has an information button."
+msgstr "La boîte *Case settings* montre le fichier du cas actif. *Open case settings...* ouvre les paramètres du cas actif dans une fenêtre de leur propre, et *Check* examine le cas sans ouvrir la fenêtre. La fenêtre affiche les paramètres sur les pages, qui sont listés à gauche dans l'ordre des sous-sections ci-dessous : *Project settings*, *Geodata*, *Liquid boundaries*, *Initial conditions*, *Mesh configuration*, *Wall roughness*, *Hydraulic simulation*, *Morphodynamic simulation*, *TELEMAC*, *OpenFOAM*, *Calibration and validation*, et *Post-processing*. Une page peut contenir plusieurs cadres : l'échange avec un corps poreux est un cadre de la page *Liquid boundaries*, le séchage des films minces un cadre de *Initial conditions*, le réseau du modèle OpenFOAM un cadre de *Mesh configuration*, et les structures et les surfaces de CAD sont des cadres de *OpenFOAM*. Sur chaque page, la fenêtre affiche les paramètres dont chaque cas a besoin et tous les paramètres que le fichier de cas contient déjà. Tous les autres réglages d'un cadre sont ajoutés avec *Add setting...*. Un tooltip explique chaque réglage, et un cadre dont le but n'est pas évident a une information bouton."
+
+# machine translation: argos 9723991c0733
+msgid "**Required settings** are written in bold dark purple, the color of the aXqua icon. For a minimal case, these are the name and the coordinate reference system, the terrain model, the model outline, the inflow and outflow lines, and the discharge, plus the outflow water level while the outflow condition is a fixed level. An option that is switched on adds the settings that it needs: an unsteady simulation requires the hydrograph, sediment transport with GAIA the sediment classes, fine sediment over a fixed bed the grain size and the concentration at the inflow, and the DEM of difference the second terrain model. The pages *TELEMAC*, *OpenFOAM* and *Calibration and validation* begin with a switch (*Simulate with TELEMAC*, *Simulate with OpenFOAM*, *Calibrate and validate this case*). A switch that is off leaves the block out of the case file and grays out its settings, also where they are shown on another page. Switched on, its required settings turn purple as well. A page whose required setting is still empty is marked in the list on the left, and saving reports each empty required setting."
+msgstr "**Les paramètres requis** sont écrits en gras violet foncé, la couleur de l'icône aXqua. Pour un cas minimal, ce sont le nom et le système de coordonnées de référence, le modèle de terrain, le contour du modèle, les lignes d'entrée et de sortie et le débit, plus la sortie niveau d'eau alors que l'état de sortie est un niveau fixe. Une option qui est activée ajoute les réglages dont elle a besoin : une simulation en régime transitoire nécessite l'hydrographe, le transport des sédiments avec GAIA les classes de sédiments, les sédiments fins sur un lit fixe la taille des grains et la concentration à l'entrée, et le MNT de différence le modèle du second terrain. Les pages *TELEMAC*, *OpenFOAM* et *Calibration and validation* commencent par un commutateur (*Simulate with TELEMAC*, *Simulate with OpenFOAM*, *Calibrate and validate this case*). Un interrupteur qui est éteint laisse le bloc hors du fichier de cas et grise ses paramètres, aussi où ils sont affichés sur une autre page. Allumé, ses réglages requis deviennent violet aussi bien. Une page dont le réglage requis est toujours vide est marquée dans la liste de gauche, et l'enregistrement indique chaque réglage requis vide."
+
+# machine translation: argos 3b4a4e9d261d
+msgid "The Case Setup tab of the plugin"
+msgstr "L'onglet Configuration cas de l'extension"
+
+# machine translation: argos 07d44f4e797a
+msgid "The *Case Setup* tab. (1) *Add case...* and *Example case...*. (2) The cases that the plugin knows. The selected case is the active one, to which all other tabs refer. (3) What the active case can do with the simulation software of this computer. (4) *Open case settings...* opens the settings of the active case, and *Check* examines the case."
+msgstr "L'onglet *Case Setup*. (1) *Add case...* et *Example case...*. (2) Le cas que l'extension connaît. Le cas sélectionné est le cas actif auquel tous les autres onglets se réfèrent. (3) Ce que le cas actif peut faire avec le logiciel de simulation de cet ordinateur. (4) *Open case settings...* ouvre les paramètres du cas actif, et *Check* examine le cas."
+
+# machine translation: argos 31317f526700
+msgid "Nothing has to be typed that can be selected. Every file has a button that opens a file dialog, and the button *Layers* offers the layers that are open in QGIS. A file in or near the case folder is entered with a path relative to the case file, so that the case can be moved together with its data."
+msgstr "Rien ne doit être tapé qui puisse être sélectionné. Chaque fichier a un bouton qui ouvre une boîte de dialogue de fichiers, et le bouton *Layers* offre les couches qui sont ouverts dans QGIS. Un fichier dans ou près du dossier cas est entré avec un chemin relatif au fichier de cas, de sorte que le cas peut être déplacé avec ses données."
+
+# machine translation: argos ea8964e2c4b2
+msgid "The case settings with the page Geodata"
+msgstr "Les paramètres cas avec la page Geodata"
+
+# machine translation: argos 1c89407ceaa6
+msgid "The case settings with the page *Geodata*. (1) The pages of the case settings; required settings are bold dark purple. (2) A file is selected with the button ``...`` or, with *Layers*, from the layers that are open in QGIS. (3) *Add setting...* adds a setting of the block that is not shown yet. (4) *Save*, *Cancel* and *Exit*."
+msgstr "Les paramètres cas avec la page *Geodata*. (1) Les pages des paramètres cas ; les paramètres requis sont gras violet foncé. (2) Un fichier est sélectionné avec le bouton ``...`` ou, avec *Layers*, des couches qui sont ouverts dans QGIS. (3) *Add setting...* ajoute un réglage du bloc qui n'est pas encore montré. (4) *Save*, *Cancel* et *Exit*."
+
+# machine translation: argos b355db19742b
+msgid "The window has three buttons at the bottom right. *Save* writes the case file and checks it, and the window stays open. *Cancel* discards the changes since the last save and closes the window. *Exit* closes the window and asks first if there are changes that were not saved. The check never prevents saving, because a case is incomplete while it is being set up. It marks each setting that is not in order with a triangle, orange for a warning and dark red for an error, and marks the page in the list on the left. A click on a triangle opens the message with its remedy (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). The button *Check* on the *Case Setup* tab runs the same check without opening the window. *Help* at the bottom left opens the section of this documentation that belongs to the page that is showing."
+msgstr "La fenêtre a trois boutons en bas à droite. *Save* écrit le fichier de cas et le vérifie, et la fenêtre reste ouverte. *Cancel* rejette les modifications depuis la dernière sauvegarde et ferme la fenêtre. *Exit* ferme la fenêtre et demande d'abord s'il y a des changements qui n'ont pas été enregistrés. La vérification n'empêche jamais l'enregistrement, car un cas est incomplet pendant sa configuration. Il marque chaque réglage qui n'est pas en ordre avec un triangle, orange pour un avertissement et rouge foncé pour une erreur, et marque la page dans la liste à gauche. Un clic sur un triangle ouvre le message avec son remède (:doc:`../troubleshooting/warnings`, :doc:`../troubleshooting/errors`). Le bouton *Check* sur l'onglet *Case Setup* effectue la même vérification sans ouvrir la fenêtre. *Help* en bas à gauche ouvre la section de cette documentation qui appartient à la page qui apparaît."
+
+# machine translation: argos 4fa8accef314
+msgid "Saving from the window rewrites the case file from its settings. Comments of a case file that was written by hand are not kept. The original is preserved as ``<name>.bak`` the first time the window saves."
+msgstr "L'enregistrement depuis la fenêtre réécrit le fichier de cas depuis ses paramètres. Les commentaires d'un fichier de cas qui a été écrit à la main ne sont pas conservés. L'original est conservé comme ``<name>.bak`` la première fois que la fenêtre économise."
+
+# machine translation: argos 5d6f11981ef8
+msgid "**In a text editor.** The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is provided in the folder ``cases/case-template/`` of the repository. Copy this folder to start a new case, and rename the case file. The command ``axqua check <case-file>`` reports everything that is not in order."
+msgstr "**Dans un éditeur de texte.** Le fichier de cas est un fichier texte au format YAML. Chaque bloc du fichier est expliqué dans une sous-section ci-dessous. Un modèle commenté est fourni dans le dossier ``cases/case-template/`` du dépôt. Copiez ce dossier pour lancer un nouveau cas, et renommez le fichier de cas. La commande ``axqua check <case-file>`` rapporte tout ce qui n'est pas en ordre."
+
+# machine translation: argos 3c0423a6df92
+msgid "Case files of earlier aXqua versions are named ``case-config.yml`` and may contain the location of the simulation software. They are still read. The following command writes a case file of the current type next to such a file:"
+msgstr "Fichiers de cas des versions aXqua antérieures sont nommées ``case-config.yml`` et peuvent contenir l'emplacement du logiciel de simulation. Ils sont encore lus. La commande suivante écrit un fichier de cas du type actuel à côté d'un tel fichier :"
+
+# machine translation: argos 7a7c6949b107
+msgid "The new file is named after the folder of the case. The command does not replace a case file of that name that exists already, because it may have been edited since it was written. To replace it, name it with ``-o <file>``. Applied to a file that is a case file of the current type already, the command rewrites that file and keeps the previous version as ``<name>.bak``."
+msgstr "Le nouveau fichier est nommé d'après le dossier du cas. La commande ne remplace pas un fichier de cas de ce nom qui existe déjà, car il peut avoir été édité depuis qu'il a été écrit. Pour le remplacer, nommez-le par ``-o <file>``. Appliquée à un fichier qui est déjà un fichier de cas du type courant, la commande réécrit ce fichier et conserve la version précédente comme ``<name>.bak``."
+
+# machine translation: argos eff45bf737f2
+msgid "A minimal case file looks as follows:"
+msgstr "Un fichier de cas minimal semble comme suit :"
+
+# machine translation: argos 8ae2c644415c
+msgid "Project settings"
+msgstr "Paramètres du projet"
+
+# machine translation: argos 7c7ca159d5ca
+msgid "The ``project`` block names the case, defines its coordinate reference system and states where aXqua writes its files."
+msgstr "Le bloc ``project`` nomme le cas, définit son système de coordonnées de référence et indique où aXqua écrit ses fichiers."
+
+# machine translation: argos 68ef7058ae93
+msgid "A case folder has two parts with different roles. The folder ``user-sources/`` contains the input data, such as terrain models, vector layers and measurements. aXqua reads these files and never changes them. The folder ``axqua-case/`` receives everything that aXqua produces, in one subfolder per workflow step:"
+msgstr "Un cas dossier a deux parties avec des rôles différents. Le dossier ``user-sources/`` contient les données d'entrée, comme les modèles de terrain, les couches vectorielles et les mesures. aXqua lit ces fichiers et ne les modifie jamais. Le dossier ``axqua-case/`` reçoit tout ce qu'aXqua produit, dans un sous-dossier par étape de workflow :"
+
+# machine translation: argos 3f76ec0d125a
+msgid "Because of this separation, a case can be rebuilt from its inputs at any time, and the folder ``axqua-case/`` can be deleted without losing data that cannot be reproduced."
+msgstr "En raison de cette séparation, un cas peut être reconstruit à partir de ses entrées à tout moment, et le dossier ``axqua-case/`` peut être supprimé sans perdre des données qui ne peuvent pas être reproduites."
+
+# machine translation: argos 7dabae95a28e
+msgid "All paths in the case file are interpreted relative to the folder of the case file. ``crs_epsg`` must be a metric (projected) coordinate reference system. Input layers may use any other reference system, because aXqua converts them when it reads them."
+msgstr "Tous les chemins du fichier de cas sont interprétés par rapport au dossier du fichier de cas. ``crs_epsg`` doit être une mesure (prévue) système de coordonnées de référence. Input couches peut utiliser n'importe quel autre système de référence, car aXqua les convertit quand il les lit."
+
+# machine translation: argos 632be0c37a09
+msgid "Geodata"
+msgstr "Géodonnées"
+
+# machine translation: argos 4c0ff8de19b6
+msgid "The ``geodata`` block lists the terrain model and the vector layers that describe the reach. The file names are free. What matters is the geometry type and the attribute fields of each layer."
+msgstr "Le bloc ``geodata`` liste le modèle de terrain et les couches vectorielles qui décrivent le tronçon. Les noms des fichiers sont gratuits. Ce qui compte, c'est le type de géométrie et les champs d'attribut de chaque couche."
+
+# machine translation: argos 78fd8e170f75
+msgid "Entry"
+msgstr "Entrée"
+
+# machine translation: argos 4f1d08508ec6
+msgid "Geometry"
+msgstr "Géométrie"
+
+# machine translation: argos 90c6a3dbdf6a
+msgid "Attribute fields"
+msgstr "Champs d'attribut"
+
+# machine translation: argos cf95b75a55e8
+msgid "Purpose"
+msgstr "Objet"
+
+# machine translation: argos b3972fb93a62
+msgid "``dem_initial`` (required)"
+msgstr "``dem_initial`` (obligatoire)"
+
+# machine translation: argos 3d84c873a698
+msgid "raster"
+msgstr "Détruire"
+
+# machine translation: argos 1979b68bf3db
+msgid "none"
+msgstr "aucune"
+
+# machine translation: argos 31a4036cf4ac
+msgid "Digital elevation model (DEM) of the riverbed and the floodplains."
+msgstr "Modèle numérique de terrain (MNT) du lit de la rivière et des lits majeurs."
+
+# machine translation: argos b3972fb93a62
+msgid "``boundary`` (required)"
+msgstr "``boundary`` (obligatoire)"
+
+# machine translation: argos 89801d456792
+msgid "one polygon"
+msgstr "un polygone"
+
+# machine translation: argos 28cd860b70d0
+msgid "Region of interest. The model covers the area inside this polygon."
+msgstr "Zone d'étude. Le modèle couvre la zone intérieure de ce polygone."
+
+# machine translation: argos c002e45c87f2
+msgid "polygons"
+msgstr "polygones"
+
+# machine translation: argos 120730acdba2
+msgid "Areas of equal mesh resolution. The zone name must contain ``channel``, ``floodplain`` or ``refinement`` (:ref:`case-mesh`)."
+msgstr "Zones d'égale résolution du maillage. Le nom de la zone doit contenir ``channel``, ``floodplain`` ou ``refinement`` (:ref:`case-mesh`)."
+
+# machine translation: argos 5a0c9f95c7e9
+msgid "one line"
+msgstr "une ligne"
+
+# machine translation: argos a4a3bbad818d
+msgid "Course of the main channel. Mesh cells in the channel are stretched along this line."
+msgstr "Le cours des cellules chenal principal. Maillage dans les cellules chenal sont étirés le long de cette ligne."
+
+# machine translation: argos 771b5d946deb
+msgid "``Zone ID`` (integer)"
+msgstr "``Zone ID`` (entier)"
+
+# machine translation: argos e20abaac1211
+msgid "Areas of equal roughness (:ref:`case-roughness`)."
+msgstr "Zones de rugosité égale (:ref:`case-roughness`)."
+
+# machine translation: argos 5727fdecf700
+msgid "table (CSV)"
+msgstr "Tableau (CSV)"
+
+# machine translation: argos 10811a97130f
+msgid "Roughness value of each zone."
+msgstr "Valeur de la rugosité de chaque zone."
+
+# machine translation: argos c5e1c2293216
+msgid "polygons or lines"
+msgstr "polygones ou lignes"
+
+# machine translation: argos d7912be4382f
+msgid "``Type``, ``Crest (m)`` or ``Height (m)``, ``Width (m)``"
+msgstr "``Type``, ``Crest (m)`` ou ``Height (m)``, ``Width (m)``"
+
+# machine translation: argos da76237db02c
+msgid "Dams, weirs, walls and buildings that the DEM does not contain."
+msgstr "Les barrages, les barrages, les murs et les bâtiments que le MNT ne contient pas."
+
+# machine translation: argos bdbd842fb99d
+msgid "lines"
+msgstr "lignes"
+
+# machine translation: argos a11f279ea5d6
+msgid "a name field"
+msgstr "un champ de nom"
+
+# machine translation: argos 93648fd4a797
+msgid "Cross sections at which the discharge is evaluated after a simulation."
+msgstr "Profils en travers où le débit est évalué après une simulation."
+
+# machine translation: argos 4f3bff0aa4b0
+msgid "DEM of a later survey, for morphodynamic simulations (:ref:`case-morphodynamics`)."
+msgstr "MNT d'une enquête ultérieure, pour les simulations morphodynamiques (:ref:`case-morphodynamics`)."
+
+# machine translation: argos adac30488008
+msgid "The inflow and outflow lines also are a vector layer, which belongs to the boundaries (:ref:`case-boundaries`)."
+msgstr "Les lignes d'entrée et de sortie sont également un vecteur couche, qui appartient aux frontières (:ref:`case-boundaries`)."
+
+# machine translation: argos 5948212bf857
+msgid "The vector layers have to fit together: the mesh zones cover the region of interest without gaps, the inflow and outflow lines lie on its outline, and the centerline runs inside the channel zone. Draw the layers in QGIS on top of a **hillshade** of the DEM, which shows banks, gravel bars and structures clearly (*Processing Toolbox > GDAL > Raster analysis > Hillshade*)."
+msgstr "Les couches vectorielles doivent s'intégrer : les zones de maillage couvrent la zone d'étude sans failles, les lignes d'entrée et de sortie se trouvent sur son contour, et l'axe du chenal court à l'intérieur de la zone chenal. Dessinez les Couchs en QGIS sur un **hillshade** du MNT, qui montre clairement les berges, les barres de gravier et les structures (*Processing Toolbox > GDAL > Raster analysis > Hillshade*)."
+
+# machine translation: argos 76c291674624
+msgid "Mesh zones, roughness zones, inflow line and channel centerline drawn over a hillshade"
+msgstr "Zones de maillage, zones de rugosité, ligne d'entrée et chenal axe du chenal dessinés sur un rainhade"
+
+# machine translation: argos f8b32a88a807
+msgid "Mesh zones, roughness zones, the inflow line and the channel centerline at the upstream end of a model, drawn over a hillshade of the DEM."
+msgstr "Zones de maillage, zones de rugosité, la ligne d'entrée et le chenal axe du chenal à l'extrémité amont d'un modèle, dessinés sur un ombrage du MNT."
+
+# machine translation: argos 370e2af299d3
+msgid "To place a small refinement zone inside a larger zone, cut a hole of the same shape into the larger polygon with the QGIS tool *Add Ring* (*Advanced Digitizing Toolbar*), so that the two polygons do not overlap."
+msgstr "Pour placer une petite zone de raffinement dans une zone plus grande, couper un trou de la même forme dans le polygone plus grand avec l'outil QGIS *Add Ring* (*Advanced Digitizing Toolbar*), de sorte que les deux polygones ne se chevauchent pas."
+
+# machine translation: argos 2a4ca84848d4
+msgid "**Structures** are drawn as ordinary features. A line with a ``Width (m)`` describes a wall or the crest of a dam. A polygon describes a building or a pier. ``Crest (m)`` gives a horizontal crest at an absolute elevation, and ``Height (m)`` gives a crest at a constant height above the ground. Structures that water can pass over (dam, weir, embankment) raise the riverbed to the crest. Structures that are never overtopped (wall, building, pier) are removed from the flow area. The distinction is taken from the text in the ``Type`` field."
+msgstr "**Les structures** sont dessinées comme des caractéristiques ordinaires. Une ligne avec un ``Width (m)`` décrit un mur ou la crête d'un barrage. Un polygone décrit un bâtiment ou une jetée. ``Crest (m)`` donne une crête horizontale à une altitude absolue, et ``Height (m)`` donne une crête à une hauteur constante au-dessus du sol. Les structures que l'eau peut traverser (dam, étang, remblai) élèvent le lit de la rivière à la crête. Les structures qui ne sont jamais surmontées (mur, bâtiment, jetée) sont retirées de la zone d'écoulement. La distinction est faite à partir du texte dans le champ ``Type``."
+
+# machine translation: argos f43af5fa8be1
+msgid "For a morphodynamic simulation, aXqua can compute the elevation change between two surveys itself from ``dem_initial`` and ``dem_target`` (:ref:`case-morphodynamics`)."
+msgstr "Pour une simulation morphodynamique, aXqua peut calculer le changement d'altitude entre deux relevés lui-même à partir de ``dem_initial`` et ``dem_target`` (:ref:`case-morphodynamics`)."
+
+# machine translation: argos 37a846bbbefc
+msgid "**Designed structures from CAD drawings.** A structure that exists as a construction drawing and not as a survey, such as a fish pass or a flume, can be supplied as a set of STL files. The ``surfaces`` block names each file and states its role. aXqua converts the files into the ordinary inputs of a case (a DEM, the region of interest, the inflow and outflow lines, structures and roughness zones), so that no entries are required under ``geodata`` for them."
+msgstr "**Structures conçues à partir de dessins CAO.** Une structure qui existe comme un dessin de construction et non comme un relevé, comme un passe de poisson ou un flume, peut être fournie comme un ensemble de fichiers STL. Le bloc ``surfaces`` nomme chaque fichier et indique son rôle. aXqua convertit les fichiers en entrées ordinaires d'un cas (un MNT, la zone d'étude, les lignes d'entrée et de sortie, les structures et les zones de rugosité), de sorte qu'aucune entrée n'est requise sous ``geodata`` pour eux."
+
+# machine translation: argos 6484dc317ee2
+msgid "The roles are ``bed`` (terrain, at least one file), ``wall`` (structures that are never overtopped), ``inflow`` and ``outflow`` (open boundaries), ``roi`` (outline of the model) and ``ignore``. A ``bed`` file with a ``zone_id`` and a ``ks`` value also defines a roughness zone. The command ``axqua surface <case-file>`` performs the conversion alone, so that the result can be inspected in QGIS before the model is built. Because a DEM stores one elevation per location, overhanging parts of a drawing cannot be represented. aXqua reports their share. Select the ``resolution`` fine enough for the thinnest wall of the structure."
+msgstr "Les rôles sont : ``bed`` (terre, au moins un fichier), ``wall`` (structures qui ne sont jamais dépassées), ``inflow`` et ``outflow`` (ouverture frontières), ``roi`` (ligne du modèle) et ``ignore``. Un fichier ``bed`` avec un ``zone_id`` et une valeur ``ks`` définit également une zone de rugosité. La commande ``axqua surface <case-file>`` effectue la conversion seule, de sorte que le résultat peut être inspecté dans QGIS avant que le modèle soit construit. Parce qu'un MNT stocke une élévation par emplacement, des parties surplombant un dessin ne peuvent pas être représentées. aXqua rapporte leur part. Sélectionnez le ``resolution`` assez bien pour le mur le plus mince de la structure."
+
+# machine translation: argos 3cf75af0aa04
+msgid "Liquid boundaries"
+msgstr "Frontières liquides"
+
+# machine translation: argos 419ea8bc0b6b
+msgid "At the liquid boundaries of the model, the user states where water enters and leaves and how much. For the subcritical flow that prevails in most rivers and in the inlets and outlets of lakes and reservoirs, the model requires the **discharge at the inflow** and the **water surface elevation at the outflow**. The discharge determines how much water enters. The downstream water level determines how deep and how fast the water leaves the model."
+msgstr "Aux frontières liquides du modèle, l'utilisateur indique où l'eau entre et sort et combien. Pour l'écoulement subcritique qui prévaut dans la plupart des rivières et dans les entrées et sorties des lacs et des réservoirs, le modèle exige le **débit à l'écoulement** et le **cote de la surface libre à l'écoulement**. Le débit détermine la quantité d'eau qui entre. Le niveau d'eau en aval détermine à quelle profondeur et à quelle vitesse l'eau quitte le modèle."
+
+# machine translation: argos 5b3ea8fce321
+msgid "``liquid_boundaries`` is a line layer with one line per inflow and per outflow cross section. An attribute field named ``Type (inflow/outflow)`` contains the word ``inflow`` or ``outflow`` for each line. All parts of the model outline that are not covered by such a line are closed walls."
+msgstr "``liquid_boundaries`` est une couche de lignes avec une ligne par afflux et par sortie profil en travers. Un champ d'attribut nommé ``Type (inflow/outflow)`` contient le mot ``inflow`` ou ``outflow`` pour chaque ligne. Toutes les parties du contour du modèle qui ne sont pas couvertes par une telle ligne sont parois fermées."
+
+# machine translation: argos d196c03b9ebf
+msgid "``outflow_condition`` selects how the downstream water level is defined:"
+msgstr "``outflow_condition`` sélectionne comment le niveau d'eau en aval est défini :"
+
+# machine translation: argos c5f50530b453
+msgid "``elevation`` (default)"
+msgstr "``elevation`` (par défaut)"
+
+# machine translation: argos 15f256306ae1
+msgid "A constant water surface elevation, given by ``prescribed_elevation``."
+msgstr "Une cote de la surface libre constante, donnée par ``prescribed_elevation``."
+
+# machine translation: argos 9a259931f9cb
+msgid "The water surface elevation is read from a rating curve for the simulated discharge. The curve is a table with the columns ``Q`` and ``WSE``, named by ``stage_discharge``. If no measured curve is available, aXqua estimates one from the channel width, the bed slope and the roughness at the outflow line."
+msgstr "La cote de la surface libre est lue d'une courbe de tarage pour le débit simulé. La courbe est une table avec les colonnes ``Q`` et ``WSE``, nommé par ``stage_discharge``. Si aucune courbe mesurée n'est disponible, aXqua en estime une à partir de la largeur du chenal, de la pente du lit et de la rugosité à la ligne de sortie."
+
+# machine translation: argos f7c5e2feb91d
+msgid "No water level is prescribed. This choice is suited for an outflow over a drop or a weir."
+msgstr "Aucun niveau d'eau n'est prescrit. Ce choix est adapté pour une sortie sur une goutte ou un déversoir."
+
+# machine translation: argos 730249e0cab4
+msgid "For a simulation with a discharge that varies in time, ``inflow`` names a table with a time column and a discharge column, and ``hydrodynamics.regime`` is set to ``unsteady``; the case settings then mark the hydrograph as required. The exchange with a porous body, in which water leaves the surface through a gravel bar and returns further downstream (:ref:`preprocessing-telemac-choices`), is a frame of the page *Liquid boundaries* in the case settings."
+msgstr "Pour une simulation avec un débit qui varie dans le temps, ``inflow`` nomme une table avec une colonne de temps et une colonne débit, et ``hydrodynamics.regime`` est réglé à ``unsteady``; les paramètres cas marquent alors l'hydrographe au besoin. L'échange avec un corps poreux, dans lequel l'eau quitte la surface à travers une barre de gravier et retourne plus loin en aval (:ref:`preprocessing-telemac-choices`), est un cadre de la page *Liquid boundaries* dans les paramètres cas."
+
+# machine translation: argos cf03d5d261a6
+msgid "**Gauge data.** The script ``scripts/gauge_data.py`` retrieves discharge time series and rating curves of river gauges and saves them in the format that aXqua reads. It supports the gauges of the Bavarian flood information service (HND) and of the United States Geological Survey (USGS). It opens in a web browser and requires the package ``streamlit`` (``pip install \".[gui]\"``). Start it from the repository folder, paste the address or the number of a gauge, and save the two tables into ``user-sources/``:"
+msgstr "**Station hydrométrique données.** Le script ``scripts/gauge_data.py`` récupère les séries chronologiques débit et courbes de tarage de River stations hydrométriques et les sauve dans le format qu'aXqua lit. Il soutient les stations hydrométriques du Service bavarois d'information sur les inondations (HND) et de l'USGS. Il s'ouvre dans un navigateur Web et nécessite le paquet ``streamlit`` (``pip install \".[gui]\"``). Commencez à partir du dossier du dépôt, collez l'adresse ou le numéro d'une station hydrométrique, et enregistrez les deux tables dans ``user-sources/``:"
+
+# machine translation: argos 365f971025e3
+msgid "The exported discharge series is the ``inflow`` table, and the exported rating curve is the ``stage_discharge`` table. Enter the elevation of the gauge zero to convert the gauge reading into an absolute water surface elevation, and verify that this elevation and the DEM refer to the same height system."
+msgstr "La série débit exportée est la table ``inflow``, et la courbe de tarage exportée est la table ``stage_discharge``. Entrez l'altitude de la station hydrométrique zéro pour convertir la station hydrométrique en une cote de la surface libre absolue, et vérifiez que cette altitude et le MNT se réfèrent au même système de hauteur."
+
+# machine translation: argos 336d156ac029
+msgid "Initial conditions"
+msgstr "Conditions initiales"
+
+# machine translation: argos 7de691b602be
+msgid "A simulation requires a state from which it starts. The ``initialization`` block offers two choices."
+msgstr "Une simulation nécessite un état à partir duquel elle commence. Le bloc ``initialization`` offre deux choix."
+
+# machine translation: argos f7d62e42bd3b
+msgid "**Dry start (default).** The riverbed is dry, except for a short stretch at the inflow that is filled with water to the depth ``dry_start_depth`` (default 0.5 m). The inflowing discharge then fills the reach from upstream. This start requires no assumption about the water level, but the model has to simulate the filling of the reach."
+msgstr "**Démarrage à sec (par défaut).** Le lit de la rivière est sèche, sauf pour une courte étirement à l'entrée qui est remplie d'eau à la profondeur ``dry_start_depth`` (par défaut 0,5 m). Le débit entrant remplit ensuite le tronçon en amont. Ce départ ne nécessite aucune hypothèse sur le niveau d'eau, mais le modèle doit simuler le remplissage du tronçon."
+
+# machine translation: argos 471a039a5eac
+msgid "**Pre-wetted channel.** When ``prewet_depth`` is set, the channel zones start with water. aXqua estimates the water level at cross sections along the centerline for the discharge of the case and fills the channel to 70 % of this level (``prewet_fill``). The lower filling is intended: a channel with too little water fills within seconds, whereas surplus water on flat ground may remain as a thin film until the end of the simulation, because a 2D model has neither infiltration nor evaporation. The mesh convergence study uses the pre-wetted start to save computing time."
+msgstr "**Préhumide chenal.** Quand ``prewet_depth`` est réglé, les zones chenal commencent par l'eau. aXqua estime le niveau d'eau à profils en travers le long de l'axe du chenal pour le débit du cas et remplit le chenal à 70 % de ce niveau (``prewet_fill``). Le remplissage inférieur est prévu : un chenal avec trop peu d'eau se remplit en quelques secondes, alors que l'eau excédentaire sur sol plat peut rester comme un mince film jusqu'à la fin de la simulation, car un modèle 2D n'a ni infiltration ni évaporation. L'étude de convergence en maillage utilise le début préhumide pour économiser du temps de calcul."
+
+# machine translation: argos 8d8c845700b8
+msgid "**Drying of thin films.** On a coarse bed, water that is thinner than the grain roughness does not flow over the bed: it stands within the grains and, in nature, drains into the ground. A 2D model has no ground below the bed, so such a film remains where it is and makes the wetted area appear much larger than it is. On the Isar case, water shallower than 1 cm covered 13 % of the wetted area and held 0.16 % of the water. With ``drying.film_infiltration: true``, aXqua removes water that is both shallower than ``film_depth`` (default 0.01 m) and slower than ``film_velocity`` (default 0.005 m/s), and returns it where the porous body gives water back, so that no water is lost. The option therefore requires the exchange with a porous body (``gain_lose``). In the case settings, it is the frame *Drying of thin films* of the page *Initial conditions*, whose information button explains it."
+msgstr "**Passer des films minces.** Sur un lit grossier, l'eau qui est plus mince que le grain rugosité ne coule pas sur le lit : elle se trouve dans les grains et, dans la nature, s'écoule dans le sol. Un modèle 2D n'a pas de sol sous le lit, donc un tel film reste là où il est et rend la zone mouillée beaucoup plus grande qu'il est. Sur le cas d'Isar, l'eau moins profonde que 1 cm couvrait 13 % de la surface mouillée et contenait 0,16 % de l'eau. Avec ``drying.film_infiltration: true``, aXqua enlève l'eau qui est à la fois plus faible que ``film_depth`` (par défaut 0,01 m) et plus lente que ``film_velocity`` (par défaut 0,005 m/s), et la retourne là où le corps poreux rend l'eau, de sorte qu'aucune eau ne soit perdue. L'option nécessite donc l'échange avec un corps poreux (``gain_lose``). Dans les paramètres cas, c'est le cadre *Drying of thin films* de la page *Initial conditions*, dont l'information bouton l'explique."
+
+# machine translation: argos 296db56f0fff
+msgid "Mesh configuration"
+msgstr "Maillage configuration"
+
+# machine translation: argos 605f4c94d314
+msgid "The computational mesh divides the region of interest into triangles. Small triangles resolve the flow in more detail but increase the computing time strongly. aXqua therefore uses different resolutions in different zones:"
+msgstr "Le maillage computationnel divise la zone d'étude en triangles. Les petits triangles résolvent le flux plus en détail mais augmentent fortement le temps de calcul. aXqua utilise donc des résolutions différentes dans différentes zones :"
+
+# machine translation: argos 3d842be78353
+msgid "``channel`` zones receive triangles that are stretched along the centerline, because the flow varies less along the channel than across it;"
+msgstr "``channel`` les zones reçoivent des triangles qui sont étirés le long de l'axe du chenal, parce que le débit varie moins le long du chenal qu'à travers lui ;"
+
+# machine translation: argos 6de53d5212d4
+msgid "``floodplain`` zones receive larger triangles of regular shape;"
+msgstr "``floodplain`` les zones reçoivent de plus grands triangles de forme régulière ;"
+
+# machine translation: argos 6257e894d0df
+msgid "``refinement`` zones receive small triangles of regular shape, for example around a structure."
+msgstr "``refinement`` les zones reçoivent de petits triangles de forme régulière, par exemple autour d'une structure."
+
+# machine translation: argos a4bceff8b3ac
+msgid "The edge length of each zone is read from the field ``Max Edge Length (m)`` of the mesh zone layer, so that the resolution is set in QGIS. The ``mesh`` block provides the values that apply where this field is empty:"
+msgstr "La longueur des bords de chaque zone est lue à partir du champ ``Max Edge Length (m)`` de la zone de maillage couche, de sorte que la résolution est définie dans QGIS. Le bloc ``mesh`` fournit les valeurs qui s'appliquent lorsque ce champ est vide :"
+
+# machine translation: argos 08400253435e
+msgid "The default values produce a fine mesh. A reach of 0.3 km² then has several hundred thousand triangles. Use larger edge lengths while boundaries and roughness are still being checked, and refine afterwards. The mesh convergence study determines which resolution is sufficient (:doc:`mesh-convergence`)."
+msgstr "Les valeurs par défaut produisent une fine maillage. Un tronçon de 0,3 km2 puis a plusieurs centaines de milliers de triangles. Utilisez des longueurs de bord plus grandes tandis que frontières et rugosité sont encore en cours de vérification, et affiner ensuite. L'étude de convergence en maillage détermine quelle résolution est suffisante (:doc:`mesh-convergence`)."
+
+# machine translation: argos c4be0244cd0c
+msgid "Without mesh zones and a centerline, aXqua creates a mesh of uniform resolution (``default_size``)."
+msgstr "Sans zones de maillage et axe du chenal, aXqua crée un maillage de résolution uniforme (``default_size``)."
+
+# machine translation: argos 05d67e76dffe
+msgid "**OpenFOAM lattice.** The OpenFOAM model is built on a lattice of columns in plan with layers in the vertical (:ref:`preprocessing-openfoam-choices`). Its resolution is set on the same page of the case settings, in the frame *OpenFOAM lattice*. With ``openfoam.cell_size_factor``, the cell size of the lattice follows the edge length in the channel: 3 makes the lattice three times coarser than the TELEMAC mesh, so that a change of the TELEMAC mesh carries over. Without the factor, ``openfoam.cell_size`` is used as it is. ``openfoam.n_layers`` is the number of layers in the vertical."
+msgstr "**OpenFOAM treillis.** Le modèle OpenFOAM est construit sur un réseau de colonnes en plan avec couches dans la verticale (:ref:`preprocessing-openfoam-choices`). Sa résolution est définie sur la même page des paramètres cas, dans le cadre *OpenFOAM lattice*. Avec ``openfoam.cell_size_factor``, la taille de maille du treillis suit la longueur de bord dans le chenal : 3 rend le treillis trois fois plus grossier que le TELEMAC maillage, de sorte qu'un changement du TELEMAC maillage se prolonge. Sans le facteur, ``openfoam.cell_size`` est utilisé tel quel. ``openfoam.n_layers`` est le nombre de couches dans la verticale."
+
+# machine translation: argos c436e03cf1c3
+msgid "Wall roughness"
+msgstr "Rugosité des parois"
+
+# machine translation: argos a35552fd6a0c
+msgid "Flowing water experiences friction forces at the riverbed and the banks. These forces depend on the roughness of the wetted surfaces, and they determine the water depth for a given discharge. Roughness is therefore the most important parameter of a hydraulic model, and it is the parameter that is usually calibrated."
+msgstr "L'eau qui coule connaît des forces de friction au lit de la rivière et sur les rives. Ces forces dépendent de la rugosité des surfaces mouillées, et elles déterminent la hauteur d'eau pour un débit donné. La rugosité est donc le paramètre le plus important d'un modèle hydraulique, et c'est le paramètre habituellement étalonné."
+
+# machine translation: argos 7cc0c0bd9d4b
+msgid "aXqua describes roughness by the **equivalent sand roughness** :math:`k_s` (in meters) after Nikuradse, which is a length of the order of the coarse grains of the bed. Each polygon of the layer ``roughness_zones`` carries an integer ``Zone ID``, and the table ``roughness_table`` assigns a :math:`k_s` value to each ID:"
+msgstr "aXqua décrit rugosité par la **rugosité équivalente de sable** :math:`k_s` (en mètres) après Nikuradse, qui est une longueur de l'ordre des grains grossiers du lit. Chaque polygone de la couche ``roughness_zones`` porte un entier ``Zone ID``, et le tableau ``roughness_table`` attribue une valeur :math:`k_s` à chaque ID :"
+
+# machine translation: argos 5a094303fce7
+msgid "In this example, zone 1 is the gravel bed of the channel and zone 2 is a vegetated floodplain. The ``friction`` block contains the roughness of the closed walls at the model outline and the values that apply without roughness zones:"
+msgstr "Dans cet exemple, la zone 1 est le lit de gravier de la chenal et la zone 2 est une végétation lit majeur. Le bloc ``friction`` contient le rugosité de la parois fermées à la contour du modèle et les valeurs qui s'appliquent sans zones de rugosité:"
+
+# machine translation: argos 87ad9582f0fa
+msgid "The :math:`k_s` values of the zones are starting values. The calibration adjusts them within the limits set by the user (:doc:`calibration-validation`)."
+msgstr "Les valeurs :math:`k_s` des zones sont des valeurs de départ. Le calage les ajuste dans les limites fixées par l'utilisateur (:doc:`calibration-validation`)."
+
+# machine translation: argos fd21b9c2d134
+msgid "Hydraulic simulation"
+msgstr "Simulation hydraulique"
+
+# machine translation: argos a75f125c1660
+msgid "The ``hydrodynamics`` block controls the hydraulic simulation with TELEMAC. Most entries have default values that are suited for water bodies with dry and wet areas. The entries that a user typically sets are:"
+msgstr "Le bloc ``hydrodynamics`` contrôle la simulation hydraulique avec TELEMAC. La plupart des entrées ont des valeurs par défaut qui sont adaptées aux plans d'eau avec des zones sèches et humides. Les entrées qu'un utilisateur définit habituellement sont :"
+
+# machine translation: argos b12e92d9ea21
+msgid "``duration`` has to be long enough for the reach to fill and for the flow to become steady. A steady state is reached when the same discharge leaves the model that enters it. aXqua evaluates this balance after each run and compares the relative difference with ``flux_tolerance``. The default of 0.1 % is far smaller than the uncertainty of a discharge measurement."
+msgstr "``duration`` doit être assez longue pour que le tronçon se remplisse et que le flux devienne stable. Un régime permanent est atteint lorsque le même débit quitte le modèle qui l'entre. aXqua évalue cet équilibre après chaque course et compare la différence relative avec ``flux_tolerance``. La valeur par défaut de 0,1 % est bien inférieure à l'incertitude d'une mesure débit."
+
+# machine translation: argos 627b87e9242e
+msgid "With ``turbulence_model: auto``, aXqua selects the turbulence model from the mesh resolution relative to the water depth. The time step is adapted automatically during the run, so that the simulation remains stable (``desired_courant``)."
+msgstr "Avec ``turbulence_model: auto``, aXqua sélectionne le modèle de turbulence de la résolution du maillage par rapport à la hauteur d'eau. Le pas de temps est adapté automatiquement pendant la course, de sorte que la simulation reste stable (``desired_courant``)."
+
+# machine translation: argos 1d2f704b2a7c
+msgid "The number of processor cores is a property of the computer and is set in its profile (``mpi_processes``, :ref:`solver-bindings`). Where the profile names no number, ``telemac.n_processors`` of the case file applies. The settings of the 3D simulation with OpenFOAM are described in :ref:`preprocessing-openfoam-choices`."
+msgstr "Le nombre de cœurs de processeur est une propriété de l'ordinateur et est défini dans son profil (``mpi_processes``, :ref:`solver-bindings`). Lorsque le profil ne donne aucun numéro, ``telemac.n_processors`` du fichier de cas s'applique. Les paramètres de la simulation 3D avec OpenFOAM sont décrits dans :ref:`preprocessing-openfoam-choices`."
+
+# machine translation: argos 2cd10b4a743f
+msgid "Morphodynamic simulation"
+msgstr "Simulation morphodynamique"
+
+# machine translation: argos 0e5777f596c8
+msgid "A morphodynamic simulation computes sediment transport and the resulting change of the bed (:doc:`morphodynamic-simulations`). The page *Morphodynamic simulation* of the case settings has three frames: sediment transport with TELEMAC and GAIA (the block ``morphodynamics``), fine sediment over a fixed bed with OpenFOAM (``fine_sediment``, :ref:`help-morphodynamics-openfoam`), and the DEM of difference (``dem_of_difference``). Sediment transport with GAIA is activated in the ``morphodynamics`` block, which describes the sediment:"
+msgstr "Une simulation morphodynamique calcule le transport des sédiments et le changement résultant du lit (:doc:`morphodynamic-simulations`). La page *Morphodynamic simulation* des paramètres cas comporte trois cadres : le transport des sédiments avec TELEMAC et GAIA (le bloc ``morphodynamics``), les sédiments fins sur un lit fixe avec OpenFOAM (``fine_sediment``, :ref:`help-morphodynamics-openfoam`), et le MNT de différence (``dem_of_difference``). Le transport des sédiments avec GAIA est activé dans le bloc ``morphodynamics``, qui décrit les sédiments :"
+
+# machine translation: argos 540a4df8d528
+msgid "Each sediment class is defined by its grain diameter (in meters), its density and its critical Shields parameter, which is the dimensionless shear stress at which grains start to move."
+msgstr "Chaque classe de sédiments est définie par son diamètre de grain (en mètres), sa densité et son paramètre critique Shields, qui est la contrainte de cisaillement sans dimension à laquelle les grains commencent à se déplacer."
+
+# machine translation: argos 718de6a43335
+msgid "The measured riverbed change serves as the reference for the calibration of a morphodynamic model. It is the difference of two terrain surveys, which is called a **DEM of difference** (DoD). With the following block, aXqua computes the DoD from ``geodata.dem_target`` and ``geodata.dem_initial``:"
+msgstr "Le changement mesuré de lit de la rivière sert de référence pour le calage d'un modèle morphodynamique. C'est la différence de deux relevés de terrain, qui est appelé un **MNT de différence** (DoD). Avec le bloc suivant, aXqua calcule le DoD de ``geodata.dem_target`` et ``geodata.dem_initial``:"
+
+# machine translation: argos 5a5a93f362e8
+msgid "Elevation changes that are smaller than the combined uncertainty of the two surveys cannot be distinguished from measurement error. aXqua removes them from the DoD. The limit is called the level of detection and results from the two accuracy values and the confidence level. Alternatively, ``min_lod`` sets the limit directly."
+msgstr "Les changements d'élévation moins importants que l'incertitude combinée des deux enquêtes ne peuvent être distingués de l'erreur de mesure. aXqua les enlève du DoD. La limite est appelée le niveau de détection et les résultats des deux valeurs de précision et le niveau de confiance. Sinon, ``min_lod`` fixe la limite directement."
+
+# machine translation: argos 5291b5fe9451
+msgid "Where the riverbed stays in place and only its content of fine sediment changes, the simulation is defined in the ``fine_sediment`` block instead. It names the grain size of the fine sediment and its concentration in the water that enters the model:"
+msgstr "Lorsque le lit de la rivière reste en place et que son contenu de sédiments fins change, la simulation est définie dans le bloc ``fine_sediment``. Il nomme la taille des grains des sédiments fins et sa concentration dans l'eau qui entre dans le modèle :"
+
+# machine translation: argos 052d3c3e6c16
+msgid "This simulation is computed with OpenFOAM. All entries of the block are explained in :ref:`help-morphodynamics-openfoam`."
+msgstr "Cette simulation est calculée avec OpenFOAM. Toutes les entrées du bloc sont expliquées à :ref:`help-morphodynamics-openfoam`."

@@ -26,8 +26,9 @@ extensions = [
 ]
 
 templates_path = ["_templates"]
-# _incoming/ is a drop folder for text that still has to be folded into the tree.
-exclude_patterns = ["_build", "_incoming", "Thumbs.db", ".DS_Store"]
+# _incoming/ is a drop folder for text that still has to be folded into the tree. i18n/ holds the
+# tools of the translations and locale/ their catalogs; neither has pages.
+exclude_patterns = ["_build", "_incoming", "i18n", "locale", "Thumbs.db", ".DS_Store"]
 
 # -- Autodoc ------------------------------------------------------------------
 autodoc_member_order = "bysource"
@@ -72,6 +73,17 @@ def _literal_absolute_values(app, what, name, obj, options, lines):
 def setup(app):
     app.connect("autodoc-process-docstring", _literal_absolute_values)
 
+
+# -- Translations -------------------------------------------------------------
+# The German and French pages are built from the catalogs in docs/locale/<lang>/LC_MESSAGES, one per
+# page, which docs/i18n/translate.py keeps up to date (docs/i18n/README.md). Sphinx reads them when
+# it builds with -D language=de or fr; Read the Docs does the same for a translation project. The
+# English build does not read them.
+locale_dirs = ["locale/"]
+gettext_compact = False
+gettext_uuid = False
+gettext_last_translator = "docs/i18n/translate.py"
+gettext_language_team = "aXqua"
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

@@ -633,6 +633,18 @@ def _run_install(argv: list[str]) -> int:
     return installcli.run_install(argv)
 
 
+def _run_docs(argv: list[str]) -> int:
+    """``axqua docs`` - where the documentation is (:mod:`axqua.docscli`)."""
+    from axqua import docscli
+    return docscli.run_docs(argv)
+
+
+def _run_cleanup(argv: list[str]) -> int:
+    """``axqua cleanup`` - files of a case that can go (:mod:`axqua.cleanupcli`)."""
+    from axqua import cleanupcli
+    return cleanupcli.run_cleanup(argv)
+
+
 def _run_profile(argv: list[str]) -> int:
     """``axqua profile`` - late-bound like the job verbs, and for the same reason."""
     from axqua import profilecli
@@ -744,6 +756,8 @@ _DISPATCH = {
     "schema": lambda argv: _case_cli("run_schema", argv),
     "case": lambda argv: _case_cli("run_case", argv),
     "check": lambda argv: _case_cli("run_check", argv),
+    "docs": lambda argv: _run_docs(argv),
+    "cleanup": lambda argv: _run_cleanup(argv),
 }
 
 

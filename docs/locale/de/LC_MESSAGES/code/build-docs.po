@@ -1,0 +1,72 @@
+# German translation of the aXqua documentation, page code/build-docs.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos 5e8e0f74a725
+msgid "Building the documentation"
+msgstr "Aufbau der Dokumentation"
+
+# machine translation: argos a02f8669e10b
+msgid "The documentation is written in reStructuredText and built with `Sphinx <https://www.sphinx-doc.org>`_. The build requires only Sphinx and the theme. The packages that aXqua needs at run time are replaced by placeholders during the build (``autodoc_mock_imports`` in ``docs/conf.py``)."
+msgstr "Die Dokumentation ist in reStructuredText geschrieben und mit `Sphinx <https://www.sphinx-doc.org>`_ aufgebaut. Der Build erfordert nur Sphinx und das Thema. Die Pakete, die aXqua zur Laufzeit benötigt, werden während des Builds durch Platzhalter ersetzt (``autodoc_mock_imports`` in ``docs/conf.py``)."
+
+# machine translation: argos e2c9b53390c5
+msgid "Open ``docs/_build/html/index.html`` in a web browser to read the result. The output folder ``docs/_build/`` is excluded from version control."
+msgstr "Öffnen Sie ``docs/_build/html/index.html`` in einem Webbrowser, um das Ergebnis zu lesen. Der Ausgabeordner ``docs/_build/`` ist von der Versionskontrolle ausgeschlossen."
+
+# machine translation: argos b2ee3d6c7e43
+msgid "Languages and publication"
+msgstr "Sprachen und Veröffentlichung"
+
+# machine translation: argos 9da024d63ac4
+msgid "The documentation is published twice. `Read the Docs <https://axqua.readthedocs.io>`_ builds the English pages from the branch ``main`` by itself, with the commands above, and serves them at ``axqua.readthedocs.io`` and ``axqua.ch``. `GitHub Pages <https://axqua.eu>`_ serves the English pages at ``axqua.eu`` together with a German translation at ``axqua.eu/de/`` and a French one at ``axqua.eu/fr/``; ``axqua.de`` and ``axqua.fr`` forward there. The German and French pages are machine translations, and every page says so."
+msgstr "Die Dokumentation wird zweimal veröffentlicht. `Read the Docs <https://axqua.readthedocs.io>`_ baut die englischen Seiten aus dem Zweig ``main`` selbst, mit den oben genannten Befehlen, und bedient sie unter ``axqua.readthedocs.io`` und ``axqua.ch``. `GitHub Pages <https://axqua.eu>`_ bedient die englischen Seiten unter ``axqua.eu`` zusammen mit einer deutschen Übersetzung unter ``axqua.eu/de/`` und einer französischen Übersetzung unter ``axqua.eu/fr/``; ``axqua.de`` und ``axqua.fr`` vorwärts dort. Die deutsche und die französische Seite sind maschinelle Übersetzungen, und jede Seite sagt es so."
+
+# machine translation: argos f4b6d05815c8
+msgid "The translations are kept per page in ``docs/locale/<language>/LC_MESSAGES/``, in the gettext format that Sphinx reads. They require a separate environment with the offline translation engine Argos Translate, and they are published with one script in the root folder of the repository:"
+msgstr "Die Übersetzungen werden pro Seite in ``docs/locale/<language>/LC_MESSAGES/`` gespeichert, in dem Gettext-Format, das Sphinx liest. Sie erfordern eine separate Umgebung mit der Offline-Übersetzungsmaschine Argos Translate und werden mit einem Skript im Stammordner des Repository veröffentlicht:"
+
+# machine translation: argos fee71a126318
+msgid "``deploy.sh`` builds the English pages, translates only the paragraphs that are new or changed since the last publication, builds the German and French pages, and copies the result into the worktree of the branch ``gh-pages``. With ``--push``, it commits the updated translations on ``main``, pushes ``main`` (which also updates Read the Docs), and commits and pushes ``gh-pages``. It refuses to publish uncommitted changes."
+msgstr "``deploy.sh`` erstellt die englischen Seiten, übersetzt nur die Absätze, die seit der letzten Veröffentlichung neu sind oder geändert wurden, erstellt die deutschen und französischen Seiten und kopiert das Ergebnis in den Worktree der Niederlassung ``gh-pages``. Mit ``--push`` verpflichtet es die aktualisierten Übersetzungen unter ``main``, drückt ``main`` (was auch Read the Docs aktualisiert) und verpflichtet und drückt ``gh-pages``. Sie weigert sich, unverbindliche Änderungen zu veröffentlichen."
+
+# machine translation: argos 1762e64d42db
+msgid "A glossary of technical terms for each language (``docs/i18n/glossary.de.tsv`` and ``glossary.fr.tsv``) makes the engine use the terms of hydraulic engineering, for example *Abflusskurve* and *courbe de tarage* for rating curve. Labels of the plugin in single asterisks, code in double backquotes, and titles of papers in the lists of references are never translated. A translation that was corrected by hand in a catalog is kept as long as the English text does not change. ``docs/i18n/README.md`` explains the glossaries, the corrections by hand and the settings of the scripts."
+msgstr "Ein Glossar mit Fachbegriffen für jede Sprache (``docs/i18n/glossary.de.tsv`` und ``glossary.fr.tsv``) lässt den Motor die Begriffe der Wassertechnik verwenden, zum Beispiel *Abflusskurve* und *courbe de tarage* für Abflusskurve. Labels des Plugins in einzelnen Sternchen, Code in doppelten Backquotes und Titel von Papieren in den Referenzlisten werden nie übersetzt. Eine Übersetzung, die in einem Katalog von Hand korrigiert wurde, wird so lange aufbewahrt, wie sich der englische Text nicht ändert. ``docs/i18n/README.md`` erklärt die Glossare, die Korrekturen von Hand und die Einstellungen der Skripte."
+
+# machine translation: argos ba3a01244a46
+msgid "Rules for the structure"
+msgstr "Vorschriften für die Struktur"
+
+# machine translation: argos 7f61a132e3d3
+msgid "The outline of sections and subsections is fixed and verified by the test ``tests/test_docs_outline.py``. Change the test together with the outline."
+msgstr "Die Gliederung der Abschnitte und Unterabschnitte wird durch den Test ``tests/test_docs_outline.py`` fixiert und verifiziert. Ändern Sie den Test zusammen mit der Gliederung."
+
+# machine translation: argos 7454327b2b13
+msgid "Each subsection is one file. Subsubsections are headings within that file."
+msgstr "Jeder Unterabschnitt ist eine Datei. Unterabschnitte sind Überschriften innerhalb dieser Datei."
+
+# machine translation: argos 723c20f1ca85
+msgid "The navigation menu shows the sections, which are set in bold capital letters. The subsections of a section are folded. They open when the section is opened with its fold button or when one of its pages is shown, and the subsubsections of a subsection open in the same way. This behavior is defined by ``html_theme_options`` in ``docs/conf.py`` and by ``docs/_static/axqua.css``."
+msgstr "Das Navigationsmenü zeigt die Abschnitte, die in fetten Großbuchstaben gesetzt sind. Die Teilabschnitte eines Abschnitts sind gefaltet. Sie öffnen sich, wenn der Abschnitt mit seiner Falte Schaltfläche oder wenn eine seiner Seiten angezeigt wird, und die Unterabschnitte eines Unterabschnitts öffnen sich auf die gleiche Weise. Dieses Verhalten wird von ``html_theme_options`` in ``docs/conf.py`` und von ``docs/_static/axqua.css`` definiert."
+
+# machine translation: argos 96b21c8f9831
+msgid "Labels that start with ``help-`` mark the targets that the plugin opens from its tabs. Keep them when a page is reorganized."
+msgstr "Labels, die mit ``help-`` beginnen, markieren die Ziele, die das Plugin von seinen Registerkarten aus öffnet. Behalten Sie sie, wenn eine Seite neu organisiert wird."
+
+# machine translation: argos 6bd98d3088b3
+msgid "The screenshots of the plugin (``docs/img/gui-*.png``) are taken by ``python scripts/build_screenshots.py --case <case-file>``, which starts QGIS without a window, frames and numbers the places that a caption explains, and replaces the folders of the computer by neutral ones. The case has to be built and to have a completed steady job. The script ends with an error and names the figure if a place that a caption explains is not on the screen, and it records the number of marks of each figure in ``docs/img/gui-screenshots.json``, which the test compares with the captions. Run the script again after a change to the plugin that a picture shows."
+msgstr "Die Screenshots des Plugins (``docs/img/gui-*.png``) werden von ``python scripts/build_screenshots.py --case <case-file>`` gemacht, das QGIS ohne Fenster startet, die Stellen, die eine Bildunterschrift erklärt, einrahmt und numeriert und die Ordner des Computers durch neutrale ersetzt. Der Fall muss gebaut werden und einen abgeschlossenen festen Job haben. Das Skript endet mit einem Fehler und benennt die Figur, wenn ein Ort, den eine Beschriftung erklärt, nicht auf dem Bildschirm ist, und es zeichnet die Anzahl der Markierungen jeder Figur in ``docs/img/gui-screenshots.json`` auf, die der Test mit den Beschriftungen vergleicht. Führen Sie das Skript nach einer Änderung des Plugins, das ein Bild zeigt, erneut aus."
+
+# machine translation: argos ffa6053145a6
+msgid "The UML diagrams (``docs/img/uml-*.svg``) are generated from the source code with ``python scripts/build_uml.py``, which requires `Graphviz <https://graphviz.org>`_. The same test fails if a diagram no longer agrees with the code. Run the script again in that case."
+msgstr "Die UML-Diagramme (``docs/img/uml-*.svg``) werden aus dem Quellcode mit ``python scripts/build_uml.py`` generiert, was `Graphviz <https://graphviz.org>`_ erfordert. Derselbe Test schlägt fehl, wenn ein Diagramm nicht mehr mit dem Code übereinstimmt. Führen Sie das Skript erneut in diesem Fall aus."

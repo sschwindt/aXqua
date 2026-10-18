@@ -1,0 +1,64 @@
+# French translation of the aXqua documentation, page installation/postprocessors.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos d2201bd47639
+msgid "Postprocessors"
+msgstr "Après traitement"
+
+# machine translation: argos af3838c3c046
+msgid "QGIS displays depth-averaged results directly and needs no additional software. Three-dimensional results are best viewed with a dedicated visualization program. aXqua works with two of them, and both are optional."
+msgstr "QGIS affiche directement les résultats en moyenne de profondeur et n'a pas besoin de logiciels supplémentaires. Les résultats tridimensionnels sont mieux vus avec un programme de visualisation dédié. aXqua fonctionne avec deux d'entre eux, et les deux sont facultatifs."
+
+# machine translation: argos 56505e530dc9
+msgid "Both programs are installed by a wizard. On a computer that runs OpenFOAM, the OpenFOAM wizard installs them together with the solvers (:ref:`install-openfoam`). On a computer that runs TELEMAC only, click *Install ParaView and VisIt...* in the box *Simulation & postprocessing software* of the *Configuration* tab. The wizard has two settings, the installation folder of VisIt and the selection of the programs, and works as described for the simulation software (:doc:`simulation-software`). It is available on Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. The same installation is started in a terminal with ``axqua install start postprocessors``."
+msgstr "Les deux programmes sont installés par un assistant. Sur un ordinateur qui exécute OpenFOAM, l'assistant OpenFOAM les installe avec les solveurs (:ref:`install-openfoam`). Sur un ordinateur qui fonctionne uniquement TELEMAC, cliquez sur *Install ParaView and VisIt...* dans la boîte *Simulation & postprocessing software* de l'onglet *Configuration*. L'assistant a deux paramètres, l'installation du dossier VisIt et la sélection des programmes, et fonctionne comme décrit pour le logiciel de simulation (:doc:`simulation-software`). Il est disponible sur Debian 12, Ubuntu 22.04, Ubuntu 24.04 et Linux Mint 22. La même installation est lancée dans un terminal avec ``axqua install start postprocessors``."
+
+# machine translation: argos ae9863d7ce1f
+msgid "**Selection of the programs.** *ParaView and VisIt* is the default. *ParaView only* leaves VisIt out: nothing is downloaded, and the wizard enters the ParaView of the operating system in the profile. The OpenFOAM wizard offers the same selection and, in addition, *None*. In a terminal, the option ``--no-visit`` leaves VisIt out. aXqua recommends installing VisIt, because it renders its predefined three-dimensional figures with VisIt (:ref:`help-postprocessing-visit`). Without VisIt, these figures are not available, and three-dimensional results are inspected interactively in ParaView. VisIt can be installed at any time afterwards with the same wizard."
+msgstr "**Sélection des programmes.** *ParaView and VisIt* est la valeur par défaut. *ParaView only* leaves VisIt out : rien n'est téléchargé, et l'assistant entre dans le ParaView du système d'exploitation dans le profil. L'assistant OpenFOAM offre la même sélection et, en outre, *None*. Dans un terminal, l'option ``--no-visit`` laisse VisIt out. aXqua recommande d'installer VisIt, car il rend ses chiffres tridimensionnels prédéfinis avec VisIt (:ref:`help-postprocessing-visit`). Sans VisIt, ces chiffres ne sont pas disponibles, et les résultats tridimensionnels sont inspectés interactivement dans ParaView. VisIt peut être installé à tout moment après avec le même assistant."
+
+# machine translation: argos 997ac07dc59c
+msgid "`VisIt <https://visit-dav.github.io/visit-website/>`_ is the program with which aXqua renders its predefined three-dimensional figures (:ref:`help-postprocessing-visit`). aXqua is tested with VisIt 3.5.0."
+msgstr "`VisIt <https://visit-dav.github.io/visit-website/>`_ est le programme avec lequel aXqua rend ses figures tridimensionnelles prédéfinies (:ref:`help-postprocessing-visit`). aXqua est testé avec VisIt 3.5.0."
+
+# machine translation: argos c5d13210aabb
+msgid "The wizard downloads VisIt 3.5.0 for the operating system in use from the VisIt project (600 MB), verifies the download against its published checksum, and installs it into the selected folder. This requires no administrator rights. The wizard then enters the VisIt **launcher**, which is the file ``bin/visit`` of the installation, in the profile of the computer (:ref:`plugin-profile`)."
+msgstr "L'assistant télécharge VisIt 3.5.0 pour le système d'exploitation utilisé à partir du projet VisIt (600 MB), vérifie le téléchargement en fonction de son bilan publié et l'installe dans le dossier sélectionné. Cela ne nécessite aucun droit d'administrateur. L'assistant entre alors le VisIt **launcher**, qui est le fichier ``bin/visit`` de l'installation, dans le profil de l'ordinateur (:ref:`plugin-profile`)."
+
+# machine translation: argos 27c1b67e97d1
+msgid "For a VisIt that is installed already, select its installation folder in the profile editor. aXqua then enters the launcher. The same is achieved by one entry in the profile file:"
+msgstr "Pour un VisIt déjà installé, sélectionnez son installation dossier dans l'éditeur de profil. aXqua entre alors dans le lanceur. La même chose est obtenue par une entrée dans le fichier de profil :"
+
+# machine translation: argos 79d1ef24accf
+msgid "``axqua profile init`` enters the launcher automatically if the command ``visit`` can be started from a terminal or if VisIt is installed in ``/opt``."
+msgstr "``axqua profile init`` entre automatiquement le lanceur si la commande ``visit`` peut être lancée à partir d'un terminal ou si VisIt est installée à ``/opt``."
+
+# machine translation: argos 95c1044d91d6
+msgid "ParaView"
+msgstr "ParaView"
+
+# machine translation: argos f0e85116cd70
+msgid "`ParaView <https://www.paraview.org/download/>`_ is suited for the interactive inspection of three-dimensional results."
+msgstr "`ParaView <https://www.paraview.org/download/>`_ est adapté pour l'inspection interactive des résultats tridimensionnels."
+
+# machine translation: argos 9728afce42af
+msgid "The wizards use the ParaView package of the operating system, which is one of the system packages listed on the *Check* tab. Installing it requires administrator rights (:doc:`simulation-software`). Once the package is installed, the wizard enters the program ``/usr/bin/paraview`` in the profile under ``postprocessors.paraview``. A newer ParaView from the ParaView website can be used instead: unpack it and select the unpacked folder as the installation folder of ParaView in the profile editor."
+msgstr "Les assistants utilisent le paquet ParaView du système d'exploitation, qui est l'un des paquets système énumérés sur l'onglet *Check*. L'installation nécessite des droits d'administrateur (:doc:`simulation-software`). Une fois le paquet installé, l'assistant entre le programme ``/usr/bin/paraview`` dans le profil sous ``postprocessors.paraview``. Un nouveau ParaView du site Web de ParaView peut être utilisé à la place : le décompresser et sélectionner le dossier décompilé comme l'installation dossier de ParaView dans l'éditeur de profil."
+
+# machine translation: argos 5db2c1197ff2
+msgid "ParaView opens an OpenFOAM case directly. It does not read the result format of TELEMAC (SELAFIN), and neither does VisIt. aXqua therefore exports TELEMAC results into a format that both programs read (:ref:`help-postprocessing-paraview`)."
+msgstr "ParaView ouvre un OpenFOAM cas directement. Il ne lit pas le format de résultat de TELEMAC (SELAFIN), et non plus VisIt. aXqua exporte donc les résultats de TELEMAC dans un format que les deux programmes lisent (:ref:`help-postprocessing-paraview`)."
+
+# machine translation: argos d682215a5cd1
+msgid "TELEMAC itself is distributed with the source code of a ParaView plugin that reads SELAFIN files (``optionals/addons/Paraview_Plugins/SerafinReader`` in the TELEMAC folder). This plugin has to be compiled for the version of ParaView in use and does not exist for VisIt. The export of aXqua requires neither."
+msgstr "TELEMAC lui-même est distribué avec le code source d'une extension ParaView qui lit les fichiers SELAFIN (``optionals/addons/Paraview_Plugins/SerafinReader`` dans le dossier TELEMAC). Cette extension doit être compilée pour la version de ParaView utilisée et n'existe pas pour VisIt. L'exportation d'aXqua n'exige pas."

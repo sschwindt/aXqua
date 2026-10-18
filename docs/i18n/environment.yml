@@ -1,0 +1,24 @@
+# The environment that builds the documentation in English, German and French and
+# translates what changed (docs/i18n/build_i18n.sh, deploy.sh). It is separate from
+# axqua-env on purpose: Argos Translate brings PyTorch, spaCy and Stanza, which
+# neither aXqua nor a plain English build of the documentation needs.
+#
+#   mamba env create -f docs/i18n/environment.yml
+#
+# The first translation downloads the English-German and English-French models of
+# Argos Translate (about 100 MB each) into ~/.local/share/argos-translate.
+name: axqua-docs
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - rsync
+  - pip:
+      # PyTorch without CUDA: the translation runs on the CPU, and the CUDA wheels
+      # are several gigabytes.
+      - --extra-index-url https://download.pytorch.org/whl/cpu
+      - sphinx>=7.0
+      - sphinx-rtd-theme>=2.0
+      - sphinx-design>=0.6
+      - argostranslate>=1.11

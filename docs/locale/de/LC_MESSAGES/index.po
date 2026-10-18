@@ -1,0 +1,64 @@
+# German translation of the aXqua documentation, page index.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos cf95b75a55e8
+msgid "Purpose"
+msgstr "Zweck"
+
+# machine translation: argos 8419ab7ffdac
+msgid "aXqua"
+msgstr "aXqua"
+
+# machine translation: argos 17f198d2c303
+msgid "About"
+msgstr "Über"
+
+# machine translation: argos c2a4c2b0b02c
+msgid "aXqua is designed as a QGIS plugin to support numerical simulations of surface waters with the open-source codes `TELEMAC <http://www.opentelemac.org/>`_ and `OpenFOAM <https://www.openfoam.com/>`_. This vibe-coded plugin is hosted on `GitHub <https://github.com/sschwindt/aXqua/>`_ and maintained by `Sebastian Schwindt <https://sebastian-schwindt.org/>`_ with the help of `Claude Code <https://claude.com/product/claude-code>`_. Installing the QGIS plugin requires a backend installation of the aXqua code, so please make sure to follow **each step** in the :doc:`installation/qgis-plugin` and :doc:`installation/plugin-setup` sections, including instructions to get ready with TELEMAC and OpenFOAM, as well as `ParaView <https://www.paraview.org/>`_, and `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_ for post-processing. This documentation is published at `axqua.eu <https://axqua.eu>`_."
+msgstr "aXqua wurde als QGIS-Plugin entwickelt, um numerische Simulationen von Oberflächengewässern mit den Open-Source-Codes `TELEMAC <http://www.opentelemac.org/>`_ und `OpenFOAM <https://www.openfoam.com/>`_ zu unterstützen. Dieses vibe-codierte Plugin wird auf `GitHub <https://github.com/sschwindt/aXqua/>`_ gehostet und von `Sebastian Schwindt <https://sebastian-schwindt.org/>`_ mit Hilfe von `Claude Code <https://claude.com/product/claude-code>`_ gepflegt. Die Installation des QGIS-Plugins erfordert eine Backend-Installation des aXqua-Codes, also achten Sie bitte darauf, **jeder Schritt** in den Abschnitten :doc:`installation/qgis-plugin` und :doc:`installation/plugin-setup` zu folgen, einschließlich Anweisungen, um sich mit TELEMAC und OpenFOAM sowie `ParaView <https://www.paraview.org/>`_ und `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_ für die Nachbearbeitung vorzubereiten. Diese Dokumentation wird unter `axqua.eu <https://axqua.eu>`_ veröffentlicht."
+
+# machine translation: argos c0bcbd7f703c
+msgid "Building a numerical model by hand involves many steps in which input files can silently disagree, for instance, a boundary numbering that does not match the mesh or a roughness zone that does not match the terrain. aXqua derives all input files from one case description, so that the same inputs always produce the same model. Specifically, aXqua sets up, runs and evaluates standardized numerical simulations of georeferenced free-surface water bodies including hydraulic structures with the open-source codes `TELEMAC <http://www.opentelemac.org/>`_ and `OpenFOAM <https://www.openfoam.com/>`_. The software treats each case as a **reach** (computational domain) that is described once, by a digital elevation model, boundaries, wall roughness, and field measurements. Both TELEMAC and OpenFOAM read that one description, so that a depth-averaged two-dimensional (2D) model and a three-dimensional (3D) model of the same reach rely on identical input data. The workflow covers the following steps that also decide whether a simulation result can be trusted via mesh convergence studies and uncertainty quantification:"
+msgstr "Das Erstellen eines numerischen Modells von Hand beinhaltet viele Schritte, in denen Eingabedateien stillschweigend widersprechen können, zum Beispiel eine Randnummerierung, die nicht zum Rechennetz passt, oder eine Rauheitszone, die nicht zum Gelände passt. aXqua leitet alle Eingabedateien aus einer Fallbeschreibung ab, so dass dieselben Eingaben immer dasselbe Modell ergeben. Konkret erstellt, führt und bewertet aXqua standardisierte numerische Simulationen von georeferenzierten freien Oberflächen-Wasserkörpern einschließlich Wasserbauwerke mit den Open-Source-Codes `TELEMAC <http://www.opentelemac.org/>`_ und `OpenFOAM <https://www.openfoam.com/>`_. Die Software behandelt jeden Fall als einen **Flussabschnitt**, der einmal beschrieben wird, von einem digitalen Geländemodell, Ränder, Wandrauheit und Feldmessungen. Sowohl TELEMAC als auch OpenFOAM haben diese eine Beschreibung gelesen, so dass ein tiefgemitteltes zweidimensionales (2D) Modell und ein dreidimensionales (3D) Modell desselben Flussabschnitts auf identischen Eingangsdaten beruhen. Der Workflow umfasst folgende Schritte, die auch darüber entscheiden, ob ein Simulationsergebnis über Netzkonvergenzstudien und Unsicherheitsquantifizierung vertrauenswürdig ist:"
+
+# machine translation: argos 3507e8b18f59
+msgid "**Preprocessing** converts geodata into a computational mesh, boundary conditions, and input files (:doc:`usage/preprocessing`)."
+msgstr "**Preprocessing** konvertiert Geodaten in Rechennetz, Randbedingungen und Eingabedateien (:doc:`usage/preprocessing`)."
+
+# machine translation: argos 9a0220a2b2a2
+msgid "**Hydraulic simulations** begin with a TELEMAC run on a dry riverbed. The result serves as the starting point for 3D simulations with TELEMAC-3D or OpenFOAM (:doc:`usage/hydraulic-simulations`)."
+msgstr "**Hydraulische Simulationen** beginnen mit einem TELEMAC-Lauf auf einer trockenen Flusssohle. Das Ergebnis dient als Ausgangspunkt für 3D-Simulationen mit TELEMAC-3D oder OpenFOAM (:doc:`usage/hydraulic-simulations`)."
+
+# machine translation: argos 3c904ca64772
+msgid "**Mesh convergence studies** quantify how much a result depends on the mesh resolution, with the grid convergence index of Celik et al. (2008) (:doc:`usage/mesh-convergence`)."
+msgstr "**Netzkonvergenzstudien** quantifizieren, wie sehr ein Ergebnis von der Netzauflösung abhängt, mit dem Netzkonvergenzindex von Celik et al. (2008) (:doc:`usage/mesh-convergence`)."
+
+# machine translation: argos 0917f0a26005
+msgid "**Morphodynamic simulations** add sediment transport and bed elevation change (:doc:`usage/morphodynamic-simulations`)."
+msgstr "**Morphodynamische Simulationen** fügen Sedimenttransport und Sohlhöhenänderung hinzu (:doc:`usage/morphodynamic-simulations`)."
+
+# machine translation: argos 4d0fd8bee5d0
+msgid "**Calibration and validation** adjust uncertain model parameters to field measurements with a surrogate-assisted Bayesian method (Oladyshkin et al. 2020) and report the remaining uncertainty (:doc:`usage/calibration-validation`) based on the `hydroBayesCal <https://hydrobayescal.readthedocs.io>`_ project."
+msgstr "**Kalibrierung und Validierung** Anpassung unsicherer Modellparameter an Feldmessungen mit einer surrogate-assistierten Bayes-Methode (Oladyshkin et al. 2020) und Meldung der verbleibenden Unsicherheit (:doc:`usage/calibration-validation`) basierend auf dem `hydroBayesCal <https://hydrobayescal.readthedocs.io>`_-Projekt."
+
+# machine translation: argos 099157083a09
+msgid "**Postprocessing** turns results into maps and figures (:doc:`usage/postprocessing`) via QGIS, `ParaView <https://www.paraview.org/>`_, and `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_."
+msgstr "**Postprocessing** wandelt Ergebnisse in Karten und Zahlen (:doc:`usage/postprocessing`) über QGIS, `ParaView <https://www.paraview.org/>`_ und `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_ um."
+
+# machine translation: argos e84014b95419
+msgid "aXqua is operated from a QGIS plugin, because the geodata of a reach is usually open in GIS software already. **Simulations** run as independent jobs outside of QGIS and **continue when QGIS is closed**. Every function is also available from a terminal without QGIS (:doc:`automation/index`)."
+msgstr "aXqua wird über ein QGIS-Plugin betrieben, da die Geodaten eines Flussabschnitts in der Regel bereits in der GIS-Software geöffnet sind. **Simulationen** werden als unabhängige Jobs außerhalb von QGIS ausgeführt und **setzen fort, wenn QGIS geschlossen ist**. Jede Funktion ist auch bei Terminal ohne QGIS (:doc:`automation/index`) verfügbar."
+
+# machine translation: argos efa1980f3f33
+msgid "References"
+msgstr "Referenzen"

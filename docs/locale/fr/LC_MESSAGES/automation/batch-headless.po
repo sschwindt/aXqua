@@ -1,0 +1,156 @@
+# French translation of the aXqua documentation, page automation/batch-headless.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos 6473ee9def0a
+msgid "Batch-processing (headless)"
+msgstr "Batch-processing (sans tête)"
+
+# machine translation: argos d1281f2513c0
+msgid "Headless batch-processing runs simulations on a computer without a graphical desktop and without supervision. Its basis is the **job**: a simulation that runs as an independent process and keeps running after the terminal that started it has been closed."
+msgstr "Le traitement par lots sans tête exécute des simulations sur un ordinateur sans bureau graphique et sans supervision. Sa base est le **tâche**: une simulation qui fonctionne comme un processus indépendant et continue de fonctionner après que le terminal qui a commencé a été fermé."
+
+# machine translation: argos 2a8888bc3df5
+msgid "Jobs"
+msgstr "Tâches"
+
+# machine translation: argos 60b0f0ee836b
+msgid "The command creates a job, starts it in the background, prints the job ID and returns immediately. The terminal can then be closed, and a connection to a remote computer can be ended. The following job kinds exist:"
+msgstr "La commande crée une tâche, la démarre en arrière-plan, imprime l'ID tâche et retourne immédiatement. Le terminal peut alors être fermé, et une connexion à un ordinateur distant peut être terminée. Les types de tâche suivants existent :"
+
+# machine translation: argos c807a7fd3b34
+msgid "Kind"
+msgstr "Genre"
+
+# machine translation: argos 405089c38856
+msgid "Function"
+msgstr "Fonction"
+
+# machine translation: argos 0bedd0e91d9e
+msgid "Build the TELEMAC model."
+msgstr "Construire le modèle TELEMAC."
+
+# machine translation: argos eb130facb82e
+msgid "Run the steady 2D simulation."
+msgstr "Lancez la simulation 2D stable."
+
+# machine translation: argos e1c6f879ec4a
+msgid "Run the simulation with a varying discharge."
+msgstr "Lancez la simulation avec un débit variable."
+
+# machine translation: argos c6b5ce4d50d0
+msgid "Write and run the TELEMAC-3D model."
+msgstr "Écrire et exécuter le modèle TELEMAC-3D."
+
+# machine translation: argos e9e9b81deff8
+msgid "Run the mesh convergence study."
+msgstr "Exécutez l'étude de convergence en maillage."
+
+# machine translation: argos cf9db7ddc05d
+msgid "Run the study of the number of vertical layers."
+msgstr "Exécuter l'étude du nombre de verticale couches."
+
+# machine translation: argos 48f399e904ee
+msgid "Build and run the OpenFOAM model."
+msgstr "Construire et exécuter le modèle OpenFOAM."
+
+# machine translation: argos b372a1c2de16
+msgid "Build and run the simulation of fine sediment over a fixed bed (:ref:`help-morphodynamics-openfoam`)."
+msgstr "Construire et exécuter la simulation de sédiments fins sur un lit fixe (:ref:`help-morphodynamics-openfoam`)."
+
+# machine translation: argos d1c2f7c58488
+msgid "Run the Bayesian calibration."
+msgstr "Dirigez le calage bayésien."
+
+# machine translation: argos 754979e6645e
+msgid "Settings of a single run are passed with ``--option``, and the number of processor cores with ``--np``:"
+msgstr "Les paramètres d'une seule exécution sont passés avec ``--option``, et le nombre de cœurs de processeur avec ``--np``:"
+
+# machine translation: argos 8cc5101b46d3
+msgid "An unknown option is rejected before the job is created."
+msgstr "Une option inconnue est rejetée avant la création de la tâche."
+
+# machine translation: argos 4a4213338059
+msgid "Each job has its own folder in the job root. The default job root is ``~/.local/share/axqua/jobs``. Another folder is selected with ``--job-root`` or with the environment variable ``AXQUA_JOB_ROOT``."
+msgstr "Chaque tâche a son propre dossier dans la racine de tâche. La racine de tâche par défaut est ``~/.local/share/axqua/jobs``. Un autre dossier est sélectionné avec ``--job-root`` ou avec la variable environnement ``AXQUA_JOB_ROOT``."
+
+# machine translation: argos 69da73e2f7f5
+msgid "The job stores the settings of the case at the time of submission. A later change of the case file does not affect a running job, and a completed job remains reproducible."
+msgstr "La tâche stocke les réglages du cas au moment de la soumission. Un changement ultérieur du fichier de cas n'affecte pas une tâche en cours d'exécution, et une tâche achevée reste reproductible."
+
+# machine translation: argos a0b98f89ec84
+msgid "Monitor and control jobs"
+msgstr "Surveiller et contrôler les tâches"
+
+# machine translation: argos c748472bc202
+msgid "A job passes through the states ``QUEUED``, ``STARTING``, ``RUNNING`` and ``POSTPROCESSING`` and ends as ``COMPLETED``, ``FAILED`` or ``CANCELLED``. If the process of a job disappears, for example because the computer was restarted, the next status query marks the job as ``FAILED``. A job therefore never remains in the state ``RUNNING`` by mistake."
+msgstr "Une tâche passe par les états ``QUEUED``, ``STARTING``, ``RUNNING`` et ``POSTPROCESSING`` et se termine par ``COMPLETED``, ``FAILED`` ou ``CANCELLED``. Si le processus d'une tâche disparaît, par exemple parce que l'ordinateur a été redémarré, la prochaine requête de statut marque la tâche comme ``FAILED``. Une tâche ne reste donc jamais dans l'état ``RUNNING`` par erreur."
+
+# machine translation: argos b373fef15465
+msgid "To examine a failed job, read ``runner.log`` first. It contains the error with a code and a suggested remedy (:doc:`../troubleshooting/index`). The command ``axqua execute <job-id>`` repeats the job in the foreground, so that all messages appear in the terminal."
+msgstr "Pour examiner une tâche échouée, lisez d'abord ``runner.log``. Il contient l'erreur avec un code et un remède suggéré (:doc:`../troubleshooting/index`). La commande ``axqua execute <job-id>`` répète la tâche au premier plan, afin que tous les messages apparaissent dans la terminal."
+
+# machine translation: argos e485160f117c
+msgid "Sequences of jobs"
+msgstr "Séquences des tâches"
+
+# machine translation: argos 3aab571db22e
+msgid "TELEMAC jobs of one case run one after the other. A job that is submitted while another job of the same case is running waits until that job has ended, so that the steps of a sequence can be submitted in direct succession. The builds of the OpenFOAM models and the fine sediment simulation wait in the same sequence, because they start from the steady 2D result. A run of the OpenFOAM model (``openfoam-run``) does not wait: submit it when its build has ended. A waiting job does not check whether the previous job succeeded. The following script for Linux therefore runs the preprocessing, the dry run and the mesh convergence study of a case in sequence and stops when a step fails:"
+msgstr "TELEMAC Les tâches d'un cas courent l'un après l'autre. Une tâche qui est soumise alors qu'une autre tâche du même cas est en cours d'attente jusqu'à ce que cette tâche soit terminée, de sorte que les étapes d'une séquence puissent être soumises en succession directe. Les constructions des modèles OpenFOAM et de la simulation sédiments fins attendent dans la même séquence, car elles partent du résultat 2D stable. Une exécution du modèle OpenFOAM (``openfoam-run``) n'attend pas : soumettez-le à la fin de sa construction. Une attente tâche ne vérifie pas si la précédente tâche a réussi. Le script suivant pour Linux exécute donc le prétraitement, la course à sec et l'étude de convergence en maillage d'un cas en séquence et s'arrête lorsqu'une étape échoue :"
+
+# machine translation: argos 494efd80b371
+msgid "Start such a script with ``nohup bash my-study.sh &`` so that it continues after the terminal is closed."
+msgstr "Commencez un tel script avec ``nohup bash my-study.sh &`` afin qu'il continue après la fermeture de terminal."
+
+# machine translation: argos 3fcbfaaf270f
+msgid "To repeat a step for several discharges, create one case file per discharge and call ``run_step`` in a loop over the case files."
+msgstr "Pour répéter une étape pour plusieurs débits, créez une fichier de cas per débit et appelez ``run_step`` en boucle au-dessus de fichiers de cas."
+
+# machine translation: argos 0607f9ab86c1
+msgid "How jobs are detached"
+msgstr "Comment les tâches sont détachées"
+
+# machine translation: argos 5841d62440fc
+msgid "aXqua reads the environment of the simulation software once when a job is submitted and passes it to the job directly. The job therefore does not depend on the settings of the terminal from which it was started. The method of detaching depends on the operating system and is selected automatically:"
+msgstr "aXqua lit l'environnement du logiciel de simulation une fois lorsqu'une tâche est soumise et la transmet directement à la tâche. La tâche ne dépend donc pas des paramètres de la terminal à partir de laquelle elle a été lancée. La méthode de détachage dépend du système d'exploitation et est sélectionnée automatiquement :"
+
+# machine translation: argos d56e91299e7c
+msgid "Launcher"
+msgstr "Lanceur"
+
+# machine translation: argos 4ba4739db33c
+msgid "Method"
+msgstr "Méthode"
+
+# machine translation: argos 3777ec7b331a
+msgid "A user service of the Linux system. Preferred on Linux."
+msgstr "Un service utilisateur du système Linux. Préféré sur Linux."
+
+# machine translation: argos a4fb7416a021
+msgid "A separate process group. Used on Linux and macOS when no user services are available, for example in some remote sessions."
+msgstr "Un groupe de processus distinct. Utilisé sur Linux et macOS quand aucun service utilisateur n'est disponible, par exemple dans certaines sessions distantes."
+
+# machine translation: argos 03b3178fe194
+msgid "A Windows job object."
+msgstr "Un objet tâche Windows."
+
+# machine translation: argos 30586ab41142
+msgid "A process inside the Windows Subsystem for Linux."
+msgstr "Un processus à l'intérieur du sous-système Windows pour Linux."
+
+# machine translation: argos e9ca6c13bc98
+msgid "Another launcher is selected with ``--launcher``. The launchers ``windows`` and ``wsl`` have not yet been tested on a real Windows installation."
+msgstr "Un autre lanceur est sélectionné avec ``--launcher``. Les lanceurs ``windows`` et ``wsl`` n'ont pas encore été testés sur une installation Windows réelle."
+
+# machine translation: argos 1b11b108aa5c
+msgid "Cancelling a job first asks the job to end itself, so that it can close its files. If the job does not react within 20 seconds, aXqua stops all of its processes, including the parallel processes of the simulation code."
+msgstr "L'annulation d'une tâche demande d'abord à la tâche de se terminer, afin qu'elle puisse fermer ses dossiers. Si la tâche ne réagit pas en 20 secondes, aXqua arrête tous ses processus, y compris les processus parallèles du code de simulation."

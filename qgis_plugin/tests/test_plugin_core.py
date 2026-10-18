@@ -913,8 +913,9 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 7 tabs, 7 sub-tabs, 3 installation wizards and the window of the example case
-    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 1
+    # 7 tabs, 7 sub-tabs, 3 installation wizards and the windows of the example case and of
+    # Clean Up
+    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 2
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
@@ -953,19 +954,58 @@ def test_a_capability_nobody_placed_still_gets_shown():
     assert sections.placement("delft3d", "tides") == ("hydraulics", "")
 
 
-def test_help_opens_the_online_documentation_at_the_section_of_the_tab():
-    """The user's decision of 2026-10-16: Help opens the online documentation, not a
-    copy built into the plugin."""
+def test_help_opens_the_published_documentation_at_the_section_of_the_tab():
+    """Without a copy built on this computer, Help opens the published documentation (no copy
+    is built into the plugin)."""
     from axqua_plugin.gui import help as help_pages
 
     assert help_pages.url_for("hydraulics", "mesh") == (
-        "https://axqua.readthedocs.io/en/latest/usage/mesh-convergence.html"
-        "#help-mesh-convergence")
+        "https://axqua.eu/usage/mesh-convergence.html#help-mesh-convergence")
     assert help_pages.url_for("postprocessing", "visit").endswith(
         "usage/postprocessing.html#help-postprocessing-visit")
     assert help_pages.url_for_window("install-telemac").endswith(
         "installation/simulation-software.html#install-telemac")
     assert not hasattr(help_pages, "LOCAL")
+
+
+def test_help_opens_the_documentation_in_the_language_of_qgis(monkeypatch):
+    from axqua_plugin.gui import help as help_pages
+
+    monkeypatch.setattr(help_pages, "language", lambda: "de")
+    assert help_pages.url_for("case") == "https://axqua.eu/de/usage/case-setup.html#help-case-setup"
+    monkeypatch.setattr(help_pages, "language", lambda: "fr")
+    assert help_pages.url_for("case").startswith("https://axqua.eu/fr/usage/")
+
+
+def test_help_opens_a_copy_built_on_this_computer_when_the_browser_can_read_it(tmp_path,
+                                                                             monkeypatch):
+    """The user's decision of 2026-10-18: the local copy first, the published one otherwise."""
+    from axqua_plugin.gui import help as help_pages
+
+    site = tmp_path / "site"
+    help_pages.configure({"local": str(site), "languages": ["en", "de"], "readable": True})
+    assert help_pages.url_for("case") == f"{site.as_uri()}/usage/case-setup.html#help-case-setup"
+    monkeypatch.setattr(help_pages, "language", lambda: "de")
+    assert help_pages.url_for("case").startswith(f"{site.as_uri()}/de/usage/")
+    monkeypatch.setattr(help_pages, "language", lambda: "fr")      # not built in French
+    assert help_pages.url_for("case").startswith(f"{site.as_uri()}/usage/")
+    # a browser in a sandbox that cannot read the copy gets the published documentation
+    help_pages.configure({"local": str(site), "languages": ["en"], "readable": False})
+    assert help_pages.url_for("case").startswith("https://axqua.eu/fr/")
+
+
+def test_a_local_page_is_opened_through_a_page_that_keeps_its_section(tmp_path):
+    """xdg-open and Chromium drop the part after # of a file address."""
+    from axqua_plugin.gui import help as help_pages
+
+    site = tmp_path / "site"
+    site.mkdir()
+    help_pages.configure({"local": str(site), "languages": ["en"], "readable": True})
+    url = help_pages.url_for("case")
+    page = help_pages.forwarding_page(url)
+    assert page == site / "_help" / "open.html"
+    text = page.read_text(encoding="utf-8")
+    assert f'content="0; url={url}"' in text and f'location.replace("{url}")' in text
 
 
 def test_a_finding_links_to_its_code_on_the_page_of_its_severity():

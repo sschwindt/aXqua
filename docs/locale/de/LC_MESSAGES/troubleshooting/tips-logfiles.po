@@ -1,0 +1,144 @@
+# German translation of the aXqua documentation, page troubleshooting/tips-logfiles.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos b3dcce8d4962
+msgid "General tips & logfiles"
+msgstr "Allgemeine Tipps & Logfiles"
+
+# machine translation: argos 1291f588f449
+msgid "Tips"
+msgstr "Tipps"
+
+# machine translation: argos 6762f6f753b7
+msgid "**Start with a coarse mesh.** The default edge lengths produce a fine mesh with long computing times. Use larger edge lengths while the boundaries, the roughness and the initial state are still being verified, and refine afterwards (:ref:`case-mesh`)."
+msgstr "**Beginnen Sie mit einem groben Rechennetz.** Die voreingestellten Kantenlängen ergeben ein feines Rechennetz mit langen Rechenzeiten. Verwenden Sie größere Kantenlängen, während der Ränder, der Rauheit und der Ausgangszustand noch verifiziert werden, und verfeinern Sie danach (:ref:`case-mesh`)."
+
+# machine translation: argos b85d531aaa4a
+msgid "**Check before building.** ``axqua <case-file> --check`` verifies the case file, the input files and the simulation software within a second and detects most problems that would otherwise stop the preprocessing after several minutes."
+msgstr "**Überprüfen Sie vor dem Bau.** ``axqua <case-file> --check`` überprüft die Fall-Datei, die Eingabedateien und die Simulationssoftware innerhalb einer Sekunde und erkennt die meisten Probleme, die das Preprocessing sonst nach einigen Minuten stoppen würden."
+
+# machine translation: argos 5a3c6f69f4e0
+msgid "**Read the log of the preprocessing before starting a simulation.** The mesh quality, the assignment of the boundaries and the initial state are decided during preprocessing and are reported in its log file."
+msgstr "**Lesen Sie das Protokoll des Preprocessing vor dem Start einer Simulation.** Die Rechennetz-Qualität, die Zuordnung des Ränders und der Anfangszustand werden unter Preprocessing entschieden und in dessen Log-Datei gemeldet."
+
+# machine translation: argos aaffebd0b3d2
+msgid "**Test an OpenFOAM model with the rigid lid first.** A coarse run in the mode ``rigid-lid`` takes minutes and reveals errors in the mesh and the boundaries before a long run is started (:ref:`preprocessing-openfoam-choices`)."
+msgstr "**Testen Sie zuerst ein OpenFOAM-Modell mit dem starren Deckel.** Ein grober Lauf im Modus ``rigid-lid`` dauert Minuten und zeigt Fehler im Rechennetz und im Ränder auf, bevor ein langer Lauf gestartet wird (:ref:`preprocessing-openfoam-choices`)."
+
+# machine translation: argos b2baf8278654
+msgid "**Repeat a failed job in the foreground.** ``axqua execute <job-id>`` runs the job in the terminal, so that all messages are visible."
+msgstr "**Wiederholen Sie einen fehlgeschlagenen Job im Vordergrund.** ``axqua execute <job-id>`` führt den Job im Terminal aus, so dass alle Nachrichten sichtbar sind."
+
+# machine translation: argos 46a99c262b1a
+msgid "**Use the same minimum water depth in all evaluations.** The evaluations of aXqua regard water shallower than ``hydrodynamics.wet_depth`` (0.01 m) as dry. Apply the same limit in QGIS, ParaView and VisIt, so that maps and reported numbers agree."
+msgstr "**Verwenden Sie das gleiche Minimum Wassertiefe in allen Auswertungen.** Die Auswertungen von aXqua betrachten Wasser flacher als ``hydrodynamics.wet_depth`` (0,01 m) als trocken. Wenden Sie den gleichen Grenzwert in QGIS, ParaView und VisIt an, damit Karten und gemeldete Zahlen übereinstimmen."
+
+# machine translation: argos fe46ce276124
+msgid "Logfiles"
+msgstr "Logfiles"
+
+# machine translation: argos c4d47aa8a25b
+msgid "aXqua records every step in log files. Which file to read depends on how the step was started."
+msgstr "aXqua zeichnet jeden Schritt in Logfiles auf. Welche Datei gelesen werden soll, hängt davon ab, wie der Schritt gestartet wurde."
+
+# machine translation: argos 87d616a4ba25
+msgid "File"
+msgstr "Datei"
+
+# machine translation: argos 494ee59b268b
+msgid "Content"
+msgstr "Inhalt"
+
+# machine translation: argos 92e67647690c
+msgid "The log of a workflow step. Each step writes its own file into its output folder, for example ``axqua-case/simulation/axqua.log`` for the preprocessing and the first run."
+msgstr "Das Protokoll eines Workflowschritts. Jeder Schritt schreibt seine eigene Datei in seinen Ausgabeordner, zum Beispiel ``axqua-case/simulation/axqua.log`` für Preprocessing und den ersten Durchlauf."
+
+# machine translation: argos 77730ad2fa93
+msgid "The log of a job: its states, the commands that were issued and, if the job failed, the error with its remedy."
+msgstr "Das Protokoll eines Jobs: seine Zustände, die Befehle, die ausgegeben wurden und, wenn der Job fehlschlug, der Fehler mit seiner Abhilfe."
+
+# machine translation: argos 242849b729c4
+msgid "The output of the simulation code for a job."
+msgstr "Die Ausgabe des Simulationscodes für einen Auftrag."
+
+# machine translation: argos 1bca23aade83
+msgid "The listing of TELEMAC, in the model folder. It contains the messages of TELEMAC itself and the discharges at the boundaries."
+msgstr "Die Auflistung von TELEMAC im Modellordner. Es enthält die Nachrichten von TELEMAC selbst und den Abflüssen am Ränder."
+
+# machine translation: argos bee61df4ebff
+msgid "The mesh check of OpenFOAM, in the OpenFOAM case folder."
+msgstr "Der Rechennetz-Check von OpenFOAM, im OpenFOAM Fall-Ordner."
+
+# machine translation: argos f3230d3bfac7
+msgid "In the plugin, *View logs* below the job list opens the log of the selected job. The messages of the plugin itself are listed in the QGIS panel *Log Messages* on the tab *aXqua*."
+msgstr "Im Plugin öffnet *View logs* unterhalb der Jobliste das Protokoll des ausgewählten Jobs. Die Nachrichten des Plugins selbst sind im QGIS-Panel *Log Messages* auf der Registerkarte *aXqua* aufgeführt."
+
+# machine translation: argos 46560c42ee3c
+msgid "A line of ``axqua.log`` consists of the time, the level of the message and the text. Search the file for the two levels that require attention:"
+msgstr "Eine Zeile von ``axqua.log`` besteht aus der Zeit, der Ebene der Nachricht und dem Text. Durchsuchen Sie die Datei nach den beiden Ebenen, die Aufmerksamkeit erfordern:"
+
+# machine translation: argos feb67ad8afb3
+msgid "The step continued, but the result may be affected. Each warning should be understood before the result is used (:doc:`warnings`)."
+msgstr "Der Schritt ging weiter, aber das Ergebnis kann beeinflusst werden. Jede Warnung sollte verstanden werden, bevor das Ergebnis verwendet wird (:doc:`warnings`)."
+
+# machine translation: argos 94d24654cdca
+msgid "The step could not be completed (:doc:`errors`)."
+msgstr "Der Schritt konnte nicht abgeschlossen werden (:doc:`errors`)."
+
+# machine translation: argos ece243df8a99
+msgid "The lines ``START`` and ``DONE ... in N s`` mark the beginning and the end of each part of a step. They show where a step failed and how long each part took."
+msgstr "Die Zeilen ``START`` und ``DONE ... in N s`` markieren den Anfang und das Ende jedes Teils eines Schrittes. Sie zeigen, wo ein Schritt fehlschlug und wie lange jeder Teil dauerte."
+
+# machine translation: argos fbb12ca327e5
+msgid "If a simulation stops without an error message of aXqua, the cause is usually reported by the simulation code. Read the end of the ``.sortie`` listing (TELEMAC) or the end of the output of the simulation code in the folder ``solver/`` of the job (OpenFOAM)."
+msgstr "Wenn eine Simulation ohne eine Fehlermeldung von aXqua stoppt, wird die Ursache in der Regel durch den Simulationscode gemeldet. Lesen Sie das Ende des ``.sortie`` Listing (TELEMAC) oder das Ende der Ausgabe des Simulationscodes im Ordner ``solver/`` des Jobs (OpenFOAM)."
+
+# machine translation: argos 47b1551780aa
+msgid "Freeing disk space"
+msgstr "Freigeben des Scheibenraums"
+
+# machine translation: argos c5169ec4397e
+msgid "A case collects files that nothing needs any more, and results that are larger than they have to be. A steady TELEMAC run writes every time step into its result, of which aXqua reads only the last one; on a reach with a few hundred thousand nodes such a result takes about 1 GB, and every run of a calibration or of a mesh convergence study writes one. *Clean Up*, left of *Help* above the tabs of the plugin, lists for one case at a time what can go, by category and with the space it frees:"
+msgstr "Ein Fall sammelt Dateien, die nichts mehr braucht, und Ergebnisse, die größer sind, als sie sein müssen. Ein stetiger TELEMAC-Lauf schreibt jeden Zeitschritt in sein Ergebnis, von dem aXqua nur den letzten liest; auf einem Flussabschnitt mit einigen hunderttausend Knoten dauert ein solches Ergebnis etwa 1 GB, und jeder Lauf einer Kalibrierung oder einer Netzkonvergenzstudie schreibt einen. *Clean Up*, links von *Help* über den Registerkarten des Plugins, listet für einen Fall auf, was gehen kann, nach Kategorie und mit dem Speicherplatz, den es freigibt:"
+
+# machine translation: argos c41b36af7af2
+msgid "working folders that TELEMAC leaves behind when a run was stopped or failed;"
+msgstr "Arbeitsordner, die TELEMAC hinterlässt, wenn ein Lauf gestoppt wurde oder fehlgeschlagen ist;"
+
+# machine translation: argos 2c3cb38ef3c9
+msgid "listings of the single processors of a parallel run, and listings of earlier runs (the newest listing of each steering file is kept);"
+msgstr "Listen der einzelnen Prozessoren eines Parallellaufs und Listen früherer Läufe (die neueste Liste jeder Steuerdatei wird beibehalten);"
+
+# machine translation: argos a5de7544465d
+msgid "**time steps of TELEMAC results**: the result is rewritten with the last time step only, or with every 5th or 10th time step and the last one. The kept time steps are copied unchanged. The last time step is the one that aXqua reads, from which a hotstart continues and which QGIS shows, so these keep working; an animation of the run loses the removed time steps;"
+msgstr "**Zeitschritte von TELEMAC-Ergebnissen**: das Ergebnis wird nur mit dem letzten Zeitschritt oder mit jedem 5. oder 10. Zeitschritt und dem letzten umgeschrieben. Die gespeicherten Zeitschritte werden unverändert kopiert. Der letzte Zeitschritt ist derjenige, den aXqua liest, von dem ein Hotstart weitergeht und den QGIS zeigt, also funktionieren diese weiter; eine Animation des Laufs verliert die entfernten Zeitschritte;"
+
+# machine translation: argos b85f81d4d485
+msgid "processor folders of OpenFOAM runs that were reconstructed, the time folders between the start and the latest time, and the results of an earlier run that OpenFOAM set aside in ``previous-run``;"
+msgstr "Prozessorordner von OpenFOAM-Läufen, die rekonstruiert wurden, die Zeitordner zwischen dem Start und der letzten Zeit und die Ergebnisse eines früheren Laufs, den OpenFOAM in ``previous-run``;"
+
+# machine translation: argos 48c477a812b3
+msgid "exports for ParaView and VisIt, which *Export* makes again."
+msgstr "Exporte für ParaView und VisIt, die *Export* wieder macht."
+
+# machine translation: argos 89a122a3692c
+msgid "The categories that need no second thought are ticked; the time steps are not. *Remove selected* asks before anything is removed, and removed files cannot be restored. The input files, the case file, the built model (geometry, boundary conditions, steering and friction files, initial conditions) and the last time step of a result are never listed, and neither are the processor folders of an OpenFOAM run that was not reconstructed, which hold the only copy of its results. Nothing is removed while a job of the case is waiting or running. In a terminal, ``axqua cleanup <case-file>`` lists the same items and ``--remove`` removes them (:doc:`../automation/terminal-syntax`)."
+msgstr "Die Kategorien, die keinen zweiten Gedanken brauchen, werden angekreuzt; die Zeitschritte sind es nicht. *Remove selected* fragt, bevor etwas entfernt wird, und entfernte Dateien können nicht wiederhergestellt werden. Die Eingabedateien, die Falldatei, das erstellte Modell (Geometrie, Randbedingungen, Lenk- und Reibungsdateien, Anfangsbedingungen) und der letzte Zeitschritt eines Ergebnisses werden nie aufgeführt, ebenso wenig wie die Prozessorordner eines nicht rekonstruierten OpenFOAM-Laufs, die die einzige Kopie seiner Ergebnisse enthalten. Nichts wird entfernt, während ein Job des Falls wartet oder läuft. In einem Terminal listet ``axqua cleanup <case-file>`` die gleichen Elemente auf und ``--remove`` entfernt sie (:doc:`../automation/terminal-syntax`)."
+
+# machine translation: argos c039434011f8
+msgid "Reporting a problem"
+msgstr "Melden eines Problems"
+
+# machine translation: argos d7278aaedd3f
+msgid "Report problems at https://github.com/sschwindt/aXqua/issues. Include the version of aXqua (``axqua --version``), the version of QGIS, the operating system, and the relevant log file."
+msgstr "Melden Sie Probleme unter https://github.com/sschwindt/aXqua/issues. Fügen Sie die Version von aXqua (``axqua --version``), die Version von QGIS, das Betriebssystem und die entsprechende Protokolldatei hinzu."

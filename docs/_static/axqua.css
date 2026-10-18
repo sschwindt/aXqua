@@ -50,3 +50,25 @@
     /* the theme gives the logo a white backing, which the drop shape does not need */
     background: transparent;
 }
+
+/* Note and info boxes in the colors of aXqua: a frame and a title bar in the dark purple of the
+   icon (the AXQUA_PURPLE of the plugin, qgis_plugin/axqua/gui/style.py) on a light purple. An info
+   box is a free admonition with the class info:
+
+       .. admonition:: About
+          :class: info
+
+   The theme draws these boxes blue, like links, which makes a note look clickable. */
+.rst-content .note,
+.rst-content .admonition.note,
+.rst-content .admonition.info {
+    background: #f3eef8;
+    border: 1px solid #2e014b;
+}
+
+.rst-content .note .admonition-title,
+.rst-content .admonition.note .admonition-title,
+.rst-content .admonition.info .admonition-title {
+    background: #2e014b;
+    color: #ffffff;
+}

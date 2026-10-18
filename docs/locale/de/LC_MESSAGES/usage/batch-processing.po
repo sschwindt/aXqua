@@ -1,0 +1,84 @@
+# German translation of the aXqua documentation, page usage/batch-processing.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos 434c4706791f
+msgid "Batch-processing (visual automation)"
+msgstr "Batch-processing (visuelle Automatisierung)"
+
+# machine translation: argos 002ae0f0fadc
+msgid "A complete study consists of several steps that depend on each other, for example preprocessing, a dry run, a mesh convergence study and a calibration. Batch-processing runs such a sequence without supervision."
+msgstr "Eine vollständige Studie besteht aus mehreren Schritten, die voneinander abhängen, zum Beispiel Preprocessing, einem Trockenlauf, einer Netzkonvergenzstudie und einer Kalibrierung. Batch-processing läuft eine solche Sequenz ohne Aufsicht."
+
+# machine translation: argos 6d382b7e95aa
+msgid "A sequence of steps"
+msgstr "Eine Abfolge von Schritten"
+
+# machine translation: argos 042b499dd728
+msgid "The *Batch-processing* tab lists the steps of the workflow for the active case: the build of the TELEMAC model, the steady 2D simulation, the mesh convergence study, the build and the run of the 3D model, the build and the run of the fine sediment simulation, the Bayesian calibration, and the validation. Tick the steps to run and click *Submit the ticked steps*. aXqua submits one job per step in the order of the list. The jobs of these steps run one after the other for one case, so that each step starts when the step before it has ended. The job list below the tabs shows ``waiting for`` with the ID of the job that a step waits for."
+msgstr "Die Registerkarte *Batch-processing* listet die Schritte des Workflows für den aktiven Fall auf: den Build des TELEMAC-Modells, die stetige 2D-Simulation, die Netzkonvergenzstudie, den Build und den Lauf des 3D-Modells, den Build und den Lauf der Feinsediment-Simulation, die Bayessche Kalibrierung und die Validierung. Klicken Sie auf die auszuführenden Schritte und klicken Sie auf *Submit the ticked steps*. aXqua sendet einen Job pro Schritt in der Reihenfolge der Liste. Die Jobs dieser Schritte laufen einer nach dem anderen für einen Fall, so dass jeder Schritt beginnt, wenn der Schritt vorher beendet ist. Die Jobliste unter den Registerkarten zeigt ``waiting for`` mit der ID des Jobs, auf den ein Schritt wartet."
+
+# machine translation: argos 710f565bd84b
+msgid "The Batch-processing tab of the plugin"
+msgstr "Der Batch-processing-Tab des Plugins"
+
+# machine translation: argos cca9b350eaab
+msgid "The *Batch-processing* tab. (1) The steps of the workflow, each with a check box. (2) *Submit the ticked steps* starts them one after the other. (3) *Generate batch-processing script...* writes the same sequence as a script for a terminal."
+msgstr "Die Registerkarte *Batch-processing*. (1) Die Schritte des Workflows, jeweils mit einem Kontrollkästchen. (2) *Submit the ticked steps* beginnt sie nacheinander. (3) *Generate batch-processing script...* schreibt die gleiche Sequenz wie ein Skript für ein Terminal."
+
+# machine translation: argos 915870f63817
+msgid "A waiting step does not check whether the step before it succeeded. If the build fails, the simulation that follows starts nevertheless and fails with a message that states what is missing. Use the script described below for a sequence that has to stop at the first failed step."
+msgstr "Ein Warteschritt prüft nicht, ob der Schritt vorher gelungen ist. Wenn der Build fehlschlägt, startet die folgende Simulation trotzdem und schlägt mit einer Nachricht fehl, die angibt, was fehlt. Verwenden Sie das unten beschriebene Skript für eine Sequenz, die beim ersten fehlgeschlagenen Schritt gestoppt werden muss."
+
+# machine translation: argos 990d69e04e75
+msgid "**Generate batch-processing script.** The button *Generate batch-processing script...* writes a shell script for the ticked steps and the active case. The script submits the steps one at a time, waits for each job, and stops when a job does not complete. Start it in a terminal with ``nohup bash <script> &``, so that it continues after the terminal is closed (:doc:`../automation/batch-headless`)."
+msgstr "**Generieren Sie Batch-Verarbeitungsskript.** Die Schaltfläche *Generate batch-processing script...* schreibt ein Shell-Skript für die angekreuzten Schritte und den aktiven Fall. Das Skript sendet die Schritte einzeln, wartet auf jeden Job und stoppt, wenn ein Job nicht abgeschlossen ist. Starten Sie es in einem Terminal mit ``nohup bash <script> &``, so dass es weitergeht, nachdem Terminal geschlossen wurde (:doc:`../automation/batch-headless`)."
+
+# machine translation: argos 00b794d1be35
+msgid "Detach: jobs continue without QGIS"
+msgstr "Detach: Jobs gehen ohne QGIS weiter"
+
+# machine translation: argos b7d532b4efb6
+msgid "Every simulation that is started from the plugin is a job that is detached from QGIS when it is submitted. QGIS can be closed afterward, and the computer can be used for other work. When QGIS is opened again, the job list shows all jobs with their current state, including jobs that finished or failed in the meantime. A job that was interrupted by a restart of the computer is marked as failed and can be submitted again. The section *Detach* of the tab states where jobs are kept and how they are detached. Both are set in the profile of this computer (:ref:`help-configuration`)."
+msgstr "Jede Simulation, die aus dem Plugin gestartet wird, ist ein Job, der beim Absenden von QGIS losgelöst wird. QGIS kann danach geschlossen werden, und der Computer kann für andere Arbeiten verwendet werden. Wenn QGIS wieder geöffnet wird, zeigt die Jobliste alle Jobs mit ihrem aktuellen Status an, einschließlich Jobs, die in der Zwischenzeit beendet oder fehlgeschlagen sind. Ein Job, der durch einen Neustart des Computers unterbrochen wurde, wird als fehlgeschlagen markiert und kann erneut eingereicht werden. Der Abschnitt *Detach* des Tabs gibt an, wo Jobs gehalten werden und wie sie losgelöst werden. Beide sind im Profil dieses Computers (:ref:`help-configuration`) eingestellt."
+
+# machine translation: argos 269e3a9a39e6
+msgid "Sequences with the QGIS model designer"
+msgstr "Sequenzen mit dem QGIS Model Designer"
+
+# machine translation: argos bec5cdc98ae1
+msgid "aXqua adds three algorithms to the QGIS *Processing Toolbox*, which can be combined in the model designer of QGIS (menu *Processing*):"
+msgstr "aXqua fügt dem QGIS *Processing Toolbox* drei Algorithmen hinzu, die im Modelldesigner von QGIS kombiniert werden können (Menü *Processing*):"
+
+# machine translation: argos b95b516ae3c3
+msgid "Algorithm"
+msgstr "Algorithmus"
+
+# machine translation: argos 405089c38856
+msgid "Function"
+msgstr "Funktion"
+
+# machine translation: argos 8e0474b1fc7d
+msgid "Checks the case, creates a job and returns its ID. The algorithm does not wait for the simulation."
+msgstr "Prüft den Fall, erstellt einen Job und gibt seine ID zurück. Der Algorithmus wartet nicht auf die Simulation."
+
+# machine translation: argos 2d66c7fb0015
+msgid "Returns the current state and progress of a job."
+msgstr "Gibt den aktuellen Zustand und Fortschritt eines Jobs zurück."
+
+# machine translation: argos f5f26ca2a418
+msgid "Loads the results of a completed job with the predefined map styles."
+msgstr "Laden Sie die Ergebnisse eines abgeschlossenen Auftrags mit den vordefinierten Kartenstilen."
+
+# machine translation: argos 6880a3024b57
+msgid "With these algorithms, the same case can for example be submitted for a series of discharges."
+msgstr "Mit diesen Algorithmen kann der gleiche Fall beispielsweise für eine Reihe von Abflüssen eingereicht werden."

@@ -131,6 +131,21 @@ Tools for input data:
    * - ``axqua migrate <old-file> --to-case``
      - Write a case file of the current type (``.axq-case``) next to a case file of an older aXqua version.
 
+Disk space and documentation:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 44 56
+
+   * - Command
+     - Function
+   * - ``axqua cleanup <case-file>``
+     - List the files of a case that nothing needs any more, by category and with their size. Nothing is removed (:ref:`help-cleanup`).
+   * - ``axqua cleanup <case-file> --remove <id> ...``
+     - Remove the listed items with these identifiers. ``--category <key>`` removes all items of a category, ``--keep every:10`` keeps every tenth time step of a result instead of the last one only.
+   * - ``axqua docs``
+     - Name the copy of this documentation built on this computer, which *Help* in the plugin opens, and the published address.
+
 Running simulations as jobs (:doc:`batch-headless`):
 
 .. list-table::

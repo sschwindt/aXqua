@@ -24,7 +24,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import (QDockWidget, QGroupBox, QPushButton, QSplitter,
+from qgis.PyQt.QtWidgets import (QDockWidget, QGroupBox, QHBoxLayout, QPushButton, QSplitter,
                                  QTabWidget, QVBoxLayout, QWidget)
 
 from ..compat import (CRITICAL, INFO, WARNING, enum_value, exec_dialog, log_message,
@@ -224,7 +224,18 @@ class AxquaDock(QDockWidget):
         self.help_button = QPushButton("Help")
         self.help_button.setToolTip("Open the documentation at the section of this tab")
         self.help_button.clicked.connect(self.open_help)
-        self.tabs.setCornerWidget(self.help_button)
+        # Clean Up left of Help (the user's order of 2026-10-18)
+        self.cleanup_button = QPushButton("Clean Up")
+        self.cleanup_button.setToolTip("Remove files of a case that nothing needs any more, "
+                                       "to free disk space")
+        self.cleanup_button.clicked.connect(self.open_cleanup)
+        corner = QWidget()
+        corner_row = QHBoxLayout(corner)
+        corner_row.setContentsMargins(0, 0, 0, 0)
+        corner_row.setSpacing(2)
+        corner_row.addWidget(self.cleanup_button)
+        corner_row.addWidget(self.help_button)
+        self.tabs.setCornerWidget(corner)
         splitter.addWidget(self.tabs)
 
         #: every page that follows the active case, by (section key, sub key)
@@ -325,6 +336,17 @@ class AxquaDock(QDockWidget):
     def open_help(self) -> str:
         key, sub = self.current_section()
         return help_pages.open_help(key, sub)
+
+    # -- clean up -----------------------------------------------------------------
+    def open_cleanup(self):
+        """The window that removes what the cases no longer need; returns it (for a test)."""
+        from .cleanup_dialog import CleanupDialog
+
+        dialog = CleanupDialog(self.ctx.client, self.ctx.project.case_paths(),
+                               active=self.ctx.project.active_case_path(), parent=self)
+        dialog.show()
+        self._cleanup_dialog = dialog          # kept, or the window is collected at once
+        return dialog
 
     # -- the list of cases --------------------------------------------------------
     def _remember_cases(self) -> None:

@@ -1,0 +1,164 @@
+# German translation of the aXqua documentation, page code/structure-uml.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos a60868eb60b2
+msgid "General structure & UML"
+msgstr "Allgemeine Struktur & UML"
+
+# machine translation: argos 27710d18e640
+msgid "aXqua consists of three parts that can be used independently of each other: a **library** that builds and evaluates models, a **job system** that runs simulations as independent processes, and the **QGIS plugin** as the user interface."
+msgstr "aXqua besteht aus drei Teilen, die unabhängig voneinander verwendet werden können: eine **Bibliothek**, die Modelle erstellt und auswertet, ein **Job-System**, das Simulationen als eigenständige Prozesse ausführt, und das **QGIS-Plugin** als Benutzeroberfläche."
+
+# machine translation: argos 148a7eadc6f1
+msgid "UML package diagram of aXqua"
+msgstr "UML-Paketdiagramm von aXqua"
+
+# machine translation: argos d5ae8e019f4c
+msgid "Packages of aXqua in the notation of the Unified Modeling Language (UML). A dashed arrow points from a package to a package that it uses. The plugin is connected by a solid arrow, because it does not use the library as program code: it starts the program ``axqua`` and reads the files that the program writes."
+msgstr "Pakete von aXqua in der Notation der Unified Modeling Language (UML). Ein gestrichelter Pfeil zeigt von einem Paket zu einem Paket, das es verwendet. Das Plugin ist durch einen festen Pfeil verbunden, weil es die Bibliothek nicht als Programmcode verwendet: Es startet das Programm ``axqua`` und liest die Dateien, die das Programm schreibt."
+
+# machine translation: argos b05dc7658878
+msgid "The diagram shows the three design rules that are stated below: no arrow leads from the core to a backend, none connects the two backends, and the plugin reaches the library through the command line only. The diagrams of this section are generated from the source code with the script ``scripts/build_uml.py`` and therefore show the code as it is."
+msgstr "Das Diagramm zeigt die drei Designregeln, die unten angegeben sind: kein Pfeil führt vom Kern zu einem Backend, keiner verbindet die beiden Backends und das Plugin Flussabschnitte die Bibliothek nur über die Kommandozeile. Die Diagramme dieses Abschnitts werden aus dem Quellcode mit dem Skript ``scripts/build_uml.py`` generiert und zeigen daher den Code so, wie er ist."
+
+# machine translation: argos be2a0580e0c6
+msgid "Class diagrams of the central data structures are part of the pages that document them:"
+msgstr "Klassendiagramme der zentralen Datenstrukturen sind Teil der Seiten, die sie dokumentieren:"
+
+# machine translation: argos 93825f46734f
+msgid "the case description, with one class per block of a case file (:ref:`uml-case`);"
+msgstr "die Fallbeschreibung, mit einer Klasse pro Block einer Fall-Datei (:ref:`uml-case`);"
+
+# machine translation: argos 393f0930932e
+msgid "the profile of the computer and the messages of the checks (:ref:`uml-computer`);"
+msgstr "das Profil des Computers und die Nachrichten der Überprüfungen (:ref:`uml-computer`);"
+
+# machine translation: argos 646efb0795bb
+msgid "the simulation codes behind one interface, and their capabilities (:ref:`uml-backends`);"
+msgstr "die Simulationscodes hinter einer Schnittstelle und ihre Fähigkeiten (:ref:`uml-backends`);"
+
+# machine translation: argos bbe83eb4ef7a
+msgid "a job, from its submission to its result (:ref:`uml-jobs`)."
+msgstr "ein Job, von seiner Einreichung bis zu seinem Ergebnis (:ref:`uml-jobs`)."
+
+# machine translation: argos 481545258591
+msgid "The class diagrams use three types of connections. An arrow with a hollow triangle points from a specialized class to the general class from which it is derived. A line with a filled diamond connects a class with its components, with the diamond at the class that contains them. A dashed arrow with a hollow triangle points from a class to an interface that the class fulfills. The label above a class name, for example ``«dataclass»`` or ``«enumeration»``, states the type of the class."
+msgstr "Die Klassendiagramme verwenden drei Arten von Verbindungen. Ein Pfeil mit einem hohlen Dreieck zeigt von einer spezialisierten Klasse zu der allgemeinen Klasse, von der es abgeleitet ist. Eine Linie mit einem gefüllten Diamanten verbindet eine Klasse mit ihren Komponenten, mit dem Diamanten an der Klasse, die sie enthält. Ein gestrichelter Pfeil mit einem hohlen Dreieck zeigt von einer Klasse zu einer Schnittstelle, die die Klasse erfüllt. Das Label über einem Klassennamen, zum Beispiel ``«dataclass»`` oder ``«enumeration»``, gibt den Typ der Klasse an."
+
+# machine translation: argos 3bdc4147a669
+msgid "Design rules"
+msgstr "Entwurfsregeln"
+
+# machine translation: argos ac10aa4d6ccb
+msgid "Three rules determine the structure. Each of them is enforced by an automated test that reads the source code."
+msgstr "Drei Regeln bestimmen die Struktur. Jeder von ihnen wird durch einen automatisierten Test erzwungen, der den Quellcode liest."
+
+# machine translation: argos 0c2cad433a60
+msgid "**The core does not depend on a simulation code.** ``axqua.core`` describes the free-surface water body and the modeling task. The backends in ``axqua.solvers`` depend on the core, never the reverse. A further simulation code can therefore be added without changing the core."
+msgstr "**Der Kern hängt nicht von einem Simulationscode ab.** ``axqua.core`` beschreibt den Wasserkörper der freien Oberfläche und die Modellierungsaufgabe. Die Backends in ``axqua.solvers`` hängen vom Kern ab, niemals umgekehrt. Ein weiterer Simulationscode kann daher hinzugefügt werden, ohne den Kern zu ändern."
+
+# machine translation: argos 466d9c95f343
+msgid "**The backends do not depend on each other.** The TELEMAC backend and the OpenFOAM backend do not import each other. Steps that involve both codes, such as the TELEMAC warm-up of an OpenFOAM model, are coordinated one level above (``axqua.prerun``, ``axqua.workflow``)."
+msgstr "**Die Backends sind nicht voneinander abhängig.** Das TELEMAC Backend und das OpenFOAM Backend importieren sich nicht gegenseitig. Schritte, die beide Codes beinhalten, wie das TELEMAC-Warm-up eines OpenFOAM-Modells, werden eine Ebene oben koordiniert (``axqua.prerun``, ``axqua.workflow``)."
+
+# machine translation: argos 001ddb120e5d
+msgid "**The plugin does not import the library.** QGIS has its own Python installation, whereas the library requires several geospatial packages and the environment of a simulation code. The plugin therefore calls the program ``axqua`` as a separate process and exchanges only small pieces of information with it: a job ID, a state, a file path. Result data never passes through the plugin. QGIS opens the result files itself."
+msgstr "**Das Plugin importiert die Bibliothek nicht.** QGIS verfügt über eine eigene Python-Installation, während die Bibliothek mehrere Geodatenpakete und die Umgebung eines Simulationscodes benötigt. Das Plugin nennt daher das Programm ``axqua`` als separaten Prozess und tauscht nur kleine Informationen mit ihm aus: eine Job-ID, einen Zustand, einen Dateipfad. Ergebnisdaten gehen nie durch das Plugin. QGIS öffnet die Ergebnisdateien selbst."
+
+# machine translation: argos fce98a3a0448
+msgid "A consequence of the third rule is that a simulation does not depend on QGIS being open. The plugin submits a job and displays its state, but the job belongs to the operating system."
+msgstr "Eine Konsequenz der dritten Regel ist, dass eine Simulation nicht davon abhängt, dass QGIS geöffnet ist. Das Plugin reicht einen Job ein und zeigt seinen Status an, aber der Job gehört dem Betriebssystem."
+
+# machine translation: argos df9eaf95bc5b
+msgid "Packages"
+msgstr "Packungen"
+
+# machine translation: argos 42729d6b6994
+msgid "Package"
+msgstr "Paket"
+
+# machine translation: argos 494ee59b268b
+msgid "Content"
+msgstr "Inhalt"
+
+# machine translation: argos 2ffcf204a2f9
+msgid "The case description as Python data classes, with reading and writing of the case file (:doc:`configuration`)."
+msgstr "Die Fallbeschreibung als Python-Datenklassen, mit Lesen und Schreiben der Fall-Datei (:doc:`configuration`)."
+
+# machine translation: argos 281b6b864d63
+msgid "Geodata, rasters, boundaries, structures, the SELAFIN file format, capabilities, the registry of backends, error types and the environments of the simulation codes (:doc:`core`)."
+msgstr "Geodaten, Raster, Ränder, Strukturen, das SELAFIN-Dateiformat, Fähigkeiten, die Registrierung von Backends, Fehlertypen und die Umgebungen der Simulationscodes (:doc:`core`)."
+
+# machine translation: argos 990108373862
+msgid "Mesh generation, boundary conditions, steering files, runs and evaluation for TELEMAC (:doc:`telemac`)."
+msgstr "Rechennetz Generation, Randbedingungen, Steuerdateien, läuft und Auswertung für TELEMAC (:doc:`telemac`)."
+
+# machine translation: argos 2a196a383448
+msgid "Mesh generation, initial fields, dictionaries, runs and evaluation for OpenFOAM (:doc:`openfoam`)."
+msgstr "Rechennetz-Generierung, Anfangsfelder, Wörterbücher, Runs und Auswertung für OpenFOAM (:doc:`openfoam`)."
+
+# machine translation: argos a3c643595659
+msgid "``axqua`` (top level)"
+msgstr "``axqua`` (oben)"
+
+# machine translation: argos 3b777d3bbf26
+msgid "Steps that are independent of the simulation code or involve both codes: terrain processing, measurements, studies and calibration (:doc:`workflow`)."
+msgstr "Schritte, die unabhängig vom Simulationscode sind oder beide Codes beinhalten: Geländeverarbeitung, Messungen, Studien und Kalibrierung (:doc:`workflow`)."
+
+# machine translation: argos f6473d89ef31
+msgid "Identity, storage, execution and detaching of jobs (:doc:`jobs`)."
+msgstr "Identität, Speicherung, Ausführung und Ablösung von Jobs (:doc:`jobs`)."
+
+# machine translation: argos a769d717d2c2
+msgid "Figures from results (:doc:`postprocessing`)."
+msgstr "Zahlen aus den Ergebnissen (:doc:`postprocessing`)."
+
+# machine translation: argos d80eabc1f4c8
+msgid "The QGIS plugin (:doc:`plugin`)."
+msgstr "Das QGIS-Plugin (:doc:`plugin`)."
+
+# machine translation: argos 10d6a9ec3f28
+msgid "The backends are registered through the entry point group ``axqua.solvers`` of the Python package. A further simulation code can be provided as a separate Python package that registers itself in this group."
+msgstr "Die Backends werden über die Eingangspunktgruppe ``axqua.solvers`` des Python-Pakets registriert. Ein weiterer Simulationscode kann als separates Python-Paket vorgesehen sein, das sich in dieser Gruppe registriert."
+
+# machine translation: argos 7019e1edac02
+msgid "Capabilities"
+msgstr "Kapazitäten"
+
+# machine translation: argos 7c405a9a6bfc
+msgid "Each backend declares which types of simulation it supports, for example a steady 2D simulation or a mesh convergence study. For a given case, aXqua reports each capability on three independent levels:"
+msgstr "Jedes Backend gibt an, welche Simulationstypen es unterstützt, zum Beispiel eine stetige 2D-Simulation oder eine Netzkonvergenzstudie. Für einen gegebenen Fall meldet aXqua jede Fähigkeit auf drei unabhängigen Ebenen:"
+
+# machine translation: argos 9ac8da87c6c1
+msgid "``implemented``: the backend supports the capability (``yes``, ``no``, or ``n/a`` when the capability does not exist for the code);"
+msgstr "``implemented``: das Backend unterstützt die Fähigkeit (``yes``, ``no`` oder ``n/a``, wenn die Fähigkeit für den Code nicht vorhanden ist);"
+
+# machine translation: argos 5ed7727b7f21
+msgid "``configured``: the case file requests it;"
+msgstr "``configured``: die Fallakte fordert dies an;"
+
+# machine translation: argos 1adb8ef6525e
+msgid "``built`` and ``run``: the input files and the result files exist."
+msgstr "``built`` und ``run``: die Eingabedateien und die Ergebnisdateien existieren."
+
+# machine translation: argos 3a4a05f4017d
+msgid "The command ``axqua case-status <case-file> --json`` returns this information. The plugin uses it to decide which functions it offers for a case."
+msgstr "Der Befehl ``axqua case-status <case-file> --json`` gibt diese Informationen zurück. Das Plugin verwendet es, um zu entscheiden, welche Funktionen es für einen Fall anbietet."
+
+# machine translation: argos 4f729f80d99d
+msgid "Licenses"
+msgstr "Lizenzen"
+
+# machine translation: argos 5a9c52a3ad6c
+msgid "The library is distributed under the BSD 3-Clause License. The QGIS plugin is distributed under the GNU General Public License, version 2 or later, because it uses the programming interface of QGIS."
+msgstr "Die Bibliothek wird unter der BSD 3-Clause-Lizenz vertrieben. Das QGIS-Plugin wird unter der GNU General Public License, Version 2 oder höher vertrieben, da es die Programmierschnittstelle von QGIS verwendet."

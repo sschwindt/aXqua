@@ -1,0 +1,224 @@
+# German translation of the aXqua documentation, page usage/mesh-convergence.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos 9fbebf793122
+msgid "Mesh convergence"
+msgstr "Netzkonvergenz"
+
+# machine translation: argos dce38403e4c9
+msgid "Every numerical result depends to some degree on the mesh on which it was computed. A mesh convergence study measures this dependence: it repeats the same simulation on meshes of different resolution and compares the results. The study answers two questions. How large is the uncertainty of the results that stems from the mesh? And which is the coarsest, and therefore fastest, mesh that is accurate enough?"
+msgstr "Jedes numerische Ergebnis hängt bis zu einem gewissen Grad vom Rechennetz ab, auf dem es berechnet wurde. Eine Netzkonvergenzstudie misst diese Abhängigkeit: Sie wiederholt dieselbe Simulation auf Rechennetzen unterschiedlicher Auflösung und vergleicht die Ergebnisse. Die Studie beantwortet zwei Fragen. Wie groß ist die Unsicherheit der Ergebnisse, die aus dem Rechennetz stammen? Und welches ist das gröbste und damit schnellste Rechennetz, das genau genug ist?"
+
+# machine translation: argos 16a09dfabc4c
+msgid "Run the study after the first TELEMAC dry run has shown that the model works (:ref:`hydraulics-dry-runs`), and before the calibration."
+msgstr "Führen Sie die Studie aus, nachdem der erste TELEMAC-Trockenlauf gezeigt hat, dass das Modell funktioniert (:ref:`hydraulics-dry-runs`), und vor der Kalibrierung."
+
+# machine translation: argos 5cbdc1759745
+msgid "Mesh study setup"
+msgstr "Rechennetz-Studienaufbau"
+
+# machine translation: argos cff255222fbc
+msgid "The study follows the procedure of Celik et al. (2008). It uses a sequence of four meshes. Between two successive meshes, all edge lengths differ by the **refinement ratio** of 1.3, which is the smallest ratio that Celik et al. (2008) recommend. Smaller ratios produce meshes that are so similar that their differences disappear in the numerical noise."
+msgstr "Die Studie folgt dem Verfahren von Celik et al. (2008). Es verwendet eine Sequenz von vier Rechennetzen. Zwischen zwei aufeinanderfolgenden Rechennetzen unterscheiden sich alle Kantenlängen durch das **Raffinationsverhältnis** von 1,3, das das kleinste Verhältnis ist, das Celik et al. (2008) empfehlen. Kleinere Verhältnisse erzeugen Rechennetze, die so ähnlich sind, dass ihre Unterschiede im numerischen Rauschen verschwinden."
+
+# machine translation: argos 1607039dea23
+msgid "Mesh"
+msgstr "Rechennetz"
+
+# machine translation: argos 5ca1e9bf0b27
+msgid "Edge lengths"
+msgstr "Kantenlängen"
+
+# machine translation: argos c9da7592873f
+msgid "Role"
+msgstr "Rolle"
+
+# machine translation: argos c1c59d2c4722
+msgid "coarse"
+msgstr "grob"
+
+# machine translation: argos f8ea618f4e48
+msgid "1.3 times the case values"
+msgstr "1,3-fache der Fallwerte"
+
+# machine translation: argos 66681e068734
+msgid "shows the trend"
+msgstr "zeigt den Trend"
+
+# machine translation: argos dc5653d6c719
+msgid "baseline"
+msgstr "Baseline"
+
+# machine translation: argos fe549847f1a5
+msgid "the values of the case"
+msgstr "Die Werte des Falls"
+
+# machine translation: argos 4ef4932e7491
+msgid "the mesh of the case"
+msgstr "Das Rechennetz des Falls"
+
+# machine translation: argos d95d3b52beea
+msgid "fine"
+msgstr "fein"
+
+# machine translation: argos 31f52936507f
+msgid "case values divided by 1.3"
+msgstr "Fallwerte geteilt durch 1,3"
+
+# machine translation: argos d9c87b22dead
+msgid "used for the convergence criterion"
+msgstr "für das Konvergenzkriterium verwendet"
+
+# machine translation: argos 9083a14e6546
+msgid "finest"
+msgstr "fein"
+
+# machine translation: argos b037618f6ae1
+msgid "case values divided by 1.69"
+msgstr "Fallwerte geteilt durch 1,69"
+
+# machine translation: argos dac826c862bc
+msgid "Each mesh is run at the constant discharge of the case until the flow is steady. All runs start with a pre-wetted channel, to save the time for filling the reach (:ref:`case-initialization`). aXqua then reads the water depth and the flow velocity at the positions of the field measurements and compares them between the meshes."
+msgstr "Jedes Rechennetz wird mit dem konstanten Abfluss des Falls betrieben, bis der Fluss stetig ist. Alle Läufe beginnen mit einer vorbenetzten Gerinne, um Zeit für das Füllen des Flussabschnitts zu sparen (:ref:`case-initialization`). aXqua liest dann die Wassertiefe und die Fließgeschwindigkeit an den Positionen der Feldmessungen und vergleicht sie zwischen den Rechennetzen."
+
+# machine translation: argos b0015acf232b
+msgid "The following options can be changed:"
+msgstr "Folgende Optionen können geändert werden:"
+
+# machine translation: argos 5953379f5887
+msgid "Option"
+msgstr "Option"
+
+# machine translation: argos 88488e99fcdc
+msgid "Default"
+msgstr "Ausfall"
+
+# machine translation: argos 2c7c3ec284a3
+msgid "Meaning"
+msgstr "Bedeutung"
+
+# machine translation: argos ce59daecd297
+msgid "Accepted uncertainty of the results due to the mesh (5 %)."
+msgstr "Akzeptierte Unsicherheit der Ergebnisse aufgrund des Rechennetzes (5 %)."
+
+# machine translation: argos 2bce34dda417
+msgid "Ratio of the edge lengths of two successive meshes."
+msgstr "Verhältnis der Kantenlängen zweier aufeinanderfolgender Rechennetze."
+
+# machine translation: argos 6cf72e25e04f
+msgid "Number of meshes coarser and finer than the baseline."
+msgstr "Zahl der Rechennetze gröber und feiner als die Baseline."
+
+# machine translation: argos 307c1eccefa4
+msgid "off"
+msgstr "ausgeschaltet"
+
+# machine translation: argos eac18b508b38
+msgid "Add finer meshes automatically until the criterion is met."
+msgstr "Fügen Sie automatisch feinere Rechennetze hinzu, bis das Kriterium erfüllt ist."
+
+# machine translation: argos 67efe0411845
+msgid "from the case"
+msgstr "Aus dem Fall"
+
+# machine translation: argos a65a42f60ff0
+msgid "Number of processor cores."
+msgstr "Anzahl der Prozessorkerne."
+
+# machine translation: argos 4cfbe5e30a27
+msgid "**Turbulence model.** The automatic selection of the turbulence model depends on the cell size (:ref:`preprocessing-telemac-choices`). To keep the meshes comparable, the study uses the turbulence model of the baseline mesh on all meshes. The report indicates for each mesh whether its resolution would call for a different model. If the recommended mesh falls into another range than the baseline, set ``hydrodynamics.turbulence_model`` to the model named in the report and repeat the study."
+msgstr "**Turbulenzmodell.** Die automatische Auswahl des Turbulenzmodells hängt von der Zellgröße (:ref:`preprocessing-telemac-choices`) ab. Um die Rechennetze vergleichbar zu halten, nutzt die Studie das Turbulenzmodell der Baseline Rechennetz für alle Rechennetze. Der Bericht gibt für jedes Rechennetz an, ob seine Entschließung ein anderes Modell erfordern würde. Wenn das empfohlene Rechennetz in einen anderen Bereich als die Baseline fällt, setzen Sie ``hydrodynamics.turbulence_model`` auf das im Bericht genannte Modell und wiederholen Sie die Studie."
+
+# machine translation: argos 95069507d319
+msgid "**Lower limit of the cell size.** A mesh cannot be refined without limit. When the cells become smaller than the roughness length :math:`k_s` of the bed, the mesh starts to resolve individual roughness elements whose effect is already contained in the roughness coefficient. The report marks such meshes."
+msgstr "**Untere Grenze der Zellgröße.** Ein Rechennetz kann nicht ohne Limit verfeinert werden. Wenn die Zellen kleiner werden als die Rauheit-Länge :math:`k_s` des Bettes, beginnt das Rechennetz, einzelne Rauheit-Elemente aufzulösen, deren Wirkung bereits im Rauheit-Koeffizienten enthalten ist. Der Bericht kennzeichnet solche Rechennetze."
+
+# machine translation: argos c2e52cd9890e
+msgid "Run mesh convergence study"
+msgstr "Lauf Netzkonvergenzstudie"
+
+# machine translation: argos ba5bc911d66c
+msgid "In the plugin, go to the tab *Simulations*, sub-tab *Mesh convergence*, select the simulation program (*TELEMAC* or *OpenFOAM*), set the options and click *Submit*. In a terminal:"
+msgstr "Gehen Sie im Plugin zur Registerkarte *Simulations*, Unterregister *Mesh convergence*, wählen Sie das Simulationsprogramm (*TELEMAC* oder *OpenFOAM*), legen Sie die Optionen fest und klicken Sie auf *Submit*. In a Terminal:"
+
+# machine translation: argos b9293e375d4a
+msgid "The sub-tab Mesh convergence of the plugin"
+msgstr "Das Sub-Tab Netzkonvergenz des Plugins"
+
+# machine translation: argos 1639f7745ceb
+msgid "The sub-tab *Mesh convergence* of the tab *Simulations*. (1) The simulation program whose mesh is studied, TELEMAC or OpenFOAM. (2) The options of the study. (3) *Submit* starts the study as a job. (4) *Load results* adds the results to the map."
+msgstr "Das Unterregister *Mesh convergence* des Tabs *Simulations*. (1) Das Simulationsprogramm, dessen Rechennetz studiert wird, TELEMAC oder OpenFOAM. (2) Die Optionen der Studie. (3) *Submit* beginnt das Studium als Job. (4) *Load results* fügt die Ergebnisse der Karte hinzu."
+
+# machine translation: argos 2f41695123e3
+msgid "Plan sufficient time and disk space:"
+msgstr "Planen Sie ausreichend Zeit und Speicherplatz:"
+
+# machine translation: argos 2c5c40320253
+msgid "**Time.** Each mesh requires its own preprocessing and its own simulation. With every refinement step, the number of cells grows and the time step shrinks, so that the computing time roughly doubles from one mesh to the next finer one. The finest mesh dominates the total time. A study typically takes several times as long as the dry run of the case."
+msgstr "**Zeit.** Jedes Rechennetz benötigt ein eigenes Preprocessing und eine eigene Simulation. Mit jedem Verfeinerungsschritt wächst die Anzahl der Zellen und der Zeitschritt schrumpft, so dass sich die Rechenzeit von einem Rechennetz zum nächsten etwa verdoppelt. Das feinste Rechennetz dominiert die Gesamtzeit. Eine Studie dauert typischerweise mehrmals so lange wie der Trockenlauf des Falls."
+
+# machine translation: argos 6048fd568899
+msgid "**Disk space.** Each mesh has its own folder with its model and its results. For fine meshes, a single result file can reach several hundred megabytes."
+msgstr "**Speicherplatz.** Jedes Rechennetz hat seinen eigenen Ordner mit seinem Modell und seinen Ergebnissen. Für feine Rechennetze kann eine einzelne Ergebnisdatei mehrere hundert Megabyte Flussabschnitt."
+
+# machine translation: argos 3255f00424b8
+msgid "**With OpenFOAM.** The study of the OpenFOAM model refines the plan spacing of its lattice (``openfoam.cell_size``, or the spacing that ``openfoam.cell_size_factor`` derives from the TELEMAC mesh) with the same refinement ratio of 1.3, one coarser and two finer than the baseline, and keeps the number of vertical layers. Each mesh is built from the same steady 2D TELEMAC result (the warm-up, :ref:`warm-up-concept`) and run to ``openfoam.end_time``. The water depth and the depth-averaged velocity of each column are compared at the same points as in the TELEMAC study, so that the grid convergence index of both models means the same. The checks of the TELEMAC turbulence model and of the bed roughness do not apply to the OpenFOAM meshes and are not made. Each mesh of a three-dimensional model is expensive: the finest of the four meshes has about 2.9 times as many columns as the baseline, and its time step is about 1.7 times shorter. The study writes into ``axqua-case/postprocessing/openfoam-mesh-convergence/``."
+msgstr "**Mit OpenFOAM.** Die Studie des OpenFOAM-Modells verfeinert den Planabstand seines Gitters (``openfoam.cell_size`` oder den Abstand, den ``openfoam.cell_size_factor`` vom TELEMAC Rechennetz ableitet) mit dem gleichen Verfeinerungsverhältnis von 1,3, ein gröber und zwei feiner als die Baseline, und hält die Anzahl der vertikalen Layer. Jedes Rechennetz wird aus dem gleichen stetigen 2D-TELEMAC-Ergebnis (das Aufwärmen, :ref:`warm-up-concept`) erstellt und zu ``openfoam.end_time`` ausgeführt. Die Wassertiefe und die Tiefe gemittelte Geschwindigkeit jeder Spalte werden an den gleichen Punkten wie in der TELEMAC-Studie verglichen, so dass der Gitterkonvergenzindex beider Modelle gleich bedeutet. Die Prüfungen des TELEMAC Turbulenzmodell und des Bettes Rauheit gelten nicht für das OpenFOAM Rechennetze und werden nicht durchgeführt. Jedes Rechennetz eines dreidimensionalen Modells ist teuer: Das feinste der vier Rechennetze hat etwa 2,9 mal so viele Spalten wie die Baseline, und Zeitschritt ist etwa 1,7 mal kürzer. Die Studie schreibt in ``axqua-case/postprocessing/openfoam-mesh-convergence/``."
+
+# machine translation: argos cfdca2280720
+msgid "The study can be interrupted. When it is started again, the meshes that are already complete are reused. If a refined mesh cannot be created or its simulation fails, the study ends and reports the meshes that were completed. This marks the practical limit of refinement for the case."
+msgstr "Die Studie kann unterbrochen werden. Wenn es wieder gestartet wird, werden die bereits kompletten Rechennetze wiederverwendet. Wenn ein verfeinertes Rechennetz nicht erstellt werden kann oder seine Simulation fehlschlägt, endet die Studie und meldet die abgeschlossenen Rechennetze. Dies markiert die praktische Grenze der Verfeinerung für den Fall."
+
+# machine translation: argos e514163b2b7a
+msgid "Study report"
+msgstr "Studienbericht"
+
+# machine translation: argos 63a440c462e3
+msgid "The study writes its results into the folder ``axqua-case/postprocessing/mesh-convergence/``. The central file is the workbook ``mesh-convergence.xlsx``, and ``mesh-convergence.txt`` contains the same report as text. The script ``mesh_convergence_study.py`` of a case folder runs the same study and writes into ``axqua-case/mesh-convergence/`` instead. The file ``README.md`` in the same folder explains all other files."
+msgstr "Die Studie schreibt ihre Ergebnisse in den Ordner ``axqua-case/postprocessing/mesh-convergence/``. Die zentrale Datei ist die Arbeitsmappe ``mesh-convergence.xlsx``, und ``mesh-convergence.txt`` enthält den gleichen Bericht wie Text. Das Skript ``mesh_convergence_study.py`` eines Fallordners führt die gleiche Studie aus und schreibt stattdessen in ``axqua-case/mesh-convergence/``. Die Datei ``README.md`` im gleichen Ordner erklärt alle anderen Dateien."
+
+# machine translation: argos 7ee6bd4bfc5e
+msgid "The workbook lists for each mesh the number of cells, the computing time and the following quantities:"
+msgstr "Die Arbeitsmappe listet für jedes Rechennetz die Anzahl der Zellen, die Rechenzeit und die folgenden Größen auf:"
+
+# machine translation: argos ad652e8342b2
+msgid "the **relative change** of water depth and flow velocity compared with the next coarser mesh;"
+msgstr "die **relative Veränderung** von Wassertiefe und Fließgeschwindigkeit im Vergleich zum nächstgröberen Rechennetz;"
+
+# machine translation: argos 4ed67faa0c0c
+msgid "the **grid convergence index** (GCI) of the finest three meshes. The GCI estimates, in percent, how far the result of a mesh is from the result of an infinitely fine mesh. It is the measure of the uncertainty that stems from the mesh;"
+msgstr "den **grid convergence index** (GCI) der drei feinsten Rechennetze. Der GCI schätzt in Prozent, wie weit das Ergebnis eines Rechennetzes vom Ergebnis eines unendlich feinen Rechennetzes entfernt ist. Es ist das Maß für die Unsicherheit, die aus dem Rechennetz stammt;"
+
+# machine translation: argos ef09fe57df99
+msgid "the checks of the turbulence model and of the lower limit of the cell size described above."
+msgstr "die oben beschriebenen Prüfungen des Turbulenzmodells und der unteren Grenze der Zellgröße."
+
+# machine translation: argos bf2adcf9fe77
+msgid "The study is passed when the GCI of the finest meshes is below the tolerance. The default tolerance of 5 % corresponds to common engineering accuracy (Celik et al. 2008). The GCI is only meaningful when the results approach a limit regularly with refinement. aXqua verifies this condition. If it is not met, the relative change between the two finest meshes is used as the criterion instead, and the report says so."
+msgstr "Die Studie wird bestanden, wenn der GCI der feinsten Rechennetze unter der Toleranz liegt. Die Standardtoleranz von 5 % entspricht der üblichen technischen Genauigkeit (Celik et al. 2008). Der GCI ist nur dann sinnvoll, wenn sich die Ergebnisse regelmäßig mit Verfeinerung einem Limit nähern. aXqua überprüft diese Bedingung. Wenn es nicht erfüllt ist, wird stattdessen die relative Veränderung zwischen den beiden feinsten Rechennetzen als Kriterium verwendet, und das sagt der Bericht."
+
+# machine translation: argos b71c0980a5c4
+msgid "**Recommended cell size.** The report recommends the coarsest mesh whose results lie within the tolerance, and states how much faster this mesh is than the finest one. To adopt it, set ``mesh.size_scale`` in the case file to the ratio of the recommended and the baseline edge length, which scales the edge lengths of all mesh zones, and repeat the preprocessing."
+msgstr "**Empfohlene Zellgröße.** Der Bericht empfiehlt das gröbste Rechennetz, dessen Ergebnisse innerhalb der Toleranz liegen, und gibt an, wie viel schneller dieses Rechennetz ist als das feinste. Um es zu übernehmen, setzen Sie ``mesh.size_scale`` in der Fall-Datei auf das Verhältnis der empfohlenen und der Baseline-Kantenlänge, die die Kantenlängen aller Rechennetz-Zonen skaliert, und wiederholen Sie Preprocessing."
+
+# machine translation: argos c0820a008ec7
+msgid "**Interpretation.** The purpose of the study is not to find a mesh on which the results no longer change. Such mesh independence is practically not attainable for a model of a natural water body. Each refinement resolves more detail of the terrain, shifts the edge of the water and changes the conditions under which the turbulence model is valid, so that the results keep changing slightly. The purpose is to select a mesh whose remaining uncertainty is known and small in comparison with the uncertainty of the field measurements, at a computing time that the subsequent calibration with its many simulations can afford."
+msgstr "**Interpretation.** Ziel der Studie ist es nicht, ein Rechennetz zu finden, an dem sich die Ergebnisse nicht mehr ändern. Eine solche Rechennetz-Unabhängigkeit ist für ein Modell eines natürlichen Wasserkörpers praktisch nicht erreichbar. Jede Verfeinerung löst mehr Details des Geländes auf, verschiebt den Rand des Wassers und verändert die Bedingungen, unter denen das Turbulenzmodell gültig ist, so dass sich die Ergebnisse leicht ändern. Ziel ist es, ein Rechennetz auszuwählen, dessen verbleibende Unsicherheit im Vergleich zur Unsicherheit der Feldmessungen bekannt und gering ist, zu einer Rechenzeit, die die anschließende Kalibrierung mit ihren vielen Simulationen leisten kann."
+
+# machine translation: argos b154449d6afe
+msgid "Keep the selected mesh for all following steps. The calibration compensates a part of the mesh error through the calibrated parameters. Parameters that were calibrated on one mesh are therefore not valid on another one."
+msgstr "Behalten Sie das ausgewählte Rechennetz für alle folgenden Schritte. Die Kalibrierung kompensiert einen Teil des Rechennetzfehlers durch die kalibrierten Parameter. Parameter, die auf einem Rechennetz kalibriert wurden, sind daher auf einem anderen nicht gültig."
+
+# machine translation: argos 318992b70b73
+msgid "Reference"
+msgstr "Referenznummer"

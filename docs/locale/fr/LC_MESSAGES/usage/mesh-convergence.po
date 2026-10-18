@@ -1,0 +1,224 @@
+# French translation of the aXqua documentation, page usage/mesh-convergence.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos fa91f7fb3508
+msgid "Mesh convergence"
+msgstr "Convergence en maillage"
+
+# machine translation: argos 8ebeefced678
+msgid "Every numerical result depends to some degree on the mesh on which it was computed. A mesh convergence study measures this dependence: it repeats the same simulation on meshes of different resolution and compares the results. The study answers two questions. How large is the uncertainty of the results that stems from the mesh? And which is the coarsest, and therefore fastest, mesh that is accurate enough?"
+msgstr "Chaque résultat numérique dépend dans une certaine mesure du maillage sur lequel il a été calculé. Une étude de convergence en maillage mesure cette dépendance : elle répète la même simulation sur maillages de résolution différente et compare les résultats. L'étude répond à deux questions. Quelle est l'ampleur de l'incertitude des résultats découlant du maillage ? Et quel est le plus grossier, et donc le plus rapide, maillage qui est assez précis ?"
+
+# machine translation: argos 06d92777d2fe
+msgid "Run the study after the first TELEMAC dry run has shown that the model works (:ref:`hydraulics-dry-runs`), and before the calibration."
+msgstr "Exécutez l'étude après que la première série TELEMAC a montré que le modèle fonctionne (:ref:`hydraulics-dry-runs`), et avant le calage."
+
+# machine translation: argos 0c4455c2518d
+msgid "Mesh study setup"
+msgstr "Configuration de l'étude maillage"
+
+# machine translation: argos d51b2c7063e2
+msgid "The study follows the procedure of Celik et al. (2008). It uses a sequence of four meshes. Between two successive meshes, all edge lengths differ by the **refinement ratio** of 1.3, which is the smallest ratio that Celik et al. (2008) recommend. Smaller ratios produce meshes that are so similar that their differences disappear in the numerical noise."
+msgstr "L'étude suit la procédure de Celik et al. (2008). Il utilise une séquence de quatre maillages. Entre deux maillages successifs, toutes les longueurs des bords diffèrent par le rapport **raffinement** de 1,3, qui est le plus petit rapport que Celik et al. (2008) recommandent. Les rapports plus petits produisent des maillages si semblables que leurs différences disparaissent dans le bruit numérique."
+
+# machine translation: argos 4ad3d02803d8
+msgid "Mesh"
+msgstr "Maillage"
+
+# machine translation: argos 5ca1e9bf0b27
+msgid "Edge lengths"
+msgstr "Longueur des bords"
+
+# machine translation: argos c9da7592873f
+msgid "Role"
+msgstr "Rôle"
+
+# machine translation: argos c1c59d2c4722
+msgid "coarse"
+msgstr "gros"
+
+# machine translation: argos 41a0ba54fe27
+msgid "1.3 times the case values"
+msgstr "1,3 fois les valeurs cas"
+
+# machine translation: argos 66681e068734
+msgid "shows the trend"
+msgstr "montre la tendance"
+
+# machine translation: argos dc5653d6c719
+msgid "baseline"
+msgstr "référence"
+
+# machine translation: argos 9aff76957e7a
+msgid "the values of the case"
+msgstr "les valeurs du cas"
+
+# machine translation: argos 5dd0066901f6
+msgid "the mesh of the case"
+msgstr "le maillage du cas"
+
+# machine translation: argos d95d3b52beea
+msgid "fine"
+msgstr "Très bien"
+
+# machine translation: argos a161b7b86c9d
+msgid "case values divided by 1.3"
+msgstr "Valeurs de cas divisées par 1,3"
+
+# machine translation: argos d9c87b22dead
+msgid "used for the convergence criterion"
+msgstr "utilisé pour le critère de convergence"
+
+# machine translation: argos 9083a14e6546
+msgid "finest"
+msgstr "meilleurs"
+
+# machine translation: argos 8bcc54772a2f
+msgid "case values divided by 1.69"
+msgstr "Valeurs de cas divisées par 1,69"
+
+# machine translation: argos 3be8308b7db8
+msgid "Each mesh is run at the constant discharge of the case until the flow is steady. All runs start with a pre-wetted channel, to save the time for filling the reach (:ref:`case-initialization`). aXqua then reads the water depth and the flow velocity at the positions of the field measurements and compares them between the meshes."
+msgstr "Chaque maillage est exécuté au débit constant du cas jusqu'à ce que le débit soit stable. Tous les parcours commencent par un chenal pré-humidifié, pour gagner du temps pour remplir le tronçon (:ref:`case-initialization`). aXqua lit ensuite la hauteur d'eau et la vitesse d'écoulement aux positions des mesures de terrain et les compare entre les maillages."
+
+# machine translation: argos b0015acf232b
+msgid "The following options can be changed:"
+msgstr "Les options suivantes peuvent être modifiées :"
+
+# machine translation: argos 5953379f5887
+msgid "Option"
+msgstr "Option"
+
+# machine translation: argos 88488e99fcdc
+msgid "Default"
+msgstr "Par défaut"
+
+# machine translation: argos 2c7c3ec284a3
+msgid "Meaning"
+msgstr "Signification"
+
+# machine translation: argos 78f9ad1130ff
+msgid "Accepted uncertainty of the results due to the mesh (5 %)."
+msgstr "Incertitude acceptée des résultats dus au maillage (5 %)."
+
+# machine translation: argos a99e2174d764
+msgid "Ratio of the edge lengths of two successive meshes."
+msgstr "Rapport des longueurs des bords de deux maillages successifs."
+
+# machine translation: argos 6a0791064c57
+msgid "Number of meshes coarser and finer than the baseline."
+msgstr "Nombre de maillages plus grossier et plus fin que la base."
+
+# machine translation: argos 307c1eccefa4
+msgid "off"
+msgstr "Départ"
+
+# machine translation: argos ccb8c12dab0f
+msgid "Add finer meshes automatically until the criterion is met."
+msgstr "Ajouter automatiquement les maillages jusqu'à ce que le critère soit rempli."
+
+# machine translation: argos b85cbc84f10b
+msgid "from the case"
+msgstr "du cas"
+
+# machine translation: argos a65a42f60ff0
+msgid "Number of processor cores."
+msgstr "Nombre de cœurs de processeur."
+
+# machine translation: argos 04f6b8070f13
+msgid "**Turbulence model.** The automatic selection of the turbulence model depends on the cell size (:ref:`preprocessing-telemac-choices`). To keep the meshes comparable, the study uses the turbulence model of the baseline mesh on all meshes. The report indicates for each mesh whether its resolution would call for a different model. If the recommended mesh falls into another range than the baseline, set ``hydrodynamics.turbulence_model`` to the model named in the report and repeat the study."
+msgstr "**Modèle de turbulence.** La sélection automatique du modèle de turbulence dépend de la taille de maille (:ref:`preprocessing-telemac-choices`). Pour maintenir les maillages comparables, l'étude utilise le modèle de turbulence de la base maillage sur tous les maillages. Le rapport indique pour chaque maillage si sa résolution appellerait un modèle différent. Si le maillage recommandé tombe dans une autre plage que la base de référence, définissez ``hydrodynamics.turbulence_model`` au modèle nommé dans le rapport et répétez l'étude."
+
+# machine translation: argos 35b8cae66105
+msgid "**Lower limit of the cell size.** A mesh cannot be refined without limit. When the cells become smaller than the roughness length :math:`k_s` of the bed, the mesh starts to resolve individual roughness elements whose effect is already contained in the roughness coefficient. The report marks such meshes."
+msgstr "**Limite inférieure de la taille de maille.** Un maillage ne peut être affiné sans limite. Lorsque les cellules deviennent plus petites que la longueur de rugosité :math:`k_s` du lit, le maillage commence à résoudre les éléments individuels de rugosité dont l'effet est déjà contenu dans le coefficient de rugosité. Le rapport marque ces maillages."
+
+# machine translation: argos ea5ac329fada
+msgid "Run mesh convergence study"
+msgstr "Exécuter étude de convergence en maillage"
+
+# machine translation: argos 375f26ac27a4
+msgid "In the plugin, go to the tab *Simulations*, sub-tab *Mesh convergence*, select the simulation program (*TELEMAC* or *OpenFOAM*), set the options and click *Submit*. In a terminal:"
+msgstr "Dans l'extension, allez à l'onglet *Simulations*, sous-tab *Mesh convergence*, sélectionnez le programme de simulation (*TELEMAC* ou *OpenFOAM*), définissez les options et cliquez sur *Submit*. Dans une terminal:"
+
+# machine translation: argos 2e6cefb5bc76
+msgid "The sub-tab Mesh convergence of the plugin"
+msgstr "Le sous-tab convergence en maillage de l'extension"
+
+# machine translation: argos a728afa911e9
+msgid "The sub-tab *Mesh convergence* of the tab *Simulations*. (1) The simulation program whose mesh is studied, TELEMAC or OpenFOAM. (2) The options of the study. (3) *Submit* starts the study as a job. (4) *Load results* adds the results to the map."
+msgstr "Le sous-onglet *Mesh convergence* de l'onglet *Simulations*. (1) Le programme de simulation dont maillage est étudié, TELEMAC ou OpenFOAM. (2) Les options de l'étude. (3) *Submit* commence l'étude comme une tâche. (4) *Load results* ajoute les résultats à la carte."
+
+# machine translation: argos 2f41695123e3
+msgid "Plan sufficient time and disk space:"
+msgstr "Planifiez suffisamment de temps et d'espace disque :"
+
+# machine translation: argos d53ea77f263e
+msgid "**Time.** Each mesh requires its own preprocessing and its own simulation. With every refinement step, the number of cells grows and the time step shrinks, so that the computing time roughly doubles from one mesh to the next finer one. The finest mesh dominates the total time. A study typically takes several times as long as the dry run of the case."
+msgstr "**L'heure.** Chaque maillage nécessite son propre prétraitement et sa propre simulation. À chaque étape de raffinement, le nombre de cellules augmente et le pas de temps se rétrécit, de sorte que le temps de calcul double à peu près d'un maillage à l'autre. Le meilleur maillage domine le temps total. Une étude prend généralement plusieurs fois aussi longtemps que la période sèche du cas."
+
+# machine translation: argos 5726a6e71bbb
+msgid "**Disk space.** Each mesh has its own folder with its model and its results. For fine meshes, a single result file can reach several hundred megabytes."
+msgstr "**Espace disque.** Chaque maillage a son propre dossier avec son modèle et ses résultats. Pour les maillages fins, un seul fichier de résultat peut tronçon plusieurs centaines de mégaoctets."
+
+# machine translation: argos 32e3f6777f3c
+msgid "**With OpenFOAM.** The study of the OpenFOAM model refines the plan spacing of its lattice (``openfoam.cell_size``, or the spacing that ``openfoam.cell_size_factor`` derives from the TELEMAC mesh) with the same refinement ratio of 1.3, one coarser and two finer than the baseline, and keeps the number of vertical layers. Each mesh is built from the same steady 2D TELEMAC result (the warm-up, :ref:`warm-up-concept`) and run to ``openfoam.end_time``. The water depth and the depth-averaged velocity of each column are compared at the same points as in the TELEMAC study, so that the grid convergence index of both models means the same. The checks of the TELEMAC turbulence model and of the bed roughness do not apply to the OpenFOAM meshes and are not made. Each mesh of a three-dimensional model is expensive: the finest of the four meshes has about 2.9 times as many columns as the baseline, and its time step is about 1.7 times shorter. The study writes into ``axqua-case/postprocessing/openfoam-mesh-convergence/``."
+msgstr "**Avec OpenFOAM.** L'étude du modèle OpenFOAM peaufine l'espacement du plan de son réseau (``openfoam.cell_size``, ou l'espacement que ``openfoam.cell_size_factor`` dérive du TELEMAC maillage) avec le même rapport de raffinement de 1,3, un plus grossier et deux plus fin que la base, et garde le nombre de couches verticales. Chaque maillage est construit à partir du même résultat stable 2D TELEMAC (le réchauffement, :ref:`warm-up-concept`) et court à ``openfoam.end_time``. La hauteur d'eau et la vitesse moyenne en profondeur de chaque colonne sont comparés aux mêmes points que dans l'étude TELEMAC, de sorte que l'indice de convergence de grille des deux modèles signifie la même chose. Les contrôles du TELEMAC modèle de turbulence et du lit rugosité ne s'appliquent pas aux maillages OpenFOAM et ne sont pas effectués. Chaque maillage d'un modèle tridimensionnel coûte cher : le meilleur des quatre maillages a environ 2,9 fois plus de colonnes que la base, et son pas de temps est environ 1,7 fois plus court. L'étude écrit à ``axqua-case/postprocessing/openfoam-mesh-convergence/``."
+
+# machine translation: argos 0d2b3f540db4
+msgid "The study can be interrupted. When it is started again, the meshes that are already complete are reused. If a refined mesh cannot be created or its simulation fails, the study ends and reports the meshes that were completed. This marks the practical limit of refinement for the case."
+msgstr "L'étude peut être interrompue. Lorsqu'il est recommencé, les maillages déjà complets sont réutilisés. Si un maillage raffiné ne peut pas être créé ou si sa simulation échoue, l'étude se termine et rapporte les maillages qui ont été complétés. Ceci marque la limite pratique de raffinement pour le cas."
+
+# machine translation: argos e514163b2b7a
+msgid "Study report"
+msgstr "Rapport d'étude"
+
+# machine translation: argos f9a9a33d9ba0
+msgid "The study writes its results into the folder ``axqua-case/postprocessing/mesh-convergence/``. The central file is the workbook ``mesh-convergence.xlsx``, and ``mesh-convergence.txt`` contains the same report as text. The script ``mesh_convergence_study.py`` of a case folder runs the same study and writes into ``axqua-case/mesh-convergence/`` instead. The file ``README.md`` in the same folder explains all other files."
+msgstr "L'étude écrit ses résultats dans le dossier ``axqua-case/postprocessing/mesh-convergence/``. Le fichier central est le manuel ``mesh-convergence.xlsx``, et ``mesh-convergence.txt`` contient le même rapport que le texte. Le script ``mesh_convergence_study.py`` d'un cas dossier dirige la même étude et écrit ``axqua-case/mesh-convergence/`` à la place. Le fichier ``README.md`` dans le même dossier explique tous les autres fichiers."
+
+# machine translation: argos 4c1ffd401fdf
+msgid "The workbook lists for each mesh the number of cells, the computing time and the following quantities:"
+msgstr "Le cahier énumère pour chaque maillage le nombre de cellules, le temps de calcul et les quantités suivantes :"
+
+# machine translation: argos ab2f00f862b4
+msgid "the **relative change** of water depth and flow velocity compared with the next coarser mesh;"
+msgstr "le **changement relatif** de hauteur d'eau et de vitesse d'écoulement par rapport au prochain maillage plus grossier ;"
+
+# machine translation: argos 2d6b1595a707
+msgid "the **grid convergence index** (GCI) of the finest three meshes. The GCI estimates, in percent, how far the result of a mesh is from the result of an infinitely fine mesh. It is the measure of the uncertainty that stems from the mesh;"
+msgstr "l'indice de convergence **grid** (GCI) des trois meilleurs maillages. Le GCI estime, en pourcentage, jusqu'à quel point le résultat d'un maillage est le résultat d'un maillage infiniment fin. C'est la mesure de l'incertitude qui découle du maillage ;"
+
+# machine translation: argos 80a71a3645eb
+msgid "the checks of the turbulence model and of the lower limit of the cell size described above."
+msgstr "les contrôles du modèle de turbulence et de la limite inférieure de la taille de maille décrite ci-dessus."
+
+# machine translation: argos 0f7e88b1158c
+msgid "The study is passed when the GCI of the finest meshes is below the tolerance. The default tolerance of 5 % corresponds to common engineering accuracy (Celik et al. 2008). The GCI is only meaningful when the results approach a limit regularly with refinement. aXqua verifies this condition. If it is not met, the relative change between the two finest meshes is used as the criterion instead, and the report says so."
+msgstr "L'étude est passée lorsque le GCI des meilleurs maillages est en dessous de la tolérance. La tolérance par défaut de 5 % correspond à la précision technique courante (Celik et al. 2008). L'ICG n'a de sens que lorsque les résultats abordent régulièrement une limite avec raffinement. aXqua vérifie cette condition. S'il n'est pas satisfait, le changement relatif entre les deux meilleurs maillages est plutôt utilisé comme critère, et le rapport le dit."
+
+# machine translation: argos 9b6e942d50bd
+msgid "**Recommended cell size.** The report recommends the coarsest mesh whose results lie within the tolerance, and states how much faster this mesh is than the finest one. To adopt it, set ``mesh.size_scale`` in the case file to the ratio of the recommended and the baseline edge length, which scales the edge lengths of all mesh zones, and repeat the preprocessing."
+msgstr "**Taille de maille recommandée.** Le rapport recommande le plus grossier maillage dont les résultats sont dans la tolérance, et indique combien plus vite ce maillage est que le meilleur. Pour l'adopter, définissez ``mesh.size_scale`` dans le fichier de cas au rapport de la longueur de bord recommandée et de la longueur de bord de base, qui écaille les longueurs de bord de toutes les zones de maillage, et répétez le prétraitement."
+
+# machine translation: argos a0ea2d80fc00
+msgid "**Interpretation.** The purpose of the study is not to find a mesh on which the results no longer change. Such mesh independence is practically not attainable for a model of a natural water body. Each refinement resolves more detail of the terrain, shifts the edge of the water and changes the conditions under which the turbulence model is valid, so that the results keep changing slightly. The purpose is to select a mesh whose remaining uncertainty is known and small in comparison with the uncertainty of the field measurements, at a computing time that the subsequent calibration with its many simulations can afford."
+msgstr "**Interprétation.** Le but de l'étude n'est pas de trouver un maillage sur lequel les résultats ne changent plus. Une telle indépendance de maillage n'est pratiquement pas réalisable pour un modèle de plan d'eau naturel. Chaque raffinement résout plus de détails sur le terrain, déplace le bord de l'eau et modifie les conditions dans lesquelles le modèle de turbulence est valide, de sorte que les résultats changent légèrement. Le but est de sélectionner un maillage dont le reste de l'incertitude est connu et faible par rapport à l'incertitude des mesures de terrain, à un moment de calcul que le calage subséquent avec ses nombreuses simulations peut se permettre."
+
+# machine translation: argos 2a2c1f0faf7e
+msgid "Keep the selected mesh for all following steps. The calibration compensates a part of the mesh error through the calibrated parameters. Parameters that were calibrated on one mesh are therefore not valid on another one."
+msgstr "Gardez le maillage sélectionné pour toutes les étapes suivantes. Le calage compense une partie de l'erreur maillage à travers les paramètres étalonnés. Les paramètres étalonnés sur un maillage ne sont donc pas valides sur un autre."
+
+# machine translation: argos 318992b70b73
+msgid "Reference"
+msgstr "Référence"

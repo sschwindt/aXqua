@@ -1,0 +1,224 @@
+# German translation of the aXqua documentation, page troubleshooting/warnings.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos e31e158500f1
+msgid "Warning messages"
+msgstr "Warnmeldungen"
+
+# machine translation: argos 3aa20120523d
+msgid "A warning means that aXqua completed a step but found something that may affect the result. Warnings appear in the log files with the level ``WARNING`` (:doc:`tips-logfiles`). This page lists the most frequent warnings with their meaning and their remedy. The messages are quoted as they appear in the log, with ``...`` in place of the values of a particular case."
+msgstr "Eine Warnung bedeutet, dass aXqua einen Schritt abgeschlossen hat, aber etwas gefunden hat, das das Ergebnis beeinflussen könnte. Warnungen erscheinen in den Protokolldateien mit der Ebene ``WARNING`` (:doc:`tips-logfiles`). Diese Seite listet die häufigsten Warnungen mit ihrer Bedeutung und ihrem Heilmittel auf. Die Nachrichten werden zitiert, wie sie im Protokoll erscheinen, mit ``...`` anstelle der Werte eines bestimmten Falls."
+
+# machine translation: argos 727da5a4d004
+msgid "Unique codes for all warnings, which link each message to its explanation, are not yet available in this version."
+msgstr "Einzigartige Codes für alle Warnungen, die jede Nachricht mit ihrer Erklärung verknüpfen, sind in dieser Version noch nicht verfügbar."
+
+# machine translation: argos e01bce456ab9
+msgid "Case file"
+msgstr "Fall-Datei"
+
+# machine translation: argos 0997b51140ea
+msgid "The case file uses entries of an older aXqua version. The case is read correctly. Run ``axqua migrate <case-file> --to-case`` to write a case file of the current type next to it."
+msgstr "Die Fall-Datei verwendet Einträge einer älteren aXqua-Version. Der Fall wird richtig gelesen. Führen Sie ``axqua migrate <case-file> --to-case`` aus, um eine Fall-Datei des aktuellen Typs daneben zu schreiben."
+
+# machine translation: argos 08c1469f53f0
+msgid "The case was built with an earlier version, in which the output folder had another name. aXqua continues to use the existing folder. Rename the folder to ``axqua-case`` when no job of this case is running."
+msgstr "Der Fall wurde mit einer früheren Version erstellt, in der der Ausgabeordner einen anderen Namen hatte. aXqua verwendet weiterhin den vorhandenen Ordner. Benennen Sie den Ordner in ``axqua-case``, wenn kein Job dieses Herbstes ausgeführt wird."
+
+# machine translation: argos 8d2d0d8d2c26
+msgid "The mesh generator did not succeed with its first settings and repeats the meshing with adapted settings. If no error follows, the mesh is valid, and no action is required. If the meshing fails repeatedly, the difference between the edge lengths of neighboring mesh zones is too large. Increase the smallest edge length or enlarge the refinement zone."
+msgstr "Der Rechennetz-Generator war mit seinen ersten Einstellungen nicht erfolgreich und wiederholt das Verzahnen mit angepassten Einstellungen. Wenn kein Fehler folgt, ist das Rechennetz gültig und es ist keine Aktion erforderlich. Fällt die Verzahnung wiederholt aus, ist der Unterschied zwischen den Kantenlängen benachbarter Rechennetzzonen zu groß. Erhöhen Sie die kleinste Kantenlänge oder vergrößern Sie die Veredelungszone."
+
+# machine translation: argos b493948ae4cc
+msgid "The mesh is much finer at one open boundary than at the other, which can cause an unstable simulation. Assign the mesh zones at the inflow and at the outflow a similar edge length."
+msgstr "Das Rechennetz ist an einem offenen Rand viel feiner als am anderen, was zu einer instabilen Simulation führen kann. Weisen Sie den Rechennetzzonen am Zufluss und am Ausfluss eine ähnliche Kantenlänge zu."
+
+# machine translation: argos 856997191ffd
+msgid "No mesh nodes were found on an inflow or outflow line. Verify that the lines lie on the outline of the region of interest and that their type field contains ``inflow`` or ``outflow``."
+msgstr "Auf einer Zufluss- oder Ausflusslinie wurden keine Rechennetzknoten gefunden. Stellen Sie sicher, dass die Zeilen auf dem Umriss des Untersuchungsgebiets liegen und dass ihr Typfeld ``inflow`` oder ``outflow`` enthält."
+
+# machine translation: argos 3c9c73d9c4ec
+msgid "The line layer has no attribute field that identifies inflow and outflow. Add the field ``Type (inflow/outflow)`` (:ref:`case-boundaries`)."
+msgstr "Der Linienlayer hat kein Attributfeld, das Zufluss und Ausfluss identifiziert. Fügen Sie das Feld ``Type (inflow/outflow)`` (:ref:`case-boundaries`) hinzu."
+
+# machine translation: argos 4062292313b3
+msgid "The model was built, but the measurement tables for the calibration were not written, because the field measurements could not be read or do not match their point layer. The reason follows in the same message. Correct the measurement files and repeat the preprocessing before starting a calibration."
+msgstr "Das Modell wurde gebaut, aber die Messtabellen für die Kalibrierung wurden nicht geschrieben, weil die Feldmessungen nicht gelesen werden konnten oder nicht zu ihrem Punktlayer passen. Der Grund folgt in derselben Botschaft. Korrigieren Sie die Messdateien und wiederholen Sie Preprocessing, bevor Sie eine Kalibrierung starten."
+
+# machine translation: argos b1edace23d87
+msgid "The finite volume method was selected together with another turbulence model. aXqua uses the constant viscosity model instead. Select finite elements if a turbulence model is required (:ref:`preprocessing-telemac-choices`)."
+msgstr "Die Finite-Volumen-Methode wurde zusammen mit einem anderen Turbulenzmodell ausgewählt. aXqua verwendet stattdessen das konstante Viskositätsmodell. Wählen Sie endliche Elemente, wenn ein Turbulenzmodell erforderlich ist (:ref:`preprocessing-telemac-choices`)."
+
+# machine translation: argos 0ff64d4f593e
+msgid "The morphodynamic simulation would not transport any sediment. Enable at least one transport mode (:ref:`help-morphodynamics-telemac`)."
+msgstr "Die morphodynamische Simulation würde kein Sediment transportieren. Aktivieren Sie mindestens einen Transportmodus (:ref:`help-morphodynamics-telemac`)."
+
+# machine translation: argos e7040f5fd598
+msgid "Simulations"
+msgstr "Simulationen"
+
+# machine translation: argos 70c57372de51
+msgid "Inflow and outflow still differed at the end of the run, so that the flow is not steady. Increase ``hydrodynamics.duration`` and repeat the run. If the difference no longer decreases, verify the downstream water level and the wetting report (:ref:`hydraulics-dry-runs`)."
+msgstr "Zufluss und Ausfluss unterschieden sich am Ende des Laufs noch, so dass der Fluss nicht stetig ist. Erhöhen Sie ``hydrodynamics.duration`` und wiederholen Sie den Lauf. Wenn die Differenz nicht mehr abnimmt, überprüfen Sie den nachgelagerten Wasserstand und den Benetzungsbericht (:ref:`hydraulics-dry-runs`)."
+
+# machine translation: argos c893597bb9d9
+msgid "The difference between inflow and outflow did not remain small for long enough. The hotstart file, which the calibration requires, was therefore not written. Increase ``hydrodynamics.duration``."
+msgstr "Der Unterschied zwischen Zufluss und Ausfluss blieb nicht lange genug klein. Die Hotstart-Datei, die die Kalibrierung erfordert, wurde daher nicht geschrieben. Erhöhen Sie ``hydrodynamics.duration``."
+
+# machine translation: argos a4c3a5078a9a
+msgid "``GRACJG: EXCEEDING MAXIMUM ITERATIONS`` (in the TELEMAC listing)"
+msgstr "``GRACJG: EXCEEDING MAXIMUM ITERATIONS`` (in der TELEMAC-Auflistung)"
+
+# machine translation: argos 0800e871d0d8
+msgid "A linear solver of TELEMAC did not reach its accuracy within the allowed number of iterations. During the filling of a dry reach, this message is common and harmless, provided that it disappears once the reach is filled. If it persists until the end of the run, the result should not be used."
+msgstr "Ein lineares Solver von TELEMAC hat seine Genauigkeit nicht innerhalb der erlaubten Anzahl von Iterationen flussabschnittiert. Während des Befüllens eines trockenen Flussabschnitts ist diese Nachricht üblich und harmlos, sofern sie nach dem Befüllen des Flussabschnitts verschwindet. Wenn es bis zum Ende des Laufs anhält, sollte das Ergebnis nicht verwendet werden."
+
+# machine translation: argos a4fd76818dad
+msgid "The OpenFOAM model is built without a TELEMAC warm-up, which increases its computing time considerably. Run the steady TELEMAC simulation first (:ref:`warm-up-concept`)."
+msgstr "Das OpenFOAM-Modell ist ohne ein TELEMAC-Warm-up aufgebaut, was die Rechenzeit erheblich erhöht. Führen Sie zuerst die stetige TELEMAC-Simulation aus (:ref:`warm-up-concept`)."
+
+# machine translation: argos a76b3d6d4021
+msgid "The mesh check of OpenFOAM found a small number of cells of low quality, typically at steps in the terrain. The simulation can be run. If it becomes unstable, increase the cell size or smooth the terrain at the reported locations."
+msgstr "Der Rechennetz-Check von OpenFOAM fand eine kleine Anzahl von Zellen von geringer Qualität, typischerweise an Stufen im Gelände. Die Simulation kann durchgeführt werden. Wenn es instabil wird, erhöhen Sie die Zellgröße oder glätten Sie das Gelände an den gemeldeten Orten."
+
+# machine translation: argos 20cab8ff01cd
+msgid "Check of a case"
+msgstr "Kontrolle eines Falls"
+
+# machine translation: argos 5e0d3376b0d6
+msgid "The check of a case (*Check* on the *Case Setup* tab, *Save* in the case settings, or ``axqua check <case-file>``) reports the following warnings. The plugin shows each of them as an orange triangle next to the setting concerned."
+msgstr "Die Überprüfung eines Falls (*Check* auf der Registerkarte *Case Setup*, *Save* in den Falleinstellungen oder ``axqua check <case-file>``) meldet die folgenden Warnungen. Das Plugin zeigt jeden von ihnen als orangefarbenes Dreieck neben der betreffenden Einstellung."
+
+# machine translation: argos 1c6de3d7a83a
+msgid "The case file contains neither a ``telemac`` nor an ``openfoam`` block. Add the block of the program to use, for example with the switch *Simulate with TELEMAC* on the page *TELEMAC* of the case settings."
+msgstr "Die Fall-Datei enthält weder einen ``telemac`` noch einen ``openfoam``-Block. Fügen Sie den Block des zu verwendenden Programms hinzu, zum Beispiel mit dem Schalter *Simulate with TELEMAC* auf der Seite *TELEMAC* der Fall-Einstellungen."
+
+# machine translation: argos 70bf43d767da
+msgid "The case can be saved, but the next step of the workflow needs this setting. Enter the discharge on the page *Liquid boundaries* of the case settings (:ref:`case-boundaries`)."
+msgstr "Der Fall kann gespeichert werden, aber der nächste Schritt des Workflows benötigt diese Einstellung. Geben Sie den Abfluss auf der Seite *Liquid boundaries* der Fall-Einstellungen ein (:ref:`case-boundaries`)."
+
+# machine translation: argos 3bd0c5a17f3b
+msgid "A validation situation has one discharge, and the table *Measurement files* of the case settings shows it in every row of the situation. Where the rows still show different values, the last one in the table was saved. Enter the discharge of the situation in one of its rows; the other rows follow (:ref:`validation situation <validation-setup>`)."
+msgstr "Eine Validierungssituation hat einen Abfluss, und die Tabelle *Measurement files* der Fall-Einstellungen zeigt sie in jeder Zeile der Situation an. Wo die Zeilen noch unterschiedliche Werte zeigen, wurde der letzte in der Tabelle gespeichert. Geben Sie den Abfluss der Situation in einer ihrer Zeilen ein; die anderen Zeilen folgen (:ref:`Validierungssituation <validation-setup>`)."
+
+# machine translation: argos ea0b969845ad
+msgid "Profile of this computer"
+msgstr "Profil dieses Computers"
+
+# machine translation: argos 1e62a4e96aea
+msgid "The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile check``) reports the following warnings. The plugin shows each of them as an orange triangle next to the entry concerned. A click on the triangle opens the message. A warning does not prevent saving the profile."
+msgstr "Die Überprüfung des Profils (*Check* auf der Registerkarte *Configuration* oder ``axqua profile check``) meldet die folgenden Warnungen. Das Plugin zeigt jeden von ihnen als orangefarbenes Dreieck neben dem betreffenden Eintrag. Ein Klick auf das Dreieck öffnet die Nachricht. Eine Warnung verhindert nicht das Speichern des Profils."
+
+# machine translation: argos bbe115f93a5d
+msgid "The profile does not state where TELEMAC or OpenFOAM is installed. Select the installation folder or the environment script of the installation in the profile editor (:ref:`solver-bindings`). Leave both entries empty if the program is not used on this computer."
+msgstr "Im Profil ist nicht angegeben, wo TELEMAC oder OpenFOAM installiert ist. Wählen Sie den Installationsordner oder das Umgebungsskript der Installation im Profileditor (:ref:`solver-bindings`). Lassen Sie beide Einträge leer, wenn das Programm nicht auf diesem Computer verwendet wird."
+
+# machine translation: argos f3f75cc667f9
+msgid "``the installation folder of ... holds several environment scripts`` or ``no environment script of ... was found in the installation folder``"
+msgstr "``the installation folder of ... holds several environment scripts`` oder ``no environment script of ... was found in the installation folder``"
+
+# machine translation: argos a2b1bbfdca67
+msgid "The profile names the installation folder of a simulation code and no environment script, and aXqua cannot determine the script from the folder. A TELEMAC installation can contain one environment script per compiler configuration. Select the environment script itself in the profile editor."
+msgstr "Das Profil benennt den Installationsordner eines Simulationscodes und kein Umgebungsskript, und aXqua kann das Skript nicht aus dem Ordner bestimmen. Eine TELEMAC-Installation kann ein Umgebungsskript pro Compiler-Konfiguration enthalten. Wählen Sie das Umgebungsskript selbst im Profileditor aus."
+
+# machine translation: argos 02532bdbae0b
+msgid "The profile names a folder that is not on this computer, for example because the program was moved or removed. Select the folder again in the profile editor, or clear the entry. A program whose environment script or program file is entered in the profile keeps working."
+msgstr "Das Profil benennt einen Ordner, der sich nicht auf diesem Computer befindet, beispielsweise weil das Programm verschoben oder entfernt wurde. Wählen Sie den Ordner im Profileditor erneut aus oder löschen Sie den Eintrag. Ein Programm, dessen Umgebungsskript oder Programmdatei in das Profil eingegeben wird, funktioniert weiterhin."
+
+# machine translation: argos f3f75cc667f9
+msgid "``the environment script of ... is not in the installation folder entered for it`` or ``the program of ... is not in the installation folder entered for it``"
+msgstr "``the environment script of ... is not in the Installation folder entered for it`` oder ``the program of ... is not in the installation folder entered for it``"
+
+# machine translation: argos 32bad83fe0f3
+msgid "The two entries of a program point to different installations. aXqua uses the environment script or the program file, and the folder has no effect. Select the folder to which the file belongs, or clear the folder."
+msgstr "Die beiden Einträge eines Programms weisen auf unterschiedliche Anlagen hin. aXqua verwendet das Umgebungsskript oder die Programmdatei, und der Ordner hat keine Wirkung. Wählen Sie den Ordner aus, zu dem die Datei gehört, oder löschen Sie den Ordner."
+
+# machine translation: argos 83c7011bb2bb
+msgid "The profile contains an entry that the installed version of aXqua does not know. If a newer version of aXqua or of the plugin wrote the entry, update aXqua, and the entry takes effect. If the entry is a typing error in a profile that was edited by hand, the message names the entry that is probably meant. Correct the name in the profile file. The remaining entries of the profile are used in either case, and saving the profile keeps the entry."
+msgstr "Das Profil enthält einen Eintrag, den die installierte Version von aXqua nicht kennt. Wenn eine neuere Version von aXqua oder des Plugins den Eintrag geschrieben hat, aktualisieren Sie aXqua und der Eintrag wird wirksam. Wenn es sich bei dem Eintrag um einen tippfehler in einem von Hand bearbeiteten Profil handelt, benennt die Nachricht den Eintrag, der wahrscheinlich gemeint ist. Korrigieren Sie den Namen in der Profildatei. Die restlichen Einträge des Profils werden in jedem Fall verwendet, und das Speichern des Profils behält den Eintrag."
+
+# machine translation: argos ace9e90cd91b
+msgid "The terminal or QGIS session already contained the settings of the simulation program before aXqua loaded the environment script, typically because a system-wide startup file loads them. A job does not inherit these settings. Verify that the environment script of the profile alone sets up the installation, in particular if several versions of the program are installed."
+msgstr "Die Terminal oder QGIS-Sitzung enthielt bereits die Einstellungen des Simulationsprogramms, bevor aXqua das Umgebungsskript geladen hat, typischerweise weil eine systemweite Startdatei sie lädt. Ein Job erbt diese Einstellungen nicht. Stellen Sie sicher, dass das Umgebungsskript des Profils allein die Installation einrichtet, insbesondere wenn mehrere Versionen des Programms installiert sind."
+
+# machine translation: argos d7afe782eac7
+msgid "More processes than processor cores slow a simulation down. Reduce the number of processor cores in the profile."
+msgstr "Mehr Prozesse als Prozessorkerne verlangsamen eine Simulation. Reduzieren Sie die Anzahl der Prozessorkerne im Profil."
+
+# machine translation: argos e919b13104d2
+msgid "The environment script belongs to another OpenFOAM version. aXqua writes its input files for the version v2406, and other versions may reject them. Enter the environment script of OpenFOAM v2406 in the profile."
+msgstr "Das Umgebungsskript gehört zu einer anderen OpenFOAM-Version. aXqua schreibt seine Eingabedateien für die Version v2406, und andere Versionen können sie ablehnen. Geben Sie das Umgebungsskript von OpenFOAM v2406 im Profil ein."
+
+# machine translation: argos ea0db95d380d
+msgid "Installation of the simulation software"
+msgstr "Installation der Simulationssoftware"
+
+# machine translation: argos 4455434e244f
+msgid "The *Check* tab of an installation wizard, the *Installation* tab of a finished installation, and ``axqua install plan`` report the following warnings. An installation can be started with a warning."
+msgstr "Die Registerkarte *Check* eines Installationsassistenten, die Registerkarte *Installation* einer fertigen Installation und ``axqua install plan`` melden die folgenden Warnungen. Eine Installation kann mit einer Warnung gestartet werden."
+
+# machine translation: argos b4471e2de51b
+msgid "The installation requires packages of the operating system that are missing. The message lists them and gives the command that installs them, which requires administrator rights. Click *Install the packages...* in the wizard, or copy the command into a terminal, and click *Check again* (:doc:`../installation/simulation-software`). For OpenFOAM with an existing OpenFOAM v2406, most of the listed packages are needed only for compiling OpenFOAM itself, and the installation normally works without them."
+msgstr "Die Installation erfordert Pakete des Betriebssystems, die fehlen. Die Nachricht listet sie auf und gibt den Befehl, der sie installiert, was Administratorrechte erfordert. Klicken Sie im Assistenten auf *Install the packages...* oder kopieren Sie den Befehl in ein Terminal und klicken Sie auf *Check again* (:doc:`../installation/simulation-software`). Für OpenFOAM mit einer vorhandenen OpenFOAM v2406 werden die meisten der aufgeführten Pakete nur zum Kompilieren von OpenFOAM selbst benötigt, und die Installation funktioniert normalerweise ohne sie."
+
+# machine translation: argos df754f10043d
+msgid "The operating system does not know a package that the installer names, typically because the system is older or newer than the one the installer was written for. The installation may still work if another package provides the same files. Otherwise an administrator has to add a package source."
+msgstr "Das Betriebssystem kennt kein Paket, das der Installer benennt, in der Regel, weil das System älter oder neuer ist als das, für das der Installer geschrieben wurde. Die Installation funktioniert möglicherweise weiterhin, wenn ein anderes Paket die gleichen Dateien bereitstellt. Andernfalls muss ein Administrator eine Paketquelle hinzufügen."
+
+# machine translation: argos b91abd4c8a55
+msgid "aXqua reads the list of required packages from the installer script and did not find it in this version of the script. The installation can be started. It stops with a message of its own if a package is missing."
+msgstr "aXqua liest die Liste der erforderlichen Pakete aus dem Installationsskript und hat sie in dieser Version des Skripts nicht gefunden. Die Installation kann gestartet werden. Es endet mit einer eigenen Nachricht, wenn ein Paket fehlt."
+
+# machine translation: argos d50e308855fe
+msgid "The drive of the installation folder may be too small. Select a folder on a drive with more free space on the *Settings* tab of the wizard."
+msgstr "Der Antrieb des Installationsordners kann zu klein sein. Wählen Sie einen Ordner auf einem Laufwerk mit mehr freiem Speicherplatz auf der *Settings* Registerkarte des Assistenten."
+
+# machine translation: argos 32cc3d345587
+msgid "An installation for all users was given a folder inside your home folder. Other user accounts usually have no access to a home folder, so they could not run the programs. Select a folder outside of it, such as ``/opt/openfoam-sediment-v2406``."
+msgstr "Eine Installation für alle Benutzer wurde mit einem Ordner in Ihrem Home-Ordner versehen. Andere Benutzerkonten haben normalerweise keinen Zugriff auf einen Home-Ordner, so dass sie die Programme nicht ausführen können. Wählen Sie einen Ordner außerhalb, wie ``/opt/openfoam-sediment-v2406``."
+
+# machine translation: argos f3f75cc667f9
+msgid "``... exists already`` or ``... holds an installation of this installer, which is continued``"
+msgstr "``... exists already`` oder ``... holds an installation of this installer, which is continued``"
+
+# machine translation: argos 484fe10565aa
+msgid "The installation folder contains an earlier installation. The installer continues with it: it keeps what is downloaded and builds the program again. Select another folder to leave the earlier installation untouched."
+msgstr "Der Installationsordner enthält eine frühere Installation. Der Installer fährt damit fort: Er behält, was heruntergeladen wird, und baut das Programm erneut auf. Wählen Sie einen anderen Ordner aus, um die frühere Installation unberührt zu lassen."
+
+# machine translation: argos b0e6d8387484
+msgid "Compiling OpenFOAM takes several hours and about 20 GB. If OpenFOAM v2406 is installed, select its file ``etc/bashrc`` on the *Settings* tab of the wizard. A packaged OpenFOAM v2406, which an administrator installs in a few minutes, avoids the compilation (:ref:`install-openfoam`)."
+msgstr "Die Zusammenstellung von OpenFOAM dauert mehrere Stunden und etwa 20 GB. Wenn OpenFOAM v2406 installiert ist, wählen Sie die Datei ``etc/bashrc`` auf der Registerkarte *Settings* des Assistenten aus. Ein verpacktes OpenFOAM v2406, das ein Administrator in wenigen Minuten installiert, vermeidet die Zusammenstellung (:ref:`install-openfoam`)."
+
+# machine translation: argos 90e97571f720
+msgid "The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* tab, or enter another ParaView in the profile editor (:ref:`install-paraview`)."
+msgstr "Die Assistenten verwenden das ParaView-Paket des Betriebssystems und es ist nicht installiert. VisIt ist trotzdem installiert. Installieren Sie die auf der Registerkarte *Check* aufgeführten Systempakete oder geben Sie eine andere ParaView im Profileditor (:ref:`install-paraview`) ein."
+
+# machine translation: argos 2a041e4c4592
+msgid "OpenFOAM and the sediment solvers are installed and entered in the profile, but the installer did not leave VisIt where aXqua expects it. The simulation software works without VisIt. Install VisIt alone with the wizard for ParaView and VisIt on the *Configuration* tab, or with ``axqua install start postprocessors`` (:ref:`install-visit`)."
+msgstr "OpenFOAM und der Sediment Solver werden installiert und in das Profil eingegeben, aber der Installateur hat VisIt nicht dort gelassen, wo aXqua es erwartet. Die Simulationssoftware funktioniert ohne VisIt. Installieren Sie VisIt allein mit dem Assistenten für ParaView und VisIt auf der Registerkarte *Configuration* oder mit ``axqua install start postprocessors`` (:ref:`install-visit`)."
+
+# machine translation: argos f21bcab2a6fe
+msgid "TELEMAC is installed and works, but the input files of its example cases were not downloaded completely. The message quotes the last lines of the installation log. The usual cause is the download server of TELEMAC, which refuses further requests for a while after many downloads from one network (``Rate limit exceeded``, ``error: 429``). Repeat the download later with the command that the message names, ``axqua install telemac-examples <folder>``. It fetches only the files that are still missing."
+msgstr "TELEMAC ist installiert und funktioniert, aber die Eingabedateien seines Beispiels Fälle wurden nicht vollständig heruntergeladen. Die Nachricht zitiert die letzten Zeilen des Installationsprotokolls. Die übliche Ursache ist der Download-Server von TELEMAC, der weitere Anfragen nach vielen Downloads aus einem Netzwerk (``Rate limit exceeded``, ``error: 429``) für eine Weile ablehnt. Wiederholen Sie den Download später mit dem Befehl, dass die Nachrichtennamen ``axqua install telemac-examples <folder>``. Es holt nur die Dateien, die noch fehlen."
+
+# machine translation: argos ddb52a001422
+msgid "The program is installed, but the profile of the computer could not be written, typically because the existing profile contains an error, or because another installation was writing the profile at the same moment and did not finish. The message lists the entries. Open the profile editor on the *Configuration* tab, correct the profile, and enter them there (:ref:`plugin-profile`)."
+msgstr "Das Programm ist installiert, aber das Profil des Computers konnte nicht geschrieben werden, in der Regel, weil das vorhandene Profil einen Fehler enthält, oder weil eine andere Installation das Profil im gleichen Moment schrieb und nicht beendet wurde. Die Nachricht listet die Einträge auf. Öffnen Sie den Profileditor auf der Registerkarte *Configuration*, korrigieren Sie das Profil und geben Sie sie dort ein (:ref:`plugin-profile`)."
+
+# machine translation: argos 3ba91fc3a9ca
+msgid "Simulation software"
+msgstr "Simulationssoftware"
+
+# machine translation: argos 7d3316c080b1
+msgid "The variables of a simulation code were already set in the terminal before aXqua read the environment script. A job does not inherit the settings of a terminal. Verify that the solver binding names the correct environment script (:ref:`solver-bindings`). Otherwise, a simulation may work in the terminal and fail as a job."
+msgstr "Die Variablen eines Simulationscodes wurden bereits im Terminal gesetzt, bevor aXqua das Umgebungsskript gelesen hat. Ein Job erbt nicht die Einstellungen eines Terminal. Stellen Sie sicher, dass die Bindung Solver das korrekte Umgebungsskript (:ref:`solver-bindings`) benennt. Andernfalls kann eine Simulation im Terminal funktionieren und als Job fehlschlagen."

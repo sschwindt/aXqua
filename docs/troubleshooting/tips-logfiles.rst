@@ -46,6 +46,21 @@ The lines ``START`` and ``DONE ... in N s`` mark the beginning and the end of ea
 
 If a simulation stops without an error message of aXqua, the cause is usually reported by the simulation code. Read the end of the ``.sortie`` listing (TELEMAC) or the end of the output of the simulation code in the folder ``solver/`` of the job (OpenFOAM).
 
+.. _help-cleanup:
+
+Freeing disk space
+------------------
+
+A case collects files that nothing needs any more, and results that are larger than they have to be. A steady TELEMAC run writes every time step into its result, of which aXqua reads only the last one; on a reach with a few hundred thousand nodes such a result takes about 1 GB, and every run of a calibration or of a mesh convergence study writes one. *Clean Up*, left of *Help* above the tabs of the plugin, lists for one case at a time what can go, by category and with the space it frees:
+
+* working folders that TELEMAC leaves behind when a run was stopped or failed;
+* listings of the single processors of a parallel run, and listings of earlier runs (the newest listing of each steering file is kept);
+* **time steps of TELEMAC results**: the result is rewritten with the last time step only, or with every 5th or 10th time step and the last one. The kept time steps are copied unchanged. The last time step is the one that aXqua reads, from which a hotstart continues and which QGIS shows, so these keep working; an animation of the run loses the removed time steps;
+* processor folders of OpenFOAM runs that were reconstructed, the time folders between the start and the latest time, and the results of an earlier run that OpenFOAM set aside in ``previous-run``;
+* exports for ParaView and VisIt, which *Export* makes again.
+
+The categories that need no second thought are ticked; the time steps are not. *Remove selected* asks before anything is removed, and removed files cannot be restored. The input files, the case file, the built model (geometry, boundary conditions, steering and friction files, initial conditions) and the last time step of a result are never listed, and neither are the processor folders of an OpenFOAM run that was not reconstructed, which hold the only copy of its results. Nothing is removed while a job of the case is waiting or running. In a terminal, ``axqua cleanup <case-file>`` lists the same items and ``--remove`` removes them (:doc:`../automation/terminal-syntax`).
+
 Reporting a problem
 -------------------
 

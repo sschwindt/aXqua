@@ -17,6 +17,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIR = PLUGIN_ROOT / "axqua"
 ALIAS = "axqua_plugin"
@@ -38,3 +40,17 @@ def _load_alias() -> None:
 
 
 _load_alias()
+
+
+@pytest.fixture(autouse=True)
+def _published_documentation(monkeypatch):
+    """Help opens the published English documentation in a test.
+
+    Help asks ``axqua docs`` where a local copy is, which would run the aXqua of the computer
+    the tests run on and give each computer other addresses. A test of the local copy or of
+    the language sets them itself.
+    """
+    from axqua_plugin.gui import help as help_pages
+
+    monkeypatch.setattr(help_pages, "_location", {})
+    monkeypatch.setattr(help_pages, "language", lambda: "en")

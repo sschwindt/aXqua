@@ -1,0 +1,244 @@
+# French translation of the aXqua documentation, page usage/preprocessing.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos a72d0dc9965e
+msgid "Preprocessing"
+msgstr "Prétraitement"
+
+# machine translation: argos 4ce20de4526d
+msgid "Preprocessing converts the case description into the files that a simulation code reads. No simulation is started during preprocessing. Its result is a complete model that can be inspected before computing time is spent."
+msgstr "Prétraitement convertit la description du cas dans les fichiers qu'un code de simulation lit. Aucune simulation n'est amorcée pendant le prétraitement. Son résultat est un modèle complet qui peut être inspecté avant le temps de calcul est passé."
+
+# machine translation: argos c703443ec85b
+msgid "aXqua workflow"
+msgstr "flux de travail aXqua"
+
+# machine translation: argos 06de61b8ce58
+msgid "aXqua builds a model in five steps, each of which uses the result of the previous one:"
+msgstr "aXqua construit un modèle en cinq étapes, chacune utilisant le résultat de la précédente :"
+
+# machine translation: argos ad5cc12e9b67
+msgid "**Terrain.** The digital elevation model is converted to the coordinate reference system of the case and cut to the region of interest."
+msgstr "**Terrain.** Le modèle numérique de terrain est transformé en système de coordonnées de référence du cas et découpé en zone d'étude."
+
+# machine translation: argos a5dba7705350
+msgid "**Mesh.** The region of interest is divided into triangles according to the mesh zones, and each mesh node receives its bed elevation from the terrain model and its roughness zone."
+msgstr "**Maillage.** La zone d'étude est divisée en triangles selon les zones de maillage, et chaque nœud du maillage reçoit sa cote du fond du modèle de terrain et sa zone de rugosité."
+
+# machine translation: argos 2b417a8bdde1
+msgid "**Boundaries.** The nodes on the outline of the mesh are compared with the inflow and outflow lines. Nodes on a line become open boundaries, and all other outline nodes become closed walls."
+msgstr "**Frontières.** Les nœuds sur les contours du maillage sont comparés aux lignes d'entrée et de sortie. Nœuds sur une ligne deviennent ouvertes frontières, et tous les autres contours nœuds deviennent parois fermées."
+
+# machine translation: argos 3a8d7f22cd3d
+msgid "**Simulation settings.** The control file of TELEMAC (the steering file) and the roughness table are written from the settings of the case file."
+msgstr "**Paramètres de simulation.** Le fichier de contrôle de TELEMAC (le fichier de paramètres) et le table de rugosité sont écrits à partir des paramètres du fichier de cas."
+
+# machine translation: argos b4eb85e71ed6
+msgid "**Measurements.** The field measurements are compiled into the table that the calibration reads."
+msgstr "**Mesures** Les mesures de terrain sont compilées dans le tableau que le calage lit."
+
+# machine translation: argos 57c95c992d18
+msgid "Because all files originate from one case file, they are consistent with each other. For example, the order of the boundary nodes in the boundary file always matches the mesh."
+msgstr "Parce que tous les fichiers proviennent d'un fichier de cas, ils sont cohérents. Par exemple, l'ordre des frontière nœuds dans le fichier frontière correspond toujours au maillage."
+
+# machine translation: argos 67b2d9a1957e
+msgid "To start preprocessing in the plugin, select the case on the *Case Setup* tab and click *Build* on the *Preprocessing* tab. The table *Preprocessing checkup* on that tab then states for every simulation of the case whether the case file asks for it, whether it is built, and whether it has been run. In a terminal, the command is:"
+msgstr "Pour commencer prétraitement dans le extension, sélectionnez le cas sur l'onglet *Case Setup* et cliquez sur *Build* sur l'onglet *Preprocessing*. La table *Preprocessing checkup* sur cet onglet indique ensuite pour chaque simulation de la cas si la fichier de cas le demande, si elle est construite, et si elle a été exécutée. Dans un terminal, la commande est :"
+
+# machine translation: argos 917d3b7aa0c8
+msgid "The Preprocessing tab of the plugin"
+msgstr "L'onglet prétraitement de l'extension"
+
+# machine translation: argos 6a120fad13a8
+msgid "The *Preprocessing* tab. (1) *Build* starts the preprocessing as a job. (2) The table *Preprocessing checkup* of the active case. (3) The job list, which is visible below every tab."
+msgstr "L'onglet *Preprocessing*. (1) *Build* commence le prétraitement en tant que tâche. (2) Le tableau *Preprocessing checkup* du cas active. (3) La liste tâche, qui est visible sous chaque onglet."
+
+# machine translation: argos 8cc1054ce86c
+msgid "The model is written to the folder ``axqua-case/simulation/``. It consists of the mesh with bed elevations (``geometry.slf``), the boundary conditions (``boundaries.cli``), the roughness table (``friction.tbl``) and the steering file (``steady2d.cas``). The log file ``axqua.log`` in the same folder records every step with its duration."
+msgstr "Le modèle est écrit à dossier ``axqua-case/simulation/``. Il se compose de maillage avec élévations de lit (``geometry.slf``), conditions aux limites (``boundaries.cli``), table de rugosité (``friction.tbl``) et fichier de paramètres (``steady2d.cas``). Le fichier journal ``axqua.log`` dans le même dossier enregistre chaque étape avec sa durée."
+
+# machine translation: argos 64ddbc257e26
+msgid "Meshing"
+msgstr "Mèche"
+
+# machine translation: argos bca6dff2a101
+msgid "The mesh is created **once** and then reused by all subsequent TELEMAC simulations of the case, including simulations with a varying discharge and 3D simulations, which use the same mesh in plan view. The only exception is the mesh convergence study, which deliberately creates several meshes of different resolution (:doc:`mesh-convergence`)."
+msgstr "Le maillage est créé **une fois** puis réutilisé par toutes les simulations TELEMAC ultérieures du cas, y compris les simulations avec un débit et des simulations 3D variables, qui utilisent le même maillage en vue du plan. La seule exception est l'étude de convergence en maillage, qui crée délibérément plusieurs maillages de résolution différente (:doc:`mesh-convergence`)."
+
+# machine translation: argos 25575cf9a804
+msgid "aXqua generates the triangular mesh with the open-source mesh generator `Gmsh <https://gmsh.info/>`_ (Geuzaine and Remacle 2009), which it controls directly, so that neither SALOME nor another graphical program is needed. Two properties of the mesh generation are relevant in practice:"
+msgstr "aXqua génère le maillage triangulaire avec le générateur maillage open-source `Gmsh <https://gmsh.info/>`_ (Geuzaine et Remacle 2009), qu'il contrôle directement, de sorte que ni SALOME ni un autre programme graphique n'est nécessaire. Deux propriétés de la génération maillage sont pertinentes dans la pratique :"
+
+# machine translation: argos 82a9d8e9b79f
+msgid "The edge lengths in the mesh zones are target values. The realized triangles deviate slightly from them, in particular at the transition between the channel and the floodplain, where the triangle size changes gradually."
+msgstr "Les longueurs de bord dans les zones de maillage sont des valeurs cibles. Les triangles réalisés s'écartent légèrement d'eux, en particulier à la transition entre le chenal et le lit majeur, où la taille du triangle change progressivement."
+
+# machine translation: argos d4af5dd6bd15
+msgid "Two builds from identical inputs produce slightly different meshes, with differences of less than 1 % in the number of nodes. Both meshes are valid. A result should therefore always be reported together with the mesh on which it was computed, and the mesh file should be kept."
+msgstr "Deux constructions à partir d'entrées identiques produisent des maillages légèrement différents, avec des différences de moins de 1 % dans le nombre de nœuds. Les deux maillages sont valides. Un résultat doit donc toujours être rapporté avec le maillage sur lequel il a été calculé, et le fichier maillage doit être conservé."
+
+# machine translation: argos 0b358c9ce82b
+msgid "After meshing, aXqua assesses the mesh and writes a quality report into the log file. The report lists the angles and the elongation of the triangles, the size ratio of neighboring triangles and the **shortest edge**. The shortest edge matters most, because it limits the time step of the simulation: one very small triangle can slow down the entire computation."
+msgstr "Après maillage, aXqua évalue le maillage et écrit un rapport de qualité dans le fichier journal. Le rapport énumère les angles et l'allongement des triangles, le rapport de taille des triangles voisins et le **bord le plus court**. Le bord le plus court compte le plus, car il limite le pas de temps de la simulation : un très petit triangle peut ralentir le calcul entier."
+
+# machine translation: argos 59e4b2f99e95
+msgid "OpenFOAM requires a three-dimensional mesh. aXqua derives it from the same region of interest in a separate step (:ref:`preprocessing-openfoam-choices`)."
+msgstr "OpenFOAM nécessite un maillage tridimensionnel. aXqua dérive de la même zone d'étude dans une étape séparée (:ref:`preprocessing-openfoam-choices`)."
+
+# machine translation: argos 8b7248f21553
+msgid "Pre-processing checkup"
+msgstr "Contrôle préalable au traitement"
+
+# machine translation: argos df68f59d7455
+msgid "Three checks show whether a case is complete and plausible before a simulation is started."
+msgstr "Trois vérifications montrent si un cas est complet et plausible avant le début d'une simulation."
+
+# machine translation: argos 1760b0fe542f
+msgid "**Check the inputs before building.** The following command reads the case file, verifies that all input files exist and that TELEMAC can be reached, and then stops. It takes about one second."
+msgstr "**Vérifier les entrées avant de construire.** La commande suivante lit le fichier de cas, vérifie que tous les fichiers d'entrée existent et que TELEMAC peut être atteint, puis s'arrête. Ça prend environ une seconde."
+
+# machine translation: argos d5296c68b211
+msgid "**Check what has been built.** aXqua reports for each code and each type of simulation whether it is available, whether the case requests it, and whether its files exist:"
+msgstr "**Vérifiez ce qui a été construit.** rapports aXqua pour chaque code et chaque type de simulation si elle est disponible, si le cas le demande, et si ses fichiers existent :"
+
+# machine translation: argos 64787babd569
+msgid "Column"
+msgstr "Colonne"
+
+# machine translation: argos 2c7c3ec284a3
+msgid "Meaning"
+msgstr "Signification"
+
+# machine translation: argos ddb7a2354bd1
+msgid "aXqua offers this type of simulation for this code (``yes``, ``no``, or ``n/a`` when the type does not exist for the code)."
+msgstr "aXqua propose ce type de simulation pour ce code (``yes``, ``no``, ou ``n/a`` lorsque le type n'existe pas pour le code)."
+
+# machine translation: argos 889a70c2f4d1
+msgid "The case file requests this type of simulation."
+msgstr "Le fichier de cas demande ce type de simulation."
+
+# machine translation: argos 9e9bc8a4f935
+msgid "The input files of the simulation exist."
+msgstr "Les fichiers d'entrée de la simulation existent."
+
+# machine translation: argos 646fa1d0370a
+msgid "A result file exists."
+msgstr "Un fichier de résultats existe."
+
+# machine translation: argos 67290cd9838c
+msgid "The plugin uses the same information to enable and disable its tabs and buttons. aXqua also stores it in two text files in the case folder, whose names state whether the case uses a code (for example ``MODEL=TELEMAC_ENABLED`` and ``MODEL=OPENFOAM_DISABLED``)."
+msgstr "L'extension utilise les mêmes informations pour activer et désactiver ses onglets et boutons. aXqua le stocke également dans deux fichiers texte dans le dossier cas, dont les noms indiquent si le cas utilise un code (par exemple ``MODEL=TELEMAC_ENABLED`` et ``MODEL=OPENFOAM_DISABLED``)."
+
+# machine translation: argos 0c8338a1e800
+msgid "**Read the log file of the build.** Verify three items in ``axqua-case/simulation/axqua.log``:"
+msgstr "**Lire le fichier journal de la construction.** Vérifier trois éléments ``axqua-case/simulation/axqua.log``:"
+
+# machine translation: argos 06456a175b2f
+msgid "the mesh quality report contains no warnings for the floodplain and a plausible shortest edge;"
+msgstr "le rapport de qualité maillage ne contient aucun avertissement pour le lit majeur et un bord plus court plausible ;"
+
+# machine translation: argos 1fb138564d45
+msgid "nodes were assigned to every inflow and outflow line. A warning appears when the node spacing at the inflow and at the outflow differs by more than 10 %, which may cause an unstable simulation;"
+msgstr "Nœuds ont été assignés à chaque ligne d'entrée et de sortie. Un avertissement apparaît lorsque l'espacement de nœud à l'entrée et à la sortie diffère de plus de 10 %, ce qui peut entraîner une simulation instable ;"
+
+# machine translation: argos 8ede5fa10564
+msgid "the measurement points lie inside the model. The command ``axqua check-gt <case-file>`` additionally compares the elevations of the measurement points with the terrain model."
+msgstr "les points de mesure se trouvent à l'intérieur du modèle. La commande ``axqua check-gt <case-file>`` compare en outre les élévations des points de mesure avec le modèle de terrain."
+
+# machine translation: argos fe495a0aa736
+msgid "The final check is the first simulation itself, which shows whether inflow and outflow reach a balance (:ref:`hydraulics-dry-runs`)."
+msgstr "La vérification finale est la première simulation elle-même, qui montre si l'entrée et la sortie tronçon un solde (:ref:`hydraulics-dry-runs`)."
+
+# machine translation: argos a1e84690d2e1
+msgid "TELEMAC choices"
+msgstr "TELEMAC choix"
+
+# machine translation: argos 91286cd63b72
+msgid "Two choices of the ``hydrodynamics`` block affect how TELEMAC solves the flow equations. Both have defaults that are suited for most rivers, lakes and reservoirs."
+msgstr "Deux choix du bloc ``hydrodynamics`` affectent la façon dont TELEMAC résout les équations de flux. Les deux ont des défauts qui conviennent à la plupart des rivières, lacs et réservoirs."
+
+# machine translation: argos 1fe03be32293
+msgid "**Numerical method.** By default, TELEMAC uses finite elements. With ``finite_volumes: true``, it uses finite volumes instead, which is more robust for flows that change between subcritical and supercritical conditions, for example at a hydraulic jump. The finite volume method only supports a constant turbulent viscosity."
+msgstr "**Méthode numérique** Par défaut, TELEMAC utilise des éléments finis. Avec ``finite_volumes: true``, il utilise plutôt des volumes finis, ce qui est plus robuste pour les flux qui changent entre les conditions subcritiques et supercritiques, par exemple lors d'un saut hydraulique. La méthode du volume fini ne supporte qu'une viscosité turbulente constante."
+
+# machine translation: argos 7e0f68653b64
+msgid "**Turbulence model.** With ``turbulence_model: auto``, aXqua compares the cell size in the channel with the water depth and selects the model that suits the mesh: a large eddy simulation model (Smagorinsky) on fine meshes, the k-epsilon model on meshes of intermediate resolution, and the Spalart-Allmaras model on coarse meshes. A number selects a particular TELEMAC model instead."
+msgstr "**Modèle de turbulence.** Avec ``turbulence_model: auto``, aXqua compare la taille de maille dans le chenal avec la hauteur d'eau et sélectionne le modèle qui convient au maillage : un modèle de simulation grand eddy (Smagorinsky) sur les maillages fins, le modèle k-epsilon sur les maillages de résolution intermédiaire, et le modèle Spalart-Allmaras sur les maillages grossiers. Un nombre sélectionne plutôt un modèle TELEMAC particulier."
+
+# machine translation: argos cfa06176b4db
+msgid "**Exchange with a porous body.** Some rivers lose water into a gravel bar and regain it further downstream. A depth-averaged model has no subsurface flow, so that aXqua represents this exchange by withdrawing water where it infiltrates and adding the same amount where it returns. The ``gain_lose`` block activates this function. ``zone`` names a polygon layer of the porous body, and ``conductivity`` is its hydraulic conductivity in m/s. Without this block, aXqua models no exchange, also if the liquid boundary layer contains internal exchange lines (``int-...``). The build log then names these lines."
+msgstr "**Échanger avec un corps poreux.** Certaines rivières perdent de l'eau dans une barre de gravier et la retrouvent plus en aval. Un modèle en moyenne de profondeur n'a pas d'écoulement souterrain, de sorte que aXqua représente cet échange en retirant l'eau où elle s'infiltre et en ajoutant la même quantité où elle revient. Le bloc ``gain_lose`` active cette fonction. ``zone`` nomme une couche de polygones du corps poreux, et ``conductivity`` est sa conductivité hydraulique en m/s. Sans ce bloc, aXqua n'échange pas, aussi si la frontière liquide couche contient des lignes d'échange internes (``int-...``). Le journal de construction nomme alors ces lignes."
+
+# machine translation: argos 704685c94ec1
+msgid "The locations of infiltration and return follow from the water levels of the channel at both ends of the porous body and therefore do not have to be drawn. The hydraulic conductivity of a riverbed varies over several orders of magnitude and should be calibrated (:doc:`calibration-validation`)."
+msgstr "Les emplacements d'infiltration et de retour suivent le niveaux d'eau du chenal aux deux extrémités du corps poreux et ne doivent donc pas être dessinés. La conductivité hydraulique d'un lit de la rivière varie sur plusieurs ordres de grandeur et doit être étalonnée (:doc:`calibration-validation`)."
+
+# machine translation: argos dcb71f3f09b0
+msgid "Structures that are never overtopped, such as walls and buildings, are represented in the TELEMAC model by a raised bed: aXqua lifts the bed at such structures to the crest elevation plus 2 m (``structures.solid_freeboard_2d``). With ``structures.solid_mode: cut``, their footprint is removed from the mesh instead."
+msgstr "Les structures qui ne sont jamais surmontées, comme les murs et les bâtiments, sont représentées dans le modèle TELEMAC par un lit surélevé : aXqua soulève le lit à ces structures jusqu'à l'élévation de la crête plus 2 m (``structures.solid_freeboard_2d``). Avec ``structures.solid_mode: cut``, leur empreinte est retirée du maillage."
+
+# machine translation: argos 3a55831f9daa
+msgid "OpenFOAM choices"
+msgstr "Choix OpenFOAM"
+
+# machine translation: argos a099a0c23509
+msgid "The ``openfoam`` block activates and controls the three-dimensional model. Its mesh consists of columns of box-shaped cells that follow the riverbed at the bottom. The top of the mesh, which is called the lid, lies shortly above the water surface of the TELEMAC warm-up (:ref:`warm-up-concept`), so that the mesh contains little air."
+msgstr "Le bloc ``openfoam`` active et contrôle le modèle tridimensionnel. Son maillage se compose de colonnes de cellules en forme de boîte qui suivent le lit de la rivière au bas. Le haut du maillage, appelé couvercle, se trouve juste au-dessus de la surface libre de l'échauffement TELEMAC (:ref:`warm-up-concept`), de sorte que le maillage contient peu d'air."
+
+# machine translation: argos e33d1209bc57
+msgid "``mode`` is the most important choice:"
+msgstr "``mode`` est le choix le plus important :"
+
+# machine translation: argos 8071db87b2af
+msgid "``vof`` (volume of fluid)"
+msgstr "``vof`` (volume de fluide)"
+
+# machine translation: argos b38ba8d05968
+msgid "Water and air are both simulated, and the position of the water surface is a result. This mode answers questions about the shape of the water surface, for example at a weir or in a bend. It is the most expensive type of simulation in aXqua."
+msgstr "L'eau et l'air sont simulés, et la position de la surface libre en est un résultat. Ce mode répond à des questions sur la forme de la surface libre, par exemple à un déversoir ou à un virage. C'est le type de simulation le plus cher en aXqua."
+
+# machine translation: argos 36f74794a10a
+msgid "The lid is placed exactly on the water surface of the TELEMAC warm-up, and only water is simulated. The water surface cannot move. A coarse run of this type takes minutes where a ``vof`` run takes hours to days. It is suited for detecting errors in the mesh, the boundaries and the roughness before a ``vof`` run is started. It is not applicable where the water surface drops in steps, for example in a fish pass with pools. aXqua detects this situation and refuses to build such a model."
+msgstr "Le couvercle est placé exactement sur la surface libre de l'échauffement TELEMAC, et seule l'eau est simulée. La surface libre ne peut pas bouger. Une course grossière de ce type prend des minutes où une course ``vof`` prend des heures à des jours. Il est adapté pour détecter les erreurs dans le maillage, les frontières et la rugosité avant le début d'une course ``vof``. Il n'est pas applicable lorsque la surface libre tombe par étapes, par exemple dans un passe de poisson avec des piscines. aXqua détecte cette situation et refuse de construire un tel modèle."
+
+# machine translation: argos b2d8da9e5a20
+msgid "Instead of ``cell_size``, the entry ``cell_size_factor`` sets the horizontal cell size as a multiple of the channel edge length of the TELEMAC mesh. To obtain the number of cells without building the model, use:"
+msgstr "Au lieu de ``cell_size``, l'entrée ``cell_size_factor`` définit l'horizontale taille de maille comme un multiple de la longueur de bord chenal du TELEMAC maillage. Pour obtenir le nombre de cellules sans construire le modèle, utilisez :"
+
+# machine translation: argos 7f3f1bde198c
+msgid "To build the OpenFOAM model in the plugin, click *Build* in the box *Free surface (VOF)* on the sub-tab *OpenFOAM* of the tab *Simulations*. The build reports the time step that the simulation will use and the resulting number of time steps, which indicates the computing time. The TELEMAC warm-up is active by default (``openfoam.pre_run.enabled``). With ``openfoam.pre_run.dimension: 3d``, the warm-up continues with a TELEMAC-3D run, so that the OpenFOAM model also starts with a vertical velocity distribution. This option requires a water depth of several horizontal cell sizes and is skipped with a message in shallow reaches."
+msgstr "Pour construire le modèle OpenFOAM dans l'extension, cliquez sur *Build* dans la boîte *Free surface (VOF)* sur le sous-tab *OpenFOAM* de l'onglet *Simulations*. La compilation rapporte le pas de temps que la simulation utilisera et le nombre résultant de pas de temps, qui indique le temps de calcul. L'échauffement TELEMAC est actif par défaut (``openfoam.pre_run.enabled``). Avec ``openfoam.pre_run.dimension: 3d``, l'échauffement continue avec une course TELEMAC-3D, de sorte que le modèle OpenFOAM commence également par une distribution verticale de vitesse. Cette option nécessite une hauteur d'eau de plusieurs tailles de maille horizontales et est doublée d'un message en tronçons peu profonds."
+
+# machine translation: argos b31cd36e0021
+msgid "**Inflow and outflow.** The OpenFOAM model takes the water in and out at the same lines as the TELEMAC model. At each inflow line, the discharge of that line enters the model, and the water level there is a result of the flow. At the outflow, the model holds the water level that the TELEMAC model prescribes there (``boundaries.outflow_condition``), or ``openfoam.outlet_stage`` where the case sets one. Above this level plus ``outlet_air_margin`` (0.25 m by default), the outflow is a closed wall, so that air enters and leaves the model only through its top. An outflow that is open over its whole height lets air circulate through the model, which in a fish pass finally drew water back in through the outflow. On the Isar example with 2 m cells, the wall changed the water levels at the inflows and the outflow by 2 mm at most, and the flow velocity in the columns of the mesh no more than it varies within one run over 100 s."
+msgstr "**Entrée et sortie.** Le modèle OpenFOAM prend l'eau dans les mêmes lignes que le modèle TELEMAC. À chaque ligne d'entrée, le débit de cette ligne entre dans le modèle, et le niveau d'eau il y a un résultat du débit. À la sortie, le modèle tient le niveau d'eau que le modèle TELEMAC prescrit là (``boundaries.outflow_condition``), ou ``openfoam.outlet_stage`` où le cas en fixe un. Au-dessus de ce niveau plus ``outlet_air_margin`` (0.25 m par défaut), la sortie est une paroi fermée, de sorte que l'air entre et ne quitte le modèle que par son sommet. Un écoulement qui s'ouvre sur toute sa hauteur permet à l'air de circuler à travers le modèle, qui, dans un poisson, a finalement attiré l'eau à travers l'écoulement. Sur l'exemple d'Isar avec des cellules de 2 m, le mur a changé les niveaux d'eau aux entrées et à la sortie de 2 mm au maximum, et la vitesse d'écoulement dans les colonnes du maillage ne varie pas plus qu'au cours d'une course sur 100 s."
+
+# machine translation: argos 8be1973af8a3
+msgid "**Outflow with a stage-discharge relation.** By default, the outflow holds one water level for the whole run, the level that the outflow condition gives at the discharge of the case. With ``openfoam.outflow_boundary: rating-curve``, the outflow follows a stage-discharge relation instead: at every time step, it holds the water level that the relation gives for the discharge that actually leaves the model. This is the boundary condition ``waterLevel_alpha_prgh`` of the Federal Waterways Engineering and Research Institute (BAW; `Thorenz 2024 <https://doi.org/10.3929/ethz-b-000675949>`_), which the OpenFOAM installation of aXqua builds (:ref:`install-openfoam`). The relation is the table ``boundaries.stage_discharge`` where it has at least two discharges. Otherwise, aXqua derives one from the terrain at the outflow line with ``boundaries.rating_method``, for nine discharges between 0.1 and 3 times the discharge of the case, and writes it as ``rating-curve-openfoam.csv`` into the folder of the OpenFOAM model; the boundary condition does not extrapolate beyond the table. The run starts at the level of the relation at the discharge of the case, and the outflow is walled from ``outlet_air_margin`` above that level. The option requires a free surface (``mode: vof``) and cannot be combined with ``outlet_stage``. Where a model has several outflow lines, each follows the same relation with its own discharge. In the case settings, the option is *Outflow boundary* on the page *OpenFOAM*. On the Isar example with cells of 2.7 m, the case was built with the relation of the cross section at the outflow, and interFoam loaded the boundary condition and ran through both stages."
+msgstr "**Sortie avec une relation hauteur-débit.** Par défaut, la sortie détient un niveau d'eau pour toute la course, le niveau que la condition de sortie donne au débit du cas. Avec ``openfoam.outflow_boundary: rating-curve``, la sortie suit plutôt une relation hauteur-débit : à chaque pas de temps, elle tient le niveau d'eau que la relation donne au débit qui quitte réellement le modèle. Il s'agit de la condition aux limites ``waterLevel_alpha_prgh`` de l'Institut fédéral d'ingénierie et de recherche sur les voies navigables (BAW ; `Thorenz 2024 <https://doi.org/10.3929/ethz-b-000675949>`_), que l'installation OpenFOAM de constructions aXqua (:ref:`install-openfoam`). La relation est la table ``boundaries.stage_discharge`` où elle a au moins deux débits. Sinon, aXqua en tire un du terrain à la ligne de sortie avec ``boundaries.rating_method``, pour neuf débits entre 0,1 et 3 fois le débit du cas, et l'écrit comme ``rating-curve-openfoam.csv`` dans le dossier du modèle OpenFOAM ; la condition aux limites n'extrapole pas au-delà de la table. La course commence au niveau de la relation au débit du cas, et la sortie est murée de ``outlet_air_margin`` au-dessus de ce niveau. L'option nécessite une surface libre (``mode: vof``) et ne peut pas être combinée avec ``outlet_stage``. Lorsqu'un modèle a plusieurs lignes de sortie, chacune suit la même relation avec son propre débit. Dans les paramètres cas, l'option est *Outflow boundary* sur la page *OpenFOAM*. Sur l'exemple d'Isar avec des cellules de 2,7 m, le cas a été construit avec la relation du profil en travers à la sortie, et interFoam a chargé la condition aux limites et a couru à travers les deux étapes."
+
+# machine translation: argos 4b0d832cf78a
+msgid "**Computing time.** The time step of a ``vof`` run is chosen by OpenFOAM from two limits: the Courant number at the water surface (``max_courant``, 0.9 by default) and the Courant number of the flow in all cells, which is the same number unless ``max_flow_courant`` sets a larger one. In a shallow river, the cells that reach the second limit first are air cells next to the waterline, where the cells are a few centimeters thick. Air needs no accuracy, so a value of 3 is reasonable; the water surface keeps its own limit. Each time step solves the pressure several times. ``pressure_correctors`` (3 by default) and ``non_orthogonal_correctors`` (2 by default) set how often, and values of 2 and 1 reduce the cost of a step by about 40 %. The following settings were used for the Isar example and gave the same result as the defaults in a comparison over 40 s of simulated time:"
+msgstr "**Temps de calcul.** Le pas de temps d'une course ``vof`` est choisi par OpenFOAM à partir de deux limites : le numéro du Courant à la surface libre (``max_courant``, 0.9 par défaut) et le numéro du Courant du flux dans toutes les cellules, qui est le même nombre à moins que ``max_flow_courant`` n'en fixe un plus grand. Dans une rivière peu profonde, les cellules que tronçon la deuxième limite d'abord sont les cellules d'air à côté de la ligne de flottaison, où les cellules sont quelques centimètres d'épaisseur. L'air n'a pas besoin de précision, donc une valeur de 3 est raisonnable ; la surface libre conserve sa propre limite. Chaque pas de temps résout la pression plusieurs fois. ``pressure_correctors`` (3 par défaut) et ``non_orthogonal_correctors`` (2 par défaut) définissent la fréquence, et les valeurs de 2 et 1 réduisent le coût d'une étape d'environ 40 %. Les paramètres suivants ont été utilisés pour l'exemple Isar et ont donné le même résultat que les valeurs par défaut dans une comparaison sur 40 s de temps simulé :"
+
+# machine translation: argos f3c6e6b14a76
+msgid "**Sharpness of the water surface.** In a shallow river, the water surface of a ``vof`` run spreads over several cells. The layers of the mesh follow the bed, and the surface crosses them wherever the bed slopes. On the Isar example with 1 m cells and 14 layers, about a third of the water was in completely filled cells, and the transition from water to air was about as high as the water was deep. The setting ``interface_compression`` (1 by default) sets how strongly OpenFOAM keeps the surface together. With 2, the transition on the Isar example was half as high with 2 m cells and a quarter as high with 1 m cells, and the run needed about a third more time steps. With 1 m cells, the averages over the reach hardly changed: where the water was deeper than 5 cm, the water depth changed by 3 mm and the depth-averaged velocity by less than 0.01 m/s on average, and the water levels at the inflows and the outflow changed by less than 5 mm. Column by column, however, the depth-averaged velocity changed by 0.09 m/s (root mean square), five times as much as it varied within one run over 100 s, and the mean bed shear stress rose from 8.7 to 9.7 Pa. Local velocities and bed shear stresses of a ``vof`` run in a shallow reach thus depend on this setting; which value gives the more accurate ones has not been tested against measurements. Traces of water in a smeared surface also leave the model with the air through its top. aXqua reports this loss after each run as a share of the discharge and includes it in the discharge balance. On the Isar example with 1 m cells, the loss was 0.8 % of the discharge with compression 1 and 1.3 to 1.6 % with compression 2."
+msgstr "**Sharpness of the surface libre.** Dans une rivière peu profonde, la surface libre d'une course ``vof`` s'étend sur plusieurs cellules. Les Couchs du maillage suivent le lit, et la surface les traverse partout où le lit est incliné. Sur l'exemple d'Isar avec 1 m de cellules et 14 couches, environ un tiers de l'eau était dans des cellules complètement remplies, et la transition de l'eau à l'air était environ aussi élevée que l'eau était profonde. Le paramètre ``interface_compression`` (1 par défaut) définit la manière dont OpenFOAM maintient la surface ensemble. Avec 2, la transition sur l'exemple d'Isar était de moitié aussi haute avec 2 m cellules et un quart aussi haute avec 1 m cellules, et la course avait besoin d'environ un tiers plus pas de temps. Avec des cellules de 1 m, les moyennes sur le tronçon n'ont guère changé : là où l'eau était plus profonde que 5 cm, la hauteur d'eau a changé de 3 mm et la vitesse moyenne de profondeur de moins de 0,01 m/s en moyenne, et les niveaux d'eau aux entrées et les sorties ont changé de moins de 5 mm. Toutefois, en colonne par colonne, la vitesse moyenne de la profondeur a changé de 0,09 m/s (carré moyen de la racine), cinq fois plus qu'au cours d'une seule course de plus de 100 s, et la moyenne de contrainte de cisaillement au fond est passée de 8,7 à 9,7 Pa. Les vitesses locales et les contraintes de cisaillement du lit d'une course ``vof`` dans un tronçon peu profond dépendent donc de ce réglage ; cette valeur donne les valeurs les plus précises n'ont pas été testées en fonction des mesures. Des traces d'eau dans une surface frottée laissent également le modèle avec l'air à travers son sommet. aXqua rapporte cette perte après chaque sortie en part du débit et l'inclut dans le solde du débit. Sur l'exemple d'Isar avec des cellules de 1 m, la perte était de 0,8 % du débit avec compression 1 et 1,3 à 1,6 % avec compression 2."
+
+# machine translation: argos f863c1c9f24e
+msgid "The simulated time a model needs to reach a steady state depends on how much water the reach has to store or release before inflow and outflow agree. A 3D model has a different resistance than the 2D model it starts from, and the difference in stored water drains slowly through pools and side channels. On the Isar example, the model with 2 m cells needed about 3000 s of simulated time until the outflow exceeded the inflow by less than 1 %."
+msgstr "Le temps simulé qu'un modèle a besoin de tronçon un régime permanent dépend de la quantité d'eau que le tronçon doit entreposer ou libérer avant l'entrée et la sortie d'eau. Un modèle 3D a une résistance différente de celle du modèle 2D à partir duquel il commence, et la différence dans l'eau stockée s'écoule lentement à travers les piscines et chenaux secondaires. Dans l'exemple d'Isar, le modèle à cellules de 2 m avait besoin d'environ 3000 s de temps simulé jusqu'à ce que la sortie dépasse l'entrée de moins de 1 %."
+
+# machine translation: argos efa1980f3f33
+msgid "References"
+msgstr "Références"

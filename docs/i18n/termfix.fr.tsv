@@ -1,0 +1,10 @@
+# Repairs of terms the engine translates wrongly, applied to its answer before the masked parts
+# go back in:
+#
+#     <english term> TAB <regular expression over the French text> TAB <replacement>
+#
+# A rule runs only on a message whose English text contains its term, so a generic French word can
+# be repaired without touching other messages. Back-references (\1) are allowed, which keeps case
+# endings. A change here translates again only the messages the rule applies to.
+# "the **prior** distribution": the glossary term already is a distribution
+distribution	distribution (\*\*)?distribution (a (?:priori|posteriori))	distribution \1\2

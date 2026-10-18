@@ -1,0 +1,344 @@
+# French translation of the aXqua documentation, page usage/morphodynamic-simulations.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos 13142432a0e2
+msgid "Morphodynamic simulations"
+msgstr "Simulations morphodynamiques"
+
+# machine translation: argos 2d5e4534e701
+msgid "A morphodynamic simulation computes how flowing water moves sediment and how the riverbed changes as a result. It extends a hydraulic simulation: in every time step, the flow moves sediment, the bed elevation is updated, and the changed bed in turn alters the flow."
+msgstr "Une simulation morphodynamique calcule comment l'eau circule les sédiments et comment le lit de la rivière change en conséquence. Il prolonge une simulation hydraulique : dans chaque pas de temps, le débit déplace les sédiments, la cote du fond est mise à jour, et le lit changé à son tour modifie le débit."
+
+# machine translation: argos 82980afb7474
+msgid "aXqua offers two simulations, which answer different questions. The coupled simulation with TELEMAC and GAIA computes a riverbed that moves (:ref:`help-morphodynamics-telemac`). The simulation with OpenFOAM computes fine sediment that passes over a riverbed which stays in place (:ref:`help-morphodynamics-openfoam`)."
+msgstr "aXqua propose deux simulations qui répondent à différentes questions. La simulation couplée avec TELEMAC et GAIA calcule un lit de la rivière qui bouge (:ref:`help-morphodynamics-telemac`). La simulation avec OpenFOAM calcule sédiments fins qui passe au-dessus d'un lit de la rivière qui reste en place (:ref:`help-morphodynamics-openfoam`)."
+
+# machine translation: argos 291f7e8b0421
+msgid "Concept"
+msgstr "Concept"
+
+# machine translation: argos 2da411f82ff5
+msgid "**Transport modes.** Flowing water moves sediment in two ways. **Bedload** consists of grains that roll, slide or jump along the bed. It is the dominant mode for gravel and coarser material. **Suspended load** consists of finer grains that turbulence keeps afloat in the water column. Simulating both modes is computationally expensive, so that only the dominant mode should be activated:"
+msgstr "**Modes de transport.** L'eau qui coule déplace les sédiments de deux façons. **Charriage** se compose de grains qui roulent, glissent ou sautent le long du lit. C'est le mode dominant pour le gravier et le matériau grossier. **Transport en suspension** se compose de grains plus fins que la turbulence maintient à flot dans la colonne d'eau. La simulation des deux modes est coûteuse par calcul, de sorte que seul le mode dominant doit être activé :"
+
+# machine translation: argos 8903e5f8b422
+msgid "a gravel or cobble bed with less than about 5 to 10 % sand: bedload only;"
+msgstr "un lit de gravier ou de galets avec moins de 5 à 10 % de sable : charriage seulement ;"
+
+# machine translation: argos c512548ec78f
+msgid "sediment that is generally finer than 1 mm, as in reservoirs: suspended load only;"
+msgstr "sédiments généralement plus fins que 1 mm, comme dans les réservoirs : transport en suspension seulement ;"
+
+# machine translation: argos b7920336e83a
+msgid "mixtures with a substantial sand content: both modes;"
+msgstr "mélanges à forte teneur en sable : les deux modes ;"
+
+# machine translation: argos 19fe13279eb4
+msgid "cohesive sediment (finer than 0.06 mm): suspended load is required."
+msgstr "sédiment cohésif (plus de 0,06 mm) : transport en suspension est nécessaire."
+
+# machine translation: argos c5517b3a0274
+msgid "**Start of motion.** A grain starts to move when the shear stress that the flow exerts on the bed exceeds a critical value. This threshold is expressed by the dimensionless critical Shields parameter, which has to be defined for each grain size class. Because it is uncertain, it is a typical calibration parameter."
+msgstr "**Début de la motion.** Un grain commence à se déplacer lorsque la contrainte de cisaillement que le flux exerce sur le lit dépasse une valeur critique. Ce seuil est exprimé par le paramètre Shields critique sans dimension, qui doit être défini pour chaque classe taille des grains. Parce qu'il est incertain, c'est un paramètre de calage typique."
+
+# machine translation: argos 232215d541e2
+msgid "**Bed change.** The bed elevation changes wherever the sediment transport rate changes along the flow path. If more sediment enters a location than leaves it, sediment deposits and the bed rises. In the opposite case, the bed erodes. This sediment mass balance is called the Exner equation (Exner 1925)."
+msgstr "**Modification de l ' état civil** La cote du fond change partout où le taux de transport des sédiments change le long de la voie d'écoulement. Si plus de sédiments entrent dans un endroit qu'ils ne le laissent, les dépôts de sédiments et le lit s'élèvent. Dans le cas opposé, le lit s'érode. Ce bilan massique de sédiments est appelé l'équation Exner (Exner 1925)."
+
+# machine translation: argos e05fd040be5a
+msgid "**Active layer.** Only the uppermost layer of the riverbed takes part in sediment transport at a given moment. This layer is called the active layer. It supplies the sediment that is eroded and receives the sediment that is deposited. Its thickness is a multiple of the characteristic grain diameter. The layers below form the substratum, which is only reached when the active layer is eroded. The distinction matters in rivers with an armored bed, where a coarse surface layer protects finer sediment underneath (Hirano 1971): as long as the armor layer is intact, little sediment moves, and once it breaks, the finer substratum is rapidly eroded."
+msgstr "**Couche active** Seul la couche supérieur du lit de la rivière participe au transport des sédiments à un moment donné. Cette couche est appelé la couche actif. Il fournit les sédiments qui sont érodés et reçoit les sédiments qui sont déposés. Son épaisseur est un multiple du diamètre caractéristique du grain. Les couches ci-dessous forment le substrat, qui n'est atteint que lorsque la couche actif est érodé. La distinction est importante dans les rivières avec un lit blindé, où une surface grossière couche protège les sédiments plus fins en dessous (Hirano 1971) : tant que l'armure couche est intacte, peu de sédiments se déplace, et une fois qu'il se brise, le substrat plus fin est rapidement érodé."
+
+# machine translation: argos 57870aa73424
+msgid "Active layer at the surface of the riverbed and substratum layers below"
+msgstr "Couche active à la surface du lit de la rivière et du substrat couches ci-dessous"
+
+# machine translation: argos 2f1d9b1a8b1a
+msgid "The active layer at the surface of the riverbed is in contact with the flow. The substratum layers below can have different grain size compositions. Figure by Schwindt (`hydro-informatics.com <https://hydro-informatics.com>`_, CC BY-NC-ND), conceptually after du Boys (1879) and Church and Haschenburger (2017)."
+msgstr "La couche actif à la surface du lit de la rivière est en contact avec le flux. Les couches substratum ci-dessous peuvent avoir différentes compositions taille des grains. Figure par Schwindt (`hydro-informatique.com <https://hydro-informatics.com>`_, CC BY-NC-ND), conceptuellement après du Boys (1879) et Church and Haschenburger (2017)."
+
+# machine translation: argos 1f6cbe6c1cae
+msgid "**Fine sediment in a stable bed.** Between floods, the gravel of a riverbed does not move, and two terrain surveys show no bed change. The bed nevertheless changes: sand and silt that the flow carries settle onto it and into its pores, and faster flow removes them again. The quantity that describes this change is the share of fine sediment in the bed material, not the bed elevation."
+msgstr "**Sédiments fins dans un lit stable.** Entre les inondations, le gravier d'un lit de la rivière ne bouge pas, et deux relevés de terrain ne montrent aucun changement de lit. Le lit change néanmoins : le sable et le limon que le flux porte s'installent sur lui et dans ses pores, et un débit plus rapide les enlève à nouveau. La quantité qui décrit ce changement est la part des sédiments fins dans le matériau du lit, et non la cote du fond."
+
+# machine translation: argos 8663605ad204
+msgid "**Reference data.** A model of a moving bed is assessed against measured bed changes, which are obtained as the difference of two terrain surveys (:ref:`case-morphodynamics`). A model of fine sediment over a stable bed is assessed against the share of fines in bed samples that were taken at two dates."
+msgstr "**Données de référence.** Un modèle de lit mobile est évalué par rapport aux changements de lit mesurés, qui sont obtenus comme la différence de deux relevés de terrain (:ref:`case-morphodynamics`). Un modèle de sédiments fins sur un lit stable est évalué en fonction de la part des amendes dans les échantillons prélevés à deux dates."
+
+# machine translation: argos 1bfaf6fe0a29
+msgid "TELEMAC-GAIA Setup"
+msgstr "TELEMAC-GAIA Configuration"
+
+# machine translation: argos dfd6ce0c6b04
+msgid "`GAIA <http://www.opentelemac.org/>`_ is the sediment transport module of TELEMAC. When ``morphodynamics.enabled`` is set in the case file, the preprocessing writes a GAIA steering file (``gaia.cas``) next to the TELEMAC model and couples it to the hydraulic simulations."
+msgstr "`GAIA <http://www.opentelemac.org/>`_ est le module de transport des sédiments de TELEMAC. Quand ``morphodynamics.enabled`` est placé dans le fichier de cas, le prétraitement écrit un GAIA fichier de paramètres (``gaia.cas``) à côté du modèle TELEMAC et le couple aux simulations hydrauliques."
+
+# machine translation: argos a447a87a7889
+msgid "The page Morphodynamic simulation of the case settings"
+msgstr "La page Simulation morphodynamique des paramètres cas"
+
+# machine translation: argos b4e04d9c80f0
+msgid "Sediment transport is switched on in the case settings (*Open case settings...* on the *Case Setup* tab). (1) The page *Morphodynamic simulation*. (2) Its settings, of which further ones are added with *Add setting...*."
+msgstr "Le transport des sédiments est activé dans les paramètres cas (*Open case settings...* sur l'onglet *Case Setup*). (1) La page *Morphodynamic simulation*. (2) Ses paramètres, dont d'autres sont ajoutés avec *Add setting...*."
+
+# machine translation: argos 3400121cf243
+msgid "Entry in ``morphodynamics``"
+msgstr "Entrée ``morphodynamics``"
+
+# machine translation: argos 2c7c3ec284a3
+msgid "Meaning"
+msgstr "Signification"
+
+# machine translation: argos 941109698650
+msgid "Transport modes to be simulated."
+msgstr "Modes de transport à simuler."
+
+# machine translation: argos f1834d37ddfc
+msgid "One entry per grain size class with ``diameter`` [m], ``density`` [kg/m³] and the critical Shields parameter ``shields``."
+msgstr "Une entrée par classe taille des grains avec ``diameter`` [m], ``density`` [kg/m3] et le paramètre critique Shields ``shields``."
+
+# machine translation: argos b386e692f3b4
+msgid "Number of the bedload transport formula in GAIA (1 is the formula of Meyer-Peter and Müller)."
+msgstr "Nombre de la formule de transport charriage dans GAIA (1 est la formule de Meyer-Peter et Müller)."
+
+# machine translation: argos 076cb38e15a6
+msgid "Thickness of the active layer [m]. A common choice is three times the diameter of the coarse grains."
+msgstr "Épaisseur de la couche actif [m]. Un choix courant est trois fois le diamètre des grains grossiers."
+
+# machine translation: argos d42c1e1c95db
+msgid "Number of substratum layers."
+msgstr "Nombre de substrats couches."
+
+# machine translation: argos a4c518a2d31b
+msgid "Deflection of the bedload on a laterally inclined bed, and the angle of repose of the sediment [degrees]."
+msgstr "La déflection du charriage sur un lit incliné latéralement, et l'angle de repos des sédiments [degrés]."
+
+# machine translation: argos 14a6d65bb4a0
+msgid "Deflection of the bedload by the spiral flow in river bends."
+msgstr "Déflection du charriage par le flux en spirale dans les virages de rivière."
+
+# machine translation: argos a90b24594316
+msgid "Sediment supply at each open boundary."
+msgstr "Fourniture de sédiments à chaque frontière ouverte."
+
+# machine translation: argos 06751fc23b40
+msgid "Factor by which the bed change is accelerated relative to the flow. A value of 10 means that one simulated hour represents ten hours of bed change. Use values above 1 with care, and only for slowly varying discharges."
+msgstr "Facteur par lequel le changement de lit est accéléré par rapport au débit. Une valeur de 10 signifie qu'une heure simulée représente dix heures de changement de lit. Utilisez des valeurs supérieures à 1 avec soin, et seulement pour des débits qui varient lentement."
+
+# machine translation: argos a9302037495e
+msgid "Significant bed changes occur during floods. A morphodynamic simulation is therefore usually run with a discharge time series. Define the time series under ``boundaries.inflow``, enable ``morphodynamics``, repeat the preprocessing and start the unsteady run (:ref:`hydraulics-hotstarts`):"
+msgstr "Des changements importants se produisent lors des inondations. Une simulation morphodynamique est donc généralement effectuée avec une série chronologique débit. Définir les séries chronologiques sous ``boundaries.inflow``, activer ``morphodynamics``, répéter le prétraitement et commencer la course instable (:ref:`hydraulics-hotstarts`) :"
+
+# machine translation: argos 36bdfeaf5ecd
+msgid "The GAIA results are written next to the hydraulic results. The variable for the bed change is the cumulated bed evolution."
+msgstr "Les résultats GAIA sont écrits à côté des résultats hydrauliques. La variable pour le changement de lit est l'évolution cumulée du lit."
+
+# machine translation: argos 0f329929cc9b
+msgid "The grain size classes are entered by hand. The automatic derivation of the classes from measured grain size distributions is not yet available in this version."
+msgstr "Les classes taille des grains sont entrées à la main. La dérivation automatique des classes de courbes granulométriques mesurées n'est pas encore disponible dans cette version."
+
+# machine translation: argos c57c1897bfe4
+msgid "OpenFOAM Setup"
+msgstr "Configuration OpenFOAM"
+
+# machine translation: argos 69ba5f3b2df1
+msgid "With OpenFOAM, aXqua simulates **fine sediment over a riverbed that stays in place**. The simulation shows where sand or silt that the flow carries settles onto the bed, and where the flow picks it up again. The bed elevation does not change. Use this simulation where surveys show no measurable bed change while the share of fine sediment in the bed differs from one sampling date to the next. Use TELEMAC and GAIA where the bed moves."
+msgstr "Avec OpenFOAM, aXqua simule **sédiments fins sur un lit de la rivière qui reste en place**. La simulation montre où le sable ou le limon que transporte l'écoulement se dépose sur le lit, et où l'écoulement reprend. La cote du fond ne change pas. Utilisez cette simulation où les enquêtes ne montrent aucun changement mesurable de lit tandis que la part de sédiments fins dans le lit diffère d'une date d'échantillonnage à l'autre. Utilisez TELEMAC et GAIA où le lit se déplace."
+
+# machine translation: argos c06ebcb4ef13
+msgid "The simulation uses the solver ``sediDriftFoam2`` of Nils Reidar B. Olsen (`documentation <https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/>`_). The solver computes a steady, three-dimensional flow below a fixed water surface, and the concentration of one grain size in that flow. The grains travel with the water, sink with their settling velocity and are mixed by turbulence. At the bed, two processes exchange sediment:"
+msgstr "La simulation utilise le solveur ``sediDriftFoam2`` de Nils Reidar B. Olsen (`Documentation <https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/>`_). Le solveur calcule un débit stable en trois dimensions au-dessous d'une surface libre fixe, et la concentration d'une taille des grains dans ce débit. Les grains voyagent avec l'eau, coulent avec leur vitesse de décantation et sont mélangés par la turbulence. Au lit, deux processus échangent des sédiments :"
+
+# machine translation: argos eac9c8a7655f
+msgid "**Settling.** Grains reach the bed at the rate *settling velocity × concentration in the cell at the bed*."
+msgstr "**Réglement.** Grains tronçon le lit au taux *settling velocity × concentration in the cell at the bed*."
+
+# machine translation: argos d4aecde8a837
+msgid "**Pick-up.** The flow removes grains at a rate that follows from the bed shear stress, with the formulas of van Rijn (1984a, 1984b). The critical shear stress, at which grains start to move, is corrected for the slope of the bed (Dey 2003)."
+msgstr "**Entraînement.** Le débit élimine les grains à une vitesse qui suit celle de la contrainte de cisaillement au fond, avec les formules de van Rijn (1984a, 1984b). La contrainte critique de cisaillement, à laquelle les grains commencent à se déplacer, est corrigée pour la pente du lit (Dey, 2003)."
+
+# machine translation: argos da11db00009a
+msgid "The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of aXqua (:ref:`install-openfoam`), and it runs in one process."
+msgstr "Le solveur ne fait pas partie d'OpenFOAM. Il est construit par l'installation OpenFOAM de aXqua (:ref:`install-openfoam`), et il fonctionne en un seul processus."
+
+# machine translation: argos dbb1406d55fe
+msgid "**Requirements.** The simulation needs the steady 2D result of the case (:ref:`hydraulics-dry-runs`), because the water surface of that result is the upper limit of the three-dimensional mesh. The mesh itself is the mesh of the OpenFOAM model in the mode ``rigid-lid`` (:ref:`preprocessing-openfoam-choices`), whatever mode the hydraulic OpenFOAM simulation of the case uses. Its cell size (``openfoam.cell_size`` or ``openfoam.cell_size_factor``) decides how long the simulation takes."
+msgstr "**Exigences** La simulation nécessite le résultat 2D stable du cas (:ref:`hydraulics-dry-runs`), car la surface libre de ce résultat est la limite supérieure du maillage tridimensionnel. Le maillage lui-même est le maillage du modèle OpenFOAM en mode ``rigid-lid`` (:ref:`preprocessing-openfoam-choices`), quel que soit le mode utilisé par la simulation hydraulique OpenFOAM du cas. Sa taille de maille (``openfoam.cell_size`` ou ``openfoam.cell_size_factor``) décide combien de temps la simulation prend."
+
+# machine translation: argos 1c82ed2f226c
+msgid "**Settings.** The simulation is defined in the block ``fine_sediment`` of the case file, which is the frame *Fine sediment over a fixed bed with OpenFOAM* on the page *Morphodynamic simulation* of the case settings:"
+msgstr "**Paramètres.** La simulation est définie dans le bloc ``fine_sediment`` du fichier de cas, qui est le cadre *Fine sediment over a fixed bed with OpenFOAM* sur la page *Morphodynamic simulation* des paramètres cas :"
+
+# machine translation: argos 3400121cf243
+msgid "Entry in ``fine_sediment``"
+msgstr "Entrée ``fine_sediment``"
+
+# machine translation: argos 8d91b20d85fb
+msgid "Diameter of the grains [m]. The simulation carries one grain size, up to 0.002 m."
+msgstr "Diamètre des grains [m]. La simulation porte une taille des grains, jusqu'à 0,002 m."
+
+# machine translation: argos 9eef657db0b6
+msgid "Settling velocity of the grains in still water [m/s]. If empty, it is computed from the grain size (Ferguson and Church 2004)."
+msgstr "Réglage de la vitesse des grains dans l'eau calme [m/s]. Si elle est vide, elle est calculée à partir de la taille des grains (Ferguson et Church 2004)."
+
+# machine translation: argos 4256a0539feb
+msgid "Sediment concentration of the water that enters the model [kg/m³]. One number applies to all inflow lines. To give each line its own value, name the lines, for example ``{inlet-1: 0.02, inlet-2: 0}``. The build lists the names of the inflow lines with their discharges in its log."
+msgstr "Concentration de sédiments dans l'eau entrant dans le modèle [kg/m3]. Un numéro s'applique à toutes les lignes d'entrée. Pour donner à chaque ligne sa propre valeur, nommer les lignes, par exemple ``{inlet-1: 0.02, inlet-2: 0}``. La compilation énumère les noms des lignes d'entrée avec leurs débits dans son journal."
+
+# machine translation: argos b5dec168a1df
+msgid "What the bed returns to the flow. ``suspended`` uses the reference concentration of van Rijn (1984b) and ``bedload`` his bedload formula (1984a). Both assume a bed that consists of the fine sediment. ``off`` means that the bed only takes sediment up."
+msgstr "Ce que le lit revient au flux. ``suspended`` utilise la concentration de référence de van Rijn (1984b) et ``bedload`` sa formule charriage (1984a). Les deux supposent un lit qui se compose des sédiments fins. ``off`` signifie que le lit ne prend que des sédiments."
+
+# machine translation: argos 3dce63b6578a
+msgid "Roughness height with which the bed shear stress is computed [m]. If empty, the median roughness of the wetted bed is used (``geodata.roughness_table``). The simulation uses one roughness for the whole bed."
+msgstr "Rugosité hauteur avec laquelle le contrainte de cisaillement au fond est calculé [m]. Si elle est vide, la médiane rugosité du lit mouillé est utilisée (``geodata.roughness_table``). La simulation utilise un rugosité pour tout le lit."
+
+# machine translation: argos c242c1138820
+msgid "Thickness of the cells at the bed [m]. If empty, it is the smallest water depth of the model divided by the number of layers."
+msgstr "Épaisseur des cellules au lit [m]. S'il est vide, c'est le plus petit hauteur d'eau du modèle divisé par le numéro couches."
+
+# machine translation: argos d394dc5f8908
+msgid "Largest number of iterations. The simulation ends earlier when it has converged."
+msgstr "Le plus grand nombre d'itérations. La simulation se termine plus tôt quand elle a convergé."
+
+# machine translation: argos 83c1572754a1
+msgid "Time over which the computed rates act [s]. If empty, the result contains rates only."
+msgstr "Temps pendant lequel les taux calculés agissent [s]. Si vide, le résultat ne contient que des taux."
+
+# machine translation: argos 7414009ab8b8
+msgid "The bed layer for which the share of fines is reported: its thickness [m], the share of pores between its coarse grains, and the share of fines in its dry mass at the beginning of the period."
+msgstr "Le lit couche pour lequel la part des fines est déclarée : son épaisseur [m], la part des pores entre ses grains grossiers, et la part des fines dans sa masse sèche au début de la période."
+
+# machine translation: argos 74261a2cc25a
+msgid "The frame Fine sediment over a fixed bed in the case settings"
+msgstr "Le cadre sédiments fins sur un lit fixe dans les réglages cas"
+
+# machine translation: argos 61cf84775837
+msgid "The fine sediment simulation is defined in the case settings (*Open case settings...* on the *Case Setup* tab). (1) The frame *Fine sediment over a fixed bed with OpenFOAM*. (2) Its settings, of which further ones are added with *Add setting...*."
+msgstr "La simulation des sédiments fins est définie dans les paramètres cas (*Open case settings...* sur l'onglet *Case Setup*). (1) Le cadre *Fine sediment over a fixed bed with OpenFOAM*. (2) Ses paramètres, dont d'autres sont ajoutés avec *Add setting...*."
+
+# machine translation: argos 5277577e73ff
+msgid "**Choice of the pick-up.** The formulas of van Rijn describe a bed of sand, from which the flow can remove as many grains as its shear stress allows. A gravel bed holds fine sediment only in its pores, so that these formulas overestimate the removal by orders of magnitude. For fine sediment over a gravel bed, set ``pick_up: off``. The result then shows where fine sediment settles and how much, and the bed shear stress in the result shows where the flow is able to remove it again."
+msgstr "**Le choix de la entraînement.** Les formules de van Rijn décrivent un lit de sable, d'où l'écoulement peut enlever autant de grains que sa contrainte de cisaillement le permet. Un lit de gravier tient sédiments fins seulement dans ses pores, de sorte que ces formules surestiment le retrait par ordre de grandeur. Pour sédiments fins sur un lit de gravier, fixer ``pick_up: off``. Le résultat montre ensuite où sédiments fins s'installe et combien, et le contrainte de cisaillement au fond dans le résultat montre où le flux est capable de le supprimer à nouveau."
+
+# machine translation: argos 884cf0394f35
+msgid "**Simulation.** Go to the tab *Simulations*, sub-tab *Morphodynamics*, and select the simulation program *OpenFOAM*. Click *Build* in the box *Fine sediment over a fixed bed*, then *Submit*. Both can be clicked one after the other, because the simulation waits for its build, and the build waits for a steady 2D simulation that is still running. The progress display counts iterations. On a mesh of 11,000 cells, the simulation takes less than one minute. In a terminal, the commands are:"
+msgstr "**Simulation.** Allez à l'onglet *Simulations*, sous-tab *Morphodynamics*, et sélectionnez le programme de simulation *OpenFOAM*. Cliquez sur *Build* dans la boîte *Fine sediment over a fixed bed*, puis *Submit*. Les deux peuvent être cliqués l'un après l'autre, parce que la simulation attend sa construction, et la construction attend une simulation 2D stable qui est toujours en cours. L'affichage de progression compte les itérations. Sur un maillage de 11 000 cellules, la simulation prend moins d'une minute. Dans un terminal, les commandes sont :"
+
+# machine translation: argos 06cc8de1faff
+msgid "The sub-tab Morphodynamics of the tab Simulations"
+msgstr "Le sous-tab Morphodynamique de l'onglet Simulations"
+
+# machine translation: argos eee1cd95ac09
+msgid "The sub-tab *Morphodynamics* of the tab *Simulations* with the simulation program *OpenFOAM*. (1) The choice of the simulation program. (2) The options: the warm-up for the build, and the largest number of iterations for the simulation. (3) *Build* creates the model. (4) *Submit* starts the simulation. (5) *Load results* adds the bed with its fine sediment to the map."
+msgstr "Le sous-onglet *Morphodynamics* de l'onglet *Simulations* avec le programme de simulation *OpenFOAM*. (1) Le choix du programme de simulation. (2) Les options : l'échauffement pour la construction, et le plus grand nombre d'itérations pour la simulation. (3) *Build* crée le modèle. (4) *Submit* commence la simulation. (5) *Load results* ajoute le lit avec ses sédiments fins à la carte."
+
+# machine translation: argos 8723a3ca95fb
+msgid "**Results.** *Load results* adds the layer *Fine sediment at the bed* to the map. It holds one polygon for every column of cells, with the attributes listed below, and is colored by the change of the share of fines, or by the net rate if the case defines no period. The file is ``axqua-case/openfoam-sediment/fine-sediment-bed.gpkg``. The three-dimensional fields of velocity and concentration can be opened in ParaView through ``case.foam`` in the same folder."
+msgstr "**Résultats.** *Load results* ajoute la couche *Fine sediment at the bed* à la carte. Il détient un polygone pour chaque colonne de cellules, avec les attributs énumérés ci-dessous, et est coloré par le changement de la part des amendes, ou par le taux net si le cas ne définit pas de période. Le fichier est ``axqua-case/openfoam-sediment/fine-sediment-bed.gpkg``. Les champs tridimensionnels de vitesse et de concentration peuvent être ouverts dans ParaView via ``case.foam`` dans le même dossier."
+
+# machine translation: argos cdeb3cd7b2b6
+msgid "Attribute"
+msgstr "Attribut"
+
+# machine translation: argos 738bb387e912
+msgid "Unit"
+msgstr "Unité"
+
+# machine translation: argos c84ef92dca61
+msgid "Water depth."
+msgstr "Hauteur d'eau."
+
+# machine translation: argos 0637ff2daecf
+msgid "Flow velocity in the cell at the bed."
+msgstr "Vitesse d'écoulement dans la cellule au lit."
+
+# machine translation: argos e104f8daf7ee
+msgid "Bed shear stress and its critical value for the grain size, as the solver computes them."
+msgstr "Contrainte de cisaillement au fond et sa valeur critique pour le taille des grains, comme le solveur les calcule."
+
+# machine translation: argos 333ef8f7a714
+msgid "Transport parameter of van Rijn: the excess of the shear stress over its critical value, divided by the critical value. Zero where the flow cannot move the grains."
+msgstr "Paramètre de transport de van Rijn : l'excédent de la contrainte de cisaillement sur sa valeur critique, divisé par la valeur critique. Zéro là où le flux ne peut pas déplacer les grains."
+
+# machine translation: argos 64b373cf1bb5
+msgid "kg/m³"
+msgstr "kg/m3"
+
+# machine translation: argos 5ce9c820ec6b
+msgid "Sediment concentration in the cell at the bed."
+msgstr "Concentration des sédiments dans la cellule au lit."
+
+# machine translation: argos f19427d924a8
+msgid "kg/(m² day)"
+msgstr "kg/(m2 jour)"
+
+# machine translation: argos dcdb097cee25
+msgid "Mass that settles onto the bed, mass that the flow picks up, and their difference, per bed area and day. A positive ``net`` means that the bed takes up fine sediment."
+msgstr "Masse qui s'installe sur le lit, masse que le flux prend, et leur différence, par zone de lit et jour. Un positif ``net`` signifie que le lit prend sédiments fins."
+
+# machine translation: argos 37a16916025a
+msgid "kg/m²"
+msgstr "kg/m2"
+
+# machine translation: argos 0c513ed1c05e
+msgid "Mass of fine sediment that the bed takes up during the period."
+msgstr "Mass of sédiments fins que le lit prend pendant la période."
+
+# machine translation: argos eda44b218598
+msgid "Share of fines in the dry mass of the bed layer at the end of the period, and its change since the beginning."
+msgstr "Part des amendes dans la masse sèche du lit couche à la fin de la période, et son changement depuis le début."
+
+# machine translation: argos 1f890faa154d
+msgid "-1 where the bed layer has given off all its fines, 1 where its fines no longer fit into its pores."
+msgstr "-1 où le lit couche a donné toutes ses amendes, 1 où ses amendes ne s'intègrent plus dans ses pores."
+
+# machine translation: argos 7e22a571134e
+msgid "The last four attributes are only present if the case defines a ``period``. They follow from a mass balance of the bed layer. The layer holds coarse grains with a mass of 2650 kg/m³ × ``layer_thickness`` × (1 − ``porosity``) per bed area, which stay in place. All fine sediment that the bed takes up is added to the layer, and the layer cannot give off more fines than it holds. The density of the grains is 2650 kg/m³ throughout, because the formulas of the solver contain this value."
+msgstr "Les quatre derniers attributs ne sont présents que si le cas définit un ``period``. Ils découlent d'un bilan de masse du lit couche. La couche contient des grains grossiers d'une masse de 2650 kg/m3 × ``layer_thickness`` × (1 - ``porosity``) par zone de lit, qui restent en place. Tous les sédiments fins que le lit prend est ajouté à la couche, et la couche ne peut pas donner plus d'amendes qu'il détient. La densité des grains est de 2650 kg/m3, car les formules du solveur contiennent cette valeur."
+
+# machine translation: argos 27f0b410df6b
+msgid "Together with the layer, aXqua writes a sediment budget (``fine-sediment-budget.json``) and prints it in the log of the job: the mass of sediment that enters the model per second, the mass that leaves it, and the masses that settle and are picked up over the whole bed. In a converged simulation, what enters equals what leaves plus what the bed takes up. If more than 2 % remain unexplained, the result says so, and ``iterations`` has to be increased."
+msgstr "Avec la couche, aXqua écrit un budget sédimentaire (``fine-sediment-budget.json``) et l'imprime dans le log de la tâche : la masse de sédiments qui entre dans le modèle par seconde, la masse qui la quitte, et les masses qui s'installent et sont ramassées sur tout le lit. Dans une simulation convergente, ce qui entre équivaut à ce qui part plus ce que le lit prend. Si plus de 2 % restent inexpliqués, le résultat le dit, et ``iterations`` doit être augmenté."
+
+# machine translation: argos 08559b4ea203
+msgid "**Limits.** The following limits result from the solver and from the fixed water surface. They are part of every result:"
+msgstr "**Limites** Les limites suivantes résultent du solveur et de la surface libre fixe. Ils font partie de chaque résultat :"
+
+# machine translation: argos 0bb6606d441f
+msgid "*The water surface is fixed.* It is the water surface of the 2D result and cannot respond to the three-dimensional flow. Where it steps by more than the local water depth within two cells, as at a riffle of a shallow reach, the flow below it becomes too fast, and the build refuses the case. With ``openfoam.allow_stepped_lid: true``, the case is built nevertheless, and the result states how large the steps are and how fast the fastest cell is. Read the bed near such steps with care."
+msgstr "*The water surface is fixed.* C'est la surface libre du résultat 2D et ne peut pas répondre au flux tridimensionnel. Là où il passe par plus que la hauteur d'eau locale dans deux cellules, comme à une truffe d'un tronçon peu profond, l'écoulement en dessous devient trop rapide, et la construction refuse le cas. Avec ``openfoam.allow_stepped_lid: true``, le cas est néanmoins construit, et le résultat indique combien les étapes sont grandes et à quelle vitesse la cellule la plus rapide est. Lisez le lit près de ces étapes avec soin."
+
+# machine translation: argos 0b2856cf7936
+msgid "*The bed does not move.* The solver can also lower and raise the bed. aXqua does not use this function, because the solver then enforces a minimum water depth by lowering the bed and treats the ends of the model as the ends of a laboratory flume."
+msgstr "*The bed does not move.* Le solveur peut aussi baisser et élever le lit. aXqua n'utilise pas cette fonction, parce que le solveur impose ensuite une hauteur d'eau minimale en abaissant le lit et traite les extrémités du modèle comme les extrémités d'un flume de laboratoire."
+
+# machine translation: argos 161b792944b4
+msgid "*One grain size and one roughness.* Sediment mixtures and roughness zones are not represented."
+msgstr "*One grain size and one roughness.* Les mélanges de sédiments et les zones de rugosité ne sont pas représentés."
+
+# machine translation: argos e11ebcd82c64
+msgid "*Steep bed.* Where the bed rises steeply within one cell, the solver computes a bed shear stress that is too high. The build reports the share of such cells and refuses a mesh on which the computation would fail. Smaller cells reduce the share."
+msgstr "*Steep bed.* Lorsque le lit s'élève fortement dans une cellule, le solveur calcule un contrainte de cisaillement au fond qui est trop élevé. La construction rapporte la part de ces cellules et refuse un maillage sur lequel le calcul échouerait. Les petites cellules réduisent la part."
+
+# machine translation: argos 0b823ae5c8bf
+msgid "*Steady flow in one process.* A discharge time series cannot be simulated, and the simulation does not run in parallel."
+msgstr "*Steady flow in one process.* Une série chronologique débit ne peut pas être simulée, et la simulation ne se déroule pas en parallèle."
+
+# machine translation: argos efa1980f3f33
+msgid "References"
+msgstr "Références"
+
+# machine translation: argos 1ceae916092e
+msgid "Du Boys, P. (1879). \"Etudes du régime du Rhône et l'action exercée par les eaux sur un lit à fond de graviers indéfiniment affouillable.\" *Annales des Ponts et Chaussées*, 5(18), 141-195."
+msgstr "Du Boys, P. (1879). \"Études du régime du Rhône et de l'action exercée par les eaux sur un lit à fond de graviers indéfinisable.\" *Annales des Ponts et Chaussées*, 5(18), 141-195."

@@ -412,6 +412,22 @@ class RunnerClient:
         args = ["case", "new", str(case)] + (["--name", name] if name else [])
         return self.call(args, timeout=60).data or {}
 
+    # -- the documentation and the clean-up ----------------------------------------
+    def docs(self) -> dict:
+        """``{published, local, languages, readable, reason}``: where Help finds the docs."""
+        return self.call(["docs"], timeout=20).data or {}
+
+    def cleanup_list(self, case: str | os.PathLike) -> dict:
+        """``{case, folders, categories: [{key, title, explanation, default, bytes, items}],
+        bytes, blocked}``: what of a case can go."""
+        return self.call(["cleanup", str(case)], timeout=600).data or {}
+
+    def cleanup_apply(self, case: str | os.PathLike, ids: Sequence[str], *,
+                      keep: str = "last") -> dict:
+        """Remove the items *ids* of :meth:`cleanup_list`; ``{removed, failed, freed_bytes}``."""
+        args = ["cleanup", str(case), "--keep", keep, "--remove", *[str(i) for i in ids]]
+        return self.call(args, timeout=7200).data or {}
+
     # -- the example cases --------------------------------------------------------
     def example_list(self) -> dict:
         """``{source, examples: [{name, title, summary, megabytes, files}]}``."""

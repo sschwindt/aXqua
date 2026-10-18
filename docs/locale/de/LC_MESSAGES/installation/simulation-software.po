@@ -1,0 +1,304 @@
+# German translation of the aXqua documentation, page installation/simulation-software.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# machine translation: argos 8ef6de0b53a5
+msgid "Simulation Software"
+msgstr "Simulationssoftware"
+
+# machine translation: argos 321739374b9b
+msgid "aXqua prepares and starts simulations, but the numerical codes are separate software that must be installed additionally. The plugin installs them with one wizard per program. Install TELEMAC first. OpenFOAM (including postprocessors) is optional and builds on TELEMAC."
+msgstr "aXqua bereitet und startet Simulationen, aber die numerischen Codes sind separate Software, die zusätzlich installiert werden muss. Das Plugin installiert sie mit einem Assistenten pro Programm. Installieren Sie TELEMAC zuerst. OpenFOAM (einschließlich Postprozessoren) ist optional und baut auf TELEMAC auf."
+
+# machine translation: argos 4c7e44675d30
+msgid "On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2). The wizards of a QGIS that runs in Windows do not install into WSL. Install a distribution with ``wsl --install -d Ubuntu-24.04`` in a **PowerShell** (similar to Linux **terminal**) with administrator rights, install aXqua inside the distribution, and run ``axqua install start telemac`` in its terminal. Select an installation folder in the Linux file system: a build in a Windows folder (``/mnt/c/...``) is slower by an order of magnitude. This route has not yet been tested on a real Windows installation."
+msgstr "Unter Windows laufen TELEMAC und OpenFOAM im Windows-Subsystem für Linux (WSL 2). Die Assistenten eines QGIS, das unter Windows ausgeführt wird, werden nicht in WSL installiert. Installieren Sie eine Distribution mit ``wsl --install -d Ubuntu-24.04`` in einem **PowerShell** (ähnlich wie Linux **Terminal**) mit Administratorrechten, installieren Sie aXqua innerhalb der Distribution und führen Sie ``axqua install start telemac`` in seinem Terminal aus. Wählen Sie einen Installationsordner im Linux-Dateisystem aus: Ein Build in einem Windows-Ordner (``/mnt/c/...``) ist um eine Größenordnung langsamer. Diese Route wurde noch nicht auf einer echten Windows-Installation getestet."
+
+# machine translation: argos fbb8c4c21032
+msgid "Installation wizards (short version)"
+msgstr "Installationsassistenten (Kurzfassung)"
+
+# machine translation: argos ab2d4474e9c1
+msgid "The wizards are opened on the **Configuration** tab, in the box **Simulation & postprocessing software** showing the operating system that the aXqua *Check* button detected."
+msgstr "Die Assistenten werden auf der Registerkarte **Konfiguration** in der Box **Simulation & Postprocessing Software** geöffnet und zeigen das Betriebssystem an, das die aXqua *Check* Schaltfläche erkannt hat."
+
+# machine translation: argos d2bd186dcd8b
+msgid "If the aXqua program *Check* identified existing TELEMAC, OpenFOAM or postprocessor software installation, the box states for each program where it is installed or that it was not found."
+msgstr "Wenn das aXqua-Programm *Check* eine bestehende Installation von TELEMAC, OpenFOAM oder Postprozessor-Software identifiziert hat, wird in der Box für jedes Programm angegeben, wo es installiert ist oder dass es nicht gefunden wurde."
+
+# machine translation: argos 91257cf0ecc9
+msgid "To start the installation of each software, click **Install <software-name>...** and an installation wizard opens. Each wizard has three intuitive tabs in which users make choices according to their needs:"
+msgstr "Um die Installation jeder Software zu starten, klicken Sie auf **Install <software-name>...** und ein Installationsassistent öffnet sich. Jeder Assistent verfügt über drei intuitive Registerkarten, in denen die Benutzer ihre Entscheidungen nach ihren Bedürfnissen treffen:"
+
+# machine translation: argos a4e95c818380
+msgid "**Settings:** Installation folder and installer choices. Every folder and file is selected in a dialog, so nothing has to be typed. Details on software-specific settings are provided below on this page."
+msgstr "**Einstellungen:** Installationsordner und Installationsprogrammauswahl. Jeder Ordner und jede Datei wird in einem Dialog ausgewählt, so dass nichts eingegeben werden muss. Details zu softwarespezifischen Einstellungen finden Sie unten auf dieser Seite."
+
+# machine translation: argos ea6b0ed807dc
+msgid "**Check:** aXqua examines the computer and lists the commands that it is about to run, expected duration, and everything that is not in order. An orange triangle marks a warning, with which the installation can be started. A dark red triangle marks an error. To proceed with the installation:"
+msgstr "**Check:** aXqua untersucht den Computer und listet die Befehle auf, die er ausführen wird, die erwartete Dauer und alles, was nicht in Ordnung ist. Ein orangefarbenes Dreieck markiert eine Warnung, mit der die Installation gestartet werden kann. Ein dunkelrotes Dreieck markiert einen Fehler. Um mit der Installation fortzufahren:"
+
+# machine translation: argos 3225000c66e9
+msgid "Complete the prompts in **the dialog frame that shows required user actions to be executed in terminal.**"
+msgstr "Füllen Sie die Eingabeaufforderungen in **dem Dialograhmen aus, der die erforderlichen Benutzeraktionen in Terminal zeigt.**"
+
+# machine translation: argos 9599eabb5c35
+msgid "Then click on the **INSTALL button on the bottom-left.**"
+msgstr "Klicken Sie dann unten links auf die **INSTALL Schaltfläche.**"
+
+# machine translation: argos 6b12d02ff28f
+msgid "**Installation:** Run and show the current step and the end of the installation log. The installation is a process of its own: the wizard and QGIS can be closed while it runs. The *Configuration* tab reports that an installation is running, and the wizard shows it again when it is reopened."
+msgstr "**Installation:** Führen Sie den aktuellen Schritt und das Ende des Installationsprotokolls aus. Die Installation ist ein eigener Prozess: Der Assistent und QGIS können während des Betriebs geschlossen werden. Die Registerkarte *Configuration* meldet, dass eine Installation ausgeführt wird, und der Assistent zeigt sie erneut an, wenn sie wieder geöffnet wird."
+
+# machine translation: argos 9610c56b2baf
+msgid "The tabs can be visited in any order, and *Back* and *Next* at the bottom of the wizard walk through them. Changed settings are checked again when the *Check* tab is opened."
+msgstr "Die Registerkarten können in beliebiger Reihenfolge besucht werden, und *Back* und *Next* unten im Assistenten gehen durch sie hindurch. Geänderte Einstellungen werden erneut überprüft, wenn die Registerkarte *Check* geöffnet wird."
+
+# machine translation: argos 476a807e8e58
+msgid "At the end, aXqua verifies that the installer produced the program, enters the program and its installation folder in the computer profile (:ref:`plugin-profile`), and starts it once. After a successful installation, the button *Cancel the installation* turns dark gray-green and reads *Installation complete*; a click closes the wizard. No further configuration is required."
+msgstr "Am Ende überprüft aXqua, ob der Installateur das Programm erstellt hat, gibt das Programm und seinen Installationsordner in das Computerprofil (:ref:`plugin-profile`) ein und startet es einmal. Nach einer erfolgreichen Installation wird die Schaltfläche *Cancel the installation* dunkelgrau-grün und liest *Installation complete*; ein Klick schließt den Assistenten. Eine weitere Konfiguration ist nicht erforderlich."
+
+# machine translation: argos 7de91bf930ce
+msgid "In the box **Simulation & postprocessing software**, the path of a program that was found is written in dark green, and *Not found on this computer.* in bold dark purple. Clicking *Install <software-name>...* for a program that is installed already first asks *Software already installed. Continue with re-installation?* *No* returns to the *Configuration* tab. *Yes* opens the wizard, whose *Settings* tab then starts with the setting *Existing installation*:"
+msgstr "In der Box **Simulation & Postprocessing Software** ist der Pfad eines gefundenen Programms in dunkelgrün und *Not found on this computer.* in fettem dunkellila geschrieben. Klicken Sie auf *Install <software-name>...* für ein Programm, das bereits installiert ist, fragt *Software already installed. Continue with re-installation?* *No* zurück zum *Configuration* Registerkarte. *Yes* öffnet den Assistenten, dessen *Settings*-Tab dann mit der Einstellung beginnt *Existing installation*:"
+
+# machine translation: argos 7e1abb6eef64
+msgid "*Remove the existing installation and install it again in its folder* deletes the earlier installation before the new one is built. aXqua removes only an installation that one of its installers made: the subfolder ``telemac-mascaret`` of TELEMAC, a folder of the OpenFOAM installer, or the VisIt folders of the postprocessors."
+msgstr "*Remove the existing installation and install it again in its folder* löscht die frühere Installation, bevor die neue erstellt wird. aXqua entfernt nur eine Installation, die eines seiner Installateure durchgeführt hat: den Unterordner ``telemac-mascaret`` von TELEMAC, einen Ordner des OpenFOAM-Installationsprogramms oder die VisIt-Ordner der Postprozessoren."
+
+# machine translation: argos f1cad78f25b0
+msgid "*Continue in the existing folder* keeps what is downloaded and built and repeats the remaining steps. The OpenFOAM installer refuses to continue a folder that another version of it started; the *Check* tab says so before anything runs."
+msgstr "*Continue in the existing folder* behält, was heruntergeladen und gebaut wird, und wiederholt die verbleibenden Schritte. Der OpenFOAM-Installer weigert sich, einen Ordner fortzusetzen, den eine andere Version gestartet hat; die Registerkarte *Check* sagt dies, bevor etwas läuft."
+
+# machine translation: argos 72ca1cc018ad
+msgid "*Install it again in a new folder* leaves the existing installation untouched."
+msgstr "*Install it again in a new folder* lässt die bestehende Anlage unberührt."
+
+# machine translation: argos 208c7144c9d3
+msgid "The wizards run installer scripts of the `installer repository <https://github.com/Ecohydraulics/numerical-software-installers>`_, in the version with which this version of aXqua was tested. The OpenFOAM installer of that repository is shipped with aXqua, together with the source code of Olsen's sediment solvers, so that installing OpenFOAM does not depend on the website where Nils Reidar Olsen publishes them (the repo was unreachable with the error HTTP 502 in October 2026). The scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22. For another system that is built on one of these, select the base system under *Further settings* on the *Settings* tab."
+msgstr "Die Assistenten führen Installer-Skripte des `Installateur-Repository <https://github.com/Ecohydraulics/numerical-software-installers>`_ aus, in der Version, mit der diese Version von aXqua getestet wurde. Der OpenFOAM-Installer dieses Repositorys wird zusammen mit dem Quellcode von Olsens Sediment Solver mit aXqua ausgeliefert, so dass die Installation von OpenFOAM nicht von der Website abhängt, auf der Nils Reidar Olsen sie veröffentlicht (das Repo war mit dem Fehler HTTP 502 im Oktober 2026 nicht erreichbar). Die Skripte existieren für Debian 12, Ubuntu 22.04, Ubuntu 24.04 und Linux Mint 22. Für ein anderes System, das auf einem dieser Systeme aufgebaut ist, wählen Sie das Basissystem unter *Further settings* auf der Registerkarte *Settings* aus."
+
+# machine translation: argos be725297df61
+msgid "User rights"
+msgstr "Nutzerrechte"
+
+# machine translation: argos c18fae7de83e
+msgid "**System packages and administrator rights:** Compilers and numerical libraries are packages of the operating system, and installing them is the only step that requires administrator rights. The *Check* tab states how many of the required packages are missing and shows the one command that installs them in a box below the heading **REQUIRED USER ACTIONS in TERMINAL:**, both in dark purple. The command can be run in two ways:"
+msgstr "**Systempakete und Administratorrechte:** Compiler und numerische Bibliotheken sind Pakete des Betriebssystems, und ihre Installation ist der einzige Schritt, der Administratorrechte erfordert. Die Registerkarte *Check* gibt an, wie viele der erforderlichen Pakete fehlen, und zeigt den einen Befehl an, der sie in einem Feld unter der Überschrift **ERFORDERLICHE BENUTZERAKTIONEN in TERMINAL:** installiert, beide in dunkelviolett. Der Befehl kann auf zwei Arten ausgeführt werden:"
+
+# machine translation: argos 32172729c5c3
+msgid "*Run fixes* runs the command. On a desktop, the password dialog of the desktop asks for the password; otherwise a terminal window opens and asks for it. The password does not pass through the plugin. aXqua then checks the computer again and repeats the fixes as long as they make progress."
+msgstr "*Run fixes* führt den Befehl aus. Auf einem Desktop fragt der Passwortdialog des Desktops nach dem Passwort; andernfalls öffnet sich ein Terminal Fenster und fragt danach. Das Passwort geht nicht durch das Plugin. aXqua überprüft dann den Computer erneut und wiederholt die Korrekturen, solange sie Fortschritte machen."
+
+# machine translation: argos 0f6de1fd0dd3
+msgid "*Copy the command* places the command in the clipboard, to be pasted into a terminal. On a computer that is managed by an institution, send the command to the administrator."
+msgstr "*Copy the command* Platziert den Befehl in der Zwischenablage, um in ein Terminal eingefügt zu werden. Senden Sie auf einem Computer, der von einer Institution verwaltet wird, den Befehl an den Administrator."
+
+# machine translation: argos e211ac4f9be0
+msgid "If the fixes do not solve the problem, for instance because the same packages remain missing, the button *Report issue* appears. It opens a window with a report of the computer, the command, and what the check found, in which your home folder is written as ``~``. The report can be read and changed before it is sent: *Open on GitHub* opens a new issue in the `issue tracker <https://github.com/sschwindt/aXqua/issues>`_ (a free GitHub account is required), *Send by e-mail* opens the mail program with the report (no account is required), and *Copy report* places it in the clipboard. A failed installation offers the same button on the *Installation* tab, with the end of the installation log in the report."
+msgstr "Wenn die Korrekturen das Problem nicht lösen, weil zum Beispiel die gleichen Pakete fehlen, erscheint die Schaltfläche *Report issue*. Es öffnet ein Fenster mit einem Bericht des Computers, dem Befehl und dem gefundenen Scheck, in dem Ihr Home-Ordner als ``~`` geschrieben ist. Der Bericht kann gelesen und geändert werden, bevor er gesendet wird: *Open on GitHub* öffnet ein neues Problem im `Issue Tracker <https://github.com/sschwindt/aXqua/issues>`_ (ein kostenloser GitHub-Account ist erforderlich), *Send by e-mail* öffnet das Mailprogramm mit dem Bericht (kein Account ist erforderlich) und *Copy report* platziert es in der Zwischenablage. Eine fehlgeschlagene Installation bietet die gleiche Schaltfläche auf der Registerkarte *Installation* mit dem Ende des Installationsprotokolls im Bericht."
+
+# machine translation: argos 3950c2a722ce
+msgid "**For me only, or for all users:** The first setting of each wizard, *Install for*, decides who can use the program:"
+msgstr "**Nur für mich oder für alle Benutzer:** Die erste Einstellung jedes Assistents, *Install for*, entscheidet, wer das Programm nutzen kann:"
+
+# machine translation: argos 115e8d7e46c4
+msgid "*Me only* (the default) installs into a folder in your home folder: ``~/opt`` for TELEMAC, ``~/.local/openfoam-sediment-v2406`` for OpenFOAM, and ``~/.local/axqua-postprocessors`` for VisIt. The installation itself requires no administrator rights; only missing system packages do, as described above."
+msgstr "*Me only* (der Standard) wird in einem Ordner in Ihrem Heimordner installiert: ``~/opt`` für TELEMAC, ``~/.local/openfoam-sediment-v2406`` für OpenFOAM und ``~/.local/axqua-postprocessors`` für VisIt. Die Installation selbst erfordert keine Administratorrechte; nur fehlende Systempakete tun dies, wie oben beschrieben."
+
+# machine translation: argos 14bd4407da0e
+msgid "*All users of this computer* installs into a folder below ``/opt``: ``/opt/telemac``, ``/opt/openfoam-sediment-v2406``, or ``/opt/axqua-postprocessors``. The build still runs under your user account, because the installers refuse to compile as the administrator. The password of an administrator is asked twice: before the build, to create the folder for you, and at its end, to hand the folder over to the administrator, readable for every user and writable for nobody else. The aXqua of every other user finds the programs in these folders without any entry in their profile. Changing the folder later, for example to add the example cases of TELEMAC, again requires an administrator."
+msgstr "*All users of this computer* Installiert in einen Ordner unter ``/opt``: ``/opt/telemac``, ``/opt/openfoam-sediment-v2406`` oder ``/opt/axqua-postprocessors``. Der Build läuft weiterhin unter Ihrem Benutzerkonto, da sich die Installateure weigern, als Administrator zu kompilieren. Das Passwort eines Administrators wird zweimal gefragt: vor dem Build, um den Ordner für Sie zu erstellen, und am Ende, um den Ordner an den Administrator zu übergeben, lesbar für jeden Benutzer und beschreibbar für niemanden sonst. Der aXqua jedes anderen Benutzers findet die Programme in diesen Ordnern ohne Eintrag in seinem Profil. Das spätere Ändern des Ordners, zum Beispiel um das Beispiel Fälle von TELEMAC hinzuzufügen, erfordert wiederum einen Administrator."
+
+# machine translation: argos 1cf11855f652
+msgid "On the desktop, the password dialog of the desktop asks for the password. In a terminal, ``axqua install start openfoam --for-all-users --foreground`` lets ``sudo`` ask for it; a detached installation without a desktop cannot ask and stops before it builds anything."
+msgstr "Auf dem Desktop fragt der Passwortdialog des Desktops nach dem Passwort. In einem Terminal lässt ``axqua install start openfoam --for-all-users --foreground`` ``sudo`` danach fragen; eine getrennte Installation ohne Desktop kann nicht fragen und stoppt, bevor sie etwas erstellt."
+
+# machine translation: argos d084529ea765
+msgid "Click *Check again* afterwards. The installation itself runs with the rights of the ordinary user and writes into the installation folder only."
+msgstr "Klicken Sie *Check again* danach. Die Installation selbst läuft mit den Rechten des gewöhnlichen Benutzers und schreibt nur in den Installationsordner."
+
+# machine translation: argos 78cac6bd133b
+msgid "**From a terminal.** Each wizard corresponds to one command, ``axqua install``, which does the same without QGIS (:doc:`../automation/terminal-syntax`)."
+msgstr "**Von einem Terminal** Jeder Assistent entspricht einem Befehl, ``axqua install``, der dasselbe ohne QGIS tut (:doc:`../automation/terminal-syntax`)."
+
+# machine translation: argos d82d50d1e800
+msgid "TELEMAC"
+msgstr "TELEMAC"
+
+# machine translation: argos 387e25b7aed8
+msgid "`TELEMAC <http://www.opentelemac.org/>`_ solves the depth-averaged (2D) and 3D flows, coupled with a large variety of modules for purposes like sediment transport (Gaia), water quality analysis (WAQTEL), wave propagation (ARTEMIS and TOMAWAC). Its sediment transport module GAIA is part of the same installation. aXqua is developed and tested with TELEMAC v9.1.1."
+msgstr "`TELEMAC <http://www.opentelemac.org/>`_ Löst die tiefengemittelten (2D) und 3D-Flüsse in Verbindung mit einer Vielzahl von Modulen für Zwecke wie Sedimenttransport (Gaia), Wasserqualitätsanalyse (WAQTEL), Wellenausbreitung (ARTEMIS und TOMAWAC). Sein Sedimenttransportmodul GAIA ist Teil derselben Anlage. aXqua wurde mit TELEMAC v9.1.1 entwickelt und getestet."
+
+# machine translation: argos a19ab796be67
+msgid "Click **Install TELEMAC...** on the **Configuration** tab. The wizard is available on Debian 12, Ubuntu 24.04 and Linux Mint 22. Its *Settings* tab has four settings besides *Install for*:"
+msgstr "Klicken Sie auf **TELEMAC installieren...** auf der Registerkarte **Konfiguration**. Der Assistent ist auf Debian 12, Ubuntu 24.04 und Linux Mint 22 verfügbar. Sein *Settings* Tab hat vier Einstellungen außer *Install for*:"
+
+# machine translation: argos 73f6d33218d2
+msgid "Setting"
+msgstr "Einstellung"
+
+# machine translation: argos 2c7c3ec284a3
+msgid "Meaning"
+msgstr "Bedeutung"
+
+# machine translation: argos a2c1a92234b6
+msgid "Installation folder"
+msgstr "Anlagenordner"
+
+# machine translation: argos d1aecf384d29
+msgid "TELEMAC is installed in the subfolder ``telemac-mascaret`` of this folder. The default is the folder ``opt`` in the home folder. If the subfolder exists already, the installer keeps its source code and builds TELEMAC in it again."
+msgstr "TELEMAC ist im Unterordner ``telemac-mascaret`` dieses Ordners installiert. Der Standard ist der Ordner ``opt`` im Home-Ordner. Wenn der Unterordner bereits vorhanden ist, behält der Installer seinen Quellcode und baut TELEMAC wieder darin auf."
+
+# machine translation: argos 60f27684076e
+msgid "TELEMAC version"
+msgstr "TELEMAC-Version"
+
+# machine translation: argos 018e5e262b73
+msgid "Leave the field empty for v9.1.1."
+msgstr "Lassen Sie das Feld für v9.1.1 leer."
+
+# machine translation: argos bd0f34f6df82
+msgid "Example cases of TELEMAC"
+msgstr "Beispiel Fälle von TELEMAC"
+
+# machine translation: argos 7955e379adc2
+msgid "TELEMAC is distributed with about 830 example cases. Their steering files are always installed with the source code. The setting selects how many of their large files are downloaded in addition. *Input files of examples only* (the default) downloads what a run of an example reads, which is mainly its mesh: about 360 files and 460 MB. *Everything* also downloads the reference results, with which TELEMAC validates itself, and the manuals: 1,500 files and 1.65 GB, which takes about one hour. *Steering files only* downloads none of the large example files. aXqua itself requires none of these files."
+msgstr "TELEMAC wird mit etwa 830 Beispielfällen verteilt. Ihre Steuerdateien werden immer mit dem Quellcode installiert. Die Einstellung wählt aus, wie viele ihrer großen Dateien zusätzlich heruntergeladen werden. *Input files of examples only* (der Standard) lädt herunter, was ein Beispiel liest, was hauptsächlich das Rechennetz ist: etwa 360 Dateien und 460 MB. *Everything* lädt auch die Referenzergebnisse herunter, mit denen sich TELEMAC selbst validiert, und die Handbücher: 1.500 Dateien und 1,65 GB, was etwa eine Stunde dauert. *Steering files only* lädt keine der großen Beispieldateien herunter. aXqua selbst benötigt keine dieser Dateien."
+
+# machine translation: argos f42bae902382
+msgid "SALOME archive"
+msgstr "SALOME Archiv"
+
+# machine translation: argos eb37bf5dc3f5
+msgid "Optional. A downloaded archive of SALOME, which is then installed next to TELEMAC. aXqua uses `Gmsh <https://gmsh.info/>`_ (Geuzaine and Remacle 2009) and does not require SALOME, because it generates the mesh and the input files itself."
+msgstr "Fakultativ Ein heruntergeladenes Archiv von SALOME, das dann neben TELEMAC installiert wird. aXqua verwendet `Gmsh <https://gmsh.info/>`_ (Geuzaine und Remacle 2009) und benötigt SALOME nicht, da es das Rechennetz und die Eingabedateien selbst generiert."
+
+# machine translation: argos 6fe3d482e3e1
+msgid "The installation downloads the source code of TELEMAC and compiles it for parallel computation with the system libraries MPI, MUMPS, METIS and MED. It requires about 2.5 GB of free space with the input files of the example cases and about 5 GB with everything. On a workstation with 32 processor cores, the installation with the default setting took 11 minutes, of which the input files of the example cases took 7 minutes."
+msgstr "Die Installation lädt den Quellcode von TELEMAC herunter und kompiliert ihn zur parallelen Berechnung mit den Systembibliotheken MPI, MUMPS, METIS und MED. Es erfordert etwa 2,5 GB freien Speicherplatz mit den Eingabedateien des Beispiels Fälle und etwa 5 GB mit allem. Auf einer Workstation mit 32 Prozessorkernen dauerte die Installation mit der Standardeinstellung 11 Minuten, wovon die Eingabedateien des Beispielfalls 7 Minuten dauerten."
+
+# machine translation: argos 32016cebc219
+msgid "The large files of the example cases are stored separately from the source code, and the download server delivers them one at a time when all of them are requested. For this reason, the default setting requests only the files that a run reads. aXqua determines these files from TELEMAC itself: the keyword dictionaries of TELEMAC state for every file whether a run reads or writes it. The missing files can be downloaded at any time afterwards: ``axqua install telemac-examples <folder>`` downloads the input files that are still missing, and ``git lfs pull`` in the folder ``telemac-mascaret`` downloads everything."
+msgstr "Die großen Dateien des Beispiels Fälle werden getrennt vom Quellcode gespeichert, und der Download-Server liefert sie einzeln, wenn alle angefordert werden. Aus diesem Grund fordert die Standardeinstellung nur die Dateien an, die ein Lauf liest. aXqua ermittelt diese Dateien aus TELEMAC selbst: Die Keyword-Wörterbücher von TELEMAC geben für jede Datei an, ob ein Lauf sie liest oder schreibt. Die fehlenden Dateien können jederzeit danach heruntergeladen werden: ``axqua install telemac-examples <folder>`` lädt die noch fehlenden Eingabedateien herunter, und ``git lfs pull`` im Ordner ``telemac-mascaret`` lädt alles herunter."
+
+# machine translation: argos 6ed6351441f4
+msgid "The result is the file ``telemac-mascaret/configs/pysource.<system>.sh`` in the installation folder. This file is the **environment script** of TELEMAC: it sets all variables that TELEMAC requires. The wizard enters it in the profile as the solver binding of TELEMAC (:ref:`solver-bindings`)."
+msgstr "Das Ergebnis ist die Datei ``telemac-mascaret/configs/pysource.<system>.sh`` im Installationsordner. Diese Datei ist das **Umgebungsskript** von TELEMAC: Sie legt alle Variablen fest, die TELEMAC benötigt. Der Assistent gibt es als Solver Bindung von TELEMAC (:ref:`solver-bindings`) in das Profil ein."
+
+# machine translation: argos bf64ba8fb0e3
+msgid "If the installation fails, the wizard shows the last lines of the installation log and the location of the complete log. After the cause is corrected, start the wizard again with the same folder. The installer continues with what is already downloaded."
+msgstr "Wenn die Installation fehlschlägt, zeigt der Assistent die letzten Zeilen des Installationsprotokolls und den Standort des vollständigen Protokolles an. Nachdem die Ursache behoben ist, starten Sie den Assistenten erneut mit dem gleichen Ordner. Der Installer fährt mit dem fort, was bereits heruntergeladen wurde."
+
+# machine translation: argos 23c7d35b5e01
+msgid "A manual installation is described in the `TELEMAC installation tutorial <https://hydro-informatics.com/get-started/install-telemac-autoinstaller.html>`_. Enter the environment script of a manual installation in the profile editor."
+msgstr "Eine manuelle Installation wird in `TELEMAC Installations-Tutorial <https://hydro-informatics.com/get-started/install-telemac-autoinstaller.html>`_ beschrieben. Geben Sie das Umgebungsskript einer manuellen Installation im Profileditor ein."
+
+# machine translation: argos 6fb1de154d09
+msgid "OpenFOAM"
+msgstr "OpenFOAM"
+
+# machine translation: argos 853288e84517
+msgid "`OpenFOAM <https://www.openfoam.com/>`_ enables a better resolution of flow in 3D, which is particularly important for the simulation of hydraulic structures such as weirs or vertical slot fishways. aXqua is designed to function with **OpenFOAM v2406** as distributed by OpenCFD (``openfoam.com``), which is compatible with the sediment transport solvers **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_). The releases of the OpenFOAM Foundation (``openfoam.org``) use different file formats and do not read the input files that aXqua writes."
+msgstr "`OpenFOAM <https://www.openfoam.com/>`_ ermöglicht eine bessere Strömungsauflösung in 3D, was besonders für die Simulation von Wasserbauwerken wie Wehren oder vertikalen Schlitzen wichtig ist. aXqua ist so konzipiert, dass es mit **OpenFOAM v2406** funktioniert, wie es von OpenCFD (``openfoam.com``) vertrieben wird, was mit dem Sedimenttransport Solver **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) und **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_) kompatibel ist. Die Veröffentlichungen der OpenFOAM Foundation (``openfoam.org``) verwenden unterschiedliche Dateiformate und lesen nicht die Eingabedateien, die aXqua schreibt."
+
+# machine translation: argos cf8e877a3525
+msgid "Install TELEMAC also when OpenFOAM is the code of interest. aXqua starts every OpenFOAM simulation from the result of a short TELEMAC run, which is called the warm-up (:ref:`warm-up-concept`). Without it, OpenFOAM has to fill a dry riverbed with water on its own, which multiplies the computing time."
+msgstr "Installieren Sie TELEMAC auch, wenn OpenFOAM der Code of Interest ist. aXqua startet jede OpenFOAM-Simulation aus dem Ergebnis eines kurzen TELEMAC-Laufs, der als Warm-up (:ref:`warm-up-concept`) bezeichnet wird. Ohne sie muss OpenFOAM eine trockene Flusssohle alleine mit Wasser füllen, was die Rechenzeit vervielfacht."
+
+# machine translation: argos c4f9f54d5548
+msgid "Click *Install OpenFOAM...* on the *Configuration* tab. The wizard is available on Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, on computers with an x86-64 processor. It installs the following components into one folder:"
+msgstr "Klicken Sie auf *Install OpenFOAM...* auf der Registerkarte *Configuration*. Der Assistent ist auf Debian 12, Ubuntu 22.04, Ubuntu 24.04 und Linux Mint 22 auf Computern mit einem x86-64-Prozessor verfügbar. Es installiert die folgenden Komponenten in einem Ordner:"
+
+# machine translation: argos fe4a4acd074d
+msgid "**OpenFOAM v2406**, unless an installation of this version exists already (see the settings below)."
+msgstr "**OpenFOAM v2406**, es sei denn, eine Installation dieser Version existiert bereits (siehe die Einstellungen unten)."
+
+# machine translation: argos 2b83a8712a8a
+msgid "The sediment transport solvers **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) and **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_), and a variant of the latter with a stage-discharge outflow, ``sediDriftFoam2Rating``, which the installer marks as not validated."
+msgstr "Der Sedimenttransport Solver **sediDriftFoam** (`Olsen et al. 2023 <https://doi.org/10.2166/hydro.2023.309>`_) und **sediDriftFoam2** (`Olsen 2025 <https://doi.org/10.2166/hydro.2025.059>`_), und eine Variante des letzteren mit einem Bühnenausfluss, ``sediDriftFoam2Rating``, den der Installateur als nicht validiert markiert."
+
+# machine translation: argos f2b33d2da756
+msgid "The **stage-discharge outflow boundary** of the Federal Waterways Engineering and Research Institute (BAW) for the solver ``interFoam`` (`Thorenz 2024 <https://doi.org/10.3929/ethz-b-000675949>`_)."
+msgstr "Die **Bühnenentladung Ausflussrand** des Federal Waterways Engineering and Research Institute (BAW) für Solver ``interFoam`` (`Thorenz 2024 <https://doi.org/10.3929/ethz-b-000675949>`_)."
+
+# machine translation: argos 5a68abe05fd7
+msgid "The postprocessors **ParaView** and **VisIt** (:ref:`help-postprocessors`), unless they are deselected."
+msgstr "Die Postprozessoren **ParaView** und **VisIt** (:ref:`help-postprocessors`), sofern sie nicht deselektiert sind."
+
+# machine translation: argos 1cbdc690eeb2
+msgid "A folder that does not exist yet, or an empty one. The installer installs into a new folder or continues an installation of its own, and refuses any other folder."
+msgstr "Ein Ordner, der noch nicht existiert, oder ein leerer. Der Installateur installiert in einen neuen Ordner oder setzt eine eigene Installation fort und lehnt jeden anderen Ordner ab."
+
+# machine translation: argos 1bcb54396835
+msgid "OpenFOAM v2406"
+msgstr "OpenFOAM v2406"
+
+# machine translation: argos 24f9f844a052
+msgid "*Use the OpenFOAM v2406 that is installed on this computer* builds the solvers on an existing installation, which takes a few minutes. aXqua enters the installation that it found. Select the file ``etc/bashrc`` of another one with *Browse...*. *Compile OpenFOAM v2406 from its source code* is the choice for a computer without OpenFOAM. It takes several hours and requires about 20 GB of free space."
+msgstr "*Use the OpenFOAM v2406 that is installed on this computer* baut den Solver auf einer bestehenden Installation auf, was einige Minuten dauert. aXqua betritt die Anlage, die es gefunden hat. Wählen Sie die Datei ``etc/bashrc`` einer anderen mit *Browse...*. *Compile OpenFOAM v2406 from its source code* ist die Wahl für einen Computer ohne OpenFOAM. Es dauert mehrere Stunden und erfordert etwa 20 GB freien Speicherplatz."
+
+# machine translation: argos 6f251ca3a53e
+msgid "Processes for compiling"
+msgstr "Verfahren zur Zusammenstellung"
+
+# machine translation: argos 258333bd1457
+msgid "The number of processor cores used for compiling. Each process requires about 2 GB of memory."
+msgstr "Die Anzahl der Prozessorkerne, die zum Kompilieren verwendet werden. Jeder Prozess benötigt etwa 2 GB Speicher."
+
+# machine translation: argos d2201bd47639
+msgid "Postprocessors"
+msgstr "Postprozessoren"
+
+# machine translation: argos 43f94f031d1d
+msgid "*ParaView and VisIt* is the default and the recommended choice, because aXqua renders its predefined three-dimensional figures with VisIt. *ParaView only* leaves VisIt out, which saves a download of 600 MB. *None* installs neither program, for a computer on which both are installed already. A program that was left out can be installed at any time afterwards (:ref:`help-postprocessors`)."
+msgstr "*ParaView and VisIt* ist der Standard und die empfohlene Wahl, weil aXqua seine vordefinierten dreidimensionalen Figuren mit VisIt darstellt. *ParaView only* lässt VisIt heraus, was einen Download von 600 MB spart. *None* installiert keines der beiden Programme für einen Computer, auf dem beide bereits installiert sind. Ein Programm, das ausgelassen wurde, kann jederzeit danach installiert werden (:ref:`help-postprocessors`)."
+
+# machine translation: argos 255d6ee10d2a
+msgid "Download the example case of the sediment solver"
+msgstr "Laden Sie das Beispiel Fall des Sediments herunter Solver"
+
+# machine translation: argos c21f0dfdf348
+msgid "Adds the example case that is published with sediDriftFoam."
+msgstr "Fügt das Beispiel Fall hinzu, das mit sediDriftFoam veröffentlicht wurde."
+
+# machine translation: argos fe244294f8f8
+msgid "Run a short test at the end"
+msgstr "Führen Sie am Ende einen kurzen Test durch"
+
+# machine translation: argos bae9bd8a2ea8
+msgid "Runs ``interFoam`` for a few time steps with the outflow boundary of the BAW, which verifies that the compiled library can be loaded."
+msgstr "Läuft ``interFoam`` für einige Zeitschritte mit dem Ausflussrand der BAW, der überprüft, dass die kompilierte Bibliothek geladen werden kann."
+
+# machine translation: argos 7990fca243fb
+msgid "The Settings tab of the OpenFOAM installation wizard"
+msgstr "Die Registerkarte Einstellungen des OpenFOAM Installationsassistent"
+
+# machine translation: argos 1168c06156a1
+msgid "The *Settings* tab of the OpenFOAM wizard. (1) For whom the program is installed: for you alone, or for all users of the computer. (2) The installation folder. (3) The existing OpenFOAM v2406 on which the solvers are built, or the choice to compile it. (4) The selection of the postprocessors. (5) *Next* leads to the tab *Check*."
+msgstr "Die Registerkarte *Settings* des OpenFOAM-Assistenten. (1) Für wen das Programm installiert ist: für Sie allein oder für alle Benutzer des Computers. (2) Der Installationsordner. (3) Der bestehende OpenFOAM v2406, auf dem der Solver aufgebaut ist, oder die Auswahl, ihn zu kompilieren. (4) Die Auswahl der Postprozessoren. (5) *Next* führt zum Tab *Check*."
+
+# machine translation: argos 83d9727ffe83
+msgid "A packaged OpenFOAM v2406 saves the hours of compilation. OpenCFD provides packages for Debian and Ubuntu. An administrator installs them according to the `installation instructions of OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, which creates the file ``/usr/lib/openfoam/openfoam2406/etc/bashrc``. The wizard finds this installation by itself."
+msgstr "Ein verpacktes OpenFOAM v2406 spart die Stunden der Zusammenstellung. OpenCFD bietet Pakete für Debian und Ubuntu. Ein Administrator installiert sie gemäß `Installationsanweisungen von OpenCFD <https://develop.openfoam.com/Development/openfoam/-/wikis/precompiled/debian>`_, der die Datei ``/usr/lib/openfoam/openfoam2406/etc/bashrc`` erstellt. Der Assistent findet diese Installation von selbst."
+
+# machine translation: argos 1b5dd67f87c8
+msgid "The result is the file ``shell-rc.sh`` in the installation folder. It is the **environment script** of this installation: it loads OpenFOAM v2406 and adds the compiled solvers and the boundary library. The wizard enters it in the profile as the solver binding of OpenFOAM, and enters the selected postprocessors. No existing OpenFOAM installation and no startup file of the user account is changed."
+msgstr "Das Ergebnis ist die Datei ``shell-rc.sh`` im Installationsordner. Es ist das **Umgebungsskript** dieser Installation: Es lädt OpenFOAM v2406 und fügt den kompilierten Solver und die Rand-Bibliothek hinzu. Der Assistent gibt sie als Solver Bindung von OpenFOAM in das Profil ein und gibt die ausgewählten Postprozessoren ein. Es wird keine bestehende OpenFOAM-Installation und keine Startdatei des Benutzerkontos geändert."
+
+# machine translation: argos 11c52bef1a57
+msgid "aXqua sets up simulations with the sediment transport solver sediDriftFoam2, for fine sediment over a bed that stays in place (*Simulations > Morphodynamics* with the simulation program *OpenFOAM*, :ref:`help-morphodynamics-openfoam`), and OpenFOAM simulations with the stage-discharge outflow boundary of the BAW (``openfoam.outflow_boundary: rating-curve``, :ref:`preprocessing-openfoam-choices`). The variant ``sediDriftFoam2Rating``, which moves the bed and the water surface, is installed but not set up by aXqua, because aXqua keeps the bed and the surface of a sediment simulation in place."
+msgstr "aXqua erstellt Simulationen mit dem Sedimenttransport Solver sediDriftFoam2, für Feinsediment über einem Bett, das an Ort und Stelle bleibt (*Simulations > Morphodynamics* mit dem Simulationsprogramm *OpenFOAM*, :ref:`help-morphodynamics-openfoam`), und OpenFOAM-Simulationen mit der Bühnenentladung Ausflussrand der BAW (``openfoam.outflow_boundary: rating-curve``, :ref:`preprocessing-openfoam-choices`). Die Variante ``sediDriftFoam2Rating``, die das Bett und das Wasserspiegel bewegt, wird von aXqua installiert, aber nicht eingerichtet, da aXqua das Bett und die Oberfläche einer Sedimentsimulation an Ort und Stelle hält."
+
+# machine translation: argos efa1980f3f33
+msgid "References"
+msgstr "Referenzen"
