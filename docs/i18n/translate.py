@@ -310,7 +310,12 @@ def load_termfix(lang: str, folder: Path = I18N) -> list[TermFix]:
             pattern = re.compile(parts[1])
         except re.error as error:
             sys.exit(f"{where}: {parts[1]!r} is no regular expression: {error}")
-        rules.append(TermFix(re.compile(_term_pattern(parts[0]), re.IGNORECASE), pattern, parts[2],
+        # the term triggers the rule in its plural and as the first part of a compound too
+        # ("solvers", "Solver-agnostic")
+        words = re.split(r"[\s-]+", parts[0].strip())
+        trigger = (r"(?<!\w)" + r"[\s-]+".join(re.escape(word) for word in words)
+                   + r"(?:s|es)?(?!\w)")
+        rules.append(TermFix(re.compile(trigger, re.IGNORECASE), pattern, parts[2],
                              "\t".join(parts)))
     return rules
 
@@ -375,6 +380,7 @@ class Prepared:
     lang: str = ""
     genders: dict[str, str] = field(default_factory=dict)  # injected French term -> "m" or "f"
     expect: list[str] = field(default_factory=list)  # terms put into the sentence: must come back
+    names: list[str] = field(default_factory=list)   # names of keep.txt sent as they are
 
     def pieces(self) -> list[str]:
         """Every text that goes to the engine for this message."""
@@ -464,8 +470,13 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
     text = EMPHASIS.sub(lambda m: sentinel(Span(m.group(0), markup=True)), text)
     text = URL.sub(lambda m: sentinel(Span(m.group(0))), text)
     for name in keep:
-        text = re.sub(rf"(?<![\w@-]){re.escape(name)}(?![\w@-])",
-                      lambda m: sentinel(Span(m.group(0))), text)
+        pattern = rf"(?<![\w@-]){re.escape(name)}(?![\w@-])"
+        if terms_masked or " " in name:
+            text = re.sub(pattern, lambda m: sentinel(Span(m.group(0))), text)
+        elif re.search(pattern, text):
+            # a single word goes as it is: one placeholder less, and the engine sees a subject; its
+            # spelling is restored afterwards ("AXqua") and it has to come back
+            prepared.names.append(name)
 
     inserted: list[tuple[str, str]] = []   # (as sent to the engine, as it is to be shown)
     if glossary.pattern is not None:
@@ -506,12 +517,17 @@ def prepare(source: str, glossary: Glossary, keep: list[str], *, bold_in_context
         return prepared
     text = re.sub(r"\ue000(\d+)\ue001", lambda m: inserted[int(m.group(1))][0], text)
 
+    # only markup (a label in italics, a DOI) is set aside; a name kept in English at the start is
+    # the subject of the sentence ("aXqua builds ...") and goes to the engine with it
+    def markup_only(found: str) -> bool:
+        return all(prepared.spans[int(m.group(1))].markup for m in SENTINEL_RE.finditer(found))
+
     group = r"(?:@@\d+@@[\s,;:]*)+"
     head = re.match(rf"^\s*{group}", text)
-    if head and needs_engine(text[head.end():]):
+    if head and needs_engine(text[head.end():]) and markup_only(head.group(0)):
         prepared.prefix, text = head.group(0), text[head.end():]
     tail = re.search(rf"(?<=[\s.,;:!?)]){group}\s*$", text)
-    if tail and needs_engine(text[:tail.start()]):
+    if tail and needs_engine(text[:tail.start()]) and markup_only(tail.group(0)):
         prepared.suffix, text = tail.group(0), text[:tail.start()]
     prepared.text = text
     return prepared
@@ -661,8 +677,14 @@ def apply_termfix(source: str, text: str, rules: list[TermFix]) -> str:
     return text
 
 
-def assemble(prepared: Prepared, results: dict[str, str], rules: list[TermFix]) -> str | None:
-    """The translation of a message, or None when the engine lost or doubled a masked part."""
+def assemble(prepared: Prepared, results: dict[str, str], rules: list[TermFix], *,
+             strict: bool = True) -> str | None:
+    """The translation of a message, or None when the engine lost or doubled a masked part.
+
+    *strict* also requires every glossary term put into the sentence to come back; the last resort
+    of :func:`translate_language` relaxes that, since a term the engine reworded in a long paragraph
+    is a smaller loss than the whole paragraph in English.
+    """
     if prepared.words is not None:
         text = re.sub(r"[A-Za-z]+", lambda m: prepared.words.get(m.group(0).lower(), m.group(0)),
                       prepared.text)
@@ -674,11 +696,16 @@ def assemble(prepared: Prepared, results: dict[str, str], rules: list[TermFix]) 
         text = prepared.text
     if prepared.words is None:
         text = _untitle(text, prepared.injected)
+    for name in prepared.names:
+        word = rf"(?<![\w@-]){re.escape(name)}(?![\w@-])"
+        text = re.sub(word, name, text, flags=re.IGNORECASE)
+        if re.search(word, text) is None:
+            return None
     if prepared.lang == "fr":
         text = _french_spacing(_french_articles(text, prepared.genders))
     elif prepared.lang == "de":
         text = _german_articles(text, prepared.genders)
-    if not _terms_came_back(text, prepared):
+    if strict and not _terms_came_back(text, prepared):
         return None
     # a capital where the English has one: headings and list items come back in lower case
     english = re.search(r"[^\W\d_]", SENTINEL_RE.sub(" ", prepared.text))
@@ -706,7 +733,7 @@ def assemble(prepared: Prepared, results: dict[str, str], rules: list[TermFix]) 
         if span.sub is None:
             rendered.append(span.text)
             continue
-        inner = assemble(span.sub, results, rules)
+        inner = assemble(span.sub, results, rules, strict=strict)
         if inner is None:
             return None
         rendered.append(span.before + inner.strip() + span.after)
@@ -1015,6 +1042,11 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
                             joined = {again.text: " ".join(results[part] for part in parts)}
                             text = assemble(again, {**results, **joined}, rules)
                     if text is not None:
+                        break
+                for again in ([prepared, *retry.get(template.msgid, [])] if text is None else []):
+                    text = assemble(again, results, rules, strict=False)
+                    if text is not None:
+                        counts["a term reworded"] += 1
                         break
                 if text is None:
                     failed.append(template.msgid)

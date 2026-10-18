@@ -15,7 +15,7 @@ msgstr ""
 msgid "Postprocessing"
 msgstr "Post-traitement"
 
-# machine translation: argos 065da928f459
+# machine translation: argos 7927ae4d8b30
 msgid "Postprocessing turns simulation results into maps, figures and tables. Depth-averaged results are best presented as maps in QGIS. Three-dimensional results require ParaView or VisIt (:doc:`../installation/postprocessors`)."
 msgstr "Le post-traitement transforme les résultats de simulation en cartes, chiffres et tableaux. Les résultats moyens de profondeur sont mieux présentés sous forme de cartes dans le SGQG. Les résultats tridimensionnels nécessitent ParaView ou VisIt (:doc:`../installation/postprocessors`)."
 
@@ -131,13 +131,13 @@ msgstr "ParaView"
 msgid "ParaView is suited for the interactive inspection of results in three dimensions. It opens an OpenFOAM model directly and a TELEMAC result after an export."
 msgstr "ParaView convient pour l'inspection interactive des résultats en trois dimensions. Il ouvre un modèle OpenFOAM directement et un résultat TELEMAC après une exportation."
 
-# machine translation: argos 4fae83a56016
+# machine translation: argos b97ec96347d5
 msgid "**Export of TELEMAC results.** ParaView and VisIt do not read the result format of TELEMAC (SELAFIN). aXqua therefore converts a result once into the VTK format, which both programs read. On the tab *Postprocessing > ParaView*, the table lists the TELEMAC results of the selected case with their number of time steps. Select one or several results, choose between all time steps and the last time step only, and click *Export*. Without a selection, all results are exported. The conversion of one time step takes about one second for a mesh of 230,000 nodes. The same export serves ParaView and VisIt, and is repeated after a simulation was run again: the column *Exported* states whether the exported files are older than the result."
-msgstr "**Exportation des résultats de TELEMAC.** ParaView et VisIt ne lisent pas le format de résultat de TELEMAC (SELAFIN). aXqua convertit donc un résultat une fois dans le format VTK, que les deux programmes lisent. Sur l'onglet *Postprocessing > ParaView*, la table liste les résultats TELEMAC du cas sélectionnée avec leur numéro de pas de temps. Sélectionnez un ou plusieurs résultats, choisissez entre tous les pas de temps et le dernier pas de temps seulement, et cliquez sur *Export*. Sans sélection, tous les résultats sont exportés. La conversion d'un pas de temps prend environ une seconde pour un maillage de 230 000 nœuds. La même exportation sert ParaView et VisIt, et est répétée après qu'une simulation a été exécutée à nouveau : la colonne *Exported* indique si les fichiers exportés sont plus anciens que le résultat."
+msgstr "**Exportation des résultats de TELEMAC.** ParaView et VisIl ne lit pas le format de résultat de TELEMAC (SELAFIN). aXqua convertit donc un résultat une fois dans le format VTK, que les deux programmes lisent. Sur l'onglet *Postprocessing > ParaView*, la table liste les résultats TELEMAC du cas sélectionnée avec leur numéro de pas de temps. Sélectionnez un ou plusieurs résultats, choisissez entre tous les pas de temps et le dernier pas de temps seulement, et cliquez sur *Export*. Sans sélection, tous les résultats sont exportés. La conversion d'un pas de temps prend environ une seconde pour un maillage de 230 000 nœuds. La même exportation sert ParaView et VisIt, et est répétée après qu'une simulation a été exécutée à nouveau : la colonne *Exported* indique si les fichiers exportés sont plus anciens que le résultat."
 
-# machine translation: argos 3c3f7f4d2211
+# machine translation: argos 6deb6589c835
 msgid "The exported files are written to the folder ``axqua-case/postprocessing/vtk/``. Each result has a file ``<result>.pvd`` for ParaView, a file ``<result>.visit`` for VisIt, and a folder with one file per time step. In a terminal, the export is:"
-msgstr "Les fichiers exportés sont écrits au dossier ``axqua-case/postprocessing/vtk/``. Chaque résultat a un fichier ``<result>.pvd`` pour ParaView, un fichier ``<result>.visit`` pour VisIt, et un dossier avec un fichier par pas de temps. Dans un terminal, l'exportation est :"
+msgstr "Les fichiers exportés sont écrits au dossier ``axqua-case/postprocessing/vtk/``. Chaque résultat a un fichier ``<result>.pvd`` pour ParaView, un fichier ``<result>.visit`` pour VisIt et un dossier avec un fichier par pas de temps. Dans un terminal, l'exportation est :"
 
 # machine translation: argos 14bd265a5889
 msgid "The sub-tab ParaView of the tab Postprocessing"
@@ -187,25 +187,29 @@ msgstr "Pour afficher le relief d'un résultat 2D, appliquez le filtre *Warp By 
 msgid "For streamlines, apply the filter *Stream Tracer* with the vector ``VELOCITY`` and a line across the channel as seed."
 msgstr "Pour simplifier, appliquer le filtre *Stream Tracer* avec le vecteur ``VELOCITY`` et une ligne à travers le chenal comme graine."
 
-# machine translation: argos 4e4d8bfabaf5
+# machine translation: argos 138794e09d0c
 msgid "**Open an OpenFOAM model.** An OpenFOAM model of aXqua needs no export. The box *OpenFOAM cases of the selected case* on the sub-tabs *ParaView* and *VisIt* lists the OpenFOAM models of the active case (the free-surface model and the fine sediment model), and *Open the OpenFOAM case in ParaView* (or *in VisIt*) starts the program with it. What an OpenFOAM model offers is set in the case settings, page *Post-processing*, with ``postproc.openfoam_outputs``: ``paraview`` (the file ``case.foam``), ``visit`` (the file ``system/controlDict``, through which VisIt opens an OpenFOAM case), and ``vtk``, a conversion with ``foamToVTK`` after every run, which can double the size of a case. ParaView and VisIt are offered by default. In ParaView, the model can also be opened with *File > Open* and the file ``case.foam`` in the folder ``axqua-case/openfoam/``. The mesh regions and the result fields can then be selected in the properties panel. To display the water only, apply the filter *Threshold* or *Clip* to the field ``alpha.water``, which is 1 in water and 0 in air."
-msgstr "**Ouvrir un modèle OpenFOAM.** Un modèle OpenFOAM d'aXqua n'a pas besoin d'exportation. La boîte *OpenFOAM cases of the selected case* sur les sous-tabs *ParaView* et *VisIt* liste les modèles OpenFOAM du cas actif (le modèle surface libre et le modèle sédiments fins), et *Open the OpenFOAM case in ParaView* (ou *in VisIt*) commence le programme avec elle. Ce qu'un modèle OpenFOAM offre est défini dans les paramètres cas, page *Post-processing*, avec ``postproc.openfoam_outputs``: ``paraview`` (le fichier ``case.foam``), ``visit`` (le fichier ``system/controlDict``, à travers lequel VisIt ouvre un cas OpenFOAM), et ``vtk``, une conversion avec ``foamToVTK`` après chaque course, qui peut doubler la taille d'un cas. ParaView et VisIt sont offerts par défaut. Dans ParaView, le modèle peut également être ouvert avec *File > Open* et le fichier ``case.foam`` dans le dossier ``axqua-case/openfoam/``. Les régions de maillage et les champs de résultat peuvent ensuite être sélectionnés dans le panneau de propriétés. Pour afficher l'eau uniquement, appliquez le filtre *Threshold* ou *Clip* au champ ``alpha.water``, qui est 1 dans l'eau et 0 dans l'air."
+msgstr "**Ouvrir un modèle OpenFOAM.** Un modèle OpenFOAM d'aXqua n'a pas besoin d'exportation. La boîte *OpenFOAM cases of the selected case* sur les sous-tabs *ParaView* et *VisIt* liste les modèles OpenFOAM du cas actif (le modèle surface libre et le modèle sédiments fins), et *Open the OpenFOAM case in ParaView* (ou *in VisIt*) commence le programme avec elle. Ce qu'offre un modèle OpenFOAM est défini dans les paramètres cas, page *Post-processing*, avec ``postproc.openfoam_outputs``: ``paraview`` (le fichier ``case.foam``), ``visit`` (le fichier ``system/controlDict``, à travers lequel VisIt ouvre un cas OpenFOAM), et ``vtk``, une conversion avec ``foamToVTK`` après chaque course, qui peut doubler la taille d'un cas. ParaView et VisIt sont offerts par défaut. Dans ParaView, le modèle peut également être ouvert avec *File > Open* et le fichier ``case.foam`` dans le dossier ``axqua-case/openfoam/``. Les régions de maillage et les champs de résultat peuvent ensuite être sélectionnés dans le panneau de propriétés. Pour afficher l'eau uniquement, appliquez le filtre *Threshold* ou *Clip* au champ ``alpha.water``, qui est 1 dans l'eau et 0 dans l'air."
 
-# machine translation: argos 751c15b7ca70
+# machine translation: argos 93cb9e215dc7
+msgid "VisIt"
+msgstr "VisIt"
+
+# machine translation: argos d5d18577a60f
 msgid "VisIt serves two purposes: the interactive inspection of results, as with ParaView, and the predefined figures that aXqua renders without interaction."
 msgstr "VisIt sert deux buts : l'inspection interactive des résultats, comme avec ParaView, et les figures prédéfinies qu'aXqua rend sans interaction."
 
-# machine translation: argos ed7e6ee6162d
+# machine translation: argos 4b7df9fa3db3
 msgid "**Open a TELEMAC result.** Export the result as described for ParaView (:ref:`export of TELEMAC results <export-telemac-results>`). The tab *Postprocessing > VisIt* has the same table and the same *Export* button, and one export serves both programs. Click *Open in VisIt*, or start VisIt and open the file ``<result>.visit``. Add a plot with *Add > Pseudocolor* and select a field, for example ``WATER DEPTH``, then click *Draw*. The time slider moves through the time steps. The operator *Elevate* displays the relief of a 2D result, and the operator *Threshold* restricts the plot to the water."
 msgstr "**Ouvrir un résultat TELEMAC.** Exporter le résultat comme décrit pour ParaView (:ref:`exportation des résultats de TELEMAC <export-telemac-results>`). L'onglet *Postprocessing > VisIt* a la même table et la même *Export* bouton, et une exportation sert les deux programmes. Cliquez sur *Open in VisIt*, ou commencez VisIt et ouvrez le fichier ``<result>.visit``. Ajoutez un complot avec *Add > Pseudocolor* et sélectionnez un champ, par exemple ``WATER DEPTH``, puis cliquez sur *Draw*. Le curseur de temps passe par le pas de temps. L'opérateur *Elevate* affiche le relief d'un résultat 2D, et l'opérateur *Threshold* limite le tracé à l'eau."
 
-# machine translation: argos 94ffd9d5b62f
+# machine translation: argos b7da2d189501
 msgid "**Open an OpenFOAM model.** VisIt opens an OpenFOAM model through the file ``system/controlDict`` in the folder ``axqua-case/openfoam/``. Unlike ParaView, it does not accept the file ``case.foam``."
 msgstr "**Ouvrir un modèle OpenFOAM.** VisIt ouvre un modèle OpenFOAM à travers le fichier ``system/controlDict`` dans le dossier ``axqua-case/openfoam/``. Contrairement à ParaView, il n'accepte pas le fichier ``case.foam``."
 
-# machine translation: argos e0b13dcf2944
+# machine translation: argos e8854dd9f9c1
 msgid "**Predefined figures.** aXqua renders predefined figures of three-dimensional OpenFOAM results with VisIt. No interaction with VisIt is required: aXqua writes a script for each figure and lets VisIt execute it without opening a window."
-msgstr "**Chiffres prédéfinis.** aXqua rend des chiffres prédéfinis de résultats OpenFOAM en trois dimensions avec VisIt. Aucune interaction avec VisIt n'est requise : aXqua écrit un script pour chaque figure et laisse VisIt l'exécuter sans ouvrir de fenêtre."
+msgstr "**Chiffres prédéfinis.** aXqua rend des chiffres prédéfinis de résultats OpenFOAM en trois dimensions avec VisIt. Aucune interaction avec VisIl est nécessaire : aXqua écrit un script pour chaque figure et permet à VisIt de l'exécuter sans ouvrir de fenêtre."
 
 # machine translation: argos c8b99e201b24
 msgid "Figure"

@@ -111,9 +111,9 @@ msgstr "Installation der Simulationssoftware"
 msgid "The *Check* tab of an installation wizard, the *Installation* tab of a failed installation, and ``axqua install`` report the following errors. An installation cannot be started with an error of the *Check* tab."
 msgstr "Die Registerkarte *Check* eines Installationsassistenten, die Registerkarte *Installation* einer fehlgeschlagenen Installation und ``axqua install`` melden die folgenden Fehler. Eine Installation kann nicht mit einem Fehler des *Check* gestartet werden."
 
-# machine translation: argos a79e9c2c6032
+# machine translation: argos 0f60de63c27f
 msgid "The installer scripts exist for Debian 12, Ubuntu 22.04, Ubuntu 24.04 and Linux Mint 22, and the TELEMAC installer does not cover Ubuntu 22.04. The OpenFOAM installer and the VisIt installer additionally require an x86-64 processor. On a system that is built on one of the supported systems, select the base system under *Further settings* on the *Settings* tab of the wizard. Otherwise install the program by hand and enter it in the profile editor (:doc:`../installation/simulation-software`)."
-msgstr "Die Installationsskripte existieren für Debian 12, Ubuntu 22.04, Ubuntu 24.04 und Linux Mint 22, und das TELEMAC-Installationsprogramm deckt Ubuntu 22.04 nicht ab. Das OpenFOAM-Installationsprogramm und das VisIt-Installationsprogramm benötigen zusätzlich einen x86-64-Prozessor. Auf einem System, das auf einem der unterstützten Systeme aufgebaut ist, wählen Sie das Basissystem unter *Further settings* auf der Registerkarte *Settings* des Assistenten aus. Andernfalls installieren Sie das Programm von Hand und geben Sie es in den Profil-Editor (:doc:`../installation/simulation-software`)."
+msgstr "Die Installationsskripte existieren für Debian 12, Ubuntu 22.04, Ubuntu 24.04 und Linux Mint 22, und das TELEMAC-Installationsprogramm deckt Ubuntu 22.04 nicht ab. Das OpenFOAM-Installationsprogramm und das VisIt-Installationsprogramm benötigen zusätzlich einen x86-64-Prozessor. Auf einem System, das auf einem der unterstützten Systeme aufgebaut ist, wählen Sie das Basissystem unter *Further settings* auf der Registerkarte *Settings* des Assistent. Andernfalls installieren Sie das Programm von Hand und geben Sie es in den Profil-Editor (:doc:`../installation/simulation-software`)."
 
 # machine translation: argos a2564ee3786c
 msgid "The simulation programs do not run in Windows itself. Install a Linux distribution in the Windows Subsystem for Linux and start the installation there (:doc:`../installation/simulation-software`)."
@@ -259,7 +259,7 @@ msgstr "Das Profil benennt eine Programmdatei, die sich nicht auf diesem Compute
 msgid "The profile names an environment script that is not on this computer. Select the script of the installation (:ref:`solver-bindings`)."
 msgstr "Das Profil benennt ein Umgebungsskript, das sich nicht auf diesem Computer befindet. Wählen Sie das Skript der Installation (:ref:`solver-bindings`)."
 
-# machine translation: argos 483857ecbef2
+# machine translation: argos bef3665514a8
 msgid "aXqua loaded the environment script and could not start the simulation program. The message states what is missing. Verify in a terminal that the installation works by itself, and that the profile names the environment script of this installation."
 msgstr "aXqua hat das Umgebungsskript geladen und konnte das Simulationsprogramm nicht starten. Die Botschaft sagt, was fehlt. Stellen Sie in einem Terminal sicher, dass die Installation von selbst funktioniert und dass das Profil das Umgebungsskript dieser Installation benennt."
 
@@ -299,7 +299,7 @@ msgstr "Der vorbenetzte Start füllt die Gerinne-Zonen mit Wasser und erfordert 
 msgid "A morphodynamic case requires the measured bed change as reference. Enter a second terrain model or a DEM of difference (:ref:`case-morphodynamics`)."
 msgstr "Ein morphodynamischer Fall erfordert die gemessene Bettänderung als Referenz. Geben Sie ein zweites Gelände-Modell oder ein DGM der Differenz ein (:ref:`case-morphodynamics`)."
 
-# machine translation: argos 561bfab12a40
+# machine translation: argos 0797c08a8c03
 msgid "Preprocessing and simulations"
 msgstr "Preprocessing und Simulationen"
 
@@ -319,7 +319,7 @@ msgstr "TELEMAC stoppt beim ersten Zeitschritt mit einer Nachricht des Unterprog
 msgid "The inflow cross section is dry, so that TELEMAC cannot distribute the discharge over it. Verify that the inflow line lies in the channel and that the water depth of the filled stretch at the inflow (``initialization.dry_start_depth``) covers the bed along the entire line."
 msgstr "Das Zufluss Querprofil ist trocken, so dass TELEMAC den Abfluss nicht darüber verteilen kann. Stellen Sie sicher, dass die Zuflusslinie in der Gerinne liegt und dass die Wassertiefe der gefüllten Strecke am Zufluss (``initialization.dry_start_depth``) das Bett entlang der gesamten Linie bedeckt."
 
-# machine translation: argos 37b58ca0bf4f
+# machine translation: argos 04dc419df609
 msgid "The water depth or a velocity component left the range that the keyword ``LIMIT VALUES`` of the steering file allows, which is 1000 m/s for the velocity. Such a value is a numerical instability and not a flow. TELEMAC-2D itself ends such a run without an error code, so aXqua reads the stop from the listing and marks the job as ``FAILED``. The message states the quantity, its value, the coordinates of the mesh node, and the simulated time. Inspect the mesh, the bed elevation, and the initial water depth at these coordinates in QGIS. Common causes are a sink or an open boundary on cells that are almost dry, an initial water surface that is far from the steady one, and a time step that is too large (``hydrodynamics.desired_courant``). Internal exchange lines that are applied as source regions with a fixed rate (``boundaries.internal_sources: true``) can cause this stop at the first time step, because the discharge is then withdrawn from a narrow strip regardless of the water depth. Use the block ``gain_lose`` instead, which limits the withdrawal by the water depth (:ref:`preprocessing-telemac-choices`)."
 msgstr "Die Wassertiefe oder eine Geschwindigkeitskomponente hat den Bereich verlassen, den das Keyword ``LIMIT VALUES`` der Steuerdatei zulässt, was 1000 m / s für die Geschwindigkeit ist. Ein solcher Wert ist eine numerische Instabilität und kein Fluss. TELEMAC-2D selbst beendet einen solchen Lauf ohne Fehlercode, so dass aXqua den Stopp aus dem Eintrag liest und den Job als ``FAILED`` markiert. Die Nachricht gibt die Menge, ihren Wert, die Koordinaten der Rechennetzknoten und die simulierte Zeit an. Inspizieren Sie das Rechennetz, die Sohlhöhe und die erste Wassertiefe an diesen Koordinaten in QGIS. Häufige Ursachen sind eine Spüle oder ein offener Rand auf Zellen, die fast trocken sind, ein anfänglicher Wasserspiegel, der weit von dem stetigen entfernt ist, und ein zu großer Zeitschritt (``hydrodynamics.desired_courant``). Interne Vermittlungsleitungen, die als Quellgebiete mit einer festen Rate (``boundaries.internal_sources: true``) angelegt werden, können diesen Stopp beim ersten Zeitschritt bewirken, da der Abfluss dann unabhängig von der Wassertiefe von einem schmalen Streifen abgezogen wird. Verwenden Sie stattdessen den Block ``gain_lose``, der die Auszahlung durch die Wassertiefe einschränkt (:ref:`preprocessing-telemac-choices`)."
 

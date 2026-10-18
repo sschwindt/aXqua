@@ -143,7 +143,7 @@ msgstr "Des changements importants se produisent lors des inondations. Une simul
 msgid "The GAIA results are written next to the hydraulic results. The variable for the bed change is the cumulated bed evolution."
 msgstr "Les résultats GAIA sont écrits à côté des résultats hydrauliques. La variable pour le changement de lit est l'évolution cumulée du lit."
 
-# machine translation: argos 0f329929cc9b
+# machine translation: argos 34293f63625b
 msgid "The grain size classes are entered by hand. The automatic derivation of the classes from measured grain size distributions is not yet available in this version."
 msgstr "Les classes taille des grains sont entrées à la main. La dérivation automatique des classes de courbes granulométriques mesurées n'est pas encore disponible dans cette version."
 
@@ -155,7 +155,7 @@ msgstr "Configuration OpenFOAM"
 msgid "With OpenFOAM, aXqua simulates **fine sediment over a riverbed that stays in place**. The simulation shows where sand or silt that the flow carries settles onto the bed, and where the flow picks it up again. The bed elevation does not change. Use this simulation where surveys show no measurable bed change while the share of fine sediment in the bed differs from one sampling date to the next. Use TELEMAC and GAIA where the bed moves."
 msgstr "Avec OpenFOAM, aXqua simule **sédiments fins sur un lit de la rivière qui reste en place**. La simulation montre où le sable ou le limon que transporte l'écoulement se dépose sur le lit, et où l'écoulement reprend. La cote du fond ne change pas. Utilisez cette simulation où les enquêtes ne montrent aucun changement mesurable de lit tandis que la part de sédiments fins dans le lit diffère d'une date d'échantillonnage à l'autre. Utilisez TELEMAC et GAIA où le lit se déplace."
 
-# machine translation: argos c06ebcb4ef13
+# machine translation: argos 11b31c3fe1e8
 msgid "The simulation uses the solver ``sediDriftFoam2`` of Nils Reidar B. Olsen (`documentation <https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/>`_). The solver computes a steady, three-dimensional flow below a fixed water surface, and the concentration of one grain size in that flow. The grains travel with the water, sink with their settling velocity and are mixed by turbulence. At the bed, two processes exchange sediment:"
 msgstr "La simulation utilise le solveur ``sediDriftFoam2`` de Nils Reidar B. Olsen (`Documentation <https://www.pvv.ntnu.no/~nilsol/sediDriftFoam/>`_). Le solveur calcule un débit stable en trois dimensions au-dessous d'une surface libre fixe, et la concentration d'une taille des grains dans ce débit. Les grains voyagent avec l'eau, coulent avec leur vitesse de décantation et sont mélangés par la turbulence. Au lit, deux processus échangent des sédiments :"
 
@@ -167,7 +167,7 @@ msgstr "**Réglement.** Grains tronçon le lit au taux *settling velocity × con
 msgid "**Pick-up.** The flow removes grains at a rate that follows from the bed shear stress, with the formulas of van Rijn (1984a, 1984b). The critical shear stress, at which grains start to move, is corrected for the slope of the bed (Dey 2003)."
 msgstr "**Entraînement.** Le débit élimine les grains à une vitesse qui suit celle de la contrainte de cisaillement au fond, avec les formules de van Rijn (1984a, 1984b). La contrainte critique de cisaillement, à laquelle les grains commencent à se déplacer, est corrigée pour la pente du lit (Dey, 2003)."
 
-# machine translation: argos da11db00009a
+# machine translation: argos 9fce4c764c8b
 msgid "The solver is not part of OpenFOAM. It is built by the OpenFOAM installation of aXqua (:ref:`install-openfoam`), and it runs in one process."
 msgstr "Le solveur ne fait pas partie d'OpenFOAM. Il est construit par l'installation OpenFOAM de aXqua (:ref:`install-openfoam`), et il fonctionne en un seul processus."
 
@@ -263,7 +263,7 @@ msgstr "Hauteur d'eau."
 msgid "Flow velocity in the cell at the bed."
 msgstr "Vitesse d'écoulement dans la cellule au lit."
 
-# machine translation: argos e104f8daf7ee
+# machine translation: argos 55062ad6d442
 msgid "Bed shear stress and its critical value for the grain size, as the solver computes them."
 msgstr "Contrainte de cisaillement au fond et sa valeur critique pour le taille des grains, comme le solveur les calcule."
 
@@ -303,7 +303,7 @@ msgstr "Part des amendes dans la masse sèche du lit couche à la fin de la pér
 msgid "-1 where the bed layer has given off all its fines, 1 where its fines no longer fit into its pores."
 msgstr "-1 où le lit couche a donné toutes ses amendes, 1 où ses amendes ne s'intègrent plus dans ses pores."
 
-# machine translation: argos 7e22a571134e
+# machine translation: argos b304d955d264
 msgid "The last four attributes are only present if the case defines a ``period``. They follow from a mass balance of the bed layer. The layer holds coarse grains with a mass of 2650 kg/m³ × ``layer_thickness`` × (1 − ``porosity``) per bed area, which stay in place. All fine sediment that the bed takes up is added to the layer, and the layer cannot give off more fines than it holds. The density of the grains is 2650 kg/m³ throughout, because the formulas of the solver contain this value."
 msgstr "Les quatre derniers attributs ne sont présents que si le cas définit un ``period``. Ils découlent d'un bilan de masse du lit couche. La couche contient des grains grossiers d'une masse de 2650 kg/m3 × ``layer_thickness`` × (1 - ``porosity``) par zone de lit, qui restent en place. Tous les sédiments fins que le lit prend est ajouté à la couche, et la couche ne peut pas donner plus d'amendes qu'il détient. La densité des grains est de 2650 kg/m3, car les formules du solveur contiennent cette valeur."
 
@@ -311,7 +311,7 @@ msgstr "Les quatre derniers attributs ne sont présents que si le cas définit u
 msgid "Together with the layer, aXqua writes a sediment budget (``fine-sediment-budget.json``) and prints it in the log of the job: the mass of sediment that enters the model per second, the mass that leaves it, and the masses that settle and are picked up over the whole bed. In a converged simulation, what enters equals what leaves plus what the bed takes up. If more than 2 % remain unexplained, the result says so, and ``iterations`` has to be increased."
 msgstr "Avec la couche, aXqua écrit un budget sédimentaire (``fine-sediment-budget.json``) et l'imprime dans le log de la tâche : la masse de sédiments qui entre dans le modèle par seconde, la masse qui la quitte, et les masses qui s'installent et sont ramassées sur tout le lit. Dans une simulation convergente, ce qui entre équivaut à ce qui part plus ce que le lit prend. Si plus de 2 % restent inexpliqués, le résultat le dit, et ``iterations`` doit être augmenté."
 
-# machine translation: argos 08559b4ea203
+# machine translation: argos e1c0bfb8b202
 msgid "**Limits.** The following limits result from the solver and from the fixed water surface. They are part of every result:"
 msgstr "**Limites** Les limites suivantes résultent du solveur et de la surface libre fixe. Ils font partie de chaque résultat :"
 
@@ -319,7 +319,7 @@ msgstr "**Limites** Les limites suivantes résultent du solveur et de la surface
 msgid "*The water surface is fixed.* It is the water surface of the 2D result and cannot respond to the three-dimensional flow. Where it steps by more than the local water depth within two cells, as at a riffle of a shallow reach, the flow below it becomes too fast, and the build refuses the case. With ``openfoam.allow_stepped_lid: true``, the case is built nevertheless, and the result states how large the steps are and how fast the fastest cell is. Read the bed near such steps with care."
 msgstr "*The water surface is fixed.* C'est la surface libre du résultat 2D et ne peut pas répondre au flux tridimensionnel. Là où il passe par plus que la hauteur d'eau locale dans deux cellules, comme à une truffe d'un tronçon peu profond, l'écoulement en dessous devient trop rapide, et la construction refuse le cas. Avec ``openfoam.allow_stepped_lid: true``, le cas est néanmoins construit, et le résultat indique combien les étapes sont grandes et à quelle vitesse la cellule la plus rapide est. Lisez le lit près de ces étapes avec soin."
 
-# machine translation: argos 0b2856cf7936
+# machine translation: argos a05f4e8e263b
 msgid "*The bed does not move.* The solver can also lower and raise the bed. aXqua does not use this function, because the solver then enforces a minimum water depth by lowering the bed and treats the ends of the model as the ends of a laboratory flume."
 msgstr "*The bed does not move.* Le solveur peut aussi baisser et élever le lit. aXqua n'utilise pas cette fonction, parce que le solveur impose ensuite une hauteur d'eau minimale en abaissant le lit et traite les extrémités du modèle comme les extrémités d'un flume de laboratoire."
 
@@ -327,7 +327,7 @@ msgstr "*The bed does not move.* Le solveur peut aussi baisser et élever le lit
 msgid "*One grain size and one roughness.* Sediment mixtures and roughness zones are not represented."
 msgstr "*One grain size and one roughness.* Les mélanges de sédiments et les zones de rugosité ne sont pas représentés."
 
-# machine translation: argos e11ebcd82c64
+# machine translation: argos d09ea79a807e
 msgid "*Steep bed.* Where the bed rises steeply within one cell, the solver computes a bed shear stress that is too high. The build reports the share of such cells and refuses a mesh on which the computation would fail. Smaller cells reduce the share."
 msgstr "*Steep bed.* Lorsque le lit s'élève fortement dans une cellule, le solveur calcule un contrainte de cisaillement au fond qui est trop élevé. La construction rapporte la part de ces cellules et refuse un maillage sur lequel le calcul échouerait. Les petites cellules réduisent la part."
 

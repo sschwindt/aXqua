@@ -21,7 +21,7 @@ msgstr "Une simulation hydraulique calcule hauteurs d'eau et vitesses d'écoulem
 
 # machine translation: argos fec4e2f54b90
 msgid "aXqua warm-up concept"
-msgstr "AXqua concept d'échauffement"
+msgstr "aXqua concept d'échauffement"
 
 # machine translation: argos 273f87708f99
 msgid "At the beginning of a simulation, nothing is known about the flow: the riverbed is dry, and the model first has to fill the reach with water until the outflow equals the inflow. This filling is of no interest in itself, but it consumes computing time. The more detailed a model is, the more expensive the filling becomes."
@@ -107,9 +107,9 @@ msgstr "La course est stable lorsque la différence relative entre l'entrée et 
 msgid "*Load results* adds the result (``r2d.slf``) to the QGIS project as water depth and flow velocity layers."
 msgstr "*Load results* ajoute le résultat (``r2d.slf``) au projet QGIS sous les noms de hauteur d'eau et vitesse d'écoulement couches."
 
-# machine translation: argos 4fed31db99d0
+# machine translation: argos ce3e4bd4ab89
 msgid "**3D.** A TELEMAC-3D simulation requires the steady 2D result. In the box *Steady 3D* on the same tab, *Build* writes the 3D steering files and *Submit* starts the run. aXqua determines the number of vertical layers from the water depth and the cell size. The build provides two variants. The **hydrostatic** variant is faster and is run first, to verify that inflow and outflow balance in 3D as well. The **non-hydrostatic** variant (``hydrodyn``) additionally resolves vertical accelerations, which matter at steep changes of the bed. The option *Variant* of the box selects which of the two *Submit* starts, and *Load results* adds the depth-averaged result to the map. In a terminal:"
-msgstr "**3D.** Une simulation TELEMAC-3D nécessite un résultat 2D stable. Dans la boîte *Steady 3D* sur le même onglet, *Build* écrit le 3D fichiers de paramètres et *Submit* commence la course. aXqua détermine le nombre de verticales couches à partir de hauteur d'eau et taille de maille. La construction fournit deux variantes. La variante **hydrostatique** est plus rapide et est exécutée en premier, pour vérifier que l'entrée et le solde de sortie en 3D aussi bien. La variante **non hydrostatique** (``hydrodyn``) résout en outre les accélérations verticales, qui comptent à des changements abrupts du lit. L'option *Variant* de la boîte sélectionne laquelle des deux *Submit* commence, et *Load results* ajoute le résultat moyen de profondeur à la carte. Dans une terminal:"
+msgstr "**3D.** Une simulation TELEMAC-3D nécessite un résultat 2D stable. Dans la boîte *Steady 3D* sur le même onglet, *Build* écrit le 3D fichiers de paramètres et *Submit* commence la course. aXqua détermine le nombre de verticales couches à partir de hauteur d'eau et taille de maille. La construction fournit deux variantes. La variante **hydrostatique** est plus rapide et est exécutée en premier, pour vérifier que l'entrée et le solde de sortie en 3D aussi bien. La variante **non hydrostatique** (``hydrodyn``) résout en outre les accélérations verticales, qui comptent à des changements abrupts du lit. L'option *Variant* de la boîte sélectionne laquelle des deux *Submit* commence, et *Load results* ajoute le résultat moyen de profondeur à la carte. Dans un terminal:"
 
 # machine translation: argos 60c8369bed6a
 msgid "The number of vertical layers is a choice of its own, which is examined with a separate study (*Vertical convergence* tab). In a shallow reach with a fine mesh, only few layers fit over the water depth, and a 3D TELEMAC simulation then adds little information to the 2D result."
@@ -125,11 +125,11 @@ msgstr "Un **hotstart** est une simulation qui se poursuit à partir de l'état 
 
 # machine translation: argos 14d84d4aa414
 msgid "**Steady hotstart.** When the dry run has reached a steady state, aXqua writes the steering file ``hotstart2d.cas`` next to the model. It continues from the result of the dry run with unchanged boundary conditions. The calibration uses this file: each of its many runs changes a parameter slightly and starts from the steady state (:doc:`calibration-validation`)."
-msgstr "**C'est pas grave.** Lorsque la course sèche a atteint un régime permanent, aXqua écrit le fichier de paramètres ``hotstart2d.cas`` à côté du modèle. Il continue à partir du résultat de la course à sec avec inchangé conditions aux limites. Le calage utilise ce fichier : chacun de ses nombreux tirages modifie légèrement un paramètre et commence par le régime permanent (:doc:`calibration-validation`)."
+msgstr "**C'est pas grave.** Lorsque la course sèche a atteint un régime permanent, aXqua écrit le fichier de paramètres ``hotstart2d.cas`` à côté du modèle. Il continue à partir du résultat de la course à sec avec inchangé conditions aux limites. Le calage utilise ce fichier : chacun de ses nombreux tours change légèrement un paramètre et commence par le régime permanent (:doc:`calibration-validation`)."
 
-# machine translation: argos 8f063153a4a9
+# machine translation: argos cddb518d7469
 msgid "**Unsteady hotstart (varying discharge).** To simulate a flood wave, enter a discharge time series under ``boundaries.inflow`` (:ref:`case-boundaries`) and repeat the preprocessing. aXqua then additionally writes the steering file ``unsteady2d.cas``. The unsteady run starts from the steady result, so that the reach is filled when the flood wave arrives. The steady discharge of the case (``boundaries.prescribed_flowrate``) should therefore equal the first value of the time series. Start the run with *Submit* on the *Unsteady 2D* tab, where the option *Run in 3D* selects the 3D model, or in a terminal:"
-msgstr "**Démarrage à chaud instable (diversité du débit).** Pour simuler une vague d'inondation, entrez une série chronologique débit sous ``boundaries.inflow`` (:ref:`case-boundaries`) et répétez le prétraitement. aXqua écrit ensuite le fichier de paramètres ``unsteady2d.cas``. La course instable commence à partir du résultat stable, de sorte que le tronçon est rempli quand la vague d'inondation arrive. Le débit stable du cas (``boundaries.prescribed_flowrate``) doit donc égaler la première valeur de la série chronologique. Commencez la course avec *Submit* sur l'onglet *Unsteady 2D*, où l'option *Run in 3D* sélectionne le modèle 3D, ou dans un terminal:"
+msgstr "**Démarrage à chaud instable (diversité du débit).** Pour simuler une vague d'inondation, entrez une série chronologique débit sous ``boundaries.inflow`` (:ref:`case-boundaries`) et répétez le prétraitement. aXqua écrit ensuite le fichier de paramètres ``unsteady2d.cas``. La course instable commence à partir du résultat stable, de sorte que le tronçon est rempli quand la vague d'inondation arrive. Le débit stable du cas (``boundaries.prescribed_flowrate``) doit donc égaler la première valeur de la série chronologique. Commencez la course avec *Submit* sur l'onglet *Unsteady 2D*, où l'option *Run in 3D* choisit le modèle 3D, ou dans un terminal:"
 
 # machine translation: argos b19b19415aae
 msgid "The duration of the unsteady run follows from the time series. With the outflow condition ``stage_discharge``, the downstream water level follows the rating curve during the flood wave."
@@ -187,9 +187,9 @@ msgstr "**Démarrer un modèle fin à partir d'un modèle grossier.** Un modèle
 msgid "Build and run the model with a large ``cell_size``, for example 2 m with 8 layers, and a long ``end_time``. Check in the report that inflow and outflow agree."
 msgstr "Construire et exécuter le modèle avec un grand ``cell_size``, par exemple 2 m avec 8 couches, et un long ``end_time``. Vérifiez dans le rapport que les entrées et sorties sont d'accord."
 
-# machine translation: argos 5f385996f559
+# machine translation: argos 488258bf6dba
 msgid "Build the fine model with the option ``hotstart`` set to the file ``depth-averaged.slf`` of the coarse model, and run it. In a terminal:"
-msgstr "Construisez le modèle fin avec l'option ``hotstart`` définie au fichier ``depth-averaged.slf`` du modèle grossier, et exécutez-le. Dans une terminal:"
+msgstr "Construisez le modèle fin avec l'option ``hotstart`` définie au fichier ``depth-averaged.slf`` du modèle grossier, et exécutez-le. Dans un terminal:"
 
 # machine translation: argos 95b88f0e0a14
 msgid "The coarse and the fine model need different folders. The entry ``project.openfoam_dir`` in the case file of the coarse model gives it its own folder, while both case files share the TELEMAC model."

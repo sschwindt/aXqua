@@ -31,7 +31,7 @@ msgstr "Einführung in die Bayessche Kalibrierung"
 msgid "A calibration by trial and error ends with one set of parameter values and no statement about how reliable these values are. Bayesian calibration answers a more useful question: which parameter values are probable, given the measurements and their errors?"
 msgstr "Eine Kalibrierung durch Versuch und Irrtum endet mit einem Satz von Parameterwerten und keiner Aussage darüber, wie zuverlässig diese Werte sind. Bayessche Kalibrierung beantwortet eine nützlichere Frage: Welche Parameterwerte sind angesichts der Messungen und ihrer Fehler wahrscheinlich?"
 
-# machine translation: argos 5adea949b1c9
+# machine translation: argos 77c713398c30
 msgid "The user states for each calibration parameter the range in which its true value is expected. This range is the **prior** distribution. Bayes' theorem combines the prior with the measurements. Parameter values with which the model reproduces the measurements become more probable, and all others become less probable. The result is the **posterior** distribution of each parameter. A narrow posterior indicates that the measurements determine the parameter well. A posterior that is as wide as the prior indicates that the measurements contain no information about this parameter."
 msgstr "Der Benutzer gibt für jeden Kalibrierparameter den Bereich an, in dem sein wahrer Wert erwartet wird. Dieser Bereich ist die **A-priori-Verteilung**. Bayes' Theorem kombiniert die A-priori-Verteilung mit den Messungen. Parameterwerte, mit denen das Modell die Messungen reproduziert, werden wahrscheinlicher und alle anderen werden weniger wahrscheinlich. Das Ergebnis ist die **A-posteriori-Verteilung** jedes Parameters. Eine enge A-posteriori-Verteilung zeigt an, dass die Messungen den Parameter gut bestimmen. Eine A-posteriori-Verteilung, die so breit ist wie die A-priori-Verteilung, zeigt an, dass die Messungen keine Informationen über diesen Parameter enthalten."
 
@@ -239,9 +239,9 @@ msgstr "Lauf HydroBayesCal"
 msgid "The calibration requires the additional package HydroBayesCal (:doc:`../installation/qgis-plugin`) and a built case with a completed steady simulation. Each run of the calibration repeats this steady simulation with another set of parameter values."
 msgstr "Die Kalibrierung erfordert das zusätzliche Paket HydroBayesCal (:doc:`../installation/qgis-plugin`) und einen gebauten Fall mit einer abgeschlossenen stationären Simulation. Jeder Lauf der Kalibrierung wiederholt diese stationäre Simulation mit einem anderen Satz von Parameterwerten."
 
-# machine translation: argos 456111c154b9
+# machine translation: argos d3fd341e93f2
 msgid "In the plugin, click *Submit* on the *Calibration & validation* tab. The option *Prepare only* writes all input files without starting the runs, so that they can be inspected first. In a terminal:"
-msgstr "Klicken Sie im Plugin auf *Submit* auf der Registerkarte *Calibration & validation*. Die Option *Prepare only* schreibt alle Eingabedateien, ohne die Runs zu starten, so dass sie zuerst inspiziert werden können. In a Terminal:"
+msgstr "Klicken Sie im Plugin auf *Submit* auf der Registerkarte *Calibration & validation*. Die Option *Prepare only* schreibt alle Eingabedateien, ohne die Runs zu starten, so dass sie zuerst inspiziert werden können. In einem Terminal:"
 
 # machine translation: argos 9d71b5bc9d25
 msgid "The Calibration & validation tab of the plugin"
@@ -259,7 +259,7 @@ msgstr "Die Rechenzeit ist ungefähr die Anzahl der Durchläufe (``max_runs``) m
 msgid "HydroBayesCal performs its runs in the folder of the built case (``axqua-case/simulation/``) and writes each tested set of parameter values into the friction table and the steering file there. aXqua restores both files when the calibration ends, so that a later simulation uses the case as it was built. For the same reason, jobs of one case run one after the other: a job that is submitted during a calibration waits until the calibration has ended. The folder ``cases/example-isar/`` of the repository contains a complete example with a run time of about half an hour, including a step-by-step guide for the plugin."
 msgstr "HydroBayesCal führt seine Läufe im Ordner des gebauten Falls aus (``axqua-case/simulation/``) und schreibt jeden getesteten Satz von Parameterwerten in den Friktionstisch und den dortigen Steuerdatei. aXqua stellt beide Dateien nach Beendigung der Kalibrierung wieder her, so dass eine spätere Simulation den Fall so verwendet, wie er gebaut wurde. Aus dem gleichen Grund laufen Jobs von einem Fall nach dem anderen: Ein Job, der während einer Kalibrierung eingereicht wird, wartet, bis die Kalibrierung beendet ist. Der Ordner ``cases/example-isar/`` des Repositorys enthält ein vollständiges Beispiel mit einer Laufzeit von etwa einer halben Stunde, einschließlich einer Schritt-für-Schritt-Anleitung für das Plugin."
 
-# machine translation: argos 8bf81adc52ad
+# machine translation: argos ef6bf5f49bd6
 msgid "**Validation run.** After the calibration, click *Validate* in the box *Validation with data of another flow situation*, or submit the job in a terminal:"
 msgstr "**Validierungslauf.** Klicken Sie nach der Kalibrierung auf *Validate* in der Box *Validation with data of another flow situation* oder senden Sie den Job in einem Terminal:"
 
@@ -291,7 +291,7 @@ msgstr "HydroBayesCal schreibt seine Ergebnisse in den Ordner ``auto-saved-resul
 msgid "**Did the active learning converge?** HydroBayesCal records two indicators after every iteration. The Bayesian model evidence (BME) expresses how well the model reproduces the measurements on average over the parameter ranges. The relative entropy (RE) expresses how much information the measurements added to the prior. Both should level off toward the end of the calibration. If they still change strongly, increase ``max_runs``."
 msgstr "**Hat sich das aktive Lernen angenähert?** HydroBayesCal zeichnet nach jeder Iteration zwei Indikatoren auf. Der Bayessche Modellnachweis (BME) drückt aus, wie gut das Modell die Messungen im Durchschnitt über die Parameterbereiche reproduziert. Die relative Entropie (RE) gibt an, wie viele Informationen die Messungen der A-priori-Verteilung hinzugefügt haben. Beide sollten sich gegen Ende der Kalibrierung abgleichen. Wenn sie sich immer noch stark ändern, erhöhen Sie ``max_runs``."
 
-# machine translation: argos d49b958c5879
+# machine translation: argos a304a5b2f217
 msgid "**Is the posterior narrower than the prior?** Compare the two distributions of each parameter. A posterior that is clearly narrower than the prior and lies inside the range identifies the parameter. A posterior at a limit of the range calls for a wider range. A posterior that resembles the prior means that the measurements do not constrain this parameter."
 msgstr "**Ist die A-posteriori-Verteilung schmaler als die A-priori-Verteilung?** Vergleichen Sie die beiden Verteilungen jedes Parameters. Eine A-posteriori-Verteilung, die deutlich schmaler als die A-priori-Verteilung ist und innerhalb des Bereichs liegt, identifiziert den Parameter. Eine A-posteriori-Verteilung an einer Grenze des Bereichs erfordert eine größere Reichweite. Eine A-posteriori-Verteilung, die der A-priori-Verteilung ähnelt, bedeutet, dass die Messungen diesen Parameter nicht einschränken."
 

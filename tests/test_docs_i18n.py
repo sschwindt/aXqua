@@ -180,6 +180,21 @@ def test_a_label_at_the_start_of_a_paragraph_is_not_sent():
     assert tr.assemble(prepared, answer, []) == "*Bed changes.* Le solveur peut aussi abaisser le lit."
 
 
+def test_a_name_at_the_start_of_a_sentence_stays_in_it():
+    """aXqua is kept in English; at the start of a sentence it is the subject and is sent along."""
+    prepared = tr.prepare("aXqua builds a model in five steps.", EMPTY, ["aXqua"])
+    assert prepared.pieces() == ["aXqua builds a model in five steps."]
+    # the engine's spelling of a kept name is put right; a name it lost fails the message
+    answer = {prepared.text: "AXqua erstellt ein Modell in fünf Schritten."}
+    assert tr.assemble(prepared, answer, []) == "aXqua erstellt ein Modell in fünf Schritten."
+    assert tr.assemble(prepared, {prepared.text: "Es erstellt ein Modell."}, []) is None
+    # in the fallback, the name is masked
+    masked = tr.prepare("aXqua builds a model in five steps.", EMPTY, ["aXqua"], terms_masked=True)
+    assert masked.pieces() == ["@@0@@ builds a model in five steps."]
+    answer = {masked.text: "@@0@@ erstellt ein Modell in fünf Schritten."}
+    assert tr.assemble(masked, answer, []) == "aXqua erstellt ein Modell in fünf Schritten."
+
+
 def test_entries_of_a_list_of_references_are_recognized():
     assert tr.is_reference('Celik, I. B., Ghia, U., and Raad, P. E. (2008). "Procedure." *J. Fluids Eng.*')
     assert tr.is_reference("Thorenz, C., 2024. Boundary conditions for hydraulic structures.")
