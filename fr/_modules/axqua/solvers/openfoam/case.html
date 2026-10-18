@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/case.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../../../_static/documentation_options.js?v=05dadb3a"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/translations.js?v=e6b791cb"></script>
@@ -614,6 +614,10 @@
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"limitVelocity cap </span><span class="si">{</span><span class="n">cap</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s "</span>
                      <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">DEFAULT_VELOCITY_CAP_FACTOR</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">x the reach's p95 water speed)"</span><span class="p">)</span>
 
+    <span class="c1"># Before the new case is written: the results of an earlier build cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would go on. A build that fails while it writes therefore leaves no old time beside the new mesh; what it moved is kept in previous-run/, and a second attempt finds nothing to move and keeps that folder.</span>
+    <span class="n">moved</span> <span class="o">=</span> <span class="n">set_aside_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">moved</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the results of the earlier build were moved to </span><span class="si">{</span><span class="n">PREVIOUS_RUN</span><span class="si">}</span><span class="s2">/ (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">moved</span><span class="p">)</span><span class="si">}</span><span class="s2">); the build before that is no longer kept"</span><span class="p">)</span>
     <span class="n">polymesh_dir</span> <span class="o">=</span> <span class="n">write_polymesh</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">)</span>
     <span class="c1"># which column each cell is in and how thick it is: what a view of the result</span>
     <span class="c1"># from above needs, saved here so that it never depends on a second build</span>
@@ -631,10 +635,6 @@
                                           <span class="n">uniform_bed_ks</span><span class="o">=</span><span class="n">uniform_bed_ks</span><span class="p">,</span> <span class="n">rating</span><span class="o">=</span><span class="n">rating</span><span class="p">)</span>
     <span class="n">dict_files</span> <span class="o">=</span> <span class="n">dicts</span><span class="o">.</span><span class="n">write_dicts</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="n">cap</span><span class="p">)</span>
     <span class="p">(</span><span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"case.foam"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>     <span class="c1"># so ParaView can open the folder</span>
-    <span class="c1"># Once the new case is written, not before: a build that fails leaves the results of the earlier one where they were. They cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would go on.</span>
-    <span class="n">moved</span> <span class="o">=</span> <span class="n">set_aside_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">moved</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the results of the earlier build were moved to </span><span class="si">{</span><span class="n">PREVIOUS_RUN</span><span class="si">}</span><span class="s2">/ (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">moved</span><span class="p">)</span><span class="si">}</span><span class="s2">); the build before that is no longer kept"</span><span class="p">)</span>
     <span class="n">_write_build_record</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">of_mesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cap</span><span class="p">))</span>
 
     <span class="n">report</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">assess</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>

@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobcli.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../_static/documentation_options.js?v=05dadb3a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/translations.js?v=e6b791cb"></script>
@@ -552,7 +552,9 @@
             <span class="n">cfg</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">profile</span><span class="o">=</span><span class="n">profile</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">_options</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">option</span><span class="p">),</span>
             <span class="n">job_root</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">job_root</span><span class="p">,</span> <span class="n">np</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">np</span><span class="p">,</span> <span class="n">workspace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">workspace</span><span class="p">,</span>
             <span class="n">source_job</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">source_job</span><span class="p">,</span> <span class="n">launcher</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span>
-            <span class="n">source_config</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">validate_env</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_validate_env</span><span class="p">,</span>
+            <span class="c1"># the full path: the job list is read from other folders (Clean Up asks it which jobs a case has)</span>
+            <span class="n">source_config</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()),</span>
+            <span class="n">validate_env</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_validate_env</span><span class="p">,</span>
             <span class="n">dry_run</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dry_run</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dry_run</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="s2">"submit.dry-run"</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>

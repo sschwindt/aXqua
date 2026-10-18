@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/troubleshooting/tips-logfiles.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -395,7 +395,7 @@
 <li><p>processor folders of OpenFOAM runs that were reconstructed, the time folders between the start and the latest time, and the results of an earlier run that OpenFOAM set aside in <code class="docutils literal notranslate"><span class="pre">previous-run</span></code>;</p></li>
 <li><p>exports for ParaView and VisIt, which <em>Export</em> makes again.</p></li>
 </ul>
-<p>The categories that need no second thought are ticked; the time steps are not. <em>Remove selected</em> asks before anything is removed, and removed files cannot be restored. The input files, the case file, the built model (geometry, boundary conditions, steering and friction files, initial conditions) and the last time step of a result are never listed, and neither are the processor folders of an OpenFOAM run that was not reconstructed, which hold the only copy of its results. Nothing is removed while a job of the case is waiting or running. In a terminal, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">cleanup</span> <span class="pre">&lt;case-file&gt;</span></code> lists the same items and <code class="docutils literal notranslate"><span class="pre">--remove</span></code> removes them (<a class="reference internal" href="../automation/terminal-syntax.html"><span class="doc">Terminal syntax</span></a>).</p>
+<p>The categories that need no second thought are ticked; the time steps are not. <em>Remove selected</em> asks before anything is removed, and removed files cannot be restored. The input files, the case file, the built model (geometry, boundary conditions, steering and friction files, initial conditions) and the last time step of a result are never listed, and neither are the processor folders of an OpenFOAM run that was not reconstructed, which hold the only copy of its results. Nothing is removed while a job of the case is waiting or running, or while the list of jobs cannot be read. A run started from a terminal is not a job, so a working folder or a result is also not listed while a program on this computer works in it, or for 15 minutes after it was last written; the window names what it holds back for this reason. In a terminal, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">cleanup</span> <span class="pre">&lt;case-file&gt;</span></code> lists the same items and <code class="docutils literal notranslate"><span class="pre">--remove</span></code> removes them (<a class="reference internal" href="../automation/terminal-syntax.html"><span class="doc">Terminal syntax</span></a>).</p>
 </section>
 <section id="reporting-a-problem">
 <h2>Reporting a problem<a class="headerlink" href="#reporting-a-problem" title="Link to this heading"></a></h2>
