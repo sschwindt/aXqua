@@ -15,7 +15,7 @@ problem, so the policy is explicit (plan §18):
 Reading ``status.json`` directly rather than shelling out for every row is deliberate:
 the file is the runner's published interface, it is written atomically, and a CLI call per
 visible row per two seconds would be a process spawn storm. The CLI is used for the
-things that need axqua's own judgement - reconciling a dead process, listing, and
+things that need axqua's own judgment - reconciling a dead process, listing, and
 every mutation.
 """
 

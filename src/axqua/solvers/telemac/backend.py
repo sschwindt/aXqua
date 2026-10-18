@@ -429,7 +429,7 @@ class TelemacBackend(BaseBackend):
                 ctx.record(name, cfg.model_path(name), kind="table")
 
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
-        """The number this job was minimising, when there is one.
+        """The number this job was minimizing, when there is one.
 
         A steady run's is the relative flux imbalance - the thing its own convergence
         is judged on - which makes "how good was this run" answerable from the job
@@ -459,6 +459,8 @@ class TelemacBackend(BaseBackend):
         written: list[Path] = []
         from axqua.solvers.telemac import threed
 
+        post = getattr(cfg, "postproc", None)
+
         # Results, in the order a user wants them: the thing that was computed first.
         # The last column is the dataset the velocity is styled by. A 2D result prints
         # the scalar velocity; the depth-averaged companion of a 3D run carries the
@@ -479,12 +481,23 @@ class TelemacBackend(BaseBackend):
             path = cfg.model_path(name)
             if not path.exists():
                 continue
-            ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
-                       variable="WATER DEPTH")
+            # Which maps the case asks for (postproc.telemac_maps), and the predefined
+            # map style the plugin applies to the depth layer (postproc.map_style).
+            # (an empty list is a choice: no map)
+            maps = getattr(post, "telemac_maps", None)
+            maps = set(("depth", "velocity") if maps is None else maps)
+            style = str(getattr(post, "map_style", "") or "")
+            if "depth" in maps:
+                ctx.record(label, path, kind="mesh", style=STYLE_DEPTH,
+                           variable="WATER DEPTH", **({"map_style": style} if style else {}))
             # The same file carries velocity; a second entry lets the plugin add two
             # differently-styled layers over one dataset without reading it twice.
-            ctx.record(f"{label} - velocity", path, kind="mesh", style=STYLE_VELOCITY,
-                       variable=velocity)
+            if "velocity" in maps:
+                ctx.record(f"{label} - velocity", path, kind="mesh",
+                           style=STYLE_VELOCITY, variable=velocity)
+            if "free-surface" in maps:
+                ctx.record(f"{label} - free surface", path, kind="mesh",
+                           variable="FREE SURFACE")
             written.append(path)
 
         # The 3D results themselves are volumes. QGIS reads SELAFIN in 2D only, so they
@@ -512,40 +525,18 @@ BACKEND = TelemacBackend()
 
 def _level_progress(ctx: Any):
     """What a convergence study calls after each of its runs; ``None`` without a job."""
-    if ctx is None:
-        return None
-    return lambda done, total, label: ctx.progress(
-        levels_done=done, levels_total=total, current_label=label)
+    from axqua.convergence import level_progress
+
+    return level_progress(ctx)
 
 
 def _write_study_report(report, folder: Path, stem: str, ctx: Any, *,
                         readme: bool = False) -> None:
-    """Write the report of a convergence study next to its levels, and record it.
+    """Write the report of a convergence study next to its levels, and record it
+    (:func:`axqua.convergence.write_study_report`, shared with OpenFOAM)."""
+    from axqua.convergence import write_study_report
 
-    The case scripts have always done this after the study returned. The job did not:
-    it ran the study for twenty minutes and left the verdict in its log, so the plugin
-    had nothing to show for it and "the report" the documentation points at did not
-    exist - although :meth:`TelemacBackend.export_qgis_results` already listed the
-    workbook among the results. A workbook that cannot be written must not fail a study
-    that ran.
-    """
-    folder = Path(folder)
-    try:
-        folder.mkdir(parents=True, exist_ok=True)
-        workbook = report.to_xlsx(folder / f"{stem}.xlsx")
-        summary = folder / f"{stem}.txt"
-        report.save(summary)
-        if readme:
-            from axqua import convergence
-
-            convergence.write_readme(folder, report=report)
-    except Exception as exc:                        # noqa: BLE001
-        log.warning("could not write the %s report: %s: %s", stem, type(exc).__name__, exc)
-        return
-    log.info("%s report -> %s", stem, workbook)
-    if ctx is not None:
-        # the workbook is listed by export_qgis_results, which has always looked for it
-        ctx.record(f"{stem.replace('-', ' ').capitalize()} summary", summary, kind="file")
+    write_study_report(report, folder, stem, ctx, readme=readme)
 
 
 def _calibration_progress(cfg, ctx: Any):

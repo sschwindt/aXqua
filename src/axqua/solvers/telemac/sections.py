@@ -11,8 +11,8 @@ mesh onto dense sample points along the line and integrated against the line nor
 
 .. math:: Q = \\int_L (q \\cdot n) \\, ds
 
-The normal is the right-hand normal of the digitised line; because the digitising
-direction of a GIS layer is arbitrary, the sign is normalised so that a section
+The normal is the right-hand normal of the digitized line; because the digitizing
+direction of a GIS layer is arbitrary, the sign is normalized so that a section
 reports the discharge **positive in the direction of its own net flow** (the sign
 convention is reported in ``orientation``). A braided reach can therefore be split
 into its threads and each thread's share read off directly.
@@ -22,7 +22,7 @@ Accuracy notes
 * Interpolation is linear within the triangle containing each sample point
   (:class:`matplotlib.tri.LinearTriInterpolator`), i.e. the same P1 basis TELEMAC
   itself uses for the depth and velocity fields - so the integral is consistent
-  with the discretisation rather than a nearest-node approximation.
+  with the discretization rather than a nearest-node approximation.
 * Sample spacing defaults to a quarter of the local mesh edge length, which keeps
   the trapezoidal integration error well below the solver's own mass imbalance.
 * Coordinates come from the *geometry* SELAFIN (written in double precision) when
@@ -173,7 +173,7 @@ def line_discharges(results: Path, lines, *, geometry: Path | None = None,
             np.asarray(interp_v(pts[:, 0], pts[:, 1]).filled(0.0), dtype=float))
         max_h = float(hh[wet].max()) if wet.any() else 0.0
         max_u = float(speed[wet].max()) if wet.any() else 0.0
-        # normalise the sign: report the section's own net flow as positive
+        # normalize the sign: report the section's own net flow as positive
         flip = q_signed < 0
         rows.append({
             "name": name,

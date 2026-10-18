@@ -81,6 +81,11 @@ def _parser() -> argparse.ArgumentParser:
                    help="the release a derivative system is built on")
     p.add_argument("--no-bind", action="store_true",
                    help="do not enter the installation in the profile")
+    p.add_argument("--reinstall", choices=("continue", "replace"), default="",
+                   help="what happens to an earlier installation in the folder: "
+                        "continue it, keeping what is downloaded and built (what the "
+                        "installers do by themselves), or replace it: remove it first "
+                        "and install anew")
     p.add_argument("--foreground", action="store_true",
                    help="start: run here and print the log, instead of detached")
     p.add_argument("--elevate", action="store_true",
@@ -101,7 +106,8 @@ def _options(args):
         visualization=not args.no_visualization, visit=not args.no_visit,
         examples=args.examples,
         smoke_test=not args.no_smoke_test, installers=args.installers,
-        ref=args.ref or "", base=args.base or "", bind=not args.no_bind)
+        ref=args.ref or "", base=args.base or "", bind=not args.no_bind,
+        reinstall=args.reinstall or "")
 
 
 def _need_target(args) -> str:
@@ -247,6 +253,7 @@ def _overview() -> dict:
             "target": target, "title": recipes.TITLES[target], "installed": installed,
             "running": runner.latest(target, active_only=True),
             "last": runner.latest(target),
+            "existing": recipes.existing_installation(target, installed),
             "default_folder": str(recipes.default_folder(target)),
             "default_folders": {scope: str(recipes.default_folder(target, scope))
                                 for scope in recipes.SCOPES},

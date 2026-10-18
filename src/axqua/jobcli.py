@@ -211,7 +211,9 @@ def run_submit(argv: list[str]) -> int:
             cfg, args.kind, profile=profile, options=_options(args.option),
             job_root=args.job_root, np=args.np, workspace=args.workspace,
             source_job=args.source_job, launcher=args.launcher,
-            source_config=args.target, validate_env=not args.no_validate_env,
+            # the full path: the job list is read from other folders (Clean Up asks it which jobs a case has)
+            source_config=str(Path(args.target).expanduser().resolve()),
+            validate_env=not args.no_validate_env,
             dry_run=args.dry_run)
         if args.dry_run:
             return emit("submit.dry-run", result.as_dict(), as_json=args.as_json,

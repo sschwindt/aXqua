@@ -1,6 +1,6 @@
 """Run the cheap solver first, so the expensive one starts from an informed guess.
 
-An OpenFOAM free-surface run of a river reach is expensive in a way a 2D
+An OpenFOAM free-surface run of a water body is expensive in a way a 2D
 depth-averaged run is not - and almost everything it needs to know at ``t = 0`` is
 something TELEMAC already answers in minutes: where the water is, how deep it is, how
 fast it moves, and roughly where its surface sits. Starting ``interFoam`` without that

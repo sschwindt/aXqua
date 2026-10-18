@@ -1,8 +1,8 @@
 """Propagating survey position uncertainty into the calibration error budget.
 
 The case this exists for: Inn KB15's September-2025 survey was positioned with an
-RTK **float** solution, so its coordinates are good to metres rather than
-centimetres - and the modelled depth there changes by 0.27 m over 3 m.
+RTK **float** solution, so its coordinates are good to meters rather than
+centimeters - and the modeled depth there changes by 0.27 m over 3 m.
 """
 
 from __future__ import annotations

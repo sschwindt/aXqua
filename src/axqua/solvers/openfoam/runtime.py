@@ -21,9 +21,13 @@ import shlex
 from pathlib import Path
 from typing import Callable
 
+from axqua.core import errors
 from axqua.core.environment import SolverEnvironment
 from axqua.env import ShellRuntime
 from axqua.solvers.openfoam import dicts
+# Layout and processor_count lived here, and are reachable here still
+from axqua.solvers.openfoam.layout import (Layout, processor_count,  # noqa: F401
+                                           set_aside_runs, time_folders)
 
 log = logging.getLogger("axqua")
 
@@ -122,7 +126,7 @@ class OpenFoamRuntime(ShellRuntime):
                         'command -v ' + shlex.quote(self.of.solver), check=False)
         if proc.returncode != 0 or not proc.stdout.strip():
             raise RuntimeError(
-                f"Could not initialise the OpenFOAM environment via {self.env_script}."
+                f"Could not initialize the OpenFOAM environment via {self.env_script}."
                 f"\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}"
             )
         return proc.stdout.strip().splitlines()[0]
@@ -166,9 +170,51 @@ class OpenFoamRuntime(ShellRuntime):
         return not fatal, failed, out
 
     # ------------------------------------------------------------- decomposition
-    def decompose(self, case_dir: str | Path, *, force: bool = True):
+    def decompose(self, case_dir: str | Path, *, force: bool = True,
+                  n_processors: int | None = None):
+        """``decomposePar`` for *n_processors* ranks (the case's own count when not given). Where the case's ``system/decomposeParDict`` names another count, a dictionary of the run's own is used (:func:`dicts.decomposition_for`), so the case's file is never changed.
+
+        Where the processor folders hold results that the case itself does not (a stage run without reconstructing), nothing is split: ``decomposePar -force`` would delete them, and whether they are continued or replaced is for the next stage to decide (:meth:`run_stage`). Returns None then.
+        """
+        layout = Layout.of(case_dir)
+        if layout.only_in_processor_folders:
+            log.info("the processor folders hold results up to t = %g s that the case itself does not; not decomposing again", layout.parallel)
+            return None
+        n = n_processors if n_processors is not None else self.of.n_processors
+        return self._decompose(case_dir, n, force=force)
+
+    def _decompose(self, case_dir: str | Path, n: int | None, *, force: bool = True):
         flag = " -force" if force else ""
-        return self.run(f"decomposePar{flag}", cwd=case_dir, check=True)
+        dictionary = dicts.decomposition_for(case_dir, n) if n and n > 1 else None
+        return self.run(f"decomposePar{flag}{_dictionary_option(case_dir, dictionary)}",
+                        cwd=case_dir, check=True)
+
+    def _prepare(self, case_dir: Path, n: int, layout: "Layout") -> None:
+        """Make the case ready for the stage whose controlDict is active, on *n* ranks. ``decomposePar`` carries over the one top-level time the active controlDict starts from: the start for a stage that starts afresh, the latest time for one that continues.
+
+        A stage that starts afresh moves what earlier runs left into ``previous-run/`` (:func:`~axqua.solvers.openfoam.layout.set_aside_runs`), because a later time at the top level or in the processor folders is where the next stage would continue from; on several ranks the case is then split anew. A stage that continues runs on results that only the processor folders hold, and stops where they were split for other ranks or where it runs on one processor, which does not read them. Where the top level holds the latest time (after ``reconstructPar``), the case is split again from it.
+        """
+        if not layout.continues:
+            set_aside_runs(case_dir)
+            if n > 1:
+                log.info("splitting the case for %d ranks, from the start time", n)
+                self._decompose(case_dir, n)
+            return
+        if layout.only_in_processor_folders:
+            if n <= 1:
+                raise errors.SolverError(
+                    f"the processor folders hold the result of an earlier stage at t = {layout.parallel:g} s, which a run on one processor does not read; it would start from t = {layout.top or 0:g} s",
+                    subject=str(case_dir),
+                    remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
+            if layout.count != n:
+                raise errors.SolverError(
+                    f"the case is split into {layout.count} domains and its processor folders hold the result of an earlier stage at t = {layout.parallel:g} s that the case itself does not; splitting it for {n} ranks would delete it",
+                    subject=str(case_dir),
+                    remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
+            return                                   # continued where the earlier stage ended
+        if n > 1 and (layout.count != n or (layout.top or 0) > (layout.parallel or 0)):
+            log.info("splitting the case for %d ranks, from its latest time (t = %g s)", n, layout.top or 0)
+            self._decompose(case_dir, n)
 
     def reconstruct(self, case_dir: str | Path, *, latest: bool = False):
         flag = " -latestTime" if latest else ""
@@ -196,20 +242,25 @@ class OpenFoamRuntime(ShellRuntime):
 
         Pass *cfg* so the dictionaries are regenerated from the configuration this
         run was launched with; without it the build-time dictionaries are used and a
-        changed ``end_time`` would be reported but not honoured (see
+        changed ``end_time`` would be reported but not honored (see
         :func:`axqua.solvers.openfoam.dicts.activate`).
 
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
+
+        The case is made ready for the stage first (:meth:`_prepare`): a stage that starts afresh moves what earlier runs left into ``previous-run/`` and is split anew for its ranks, a stage that continues runs on what the stage before it left, also where only the processor folders hold it. A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks).
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
-        n = n_processors if n_processors is not None else self.of.n_processors
-        if n and n > 1:
+        n = int((n_processors if n_processors is not None else self.of.n_processors) or 1)
+        self._prepare(case_dir, n, Layout.of(case_dir))
+        if n > 1:
+            decomposition = dicts.decomposition_for(case_dir, n)
             # Through the environment, not a hard-coded "mpirun": MS-MPI on Windows
             # provides `mpiexec`, and a profile may point at `srun` on a cluster. The
             # launcher is a configured field, not a constant (plan §13).
-            command = self.environment.mpi_command(f"{self.of.solver} -parallel", n)
+            command = self.environment.mpi_command(
+                f"{self.of.solver} -parallel{_dictionary_option(case_dir, decomposition)}", n)
         else:
             command = self.of.solver
 
@@ -227,10 +278,17 @@ class OpenFoamRuntime(ShellRuntime):
 
     def latest_time(self, case_dir: str | Path) -> float:
         """Largest numeric time directory in the case (0 when only ``0/`` exists)."""
-        times = []
-        for entry in Path(case_dir).iterdir():
-            try:
-                times.append(float(entry.name))
-            except ValueError:
-                continue
-        return max(times) if times else 0.0
+        times = time_folders(case_dir)
+        return times[-1][0] if times else 0.0
+
+
+def _dictionary_option(case_dir: str | Path, dictionary: str | Path | None) -> str:
+    """`` -decomposeParDict <file>`` relative to the case, or nothing."""
+    if dictionary is None:
+        return ""
+    path = Path(dictionary)
+    try:
+        path = path.relative_to(Path(case_dir))
+    except ValueError:
+        pass
+    return f" -decomposeParDict {shlex.quote(path.as_posix())}"

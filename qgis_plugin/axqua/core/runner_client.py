@@ -40,7 +40,7 @@ from pathlib import Path
 from typing import Any, Sequence
 
 ENV_VAR = "AXQUA_EXE"
-#: The pre-rename spelling. Still honoured, because a shell profile written before the
+#: The pre-rename spelling. Still honored, because a shell profile written before the
 #: rename is not something the plugin should silently ignore.
 LEGACY_ENV_VAR = "HYDROMATE_EXE"
 SETTINGS_KEY = "axqua/executable"
@@ -201,10 +201,8 @@ def _probe(path: str) -> str:
     return version
 
 
-#: The oldest axqua that speaks the JSON envelope this plugin reads. Documented as a
-#: requirement since the first release, and until now never actually checked - so an
-#: older one presented as a series of unexplained parse failures instead.
-MINIMUM_VERSION = (0, 3)
+#: The oldest axqua this plugin works with. An older one presented as a series of unexplained parse failures; since 1.0 the plugin also calls commands that 0.5 does not have (``docs``, ``cleanup``), so plugin and program are released together.
+MINIMUM_VERSION = (1, 0)
 
 
 def _require_minimum(version: str) -> None:
@@ -412,6 +410,21 @@ class RunnerClient:
         args = ["case", "new", str(case)] + (["--name", name] if name else [])
         return self.call(args, timeout=60).data or {}
 
+    # -- the documentation and the clean-up ----------------------------------------
+    def docs(self) -> dict:
+        """``{published, local, languages, readable, reason}``: where Help finds the docs."""
+        return self.call(["docs"], timeout=20).data or {}
+
+    def cleanup_list(self, case: str | os.PathLike) -> dict:
+        """``{case, folders, categories: [{key, title, explanation, default, bytes, items}], bytes, blocked}``: what of a case can go."""
+        return self.call(["cleanup", str(case)], timeout=600).data or {}
+
+    def cleanup_apply(self, case: str | os.PathLike, ids: Sequence[str], *,
+                      keep: str = "last") -> dict:
+        """Remove the items *ids* of :meth:`cleanup_list`; ``{removed, failed, freed_bytes}``."""
+        args = ["cleanup", str(case), "--keep", keep, "--remove", *[str(i) for i in ids]]
+        return self.call(args, timeout=7200).data or {}
+
     # -- the example cases --------------------------------------------------------
     def example_list(self) -> dict:
         """``{source, examples: [{name, title, summary, megabytes, files}]}``."""
@@ -520,7 +533,8 @@ class RunnerClient:
 #: ``option -> flag`` of ``axqua install``, for the options that carry a value.
 _INSTALL_VALUES = (("folder", "--folder"), ("tag", "--tag"), ("salome", "--salome"),
                    ("reuse_openfoam", "--reuse-openfoam"), ("jobs", "--jobs"),
-                   ("installers", "--installers"), ("ref", "--ref"), ("base", "--base"))
+                   ("installers", "--installers"), ("ref", "--ref"), ("base", "--base"),
+                   ("reinstall", "--reinstall"))
 
 
 def install_flags(options: dict | None) -> list[str]:

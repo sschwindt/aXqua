@@ -44,6 +44,20 @@ def qgis_app():
     yield app
 
 
+@pytest.fixture(autouse=True)
+def _cases_not_in_the_settings_of_qgis(monkeypatch):
+    """The panel keeps its list of cases in the settings of QGIS. In a test the list
+    starts empty and what the panel would store is kept on the dock, so that no test
+    reads or writes the settings file of the QGIS that runs the tests."""
+    from axqua_plugin.core import project as project_io
+    from axqua_plugin.gui import dock as dock_module
+
+    monkeypatch.setattr(dock_module, "_stored_cases", lambda: "")
+    monkeypatch.setattr(dock_module.AxquaDock, "_remember_cases",
+                        lambda self: setattr(self, "remembered",
+                                             project_io.as_settings(self.ctx.project)))
+
+
 @pytest.fixture
 def project(qgis_app):
     """A clean project per test - layers left behind would leak between them."""
@@ -453,7 +467,7 @@ def test_the_velocity_fill_is_transparent_where_nothing_moves(qgis_app):
 
 
 def test_the_dataset_maximum_comes_from_the_file(project, tmp_path):
-    """A silent ``or 1.0`` capped a 6 m river's colour scale at 1 m."""
+    """A silent ``or 1.0`` capped a 6 m river's color scale at 1 m."""
     from qgis.core import QgsMeshLayer
     layer = QgsMeshLayer(str(_write_mesh(tmp_path)), "reach", "mdal")
     maximum, why = result_loader._dataset_maximum(layer, 0)
@@ -894,14 +908,12 @@ def dock(qgis_app, monkeypatch):
 
 def test_the_panel_has_the_prescribed_tabs_and_sub_tabs(dock):
     titles = [dock.tabs.tabText(i).replace("&&", "&") for i in range(dock.tabs.count())]
-    assert titles == ["Configuration", "Case Setup", "Preprocessing",
-                      "Hydraulic simulation", "Mesh convergence",
-                      "Morphodynamic simulation", "Calibration & validation",
-                      "Postprocessing", "Batch-processing"]
+    assert titles == ["Configuration", "Case Setup", "Preprocessing", "Simulations",
+                      "Calibration & validation", "Postprocessing", "Batch-processing"]
     inner = {key: [tabs.tabText(i) for i in range(tabs.count())]
              for key, tabs in dock.subtabs.items()}
-    assert inner == {"hydraulics": ["Telemac", "OpenFOAM"],
-                     "morphodynamics": ["Telemac", "OpenFOAM"],
+    assert inner == {"hydraulics": ["Baseline (Telemac)", "OpenFOAM",
+                                    "Mesh convergence", "Morphodynamics"],
                      "postprocessing": ["QGIS", "ParaView", "VisIt"]}
     # the job list is below the tabs and not one of them
     assert dock.jobs_tab.parent() is not None and dock.tabs.indexOf(dock.jobs_tab) == -1
@@ -912,7 +924,6 @@ def test_help_opens_the_section_of_the_tab_that_is_showing(dock, monkeypatch):
 
     opened = []
     monkeypatch.setattr(help_pages, "open_url", lambda url: opened.append(url) or True)
-    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
     dock.show_section("case")
     dock.open_help()
     dock.show_section("hydraulics", "openfoam")
@@ -920,7 +931,7 @@ def test_help_opens_the_section_of_the_tab_that_is_showing(dock, monkeypatch):
     dock.open_help()
     dock.show_section("postprocessing", "paraview")
     dock.open_help()
-    assert [url.split("/latest/")[1] for url in opened] == [
+    assert [url.split("axqua.eu/")[1] for url in opened] == [
         "usage/case-setup.html#help-case-setup",
         "usage/hydraulic-simulations.html#help-hydraulics-openfoam",
         "usage/postprocessing.html#help-postprocessing-paraview"]
@@ -936,10 +947,14 @@ def test_the_capabilities_of_a_case_appear_on_the_tabs_of_their_sections(dock):
     # the build of the 2D model has a tab of its own; the 3D build stays with its run
     assert telemac.tab("telemac", "steady2d").build_button.isHidden()
     assert not telemac.tab("telemac", "steady3d").build_button.isHidden()
-    assert [key[1] for key in dock.page("mesh")._boxes] == [
-        "mesh_convergence", "vertical_convergence"]
+    mesh = dock.page("hydraulics", "mesh")
+    assert mesh.solver == "telemac"
+    assert [key[1] for key in mesh._boxes] == ["mesh_convergence", "vertical_convergence"]
+    mesh.choose("openfoam")                    # this case does not use OpenFOAM
+    assert mesh._boxes == {} and "does not use OpenFOAM" in mesh.note.text()
+    mesh.choose("telemac")
     assert list(dock.page("calibration")._boxes) == [("telemac", "calibration")]
-    assert list(dock.page("morphodynamics", "telemac")._boxes) == [
+    assert list(dock.page("hydraulics", "morphodynamics")._boxes) == [
         ("telemac", "morphodynamics")]
     # a case without an openfoam block: the sub-tab says so instead of being empty
     openfoam = dock.page("hydraulics", "openfoam")
@@ -1005,9 +1020,34 @@ def test_the_fine_sediment_steps_of_a_batch_need_openfoam_to_be_asked(dock):
                                             "implemented": "yes", "configured": True,
                                             "built": False, "run": False}]}
     assert offered(fine) is True
-    box = dock.page("morphodynamics", "openfoam").tab("openfoam", "morphodynamics")
+    morphodynamics = dock.page("hydraulics", "morphodynamics")
+    morphodynamics.choose("openfoam")
+    box = morphodynamics.tab("openfoam", "morphodynamics")
     assert box.build_button.isEnabled() and box.submit_button.isEnabled()
     assert not box.results_button.isEnabled()              # nothing has run yet
+
+
+def test_the_mesh_study_of_the_openfoam_model_is_chosen_on_the_simulations_tab(dock):
+    """The user's correction of 2026-10-16: Mesh convergence is a sub-tab of
+    Simulations, where the study is run with TELEMAC or with OpenFOAM."""
+    import copy
+
+    from axqua_plugin.gui.capability_tabs import CaseView
+
+    both = copy.deepcopy(EXAMPLE)
+    both["solvers"][1] = {"solver": "openfoam", "enabled": True, "env_ok": True,
+                          "capabilities": [{"capability": "mesh_convergence",
+                                            "implemented": "yes", "configured": True,
+                                            "built": False, "run": False}]}
+    dock._apply_case_view(CaseView.from_payload(both))
+    mesh = dock.page("hydraulics", "mesh")
+    assert [key[0] for key in mesh._boxes] == ["telemac", "telemac"]
+    mesh.choose("openfoam")
+    assert list(mesh._boxes) == [("openfoam", "mesh_convergence")]
+    box = mesh.tab("openfoam", "mesh_convergence")
+    assert box.view.submit_kind == "openfoam-mesh-convergence"
+    assert box.view.build_kind is None and box.submit_button.isEnabled()
+    assert "pre_run" in box._fields
 
 
 def test_every_step_of_a_batch_is_on_the_screen(dock):
@@ -1515,6 +1555,294 @@ def test_findings_appear_at_their_setting_at_their_block_and_in_the_list(
     editor.deleteLater()
 
 
+def _req(key, kind, label="", *, required=False, when=(), **extra):
+    item = _field(key, kind, label, True, **extra)
+    item.update(required=required, required_when=list(when))
+    return item
+
+
+#: What ``axqua schema --json`` sends since the corrections of 2026-10-16: pages with
+#: frames, switches, and what is required.
+PAGED_FIELDS = [
+    _req("project.name", "text", "Name of the case", required=True),
+    _req("boundaries.prescribed_flowrate", "number", "Discharge", required=True),
+    _req("boundaries.outflow_condition", "choice", "Water level at the outflow",
+         choices=["elevation", "stage_discharge", "free"], default="elevation"),
+    _req("boundaries.prescribed_elevation", "number", "Outflow water level",
+         when=[{"key": "boundaries.outflow_condition", "in": ["elevation"]}]),
+    _req("drying.film_infiltration", "bool", "Remove thin films"),
+    _req("openfoam.cell_size", "number", "Cell size"),
+    _req("openfoam.mode", "choice", "Free surface", choices=["vof", "rigid-lid"],
+         when=[{"block": "openfoam"}]),
+    _req("openfoam.end_time", "number", "Simulated time", when=[{"block": "openfoam"}]),
+    _req("ground_truth.sources", "yaml", "Measurement files",
+         when=[{"block": "calibration"}]),
+    _req("calibration.parameters", "yaml", "Parameters", when=[{"block": "calibration"}]),
+    _req("calibration.validation", "yaml", "Validation"),
+    _req("postproc.telemac_maps", "multichoice", "Maps",
+         choices=["depth", "velocity", "free-surface"], default=["depth", "velocity"]),
+]
+PAGED_SCHEMA = {
+    "sections": [{"block": block, "title": block, "label": "",
+                  "fields": [f for f in PAGED_FIELDS if f["block"] == block]}
+                 for block in dict.fromkeys(f["block"] for f in PAGED_FIELDS)],
+    "pages": [
+        {"key": "project", "title": "Project settings", "label": "case-project",
+         "switch": {}, "frames": [{"title": "", "info": "", "keys": ["project.name"]}]},
+        {"key": "boundaries", "title": "Liquid boundaries", "label": "case-boundaries",
+         "switch": {}, "frames": [{"title": "", "info": "", "keys": [
+             "boundaries.prescribed_flowrate", "boundaries.outflow_condition",
+             "boundaries.prescribed_elevation"]}]},
+        {"key": "initialization", "title": "Initial conditions",
+         "label": "case-initialization", "switch": {}, "frames": [
+             {"title": "Drying of thin films", "info": "On a coarse bed ...",
+              "keys": ["drying.film_infiltration"]}]},
+        {"key": "mesh", "title": "Mesh configuration", "label": "case-mesh",
+         "switch": {}, "frames": [{"title": "OpenFOAM lattice", "info": "",
+                                   "keys": ["openfoam.cell_size"]}]},
+        {"key": "openfoam", "title": "OpenFOAM", "label": "case-hydraulics",
+         "switch": {"label": "Simulate with OpenFOAM", "seed": {"mode": "vof"}},
+         "frames": [{"title": "", "info": "", "keys": ["openfoam.mode",
+                                                        "openfoam.end_time"]}]},
+        {"key": "calibration", "title": "Calibration and validation",
+         "label": "help-calibration",
+         "switch": {"label": "Calibrate and validate this case", "seed": {}},
+         "frames": [{"title": "Measurements", "info": "",
+                     "keys": ["ground_truth.sources"]},
+                    {"title": "Calibration and validation", "info": "",
+                     "keys": ["calibration.parameters", "calibration.validation"]}]},
+        {"key": "postproc", "title": "Post-processing", "label": "help-postprocessing",
+         "switch": {}, "frames": [{"title": "", "info": "",
+                                   "keys": ["postproc.telemac_maps"]}]},
+    ]}
+
+PAGED_CASE = {
+    "project": {"name": "reach"},
+    "boundaries": {"prescribed_flowrate": 2.4},
+    "ground_truth": {"sources": [{"category": "hydraulics", "kind": "points",
+                                  "values": "gt/nov.gpkg"}]},
+    "calibration": {"parameters": [{"name": "zone4", "min": 0.02, "max": 0.3}],
+                    "validation": [{"name": "High flow", "prescribed_flowrate": 5.3,
+                                    "prescribed_elevation": 815.2,
+                                    "sources": [{"category": "hydraulics",
+                                                 "kind": "points",
+                                                 "values": "gt/sep.gpkg"}]}]},
+}
+
+
+def _paged(tmp_path, monkeypatch, case=None):
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _CaseClient()
+    editor = case_editor.CaseEditor(client, tmp_path / "reach.axq-case",
+                                    case or PAGED_CASE, PAGED_SCHEMA)
+    return editor, client
+
+
+def _purple(label) -> bool:
+    return "#2e014b" in label.styleSheet() and "bold" in label.styleSheet()
+
+
+def test_the_case_settings_have_the_pages_the_user_named(qgis_app, tmp_path,
+                                                         monkeypatch):
+    from qgis.PyQt.QtWidgets import QGroupBox, QToolButton
+
+    editor, client = _paged(tmp_path, monkeypatch)
+    assert editor.windowTitle() == "Case settings: reach.axq-case"
+    assert [editor.section_list.item(i).text() for i in range(7)] == [
+        "Project settings", "Liquid boundaries", "Initial conditions",
+        "Mesh configuration", "OpenFOAM", "Calibration and validation",
+        "Post-processing"]
+    frames = [box.title() for box in editor.findChildren(QGroupBox)]
+    assert "Drying of thin films" in frames and "OpenFOAM lattice" in frames
+    # the drying frame explains why it matters
+    drying = next(b for b in editor.findChildren(QGroupBox)
+                  if b.title() == "Drying of thin films")
+    assert any(t.toolTip().startswith("On a coarse bed")
+               for t in drying.findChildren(QToolButton))
+    # nothing touched: written back as it was read
+    assert editor.values() == PAGED_CASE and not editor.dirty
+    editor.deleteLater()
+
+
+def test_required_entries_are_purple_and_follow_the_options(qgis_app, tmp_path,
+                                                           monkeypatch):
+    editor, _client = _paged(tmp_path, monkeypatch)
+    rows = editor.rows
+    assert _purple(rows["project.name"].label_widget)
+    # the outflow level is required while the outflow condition is a level (its default)
+    assert _purple(rows["boundaries.prescribed_elevation"].label_widget)
+    outflow = rows["boundaries.outflow_condition"].widget
+    outflow.setCurrentIndex(outflow.findData("free"))
+    assert not _purple(rows["boundaries.prescribed_elevation"].label_widget)
+    outflow.setCurrentIndex(outflow.findData("elevation"))
+    # the page that lacks it is marked as well
+    item = editor.section_list.item(1)
+    assert item.font().bold() and "required" in item.toolTip()
+    rows["boundaries.prescribed_elevation"].widget.setText("815.3")
+    assert not editor.section_list.item(1).font().bold()
+
+    # OpenFOAM is off: its entries are grayed out, required nowhere, and not written
+    switch = editor.switches["openfoam"]
+    assert not switch.isChecked() and not rows["openfoam.cell_size"].container.isEnabled()
+    assert not _purple(rows["openfoam.end_time"].label_widget)
+    switch.setChecked(True)                                      # switched on
+    assert rows["openfoam.mode"].widget.currentData() == "vof"   # the seed entry
+    assert _purple(rows["openfoam.end_time"].label_widget)
+    assert rows["openfoam.cell_size"].container.isEnabled()      # on the mesh page
+    assert editor.values()["openfoam"] == {"mode": "vof"}
+    rows["openfoam.cell_size"].widget.setText("1.5")
+    switch.setChecked(False)
+    assert "openfoam" not in editor.values()                     # off is off
+    editor.deleteLater()
+
+
+def test_measurement_files_are_used_for_calibration_or_validation(qgis_app, tmp_path,
+                                                                 monkeypatch):
+    editor, client = _paged(tmp_path, monkeypatch)
+    table = editor.measurements
+    assert table.table.rowCount() == 2
+    roles = [table._rows[i]["use"].currentData() for i in range(2)]
+    assert roles == ["calibration", "validation"]
+    assert table._rows[1]["situation"].text() == "High flow"
+    assert table._rows[1]["discharge"].text() == "5.3"
+    assert not table._rows[0]["discharge"].isEnabled()           # the case's discharge
+
+    table.add("gt/aug.gpkg")
+    table.set_role(2, "validation", "Summer", "54.3")
+    data = editor.values()
+    assert [s["values"] for s in data["ground_truth"]["sources"]] == ["gt/nov.gpkg"]
+    situations = {s["name"]: s for s in data["calibration"]["validation"]}
+    assert situations["High flow"]["prescribed_elevation"] == 815.2    # kept
+    assert situations["Summer"]["prescribed_flowrate"] == 54.3
+    assert [s["values"] for s in situations["Summer"]["sources"]] == ["gt/aug.gpkg"]
+
+    table.set_role(0, "validation", "Summer", "54.3")             # no calibration data
+    assert "ground_truth" not in editor.values()
+    assert _purple(editor.measurement_label)                       # calibration is on
+    editor.save()
+    assert any("Measurement files" in f.message for f in editor.findings)
+    editor.deleteLater()
+
+
+def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_discharge(
+        qgis_app, tmp_path, monkeypatch):
+    case = {"project": {"name": "reach"},
+            "ground_truth": {"sources": [{"category": "hydraulics",
+                                          "values": "ft/nov.ft.sum.xlsx",
+                                          "positions": "ft/nov.gpkg"}]},
+            "calibration": {"validation": [{"name": "High flow",
+                                            "prescribed_flowrate": 5.3,
+                                            "sources": [{"category": "hydraulics",
+                                                         "kind": "points",
+                                                         "values": "gt/sep.gpkg"}]}]}}
+    editor, _client = _paged(tmp_path, monkeypatch, case)
+    table = editor.measurements
+    # a source without a kind is a FlowTracker source, and is written back without one
+    assert table._rows[0]["kind"].currentData() == "flowtracker"
+    assert editor.values() == case and not editor.dirty
+    # a corrected path in the table is what is saved
+    table.table.item(0, 0).setText("ft/nov-corrected.xlsx")
+    table.table.item(0, 1).setText("")
+    source = editor.values()["ground_truth"]["sources"][0]
+    assert source["values"] == "ft/nov-corrected.xlsx" and "positions" not in source
+    assert "kind" not in source
+    # a second file of the same situation, its discharge left empty, keeps the discharge
+    table.add("gt/sep-b.gpkg")
+    table.set_role(2, "validation", "High flow")
+    situation = editor.values()["calibration"]["validation"][0]
+    assert situation["prescribed_flowrate"] == 5.3 and len(situation["sources"]) == 2
+    # the discharge is one of the situation: changed in one row, changed in all
+    table._rows[1]["discharge"].setText("6.1")
+    assert table._rows[2]["discharge"].text() == "6.1"
+    assert editor.values()["calibration"]["validation"][0]["prescribed_flowrate"] == 6.1
+    # a file renamed into the situation shows, and keeps, the situation's discharge
+    table.add("gt/low.gpkg")
+    table.set_role(3, "validation", "Low flow", "2.0")
+    entry = table._rows[3]
+    entry["situation"].setText("High flow")
+    entry["situation"].editingFinished.emit()
+    assert entry["discharge"].text() == "6.1"
+    situations = editor.values()["calibration"]["validation"]
+    assert [(s["name"], s["prescribed_flowrate"]) for s in situations] == [("High flow", 6.1)]
+    assert table.discharge_conflicts() == []
+    # a row set to the situation it is in keeps the discharge
+    table.set_role(1, "validation", "High flow")
+    assert table._rows[1]["discharge"].text() == "6.1"
+    # a file of the calibration keeps no discharge to take into a situation later, also when the role is changed in its combo box
+    table.set_role(0, "calibration", discharge="3")
+    assert table._rows[0]["discharge"].text() == ""
+    table._rows[1]["use"].setCurrentIndex(table._rows[1]["use"].findData("calibration"))
+    assert table._rows[1]["discharge"].text() == ""
+    table._rows[1]["use"].setCurrentIndex(table._rows[1]["use"].findData("validation"))
+    assert table._rows[1]["discharge"].text() == "6.1"           # its situation's again
+    # what the table could not keep equal is named on Save
+    table._show(entry, "7.0")
+    assert table.discharge_conflicts() == ["High flow"]
+    editor.save()
+    assert any(f.code == "axqua.config.discharge_conflict" for f in editor.findings)
+    # a row moved to a situation without a discharge does not take its old one along
+    table.set_role(3, "validation", "Summer")
+    assert entry["discharge"].text() == "" and table.missing_discharge() == ["Summer"]
+    # nor when its new name is typed, and the rows it left keep theirs
+    moved = table._rows[2]
+    moved["situation"].setText("Autumn")
+    moved["situation"].editingFinished.emit()
+    assert moved["discharge"].text() == "" and table._rows[1]["discharge"].text() == "6.1"
+    moved["situation"].editingFinished.emit()                   # left again, unchanged
+    assert sorted(table.missing_discharge()) == ["Autumn", "Summer"]
+    # a file alone in its situation renames it and keeps the discharge: a name typed over the default, a misspelling corrected row by row
+    table.add("gt/flood-a.gpkg")
+    table.add("gt/flood-b.gpkg")
+    first, second = table._rows[-2:]
+    table.set_role(len(table._rows) - 2, "validation")          # named "validation" for now
+    first["discharge"].setText("9.5")
+    first["situation"].setText("Fluod")
+    first["situation"].editingFinished.emit()
+    assert first["discharge"].text() == "9.5"
+    table.set_role(len(table._rows) - 1, "validation", "Fluod")
+    assert second["discharge"].text() == "9.5"
+    for row in (first, second):
+        row["situation"].setText("Flood")
+        row["situation"].editingFinished.emit()
+    assert first["discharge"].text() == second["discharge"].text() == "9.5"
+    # with the calibration switched off, nothing of the situations is saved or warned of
+    editor.switches["calibration"].setChecked(False)
+    editor.save()
+    assert not any(f.subject == "calibration.validation" for f in editor.findings)
+    editor.deleteLater()
+
+
+def test_a_file_for_the_validation_switches_the_calibration_on(qgis_app, tmp_path,
+                                                               monkeypatch):
+    case = {"project": {"name": "reach"}, "boundaries": {"prescribed_flowrate": 2.4},
+            "ground_truth": {"sources": [{"category": "hydraulics", "kind": "points",
+                                          "values": "gt/nov.gpkg"}]}}
+    editor, _client = _paged(tmp_path, monkeypatch, case)
+    switch = editor.switches["calibration"]
+    assert not switch.isChecked()
+    editor.measurements.add("gt/sep.gpkg")
+    editor.measurements.set_role(1, "validation", "High flow", "5.3")
+    assert switch.isChecked()
+    assert editor.values()["calibration"]["validation"][0]["name"] == "High flow"
+    editor.deleteLater()
+
+
+def test_a_multiple_choice_is_check_boxes_and_its_default_is_not_written(
+        qgis_app, tmp_path, monkeypatch):
+    editor, _client = _paged(tmp_path, monkeypatch)
+    row = editor.rows["postproc.telemac_maps"]
+    assert [c for c, box in row.boxes.items() if box.isChecked()] == ["depth", "velocity"]
+    assert "postproc" not in editor.values()                     # the default stays
+    row.boxes["free-surface"].setChecked(True)
+    assert editor.values()["postproc"]["telemac_maps"] == ["depth", "velocity",
+                                                           "free-surface"]
+    editor.deleteLater()
+
+
 def test_a_selected_file_is_written_relative_to_the_case_where_it_is_near(tmp_path):
     from axqua_plugin.gui.case_editor import stored_path
 
@@ -1535,6 +1863,45 @@ def test_text_is_converted_by_the_kind_of_its_setting():
     assert parse("vector", "data/lines.gpkg") == "data/lines.gpkg"
     assert parse("number", "") is None
     assert parse("number", "fast") == "fast"         # kept; the check says what is wrong
+
+
+def test_the_case_setup_tab_has_case_settings_and_no_project_file(dock, tmp_path,
+                                                                   monkeypatch):
+    """The user's correction of 2026-10-16: a project is a case. The list of cases is
+    kept in the settings of QGIS, and the box Case settings opens the active case."""
+    import json
+
+    from qgis.PyQt.QtWidgets import QGroupBox, QPushButton
+
+    from axqua_plugin.core import project as project_io
+
+    tab = dock.case_tab
+    titles = [box.title() for box in tab.findChildren(QGroupBox)]
+    assert titles == ["Cases", "Case settings"]
+    labels = [button.text() for button in tab.findChildren(QPushButton)]
+    assert "Open case settings..." in labels
+    assert not {"Open project...", "Save project", "Save as...", "Edit case..."} & set(labels)
+    assert not tab.settings_button.isEnabled()                  # no case yet
+
+    first, second = tmp_path / "a.axq-case", tmp_path / "b.axq-case"
+    for case in (first, second):
+        case.write_text("project: {name: x}\n", encoding="utf-8")
+    dock.add_case(first)
+    dock.add_case(second)
+    assert tab.settings_button.isEnabled() and str(first) in tab.case_label.text()
+    dock.set_active_case(str(second))
+    assert str(second) in tab.case_label.text()
+    stored = json.loads(dock.remembered)
+    assert stored == {"cases": [str(first), str(second)], "active_case": str(second)}
+    dock.remove_case(second)
+    assert json.loads(dock.remembered)["cases"] == [str(first)]
+
+    # a project file of an earlier version adds its cases
+    old = project_io.AxquaProject(path=tmp_path / "old.axqua-prj")
+    old.add_case(second)
+    project_io.save(old)
+    dock.import_project(tmp_path / "old.axqua-prj")
+    assert json.loads(dock.remembered)["cases"] == [str(first), str(second)]
 
 
 def test_the_case_tab_opens_the_editor_and_takes_over_what_it_found(dock, tmp_path,
@@ -1649,7 +2016,6 @@ def test_an_example_case_is_downloaded_and_added_to_the_cases(dock, tmp_path,
     # Help opens the paragraph on the example case
     urls = []
     monkeypatch.setattr(help_pages, "open_url", lambda url: urls.append(url) or True)
-    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
     help_pages.open_window_help(example_dialog.HELP_KEY)
     assert urls[-1].endswith("usage/case-setup.html#help-example-case")
     window.deleteLater()
@@ -1662,6 +2028,248 @@ def _now(call, on_success, on_error):
         on_error(exc)
     else:
         on_success(answer)
+
+
+CLEANUP = {
+    "case": "/cases/reach.axq-case", "folders": ["/cases/axqua-case"], "bytes": 3_100_000_000,
+    "blocked": "",
+    "categories": [
+        {"key": "telemac-run-folders", "title": "Working folders of interrupted TELEMAC runs",
+         "explanation": "left by a stopped run", "default": True, "bytes": 100_000_000,
+         "items": [{"id": "delete:axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s",
+                    "category": "telemac-run-folders", "action": "delete",
+                    "path": "/cases/axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s",
+                    "bytes": 100_000_000, "saves": 100_000_000, "detail": "", "frames": 0,
+                    "header_bytes": 0, "frame_bytes": 0, "paths": []}]},
+        {"key": "time-steps", "title": "Time steps of TELEMAC results", "explanation": "",
+         "default": False, "bytes": 3_000_000_000,
+         "items": [{"id": "thin:axqua-case/simulation/r2d.slf", "category": "time-steps",
+                    "action": "thin", "path": "/cases/axqua-case/simulation/r2d.slf",
+                    "bytes": 3_110_000_000, "saves": 3_000_000_000, "detail": "31 time steps",
+                    "frames": 31, "header_bytes": 10_000_000, "frame_bytes": 100_000_000,
+                    "paths": []}]},
+    ]}
+
+
+def test_clean_up_sits_left_of_help_and_removes_what_was_ticked(dock, monkeypatch, tmp_path):
+    """The user's order of 2026-10-18: a Clean Up button left of Help that removes, case by case, files the simulations no longer need."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    from axqua_plugin.gui import cleanup_dialog
+
+    corner = dock.tabs.cornerWidget()
+    buttons = [corner.layout().itemAt(i).widget().text() for i in range(corner.layout().count())]
+    assert buttons == ["Clean Up", "Help"]
+
+    asked = []
+
+    class Client:
+        def cleanup_list(self, case):
+            asked.append(("list", case))
+            return CLEANUP
+
+        def cleanup_apply(self, case, ids, keep="last"):
+            asked.append(("apply", case, list(ids), keep))
+            return {"removed": list(ids), "failed": [], "freed_bytes": 2_800_000_000}
+
+    case = tmp_path / "reach.axq-case"
+    case.write_text("project: {}\n", encoding="utf-8")
+    dock.ctx.project.add_case(case)
+    dock.ctx.client = Client()
+    now = lambda title, call, on_success=None, on_error=None, owner=None: _now(  # noqa: E731
+        call, on_success, on_error)
+    monkeypatch.setattr(cleanup_dialog, "run_async", now)
+    window = dock.open_cleanup()
+    try:
+        assert asked == [("list", str(case.resolve()))] or asked[0][0] == "list"
+        assert window.tree.topLevelItemCount() == 2
+        # the safe category is ticked, the time steps are not
+        assert [item["id"] for item in window.chosen()] == [
+            "delete:axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s"]
+        assert "100.0 MB" in window.status.text()
+        steps = window.tree.topLevelItem(1).child(0)
+        steps.setCheckState(0, cleanup_dialog.CHECKED)
+        # keeping the last of 31 time steps frees 30 of them; every 10th keeps 0, 10, 20, 30
+        assert "3.1 GB" in window.status.text()
+        window.keep.setCurrentIndex(1)
+        assert steps.text(1) == "2.7 GB"
+        monkeypatch.setattr(cleanup_dialog.QMessageBox, "question",
+                            lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+        window.remove()
+        apply = [a for a in asked if a[0] == "apply"]
+        assert apply == [("apply", window.current_case(),
+                          ["delete:axqua-case/simulation/steady2d.cas_2026-01-01-10h00min00s",
+                           "thin:axqua-case/simulation/r2d.slf"], "every:10")]
+        assert "freed 2.8 GB" in window.status.text()
+    finally:
+        window.deleteLater()
+
+
+def test_clean_up_removes_nothing_while_a_job_of_the_case_runs(qgis_app, monkeypatch, tmp_path):
+    from axqua_plugin.gui import cleanup_dialog
+
+    class Client:
+        def cleanup_list(self, case):
+            return {**CLEANUP, "blocked": "jobs of this case are waiting or running: J1"}
+
+    now = lambda title, call, on_success=None, on_error=None, owner=None: _now(  # noqa: E731
+        call, on_success, on_error)
+    monkeypatch.setattr(cleanup_dialog, "run_async", now)
+    window = cleanup_dialog.CleanupDialog(Client(), [tmp_path / "reach.axq-case"])
+    try:
+        assert "waiting or running" in window.status.text()
+        assert not window.remove_button.isEnabled()
+    finally:
+        window.deleteLater()
+
+
+def test_a_listing_that_arrives_for_a_case_no_longer_chosen_is_dropped(qgis_app, monkeypatch, tmp_path):
+    """Review of 2026-10-18: a slow listing of case A that arrived after case B was chosen replaced the tree, and Remove sent A's identifiers for case B."""
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    from axqua_plugin.gui import cleanup_dialog
+
+    pending, applied = [], []
+
+    class Client:
+        def cleanup_list(self, case):
+            return {**CLEANUP, "case": case}
+
+        def cleanup_apply(self, case, ids, keep="last"):
+            applied.append((case, list(ids)))
+            return {"removed": list(ids), "failed": [], "freed_bytes": 1}
+
+    def later(title, call, on_success=None, on_error=None, owner=None):
+        pending.append((call, on_success, on_error))
+    monkeypatch.setattr(cleanup_dialog, "run_async", later)
+    first, second = tmp_path / "a" / "a.axq-case", tmp_path / "b" / "b.axq-case"
+    window = cleanup_dialog.CleanupDialog(Client(), [first, second])
+    try:
+        window.case.setCurrentIndex(1)                     # B chosen while A is still listed
+        listing_a, listing_b = pending[0], pending[1]
+        _now(*listing_b)
+        assert window.listed == str(second) and window.tree.topLevelItemCount() == 2
+        window.tree.topLevelItem(1).child(0).setCheckState(0, cleanup_dialog.CHECKED)
+        _now(*listing_a)                                   # A's answer comes last
+        assert window.listed == str(second) and window.found["case"] == str(second)
+        assert window.tree.topLevelItem(1).child(0).checkState(0) == cleanup_dialog.CHECKED
+        monkeypatch.setattr(cleanup_dialog.QMessageBox, "question",
+                            lambda *args, **kwargs: QMessageBox.StandardButton.Yes)
+        window.remove()
+        _now(*pending[-1])
+        assert [case for case, _ in applied] == [str(second)]
+    finally:
+        window.deleteLater()
+
+
+def test_help_asks_the_axqua_of_the_settings_in_the_background(qgis_app, monkeypatch, tmp_path):
+    """Review of 2026-10-18: Help built a client of its own, which ignored the program of the plugin settings, and ran it on the thread of the window."""
+    from axqua_plugin.core import runner_client, tasks
+    from axqua_plugin.gui import help as help_pages
+
+    def no_client(*args, **kwargs):
+        raise AssertionError("Help must not start an axqua of its own")
+    monkeypatch.setattr(runner_client, "RunnerClient", no_client)
+    monkeypatch.setattr(help_pages, "_location", None)
+    assert help_pages.url_for("case").startswith("https://axqua.eu/usage/")   # not known yet
+
+    site = tmp_path / "site"
+    asked = []
+
+    class Client:
+        def docs(self):
+            asked.append(1)
+            return {"local": str(site), "languages": ["en"], "readable": True}
+
+    monkeypatch.setattr(tasks, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        _now(call, on_success, on_error))
+    help_pages.ask(Client())
+    assert help_pages.url_for("case").startswith(site.as_uri())
+    help_pages.ask(Client())                               # once per session
+    assert asked == [1]
+
+
+def test_an_answer_of_the_program_set_before_the_settings_changed_is_dropped(qgis_app, monkeypatch, tmp_path):
+    """Re-review of 2026-10-18: the answer of the old program could arrive after the settings changed and stop the new program from being asked."""
+    from axqua_plugin.core import tasks
+    from axqua_plugin.gui import help as help_pages
+
+    pending = []
+
+    def later(title, call, on_success=None, on_error=None, owner=None):
+        task = object()                          # a task of the task manager, still running
+        tasks._IN_FLIGHT.add(task)
+        pending.append((task, call, on_success, on_error))
+        return task
+
+    def deliver(index, cancelled=False):
+        task, call, on_success, on_error = pending[index]
+        tasks._IN_FLIGHT.discard(task)
+        if not cancelled:
+            _now(call, on_success, on_error)
+
+    monkeypatch.setattr(tasks, "run_async", later)
+
+    class Client:
+        def __init__(self, folder):
+            self.folder = folder
+
+        def docs(self):
+            return {"local": str(self.folder), "languages": ["en"], "readable": True}
+
+    old, new = tmp_path / "old", tmp_path / "new"
+    help_pages.configure(None)
+    help_pages.ask(Client(old))
+    help_pages.ask(Client(old))                            # on its way already: not asked twice
+    assert len(pending) == 1
+    help_pages.configure(None)                             # the settings changed
+    help_pages.ask(Client(new))
+    assert len(pending) == 2
+    deliver(0)                                             # the old program answers after the change
+    assert help_pages.location() == {}
+    deliver(1)
+    assert help_pages.url_for("case").startswith(new.as_uri())
+
+
+def test_a_question_for_the_documentation_that_was_cancelled_is_asked_again(qgis_app, monkeypatch, tmp_path):
+    """Review of f75110e: a question cancelled in the task bar, or whose window was closed, left the panel waiting for an answer that never came, so Help opened the published docs for the rest of the session."""
+    from axqua_plugin.core import tasks
+    from axqua_plugin.gui import help as help_pages
+
+    started = []
+
+    def later(title, call, on_success=None, on_error=None, owner=None):
+        assert owner is None
+        task = object()
+        tasks._IN_FLIGHT.add(task)
+        started.append((task, call, on_success, on_error))
+        return task
+
+    monkeypatch.setattr(tasks, "run_async", later)
+
+    class Client:
+        def docs(self):
+            return {"local": str(tmp_path), "languages": ["en"], "readable": True}
+
+    help_pages.configure(None)
+    help_pages.ask(Client())
+    tasks._IN_FLIGHT.discard(started[0][0])                # cancelled: no callback, out of the list
+    help_pages.ask(Client())
+    assert len(started) == 2
+    task, call, on_success, on_error = started[1]
+    tasks._IN_FLIGHT.discard(task)
+    _now(call, on_success, on_error)
+    assert help_pages.url_for("case").startswith(tmp_path.as_uri())
+
+
+def test_the_space_a_result_keeps_of_its_time_steps():
+    from axqua_plugin.gui import cleanup_dialog
+
+    assert cleanup_dialog.kept(31, "last") == 1 and cleanup_dialog.kept(31, "every:10") == 4
+    item = CLEANUP["categories"][1]["items"][0]
+    assert cleanup_dialog.saving(item, "last") == 3_000_000_000
+    assert cleanup_dialog.human(2_700_000_000) == "2.7 GB"
 
 
 def test_no_example_is_said_so(qgis_app, monkeypatch):
@@ -1840,12 +2448,18 @@ def test_missing_packages_are_shown_with_their_command_and_do_not_block(
     client = _InstallClient(_plan(missing=["gfortran"], findings=[warning, exists]))
     wizard = install_wizard.InstallWizard(client, "telemac", _overview())
     wizard.go_next()
-    assert wizard.pages.currentIndex() == 1 and wizard.next_button.text() == "Install"
+    assert wizard.pages.currentIndex() == 1 and wizard.install_button.text() == "Install"
     assert client.calls[0][:2] == ("plan", "telemac")
     assert "1 of 3 system packages" in wizard.package_label.text()
     assert wizard.package_command.toPlainText().endswith("install -y gfortran")
-    assert not wizard.copy_button.isHidden() and wizard.elevate_button.isEnabled()
-    assert wizard.next_button.isEnabled()                        # a warning only
+    # the required actions in a terminal, under their heading in aXqua purple
+    assert not wizard.actions_heading.isHidden()
+    assert wizard.actions_heading.text() == "REQUIRED USER ACTIONS in TERMINAL:"
+    assert "#2e014b" in wizard.actions_heading.styleSheet()
+    assert "#2e014b" in wizard.package_command.styleSheet()
+    assert wizard.package_command.minimumHeight() >= 120
+    assert not wizard.copy_button.isHidden() and wizard.fix_button.isEnabled()
+    assert wizard.install_button.isEnabled()                     # a warning only
     assert len(wizard.finding_list.findings) == 2
     assert not wizard._triangles["folder"].isHidden()            # at the row concerned
     assert wizard._triangles["tag"].isHidden()
@@ -1856,15 +2470,14 @@ def test_missing_packages_are_shown_with_their_command_and_do_not_block(
     wizard.install_packages()                                    # the desktop asks
     assert ("packages", "telemac", True) in client.calls
     assert "All 3 system packages" in wizard.package_label.text()
-    assert wizard.copy_button.isHidden()
+    assert wizard.copy_button.isHidden() and wizard.actions_heading.isHidden()
     assert "The packages were installed" in wizard.plan_label.text()
     wizard.deleteLater()
 
     terminal = _InstallClient(_plan(missing=["gfortran"], elevation=""))
     plain = install_wizard.InstallWizard(terminal, "telemac", _overview())
     plain.go_next()
-    assert not plain.elevate_button.isEnabled()                  # no desktop dialog
-    assert "terminal" in plain.elevate_button.toolTip()
+    assert "terminal" in plain.fix_button.toolTip()              # no desktop dialog
     plain.deleteLater()
 
 
@@ -1875,8 +2488,8 @@ def test_an_installation_that_cannot_work_cannot_be_started(qgis_app, monkeypatc
     client = _InstallClient(_plan(ready=False, findings=[error]))
     wizard = install_wizard.InstallWizard(client, "telemac", _overview())
     wizard.go_next()
-    assert not wizard.next_button.isEnabled()
-    assert "cannot be started" in wizard.next_button.toolTip()
+    assert not wizard.install_button.isEnabled()
+    assert "cannot be started" in wizard.install_button.toolTip()
     wizard.go_back()
     assert wizard.pages.currentIndex() == 0 and wizard.next_button.isEnabled()
     wizard.deleteLater()
@@ -1898,10 +2511,11 @@ def test_an_installation_is_followed_until_it_ends_and_reported_once(
     wizard = install_wizard.InstallWizard(client, "telemac", _overview(),
                                           on_done=reported.append)
     wizard.go_next()
-    wizard.go_next()                                             # Install
+    wizard.install_button.click()
     assert client.calls[-1][0] == "start"
     assert wizard.pages.currentIndex() == 2 and wizard.timer.isActive()
-    assert wizard.next_button.isHidden() and wizard.back_button.isHidden()
+    assert wizard.next_button.isHidden() and not wizard.back_button.isHidden()
+    assert not wizard.install_button.isEnabled()                 # one at a time
 
     wizard.poll()
     assert "step 1 of 1" in wizard.state_label.text()
@@ -1912,7 +2526,10 @@ def test_an_installation_is_followed_until_it_ends_and_reported_once(
     wizard.poll()
     assert "finished" in wizard.state_label.text()
     assert "default.axq-profile" in wizard.state_label.text()
-    assert not wizard.timer.isActive() and not wizard.cancel_button.isEnabled()
+    assert not wizard.timer.isActive()
+    # the cancel button says that the work is done, in dark gray-green
+    assert wizard.cancel_button.text() == "Installation complete"
+    assert "#5b7a5e" in wizard.cancel_button.styleSheet()
     assert len(reported) == 1 and reported[0]["state"] == "succeeded"
     wizard.show_status(done)                                     # shown again
     assert len(reported) == 1
@@ -1948,15 +2565,176 @@ def test_the_help_of_a_wizard_opens_the_section_on_its_program(qgis_app, monkeyp
     install_wizard = _wizard_now(monkeypatch)
     opened = []
     monkeypatch.setattr(help_pages, "open_url", lambda url: opened.append(url) or True)
-    monkeypatch.setattr(help_pages, "LOCAL", Path("/no/built/documentation"))
     for target in ("telemac", "openfoam", "postprocessors"):
         wizard = install_wizard.InstallWizard(_InstallClient(), target, _overview())
         wizard.open_help()
         wizard.deleteLater()
-    assert [url.split("/latest/")[1] for url in opened] == [
+    assert [url.split("axqua.eu/")[1] for url in opened] == [
         "installation/simulation-software.html#install-telemac",
         "installation/simulation-software.html#install-openfoam",
         "installation/postprocessors.html#help-postprocessors"]
+
+
+def test_the_tabs_of_a_wizard_can_be_visited_in_any_order(qgis_app, monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    client = _InstallClient()
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    # the installation folder is the one setting that is required: aXqua purple
+    from qgis.PyQt.QtWidgets import QLabel
+    folder = next(label for label in wizard.findChildren(QLabel)
+                  if label.text() == "Installation folder")
+    assert "#2e014b" in folder.styleSheet()
+    assert [wizard.tabs.tabText(i) for i in range(3)] == \
+        ["Settings", "Check", "Installation"]
+    wizard.tabs.setCurrentIndex(2)                               # straight there
+    assert "No installation has been started" in wizard.state_label.text()
+    assert not wizard.cancel_button.isEnabled()
+    wizard.tabs.setCurrentIndex(1)                               # checks on arrival
+    assert [call[0] for call in client.calls] == ["plan"]
+    wizard.tabs.setCurrentIndex(0)
+    wizard.tabs.setCurrentIndex(1)                               # same settings
+    assert [call[0] for call in client.calls] == ["plan"]
+    wizard.tabs.setCurrentIndex(0)
+    wizard._widgets["tag"].setText("v9.0.0")
+    wizard.tabs.setCurrentIndex(1)                               # other settings
+    assert [call[0] for call in client.calls] == ["plan", "plan"]
+    assert client.calls[-1][2]["tag"] == "v9.0.0"
+    wizard.deleteLater()
+
+
+class _StubbornClient(_InstallClient):
+    """Each round of fixes installs one package, until the last one will not go."""
+
+    def __init__(self, missing):
+        super().__init__(_plan(missing=missing))
+        self.missing = list(missing)
+
+    def install_plan(self, target, options):
+        self.calls.append(("plan", target, dict(options)))
+        return _plan(missing=self.missing)
+
+    def install_packages(self, target, options, *, elevate=False):
+        self.calls.append(("packages", target, elevate))
+        if len(self.missing) > 1:
+            self.missing.pop(0)
+        return {"installation": {"message": "the command ended with code 100"}}
+
+
+def test_run_fixes_repeats_while_it_helps_and_then_offers_a_report(qgis_app,
+                                                                  monkeypatch):
+    install_wizard = _wizard_now(monkeypatch)
+    client = _StubbornClient(["gfortran", "cmake", "libmetis-dev"])
+    wizard = install_wizard.InstallWizard(client, "telemac", _overview())
+    wizard.go_next()
+    assert wizard.report_button.isHidden()
+    wizard.fix_button.click()
+    # two rounds helped, the third found the same package missing as before
+    assert [c[0] for c in client.calls].count("packages") == 3
+    assert wizard.missing() == ["libmetis-dev"]
+    assert not wizard.report_button.isHidden()
+    assert "libmetis-dev" in wizard.package_label.text()
+    assert "code 100" in wizard.package_label.text()
+
+    shown = []
+    monkeypatch.setattr(install_wizard, "exec_dialog",
+                        lambda dialog: shown.append(dialog) or 0)
+    wizard.report()
+    text = shown[0].report_text.toPlainText()
+    assert "libmetis-dev" in text and "3 round(s)" in text
+    assert shown[0].report_title.text() == "Installation of telemac does not work out"
+    wizard.deleteLater()
+
+    helped = _StubbornClient(["gfortran"])
+    helped.install_packages = lambda target, options, elevate=False: (
+        helped.missing.clear() or {"installation": {"message": ""}})
+    done = install_wizard.InstallWizard(helped, "telemac", _overview())
+    done.go_next()
+    done.fix_button.click()
+    assert "The fixes worked" in done.package_label.text()
+    assert done.report_button.isHidden() and done.install_button.isEnabled()
+    done.deleteLater()
+
+
+def test_a_report_is_shown_before_it_is_sent_and_names_no_home_folder(qgis_app):
+    from axqua_plugin.gui import report_issue
+
+    plan = _plan(missing=["gfortran"])
+    plan["findings"] = [{"severity": "error", "code": "axqua.install.x",
+                         "message": f"{Path.home()}/opt cannot be written"}]
+    title, body = report_issue.installation_report("openfoam", plan, rounds=2)
+    assert "~/opt cannot be written" in body and str(Path.home()) not in body
+    assert "gfortran" in body and "2 round(s)" in body
+    info = report_issue.metadata()
+    assert info["tracker"].startswith("https://github.com/") and "@" in info["email"]
+    url = report_issue.issue_url(title, body, info["tracker"])
+    assert url.startswith(info["tracker"] + "/new?title=Installation")
+    long = report_issue.mail_url(title, "x" * 5000, "a@b.c")
+    assert long.startswith("mailto:a@b.c?subject=") and len(long) < 2500
+
+
+def test_an_installed_program_is_installed_again_only_after_a_question(dock,
+                                                                       monkeypatch):
+    from qgis.PyQt.QtWidgets import QMessageBox
+
+    from axqua_plugin.gui import configuration_tab
+
+    tab = dock.configuration_tab
+    tab.show_software(_overview())
+    # found in dark green, not found in aXqua purple and bold
+    assert "#1b5e20" in tab._program_labels["openfoam"].styleSheet()
+    missing = tab._program_labels["postprocessors"]
+    assert "#2e014b" in missing.styleSheet() and "bold" in missing.styleSheet()
+    assert tab.findChildren(configuration_tab.QGroupBox)[-1].title() == \
+        "Simulation && postprocessing software"
+
+    opened = []
+    monkeypatch.setattr(configuration_tab, "InstallWizard",
+                        lambda *a, **k: opened.append(k) or object())
+    monkeypatch.setattr(configuration_tab, "exec_dialog", lambda _w: 0)
+    asked = []
+    no = configuration_tab.enum_value(QMessageBox, "StandardButton.No", "No")
+    yes = configuration_tab.enum_value(QMessageBox, "StandardButton.Yes", "Yes")
+    monkeypatch.setattr(QMessageBox, "question",
+                        lambda *a, **k: asked.append(a[2]) or no)
+    tab.open_wizard("openfoam")                                  # No: back to the tab
+    assert asked == ["Software already installed. Continue with re-installation?"]
+    assert opened == []
+    monkeypatch.setattr(QMessageBox, "question", lambda *a, **k: yes)
+    tab.open_wizard("openfoam")
+    assert opened[-1]["reinstall"] is True
+    asked.clear()
+    tab.open_wizard("postprocessors")                            # nothing to ask
+    assert asked == [] and opened[-1]["reinstall"] is False
+
+
+def test_a_wizard_for_an_installed_program_says_what_happens_to_it(qgis_app,
+                                                                   monkeypatch,
+                                                                   tmp_path):
+    install_wizard = _wizard_now(monkeypatch)
+    overview = _overview()
+    entry = next(t for t in overview["targets"] if t["target"] == "telemac")
+    entry["existing"] = {"folder": str(tmp_path / "opt"), "removable": True,
+                         "removes": str(tmp_path / "opt" / "telemac-mascaret")}
+    wizard = install_wizard.InstallWizard(_InstallClient(), "telemac", overview,
+                                          reinstall=True)
+    choice = wizard._widgets["reinstall"]
+    assert [choice.itemData(i) for i in range(choice.count())] == \
+        ["replace", "continue", "new"]
+    assert wizard.options()["reinstall"] == "replace"
+    assert wizard.options()["folder"] == str(tmp_path / "opt")
+    choice.setCurrentIndex(2)                                    # a new folder
+    assert wizard.options()["reinstall"] == ""
+    assert wizard.options()["folder"] == str(tmp_path / "opt-2")
+    assert wizard.windowTitle().startswith("Install again")
+    wizard.deleteLater()
+
+    entry["existing"] = {"folder": "/usr/lib/openfoam/openfoam2406", "removable": False}
+    foreign = install_wizard.InstallWizard(_InstallClient(), "telemac", overview,
+                                           reinstall=True)
+    choice = foreign._widgets["reinstall"]
+    assert [choice.itemData(i) for i in range(choice.count())] == ["new"]
+    assert "leaves it as it is" in foreign.reinstall_note.text()
+    foreign.deleteLater()
 
 
 def test_the_configuration_tab_says_what_is_installed_and_what_is_running(dock):
@@ -2077,6 +2855,46 @@ def test_the_results_of_a_case_are_listed_exported_and_opened(program_pages):
     dock.profile_changed({"installations": {"visit": "/data/visit"},
                           "programs": {"visit": "/data/visit/bin/visit"}})
     assert visit.program_path == "/data/visit/bin/visit"
+
+
+def test_an_openfoam_case_is_opened_in_paraview_and_visit_without_export(program_pages):
+    dock, paraview, visit, started = program_pages
+    payload = dict(_export_list(), openfoam=[
+        {"label": "OpenFOAM free surface", "folder": "/c/openfoam", "run": True,
+         "paraview": "/c/openfoam/case.foam", "visit": "/c/openfoam/system/controlDict"}])
+    dock.profile_changed({"postprocessors": {"paraview": "/usr/bin/paraview",
+                                             "visit": "/opt/visit/bin/visit"}})
+    for page in (paraview, visit):
+        page.show_results(payload)
+        assert page.foam_list.count() == 1 and page.foam_button.isEnabled()
+        page.open_openfoam()
+    assert started == [("/usr/bin/paraview", ["/c/openfoam/case.foam"]),
+                       ("/opt/visit/bin/visit", ["-o", "/c/openfoam/system/controlDict"])]
+    visit.show_results(_export_list())                       # a case without OpenFOAM
+    assert visit.foam_list.count() == 0 and not visit.foam_button.isEnabled()
+
+
+def test_a_map_style_the_case_asks_for_reaches_the_loader(tmp_path):
+    import json
+
+    from axqua_plugin.core import result_loader, styles
+
+    mesh = _write_mesh(tmp_path)
+    (tmp_path / "results").mkdir(exist_ok=True)
+    (tmp_path / "results" / "results.json").write_text(json.dumps({
+        "job_id": "J", "results": [{"name": "depth", "path": str(mesh), "kind": "mesh",
+                                    "style": "water-depth", "variable": "WATER DEPTH",
+                                    "extra": {"map_style": "depth-arrows"}}]}))
+    results = result_loader.discover(tmp_path)
+    assert results.items[0].map_style == "depth-arrows"
+    # the case file names a style by the keys of this plugin: aXqua lists the same
+    import ast
+    import re
+
+    source = (Path(__file__).resolve().parents[2] / "src" / "axqua" / "config.py"
+              ).read_text(encoding="utf-8")
+    listed = re.search(r"^MAP_STYLES = (\(.*?\))$", source, re.MULTILINE | re.DOTALL)
+    assert ast.literal_eval(listed.group(1)) == tuple(styles.MAP_STYLES)
 
 
 def test_everything_is_exported_when_no_result_is_selected(program_pages):

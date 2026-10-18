@@ -138,14 +138,14 @@ throttled to >=2 s (a listing at a few headers a second would otherwise cause se
 fsync'd rewrites a second on scratch) but never throttles a state or step change. The
 terminal write in `executor._finish` deliberately bypasses the sink: the sink considers
 itself clean because those fields are assigned directly, so a failed job kept its real error
-in `runner.log` while `status.json` still said RUNNING and the reaper later relabelled it
+in `runner.log` while `status.json` still said RUNNING and the reaper later relabeled it
 "abandoned".
 
 **Interactive studies.** `convergence.run_mesh_convergence`'s `_default_ask` returns the
 default off a TTY, so a detached job does not hang - but it silently *truncates* a study
 submitted to march finer. The executor therefore **always injects `ask=`**
 (`interaction.PolicyAsk`), answering from `job.json`'s `options.answers`, recording every
-question and answer in `runner.log`, and honouring a later `answers.json`. A test
+question and answer in `runner.log`, and honoring a later `answers.json`. A test
 monkeypatches `_default_ask` to raise and asserts a mesh-convergence job still completes.
 
 **Detachment** (`jobs/launcher.py` + `jobs/launchers/`) is the first caller of

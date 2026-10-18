@@ -57,7 +57,7 @@ def parse_decimal(value) -> float | None:
 
     A GeoPackage ``double`` field already comes back as a float, but a field authored
     in a German-locale GIS may arrive as the *string* ``"0,5"``. Accept both:
-    floats/ints pass through; strings have their decimal comma normalised to a point
+    floats/ints pass through; strings have their decimal comma normalized to a point
     before parsing. Returns ``None`` for blanks / NaN / unparseable values so the
     caller can fall back to a configured default.
     """
@@ -350,7 +350,7 @@ _FALSEY = {"false", "f", "no", "n", "0"}
 
 
 def _as_bool(value) -> bool | None:
-    """Parse a spreadsheet-ish boolean; ``None`` when blank or unrecognised."""
+    """Parse a spreadsheet-ish boolean; ``None`` when blank or unrecognized."""
     if isinstance(value, bool):
         return value
     if value is None:

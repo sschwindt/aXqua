@@ -167,7 +167,7 @@ def build_calibration_csv(cfg: Config, *,
     variance from this column, so a measured error that is zero (or a value near
     zero multiplied by the relative fraction) gives that point a near-zero variance
     and lets the least trustworthy measurement dominate the whole likelihood. The
-    default ``None`` leaves the existing behaviour exactly as it was.
+    default ``None`` leaves the existing behavior exactly as it was.
 
     *path* overrides the output location, for a second CSV alongside the default
     one (the OpenFOAM calibration targets the same points with different columns).
@@ -421,7 +421,7 @@ hydrodynamic_simulation = {{
 # driver: the patch rewrites a string literal in someone else's file, so it silently
 # no-ops if that literal ever changes. This says it in the config, which is the
 # interface the drivers actually document. (The patch is kept as well - hydrobayescal
-# 1.4.3's multiflow driver ignores this block, and only honours it from 1.4.4 on.)
+# 1.4.3's multiflow driver ignores this block, and only honors it from 1.4.4 on.)
 # n_last is unused while output_extraction_time is 'last'; 1 is the value that keeps
 # the intent if anyone flips this back to 'mean_last'.
 extraction = {{

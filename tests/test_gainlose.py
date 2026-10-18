@@ -2,7 +2,7 @@
 
 The point of the module is that a **polygon alone** locates the exchange: given the
 porous body and its water table, the losing and gaining faces follow from a head
-comparison, so nobody has to draw them. The checks are therefore behavioural rather
+comparison, so nobody has to draw them. The checks are therefore behavioral rather
 than numerical:
 
 * both faces exist, are disjoint, and lie inside the (buffered) zone;

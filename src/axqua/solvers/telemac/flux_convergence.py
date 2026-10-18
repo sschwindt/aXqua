@@ -13,7 +13,7 @@ the dimensionless *relative flux imbalance* per listing printout::
 
     eps_t = | |Q_in,t| - |Q_out,t| | / |Q_in,t|
 
-(magnitudes because Telemac reports inflow positive, outflow negative; normalising
+(magnitudes because Telemac reports inflow positive, outflow negative; normalizing
 by the inflow makes it dimensionless), and take the run as converged at the first
 printout beyond which ``eps_t`` stays permanently below a target tolerance. For a
 steady run this mass-flux balance is the governing criterion: once it holds, the
@@ -22,7 +22,7 @@ velocity grid-convergence at the measurement probes is a different question,
 handled by the mesh-convergence study.)
 
 **The tolerance depends on what the result is for**, and the imbalance being a
-*relative* measure is what makes that judgement possible: the discharge, depth and
+*relative* measure is what makes that judgment possible: the discharge, depth and
 velocity read off a steady run inherit it directly. ``1e-3`` (0.1%) is therefore the
 default -- a tenth of a percent moves Q, h or U by far less than the uncertainty of
 the field data they are compared against, and by far less than the 5% the
@@ -68,7 +68,7 @@ log = logging.getLogger("axqua")
 #         discharge, water depth or velocity: a 0.1% flux imbalance moves those by
 #         far less than the measurement uncertainty of any field campaign (a
 #         FlowTracker vertical is good to a few percent), and well below the
-#         discretisation error the mesh-convergence study accepts (5%).
+#         discretization error the mesh-convergence study accepts (5%).
 #   1e-4  HOTSTART_TOLERANCE - the strict grade for a hotstart *seed*. A calibration
 #         fleet restarts from this state a few dozen times, so any residual
 #         transient is inherited by every perturbed run rather than averaged out.
@@ -302,7 +302,7 @@ def _remove_processor_sorties(model_dir: Path, cas_name: str) -> int:
 
     A parallel run leaves one ``<cas>_<timestamp>_p0000N.sortie`` per MPI rank next
     to the merged main listing; only the main ``.sortie`` carries the flux printouts
-    analysed here, so the per-rank copies are just clutter."""
+    analyzed here, so the per-rank copies are just clutter."""
     removed = 0
     for p in processor_sorties(model_dir, cas_name):
         p.unlink()
@@ -319,7 +319,7 @@ def analyze_flux_convergence(
     write_hotstart: bool = True,
     pythomac_dir: str | Path | None = None,
 ) -> FluxConvergence:
-    """Analyse boundary-flux convergence of the steady run in ``cfg.model_dir``.
+    """Analyze boundary-flux convergence of the steady run in ``cfg.model_dir``.
 
     Reads the latest ``<cas>_<timestamp>.sortie`` listing (so the run must have used
     the ``-s`` flag and ``PRINTING CUMULATED FLOWRATES : YES``) and writes four files
@@ -335,7 +335,7 @@ def analyze_flux_convergence(
     ``hotstart2d.cas`` continuing from the steady results file with that time as
     ``DURATION`` is written next to the steady case (``steering.write_hotstart_cas``).
     The per-processor ``*_p0000N.sortie`` copies of a parallel run are deleted after
-    a successful extraction (only the merged main listing is analysed and kept).
+    a successful extraction (only the merged main listing is analyzed and kept).
 
     *pythomac_dir* is accepted and ignored; the analysis no longer shells out to that
     package (see the module docstring).

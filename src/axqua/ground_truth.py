@@ -9,8 +9,8 @@ are joined here:
 * **values** - the measured quantities, in a source-specific export (e.g. a
   SonTek FlowTracker2 ``.ft.sum`` workbook).
 
-Every source is normalised to the same **tidy** schema: the first three columns
-are ``x, y, z`` (project CRS, metres), followed by quantity columns. For
+Every source is normalized to the same **tidy** schema: the first three columns
+are ``x, y, z`` (project CRS, meters), followed by quantity columns. For
 FlowTracker hydraulics these are ``u, v, w`` (velocity components, m/s),
 ``u_err, v_err, w_err`` (per-component error, m/s) and ``h`` (water depth, m).
 
@@ -286,8 +286,8 @@ def scalar_velocity(df: pd.DataFrame) -> pd.Series:
 
 # --------------------------------------------------------------------------- #
 # Canonical tidy table: one sheet per category, columns ``x, y, z`` then
-# quantities. Column headers are normalised to canonical names where known;
-# unrecognised columns pass through unchanged so arbitrary quantities work.
+# quantities. Column headers are normalized to canonical names where known;
+# unrecognized columns pass through unchanged so arbitrary quantities work.
 # --------------------------------------------------------------------------- #
 log = logging.getLogger("axqua")
 
@@ -299,9 +299,10 @@ _COLUMN_ALIASES = {
     "z": "z", "elevation": "z", "bed": "z", "bed_level": "z", "alt": "z", "alt.": "z",
     # "v(x)" is how the FlowTracker summary workbooks and the point layers exported
     # from them head the velocity components.
-    "u": "u", "vx": "u", "velx": "u", "u_x": "u", "ux": "u", "v(x)": "u",
-    "v": "v", "vy": "v", "vely": "v", "u_y": "v", "uy": "v", "v(y)": "v",
-    "w": "w", "vz": "w", "velz": "w", "u_z": "w", "uz": "w", "v(z)": "w",
+    # "v_x" is how the corrected campaign layers of 2026-10 head them.
+    "u": "u", "vx": "u", "velx": "u", "u_x": "u", "ux": "u", "v(x)": "u", "v_x": "u",
+    "v": "v", "vy": "v", "vely": "v", "u_y": "v", "uy": "v", "v(y)": "v", "v_y": "v",
+    "w": "w", "vz": "w", "velz": "w", "u_z": "w", "uz": "w", "v(z)": "w", "v_z": "w",
     "u_err": "u_err", "u'": "u_err", "uerr": "u_err", "vxerr": "u_err",
     "v_err(x)": "u_err",
     "v_err": "v_err", "v'": "v_err", "verr": "v_err", "vyerr": "v_err",
@@ -323,11 +324,13 @@ _COLUMN_ALIASES = {
 }
 
 
-#: A unit in square brackets at the end of a header ("v(x) [m/s]", "Total Depth [m]").
-#: A layer drawn up in a GIS usually says what its numbers are, and the name in front
-#: of the unit is the name. Without this, such a layer loaded without complaint and
-#: none of its columns was recognised.
-_UNIT_SUFFIX = re.compile(r"\s*\[[^\]]*\]\s*$")
+#: A unit at the end of a header, in square brackets ("v(x) [m/s]", "Total Depth [m]")
+#: or in parentheses after a space ("v_x (m/s)", "Total Depth (m)"). A layer drawn up
+#: in a GIS usually says what its numbers are, and the name in front of the unit is
+#: the name. Without this, such a layer loaded without complaint and none of its
+#: columns was recognized. The space is required before parentheses, because in
+#: "v(x)" they are part of the name.
+_UNIT_SUFFIX = re.compile(r"(\s*\[[^\]]*\]|\s+\([^)]*\))\s*$")
 
 
 def _canonical_name(name: object) -> str:
@@ -351,7 +354,7 @@ def read_points(path: Path, crs_epsg: int) -> pd.DataFrame:
 
     A spatial layer (shp/gpkg/geojson) is reprojected to ``crs_epsg`` and its
     geometry becomes ``x, y``; a CSV must provide ``x``/``y`` columns (or
-    aliases). All other columns pass through (canonicalised where recognised).
+    aliases). All other columns pass through (canonicalised where recognized).
     """
     path = Path(path)
     if path.suffix.lower() in (".shp", ".gpkg", ".geojson"):
@@ -571,13 +574,13 @@ def select_profile_rows(df: pd.DataFrame, rule: str = "single", *,
     """Reduce a multi-depth profile table to the rows that become targets.
 
     A FlowTracker vertical may carry several readings at different depths. Which
-    of them a calibration should see is a modelling decision, not a data
+    of them a calibration should see is a modeling decision, not a data
     property, so it is named explicitly:
 
     ``single``
         one row per vertical - the reading nearest the conventional 0.6 depth.
         **The default, and a no-op when there is already one row per vertical**,
-        so every existing config keeps its present behaviour.
+        so every existing config keeps its present behavior.
     ``all``
         every reading, one target each.
     ``drop-lowest``

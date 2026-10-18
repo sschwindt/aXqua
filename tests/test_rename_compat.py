@@ -250,7 +250,7 @@ def test_the_package_imports_under_the_new_name():
 
 
 def test_the_distribution_is_branded_but_the_module_is_lowercase():
-    """``pip install aXqua`` and ``import axqua``. PyPI normalises the two spellings to
+    """``pip install aXqua`` and ``import axqua``. PyPI normalizes the two spellings to
     one project, so the brand survives without a mixed-case module name."""
     from importlib.metadata import metadata
 

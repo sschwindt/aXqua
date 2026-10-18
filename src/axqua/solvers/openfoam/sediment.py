@@ -35,7 +35,7 @@ written (:func:`check_columns`), because the solver itself checks none of them:
 * **a positive height of the first cell center above the bed face center**, in the
   solver's own definition ``mesh.C().z() - patch.Cf().z()``. It enters a logarithm and
   ends the run with a floating point exception where it is zero or negative. On a
-  terrain-following mesh that happens wherever neighbouring verticals have layers of
+  terrain-following mesh that happens wherever neighboring verticals have layers of
   different thickness on a sloping bed, since the cell center then lies towards the
   thick side, which is the low side. The layer at the bed is therefore given **one
   thickness everywhere** (:func:`pin_bottom_layer`). A steep and twisted bed face
@@ -69,6 +69,7 @@ from typing import Any
 import numpy as np
 
 from axqua.core import errors
+from axqua.solvers.openfoam.layout import time_folders
 
 log = logging.getLogger("axqua")
 
@@ -269,7 +270,7 @@ def bed_vectors(points: np.ndarray, bed_faces: np.ndarray, centres: np.ndarray,
                 neighbours) -> np.ndarray:
     """Unit vector normal to the bed at every bed face, as the solver computes it.
 
-    From the centers of the four neighbouring faces where a face has all four
+    From the centers of the four neighboring faces where a face has all four
     (``computevx3.h``), from its own corners otherwise (``computevx4.h``).
     """
     east, west, north, south, count = neighbours
@@ -961,22 +962,15 @@ def _clear_case(case_dir: Path) -> None:
     """
     import shutil
 
+    times = {path for _, path in time_folders(case_dir)}
     for entry in case_dir.iterdir():
-        numbered = entry.is_dir() and _is_time(entry.name)
+        numbered = entry in times
         if entry.is_dir() and (numbered or entry.name in ("constant", "system")):
             shutil.rmtree(entry)
         elif entry.is_file() and entry.name in (
                 BUILD_RECORD, BED_LAYER_NAME, BUDGET_NAME, LOG_NAME, "case.foam",
                 "scour.txt"):
             entry.unlink()
-
-
-def _is_time(name: str) -> bool:
-    try:
-        float(name)
-    except ValueError:
-        return False
-    return True
 
 
 def is_built(case_dir: Path) -> bool:
@@ -988,12 +982,9 @@ def is_built(case_dir: Path) -> bool:
 
 def latest_time(case_dir: Path) -> str | None:
     """Name of the last time folder a run wrote, ``None`` before the first."""
-    best: tuple[float, str] | None = None
-    for entry in Path(case_dir).iterdir():
-        if entry.is_dir() and _is_time(entry.name) and float(entry.name) > 0:
-            if (entry / "Conc").is_file() and (best is None or float(entry.name) > best[0]):
-                best = (float(entry.name), entry.name)
-    return best[1] if best else None
+    later = [path for value, path in time_folders(case_dir)
+             if value > 0 and (path / "Conc").is_file()]
+    return later[-1].name if later else None
 
 
 # --------------------------------------------------------------------------- #
@@ -1434,8 +1425,8 @@ def run_case(cfg, *, case_dir: str | Path | None = None, runtime=None,
 
     import shutil
 
-    for entry in case_dir.iterdir():           # a run starts from the first iteration
-        if entry.is_dir() and _is_time(entry.name) and float(entry.name) > 0:
+    for value, entry in time_folders(case_dir):   # a run starts from the first iteration
+        if value > 0:
             shutil.rmtree(entry)
     for name in (BED_LAYER_NAME, BUDGET_NAME):
         (case_dir / name).unlink(missing_ok=True)

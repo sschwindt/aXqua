@@ -81,6 +81,28 @@ def _describe(name: str, label: str, path: Path, out_dir: Path) -> dict:
     return row
 
 
+def openfoam_cases(cfg) -> list[dict]:
+    """The OpenFOAM cases of a case that exist, with what ParaView and VisIt open.
+
+    They need no conversion: ParaView opens ``case.foam``, VisIt the case's
+    ``system/controlDict``.
+    """
+    out = []
+    for label, folder in (("OpenFOAM free surface", cfg.openfoam_case_dir),
+                          ("OpenFOAM fine sediment", cfg.fine_sediment_case_dir)):
+        folder = Path(folder)
+        control = folder / "system" / "controlDict"
+        if not control.is_file():
+            continue
+        times = [entry.name for entry in folder.iterdir() if entry.is_dir()
+                 and entry.name.replace(".", "", 1).isdigit() and float(entry.name) > 0]
+        foam = folder / "case.foam"
+        out.append({"label": label, "folder": str(folder),
+                    "paraview": str(foam) if foam.is_file() else "",
+                    "visit": str(control), "run": bool(times)})
+    return out
+
+
 def run_export(argv: list[str]) -> int:
     args = parse_args(_parser(), argv, "export")
     _setup_logging(args)
@@ -95,6 +117,7 @@ def run_export(argv: list[str]) -> int:
         geometry = args.geometry.expanduser() if args.geometry else None
         if geometry is not None and not geometry.is_file():
             raise ConfigError(f"{geometry} does not exist", subject="geometry")
+        openfoam: list[dict] = []
         if _is_result(source):
             out_dir = (args.out or source.parent / FOLDER).expanduser()
             candidates = [(source.name, "TELEMAC result", source)]
@@ -108,6 +131,7 @@ def run_export(argv: list[str]) -> int:
                 model = cfg.model_path(cfg.geometry_slf)
                 geometry = model if model.is_file() else None
             candidates = [row for row in spec.result_files(cfg) if row[2].is_file()]
+            openfoam = openfoam_cases(cfg)
             if args.result:
                 known = {name: (name, label, path) for name, label, path in candidates}
                 missing = [name for name in args.result if name not in known]
@@ -125,7 +149,10 @@ def run_export(argv: list[str]) -> int:
                      f"step(s), {row['megabytes']} MB"
                      + (", exported" if (row.get("exported") or {}).get("up_to_date")
                         else "") for row in rows]
-            return emit(command, {"folder": str(out_dir), "results": rows},
+            lines += [f"{case['label']}: {case['folder']} (no conversion needed)"
+                      for case in openfoam]
+            return emit(command, {"folder": str(out_dir), "results": rows,
+                                  "openfoam": openfoam},
                         as_json=args.as_json,
                         lines=lines or ["this case has no results yet"])
 

@@ -168,7 +168,13 @@ def visit_target(dataset: Dataset) -> Path:
 
 def _open(dataset: Dataset) -> str:
     target = visit_target(dataset)
-    return f'''
+    # VisIt's OpenFOAM reader opens a case reconstructed by default, which for a parallel run that was not reconstructed is t = 0 alone; "Case Type" 0 reads the processor folders (measured with VisIt 3.5.0)
+    decomposed = '''
+_options = GetDefaultFileOpenOptions("OpenFOAM")
+_options["Case Type"] = 0
+SetDefaultFileOpenOptions("OpenFOAM", _options)
+''' if dataset.kind == "openfoam" and dataset.decomposed else ""
+    return decomposed + f'''
 try:
     OpenDatabase({str(target)!r})
 except Exception as exc:
@@ -198,7 +204,7 @@ def _time_state(time: str | float) -> str:
 
     Not cosmetic. VisIt opens a database on its FIRST state, which for a solver
     case is t=0 - the initial condition, where the velocity field is identically
-    zero. A figure made without this shows a blank result and a 0.000 colour bar
+    zero. A figure made without this shows a blank result and a 0.000 color bar
     while looking perfectly well-formed, which is the same failure the
     ``mean_last`` -> ``last`` extraction patch exists to prevent on the
     calibration side.
@@ -271,7 +277,7 @@ banner.height = 0.02
 
 def _render_velocity_plan(dataset: Dataset, scene: Scene, out_dir: Path,
                           *, used: tuple[str, ...], **_kw) -> str:
-    """Plan view coloured by speed, with vector glyphs over it."""
+    """Plan view colored by speed, with vector glyphs over it."""
     slice_block = ""
     if dataset.kind == "openfoam" and dataset.bounds:
         zmin, zmax = dataset.bounds[4], dataset.bounds[5]
@@ -319,7 +325,7 @@ def _render_profiles(dataset: Dataset, scene: Scene, out_dir: Path, *,
     # the surveyed bed upward misses the water column entirely and VisIt returns
     # "Curve plot yielded no data" for every vertical. Asking VisIt for the spatial
     # extents costs nothing, works whatever the datum, and lets profiles.compare
-    # normalise on the modelled column.
+    # normalize on the modeled column.
     blocks = [f'''
 import os
 os.makedirs({str(data_dir)!r}, exist_ok=True)

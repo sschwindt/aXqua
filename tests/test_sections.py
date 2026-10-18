@@ -25,9 +25,9 @@ def _uniform_channel(nx=21, ny=15, length=20.0, width=14.0, depth=0.5, u=1.0):
     """A rectangular grid carrying a uniform flow of ``depth * width * u`` m3/s.
 
     The flow fills the mesh edge to edge, so a section spanning exactly ``0..width``
-    integrates the analytic discharge with no discretisation edge effect. (A dry bank
+    integrates the analytic discharge with no discretization edge effect. (A dry bank
     would not work as a check: with P1 fields the depth ramps linearly across the
-    bank cell, so the discretised field genuinely carries more than a sharp-edged
+    bank cell, so the discretized field genuinely carries more than a sharp-edged
     channel of the same nominal width.)
     """
     xs = np.linspace(0.0, length, nx)
@@ -50,7 +50,7 @@ def _uniform_channel(nx=21, ny=15, length=20.0, width=14.0, depth=0.5, u=1.0):
 
 def test_line_discharge_recovers_uniform_flow(tmp_path):
     """A section across a uniform flow returns width * depth * velocity, whichever
-    way the line is digitised, and an oblique cut of the same flow gives the same
+    way the line is digitized, and an oblique cut of the same flow gives the same
     discharge (only the normal component counts)."""
     pytest.importorskip("matplotlib")
     import geopandas as gpd
@@ -69,13 +69,13 @@ def test_line_discharge_recovers_uniform_flow(tmp_path):
         {"name": ["straight", "reversed", "oblique"]},
         geometry=[
             LineString([(10.0, 0.0), (10.0, 14.0)]),       # across the flow
-            LineString([(10.0, 14.0), (10.0, 0.0)]),       # same, digitised backwards
+            LineString([(10.0, 14.0), (10.0, 0.0)]),       # same, digitized backwards
             LineString([(4.0, 0.0), (16.0, 14.0)]),        # oblique cut
         ], crs="EPSG:25832")
     df = line_discharges(res, lines, name_field="name", crs_epsg=25832).set_index("name")
 
     assert df.loc["straight", "discharge"] == pytest.approx(expected, rel=2e-3)
-    # digitising direction must not change the answer (the sign is normalised)
+    # digitizing direction must not change the answer (the sign is normalized)
     assert df.loc["reversed", "discharge"] == pytest.approx(expected, rel=2e-3)
     # an oblique section carries the same discharge: the extra length is exactly
     # compensated by the smaller normal component

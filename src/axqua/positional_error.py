@@ -6,10 +6,10 @@ exact. When they are not, the model is read at the wrong place and the differenc
 is charged to the model - or, worse, to whichever parameter happens to move it.
 
 This is not a hypothetical. Inn KB15's September-2025 survey was positioned with
-an **RTK float** solution rather than a fixed one, which is decimetre-to-metre
-horizontal rather than centimetre. On that reach the modelled water depth at the
+an **RTK float** solution rather than a fixed one, which is decimeter-to-metre
+horizontal rather than centimeter. On that reach the modeled water depth at the
 survey verticals is 0.374 m while the deepest node within 3 m is 0.648 m, so a
-position error of a few metres moves the modelled depth by more than the entire
+position error of a few meters moves the modeled depth by more than the entire
 model-data discrepancy being calibrated against.
 
 **The fix is not to relocate the points.** Their true positions are unknown, and
@@ -24,7 +24,7 @@ the weighting a likelihood should give them.
 The spread is measured by **sampling**, not by a gradient. A gradient is a local
 linearisation, and the fields that make this matter - depth near a bank, velocity
 at a shear layer - are precisely the ones where a linearisation is worst over a
-metre-scale radius. Sampling a ring at the uncertainty radius costs nothing here
+meter-scale radius. Sampling a ring at the uncertainty radius costs nothing here
 (the sampler is a KD-tree lookup) and stays honest on a step.
 """
 
@@ -106,7 +106,7 @@ def telemac_sampler(geometry, results, variable: str
     Nearest-node rather than P1: a result merged from a parallel run is not a clean
     triangulation (it carries coincident nodes and zero-area triangles at the
     subdomain interfaces), and the question here is how much the field varies over
-    metres - which nearest-node answers perfectly well on a sub-metre mesh.
+    meters - which nearest-node answers perfectly well on a sub-metre mesh.
     """
     from scipy.spatial import cKDTree
 
@@ -156,6 +156,6 @@ def resolve_sigma(cfg) -> tuple[float, str | None]:
             raise ValueError(
                 f"unknown ground_truth.position_quality {quality!r}; expected one "
                 f"of {', '.join(sorted(GNSS_SIGMA))}, or set "
-                "ground_truth.position_sigma to a number of metres.")
+                "ground_truth.position_sigma to a number of meters.")
         return GNSS_SIGMA[key], key
     return 0.0, None

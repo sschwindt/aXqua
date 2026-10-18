@@ -68,10 +68,10 @@ RUNGS: dict[str, dict] = {
     # T5 uses the SAME mode as T4; what changed is the generated routine itself.
     # T4 spread Q uniformly over the whole patch and then tapered, so the dry half
     # of the patch simply lost its share (~48 % of the target delivered). T5
-    # normalises over the currently WET area, so the full 0.065 m3/s is delivered
+    # normalizes over the currently WET area, so the full 0.065 m3/s is delivered
     # whenever there is enough wet patch to draw it from.
     "T5": {
-        "why": "USER_RAIN normalised over the WET patch area (full target delivery)",
+        "why": "USER_RAIN normalized over the WET patch area (full target delivery)",
         "drop_internal_lines": False,
         "percolation_mode": "fortran",
     },
@@ -115,7 +115,7 @@ def check_side_channel(cfg, model_dir: Path, radius: float = 40.0) -> None:
     Reads the run's ``r2d.slf`` and reports the wetted fraction and mean depth in a
     *radius* around the **gaining** line, which is what supplies the side channel.
     Compare a percolation run against the T1 baseline (which has no exchange at
-    all): if the exchange is doing its job, the gaining neighbourhood is wetter.
+    all): if the exchange is doing its job, the gaining neighborhood is wetter.
     """
     import numpy as np
     import shapely
@@ -137,7 +137,7 @@ def check_side_channel(cfg, model_dir: Path, radius: float = 40.0) -> None:
             if _is_internal(r[tcol]) and _internal_sign(str(r[tcol])) > 0]
     if not gain:
         print("no gaining line in the layer (T1 baseline?) - reporting the same "
-              "neighbourhood anyway for comparison")
+              "neighborhood anyway for comparison")
         gain = [r.geometry for _, r in gpd.read_file(
             cfg.config_dir / "user-sources/geodata/liquid-boundaries.gpkg"
         ).iterrows() if _is_internal(r[tcol]) and _internal_sign(str(r[tcol])) > 0]
@@ -268,7 +268,7 @@ def main() -> int:
     ap.add_argument("--ncsize", type=int, default=None,
                     help="MPI process count for this run (default: config)")
     ap.add_argument("--summary", action="store_true",
-                    help="only summarise an already-completed rung's listing")
+                    help="only summarize an already-completed rung's listing")
     args = ap.parse_args()
 
     if args.summary:   # read-only: no rebuild, no filtered-layer side effects

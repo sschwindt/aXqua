@@ -49,7 +49,7 @@ class OpenFoamBackend(BaseBackend):
 
         *seed* is the 2D result to hotstart from, supplied by the caller. When it is
         absent the case still builds - cold, under a flat lid - which is the documented
-        ``--no-pre-run`` behaviour rather than a failure.
+        ``--no-pre-run`` behavior rather than a failure.
         """
         from axqua.solvers.openfoam import case as of_case
         from axqua.solvers.openfoam.hotstart import load_hotstart
@@ -151,21 +151,16 @@ class OpenFoamBackend(BaseBackend):
                 # survey steps and seams. That is the terrain, not a meshing fault.
                 log.info("checkMesh: runnable, with marginal faces: %s", "; ".join(failed))
 
+        # The ranks of the job, not the number the case was built with: the decomposition has to give each rank its domain, or mpirun stops at once with "Number of processor directories = 1 is not equal to the number of ranks" (found by the mesh study of 2026-10-17, and the same for the MPI ranks option of an openfoam-run job). Each stage splits the case for them where it has to (run_stage), with a dictionary of the run's own where the case's file names another count, so the case's file is never changed.
         nprocs = n_processors if n_processors is not None else cfg.openfoam.n_processors
-        if nprocs and nprocs > 1:
-            # scotch, set in the case: the wetted corridor is sinuous, so a geometric
-            # split would hand some ranks empty space.
-            runtime.decompose(case_dir)
 
         for stage in dicts.stages(cfg):
             if ctx is not None:
                 ctx.check_cancelled()
                 ctx.sink.step(f"openfoam:{stage.name}")
-            # start_from, not the stage name: a rigid-lid case has ONE stage and it is
-            # called "run", but it starts from t=0 like a spin-up does. Keying off the
-            # name told the progress bar the run began at spinup_time and it reported
-            # a run that was already 8 s in before the first step.
-            start = 0.0 if stage.start_from == "startTime" else cfg.openfoam.spinup_time
+            # start_from, not the stage name: a rigid-lid case has ONE stage and it is called "run", but it starts from t=0 like a spin-up does. Keying off the name told the progress bar the run began at spinup_time and it reported a run that was already 8 s in before the first step.
+            start = (0.0 if stage.start_from == "startTime"
+                     else cfg.openfoam.spinup_time)
             proc = runtime.run_stage(
                 case_dir, stage.name, end_time=stage.end_time, start_time=start,
                 n_processors=nprocs, cfg=cfg,
@@ -175,7 +170,8 @@ class OpenFoamBackend(BaseBackend):
                 ctx.check_cancelled()
             if proc.returncode != 0:
                 raise errors.SolverError(
-                    f"interFoam stage {stage.name!r} exited with code {proc.returncode}",
+                    f"interFoam stage {stage.name!r} exited with code "
+                    f"{proc.returncode}",
                     subject=str(case_dir),
                     remedy=f"Read {case_dir / cfg.log_file} for the first error.",
                     component="interfoam",
@@ -199,6 +195,8 @@ class OpenFoamBackend(BaseBackend):
 
         if _is_sediment(ctx):
             return self._book_sediment(cfg, ctx)
+        if _is_mesh_study(ctx):
+            return {}                    # the study wrote its own report
         case_dir = Path(cfg.openfoam_case_dir)
         out: dict[str, Any] = {}
 
@@ -239,7 +237,7 @@ class OpenFoamBackend(BaseBackend):
             log.warning("depth-averaged result skipped: %s: %s",
                         type(exc).__name__, exc)
 
-        if _wants_vtk(ctx):
+        if _wants_vtk(ctx, cfg):
             try:
                 OpenFoamRuntime(cfg.openfoam).to_vtk(case_dir, latest=False)
                 out["vtk"] = str(case_dir / "VTK")
@@ -268,7 +266,8 @@ class OpenFoamBackend(BaseBackend):
     def study(self, cfg, capability=None, *, ctx: Any = None,
               launch_mode: str = "prepare", checkout=None, rebuild: bool = False,
               seed=None, **kwargs):
-        """Multi-run investigations. Currently only the calibration campaign.
+        """Multi-run investigations: the calibration campaign and the mesh
+        convergence study.
 
         The 2D seed is passed in rather than obtained here: ``axqua.prerun`` imports
         the TELEMAC backend transitively, and this module must not reach into it
@@ -276,6 +275,8 @@ class OpenFoamBackend(BaseBackend):
         """
         from axqua.core.capabilities import Capability
 
+        if capability is Capability.MESH_CONVERGENCE:
+            return self._mesh_convergence(cfg, ctx=ctx, seed=seed, **kwargs)
         if capability is not Capability.CALIBRATION:
             return super().study(cfg, capability, **kwargs)
         from axqua.solvers.openfoam.calibration import run_openfoam_calibration
@@ -283,9 +284,38 @@ class OpenFoamBackend(BaseBackend):
             cfg, launch_mode=launch_mode, checkout=checkout, rebuild=rebuild,
             state=seed, ctx=ctx, **kwargs)
 
+    def _mesh_convergence(self, cfg, *, ctx: Any = None, seed=None,
+                          discharge: float | None = None, refinement_ratio: float = 1.3,
+                          tolerance: float = 0.05, n_coarser: int = 1, n_finer: int = 2,
+                          max_extra_levels: int = 3, auto_extend: bool = False,
+                          n_processors: int | None = None, **_ignored):
+        """The mesh convergence study of the free-surface model
+        (:mod:`axqua.solvers.openfoam.convergence`)."""
+        from axqua import convergence
+        from axqua.solvers.openfoam import convergence as of_convergence
+
+        report = of_convergence.run_openfoam_mesh_convergence(
+            cfg, seed=seed, discharge=discharge, refinement_ratio=refinement_ratio,
+            tolerance=tolerance, n_coarser=n_coarser, n_finer=n_finer,
+            max_extra_levels=max_extra_levels, auto_extend=auto_extend,
+            n_processors=n_processors,
+            # never the study's own stdin prompt (see jobs.interaction)
+            ask=(ctx.ask if ctx is not None else None),
+            on_level=convergence.level_progress(ctx),
+            check_cancelled=(ctx.check_cancelled if ctx is not None else None))
+        if ctx is not None:
+            ctx.progress(levels_done=len(report.levels), levels_total=len(report.levels),
+                         converged=bool(getattr(report, "converged", False)))
+        convergence.write_study_report(
+            report, Path(cfg.postprocessing_dir) / of_convergence.FOLDER,
+            of_convergence.STEM, ctx)
+        return report
+
     def extract_objective(self, cfg, ctx: Any = None) -> float | None:
         """The relative inlet/outlet discharge imbalance - what the run is judged on."""
         from axqua.solvers.openfoam import report
+        if _is_mesh_study(ctx):
+            return None
         if _is_sediment(ctx):
             # how far the sediment budget of the reach is from closing, as a share
             summary = getattr(getattr(ctx, "manifest", None), "summary", {}) or {}
@@ -303,7 +333,7 @@ class OpenFoamBackend(BaseBackend):
         return float(value) if value is not None else None
 
     def describe_results(self, cfg) -> list:
-        """What a visualiser can open for this case.
+        """What a visualizer can open for this case.
 
         Cheap by contract: directory listings and the ``0/`` field names, no
         pyvista and no solver launch, because a caller may ask this just to decide
@@ -323,19 +353,14 @@ class OpenFoamBackend(BaseBackend):
             except OSError:
                 return []
 
-        times: list[float] = []
-        for root in (case_dir, case_dir / "processor0"):
-            if not root.is_dir():
-                continue
-            for entry in root.iterdir():
-                if not entry.is_dir():
-                    continue
-                try:
-                    times.append(float(entry.name))
-                except ValueError:
-                    continue
-            if times:
-                break
+        # The times of the case itself, unless the result is in the processor folders only (a parallel run that was not reconstructed): VisIt and ParaView open the case reconstructed unless told otherwise, and a reconstructed case without a result shows nothing but t = 0 (VisIt 3.5.0, measured 2026-10-18). Such a case is described as decomposed, with the times of its first domain, and the VisIt script opens it so.
+        from axqua.solvers.openfoam.layout import Layout, time_folders
+
+        layout = Layout.of(case_dir)
+        decomposed = layout.only_in_processor_folders
+        times = [value for value, _ in time_folders(layout.folders[0] if decomposed else case_dir)]
+        pending = (("the result is in the processor folders of a parallel run, not reconstructed; ParaView reads it with the case type Decomposed Case",)
+                   if decomposed else ())
 
         fields: set[str] = set()
         zero = case_dir / "0"
@@ -367,7 +392,7 @@ class OpenFoamBackend(BaseBackend):
             times=tuple(sorted(times)), fields=frozenset(fields),
             patches=frozenset(patches),
             vector_fields={"U": ("U_x", "U_y", "U_z")},
-            notes=notes,
+            notes=notes + pending, decomposed=decomposed,
         )]
 
     def export_qgis_results(self, cfg, ctx: Any = None):
@@ -376,6 +401,12 @@ class OpenFoamBackend(BaseBackend):
             return []
         if _is_sediment(ctx):
             return self._export_sediment(cfg, ctx)
+        if _is_mesh_study(ctx):
+            from axqua.solvers.openfoam.convergence import FOLDER, STEM
+
+            workbook = Path(cfg.postprocessing_dir) / FOLDER / f"{STEM}.xlsx"
+            ctx.record("Mesh-convergence report", workbook, kind="table")
+            return [workbook] if workbook.exists() else []
         case_dir = Path(cfg.openfoam_case_dir)
         written: list[Path] = []
 
@@ -393,10 +424,18 @@ class OpenFoamBackend(BaseBackend):
                        variable="SCALAR VELOCITY")
             written.append(plan)
 
+        # what the case asks to offer for ParaView and VisIt (postproc.openfoam_outputs)
+        # (an empty list is a choice: nothing for either program)
+        outputs = getattr(getattr(cfg, "postproc", None), "openfoam_outputs", None)
+        outputs = set(("paraview", "visit") if outputs is None else outputs)
         foam = case_dir / "case.foam"
-        if foam.exists():
+        if foam.exists() and "paraview" in outputs:
             ctx.record("OpenFOAM case (ParaView)", foam, kind="file")
             written.append(foam)
+        control = case_dir / "system" / "controlDict"
+        if control.exists() and "visit" in outputs:
+            # VisIt opens an OpenFOAM case through its controlDict, not case.foam
+            ctx.record("OpenFOAM case (VisIt)", control, kind="file")
 
         # VTK is what QGIS can actually read; the .foam file needs ParaView. Both are
         # listed, and the plugin picks what it can load.
@@ -441,13 +480,25 @@ def _is_sediment(ctx: Any) -> bool:
     return getattr(ctx, "capability", None) is Capability.MORPHODYNAMICS
 
 
-def _wants_vtk(ctx: Any) -> bool:
-    """VTK conversion is opt-in: it can double the size of an already large case."""
+def _is_mesh_study(ctx: Any) -> bool:
+    """Whether the job at hand is the mesh convergence study."""
+    return getattr(ctx, "capability", None) is Capability.MESH_CONVERGENCE
+
+
+def _wants_vtk(ctx: Any, cfg: Any = None) -> bool:
+    """VTK conversion is opt-in: it can double the size of an already large case.
+
+    The option of the job decides; without one, the case decides
+    (``postproc.openfoam_outputs`` naming ``vtk``), and then the environment.
+    """
     if ctx is None:
         return False
     explicit = getattr(getattr(ctx, "options", None), "to_vtk", None)
     if explicit is not None:
         return bool(explicit)
+    outputs = getattr(getattr(cfg, "postproc", None), "openfoam_outputs", None) or ()
+    if "vtk" in outputs:
+        return True
     postprocess = (getattr(ctx, "spec", None) and
                    ctx.spec.environment.get("postprocess")) or []
     return "foamToVTK" in postprocess

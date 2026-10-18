@@ -3,7 +3,7 @@
 The rule this file exists to enforce is plan §26: the runner and the plugin communicate
 through **job metadata, status metadata, file paths and small structured results** - never
 through solver field arrays. A TELEMAC result is hundreds of megabytes and a
-reconstructed OpenFOAM case is gigabytes; serialising any of that into JSON, or copying
+reconstructed OpenFOAM case is gigabytes; serializing any of that into JSON, or copying
 it so the plugin can find it, would be the single easiest way to make the system
 unusable.
 

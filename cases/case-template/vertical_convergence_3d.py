@@ -4,7 +4,7 @@ of mesh_convergence_study.py).
 Where mesh_convergence_study.py varies the *horizontal* cell size, this varies the
 **number of sigma layers** (NUMBER OF HORIZONTAL LEVELS) on the same horizontal mesh
 to demonstrate that the depth-resolved 3D solution is independent of the vertical
-discretisation. For a ladder of layer counts (few -> many, derived from the count
+discretization. For a ladder of layer counts (few -> many, derived from the count
 add3d.py infers, or set explicitly via LAYER_COUNTS) it runs the hotstarted,
 non-hydrostatic 3D case once per count, samples depth-averaged water depth and
 scalar velocity at the ground-truth probe points, and reports the relative change

@@ -25,14 +25,18 @@ DOCS = Path(__file__).resolve().parents[1] / "docs"
 OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
     ("Installation & Configuration", "installation/index", [
         ("QGIS plugin", "qgis-plugin", None),
-        ("Simulation Software", "simulation-software", ["TELEMAC", "OpenFOAM"]),
+        # the first two headings are the user's own (2026-10-15)
+        ("Simulation Software", "simulation-software",
+         ["Installation wizards (short version)", "User rights", "TELEMAC", "OpenFOAM"]),
         ("Plugin setup", "plugin-setup",
          ["Plugin profile", "Define solver bindings", "Job execution"]),
         ("Postprocessors", "postprocessors", ["VisIt", "ParaView"]),
     ]),
     ("Usage", "usage/index", [
+        # the names of the pages of the case settings (the user's corrections of
+        # 2026-10-16: Project settings, Liquid boundaries, Initial conditions)
         ("aXqua case setup", "case-setup",
-         ["Project paths", "Geodata", "Boundaries", "Initialization",
+         ["Project settings", "Geodata", "Liquid boundaries", "Initial conditions",
           "Mesh configuration", "Wall roughness", "Hydraulic simulation",
           "Morphodynamic simulation"]),
         ("Preprocessing", "preprocessing",

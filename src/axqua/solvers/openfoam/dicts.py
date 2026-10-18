@@ -45,6 +45,7 @@ than paying for it over the whole run.
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -217,10 +218,24 @@ def gravity() -> str:
 # --------------------------------------------------------------------------- #
 
 
+#: The library of the boundary conditions of the BAW that the OpenFOAM installation of
+#: aXqua builds (``BAW_LIBRARY`` of its installer), with ``waterLevel_alpha_prgh``.
+BAW_LIBRARY = "lib_BAW_public_BCs_v2412_20260813.so"
+
+
+def uses_rating_outlet(cfg) -> bool:
+    """Whether the outlets follow a stage-discharge relation (needs a free surface)."""
+    of = cfg.openfoam
+    return getattr(of, "outflow_boundary", "level") == "rating-curve" \
+        and of.mode != "rigid-lid"
+
+
 def control_dict(cfg, stage: Stage, *, patches: list[str],
                  boundary_patches: tuple[str, str] | None = None) -> str:
     of = cfg.openfoam
-    body = f"""application     {of.solver};
+    libs = (f'libs            ("{BAW_LIBRARY}");\n\n' if uses_rating_outlet(cfg)
+            else "")
+    body = f"""{libs}application     {of.solver};
 
 startFrom       {stage.start_from};
 
@@ -715,15 +730,56 @@ limitU
 
 
 def decompose_par_dict(cfg) -> str:
-    n = max(int(cfg.openfoam.n_processors), 1)
+    """``system/decomposeParDict`` for the processor count of the case."""
+    return decomposition_dict(cfg.openfoam.n_processors)
+
+
+def decomposition_dict(n_processors: int) -> str:
+    """A ``decomposeParDict`` that splits a case into *n_processors* domains."""
+    n = max(int(n_processors), 1)
     body = f"""numberOfSubdomains {n};
 
 // 'scotch' rather than 'simple'/'hierarchical': the wetted corridor is a sinuous,
 // non-convex block, so a geometric split would hand some processors mostly empty
-// space. Scotch balances by cell count and minimises the interface.
+// space. Scotch balances by cell count and minimizes the interface.
 method          scotch;
 """
     return _dict_file("decomposeParDict", body, location="system")
+
+
+def decomposition_of(case_dir: str | Path) -> int | None:
+    """``numberOfSubdomains`` of the case's ``system/decomposeParDict``, None without one."""
+    path = Path(case_dir) / "system" / "decomposeParDict"
+    if not path.is_file():
+        return None
+    found = re.search(r"^\s*numberOfSubdomains\s+(\d+)\s*;", path.read_text(), re.M)
+    return int(found.group(1)) if found else None
+
+
+def decomposition_for(case_dir: str | Path, n_processors: int) -> Path | None:
+    """The decomposition dictionary of a run on *n_processors* ranks, for ``-decomposeParDict``.
+
+    None where the case's own ``system/decomposeParDict`` names that number: the run uses it, with its method and coefficients, which may be the user's. Otherwise aXqua's scotch decomposition for the number is written to ``system/decomposeParDict-<n>`` and that file is returned; ``decomposePar`` and the solver are both given it, so the case's own file is never changed (a run on other ranks, killed or not, leaves nothing behind in it).
+    """
+    return _write_decomposition(case_dir, n_processors, f"decomposeParDict-{max(int(n_processors), 1)}")
+
+
+def write_decomposition(case_dir: str | Path, n_processors: int) -> bool:
+    """Make the case's own ``system/decomposeParDict`` name *n_processors* domains, for a case that others decompose with that file (the calibration template, which HydroBayesCal copies). A file that names the number already is left as it is. Returns whether the file was written."""
+    return _write_decomposition(case_dir, n_processors, "decomposeParDict") is not None
+
+
+def _write_decomposition(case_dir: str | Path, n_processors: int, name: str) -> Path | None:
+    """aXqua's decomposition for *n_processors* into ``system/<name>``, unless the case's own file names that number already (None then)."""
+    n = max(int(n_processors), 1)
+    if decomposition_of(case_dir) == n:
+        return None
+    path = Path(case_dir) / "system" / name
+    text = decomposition_dict(n)
+    if not (path.is_file() and path.read_text() == text):    # each stage asks again
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+    return path
 
 
 # --------------------------------------------------------------------------- #
@@ -815,7 +871,7 @@ def activate(case_dir: str | Path, stage: str, cfg=None, *,
     """Make one stage's dictionaries the active ``system/`` set.
 
     With *cfg* the three staged files are **regenerated from that config** before
-    being activated, so a run always honours the configuration it was launched with.
+    being activated, so a run always honors the configuration it was launched with.
     Without it they would come from the build, and changing ``end_time`` or
     ``max_courant`` and re-running ``openfoam_run.py`` would silently run the old
     values while every message reported the new ones - a trap precisely because

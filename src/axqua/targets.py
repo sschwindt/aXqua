@@ -241,7 +241,7 @@ PARAMETER_CATALOG: tuple[ParameterSpec, ...] = (
         "continuously in the Bayesian calibration"),
     # --- OpenFOAM (interFoam) ------------------------------------------------ #
     # These are NOT TELEMAC keywords: ParameterSpec.hbc_name falls through to the
-    # bare keyword for an unrecognised module, which is exactly the name
+    # bare keyword for an unrecognized module, which is exactly the name
     # HydroBayesCal's OpenFOAM binding dispatches on (see
     # hydroBayesCal.openfoam.control_openfoam.KEPSILON_COEFFS and "ks").
     # See axqua.solvers.openfoam.calibration.
@@ -421,7 +421,7 @@ def write_target_template(cfg: Config, path: Path | None = None,
             w.column_dimensions[get_column_letter(j)].width = max(12, len(h) + 2)
         w.freeze_panes = "A2"
 
-        for h in auto_cols:                     # grey the auto-computed columns
+        for h in auto_cols:                     # gray the auto-computed columns
             j = headers.index(h) + 1
             for r in range(2, _N_INPUT_ROWS + 2):
                 w.cell(row=r, column=j).fill = auto_fill
@@ -594,7 +594,7 @@ def _norm_id(value: object) -> str:
     """'1', 1, 1.0, ' P12 ' -> a canonical join string ('1' / 'P12').
 
     xlsx numeric cells always come back as floats, while the position layer
-    usually carries integer IDs; both sides are normalised so 1.0 joins 1.
+    usually carries integer IDs; both sides are normalized so 1.0 joins 1.
     """
     s = str(value).strip()
     try:

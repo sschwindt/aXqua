@@ -885,6 +885,9 @@ def test_every_code_of_the_profile_check_is_explained_in_the_documentation():
     # the check of the profile and the check of a case: both end as triangles
     source = "".join((root / "src" / "axqua" / "core" / name).read_text(encoding="utf-8")
                      for name in ("profile.py", "casecheck.py"))
+    # and what the case settings of the plugin add on Save
+    source += (root / "qgis_plugin" / "axqua" / "gui" / "case_editor.py").read_text(
+        encoding="utf-8")
     codes = set(re.findall(r'"(axqua\.(?:environment|config)\.[a-z_]+)"', source))
     assert len(codes) >= 17
     pages = "".join((root / "docs" / "troubleshooting" / name).read_text(encoding="utf-8")

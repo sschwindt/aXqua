@@ -32,6 +32,7 @@ from axqua.core.capabilities import refresh_markers
 from axqua.solvers.openfoam import (dicts, fields, mesh as ofmesh,
                                     planview, potential, quality)
 from axqua.solvers.openfoam.hotstart import State2D, load_hotstart
+from axqua.solvers.openfoam.layout import PREVIOUS_RUN, set_aside_runs
 from axqua.solvers.openfoam.polymesh import write_polymesh
 
 log = logging.getLogger("axqua")
@@ -130,6 +131,44 @@ def _inlet_discharges(of_mesh, cfg: Config, total: float) -> dict[str, float]:
     return {p: total * counts[p] / n_total for p in patches}
 
 
+#: Discharges, as shares of the case's own, at which a derived rating curve is
+#: tabulated for an outlet that follows it (``openfoam.outflow_boundary:
+#: rating-curve``). The outlet of the BAW refuses to extrapolate, so the range has to
+#: cover what the outflow does while the run settles.
+RATING_SHARES = (0.1, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0)
+
+
+def _derive_rating(cfg, discharges, *, out):
+    """A rating curve from the terrain at the outflow, by the case's own method."""
+    from axqua import rating
+
+    if getattr(cfg.boundaries, "rating_method", "trapezoid") == "section":
+        return rating.synthesize_outflow_rating_from_section(cfg, discharges, out=out)
+    return rating.synthesize_outflow_rating(cfg, discharges, out=out)
+
+
+def rating_table(cfg, discharge: float, folder, *, derive=None
+                 ) -> list[tuple[float, float]]:
+    """The stage-discharge relation an outlet follows: ``[(Q, h), ...]`` sorted by Q.
+
+    ``boundaries.stage_discharge`` where it has at least two discharges; otherwise a
+    curve derived from the terrain over :data:`RATING_SHARES` of *discharge*, written
+    to *folder* (one pair is enough for a fixed level, not for a relation).
+    """
+    from axqua.hydraulics import read_rating_pairs
+
+    given = getattr(cfg.boundaries, "stage_discharge", None)
+    if given and Path(given).is_file():
+        q, h = read_rating_pairs(Path(given))
+        if len(set(q.tolist())) >= 2:
+            return [(float(a), float(b)) for a, b in zip(q, h)]
+    out = Path(folder) / "rating-curve-openfoam.csv"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    (derive or _derive_rating)(cfg, [discharge * f for f in RATING_SHARES], out=out)
+    q, h = read_rating_pairs(out)
+    return [(float(a), float(b)) for a, b in zip(q, h)]
+
+
 def build_case(cfg: Config, *, state: State2D | None = None,
                hotstart: str | Path | None = None,
                case_dir: str | Path | None = None,
@@ -152,7 +191,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         state = load_hotstart(cfg, hotstart)
 
     # The same shared helper the TELEMAC scripts use, so the 3D case takes its
-    # discharge and its outflow rating from one source of truth. It also synthesises
+    # discharge and its outflow rating from one source of truth. It also synthesizes
     # the rating curve when the config leaves it unset - which isar deliberately
     # does, so each scenario derives its own from that scenario's geometry.
     from axqua.workflow import prepare_steady_inputs
@@ -166,7 +205,13 @@ def build_case(cfg: Config, *, state: State2D | None = None,
     # The level of the outflow is needed before the mesh, which walls an outlet above
     # it; a stage per outlet patch (openfoam.outlet_stage) is read by the mesher.
     tailwater = None
-    if of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
+    rating = None
+    if dicts.uses_rating_outlet(cfg):
+        # the outlet follows a stage-discharge relation; the run starts from its level
+        # at the discharge of the case, and the mesher walls the outlet above that
+        rating = rating_table(cfg, q, case_dir)
+        tailwater = float(np.interp(q, [r[0] for r in rating], [r[1] for r in rating]))
+    elif of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
         from axqua.hydraulics import resolve_outflow_wse
 
         tailwater = float(resolve_outflow_wse(cfg, q))
@@ -197,6 +242,20 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         else:
             notes.append(f"outlet stage {levels[0]:.3f} m a.s.l. from "
                          f"openfoam.outlet_stage - {where}")
+    elif rating is not None:
+        stage = tailwater
+        notes.append(
+            f"outlet follows a stage-discharge relation of {len(rating)} pairs "
+            f"(Q {rating[0][0]:.3g} to {rating[-1][0]:.3g} m3/s) with the boundary "
+            f"condition waterLevel_alpha_prgh of the BAW; it starts at {stage:.3f} m "
+            "a.s.l., the level at the discharge of the case. The library "
+            f"{dicts.BAW_LIBRARY} has to be in the OpenFOAM installation (the one aXqua "
+            "installs has it).")
+        if len(of_mesh.outlet_patches) > 1:
+            notes.append(
+                f"{len(of_mesh.outlet_patches)} outlets each follow the same relation "
+                "with the discharge through their own patch, which is right only where "
+                "each outlet has a rating curve of that shape")
     elif cfg.boundaries.outflow_condition == "free":
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
@@ -214,6 +273,10 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         notes.append(f"limitVelocity cap {cap:.2f} m/s "
                      f"({DEFAULT_VELOCITY_CAP_FACTOR:g}x the reach's p95 water speed)")
 
+    # Before the new case is written: the results of an earlier build cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would go on. A build that fails while it writes therefore leaves no old time beside the new mesh; what it moved is kept in previous-run/, and a second attempt finds nothing to move and keeps that folder.
+    moved = set_aside_runs(case_dir)
+    if moved:
+        notes.append(f"the results of the earlier build were moved to {PREVIOUS_RUN}/ ({', '.join(moved)}); the build before that is no longer kept")
     polymesh_dir = write_polymesh(of_mesh.polymesh, case_dir)
     # which column each cell is in and how thick it is: what a view of the result
     # from above needs, saved here so that it never depends on a second build
@@ -228,7 +291,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
     else:
         field_files = fields.write_fields(of_mesh, cfg, case_dir, state=state,
                                           outflow_stage=stage, discharges=inlets,
-                                          uniform_bed_ks=uniform_bed_ks)
+                                          uniform_bed_ks=uniform_bed_ks, rating=rating)
     dict_files = dicts.write_dicts(of_mesh, cfg, case_dir, velocity_cap=cap)
     (case_dir / "case.foam").write_text("")     # so ParaView can open the folder
     _write_build_record(cfg, of_mesh, case_dir, velocity_cap=float(cap))
@@ -258,7 +321,7 @@ BUILD_RECORD = "axqua-build.json"
 
 def _write_build_record(cfg: Config, of_mesh, case_dir: Path, *,
                         velocity_cap: float) -> Path:
-    """Record the build-time judgements the finished run has to be read against.
+    """Record the build-time judgments the finished run has to be read against.
 
     Only what the run itself cannot tell you afterwards. The lid-step ratio is the
     whole point: it is measured from the *prescribed* surface, so no amount of
@@ -373,7 +436,7 @@ def terrain_slope(of_mesh) -> float:
 
 
 def reach_flush_time(of_mesh, state) -> float:
-    """Rough time [s] for water to traverse the modelled reach once.
+    """Rough time [s] for water to traverse the modeled reach once.
 
     The yardstick for "how long must this run be": a free-surface run cannot be
     called steady before the domain has been flushed at least once, and comparing
@@ -390,7 +453,7 @@ def reach_flush_time(of_mesh, state) -> float:
 def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
     """What this run will cost, stated before anyone commits to it.
 
-    A 3D VOF model of a whole river reach is expensive in a way a 2D model is not,
+    A 3D VOF model of a whole water body is expensive in a way a 2D model is not,
     and the expense is not obvious from the cell count alone: it is the cell count
     **times** the number of time steps, and the time step is set by the thinnest
     cell. Spelling both out here is the difference between choosing a resolution and
@@ -430,7 +493,7 @@ def cost_lines(of_mesh, state, cfg: Config, velocity_cap: float) -> list[str]:
             out.append(f"  ! openfoam.end_time ({of.end_time:g} s) is shorter than one "
                        f"flush ({flush:,.0f} s), so the run cannot reach a steady "
                        "state. Either accept it as a transient study of the first "
-                       f"{of.end_time:g} s, or shorten the modelled reach - raising "
+                       f"{of.end_time:g} s, or shorten the modeled reach - raising "
                        "end_time to a full flush multiplies the step count above by "
                        f"{flush / max(of.end_time, 1e-9):.0f}.")
     return out

@@ -65,7 +65,7 @@ def test_metadata_declares_both_qgis_generations():
     assert fields["qgisMinimumVersion"].strip() == "3.44"
     assert float(fields["qgisMaximumVersion"].strip()) >= 4.0
     assert "supportsQt6" not in fields
-    # plugins.qgis.org requires all three links plus a GPL-compatible licence.
+    # plugins.qgis.org requires all three links plus a GPL-compatible license.
     for key in ("homepage", "repository", "tracker", "license", "description", "about"):
         assert fields[key].strip(), f"metadata.txt needs a {key}"
     assert "GPL" in fields["license"]
@@ -128,7 +128,7 @@ def test_the_plugin_never_imports_axqua():
 # ----------------------------------------------------------- executable discovery
 
 
-def _fake_axqua(tmp_path: Path, *, version: str = "axqua 0.3.5",
+def _fake_axqua(tmp_path: Path, *, version: str = "axqua 1.0.2",
                     exit_code: int = 0) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "axqua"
@@ -178,25 +178,23 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_axqua_too_old_for_this_plugin_is_refused_by_name(tmp_path, monkeypatch):
-    """The documentation has required aXqua 0.3 since the first release, and nothing
-    checked - so an older one presented as a series of unexplained parse failures at
-    every verb rather than as one sentence here."""
-    old = _fake_axqua(tmp_path, version="axqua 0.2.0")
+    """An older aXqua presented as a series of unexplained parse failures at every verb rather than as one sentence here. Since 1.0 the plugin also calls commands 0.5 does not have."""
+    old = _fake_axqua(tmp_path, version="axqua 0.5.0")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
     with pytest.raises(runner_client.RunnerNotFound) as excinfo:
         runner_client.find_executable(str(old))
-    assert "0.3 or newer" in str(excinfo.value)
+    assert "1.0 or newer" in str(excinfo.value)
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_unusual_version_string_is_accepted(tmp_path, monkeypatch):
     """Refusing to run something because its version is a git describe string would be
     worse than the problem the check exists for."""
-    dev = _fake_axqua(tmp_path, version="axqua 0.4.0.dev3+g1a2b3c4")
+    dev = _fake_axqua(tmp_path, version="axqua 1.0.1.dev3+g1a2b3c4")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
-    assert runner_client.find_executable(str(dev)).version.startswith("0.4.0")
+    assert runner_client.find_executable(str(dev)).version.startswith("1.0.1")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
@@ -254,7 +252,7 @@ def test_a_structured_failure_reaches_the_user_with_its_remedy():
 def test_output_that_is_not_json_is_reported_as_such(tmp_path, monkeypatch):
     script = tmp_path / "axqua"
     script.write_text("#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo "
-                      "'axqua 0.3.5'; else echo 'Segmentation fault'; fi\n",
+                      "'axqua 1.0.0'; else echo 'Segmentation fault'; fi\n",
                       encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     client = runner_client.RunnerClient(str(script))
@@ -653,6 +651,18 @@ def test_user_text_handles_anything_thrown_at_it():
         runner_client.RunnerError("failed", remedy="remedy"))
 
 
+def test_the_list_of_cases_round_trips_through_the_settings_of_qgis(tmp_path):
+    project = project_io.AxquaProject()
+    project.add_case(tmp_path / "a.axq-case")
+    project.add_case(tmp_path / "b.axq-case")
+    project.active_case = project.cases[1]
+    again = project_io.from_settings(project_io.as_settings(project))
+    assert again.cases == [str(tmp_path / "a.axq-case"), str(tmp_path / "b.axq-case")]
+    assert again.active_case == str(tmp_path / "b.axq-case")
+    for broken in ("", "not json", "[1, 2]", None):
+        assert project_io.from_settings(broken).cases == []
+
+
 def test_a_case_added_before_the_project_is_saved_survives_the_save(tmp_path):
     """Stored relative to QGIS's working directory, an entry resolved later against the
     project's own folder - a path that had never existed anywhere."""
@@ -872,13 +882,14 @@ def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
 # ------------------------------------------------------------------ the fixed tabs
 
 #: The tabs the user's instructions prescribe, in their order, with their sub-tabs.
+#: The user's corrections of 2026-10-16: Mesh convergence and Morphodynamic simulation
+#: moved into Simulations, whose TELEMAC sub-tab is the baseline.
 PRESCRIBED = [
     ("Configuration", []),
     ("Case Setup", []),
     ("Preprocessing", []),
-    ("Hydraulic simulation", ["Telemac", "OpenFOAM"]),
-    ("Mesh convergence", []),
-    ("Morphodynamic simulation", ["Telemac", "OpenFOAM"]),
+    ("Simulations", ["Baseline (Telemac)", "OpenFOAM", "Mesh convergence",
+                     "Morphodynamics"]),
     ("Calibration & validation", []),
     ("Postprocessing", ["QGIS", "ParaView", "VisIt"]),
     ("Batch-processing", []),
@@ -900,14 +911,19 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 9 tabs, 7 sub-tabs, 3 installation wizards and the window of the example case
-    assert len(keys) == len({key for key, _, _ in keys}) == 9 + 7 + 3 + 1
+    # 7 tabs, 7 sub-tabs, 3 installation wizards and the windows of the example case and of Clean Up
+    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 2
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
     assert sections.help_target("hydraulics") == ("usage/hydraulic-simulations",
                                                   "help-hydraulics")
     assert sections.help_target("hydraulics", "openfoam")[1] == "help-hydraulics-openfoam"
+    # a study within Simulations opens its own page
+    assert sections.help_target("hydraulics", "mesh") == ("usage/mesh-convergence",
+                                                          "help-mesh-convergence")
+    assert sections.help_target("hydraulics", "morphodynamics")[0] == \
+        "usage/morphodynamic-simulations"
 
 
 def test_a_capability_is_shown_on_the_tab_of_its_section():
@@ -916,9 +932,13 @@ def test_a_capability_is_shown_on_the_tab_of_its_section():
     assert sections.placement("telemac", "steady2d") == ("hydraulics", "telemac")
     assert sections.placement("telemac", "gain_lose") == ("hydraulics", "telemac")
     assert sections.placement("openfoam", "free_surface_3d") == ("hydraulics", "openfoam")
-    assert sections.placement("telemac", "vertical_convergence") == ("mesh", "")
-    assert sections.placement("telemac", "morphodynamics") == ("morphodynamics",
-                                                               "telemac")
+    assert sections.placement("telemac", "vertical_convergence") == ("hydraulics",
+                                                                     "mesh")
+    assert sections.placement("openfoam", "mesh_convergence") == ("hydraulics", "mesh")
+    assert sections.placement("telemac", "morphodynamics") == ("hydraulics",
+                                                               "morphodynamics")
+    assert sections.placement("openfoam", "morphodynamics") == ("hydraulics",
+                                                                "morphodynamics")
     assert sections.placement("openfoam", "calibration") == ("calibration", "")
 
 
@@ -931,29 +951,65 @@ def test_a_capability_nobody_placed_still_gets_shown():
     assert sections.placement("delft3d", "tides") == ("hydraulics", "")
 
 
-def test_help_opens_the_built_documentation_and_the_published_one_without_it(tmp_path):
+def test_help_opens_the_published_documentation_at_the_section_of_the_tab():
+    """Without a copy built on this computer, Help opens the published documentation (no copy is built into the plugin)."""
     from axqua_plugin.gui import help as help_pages
 
-    published = help_pages.url_for("mesh", local=tmp_path)
-    assert published == ("https://axqua.readthedocs.io/en/latest/"
-                         "usage/mesh-convergence.html#help-mesh-convergence")
-    assert help_pages.url_for("postprocessing", "visit", local=tmp_path).endswith(
+    assert help_pages.url_for("hydraulics", "mesh") == (
+        "https://axqua.eu/usage/mesh-convergence.html#help-mesh-convergence")
+    assert help_pages.url_for("postprocessing", "visit").endswith(
         "usage/postprocessing.html#help-postprocessing-visit")
-
-    (tmp_path / "postprocessing-visit.html").write_text("redirect", encoding="utf-8")
-    local = help_pages.url_for("postprocessing", "visit", local=tmp_path)
-    assert local.startswith("file://") and local.endswith("postprocessing-visit.html")
-    # the redirect page carries the anchor, because a file address may lose it
-    page = help_pages.redirect_page("usage/postprocessing", "help-postprocessing-visit")
-    assert "url=html/usage/postprocessing.html#help-postprocessing-visit" in page
+    assert help_pages.url_for_window("install-telemac").endswith(
+        "installation/simulation-software.html#install-telemac")
+    assert not hasattr(help_pages, "LOCAL")
 
 
-def test_a_finding_links_to_its_code_on_the_page_of_its_severity(tmp_path):
+def test_help_opens_the_documentation_in_the_language_of_qgis(monkeypatch):
     from axqua_plugin.gui import help as help_pages
 
-    warning = help_pages.url_for_code("axqua.environment.ambient", local=tmp_path)
+    monkeypatch.setattr(help_pages, "language", lambda: "de")
+    assert help_pages.url_for("case") == "https://axqua.eu/de/usage/case-setup.html#help-case-setup"
+    monkeypatch.setattr(help_pages, "language", lambda: "fr")
+    assert help_pages.url_for("case").startswith("https://axqua.eu/fr/usage/")
+
+
+def test_help_opens_a_copy_built_on_this_computer_when_the_browser_can_read_it(tmp_path,
+                                                                             monkeypatch):
+    """The user's decision of 2026-10-18: the local copy first, the published one otherwise."""
+    from axqua_plugin.gui import help as help_pages
+
+    site = tmp_path / "site"
+    help_pages.configure({"local": str(site), "languages": ["en", "de"], "readable": True})
+    assert help_pages.url_for("case") == f"{site.as_uri()}/usage/case-setup.html#help-case-setup"
+    monkeypatch.setattr(help_pages, "language", lambda: "de")
+    assert help_pages.url_for("case").startswith(f"{site.as_uri()}/de/usage/")
+    monkeypatch.setattr(help_pages, "language", lambda: "fr")      # not built in French
+    assert help_pages.url_for("case").startswith(f"{site.as_uri()}/usage/")
+    # a browser in a sandbox that cannot read the copy gets the published documentation
+    help_pages.configure({"local": str(site), "languages": ["en"], "readable": False})
+    assert help_pages.url_for("case").startswith("https://axqua.eu/fr/")
+
+
+def test_a_local_page_is_opened_through_a_page_that_keeps_its_section(tmp_path):
+    """xdg-open and Chromium drop the part after # of a file address."""
+    from axqua_plugin.gui import help as help_pages
+
+    site = tmp_path / "site"
+    site.mkdir()
+    help_pages.configure({"local": str(site), "languages": ["en"], "readable": True})
+    url = help_pages.url_for("case")
+    page = help_pages.forwarding_page(url)
+    assert page == site / "_help" / "open.html"
+    text = page.read_text(encoding="utf-8")
+    assert f'content="0; url={url}"' in text and f'location.replace("{url}")' in text
+
+
+def test_a_finding_links_to_its_code_on_the_page_of_its_severity():
+    from axqua_plugin.gui import help as help_pages
+
+    warning = help_pages.url_for_code("axqua.environment.ambient")
     assert warning.endswith("troubleshooting/warnings.html#axqua-environment-ambient")
-    error = help_pages.url_for_code("axqua.config.invalid_value", "error", local=tmp_path)
+    error = help_pages.url_for_code("axqua.config.invalid_value", "error")
     assert error.endswith("troubleshooting/errors.html#axqua-config-invalid-value")
 
 

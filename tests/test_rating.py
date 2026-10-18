@@ -138,6 +138,12 @@ friction: {{boundary_law: 3, boundary_coefficient: 38}}
     assert 379.8 < df["WSE"][0] < 381.0
     assert abs(df["WSE"][0] - (379.8 + df["depth"][0])) < 0.05
 
+    # several discharges, as the rating-curve outlet of the OpenFOAM model asks for
+    curve = pd.read_csv(synthesize_outflow_rating(cfg, [5.0, 10.0, 20.0], side_slope=1.0,
+                                                  out=tmp_path / "curve.csv"))
+    assert list(curve["Q"]) == [5.0, 10.0, 20.0]
+    assert curve["WSE"].is_monotonic_increasing
+
 
 def test_stage_for_discharge_matches_section_rating(tmp_path):
     """``stage_for_discharge`` is the solver ``section_rating`` writes out, so the
@@ -158,6 +164,11 @@ def test_stage_for_discharge_matches_section_rating(tmp_path):
     for q, wse in zip(df["Q"], df["WSE"]):
         direct = stage_for_discharge(q, station=station, bed=bed, ks=ks, slope=slope)
         assert abs(direct - wse) < 1e-3
+    # one discharge also as a numpy number, as the case's discharge often is
+    for one in (np.int64(5), np.array(5.0)):
+        single = pd.read_csv(section_rating(tmp_path / "one.csv", one, station=station,
+                                            bed=bed, ks=ks, slope=slope))
+        assert list(single["Q"]) == [5.0]
 
 
 def test_stage_for_discharge_is_monotonic_and_validated():

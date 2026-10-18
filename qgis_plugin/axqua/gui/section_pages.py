@@ -51,6 +51,8 @@ class SectionPage(QWidget):
         self.empty_text = empty_text
         self.hide_build = set(hide_build)
         self._boxes: dict[tuple[str, str], tuple[QGroupBox, CapabilityTab]] = {}
+        #: the index of the first box in the layout: after the note
+        self._first_box = 1
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         body = QWidget()
@@ -99,7 +101,7 @@ class SectionPage(QWidget):
                 inner.setContentsMargins(4, 4, 4, 4)
                 inner.addWidget(tab)
                 self._boxes[key] = (box, tab)
-                self._layout.insertWidget(position + 1, box)
+                self._layout.insertWidget(position + self._first_box, box)
             box.setTitle(title)
             if key in self.hide_build:
                 tab.build_button.setVisible(False)
@@ -115,6 +117,49 @@ class SectionPage(QWidget):
     def tab(self, solver: str, capability: str) -> CapabilityTab | None:
         box = self._boxes.get((solver, capability))
         return box[1] if box else None
+
+
+class SolverChoicePage(SectionPage):
+    """A sub-tab whose study or simulation exists for TELEMAC and for OpenFOAM.
+
+    A choice at the top selects the simulation program, and the page shows the boxes of
+    that program only: the mesh convergence study of the TELEMAC or of the OpenFOAM
+    model, the morphodynamic simulation with TELEMAC and GAIA or with OpenFOAM and
+    sediDriftFoam2.
+    """
+
+    def __init__(self, context, section_key: str, sub_key: str, *,
+                 empty_texts: dict[str, str] | None = None, parent=None) -> None:
+        super().__init__(context, section_key, sub_key, parent=parent)
+        self.empty_texts = dict(empty_texts or {})
+        self._view = None
+        row = QHBoxLayout()
+        row.addWidget(QLabel("Simulation program:"))
+        self.solver_choice = QComboBox()
+        for solver, title in sections.SOLVERS:
+            self.solver_choice.addItem(title, solver)
+        self.solver_choice.currentIndexChanged.connect(lambda _=0: self.apply(self._view))
+        row.addWidget(self.solver_choice)
+        row.addStretch(1)
+        self._layout.insertLayout(0, row)
+        self._first_box = 2                    # after the choice and the note
+
+    @property
+    def solver(self) -> str:
+        return self.solver_choice.currentData() or "telemac"
+
+    def capabilities(self, case_view) -> list:
+        return [c for c in super().capabilities(case_view) if c.solver == self.solver]
+
+    def apply(self, case_view) -> None:
+        self._view = case_view
+        self.empty_text = self.empty_texts.get(self.solver, "")
+        super().apply(case_view)
+
+    def choose(self, solver: str) -> None:
+        index = self.solver_choice.findData(solver)
+        if index >= 0:
+            self.solver_choice.setCurrentIndex(index)
 
 
 class PreprocessingPage(QWidget):
@@ -145,8 +190,8 @@ class PreprocessingPage(QWidget):
         layout.addWidget(build_box)
 
         self.openfoam_note = _label(
-            "The OpenFOAM case is built on the tab Hydraulic simulation > OpenFOAM, "
-            "because its build starts from the TELEMAC warm-up run.")
+            "The OpenFOAM case is built on the tab Simulations > OpenFOAM, because its "
+            "build starts from the TELEMAC warm-up run.")
         layout.addWidget(self.openfoam_note)
 
         check_box = QGroupBox("Preprocessing checkup")
@@ -350,9 +395,25 @@ class ProgramPage(QWidget):
         inner.addWidget(self.status)
         layout.addWidget(box, 1)
 
-        layout.addWidget(_label(
-            f"OpenFOAM results need no export. {title} opens the case folder of an "
-            "OpenFOAM simulation directly."))
+        foam_box = QGroupBox("OpenFOAM cases of the selected case")
+        foam_layout = QVBoxLayout(foam_box)
+        foam_layout.addWidget(_label(
+            f"OpenFOAM results need no export: {title} opens the case "
+            + ("file case.foam." if key == "paraview" else
+               "through its file system/controlDict.")
+            + " Which outputs a case offers is set in its post-processing settings."))
+        self.foam_list = QListWidget()
+        self.foam_list.setMaximumHeight(70)
+        self.foam_list.itemSelectionChanged.connect(self._update_buttons)
+        foam_layout.addWidget(self.foam_list)
+        row = QHBoxLayout()
+        self.foam_button = QPushButton(f"Open the OpenFOAM case in {title}")
+        self.foam_button.clicked.connect(self.open_openfoam)
+        row.addWidget(self.foam_button)
+        row.addStretch(1)
+        foam_layout.addLayout(row)
+        layout.addWidget(foam_box)
+        self.foam_cases: list[dict] = []
         self.show_profile(getattr(context, "profile", None))
         self._update_buttons()
 
@@ -407,6 +468,14 @@ class ProgramPage(QWidget):
                   owner=self)
 
     def show_results(self, payload: dict, *, note: str = "") -> None:
+        self.foam_cases = [case for case in (payload or {}).get("openfoam") or []
+                           if case.get(self.key)]
+        self.foam_list.clear()
+        for case in self.foam_cases:
+            self.foam_list.addItem(case.get("label", "") + ("" if case.get("run")
+                                                            else " (not run yet)"))
+        if self.foam_cases:
+            self.foam_list.setCurrentRow(0)
         self.results = list((payload or {}).get("results") or [])
         self.folder = str((payload or {}).get("folder") or "")
         self.table.setRowCount(len(self.results))
@@ -447,6 +516,8 @@ class ProgramPage(QWidget):
         return ""
 
     def _update_buttons(self) -> None:
+        if hasattr(self, "foam_button"):
+            self.foam_button.setEnabled(bool(self.program_path and self._foam_file()))
         self.export_button.setEnabled(bool(self.results))
         ready = bool(self.program_path and self._exported_file())
         self.open_button.setEnabled(ready)
@@ -484,6 +555,25 @@ class ProgramPage(QWidget):
         self.export_button.setEnabled(bool(self.results))
         self.status.setText(user_text(exc))
         self.ctx.error(user_text(exc))
+
+    def _foam_file(self) -> str:
+        """What the program opens of the selected OpenFOAM case."""
+        row = self.foam_list.currentRow() if hasattr(self, "foam_list") else -1
+        if not 0 <= row < len(getattr(self, "foam_cases", [])):
+            return ""
+        return str(self.foam_cases[row].get(self.key) or "")
+
+    def open_openfoam(self) -> None:
+        path = self._foam_file()
+        if not (path and self.program_path):
+            return
+        arguments = PROGRAMS[self.key][1](path)
+        if launch(self.program_path, arguments):
+            self.status.setText(f"{self.title} was started with {path}.")
+        else:
+            self.status.setText(f"{self.title} could not be started: "
+                                f"{self.program_path}")
+            self.ctx.warn(self.status.text())
 
     def open_program(self) -> None:
         path = self._exported_file()
@@ -554,7 +644,7 @@ class BatchPage(QWidget):
         return batch.ordered(kinds)
 
     def apply(self, case_view) -> None:
-        """Grey out the steps the active case does not ask for."""
+        """Gray out the steps the active case does not ask for."""
         asked, by_solver = set(), set()
         for solver in (case_view.enabled_solvers if case_view is not None else []):
             names = {c.name for c in solver.visible_capabilities if c.configured}
@@ -567,7 +657,7 @@ class BatchPage(QWidget):
             step = batch.step(entry.data(role))
             needed = step.needs
             # 3D and calibration become possible once the steps before them have run,
-            # so only what the case file itself rules out is greyed out
+            # so only what the case file itself rules out is grayed out
             wanted = ((step.solver, needed) in by_solver if step.solver
                       else needed in asked)
             usable = case_view is not None and (wanted or needed == "steady3d")

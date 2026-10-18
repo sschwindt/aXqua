@@ -39,7 +39,7 @@ OFFSET_THRESHOLD = 0.30
 SIGMA_RATIO = 4.0
 #: ...with scatter no larger than this [m].
 CONSTANT_TOLERANCE = 0.06
-#: Above this, a constant residual is an error even under `warn` - a metre of "bed"
+#: Above this, a constant residual is an error even under `warn` - a meter of "bed"
 #: error in a wadeable reach is never data.
 REFUSE_THRESHOLD = 1.00
 #: Fewer points than this cannot support the statistics.

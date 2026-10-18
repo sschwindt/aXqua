@@ -163,7 +163,7 @@ def initial_velocity(of_mesh, alpha: np.ndarray, state=None) -> np.ndarray:
     """Per-cell velocity: the seed's velocity in water, zero in air.
 
     From a **2D** seed this is uniform over the depth, deliberately, rather than an
-    assumed log profile: the log profile's normalisation is only meaningful where the
+    assumed log profile: the log profile's normalization is only meaningful where the
     wall function is admissible, and on a gravel bed that is often nowhere (see
     :mod:`axqua.solvers.openfoam.quality`). The vertical structure is what the 3D
     run is *for*, so it is left to develop during the spin-up rather than invented
@@ -269,7 +269,7 @@ def _outlet_profiles(of_mesh, patch: str, stage: float, rho: float, *,
                      reference: float | None = None) -> tuple[str, str]:
     """``(alpha inletValue, p profile)`` on an outlet patch holding *stage*.
 
-    ``alpha`` is 1 on faces whose centre lies below the target water level and 0
+    ``alpha`` is 1 on faces whose center lies below the target water level and 0
     above; ``p`` is the still-water hydrostatic pressure of a column standing at that
     level, continued upwards as air at rest (:func:`outlet_pressure`). Together they
     are what ``prghPressure`` needs to hold a tailwater.
@@ -354,10 +354,16 @@ def outlet_stages(outflow_stage, patches) -> dict[str, float] | None:
     return {p: float(outflow_stage) for p in patches}
 
 
+def rating_entry(table) -> str:
+    """A rating curve as the ``table`` of a Function1: ``table ((Q h) ...)``."""
+    return "table (" + " ".join(f"({q:.6g} {h:.6f})" for q, h in table) + ")"
+
+
 def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
                  outflow_stage: "float | Mapping[str, float] | None" = None,
                  discharges: dict[str, float] | None = None,
-                 uniform_bed_ks: bool = False) -> list[Path]:
+                 uniform_bed_ks: bool = False,
+                 rating: "list[tuple[float, float]] | None" = None) -> list[Path]:
     """Write ``0/{alpha.water, U, p_rgh, nut, k, omega|epsilon}``.
 
     *outflow_stage* is the water level [m a.s.l.] the outlet patches hold; ``None``
@@ -365,6 +371,11 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     *discharges* maps each inlet patch to its own Q [m3/s].
     *uniform_bed_ks* writes one global bed roughness instead of the per-face list
     (see :func:`_wall_entries`); set it for a calibration template.
+    *rating* is a stage-discharge relation ``[(Q, h), ...]``: with it, every outlet of
+    a two-phase case holds the level that the relation gives at the discharge that
+    leaves through it, with the boundary condition ``waterLevel_alpha_prgh`` of the
+    BAW (``openfoam.outflow_boundary: rating-curve``). *outflow_stage* is then the
+    level the run starts from.
     """
     of = cfg.openfoam
     rigid = getattr(of_mesh, "rigid_lid", False)
@@ -391,7 +402,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     # Under a rigid lid the domain is water only, so alpha is identically 1: no
     # interface to compress, no air to accelerate, and interFoam degenerates to a
     # single-phase solver while keeping its p_rgh + gravity treatment intact. That is
-    # the whole trick - the air phase is removed by construction rather than modelled
+    # the whole trick - the air phase is removed by construction rather than modeled
     # cheaply, and none of the pressure formulation has to be re-derived.
     alpha = (np.ones(of_mesh.n_cells) if rigid
              else initial_alpha(of_mesh, wet_depth=cfg.hydrodynamics.wet_depth))
@@ -411,6 +422,13 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
         # it would only be discarded below.
         if rigid or stages is None:
             bc[patch] = {"type": "zeroGradient"}
+        elif rating:
+            # BAW: zeroGradient where water leaves, the level of the curve where it
+            # enters; the profile of the starting level is only the first value
+            inlet_value, _ = _outlet_profiles(of_mesh, patch, stages[patch],
+                                              of.water_density)
+            bc[patch] = {"type": "waterLevel_alpha_prgh", "mode": "ratingCurveTable",
+                         "data": rating_entry(rating), "value": inlet_value}
         else:
             inlet_value, _ = _outlet_profiles(of_mesh, patch, stages[patch],
                                               of.water_density)
@@ -476,7 +494,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
             # constant, but a constant equal to the free-surface elevation head, not
             # to nothing. Writing 0 puts the zero-pressure level at the mesh DATUM
             # instead of at the water surface, which on this case (z_s = 0.715 m in
-            # local CAD metres) offset every reported pressure by -7.0 kPa. Velocities
+            # local CAD meters) offset every reported pressure by -7.0 kPa. Velocities
             # are unaffected - a uniform shift of p has no gradient - but anything
             # read FROM the pressure is wrong, and correct_lid.py is exactly that: it
             # reported a 0.87 m lid error that was purely this datum.
@@ -486,6 +504,11 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
                          "value": f"uniform {of.water_density * GRAVITY * level:.6g}"}
         elif stages is None:
             bc[patch] = {"type": "zeroGradient"}
+        elif rating:
+            # the hydrostatic pressure below the level that the curve gives for the
+            # discharge through the patch, air at rest above it (Thorenz 2024)
+            bc[patch] = {"type": "waterLevel_alpha_prgh", "mode": "ratingCurveTable",
+                         "data": rating_entry(rating), "value": "uniform 0"}
         else:
             _, profile = _outlet_profiles(of_mesh, patch, stages[patch],
                                           of.water_density,

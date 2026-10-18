@@ -10,12 +10,12 @@ A 2D depth-averaged model cannot give the vertical structure of the flow, and a
 steady single-phase 3D solver (``simpleFoam``) cannot represent a water surface that
 has a gradient - which every real reach does. That leaves a two-phase VOF solver,
 and with it the air phase, which is where OpenFOAM river models usually come apart:
-the air drives the Courant number, collapses the time step and destabilises the
-outlet, all for a phase nobody is modelling for its own sake.
+the air drives the Courant number, collapses the time step and destabilizes the
+outlet, all for a phase nobody is modeling for its own sake.
 
 Three things here address that directly:
 
-* **The lid follows the water.** The mesh is only built ``openfoam.freeboard`` metres
+* **The lid follows the water.** The mesh is only built ``openfoam.freeboard`` meters
   above the 2D free surface, so most of the air simply does not exist as cells.
 * **The velocity is capped.** ``system/fvConstraints`` carries a ``limitVelocity``
   constraint at several times the reach's own water speed. Water never reaches it;

@@ -24,6 +24,9 @@ flow specs, or the ``compile_*`` helpers directly):
   positions come from a companion point GeoPackage keyed by vertical number.
 * ``inline`` - verticals with EPSG coordinates repeated inline on every row and
   0.2/0.6/0.8 profiles.
+* ``points`` - a point layer with one point per reading, as the corrected campaign
+  layers of 2026-10 are (via :func:`axqua.ground_truth.read_points`); the readings
+  of a vertical are reduced by a profile rule, the depth average by default.
 
 The per-point velocity error propagates the FlowTracker component errors and is
 floored (``vel_err_floor``). Raise the floor for a campaign that is not an
@@ -214,12 +217,30 @@ def compile_inline(values_xlsx: Path, sheet: str = "KB15",
         [f"{label}-{k.replace(' ', '')}" for k in rows], vel_err_floor)
 
 
+def compile_points(layer, crs_epsg: int, vel_err_floor=VELOCITY_ERROR_FLOOR,
+                   label: str = "pt", profile: str = "depth-average") -> pd.DataFrame:
+    """A point layer with one point per reading -> one calibration point per vertical.
+
+    The layer carries no component errors, so every point gets ``vel_err_floor``. It
+    carries no elevation either, so ``z`` is 0, which the 2D calibration ignores.
+    """
+    from axqua.ground_truth import read_points, select_point_profiles
+
+    df = select_point_profiles(read_points(layer, crs_epsg), profile)
+    if df.empty:
+        raise ValueError(f"no measurement verticals in {Path(layer).name}")
+    nan = np.full(len(df), np.nan)
+    return assemble_velocity_csv(
+        df["x"], df["y"], df["z"], df["u"], df["v"], nan, nan, df["h"],
+        [f"{label}-{i + 1}" for i in range(len(df))], vel_err_floor)
+
+
 _COMPILERS = {"adapter": compile_adapter, "transect": compile_transect,
-              "inline": compile_inline}
+              "inline": compile_inline, "points": compile_points}
 
 
 def compile_campaign(kind: str, **kwargs) -> pd.DataFrame:
-    """Dispatch to the ``adapter`` / ``transect`` / ``inline`` layout compiler."""
+    """Dispatch to the ``adapter`` / ``transect`` / ``inline`` / ``points`` layout compiler."""
     try:
         fn = _COMPILERS[kind]
     except KeyError:

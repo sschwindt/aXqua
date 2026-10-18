@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 project = "aXqua"
 author = "Sebastian Schwindt"
 copyright = f"{datetime.now():%Y}, {author}"
-release = "0.5.0"
+release = "1.0.0"
 version = "0.1"
 
 # -- General configuration ----------------------------------------------------
@@ -22,18 +22,12 @@ extensions = [
     "sphinx.ext.napoleon",     # parse NumPy-/Google-style docstrings
     "sphinx.ext.viewcode",     # add [source] links
     "sphinx.ext.intersphinx",  # cross-link to numpy/python docs
+    "sphinx_design",           # tab-set / tab-item
 ]
 
-# The copy of the documentation that is built into the QGIS plugin
-# (scripts/build_plugin_zip.py passes "-t plugin_help") leaves the source listings out:
-# they are 10 MB of the 25 MB an archive may have, and Help is opened for the workflow
-# sections, not to read source code. "tags" is provided by Sphinx when it runs this file.
-if tags.has("plugin_help"):  # noqa: F821
-    extensions.remove("sphinx.ext.viewcode")
-
 templates_path = ["_templates"]
-# _incoming/ is a drop folder for text that still has to be folded into the tree.
-exclude_patterns = ["_build", "_incoming", "Thumbs.db", ".DS_Store"]
+# _incoming/ is a drop folder for text that still has to be folded into the tree. i18n/ holds the tools of the translations and locale/ their catalogs; neither has pages.
+exclude_patterns = ["_build", "_incoming", "i18n", "locale", "Thumbs.db", ".DS_Store"]
 
 # -- Autodoc ------------------------------------------------------------------
 autodoc_member_order = "bysource"
@@ -79,6 +73,14 @@ def setup(app):
     app.connect("autodoc-process-docstring", _literal_absolute_values)
 
 
+# -- Translations -------------------------------------------------------------
+# The German and French pages are built from the catalogs in docs/locale/<lang>/LC_MESSAGES, one per page, which docs/i18n/translate.py keeps up to date (docs/i18n/README.md). Sphinx reads them when it builds with -D language=de or fr; Read the Docs does the same for a translation project. The English build does not read them.
+locale_dirs = ["locale/"]
+gettext_compact = False
+gettext_uuid = False
+gettext_last_translator = "docs/i18n/translate.py"
+gettext_language_team = "aXqua"
+
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
@@ -106,3 +108,6 @@ html_theme_options = {
     "sticky_navigation": True,
 }
 html_css_files = ["axqua.css"]
+html_baseurl = os.environ.get(
+    "READTHEDOCS_CANONICAL_URL", "https://axqua.eu/"
+)

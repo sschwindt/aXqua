@@ -60,7 +60,7 @@ cases/<your-case>/
      - (the TELEMAC installation is set once per computer: axqua profile init)
      - inputs.*          -> your files under user-sources/
      - mesh / friction / hydrodynamics / calibration -> your values
-   No measured outlet rating curve? Synthesise one from normal-flow hydraulics:
+   No measured outlet rating curve? Synthesize one from normal-flow hydraulics:
      axqua rating -o user-sources/geodata/rating-curve.csv \
        --manning 0.035 --slope <S0> --width <b> --bed-elevation <z> --q <Q>
 
@@ -68,7 +68,7 @@ cases/<your-case>/
      axqua cases/<your-case>/case-template.axq-case --check
 
 4. Step 1 - build the complete TELEMAC case into tm-simulation/simulation/
-   (final mesh, .cli, .tbl, .cas; the inflow + outflow rating are synthesised
+   (final mesh, .cli, .tbl, .cas; the inflow + outflow rating are synthesized
    from the geodata if missing; HBC artifacts -> calibration-validation/):
      python cases/<your-case>/preprocessing.py
 

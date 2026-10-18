@@ -58,7 +58,7 @@ _HEADER_RULE = "# " + "-" * 74
 
 
 class Capability(str, Enum):
-    """The shared vocabulary. One name per modelling capability, across all solvers.
+    """The shared vocabulary. One name per modeling capability, across all solvers.
 
     Shared on purpose: "does this reach have an unsteady case" is the same question
     whichever code answers it, and a per-solver vocabulary would make the status
@@ -302,7 +302,7 @@ class CaseStatus:
     #: of the REACH: `hydrodynamics.wet_depth` is the depth below which water is not
     #: surface flow (and is the threshold aXqua's own reports already use, so a map
     #: drawn to a different one disagrees with its own report), and
-    #: `postproc.velocity_scale_max` is the top of the velocity colour scale, which a
+    #: `postproc.velocity_scale_max` is the top of the velocity color scale, which a
     #: chute and a lowland river do not share.
     display: dict = field(default_factory=dict)
 

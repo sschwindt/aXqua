@@ -43,7 +43,7 @@ log = logging.getLogger("axqua")
 
 #: Keep a target this far (as a fraction of the column) off the bed and the
 #: surface. A target *on* the bed sits in the wall-function layer, where the
-#: modelled velocity is a boundary condition rather than a result; one *on* the
+#: modeled velocity is a boundary condition rather than a result; one *on* the
 #: surface sits on the lid.
 DEFAULT_MARGIN = 0.05
 
@@ -61,7 +61,7 @@ class ModelColumn:
 
     @property
     def wse(self) -> np.ndarray:
-        """Modelled water-surface elevation."""
+        """Modeled water-surface elevation."""
         return self.bed + self.depth
 
     def usable(self, *, min_depth: float = 0.05) -> np.ndarray:
@@ -204,11 +204,11 @@ def openfoam_column(x, y, *, cfg, cache: Path | None = None,
     Not from ``geometry.slf``: the campaign mesh is coarsened by
     ``openfoam.cell_size_factor`` (0.5 m -> 2.0 m on KB15) and its bed is resampled
     from the DEM onto that lattice, so on a rough bed the two disagree by
-    decimetres - enough to place a near-bed target below the OpenFOAM bed. The
+    decimeters - enough to place a near-bed target below the OpenFOAM bed. The
     column has to come from the mesh the solver will actually run on.
 
     Under ``mode: rigid-lid`` the lid *is* the prescribed free surface, so the
-    column height is exactly the modelled depth.
+    column height is exactly the modeled depth.
 
     *cache* is an ``.npz`` sidecar written at template-build time; without it the
     lattice is rebuilt, which is deterministic given the same config, DEM and seed.
@@ -248,7 +248,7 @@ def columns_from_openfoam_mesh(mesh) -> tuple[np.ndarray, np.ndarray, np.ndarray
     else:
         raise ValueError(
             "the OpenFOAM mesh carries no hotstart column depth, so there is no "
-            "modelled water column to place a target in. Build the case with a 2D "
+            "modeled water column to place a target in. Build the case with a 2D "
             "seed (openfoam.pre_run / a converged r2d.slf).")
     return (np.asarray(mesh.grid.cell_xy, dtype=float), bed, top, float(mesh.grid.dx))
 

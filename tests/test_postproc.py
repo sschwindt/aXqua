@@ -9,6 +9,7 @@ condition while looking perfectly well-formed.
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -210,6 +211,27 @@ def test_a_rigid_lid_case_does_not_advertise_alpha_water(tmp_path):
     cfg.openfoam.mode = "vof"
     assert "alpha.water" in OpenFoamBackend().describe_results(cfg)[0].fields
 
+    # the times are those of the case, which a visualizer opens
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert dataset.times == (0.0, 120.0) and not dataset.notes and not dataset.decomposed
+    # ...unless the result is in the processor folders only: a decomposed case, opened as one
+    for folder in ("processor0/0", "processor0/150", "processor1/0", "processor1/150"):
+        (case / folder).mkdir(parents=True)
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert dataset.decomposed and dataset.times == (0.0, 150.0)
+    assert any("Decomposed Case" in note for note in dataset.notes)
+    from axqua.postproc.visit import _open
+    assert '_options["Case Type"] = 0' in _open(dataset)
+    shutil.rmtree(case / "processor0")
+    shutil.rmtree(case / "processor1")
+    (case / "processors2" / "180").mkdir(parents=True)          # a collated decomposition
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert dataset.decomposed and dataset.times == (180.0,)
+    (case / "200").mkdir()                                        # reconstructed
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert not dataset.decomposed and dataset.times == (0.0, 120.0, 200.0)
+    assert "Case Type" not in _open(dataset)
+
 
 def test_profiles_emits_one_lineout_per_vertical(tmp_path):
     points = [{"id": "01", "x": 10.0, "y": 20.0, "z_bed": 370.0, "z_top": 370.5},
@@ -368,4 +390,19 @@ def test_a_dataset_is_not_assumed_hashable(tmp_path):
     import pytest as _pytest
 
     with _pytest.raises(TypeError):
-        {_vof(tmp_path)}          # noqa: B018 - the behaviour being pinned
+        {_vof(tmp_path)}          # noqa: B018 - the behavior being pinned
+
+
+def test_an_empty_scene_list_renders_no_figure(tmp_path, monkeypatch, capsys):
+    """Every box of *VisIt figures* unchecked writes ``scenes: []``: a choice, not "every scene"."""
+    from axqua import cli
+    from axqua.postproc import render as render_mod
+
+    case = tmp_path / "case.axq-case"
+    case.write_text("project: {name: c, crs_epsg: 25832}\n"
+                    "geodata: {dem_initial: dem.tif, boundary: outline.gpkg}\n"
+                    "postproc: {scenes: []}\n", encoding="utf-8")
+    monkeypatch.setattr(render_mod, "render",
+                        lambda *a, **k: pytest.fail("rendered although none was asked"))
+    assert cli._run_postproc([str(case)]) == 0
+    assert "no figure" in capsys.readouterr().out

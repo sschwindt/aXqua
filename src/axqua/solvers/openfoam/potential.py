@@ -362,7 +362,7 @@ def fv_schemes() -> str:
 
     ``ddtSchemes default Euler`` matters more than it looks: ``waveSurfacePressure``
     reads the ddt scheme registered for ``zeta`` to decide how to integrate the
-    surface displacement, and aborts on anything it does not recognise.
+    surface displacement, and aborts on anything it does not recognize.
     """
     from .dicts import _dict_file
 

@@ -24,23 +24,25 @@ The plugin lives in ``qgis_plugin/axqua/`` and is compatible with QGIS 3.44 and 
    * - ``core/styles.py``
      - The predefined map styles for water depth and flow velocity.
    * - ``core/project.py``
-     - The project file of the plugin, which lists the cases of a project.
+     - The list of cases of the panel, kept in the settings of QGIS, and the reader of the project files of earlier versions.
    * - ``core/batch.py``
      - The steps of a batch and the shell script that runs them without QGIS.
    * - ``gui/sections.py``
      - The table of the tabs and sub-tabs: their order, the capabilities each one shows, and the documentation page and label that *Help* opens for it.
    * - ``gui/dock.py``
-     - The panel: the fixed tabs, the job list below them, and *Help*.
+     - The panel: the fixed tabs, the job list below them, *Clean Up* and *Help*.
    * - ``gui/configuration_tab.py``, ``gui/profile_editor.py``
      - The *Configuration* tab and the editor of the profile of this computer.
-   * - ``gui/install_wizard.py``
-     - The installation wizards for TELEMAC, OpenFOAM and the postprocessors: settings, check, and the running installation. A window around ``axqua install``.
+   * - ``gui/install_wizard.py``, ``gui/report_issue.py``
+     - The installation wizards for TELEMAC, OpenFOAM and the postprocessors: the tabs settings, check, and the running installation, a window around ``axqua install``; and the report of a problem that the checks and fixes did not solve.
    * - ``gui/case_editor.py``, ``gui/editor_base.py``
-     - The editor of a case file, with forms that are generated from ``axqua schema``, and what both editors share: *Save*, *Cancel* and *Exit*.
+     - The case settings: the pages and frames of a case file, generated from ``axqua schema`` with the settings that are required in bold dark purple, and what both editors share: *Save*, *Cancel* and *Exit*.
    * - ``gui/case_tab.py``, ``gui/section_pages.py``
      - The *Case Setup* tab and the pages of the workflow tabs.
    * - ``gui/findings.py``, ``gui/help.py``
-     - The warning triangles, and the addresses of the documentation that the plugin opens.
+     - The warning triangles, and the addresses of the documentation that the plugin opens (a local copy or the published one, in the language of QGIS). ``gui/style.py`` holds the colors: the dark purple of the aXqua icon for what is required, dark green for what was found.
+   * - ``gui/cleanup_dialog.py``
+     - The window of *Clean Up*, around ``axqua cleanup``: what a case can do without, ticked by category, and its removal.
    * - ``gui/`` (other files)
      - The job table, the log viewer, the settings dialog, the print layout and the movie export.
    * - ``processing/``
@@ -61,6 +63,6 @@ Where the installed QGIS is older than version 3.44, the script ``scripts/qgis_d
 
 QGIS lists a plugin only if it can read ``metadata.txt``. The command ``python scripts/build_plugin_zip.py --check`` reads the file in the same way as QGIS.
 
-*Help* in the plugin opens the documentation that is built into the plugin archive. A linked plugin folder has no built documentation, so that *Help* opens the published documentation instead. To build it into the linked folder, run ``python scripts/build_plugin_zip.py --help-only``.
+*Help* in the plugin opens the documentation at the section of the tab that is showing. The plugin archive carries no copy of the documentation: ``axqua docs`` names a copy built on this computer (``$AXQUA_DOCS``, else ``docs/_build/site`` or ``docs/_build/html`` of the source checkout) and whether the default browser can read it, and the plugin opens the published documentation otherwise. A local page is opened through a small forwarding page (``_help/open.html`` beside the copy), because ``xdg-open`` and Chromium drop the section part (``#...``) of a file address.
 
 The tests of the plugin are in ``qgis_plugin/tests/``. The tests that require QGIS are skipped when the Python module ``qgis`` is not available. The script ``scripts/build_plugin_zip.py`` builds the plugin archive and verifies the requirements of the QGIS plugin repository.

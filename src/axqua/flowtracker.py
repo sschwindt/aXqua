@@ -65,7 +65,7 @@ def _norm(h: object) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
-# canonical field -> the normalised headers that map to it, in priority order
+# canonical field -> the normalized headers that map to it, in priority order
 _FIELD_HEADERS: dict[str, tuple[str, ...]] = {
     "u": ("velx", "v(x)", "vx", "u average", "average v(x)"),
     "v": ("vely", "v(y)", "vy", "v average", "average v(y)"),

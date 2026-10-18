@@ -40,6 +40,8 @@ TELEMAC results are loaded as a mesh layer with two predefined styles:
    * - Velocity magnitude with arrows
      - The velocity magnitude from yellow to purple with dark arrows. This is the style in which the velocity layer is loaded.
 
+**Maps of a case.** Which layers *Load results* adds, and whether one of these map styles is applied at once, is set for each case in its settings (*Open case settings...* on the *Case Setup* tab, page *Post-processing*): ``postproc.telemac_maps`` selects the maps of a TELEMAC result (``depth``, ``velocity``, ``free-surface``; water depth and velocity by default), and ``postproc.map_style`` names a map style that is applied to the water depth layer of every loaded TELEMAC result (``depth-streamlines``, ``depth-arrows``, ``velocity-streamlines``, ``velocity-arrows``; none by default).
+
 A streamline is a line that is tangent to the velocity at each of its points. Streamlines therefore show flow paths, recirculation zones and the division of the discharge among several channels more clearly than arrows. Neither arrows nor streamlines are drawn where the velocity is below 0.05 m/s. All other properties of the layers are changed in the QGIS layer properties as usual (*Layer Properties > Symbology*).
 
 .. figure:: ../img/gui-map-streamlines.png
@@ -96,7 +98,7 @@ The node coordinates are taken from the geometry file of the model and not from 
 #. To display the relief of a 2D result, apply the filter *Warp By Scalar* with ``BOTTOM`` for the terrain or with ``FREE SURFACE`` for the water surface. The mesh is flat by default for a reason: an area or a volume that the filter *Integrate Variables* computes over the flat mesh is the area or the volume of the model, whereas the same integral over a mesh on the sloping bed is larger.
 #. For streamlines, apply the filter *Stream Tracer* with the vector ``VELOCITY`` and a line across the channel as seed.
 
-**Open an OpenFOAM model.** An OpenFOAM model of aXqua needs no export. In ParaView, select *File > Open* and choose the file ``case.foam`` in the folder ``axqua-case/openfoam/``. The mesh regions and the result fields can then be selected in the properties panel. To display the water only, apply the filter *Threshold* or *Clip* to the field ``alpha.water``, which is 1 in water and 0 in air.
+**Open an OpenFOAM model.** An OpenFOAM model of aXqua needs no export. The box *OpenFOAM cases of the selected case* on the sub-tabs *ParaView* and *VisIt* lists the OpenFOAM models of the active case (the free-surface model and the fine sediment model), and *Open the OpenFOAM case in ParaView* (or *in VisIt*) starts the program with it. What an OpenFOAM model offers is set in the case settings, page *Post-processing*, with ``postproc.openfoam_outputs``: ``paraview`` (the file ``case.foam``), ``visit`` (the file ``system/controlDict``, through which VisIt opens an OpenFOAM case), and ``vtk``, a conversion with ``foamToVTK`` after every run, which can double the size of a case. ParaView and VisIt are offered by default. In ParaView, the model can also be opened with *File > Open* and the file ``case.foam`` in the folder ``axqua-case/openfoam/``. The mesh regions and the result fields can then be selected in the properties panel. To display the water only, apply the filter *Threshold* or *Clip* to the field ``alpha.water``, which is 1 in water and 0 in air.
 
 .. _help-postprocessing-visit:
 
@@ -132,7 +134,7 @@ In a terminal, the commands are:
    axqua postproc <case-file>             # render all figures
    axqua postproc <case-file> --script-only   # write the VisIt scripts without rendering
 
-The figures are written to ``axqua-case/postprocessing/figures/``. The scripts are kept in ``axqua-case/postprocessing/visit/``, so that every figure can be reproduced and adapted. The list of figures and the image size are set in the ``postproc`` block of the case file.
+The figures are written to ``axqua-case/postprocessing/figures/``. The scripts are kept in ``axqua-case/postprocessing/visit/``, so that every figure can be reproduced and adapted. The list of figures (``postproc.scenes``) and the image size are set in the ``postproc`` block of the case file, which is the page *Post-processing* of the case settings.
 
 .. note::
 

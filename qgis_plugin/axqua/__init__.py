@@ -1,4 +1,4 @@
-"""aXqua - TELEMAC and OpenFOAM river modelling from QGIS.
+"""aXqua - TELEMAC and OpenFOAM models of free-surface water bodies from QGIS.
 
 QGIS calls :func:`classFactory` to load the plugin. Everything else is imported lazily
 from inside it, so a broken import in a widget produces a readable error in the plugin

@@ -93,15 +93,8 @@ def read_inflow(path: Path, steady: bool = True) -> Inflow:
     return Inflow(times_s=(None if steady else t), discharge=q, steady_value=steady_value)
 
 
-def read_stage_discharge(path: Path):
-    """Read a rating curve -> callable mapping discharge (m3/s) to WSE (m).
-
-    Accepts a ``Q,WSE`` (or ``Q,stage``) CSV with one or more rows. A single Q-h
-    pair is enough for a steady run (the WSE is then constant); with several rows
-    the WSE is linearly interpolated in Q. Querying a Q outside the tabulated
-    range clamps to the nearest endpoint and logs a warning (the curve does not
-    extrapolate), so for steady runs supply the pair at the simulated discharge.
-    """
+def read_rating_pairs(path: Path):
+    """The pairs of a rating curve: ``(Q, WSE)`` as two arrays sorted by Q."""
     df = _read_generic(Path(path))
     num = df.select_dtypes("number")
     if num.shape[1] < 2:
@@ -119,7 +112,19 @@ def read_stage_discharge(path: Path):
     if q.size == 0:
         raise ValueError(f"stage-discharge file {Path(path).name!r} has no Q-h pairs")
     order = np.argsort(q)
-    q, h = q[order], h[order]
+    return q[order], h[order]
+
+
+def read_stage_discharge(path: Path):
+    """Read a rating curve -> callable mapping discharge (m3/s) to WSE (m).
+
+    Accepts a ``Q,WSE`` (or ``Q,stage``) CSV with one or more rows. A single Q-h
+    pair is enough for a steady run (the WSE is then constant); with several rows
+    the WSE is linearly interpolated in Q. Querying a Q outside the tabulated
+    range clamps to the nearest endpoint and logs a warning (the curve does not
+    extrapolate), so for steady runs supply the pair at the simulated discharge.
+    """
+    q, h = read_rating_pairs(path)
 
     def wse_at(discharge: float) -> float:
         if discharge < q[0] - 1e-9 or discharge > q[-1] + 1e-9:

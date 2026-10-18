@@ -26,9 +26,9 @@ from axqua.core.casefile import find_case_file
 
 CONFIG = find_case_file(Path(__file__).resolve().parent)
 
-# calibration target (edit to switch quantity); water depth is extracted alongside
-CALIBRATION_QUANTITIES = ["SCALAR VELOCITY"]
-EXTRACTION_QUANTITIES = ["WATER DEPTH", "SCALAR VELOCITY"]
+# The calibration targets are those of the case file; name them here only to override.
+CALIBRATION_QUANTITIES = None   # None: calibration.calibration_quantities of the case file
+EXTRACTION_QUANTITIES = None    # None: calibration.extraction_quantities of the case file
 
 
 def main() -> int:

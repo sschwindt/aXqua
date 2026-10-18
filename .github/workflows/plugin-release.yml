@@ -49,11 +49,9 @@ jobs:
           bandit -r qgis_plugin/axqua -q
 
       - name: Build the zip
-        # With Sphinx installed, the documentation is built into the archive, so that
-        # Help in the plugin opens the documentation of this very version, offline.
-        run: |
-          pip install -r docs/requirements-docs.txt
-          python scripts/build_plugin_zip.py
+        # No documentation in the archive: Help opens a copy built on the computer, or
+        # the published one at https://axqua.eu.
+        run: python scripts/build_plugin_zip.py
 
       - uses: actions/upload-artifact@v4
         with:

@@ -1,6 +1,6 @@
 """Solver-agnostic core of axqua.
 
-Everything here describes the *river and the modelling intent*, never a particular
+Everything here describes the *river and the modeling intent*, never a particular
 simulation code: the case configuration, the geodata, the boundary conditions, the
 ground truth, the convergence maths, and the capability/registry machinery that lets a
 solver backend plug in.

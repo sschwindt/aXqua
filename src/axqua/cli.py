@@ -7,7 +7,7 @@ Two forms:
 * ``axqua clip <raster> -b <boundary> -o <out>`` - clip a single raster to a
   region-of-interest polygon, without needing a full configuration.
 * ``axqua rating -o <out.csv> --manning <n>|--strickler <Kst> --slope <S0>
-  --width <b> [--side-slope <m>] [--bed-elevation <z>] --q <Q...>`` - synthesise a
+  --width <b> [--side-slope <m>] [--bed-elevation <z>] --q <Q...>`` - synthesize a
   normal-flow outflow stage-discharge curve to use as ``boundaries.stage_discharge``.
 * ``axqua targets <config.yml> [-o <out.xlsx>] [--force]`` - generate the
   user-fillable ``calibration-target-data.xlsx`` template (hydraulics /
@@ -81,7 +81,7 @@ def _clip_parser() -> argparse.ArgumentParser:
                    help="reproject the raster to this EPSG before clipping "
                         "(default: keep the source CRS)")
     p.add_argument("--all-touched", action="store_true",
-                   help="keep pixels touched by the polygon edge (default: centre-in)")
+                   help="keep pixels touched by the polygon edge (default: center-in)")
     p.add_argument("-v", "--verbose", action="store_true")
     return p
 
@@ -633,6 +633,18 @@ def _run_install(argv: list[str]) -> int:
     return installcli.run_install(argv)
 
 
+def _run_docs(argv: list[str]) -> int:
+    """``axqua docs`` - where the documentation is (:mod:`axqua.docscli`)."""
+    from axqua import docscli
+    return docscli.run_docs(argv)
+
+
+def _run_cleanup(argv: list[str]) -> int:
+    """``axqua cleanup`` - files of a case that can go (:mod:`axqua.cleanupcli`)."""
+    from axqua import cleanupcli
+    return cleanupcli.run_cleanup(argv)
+
+
 def _run_profile(argv: list[str]) -> int:
     """``axqua profile`` - late-bound like the job verbs, and for the same reason."""
     from axqua import profilecli
@@ -674,11 +686,15 @@ def _run_postproc(argv: list[str]) -> int:
         cfg = load_config(args.config)
         if args.backend:
             cfg.postproc.backend = args.backend
-        names = args.scenes if args.scenes else (cfg.postproc.scenes or None)
+        # an empty postproc.scenes (every box unchecked) is a choice, not "all"
+        names = args.scenes if args.scenes else cfg.postproc.scenes
 
         if args.list:
             for line in render_mod.plan_lines(cfg, names=names, solver=args.solver):
                 print(line)
+            return 0
+        if names is not None and not names:
+            print("postproc.scenes asks for no figure: nothing to render.")
             return 0
         return render_mod.render(cfg, names=names, solver=args.solver,
                                  out_dir=args.out, script_only=args.script_only)
@@ -740,6 +756,8 @@ _DISPATCH = {
     "schema": lambda argv: _case_cli("run_schema", argv),
     "case": lambda argv: _case_cli("run_case", argv),
     "check": lambda argv: _case_cli("run_check", argv),
+    "docs": lambda argv: _run_docs(argv),
+    "cleanup": lambda argv: _run_cleanup(argv),
 }
 
 

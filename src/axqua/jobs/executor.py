@@ -340,7 +340,8 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
     belongs. The case of the fine sediment simulation takes its water surface from the
     same result.
     """
-    if spec.kind not in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD):
+    if spec.kind not in (JobKind.OPENFOAM_BUILD, JobKind.OPENFOAM_SEDIMENT_BUILD,
+                         JobKind.OPENFOAM_MESH_CONVERGENCE):
         return {}
     named = getattr(spec.options, "hotstart", None)
     if named:
@@ -350,14 +351,16 @@ def _pre_step(spec: JobSpec, cfg: Any, ctx: ExecutionContext) -> dict[str, Any]:
         # used and, in a case without one, started a TELEMAC pre-run for nothing.
         log.info("seed: the result named in the job, %s", named)
         ctx.sink.step("seed", done=True)
-        return {}
+        # the study builds its levels itself and takes the result as their seed
+        return ({"seed": named} if spec.kind is JobKind.OPENFOAM_MESH_CONVERGENCE
+                else {})
     from axqua import prerun
     enabled = getattr(spec.options, "pre_run", None)
     try:
         seed = prerun.ensure_seed(cfg, enabled=enabled)
     except Exception as exc:                        # noqa: BLE001
         # A missing seed costs accuracy, not the build: the case still meshes under a
-        # flat lid, which is the documented --no-pre-run behaviour.
+        # flat lid, which is the documented --no-pre-run behavior.
         log.warning("no 2D seed for the OpenFOAM build (%s: %s); building cold",
                     type(exc).__name__, exc)
         return {}
@@ -462,7 +465,7 @@ def _postprocess(backend: Any, cfg: Any, ctx: ExecutionContext,
 
 
 def _describe(artifacts: Any) -> Any:
-    """Summarise whatever a backend verb returned, without serialising bulk data."""
+    """Summarize whatever a backend verb returned, without serializing bulk data."""
     if artifacts is None:
         return None
     if isinstance(artifacts, (str, int, float, bool)):

@@ -40,7 +40,7 @@ Lessons baked in (see the module functions):
   gpytorch, so it is kept modest (``calibration.prior_samples``, default 5000) -
   ample for a low-dimensional roughness posterior and safe on a 16 GB box;
 * per-flow steering files differ only in Q, the outflow stage (from the
-  synthesised rating at that Q), ``DURATION`` and the results name.
+  synthesized rating at that Q), ``DURATION`` and the results name.
 """
 
 from __future__ import annotations
@@ -211,8 +211,8 @@ def _inside_the_model(cfg: Config, points: pd.DataFrame) -> pd.DataFrame:
 
 
 def run_single_flow_calibration(
-        cfg: Config, *, calibration_quantities=("SCALAR VELOCITY",),
-        extraction_quantities=("WATER DEPTH", "SCALAR VELOCITY"),
+        cfg: Config, *, calibration_quantities=None,
+        extraction_quantities=None,
         vel_err_floor: float = campaigns.VELOCITY_ERROR_FLOOR,
         depth_err_floor: float = campaigns.DEPTH_ERROR_FLOOR,
         prepare_only: bool = False, checkout: Path | None = None,
@@ -227,6 +227,18 @@ def run_single_flow_calibration(
     from axqua.calibration import emit_hbc_config
 
     cfg.ensure_dirs()
+    # The case file decides what is calibrated against. Until 2026-10-17 a built-in
+    # ("SCALAR VELOCITY",) replaced it whenever the caller named nothing, which is
+    # what every job did: a case asking for depth and velocity was calibrated
+    # against velocity alone, without a word.
+    if calibration_quantities is None:
+        calibration_quantities = (cfg.calibration.calibration_quantities
+                                  or ["SCALAR VELOCITY"])
+    if extraction_quantities is None:
+        extraction_quantities = (cfg.calibration.extraction_quantities
+                                 or ["WATER DEPTH", "SCALAR VELOCITY"])
+    extraction_quantities = list(dict.fromkeys([*extraction_quantities,
+                                                *calibration_quantities]))
     cfg.calibration.calibration_quantities = list(calibration_quantities)
     cfg.calibration.extraction_quantities = list(extraction_quantities)
     print(f"calibration target(s): {list(calibration_quantities)}  "
@@ -335,8 +347,8 @@ class FlowSpec:
     """
     name: str                       # short tag (steering + results names)
     discharge: float                # m3/s
-    kind: str                       # adapter | transect | inline | csv
-    values: Path                    # FlowTracker xlsx (or a ready CSV for kind "csv")
+    kind: str                       # adapter | transect | inline | points | csv
+    values: Path                    # FlowTracker xlsx, point layer ("points") or a ready CSV ("csv")
     positions: Path | None = None   # DGPS point layer (adapter/transect)
     sheet: str = "KB15"
     duration: float | None = None   # steady sim seconds (default: cfg duration)
@@ -365,6 +377,9 @@ class FlowSpec:
                                               label=self.name)
         if self.kind == "inline":
             return campaigns.compile_inline(self.values, self.sheet,
+                                            self.vel_err_floor, label=self.name)
+        if self.kind == "points":
+            return campaigns.compile_points(self.values, crs_epsg,
                                             self.vel_err_floor, label=self.name)
         raise ValueError(f"flow {self.name!r}: unknown kind {self.kind!r}")
 
@@ -541,7 +556,7 @@ extraction = {{
     # march to steady state from a pre-wetted start, so a mean_last window folds the
     # residual transient into the values the surrogate is trained on. The multiflow
     # driver silently defaulted to 'mean_last' until HydroBayesCal 1.5 made it read
-    # this block (single-flow runs on the same config already honoured it), so the
+    # this block (single-flow runs on the same config already honored it), so the
     # two modes were fitted to different data - emit it explicitly.
     'output_extraction_time': 'last',
     'n_last': 80,

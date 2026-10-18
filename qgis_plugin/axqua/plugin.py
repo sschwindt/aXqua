@@ -17,7 +17,7 @@ import logging
 
 from qgis.PyQt.QtWidgets import QAction
 
-from .compat import DOCK_RIGHT, icon
+from .compat import DOCK_RIGHT, icon, theme_icon
 
 log = logging.getLogger("axqua.plugin")
 
@@ -54,7 +54,8 @@ class AxquaPlugin:
         self.dock.visibilityChanged.connect(show.setChecked)
         self._register(show, toolbar=True)
 
-        settings = QAction("Settings...", self.iface.mainWindow())
+        settings = QAction(theme_icon("mActionOptions.svg"), "Settings...",
+                           self.iface.mainWindow())
         settings.triggered.connect(lambda: self.dock.open_settings())
         self._register(settings)
 
@@ -67,9 +68,11 @@ class AxquaPlugin:
         self._register(movie)
 
         # The documentation, at the section of the tab that is showing in the panel.
-        help_action = QAction("Help", self.iface.mainWindow())
+        help_action = QAction(theme_icon("mActionHelpContents.svg"), "Help",
+                              self.iface.mainWindow())
         help_action.triggered.connect(lambda: self.dock.open_help())
         self._register(help_action)
+        self._mark_menu()
 
         self._add_provider()
 
@@ -102,6 +105,20 @@ class AxquaPlugin:
         if toolbar:
             self.iface.addToolBarIcon(action)
         self._actions.append(action)
+
+    def _mark_menu(self) -> None:
+        """Give the entry aXqua in the menu Plugins the icon of aXqua.
+
+        QGIS creates that submenu with the first action added to it and gives it no
+        icon; the actions inside have theirs (the panel the icon of aXqua, the
+        settings a cogwheel).
+        """
+        menu = getattr(self.iface, "pluginMenu", lambda: None)()
+        if menu is None:
+            return
+        for action in menu.actions():
+            if action.menu() is not None and action.text().replace("&", "") == "aXqua":
+                action.setIcon(icon("favicon.ico"))
 
     def _toggle(self, checked: bool) -> None:
         if self.dock is None:

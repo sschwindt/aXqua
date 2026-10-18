@@ -1,7 +1,7 @@
 """Has the OpenFOAM run reached a steady discharge balance?
 
 The 3D analogue of :mod:`axqua.flux_convergence`, and deliberately the same
-judgement: a free-surface run is converged when the **water** entering equals the
+judgment: a free-surface run is converged when the **water** entering equals the
 water leaving, measured as a relative imbalance against the prescribed inflow. The
 tolerance grades carry over unchanged (``hydrodynamics.flux_tolerance``, 1e-3 for a
 result read as discharge/depth/velocity), so a 2D and a 3D run of the same reach are
@@ -79,7 +79,7 @@ class DischargeHistory:
 
     @property
     def final_imbalance(self) -> float | None:
-        """``|relative imbalance|`` the run settled at - the number a study minimises.
+        """``|relative imbalance|`` the run settled at - the number a study minimizes.
 
         The mean of the last ``STEADY_WINDOW`` finite samples, not the single last
         one: the same window already decides convergence, and one final sample on a
@@ -600,7 +600,7 @@ class LidApplicability:
                        "structure or a slot - and a lid cannot answer a drop by "
                        "plunging, so it converts the head into velocity instead "
                        "(sqrt(2 g dz): a 1 m step drives 4.4 m/s). The velocity at "
-                       "those steps is an artefact of the mode, whatever the "
+                       "those steps is an artifact of the mode, whatever the "
                        "discharge balance and the Courant number say.")
         else:
             out.append("  ! the rigid lid is doubtful here. Expect the fastest cells "
@@ -649,7 +649,7 @@ def verdict_lines(cfg, case_dir: str | Path | None = None,
 def write_report(cfg, case_dir: str | Path | None = None, *,
                  out_dir: str | Path | None = None,
                  target: float | None = None) -> tuple[DischargeHistory, list[Path]]:
-    """Analyse the run and write ``discharge-convergence.csv`` + ``.png``."""
+    """Analyze the run and write ``discharge-convergence.csv`` + ``.png``."""
     case_dir = Path(case_dir) if case_dir else cfg.openfoam_case_dir
     out_dir = Path(out_dir) if out_dir else case_dir
     out_dir.mkdir(parents=True, exist_ok=True)

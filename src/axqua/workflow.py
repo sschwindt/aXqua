@@ -23,7 +23,7 @@ from axqua.rating import synthesize_outflow_rating
 
 log = logging.getLogger("axqua")
 
-# trapezoidal channel banks (H:V) used when a stage-discharge rating is synthesised
+# trapezoidal channel banks (H:V) used when a stage-discharge rating is synthesized
 DEFAULT_BANK_SLOPE = 1.0
 
 _UNSET = object()   # sentinel: "leave initialization.prewet_depth untouched"
@@ -62,13 +62,13 @@ def synthesize_constant_inflow(cfg: Config, discharge: float) -> Path:
         f"datetime,Q\n2020-11-01 00:00,{discharge}\n2020-11-01 01:00,{discharge}\n"
     )
     cfg.boundaries.inflow = path
-    log.info("synthesised constant inflow Q=%g m3/s -> %s", discharge, path.name)
+    log.info("synthesized constant inflow Q=%g m3/s -> %s", discharge, path.name)
     return path
 
 
 def synthesize_rating_if_missing(cfg: Config, discharge: float,
                                  side_slope: float = DEFAULT_BANK_SLOPE) -> Path | None:
-    """Synthesise the outflow stage-discharge rating from the geodata when the
+    """Synthesize the outflow stage-discharge rating from the geodata when the
     ``stage_discharge`` outflow condition is active and no rating CSV is given.
 
     Width comes from the outflow boundary line, bed + reach slope from the DEM and
@@ -100,7 +100,7 @@ def prepare_steady_inputs(cfg: Config, discharge: float | None = None, *,
     """Configure the steady boundary conditions for a build and return the discharge.
 
     Prescribes the steady discharge (from the config, see :func:`resolve_discharge`),
-    synthesises a constant inflow series and the outflow stage-discharge rating when
+    synthesizes a constant inflow series and the outflow stage-discharge rating when
     those inputs are missing, so the build draws the inflow Q (m3/s) and the outflow
     stage (H) straight from ``case-config.yml``. Used by ``preprocessing.py`` and the
     mesh-convergence study so they share one source of truth for the steady setup.

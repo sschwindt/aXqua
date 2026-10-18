@@ -2,8 +2,8 @@
 
 QGIS 4 moved to Qt 6, and Qt 6 changed several things that a plugin touches on nearly
 every line: enums became strictly scoped, ``exec_`` became ``exec``, ``QRegExp`` was
-removed in favour of ``QRegularExpression``. Scattering ``if Qgis.versionInt() >= 40000``
-through the widgets is how a codebase ends up with two behaviours nobody can enumerate,
+removed in favor of ``QRegularExpression``. Scattering ``if Qgis.versionInt() >= 40000``
+through the widgets is how a codebase ends up with two behaviors nobody can enumerate,
 so every difference is resolved **here** and the rest of the plugin imports from this
 module without knowing which Qt it is running on.
 
@@ -110,7 +110,7 @@ LEGEND_STYLES = {
     for name in ("Title", "Group", "Subgroup", "SymbolLabel")
 }
 
-#: Colouring a vector (arrow) layer by a ramp. **Optional**: resolving it eagerly
+#: Coloring a vector (arrow) layer by a ramp. **Optional**: resolving it eagerly
 #: without a default would stop the whole plugin from importing on a build that lacks
 #: it, rather than costing one styling nicety. The member belongs to
 #: ``QgsInterpolatedLineColor``. It was looked for on the vector settings, where it
@@ -153,6 +153,15 @@ def icon(name: str) -> QIcon:
     return QIcon(str(path)) if path.exists() else QIcon()
 
 
+def theme_icon(name: str) -> QIcon:
+    """An icon of the active QGIS theme, such as ``mActionOptions.svg`` (a cogwheel)."""
+    try:
+        from qgis.core import QgsApplication
+        return QgsApplication.getThemeIcon("/" + name.lstrip("/"))
+    except Exception:                          # noqa: BLE001 - an icon is a nicety
+        return QIcon()
+
+
 def color(spec: str, alpha: int | None = None) -> QColor:
     out = QColor(spec)
     if alpha is not None:
@@ -193,7 +202,7 @@ def is_deleted(obj) -> bool:
     C++ object is gone, and touching it raises ``RuntimeError: wrapped C/C++ object has
     been deleted`` from inside a Qt slot, where nothing is left to catch it and QGIS
     reports it as a plugin crash. Asking first costs nothing and turns that into a
-    callback that simply does not fire, which is the correct behaviour anyway.
+    callback that simply does not fire, which is the correct behavior anyway.
     """
     if obj is None:
         return False

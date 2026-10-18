@@ -138,6 +138,23 @@ def test_the_calibrated_values_are_the_joint_maximum_of_the_last_iteration(built
     assert older.as_dict() == pytest.approx({"zone4": 0.07, "zone6": 0.07})
 
 
+
+def test_a_joint_maximum_of_nan_is_never_applied(built):
+    """With one surviving posterior sample HydroBayesCal writes NaN as the joint
+    maximum (the example of 2026-10-15); a NaN in the friction table wrecks the run."""
+    from axqua.core.errors import ConfigError
+
+    _calibrated(built, joint_optimum=np.full((2, 2), np.nan),
+                posterior=[np.zeros((5, 2)), np.array([[0.298, 0.064]])])
+    found = validation.calibrated_parameters(built)
+    assert found.as_dict() == pytest.approx({"zone4": 0.298, "zone6": 0.064})
+    assert found.estimate.startswith("the only posterior sample")
+    _calibrated(built, joint_optimum=np.full((2, 2), np.nan),
+                posterior=[np.full((1, 2), np.nan)])
+    with pytest.raises(ConfigError, match="no finite calibrated values"):
+        validation.calibrated_parameters(built)
+
+
 # ------------------------------------------------------------------------ the run
 
 

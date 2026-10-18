@@ -94,7 +94,7 @@ def read_vtu(path: Path) -> dict:
     return {"arrays": arrays, "fields": fields, "head": head}
 
 
-# A strip of four triangles far from the origin, as a river reach in UTM is.
+# A strip of four triangles far from the origin, as a model in UTM is.
 X = np.array([676927.125, 676928.375, 676929.625, 676927.125, 676928.375, 676929.625])
 Y = np.array([5267833.5, 5267833.5, 5267833.5, 5267834.75, 5267834.75, 5267834.75])
 IKLE = np.array([[0, 1, 4], [0, 4, 3], [1, 2, 5], [1, 5, 4]])       # counterclockwise

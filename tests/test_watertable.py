@@ -188,7 +188,7 @@ def test_plane_from_the_zone_alone_matches_the_line_fit(tmp_path):
     assert plane.elevation(30.0, 20.0) == pytest.approx(10.6 - 0.3, abs=0.05)
     assert plane.elevation(70.0, 20.0) == pytest.approx(10.6 - 0.7, abs=0.05)
     assert plane.gradient == pytest.approx(0.01, abs=0.002)
-    # the higher end is the one that loses - no digitising direction is assumed
+    # the higher end is the one that loses - no digitizing direction is assumed
     assert plane.levels["losing"] > plane.levels["gaining"]
 
 

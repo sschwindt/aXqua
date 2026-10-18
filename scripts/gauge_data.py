@@ -20,7 +20,7 @@ Two data sources, auto-detected from what you paste:
   Instantaneous- or Daily-Values JSON web service and the rating from the USGS rating
   depot (native units ft³/s and ft; **converted to metric** on ingest).
 
-Everything is normalised to **metric** (m³/s, m) so the exports feed axqua directly.
+Everything is normalized to **metric** (m³/s, m) so the exports feed axqua directly.
 
 Run it (from the repository root)::
 
@@ -45,8 +45,8 @@ from urllib.parse import urlsplit, urlunsplit
 import pandas as pd
 
 HND_HOST = "www.hnd.bayern.de"
-CFS_TO_CMS = 0.028316846592     # cubic feet/s -> cubic metres/s
-FT_TO_M = 0.3048                # feet -> metres
+CFS_TO_CMS = 0.028316846592     # cubic feet/s -> cubic meters/s
+FT_TO_M = 0.3048                # feet -> meters
 
 PRESETS = {
     "HND · Muehldorf / Inn (18004506)":
@@ -75,7 +75,7 @@ def fetch(url: str, timeout: float = 40.0) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# The normalised result every backend returns
+# The normalized result every backend returns
 # --------------------------------------------------------------------------- #
 @dataclass
 class GaugeData:
@@ -385,7 +385,7 @@ def run_app() -> None:
     st.set_page_config(page_title="Gauge data fetch", page_icon="🌊", layout="wide")
     st.title("🌊 River-gauge data fetch")
     st.caption("Discharge series + stage-discharge relation from **HND Bayern** or "
-               "**USGS NWIS**, normalised to metric and exported for axqua.")
+               "**USGS NWIS**, normalized to metric and exported for axqua.")
 
     load_cached = st.cache_data(ttl=600, show_spinner=False)(load_gauge)
 
@@ -450,7 +450,7 @@ def run_app() -> None:
             st.scatter_chart(data.rating, x="Q", y="stage_m",
                              x_label="Q [m³/s]", y_label="stage above gauge zero [m]")
             st.markdown(
-                "**Absolute water-surface elevation.** The stage is metres above the "
+                "**Absolute water-surface elevation.** The stage is meters above the "
                 "gauge zero (HND *Pegelnullpunkt* / USGS *gage datum*), which the "
                 "services do not always publish. Enter it to export a axqua "
                 "`Q,WSE` rating; leave 0 to export the stage relative to the gauge zero.")

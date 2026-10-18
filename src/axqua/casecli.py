@@ -45,7 +45,9 @@ def run_schema(argv: list[str]) -> int:
             lines.append(f"[{section['block']}] {section['title']}")
             lines += [f"  {item['name']:<32} {item['kind']:<7} {item['label']}"
                       for item in section["fields"]]
-        return emit("schema", {"sections": sections}, as_json=args.as_json, lines=lines)
+        return emit("schema", {"sections": sections,
+                               "pages": schema_meta.pages(sections)},
+                    as_json=args.as_json, lines=lines)
     except BaseException as exc:  # noqa: BLE001
         return fail("schema", exc, as_json=args.as_json, verbose=args.verbose)
 

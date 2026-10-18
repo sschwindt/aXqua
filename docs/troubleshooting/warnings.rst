@@ -61,17 +61,22 @@ Simulations
 Check of a case
 ---------------
 
-The check of a case (*Check* on the *Case Setup* tab, *Save* in the case editor, or ``axqua check <case-file>``) reports the following warnings. The plugin shows each of them as an orange triangle next to the setting concerned.
+The check of a case (*Check* on the *Case Setup* tab, *Save* in the case settings, or ``axqua check <case-file>``) reports the following warnings. The plugin shows each of them as an orange triangle next to the setting concerned.
 
 .. _axqua-config-no-solver:
 
 ``the case names no simulation program, so nothing can be built or run``
-    The case file contains neither a ``telemac`` nor an ``openfoam`` block. Add the block of the program to use, for example by selecting the solver in the section *TELEMAC* of the case editor.
+    The case file contains neither a ``telemac`` nor an ``openfoam`` block. Add the block of the program to use, for example with the switch *Simulate with TELEMAC* on the page *TELEMAC* of the case settings.
 
 .. _axqua-config-incomplete:
 
 ``no discharge is set, so the steady simulation has no inflow``
-    The case can be saved, but the next step of the workflow needs this setting. Enter the discharge in the section *Boundaries* of the case editor (:ref:`case-boundaries`).
+    The case can be saved, but the next step of the workflow needs this setting. Enter the discharge on the page *Liquid boundaries* of the case settings (:ref:`case-boundaries`).
+
+.. _axqua-config-discharge-conflict:
+
+``The files of the validation situation 'High flow' show different discharges; the last one in the table was saved.``
+    A validation situation has one discharge, and the table *Measurement files* of the case settings shows it in every row of the situation. Where the rows still show different values, the last one in the table was saved. Enter the discharge of the situation in one of its rows; the other rows follow (:ref:`validation situation <validation-setup>`).
 
 Profile of this computer
 ------------------------
@@ -119,7 +124,7 @@ The check of the profile (*Check* on the *Configuration* tab, or ``axqua profile
 Installation of the simulation software
 ---------------------------------------
 
-The *Check* page of an installation wizard, the last page of a finished installation, and ``axqua install plan`` report the following warnings. An installation can be started with a warning.
+The *Check* tab of an installation wizard, the *Installation* tab of a finished installation, and ``axqua install plan`` report the following warnings. An installation can be started with a warning.
 
 .. _axqua-install-packages-missing:
 
@@ -139,7 +144,7 @@ The *Check* page of an installation wizard, the last page of a finished installa
 .. _axqua-install-little-space:
 
 ``... GiB are free in ...; the installation needs about ... GiB``
-    The drive of the installation folder may be too small. Select a folder on a drive with more free space on the first page of the wizard.
+    The drive of the installation folder may be too small. Select a folder on a drive with more free space on the *Settings* tab of the wizard.
 
 .. _axqua-install-folder-in-home:
 
@@ -154,12 +159,12 @@ The *Check* page of an installation wizard, the last page of a finished installa
 .. _axqua-install-compiles-openfoam:
 
 ``no OpenFOAM v2406 was found on this computer, so it is compiled from its source code``
-    Compiling OpenFOAM takes several hours and about 20 GB. If OpenFOAM v2406 is installed, select its file ``etc/bashrc`` on the first page of the wizard. A packaged OpenFOAM v2406, which an administrator installs in a few minutes, avoids the compilation (:ref:`install-openfoam`).
+    Compiling OpenFOAM takes several hours and about 20 GB. If OpenFOAM v2406 is installed, select its file ``etc/bashrc`` on the *Settings* tab of the wizard. A packaged OpenFOAM v2406, which an administrator installs in a few minutes, avoids the compilation (:ref:`install-openfoam`).
 
 .. _axqua-install-paraview-missing:
 
 ``ParaView is not installed``
-    The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* page, or enter another ParaView in the profile editor (:ref:`install-paraview`).
+    The wizards use the ParaView package of the operating system, and it is not installed. VisIt is installed all the same. Install the system packages listed on the *Check* tab, or enter another ParaView in the profile editor (:ref:`install-paraview`).
 
 .. _axqua-install-visit-missing:
 

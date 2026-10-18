@@ -144,7 +144,7 @@ def estimate_exchange(cfg, mesh, faces: ExchangeFaces, surface) -> float:
 
     Green-Ampt's saturated limit per node, ``f = kf (h + Lz + hf) / Lz`` with *h* the
     head over the table, integrated over the losing face. Logged at build time so the
-    modelled exchange is visible before a run - it is easy to be an order of
+    modeled exchange is visible before a run - it is easy to be an order of
     magnitude out on kf, and this is the number to compare against a measured one.
     """
     import numpy as np

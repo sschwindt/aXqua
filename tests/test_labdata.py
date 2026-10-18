@@ -146,7 +146,7 @@ def test_the_section_maxima_are_read_with_their_spread(tmp_path):
 
 def test_the_resultant_speed_is_not_confused_with_the_u_component(tmp_path):
     """The sheet has both 'u time avg. max' (component) and 'U time avg. max'
-    (resultant), differing only by the capital. A modelled speed compares with the
+    (resultant), differing only by the capital. A modeled speed compares with the
     resultant; taking the component instead is a fifth low where the flow turns."""
     rows = labdata.read_velocities(write_velocity_sheet(tmp_path / "v.xlsx"))
     first = rows[0]

@@ -4,7 +4,7 @@ axqua turns user-provided geodata and hydraulic data (DEM, ROI boundary,
 inflow/outflow, measurements) into a production-ready simulation case, plus the
 artifacts a surrogate-assisted Bayesian calibration needs. Two simulation backends
 ship with it - TELEMAC-2D/3D (+GAIA) and OpenFOAM ``interFoam`` - and both are driven
-from **one** case configuration describing the river and the modelling intent.
+from **one** case configuration describing the river and the modeling intent.
 
 Layering
 --------
@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING
 # Single source of truth: whatever was installed. The literal is the fallback for a
 # source checkout that was never `pip install`ed, and is kept in step with
 # pyproject.toml by a test.
-_FALLBACK_VERSION = "0.5.0"
+_FALLBACK_VERSION = "1.0.0"
 
 try:
     from importlib.metadata import version as _pkg_version

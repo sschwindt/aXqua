@@ -433,11 +433,30 @@ def write_receipt(prefix, args, tag, library):
     target.write_text(json.dumps(receipt, indent=2) + "\n")
 
 
+def _smoke_passed(log: Path) -> bool:
+    """Whether a smoke log shows the water-level BC loaded and no fatal error."""
+    if not log.is_file():
+        return False
+    text = log.read_text(errors="replace")
+    return "waterLevel BC on" in text and "FOAM FATAL" not in text
+
+
 def smoke_baw(prefix, bashrc, args):
     source = prefix / "cases/baw-interFoam"
     target = prefix / "runs/baw-smoke"
     if target.exists():
-        raise InstallError("Smoke-run directory already exists; preserve it and choose a new prefix")
+        # A repeated installation in the same prefix reaches this step again. A smoke
+        # run that passed is not repeated; one that failed or was interrupted is kept
+        # beside the new one for inspection, never deleted.
+        if _smoke_passed(target / "log.smoke"):
+            print(f"BAW smoke run passed earlier: {target}")
+            return
+        stamp = 1
+        while target.with_name(f"baw-smoke.failed-{stamp}").exists():
+            stamp += 1
+        aside = target.with_name(f"baw-smoke.failed-{stamp}")
+        target.rename(aside)
+        print(f"Earlier BAW smoke run did not pass; kept as {aside}")
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(source, target)
     for item in (target / "0/bak").iterdir():
@@ -450,9 +469,12 @@ def smoke_baw(prefix, bashrc, args):
     for command in (["checkMesh", "-constant"], ["setFields"], ["timeout", "10m", "interFoam"]):
         foam_command(bashrc, prefix, command, args.jobs, cwd=target,
                      log=target / "log.smoke")
-    text = (target / "log.smoke").read_text(errors="replace")
-    if "waterLevel BC on" not in text or "FOAM FATAL" in text:
-        raise InstallError("BAW smoke did not demonstrate the loaded water-level BC")
+    if not _smoke_passed(target / "log.smoke"):
+        log = target / "log.smoke"
+        tail = log.read_text(errors="replace").splitlines()[-15:] if log.is_file() else []
+        raise InstallError("BAW smoke did not demonstrate the loaded water-level BC; "
+                           f"see {log}. Its last lines:\n"
+                           + "\n".join(tail))
 
 
 def install(args):

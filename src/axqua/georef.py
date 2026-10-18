@@ -3,7 +3,7 @@
 An STL carries no coordinate system - the format has no field for one. The drawing the
 STL was exported from usually does, because a construction drawing is set out in the
 national grid. So the transform is recoverable by matching the two: the same structure,
-drawn twice, once in metres of the map and once in whatever the CAD file used.
+drawn twice, once in meters of the map and once in whatever the CAD file used.
 
 What can honestly be recovered, and what cannot
 -----------------------------------------------
@@ -107,11 +107,11 @@ def match(stl: Path, dxf: Path, *, layers: list[str] | None = None,
     """Propose a transform placing *stl* where *dxf* says the structure is.
 
     The scale comes from the ratio of the two footprints' diagonals, snapped to a
-    common CAD unit when it is within 2 % of one - a drawing is in millimetres or it is
+    common CAD unit when it is within 2 % of one - a drawing is in millimeters or it is
     not, and 0.00098 is the former measured through a bounding box that includes a
     kerb. The rotation is not solved for: the candidates that could align the boxes are
     reported, and *rotation_deg* selects one. The translation then follows from the box
-    centres, which is exact once scale and rotation are fixed.
+    centers, which is exact once scale and rotation are fixed.
     """
     surface = read_stl(stl)
     xmin, ymin, _, xmax, ymax, _ = surface.bounds
@@ -138,7 +138,7 @@ def match(stl: Path, dxf: Path, *, layers: list[str] | None = None,
     chosen = rotation_deg if rotation_deg is not None else (
         candidates[0] if candidates else 0.0)
 
-    # translation from the box centres, after scale and rotation
+    # translation from the box centers, after scale and rotation
     centre_cad = np.array([[(cad[0] + cad[2]) / 2.0, (cad[1] + cad[3]) / 2.0, 0.0]])
     moved = Transform(scale=scale, rotation_deg=chosen).apply(centre_cad)[0]
     dx = (map_box[0] + map_box[2]) / 2.0 - moved[0]
@@ -204,7 +204,7 @@ def match_control_points(stl: Path, points: list[str], *, dz: float = 0.0) -> Ma
 
     The residuals are the whole point of reporting rather than applying: two points
     always fit exactly, so a third is what tells you whether the pairs were identified
-    correctly. A metre of residual on a fish pass means a point was mis-picked.
+    correctly. A meter of residual on a fish pass means a point was mis-picked.
     """
     pairs = [parse_control_point(text) for text in points]
     cad = [p[0] for p in pairs]

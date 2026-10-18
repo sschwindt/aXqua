@@ -2,7 +2,7 @@
 
 A case config mixes two kinds of statement that look identical in YAML:
 
-* **shared intent** - facts about the reach and the modelling goal. The discharge,
+* **shared intent** - facts about the reach and the modeling goal. The discharge,
   the roughness, the channel resolution, how converged a run has to be. Change the
   solver and these stay true.
 * **solver detail** - the knobs of one particular code. ``IMPLICITATION FOR DEPTH``
@@ -29,7 +29,7 @@ anisotropic target edge length; OpenFOAM's is a uniform Cartesian spacing. Colla
 them would have replaced a real relationship with a false identity.
 
 The remaining moves (twenty-odd Telemac2d keywords out of ``hydrodynamics:`` into a
-``telemac.numerics`` block) are pure renaming: they change no behaviour, touch every
+``telemac.numerics`` block) are pure renaming: they change no behavior, touch every
 case config, and would invalidate the artifact regression baseline for nothing. So the
 classification lives here, where a plugin can read it, and the field layout stays put.
 :data:`LEGACY_KEYS` is the mechanism for doing the move later without breaking a
@@ -79,7 +79,7 @@ BLOCK_LAYER: dict[str, Layer] = {
 # this table short and makes "is this shared?" the question that has to be answered
 # deliberately.
 SHARED_FIELDS: dict[str, tuple[str, ...]] = {
-    # Resolution is a modelling decision about the reach, not a solver keyword. The
+    # Resolution is a modeling decision about the reach, not a solver keyword. The
     # gmsh/BAMG specifics beside them (growth_ratio, max_aspect_ratio, size_scale,
     # the quality thresholds) are TELEMAC's mesher and stay TELEMAC's.
     "mesh": ("channel_size", "floodplain_size", "refinement_size",

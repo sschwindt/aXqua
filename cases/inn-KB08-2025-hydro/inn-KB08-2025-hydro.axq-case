@@ -51,13 +51,19 @@ boundaries:
   liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg  # [REQUIRED for a build]
   # inflow: user-sources/hydraulics/inflow.csv   # OPTIONAL discharge series (for a later unsteady case)
   # THIS case's steady boundary conditions, read straight from here for steady2d.cas:
-  prescribed_flowrate: 35.0    # inflow Q [m3/s] for steady2d.cas
+  # September 1-2, 2025, the calibration campaign: the gauge Muehldorf gave 54.7
+  # m3/s on average over the measurement hours (Kraiburg 46.9). It was 35.0 before
+  # 2026-10-15 and 47.3 (Kraiburg) until 2026-10-17.
+  prescribed_flowrate: 54.7    # inflow Q [m3/s] for steady2d.cas
   # outflow (downstream) boundary type: stage_discharge (WSE from the rating curve
   # at the simulated Q) | elevation (fixed prescribed_elevation) | free (Neumann).
+  # Outflow: the water level of a rating curve that aXqua computes from the terrain
+  # cross section at the outflow line (normal flow, friction slope = bed slope) for
+  # the discharge of each run, so every validation situation gets its own level.
+  # The measured stage is too uncertain to prescribe (the user, 2026-10-17); a free
+  # outflow (outflow_condition: free) is the fallback if this misbehaves.
   outflow_condition: stage_discharge
-  prescribed_elevation: 386.4  # m a.s.l.; only for outflow_condition: elevation
-  # outlet rating curve (Q,WSE): one Q-h pair at the steady discharge suffices.
-  stage_discharge: user-sources/geodata/rating-curve.csv
+  rating_method: section
 
 initialization:
   # dry start (default): the domain starts dry except a thin plug at the inflow line
@@ -73,7 +79,10 @@ mesh:
   channel_size: 0.5            # fallback channel edge length (m)
   floodplain_size: 2.5         # fallback floodplain edge length (m); default outside all zones
   refinement_size: 0.5         # fallback 'refinement' zone edge length (m)
-  # zone_size_field: "Max Edge Length (m)"  # per-polygon edge length field (default shown)
+  # The KB08 mesh-zones layer names its field without the unit (channel 0.2 m,
+  # floodplain 3.0 m); with the default "Max Edge Length (m)" it would be ignored
+  # and the fallback sizes above used instead.
+  zone_size_field: "Max Edge Length"  # per-polygon edge length field
   growth_ratio: 1.2            # max edge-size growth per element (channel -> floodplain)
   channel_anisotropy: 4.0      # along-flow / cross-flow edge ratio in the channel
   max_aspect_ratio: 4.0        # hard cap on cell aspect ratio (AnisoMax + post-mesh edge flips)
@@ -84,7 +93,7 @@ friction:
   roughness_law: 5             # law for roughness-zone rows (5 = NIKU, ks in m)
   default_law: 4               # 4 = Manning (0 NOFR, 1 HAAL, 2 CHEZ, 3 STRI, 5 NIKU, 7 COWH)
   default_coefficient: 0.03
-  # lateral (wall) boundary friction; also the roughness used to synthesise the
+  # lateral (wall) boundary friction; also the roughness used to synthesize the
   # outflow stage-discharge curve when missing.
   boundary_law: 3              # 3 = Strickler
   boundary_coefficient: 38     # Strickler Kst
@@ -123,28 +132,59 @@ dem_of_difference:
   mask_below_lod: true
 
 ground_truth:
-  # Calibration ground truth: a tidy multi-tab table (measurements) OR raw sources
-  # axqua compiles into it. Compiled to preprocessing/ground-truth.xlsx unless
-  # `measurements` gives an explicit output path.
-  # measurements: path/to/ground-truth.xlsx    # (a) user-authored tidy table
-  sources:                                      # (b) raw sources -> compiled tidy table
-    # FlowTracker2 Sept-2025 campaign (KB8 sheet = sheet 0 of the revised
-    # FT_TKE_Summary.xlsx: one row per vertical at ~0.6 x depth, numeric IDs
-    # 801..831), joined by ID to the DGPS positions GeoPackage (EPSG:25832,
-    # z = bed elevation from the DGPS survey).
-    - { category: hydraulics, kind: flowtracker, join_key: ID,
-        values: user-sources/ground-truth/FT_TKE_Summary.xlsx,
-        positions: user-sources/geodata/FlowTracker2/dgps-flowtracker-kb8-sept25.gpkg }
+  # FlowTracker2 campaigns with corrected DGPS positions (delivered 2026-10-14), one
+  # folder per campaign under user-sources/ground-truth/flowtracker/: the point layer
+  # (one point per reading, several readings per vertical, EPSG:25832) and the
+  # summary workbook it was exported from (the 2025 and March 2026 workbooks hold
+  # both gravel bars, KB8 and KB15). See the README there.
+  #
+  # CALIBRATION: September 1-2, 2025, the flow situation of this model.
+  # depth-average reduces each vertical to the USGS three-point depth average of the
+  # velocity components, which is what a depth-averaged model computes. The
+  # OpenFOAM calibration reads the same table; give it profile: all, so that every
+  # reading becomes a target at its own height.
+  sources:
+    - category: hydraulics
+      kind: points
+      positions: user-sources/ground-truth/flowtracker/Sep25/KB8_Sep25.gpkg
+      profile: depth-average
 
 calibration:
-  calibration_quantities: ["WATER DEPTH"]                    # measured columns used for calibration
+  calibration_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]                    # measured columns used for calibration
   extraction_quantities: ["WATER DEPTH", "SCALAR VELOCITY"]  # quantities pulled from results
   measurement_error: 0.10      # fraction of the measured value
   init_runs: 30                # initial design samples
   max_runs: 50                 # total runs (initial + active-learning iterations)
   gp_library: gpy
-  # zone1/zone2 perturb the Nikuradse ks of the two roughness zones; ranges in metres.
+  # zone1/zone2 perturb the Nikuradse ks of the two roughness zones; ranges in meters.
   parameters:
     - { name: zone1, min: 0.05, max: 0.50, comment: "channel ks [m] (Nikuradse)" }
     - { name: zone2, min: 0.10, max: 1.00, comment: "floodplain ks [m] (Nikuradse)" }
     # - { name: "gaiaCLASSES SHIELDS PARAMETERS 1", min: 0.030, max: 0.060 }
+  # VALIDATION: measurements of other flow situations, which the calibration does
+  # not see (never a split of the calibration data). Discharges: the gauge Muehldorf
+  # (the user, 2026-10-17: it defines the discharge of the gravel bars better than
+  # Kraiburg), averaged over the measurement hours of each campaign
+  # (user-sources/ground-truth/hydraulics/discharge-records-*.xlsx).
+  validation:
+    - name: November 2025
+      prescribed_flowrate: 47.8   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Nov25/KB8_Nov25.gpkg
+          profile: depth-average
+    - name: March 2026
+      prescribed_flowrate: 47.0   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Mar26/KB8_Mar26.gpkg
+          profile: depth-average
+    - name: August 2026
+      prescribed_flowrate: 53.9   # [m3/s]
+      sources:
+        - category: hydraulics
+          kind: points
+          positions: user-sources/ground-truth/flowtracker/Aug26/KB8_Aug26.gpkg
+          profile: depth-average

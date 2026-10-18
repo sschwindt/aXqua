@@ -27,7 +27,7 @@ from ..core.tasks import run_async
 
 COLUMNS = ["Job ID", "Case", "Solver", "Kind", "State", "Progress", "Best objective"]
 
-#: Colours chosen to survive both QGIS themes - a light wash rather than a saturated fill,
+#: Colors chosen to survive both QGIS themes - a light wash rather than a saturated fill,
 #: so the text stays readable on a dark palette too.
 STATE_COLOURS = {
     "RUNNING": "#d7ecff", "STARTING": "#d7ecff", "POSTPROCESSING": "#e6dcff",
@@ -94,10 +94,9 @@ class JobsWidget(QWidget):
         client = self.ctx.client_or_warn()
         if client is None:
             return
-        job_root = self.ctx.project.job_root or None
-        case = None
+        # the folder for jobs is the profile's (axqua resolves it)
         run_async("aXqua: listing jobs",
-                  lambda: client.list_jobs(job_root=job_root, case=case),
+                  lambda: client.list_jobs(),
                   on_success=self._rows_arrived,
                   on_error=lambda exc: self.ctx.warn(user_text(exc)), owner=self)
 

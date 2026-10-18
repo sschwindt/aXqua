@@ -4,7 +4,7 @@ The September-2025 campaign of the Isar case is such a layer. It heads its colum
 units (``v(x) [m/s]``, ``Total Depth [m]``) and holds one point per *reading*, three on
 top of each other where a vertical was sampled at 0.2, 0.6 and 0.8 of the depth. Before
 these tests existed it loaded without a word and yielded nothing: no column was
-recognised, and each vertical would have counted three times.
+recognized, and each vertical would have counted three times.
 """
 
 from __future__ import annotations
@@ -54,6 +54,15 @@ def test_a_unit_in_brackets_is_not_part_of_the_name():
         "x", "y", "u", "v", "w", "h", "h_meas", "tke", "something else"]
 
 
+def test_a_unit_in_parentheses_is_not_part_of_the_name_either():
+    # the corrected campaign layers of October 2026 write their headers this way
+    frame = pd.DataFrame(columns=["Point Name", "Meas. Depth (m)", "Total Depth (m)",
+                                  "v_x (m/s)", "v_y (m/s)", "v_z (m/s)", "TKE (m²/s²)",
+                                  "TKE2D (m²/s²)", "v_err(x)"])
+    assert list(_canonical_columns(frame).columns) == [
+        "point name", "h_meas", "h", "u", "v", "w", "tke", "tke2d", "u_err"]
+
+
 def test_two_headers_for_one_quantity_do_not_produce_a_table_in_a_column():
     frame = pd.DataFrame({"x": [1.0], "East.": [9.0], "y": [2.0]})
     out = _canonical_columns(frame)
@@ -92,7 +101,7 @@ def test_a_layer_with_one_reading_per_position_comes_back_as_it_was(tmp_path):
 
 
 def test_a_named_column_decides_what_a_vertical_is(tmp_path):
-    """Two rods a few centimetres apart are two verticals unless the layer says not."""
+    """Two rods a few centimeters apart are two verticals unless the layer says not."""
     rows = [dict(_reading(100.00, 200.0, 0.10, 0.50, 1.0), Vertical="V1"),
             dict(_reading(100.30, 200.0, 0.30, 0.50, 0.8), Vertical="V1"),
             dict(_reading(105.00, 200.0, 0.12, 0.20, 0.3), Vertical="V2")]

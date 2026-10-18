@@ -1,7 +1,7 @@
 """Which reading of a multi-depth vertical becomes a calibration target.
 
 The load-bearing test in here is backwards compatibility: ``profile="single"``
-must reproduce the historic behaviour exactly, because every existing case config
+must reproduce the historic behavior exactly, because every existing case config
 relies on it without saying so.
 """
 

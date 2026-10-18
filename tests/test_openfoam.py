@@ -10,7 +10,7 @@ fail once ``checkMesh`` or ``interFoam`` had been launched on a million cells:
   read, and the failure message points at the file rather than at the bug;
 * the **sigma distribution**, in particular that pinning the bed layer never eats the
   column and always lands exactly on 1 at the top - the mesh is conformal only
-  because neighbouring columns share their vertex levels exactly;
+  because neighboring columns share their vertex levels exactly;
 * the **geometric measures**, against closed-form answers on a uniform box, since the
   whole point of computing them here is to agree with ``checkMesh``;
 * the **dictionary and field keywords**, which are the OpenFOAM 9 spellings verified
@@ -92,7 +92,7 @@ def test_upper_triangular_ordering_and_owner_less_than_neighbour():
     ni = mesh.n_internal_faces
     owner = mesh.owner[:ni]
     assert (owner < mesh.neighbour).all()
-    # ascending owner, and ascending neighbour within one owner
+    # ascending owner, and ascending neighbor within one owner
     key = owner.astype(np.int64) * (mesh.n_cells + 1) + mesh.neighbour
     assert (np.diff(key) > 0).all()
 
@@ -890,6 +890,47 @@ def test_the_plan_view_is_listed_for_qgis_with_the_styles_of_a_2d_result(tmp_pat
     assert ctx.records[0][1] == RESULT_NAME      # what QGIS draws comes first
 
 
+def test_what_an_openfoam_case_offers_paraview_and_visit_is_set_by_the_case(tmp_path):
+    from types import SimpleNamespace
+
+    from axqua.exportcli import openfoam_cases
+    from axqua.solvers.openfoam.backend import OpenFoamBackend, _wants_vtk
+
+    case_dir = tmp_path / "openfoam"
+    (case_dir / "system").mkdir(parents=True)
+    (case_dir / "system" / "controlDict").write_text("")
+    (case_dir / "case.foam").write_text("")
+    (case_dir / "12.5").mkdir()
+
+    def listed(outputs):
+        cfg = SimpleNamespace(openfoam_case_dir=case_dir,
+                              postproc=SimpleNamespace(openfoam_outputs=outputs))
+        records = []
+        ctx = SimpleNamespace(record=lambda name, path, **kw: records.append(
+            (name, Path(path).name)), capability=None)
+        OpenFoamBackend().export_qgis_results(cfg, ctx)
+        return records
+
+    assert ("OpenFOAM case (ParaView)", "case.foam") in listed(["paraview", "visit"])
+    assert ("OpenFOAM case (VisIt)", "controlDict") in listed(["paraview", "visit"])
+    assert ("OpenFOAM case (VisIt)", "controlDict") not in listed(["paraview"])
+    # every box unchecked is a choice, not "the default"
+    def programs(outputs):
+        return [r for r in listed(outputs) if r[0].startswith("OpenFOAM case")]
+
+    assert programs([]) == [] and len(programs(None)) == 2
+    # vtk in the case asks for the conversion; an option of the job still decides
+    vtk = SimpleNamespace(postproc=SimpleNamespace(openfoam_outputs=["vtk"]))
+    job = SimpleNamespace(options=SimpleNamespace(to_vtk=None), spec=None)
+    assert _wants_vtk(job, vtk) and not _wants_vtk(job, SimpleNamespace())
+    assert not _wants_vtk(SimpleNamespace(options=SimpleNamespace(to_vtk=False)), vtk)
+    cases = openfoam_cases(SimpleNamespace(openfoam_case_dir=case_dir,
+                                           fine_sediment_case_dir=tmp_path / "none"))
+    assert cases == [{"label": "OpenFOAM free surface", "folder": str(case_dir),
+                      "paraview": str(case_dir / "case.foam"),
+                      "visit": str(case_dir / "system" / "controlDict"), "run": True}]
+
+
 # --------------------------------------------------------------------------- #
 # rigid lid: the air phase removed by construction
 # --------------------------------------------------------------------------- #
@@ -1205,15 +1246,15 @@ def test_a_two_phase_run_is_not_asked_the_lid_question(tmp_path):
 
 
 def test_a_wall_thinner_than_a_cell_still_blocks():
-    """A column is blanked on its CENTRE, so a baffle thinner than the lattice - or
-    one that passes between two centres - used to block nothing and the mesh joined
+    """A column is blanked on its CENTER, so a baffle thinner than the lattice - or
+    one that passes between two centers - used to block nothing and the mesh joined
     both sides of it. The structure is there precisely because the two sides are at
     different levels, so the hole carries the whole head difference."""
     import shapely
 
     polygon = shapely.geometry.box(0, 0, 1.0, 0.3)
     # A vertical-slot baffle: a 5 mm wall on a 5 cm lattice, lying between two rows of
-    # cell centres, leaving a slot along the far side. Partial, because a wall across
+    # cell centers, leaving a slot along the far side. Partial, because a wall across
     # the whole channel is a different case the builder already warns about.
     wall = shapely.geometry.box(0.4975, -0.1, 0.5025, 0.15)
 
@@ -1222,7 +1263,7 @@ def test_a_wall_thinner_than_a_cell_still_blocks():
     assert sealed.n_columns < open_grid.n_columns, "the wall blocked nothing"
 
     # Nothing spans the wall: before the seal, every row passed straight through it
-    # because no cell centre fell inside 5 mm of solid.
+    # because no cell center fell inside 5 mm of solid.
     through = ((sealed.cell_xy[:, 0] > 0.4975) & (sealed.cell_xy[:, 0] < 0.5025)
                & (sealed.cell_xy[:, 1] < 0.15))
     assert not through.any(), "the wall still leaks"

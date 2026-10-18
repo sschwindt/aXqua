@@ -48,6 +48,7 @@ from axqua.calibration import build_calibration_csv, merged_parameters
 from axqua.config import Config
 from axqua.solvers.openfoam import dicts
 from axqua.solvers.openfoam.case import build_case
+from axqua.solvers.openfoam.layout import PREVIOUS_RUN
 from axqua.solvers.openfoam.spec import OPENFOAM_PARAMETERS
 
 log = logging.getLogger("axqua")
@@ -60,7 +61,7 @@ CAMPAIGN_SUBDIR = "openfoam"
 #: mounting tilt and by the probe's own beam geometry, so the raw per-point error
 #: claims a precision the measurement does not have. This keeps U_z in the
 #: likelihood as a weak constraint on the secondary circulation instead of as the
-#: loudest voice in it. It is a judgement, not a measurement - drop U_z from
+#: loudest voice in it. It is a judgment, not a measurement - drop U_z from
 #: ``calibration_quantities`` (it is still extracted) if that trade is not wanted.
 VERTICAL_ERROR_FLOOR = 0.03
 
@@ -137,7 +138,9 @@ def campaign_config(cfg: Config, *, cell_size_factor: float, end_time: float,
 
 def _clean_template(case_dir: Path) -> None:
     """Strip a built case down to what is worth copying once per run."""
-    for pattern in ("processor*", "VTK", "postProcessing", "log.*", "*.log"):
+    for pattern in ("processor*", "VTK", "postProcessing", "log.*", "*.log",
+                    "system/decomposeParDict-*",          # the dictionaries of earlier runs
+                    PREVIOUS_RUN):                        # what a rebuild of the template set aside
         for path in case_dir.glob(pattern):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
     for path in case_dir.iterdir():
@@ -258,7 +261,7 @@ def stage_case_template(cfg: Config, *, state=None, rebuild: bool = False,
         artifacts = built = build_case(cfg, state=state, uniform_bed_ks=True)
         # The template's nominal Ks should be representative of the reach rather
         # than the 0.05 m fallback: it is the value every run starts from and the
-        # natural centre for the ks prior.
+        # natural center for the ks prior.
         bed_ks = getattr(artifacts.mesh, "bed_ks", None)
         if bed_ks is not None:
             import numpy as np
@@ -291,6 +294,8 @@ def stage_case_template(cfg: Config, *, state=None, rebuild: bool = False,
     except Exception as exc:  # noqa: BLE001 - the placer rebuilds if this is absent
         log.debug("column cache not written (%s: %s); the target placer will "
                   "rebuild the lattice", type(exc).__name__, exc)
+    # HydroBayesCal decomposes every copy with the template's own file, so it names the ranks of this config, also for a template reused from a campaign on other ranks.
+    dicts.write_decomposition(dest, int(cfg.openfoam.n_processors or 1))
     # A two-phase template is spun up ONCE, here, and the settled state promoted
     # into 0/ - see _prespin_template. Must happen before _clean_template's
     # sibling below would have removed the produced time directory, and before
@@ -342,9 +347,7 @@ def _prespin_template(case_dir: Path, cfg: Config) -> None:
              "campaign)", of.spinup_time)
     runtime = OpenFoamRuntime(of)
     nprocs = int(getattr(of, "n_processors", 1) or 1)
-    if nprocs > 1:
-        runtime.decompose(case_dir)
-    proc = runtime.run_stage(case_dir, "spinup", end_time=of.spinup_time, cfg=cfg)
+    proc = runtime.run_stage(case_dir, "spinup", end_time=of.spinup_time, cfg=cfg)  # splits the case for nprocs
     if getattr(proc, "returncode", 0) != 0:
         raise SystemExit(
             f"the pre-spin of the calibration template failed (exit "
@@ -967,9 +970,9 @@ def _assert_targets_placed(placement: pd.DataFrame, *, min_points: int = 6,
                            min_fraction: float = 0.5) -> None:
     """Refuse a campaign whose targets do not land in real water.
 
-    This is not defence in depth - it is the only defence. HydroBayesCal's
+    This is not defense in depth - it is the only defense. HydroBayesCal's
     OpenFOAM binding finds the nearest extraction point with **no distance
-    cutoff**, so a target metres from the water returns a plausible number instead
+    cutoff**, so a target meters from the water returns a plausible number instead
     of an error, and the whole campaign trains on it.
     """
     usable = placement["usable"].to_numpy(dtype=bool)
@@ -983,6 +986,6 @@ def _assert_targets_placed(placement: pd.DataFrame, *, min_points: int = 6,
         f"(need at least {max(min_points, int(np.ceil(min_fraction * n)))}).\n"
         f"unusable: {detail}\n"
         "See target-placement.csv. Either the measurement points lie outside the "
-        "modelled wetted extent, or the model is far too shallow there. Do NOT run "
+        "modeled wetted extent, or the model is far too shallow there. Do NOT run "
         "the campaign: HydroBayesCal's nearest-point search has no distance "
         "cutoff, so it will silently return values from wherever it can reach.")

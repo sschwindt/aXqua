@@ -15,7 +15,7 @@ elongated along the flow). Ideals follow common hydrodynamic-meshing guidance:
 Validity (fatal) checks: zero-area / degenerate triangles and inverted (mixed
 orientation) elements raise; duplicate / orphan nodes, non-manifold edges, extra
 boundary loops (hanging gaps) and IPOBO inconsistency (wrong boundary tags) are
-flagged. All metrics are vectorised with numpy so they scale to large meshes.
+flagged. All metrics are vectorized with numpy so they scale to large meshes.
 """
 
 from __future__ import annotations
@@ -140,7 +140,7 @@ def _region_quality(label, relaxed, L, angles, min_angle_deg, max_angle_deg):
 
 
 def _edge_table(tri):
-    """Unique undirected edges with their occurrence counts (vectorised)."""
+    """Unique undirected edges with their occurrence counts (vectorized)."""
     edges = np.vstack([tri[:, [0, 1]], tri[:, [1, 2]], tri[:, [2, 0]]])
     edges = np.sort(edges, axis=1)
     uniq, inv, counts = np.unique(edges, axis=0, return_inverse=True,

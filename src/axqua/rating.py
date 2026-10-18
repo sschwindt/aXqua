@@ -2,7 +2,7 @@
 
 For a steady simulation the downstream (outflow) boundary needs the water-surface
 elevation at the simulated discharge. When no *measured* rating curve is
-available, this module synthesises one from a roughness coefficient and a
+available, this module synthesizes one from a roughness coefficient and a
 prismatic channel cross-section by inverting Manning's uniform- (normal-) flow
 equation::
 
@@ -95,6 +95,15 @@ def normal_depth(discharge: float, *, manning: float | None = None,
     return 0.5 * (lo + hi)
 
 
+def _discharges(value) -> list[float]:
+    """One discharge or several, as a sorted list (numpy scalars included)."""
+    try:
+        values = list(value)
+    except TypeError:                     # a number, also a numpy scalar or 0-d array
+        values = [value]
+    return sorted(float(q) for q in values)
+
+
 def generate_stage_discharge(out: str | Path, discharges: Iterable[float] | float,
                              *, manning: float | None = None,
                              strickler: float | None = None, slope: float,
@@ -105,8 +114,7 @@ def generate_stage_discharge(out: str | Path, discharges: Iterable[float] | floa
     For a steady run a single discharge (the simulated Q) is enough; pass several
     to tabulate a curve. ``WSE = bed_elevation + normal_depth(Q)``.
     """
-    qs = [float(discharges)] if isinstance(discharges, (int, float)) else \
-        sorted(float(q) for q in discharges)
+    qs = _discharges(discharges)
     if not qs:
         raise ValueError("no discharges given")
 
@@ -144,7 +152,7 @@ def synthesize_outflow_rating(cfg, discharge, *, side_slope: float = 0.0,
     slope from a linear fit of the DEM along ``geodata.channel_centerline``. The
     roughness defaults to the lateral-boundary friction in the config
     (``friction.boundary_law``/``boundary_coefficient``; Strickler or Manning).
-    Writes a one-row ``Q,WSE,depth`` CSV to *out* (default ``boundaries.stage_discharge``).
+    *discharge* is one discharge or several; writes a ``Q,WSE,depth`` CSV with one row per discharge to *out* (default ``boundaries.stage_discharge``).
     """
     import geopandas as gpd
     import numpy as np
@@ -216,10 +224,12 @@ def synthesize_outflow_rating(cfg, discharge, *, side_slope: float = 0.0,
 
     out = Path(out) if out is not None else Path(cfg.boundaries.stage_discharge)
     rough = f"Strickler Kst={strickler}" if strickler is not None else f"Manning n={manning}"
-    log.info("outflow rating from geodata: Q=%.2f m3/s, width=%.1f m (outflow line), "
+    flows = _discharges(discharge)
+    log.info("outflow rating from geodata: Q=%s m3/s, width=%.1f m (outflow line), "
              "bed=%.2f m (thalweg), slope=%.5f, banks %g:1, %s",
-             float(discharge), width, bed_elevation, slope, side_slope, rough)
-    return generate_stage_discharge(out, discharge, manning=manning, strickler=strickler,
+             ", ".join(f"{q:.2f}" for q in flows), width, bed_elevation, slope,
+             side_slope, rough)
+    return generate_stage_discharge(out, flows, manning=manning, strickler=strickler,
                                     slope=slope, bottom_width=width, side_slope=side_slope,
                                     bed_elevation=bed_elevation)
 
@@ -308,12 +318,11 @@ def section_rating(out, discharges, *, station, bed, ks, slope, log_label=""):
     section the error is large enough to force a supercritical drawdown at a
     prescribed-elevation outflow - the boundary pulls the level below the reach's
     own normal depth and the flow accelerates through the outlet to satisfy
-    continuity. Integrating the real section removes that artefact.
+    continuity. Integrating the real section removes that artifact.
     """
     station, bed, ks = _sorted_section(station, bed, ks, slope)
 
-    qs = [float(discharges)] if isinstance(discharges, (int, float)) else \
-        sorted(float(q) for q in discharges)
+    qs = _discharges(discharges)
     rows = []
     lo0 = float(bed.min())
     for q in qs:
@@ -411,7 +420,7 @@ def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=No
             zc = np.array([s[0] for s in dem.sample(zip(cx, cy))], dtype=float)
             # nodata, not just NaN: rasterio hands back the raster's fill value, and
             # -9999 is perfectly finite. Fitting a slope through it is not a small
-            # error - on munich-vsf, whose centreline crosses walls the bed rasters
+            # error - on munich-vsf, whose centerline crosses walls the bed rasters
             # leave empty, it returned 44.5 instead of 0.053, and a slope three orders
             # of magnitude too steep gives a normal depth of 29 mm at the outlet.
             good = _valid(zc, dem)

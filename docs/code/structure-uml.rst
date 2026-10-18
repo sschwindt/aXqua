@@ -25,7 +25,7 @@ Design rules
 
 Three rules determine the structure. Each of them is enforced by an automated test that reads the source code.
 
-#. **The core does not depend on a simulation code.** ``axqua.core`` describes the river reach and the modeling task. The backends in ``axqua.solvers`` depend on the core, never the reverse. A further simulation code can therefore be added without changing the core.
+#. **The core does not depend on a simulation code.** ``axqua.core`` describes the free-surface water body and the modeling task. The backends in ``axqua.solvers`` depend on the core, never the reverse. A further simulation code can therefore be added without changing the core.
 #. **The backends do not depend on each other.** The TELEMAC backend and the OpenFOAM backend do not import each other. Steps that involve both codes, such as the TELEMAC warm-up of an OpenFOAM model, are coordinated one level above (``axqua.prerun``, ``axqua.workflow``).
 #. **The plugin does not import the library.** QGIS has its own Python installation, whereas the library requires several geospatial packages and the environment of a simulation code. The plugin therefore calls the program ``axqua`` as a separate process and exchanges only small pieces of information with it: a job ID, a state, a file path. Result data never passes through the plugin. QGIS opens the result files itself.
 

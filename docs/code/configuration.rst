@@ -1,7 +1,7 @@
 Configuration
 =============
 
-The case description and everything that locates the simulation software on a computer. ``axqua.config`` holds one data class per block of the case file. ``axqua.core.schema`` states which settings describe the river reach, which belong to one simulation code, and which describe the computer. The settings of the computer are stored in the profile (``axqua.core.profile``).
+The case description and everything that locates the simulation software on a computer. ``axqua.config`` holds one data class per block of the case file. ``axqua.core.schema`` states which settings describe the free-surface water body, which belong to one simulation code, and which describe the computer. The settings of the computer are stored in the profile (``axqua.core.profile``).
 
 .. _uml-case:
 

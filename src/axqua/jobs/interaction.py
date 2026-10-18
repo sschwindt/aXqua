@@ -11,7 +11,7 @@ ladder. The fix is not to make the prompt smarter; it is to make the answer part
 submission. :class:`PolicyAsk` answers from ``job.json``, never blocks, and records every
 question and answer in ``runner.log`` so the decision is auditable rather than invisible.
 
-An answer *file* is also honoured, which is what lets a future ``axqua answer JOB_ID
+An answer *file* is also honored, which is what lets a future ``axqua answer JOB_ID
 --yes`` reach a running study without restarting it. The file format is fixed here even
 though the CLI verb is not built yet, so adding it later needs no migration.
 """

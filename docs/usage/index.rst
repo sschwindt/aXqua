@@ -3,7 +3,7 @@ Usage
 
 This section follows the order in which a model is built and used. Each subsection corresponds to one working step:
 
-#. :doc:`case-setup` describes the river reach and the modeling task in a case file.
+#. :doc:`case-setup` describes the free-surface water body and the modeling task in a case file.
 #. :doc:`preprocessing` converts the case into a computational mesh and the input files of the simulation codes.
 #. :doc:`hydraulic-simulations` computes water depths and flow velocities, first with TELEMAC and optionally with OpenFOAM.
 #. :doc:`mesh-convergence` determines the mesh resolution that the results require.

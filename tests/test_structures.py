@@ -142,7 +142,7 @@ def test_the_layer_is_reprojected_like_every_other(tmp_path):
                            (11.0, 48.002)])],
         crs="EPSG:4326").to_file(tmp_path / "structures.gpkg")
     dam = load_structures(_case(tmp_path))[0]
-    assert dam.polygon.area > 10_000        # square metres, not square degrees
+    assert dam.polygon.area > 10_000        # square meters, not square degrees
 
 
 def test_no_layer_means_no_structures(tmp_path):
@@ -174,7 +174,7 @@ def _band(x0, x1):
 
 
 def test_an_overflow_crest_raises_the_bed_and_never_lowers_it():
-    """A structure adds material; a crest digitised below the surveyed ground must
+    """A structure adds material; a crest digitized below the surveyed ground must
     not carve a trench through it."""
     xy = np.array([[10.0, 50.0], [50.0, 50.0], [90.0, 50.0]])
     bed = np.array([100.0, 100.0, 100.0])
@@ -267,7 +267,7 @@ def test_the_area_rule_keeps_a_narrow_opening_and_still_seals():
     `structures.blanking_rule: area` blanks only elements the wall really covers.
     Measured on a synthetic vertical-slot flume with a 0.170 m DIAGONAL slot
     (cases/slot-flume/blanking_rules.py): zero crossings through a wall at dx 0.10 to
-    0.025 m, and a realised slot of 102-104% of drawn against 74-86% for `touch`.
+    0.025 m, and a realized slot of 102-104% of drawn against 74-86% for `touch`.
 
     The guarantee both must keep: no element may have open water on both sides of a
     wall. Here that is pinned as "every element the wall passes through is raised".
@@ -396,7 +396,7 @@ def test_the_blanking_rule_is_validated_and_defaults_to_the_safe_one():
 
 
 def test_the_element_rule_is_chunked_without_changing_its_answer():
-    """`shapely.polygons` materialises one GEOS polygon per candidate element, and
+    """`shapely.polygons` materializes one GEOS polygon per candidate element, and
     the bbox prefilter cannot help the case that matters: a wall drawn diagonally
     across a reach has a bbox covering the whole domain, so every element is a
     candidate. Measured on inn-KB15's 680k-element mesh, the unchunked construction
@@ -455,7 +455,7 @@ def test_a_solid_structure_removes_columns_from_the_openfoam_lattice():
     assert blocked.n_columns < plain.n_columns
     # A 10x10 solid on a 1 m lattice covers 100 columns as drawn, but it is blanked
     # against itself grown by half a cell diagonal so that a structure thinner than
-    # the lattice cannot slip between two cell centres and leave the mesh joined
+    # the lattice cannot slip between two cell centers and leave the mesh joined
     # through it. That costs up to one extra cell on every side: 100 as drawn, 144 at
     # the limit of 12x12.
     removed = plain.n_columns - blocked.n_columns

@@ -266,10 +266,10 @@ def _snap_to_domain(line, roi, label: str, dem=None, walls=None, search: float =
 
     Projecting onto the *nearest* stretch of the outline is not enough either. Near the
     end of a channel the outline runs across walls as well as bed, and a discharge
-    prescribed over a segment whose bed stands a metre above its neighbours piles water
-    onto the wall instead of into the channel - which shows up as a metres-deep spike at
+    prescribed over a segment whose bed stands a meter above its neighbours piles water
+    onto the wall instead of into the channel - which shows up as a meters-deep spike at
     the boundary and nowhere else. So the line is placed at the **lowest** stretch of
-    outline within a few metres of the patch: the invert, which is where the opening is.
+    outline within a few meters of the patch: the invert, which is where the opening is.
     """
     from shapely.geometry import LineString
 
@@ -291,8 +291,8 @@ def _snap_to_domain(line, roi, label: str, dem=None, walls=None, search: float =
                 continue
             candidate = _substring(exterior, centre - half, centre + half)
             # The wall is burned into the bed later, at the mesh stage, so a boundary
-            # node sitting on one is a node whose bed stands a metre above its
-            # neighbours - and prescribing a discharge over it piles water onto the
+            # node sitting on one is a node whose bed stands a meter above its
+            # neighbors - and prescribing a discharge over it piles water onto the
             # crest. The opening itself is *between* walls, though, so rejecting every
             # stretch that touches one would reject the inlet as well: clip instead,
             # and keep the widest open gap.
@@ -422,7 +422,7 @@ def _crs(cfg):
     """The project CRS, or None when the case runs in local CAD coordinates.
 
     A case whose transform is the identity has not been georeferenced, and stamping a
-    UTM code onto metres that start at the corner of a drawing would be a lie that QGIS
+    UTM code onto meters that start at the corner of a drawing would be a lie that QGIS
     would then act on. Local coordinates are a supported way to run: the model is the
     same, only its place on the map is missing.
     """

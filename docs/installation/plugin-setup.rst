@@ -3,7 +3,7 @@
 Plugin setup
 ============
 
-The plugin setup contains everything that describes the **computer** and not the river: where Python and the simulation software are installed, and where simulations are written. These settings are made once per computer. They are kept apart from the description of a river reach (:doc:`../usage/case-setup`), so that a case can be copied to another computer without changes.
+The plugin setup contains everything that describes the **computer** and not the simulation project, that is, where Python and the simulation software are installed, and where simulations will be written. These **settings are made once per computer**. They are kept apart from the description of a reach (:doc:`../usage/case-setup`), so that a case can be copied to another computer without changes.
 
 .. _plugin-profile:
 
@@ -22,7 +22,7 @@ All settings of a computer are stored in one file, the **profile**. Its name end
    :alt: The Configuration tab of the plugin
    :width: 70%
 
-   The *Configuration* tab. (1) The ``axqua`` program that the plugin calls, with *Settings...* to select it. (2) The profile of the computer with what it names for each program, *Edit profile...* and *Check*. (3) The installation wizards of the simulation software. (4) *Help* opens this documentation at the section of the tab that is showing.
+   The *Configuration* tab. (1) The ``axqua`` program that the plugin calls, with *Settings...* to select it. (2) The profile of the computer with what it names for each program, *Edit profile...* and *Check*. (3) The box *Simulation & postprocessing software*: the installation wizards, with each program that was found in dark green; a program that was not found is named in bold dark purple. (4) *Help* opens the documentation at the section of the tab that is showing: a copy built on this computer if there is one, else the published documentation, in German or French when QGIS is set to one of them. *Clean Up* to its left removes files that the cases no longer need (:ref:`help-cleanup`).
 
 Each program has two rows in the editor: its **installation folder**, and below it the file that aXqua runs. For TELEMAC and OpenFOAM this file is the environment script (:ref:`solver-bindings`), and for ParaView and VisIt it is the program file. Selecting the installation folder is sufficient: aXqua searches the folder and enters the file in the row below, where it can still be changed. If a folder contains several environment scripts, the editor lists them, and one of them has to be selected in the row below.
 

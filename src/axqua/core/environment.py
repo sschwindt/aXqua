@@ -15,7 +15,7 @@ Windows, where TELEMAC is configured through a ``.bat`` and MS-MPI provides
 Three kinds, chosen per solver
 ------------------------------
 ``posix``
-    ``bash -lc 'source <script>; <cmd>'``. Linux and macOS; the historic behaviour.
+    ``bash -lc 'source <script>; <cmd>'``. Linux and macOS; the historic behavior.
 
 ``windows``
     ``cmd /c 'call <script>.bat && <cmd>'`` for a native install, or the same shape as
@@ -195,7 +195,7 @@ class SolverEnvironment:
         command line unquoted.
 
         When the environment has **already been entered** (see :attr:`assume_entered`)
-        the setup script is skipped. That is not an optimisation: a detached job is
+        the setup script is skipped. That is not an optimization: a detached job is
         launched with a captured environment set directly on the process, so re-sourcing
         would both be redundant and put a shell back inside the job's process tree -
         which is exactly the layer that makes tree-kill unreliable.
@@ -400,7 +400,7 @@ class SolverEnvironment:
 
     @classmethod
     def from_config(cls, block, legacy_script=None) -> "SolverEnvironment":
-        """Build from a config block, honouring the pre-environment spelling.
+        """Build from a config block, honoring the pre-environment spelling.
 
         A config that only carries ``telemac.pysource`` (every case written before this
         existed) resolves to a POSIX environment against that script, so nothing has to

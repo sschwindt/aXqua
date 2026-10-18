@@ -25,7 +25,7 @@ def norm_stone(raw: str) -> str:
     """'L-S8' -> 'S08', 'L-D2' -> 'D02', 'L-S15' -> 'S15'."""
     m = re.match(r"L-([SD])(\d+)$", raw.strip())
     if not m:
-        raise ValueError(f"unrecognised logger name: {raw!r}")
+        raise ValueError(f"unrecognized logger name: {raw!r}")
     return f"{m.group(1)}{int(m.group(2)):02d}"
 
 

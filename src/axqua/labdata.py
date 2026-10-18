@@ -4,7 +4,7 @@ A laboratory campaign on a scale model does not produce what
 :mod:`axqua.ground_truth` expects. There are no coordinates and no point cloud: there
 are a handful of **cross-sections**, each with a mean water depth and a maximum
 velocity, at a few steady discharges. Comparing those against a model means comparing
-*aggregates along a section* with aggregates along the same section - not a modelled
+*aggregates along a section* with aggregates along the same section - not a modeled
 value at a point against a measured value at a point, which is what the calibration CSV
 would otherwise imply.
 
@@ -66,7 +66,7 @@ def read_depths(path: Path, *, sheet=0, length_scale: float = 1.0) -> list[dict]
     The sheet is a stack of blocks, one per discharge: a title row naming the
     discharge (``Q30 - 60 L/s``) whose remaining cells are the section labels
     (``XS1 - US2``), then a ``MEAN`` row and a standard-deviation row, both in
-    millimetres. Depths are returned in **metres**, multiplied by *length_scale*.
+    millimeters. Depths are returned in **meters**, multiplied by *length_scale*.
 
     Returns a list of dicts with ``discharge_label``, ``discharge``, ``section``,
     ``station``, ``h_mean``, ``h_std``.
@@ -96,7 +96,7 @@ def read_depths(path: Path, *, sheet=0, length_scale: float = 1.0) -> list[dict]
                 "discharge": discharge,
                 "section": section,
                 "station": station,
-                # millimetres in the sheet, metres in the model
+                # millimeters in the sheet, meters in the model
                 "h_mean": float(value) / 1000.0 * length_scale,
                 "h_std": (float(std.iat[column]) / 1000.0 * length_scale
                           if std is not None and _is_number(std.iat[column]) else None),
@@ -177,9 +177,9 @@ def reference_table(depths: list[dict], velocities: list[dict] | None = None):
 
 def compare(reference, modelled, *, length_scale: float = 1.0,
             velocity_scale: float = 1.0):
-    """Put measured section aggregates next to modelled ones.
+    """Put measured section aggregates next to modeled ones.
 
-    *modelled* is the output of
+    *modeled* is the output of
     :func:`~axqua.solvers.telemac.sections.section_statistics` for the same sections,
     carrying a ``name`` that matches the reference ``section``. The scales are recorded
     in the result so a table can never be read without knowing which convention the
@@ -266,7 +266,7 @@ def _velocity_columns(header) -> dict[str, int]:
     """
     wanted = {
         "section": ("XS",),
-        # the resultant horizontal speed, which is what a modelled |U| compares with
+        # the resultant horizontal speed, which is what a modeled |U| compares with
         "u_max": ("U time avg. max",),
         "u_std": ("U std",),
         "u3d_max": ("U3d time-avg. max", "U3d time avg. max"),
@@ -289,6 +289,6 @@ def _velocity_columns(header) -> dict[str, int]:
     if "u_max" not in out:
         raise ValueError(
             "the velocity sheet has no resultant 'U time avg. max' column; only the "
-            "components are present, and comparing one of those against a modelled "
+            "components are present, and comparing one of those against a modeled "
             "speed would be wrong")
     return out

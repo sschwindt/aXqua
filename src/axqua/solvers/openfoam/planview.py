@@ -32,6 +32,7 @@ from pathlib import Path
 import numpy as np
 
 from axqua.core import errors
+from axqua.solvers.openfoam.layout import time_folders
 
 log = logging.getLogger("axqua")
 
@@ -145,17 +146,9 @@ def read_cells(path: str | Path, n_cells: int) -> np.ndarray:
 
 def latest_time(case_dir: str | Path) -> str | None:
     """Name of the last time folder that holds a result, ``None`` when there is none."""
-    best: tuple[float, str] | None = None
-    for entry in Path(case_dir).iterdir():
-        if not entry.is_dir():
-            continue
-        try:
-            value = float(entry.name)
-        except ValueError:
-            continue
-        if value > 0 and (entry / "U").is_file() and (best is None or value > best[0]):
-            best = (value, entry.name)
-    return best[1] if best else None
+    later = [path for value, path in time_folders(case_dir)
+             if value > 0 and (path / "U").is_file()]
+    return later[-1].name if later else None
 
 
 @dataclass
@@ -209,7 +202,7 @@ def depth_average(columns: Columns, alpha: np.ndarray, velocity: np.ndarray,
 
 
 def lattice_triangles(col_id: np.ndarray, xy: np.ndarray) -> np.ndarray:
-    """Two triangles for every square of four neighbouring column centers.
+    """Two triangles for every square of four neighboring column centers.
 
     Counter-clockwise in plan, as TELEMAC numbers its elements, whichever way the
     lattice is turned.

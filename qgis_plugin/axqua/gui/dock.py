@@ -1,10 +1,9 @@
 """The panel: the tabs of the workflow, and the job list below them.
 
-The tabs are fixed and follow the documentation section by section
-(:mod:`.sections`): Configuration, Case Setup, Preprocessing, Hydraulic simulation,
-Mesh convergence, Morphodynamic simulation, Calibration & validation, Postprocessing and
-Batch-processing. *Help* opens the documentation at the section of the tab that is
-showing.
+The tabs are fixed and follow the workflow (:mod:`.sections`): Configuration, Case
+Setup, Preprocessing, Simulations (Baseline (Telemac), OpenFOAM, Mesh convergence,
+Morphodynamics), Calibration & validation, Postprocessing and Batch-processing. *Help*
+opens the online documentation at the section of the tab that is showing.
 
 What a tab offers still comes from ``axqua case-status --json``: the plugin does not
 know what TELEMAC or OpenFOAM can do, it *asks*, so a capability added to aXqua appears
@@ -25,7 +24,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import (QDockWidget, QGroupBox, QPushButton, QSplitter,
+from qgis.PyQt.QtWidgets import (QDockWidget, QGroupBox, QHBoxLayout, QPushButton, QSplitter,
                                  QTabWidget, QVBoxLayout, QWidget)
 
 from ..compat import (CRITICAL, INFO, WARNING, enum_value, exec_dialog, log_message,
@@ -41,22 +40,27 @@ from .case_tab import CaseTab
 from .configuration_tab import ConfigurationTab
 from .jobs_widget import JobsWidget
 from .section_pages import (BatchPage, PreprocessingPage, ProgramPage, QgisPage,
-                            SectionPage)
+                            SectionPage, SolverChoicePage)
 from .settings_dialog import SettingsDialog, read_settings
 
-#: What a sub-tab says when the active case has nothing for it.
+#: What a sub-tab says when the active case has nothing for it. A sub-tab with a
+#: choice of the simulation program has one text per program.
 EMPTY = {
-    ("hydraulics", "telemac"): "This case does not use TELEMAC. Add a telemac: block to "
-                               "its case file.",
-    ("hydraulics", "openfoam"): "This case does not use OpenFOAM. Add an openfoam: "
-                                "block to its case file to simulate the free surface "
-                                "in three dimensions.",
-    ("mesh", ""): "This case has no simulation for which a mesh study can be run.",
-    ("morphodynamics", "telemac"): "This case does not use TELEMAC.",
-    ("morphodynamics", "openfoam"): "This case does not use OpenFOAM. Add a "
-                                    "fine_sediment: block to its case file to "
-                                    "simulate fine sediment over a bed that stays in "
-                                    "place.",
+    ("hydraulics", "telemac"): "This case does not use TELEMAC. Switch on the TELEMAC "
+                               "settings in Case settings.",
+    ("hydraulics", "openfoam"): "This case does not use OpenFOAM. Switch on the "
+                                "OpenFOAM settings in Case settings to simulate the "
+                                "free surface in three dimensions.",
+    ("hydraulics", "mesh", "telemac"): "This case does not use TELEMAC, so no mesh "
+                                       "study of a TELEMAC model can be run.",
+    ("hydraulics", "mesh", "openfoam"): "This case does not use OpenFOAM. Switch on "
+                                        "the OpenFOAM settings in Case settings to "
+                                        "study the mesh of the OpenFOAM model.",
+    ("hydraulics", "morphodynamics", "telemac"): "This case does not use TELEMAC.",
+    ("hydraulics", "morphodynamics", "openfoam"): (
+        "This case does not use OpenFOAM for morphodynamics. Switch on Fine sediment "
+        "over a fixed bed in Case settings > Morphodynamic simulation to simulate fine "
+        "sediment with sediDriftFoam2 over a bed that stays in place."),
     ("calibration", ""): "This case has no simulation that can be calibrated.",
 }
 
@@ -71,13 +75,14 @@ class PluginContext:
         self.client = RunnerClient(settings["executable"] or None)
         # How results are drawn belongs to the CASE, not to this installation: the
         # depth below which water is not surface flow is `hydrodynamics.wet_depth`,
-        # which aXqua's own reports already use, and the top of the velocity colour
+        # which aXqua's own reports already use, and the top of the velocity color
         # scale is `postproc.velocity_scale_max`, which a chute and a lowland river do
         # not share. Until a case is open these are the style defaults, which match
         # the defaults of those two settings.
         self.min_depth = styles.DEFAULT_MIN_DEPTH
         self.velocity_cap = styles.DEFAULT_VELOCITY_MAX
-        self.project = project_io.AxquaProject()
+        # the cases the panel knows, kept in the settings of QGIS (core/project.py)
+        self.project = project_io.from_settings(_stored_cases())
         self.case_view: CaseView | None = None
         self.profile: dict | None = None
         self.actions: dict = {}             # what the plugin menu can do, by name
@@ -154,14 +159,14 @@ class PluginContext:
     def open_settings(self) -> None:
         self.dock.open_settings()
 
-    def open_project(self, path: Path) -> None:
-        self.dock.open_project(path)
-
-    def save_project(self, path: Path | None = None) -> None:
-        self.dock.save_project(path)
+    def import_project(self, path: Path) -> None:
+        self.dock.import_project(path)
 
     def add_case(self, path: Path) -> None:
         self.dock.add_case(path)
+
+    def remove_case(self, path: Path) -> None:
+        self.dock.remove_case(path)
 
     def set_active_case(self, stored: str) -> None:
         self.dock.set_active_case(stored)
@@ -219,7 +224,18 @@ class AxquaDock(QDockWidget):
         self.help_button = QPushButton("Help")
         self.help_button.setToolTip("Open the documentation at the section of this tab")
         self.help_button.clicked.connect(self.open_help)
-        self.tabs.setCornerWidget(self.help_button)
+        # Clean Up left of Help (the user's order of 2026-10-18)
+        self.cleanup_button = QPushButton("Clean Up")
+        self.cleanup_button.setToolTip("Remove files of a case that nothing needs any more, "
+                                       "to free disk space")
+        self.cleanup_button.clicked.connect(self.open_cleanup)
+        corner = QWidget()
+        corner_row = QHBoxLayout(corner)
+        corner_row.setContentsMargins(0, 0, 0, 0)
+        corner_row.setSpacing(2)
+        corner_row.addWidget(self.cleanup_button)
+        corner_row.addWidget(self.help_button)
+        self.tabs.setCornerWidget(corner)
         splitter.addWidget(self.tabs)
 
         #: every page that follows the active case, by (section key, sub key)
@@ -279,6 +295,12 @@ class AxquaDock(QDockWidget):
             from .validation_box import CalibrationPage
             return CalibrationPage(self.ctx, key, sub,
                                    empty_text=EMPTY.get((key, sub), ""))
+        placed = sections.section(key).subsection(sub) if sub else None
+        if placed is not None and placed.choose_solver:
+            return SolverChoicePage(
+                self.ctx, key, sub,
+                empty_texts={solver: EMPTY.get((key, sub, solver), "")
+                             for solver, _ in sections.SOLVERS})
         # the build of the 2D model has a tab of its own
         hide = (sections.PREPROCESSING_CAPABILITY,) if key == "hydraulics" else ()
         return SectionPage(self.ctx, key, sub, empty_text=EMPTY.get((key, sub), ""),
@@ -315,36 +337,54 @@ class AxquaDock(QDockWidget):
         key, sub = self.current_section()
         return help_pages.open_help(key, sub)
 
-    # -- project ------------------------------------------------------------------
-    def open_project(self, path: Path) -> None:
+    # -- clean up -----------------------------------------------------------------
+    def open_cleanup(self):
+        """The window that removes what the cases no longer need; returns it (for a test)."""
+        from .cleanup_dialog import CleanupDialog
+
+        dialog = CleanupDialog(self.ctx.client, self.ctx.project.case_paths(),
+                               active=self.ctx.project.active_case_path(), parent=self)
+        dialog.show()
+        self._cleanup_dialog = dialog          # kept, or the window is collected at once
+        return dialog
+
+    # -- the list of cases --------------------------------------------------------
+    def _remember_cases(self) -> None:
+        """Keep the list of cases in the settings of QGIS, so that it survives a
+        restart without anything being saved by hand."""
+        from qgis.PyQt.QtCore import QSettings
+
+        QSettings().setValue(project_io.SETTINGS_KEY, project_io.as_settings(self.ctx.project))
+
+    def import_project(self, path: Path) -> None:
+        """Add the cases of a project file of an earlier version."""
         try:
-            self.ctx.project = project_io.load(path)
+            added = project_io.import_cases(self.ctx.project, path)
         except (OSError, ValueError) as exc:
-            self.ctx.error(f"Could not open {path.name}: {exc}")
+            self.ctx.error(f"Could not read {path.name}: {exc}")
             return
+        self._remember_cases()
         self.case_tab.refresh()
-        self.ctx.info(f"Opened {path.name} with {len(self.ctx.project.cases)} case(s).")
-        # Rediscovery: the jobs are found with whatever state they have reached while
-        # QGIS was closed.
+        self.ctx.info(f"Added {added} case(s) of {path.name}.")
         self.refresh_case()
         self.jobs_tab.refresh()
 
-    def save_project(self, path: Path | None = None) -> None:
-        try:
-            written = project_io.save(self.ctx.project, path)
-        except (OSError, ValueError) as exc:
-            self.ctx.error(f"Could not save the project: {exc}")
-            return
-        self.case_tab.refresh()
-        self.ctx.info(f"Saved {written.name}.")
-
     def add_case(self, path: Path) -> None:
         self.ctx.project.add_case(path)
+        self._remember_cases()
+        self.case_tab.refresh()
+        self.refresh_case()
+
+    def remove_case(self, path: Path) -> None:
+        self.ctx.project.remove_case(path)
+        self._remember_cases()
         self.case_tab.refresh()
         self.refresh_case()
 
     def set_active_case(self, stored: str) -> None:
         self.ctx.project.active_case = stored
+        self._remember_cases()
+        self.case_tab.refresh()
         self.refresh_case()
 
     # -- capabilities -------------------------------------------------------------
@@ -427,6 +467,7 @@ class AxquaDock(QDockWidget):
         if exec_dialog(dialog):
             values = dialog.values()
             self.ctx.client = RunnerClient(values["executable"] or None)
+            help_pages.configure(None)      # asked again with the new program
             self.configuration_tab.check_runner()
 
     def submit(self, kinds, options: dict | None = None) -> None:
@@ -440,15 +481,12 @@ class AxquaDock(QDockWidget):
         config = self.ctx.active_case_or_warn()
         if client is None or config is None or not kinds:
             return
-        project = self.ctx.project
         kinds = list(kinds)
 
         def work():
             submitted = []
             for kind in kinds:
-                data = client.submit(config, kind, profile=project.profile or None,
-                                     job_root=project.job_root or None,
-                                     launcher=project.launcher,
+                data = client.submit(config, kind,
                                      options=options if len(kinds) == 1 else None)
                 submitted.append(str((data or {}).get("job_id") or ""))
             return submitted
@@ -485,3 +523,9 @@ class AxquaDock(QDockWidget):
 def _qt():
     from qgis.PyQt.QtCore import Qt
     return Qt
+
+
+def _stored_cases() -> str:
+    from qgis.PyQt.QtCore import QSettings
+
+    return str(QSettings().value(project_io.SETTINGS_KEY, "") or "")
