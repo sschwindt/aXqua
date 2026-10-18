@@ -22,12 +22,18 @@ TRANSLATED = ("de", "fr")
 
 #: What ``axqua docs`` answered: None until the first Help of a session asks.
 _location: dict | None = None
+#: Counts the calls of :func:`configure`; an answer to a question asked before the last one is dropped.
+_generation = 0
+#: The generation a question is on its way for, None when none is.
+_asking: int | None = None
 
 
 def configure(location: dict | None) -> None:
-    """Set where the documentation is (``axqua docs --json``); None asks again next time."""
-    global _location
+    """Set where the documentation is (``axqua docs --json``); None asks again next time. An answer still on its way from before is dropped."""
+    global _location, _generation, _asking
     _location = location
+    _generation += 1
+    _asking = None
 
 
 def location() -> dict:
@@ -40,13 +46,20 @@ def ask(client, *, owner=None) -> None:
 
     *client* is the client of the panel, which runs the axqua program of the plugin settings; a client of its own would look on ``PATH`` only. A failed answer counts as "no local copy" for the rest of the session, until :func:`configure` forgets it (the panel does so when the settings change).
     """
-    if _location is not None:
-        return
+    global _asking
+    if _location is not None or _asking == _generation:
+        return                  # known, or a question for the same program is on its way
     from ..core.tasks import run_async
 
+    mine = _asking = _generation
+
+    def answered(answer) -> None:
+        # the program may have changed while the question was on its way (open_settings forgets the answer): then the answer is of the old program
+        if mine == _generation:
+            configure(answer or {})
+
     run_async("aXqua: looking for the documentation", client.docs,
-              on_success=lambda answer: configure(answer or {}),
-              on_error=lambda _exc: configure({}), owner=owner)
+              on_success=answered, on_error=lambda _exc: answered({}), owner=owner)
 
 
 def language() -> str:

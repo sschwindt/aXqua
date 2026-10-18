@@ -157,17 +157,17 @@ def _abandoned(ticket: Path) -> bool:
     return not started and age > TICKET_GRACE
 
 
-def waiting_in(folder: str | os.PathLike) -> list[str]:
-    """The jobs that hold a ticket in *folder*, oldest first. Drops abandoned tickets."""
+def waiting_in(folder: str | os.PathLike, *, drop: bool = True) -> list[str]:
+    """The jobs that hold a ticket in *folder*, oldest first. Drops abandoned tickets, unless *drop* is false (a caller that only looks, such as Clean Up)."""
     queue = Path(folder) / QUEUE_NAME
     if not queue.is_dir():
         return []
     alive = []
     for ticket in sorted(queue.glob("*.json")):
-        if _abandoned(ticket):
-            ticket.unlink(missing_ok=True)
-        else:
+        if not _abandoned(ticket):
             alive.append(ticket.stem.split("-", 1)[1])
+        elif drop:
+            ticket.unlink(missing_ok=True)
     return alive
 
 

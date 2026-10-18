@@ -244,12 +244,57 @@ def test_what_a_run_outside_the_job_system_still_uses_is_not_offered(tmp_path, m
     assert run.is_dir() and len(cleanup.read_layout(sim / "r2d.slf").frames) == 8
 
 
-def test_the_processes_of_this_computer_are_read_from_proc():
+def test_the_processes_of_this_computer_are_read_from_proc_except_the_one_that_asks(tmp_path):
+    """Re-review of 2026-10-18: the QGIS that runs Clean Up keeps every result it shows open, so its own files counted as used by a run. This process and the ones it was started from are left out."""
+    import subprocess
+    import sys
+
     if not Path("/proc/self/cwd").exists():
         pytest.skip("no /proc")
-    with open(__file__, "rb"):
-        seen = cleanup.open_paths()
-        assert os.getcwd() in seen and str(Path(__file__).resolve()) in seen
+    mine, theirs = tmp_path / "shown-in-qgis.slf", tmp_path / "run" / "r2d.slf"
+    theirs.parent.mkdir()
+    mine.write_text("x")
+    theirs.write_text("x")
+    child = subprocess.Popen([sys.executable, "-c", "import sys, time; f = open(sys.argv[1]); "
+                              "print('open', flush=True); time.sleep(30)", str(theirs)],
+                             cwd=theirs.parent, stdout=subprocess.PIPE, text=True)
+    try:
+        assert child.stdout.readline().strip() == "open"
+        with open(mine, "rb"):
+            seen = cleanup.open_paths()
+        assert str(theirs.resolve()) in seen and str(theirs.parent.resolve()) in seen
+        assert str(mine.resolve()) not in seen          # open in this process only
+    finally:
+        child.kill()
+        child.wait()
+
+
+def test_an_openfoam_case_a_solver_works_in_is_not_offered(tmp_path, monkeypatch):
+    """Re-review of 2026-10-18: a parallel stage started from a terminal works in the case folder and writes into its processor folders, which were offered (ticked) until its first time was written."""
+    cfg, case_file = _case(tmp_path)
+    monkeypatch.setattr(cleanup, "open_paths", lambda: {str(cfg.openfoam_case_dir.resolve())})
+    found = cleanup.inventory(cfg, case_file)
+    assert not any(item_id.startswith(("delete:axqua-case/openfoam/"))
+                   for item_id in _items(found))
+    assert {"path": "axqua-case/openfoam", "reason": cleanup.BUSY_PROCESS} in found["in_use"]
+    assert "thin:axqua-case/simulation/r2d.slf" in _items(found)     # the rest of the case is offered
+
+
+def test_every_kind_of_item_is_held_back_while_it_is_written_to(tmp_path):
+    cfg, case_file = _case(tmp_path)
+    vtk = cfg.postprocessing_dir / "vtk" / "r2d.pvd"
+    vtk.write_text("<VTKFile/> being written")            # now
+    found = cleanup.inventory(cfg, case_file)
+    assert "delete:axqua-case/postprocessing/vtk" not in _items(found)
+    assert any(b["path"] == "axqua-case/postprocessing/vtk" for b in found["in_use"])
+
+
+def test_what_may_be_removed_is_decided_by_one_rule(tmp_path):
+    root = tmp_path / "case"
+    assert cleanup.permitted(root / "axqua-case" / "simulation" / "r2d.slf", [root])
+    assert not cleanup.permitted(root / "user-sources" / "dem.tif", [root])
+    assert not cleanup.permitted(root / "sub" / "user-sources" / "dem.tif", [root])
+    assert not cleanup.permitted(tmp_path / "elsewhere" / "r2d.slf", [root])
 
 
 def test_the_inputs_are_never_walked_into_even_where_an_output_folder_contains_them(tmp_path):
@@ -281,16 +326,35 @@ def test_a_job_submitted_with_a_relative_path_or_holding_the_folder_blocks_the_r
     from axqua.jobs import index, workspace
 
     cfg, case_file = _case(tmp_path)
+    cfg.name = "isar"
     rows = [index.JobRow(job_id="J1", root=str(tmp_path), kind="steady", state="RUNNING",
-                         source_config="cases/somewhere/reach.axq-case")]
+                         case_name="isar", source_config="cases/somewhere/reach.axq-case"),
+            # the same file name, another project (case-config.yml of another case)
+            index.JobRow(job_id="J2", root=str(tmp_path), kind="steady", state="RUNNING",
+                         case_name="inn", source_config="reach.axq-case")]
     monkeypatch.setattr(index, "list_jobs", lambda **kw: rows)
-    assert "J1" in cleanup.active_jobs(case_file, cfg)
+    reason = cleanup.active_jobs(case_file, cfg)
+    assert "J1" in reason and "J2" not in reason
     rows.clear()
     assert cleanup.active_jobs(case_file, cfg) == ""
     monkeypatch.setattr(workspace, "holder_of", lambda folder: "J7")
-    monkeypatch.setattr(workspace, "waiting_in", lambda folder: ["J7", "J8"])
+    monkeypatch.setattr(workspace, "waiting_in", lambda folder, drop=True: ["J7", "J8"])
     reason = cleanup.active_jobs(case_file, cfg)
     assert "J7 (works in simulation)" in reason and "J8 (waits for simulation)" in reason
+
+
+def test_listing_what_can_go_leaves_the_queue_of_the_case_as_it_is(tmp_path, monkeypatch):
+    """Re-review of 2026-10-18: the listing asked the queue through a function that deletes the tickets it judges abandoned; a command run only to look wrote into the simulation folder."""
+    from axqua.jobs import workspace
+
+    cfg, case_file = _case(tmp_path)
+    queue = cfg.model_dir / workspace.QUEUE_NAME
+    queue.mkdir()
+    ticket = queue / "00000000000000000001-J9.json"
+    ticket.write_text("not json")                        # unreadable: taken for abandoned
+    cleanup.inventory(cfg, case_file)
+    assert ticket.exists()
+    assert workspace.waiting_in(cfg.model_dir) == [] and not ticket.exists()   # the queue itself tidies
 
 
 def test_a_list_of_jobs_that_cannot_be_read_blocks_the_removal(tmp_path, monkeypatch):

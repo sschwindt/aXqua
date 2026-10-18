@@ -758,18 +758,23 @@ def recapitalize(text: str, nouns: set[str]) -> str:
 
     Argos writes a German sentence entirely in lower case now and then ("bei dem eintrag um einen tippfehler"). A sentence of eight words or more without a single capital is taken for one.
     """
-    def capitalize(part: str) -> str:
-        return _GERMAN_WORD.sub(lambda m: m.group(1).capitalize() if m.group(1).lower() in nouns
-                                else m.group(1), part)
+    # Literals, roles, links and GUI labels are not German text: they decide nothing and are never changed. They are set aside before the text is cut into sentences, because they may hold a full stop or a colon themselves ("Celik et al. 2008", ``a. b``).
+    kept: list[str] = []
+
+    def aside(match: re.Match) -> str:
+        kept.append(match.group(0))
+        return f"\x00{len(kept) - 1}\x01"
 
     def fix(sentence: str) -> str:
-        # literals, roles, links and GUI labels are not German text: they decide nothing and are never changed
-        parts = _PROTECTED.split(sentence)
-        words = _GERMAN_WORD.findall(" ".join(parts[0::2]))
+        words = _GERMAN_WORD.findall(sentence)
         if len(words) < 8 or any(w[:1].isupper() for w in words[1:]):
             return sentence
-        return "".join(part if index % 2 else capitalize(part) for index, part in enumerate(parts))
-    return "".join(fix(part) for part in re.split(r"((?<=[.!?:])\s+)", text))
+        return _GERMAN_WORD.sub(lambda m: m.group(1).capitalize() if m.group(1).lower() in nouns
+                                else m.group(1), sentence)
+
+    masked = _PROTECTED.sub(aside, text)
+    done = "".join(fix(part) for part in re.split(r"((?<=[.!?:])\s+)", masked))
+    return re.sub("\x00(\\d+)\x01", lambda m: kept[int(m.group(1))], done)
 
 
 def _sentences(text: str) -> list[str]:
@@ -993,6 +998,7 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
         results.update(run(sorted(more | (sentences - results.keys())), engine, lang, jobs))
 
     failed: list[str] = []
+    kept_after_failure: list[str] = []          # failed again, the earlier translation kept
     nouns = german_nouns(memory.values()) if lang == "de" else set()
     out_dir.mkdir(parents=True, exist_ok=True)
     written = set()
@@ -1024,6 +1030,7 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
                     old = memory[template.key]
                     entry.msgstr, entry.comments = old.msgstr, list(old.comments)
                     counts["failed, earlier translation kept"] += 1
+                    kept_after_failure.append(template.msgid)
                     entries.append(entry)
                     continue
                 if text is None:
@@ -1050,8 +1057,14 @@ def translate_language(lang: str, pot_dir: Path, *, engine: str, locale: Path = 
             stale.unlink()
 
     report = pot_dir.parent / f"failed-{lang}.txt"
-    if failed:
-        report.write_text("\n\n".join(failed) + "\n", encoding="utf-8")
+    if failed or kept_after_failure:
+        sections = []
+        if failed:
+            sections.append("# left in English\n\n" + "\n\n".join(failed))
+        if kept_after_failure:
+            sections.append("# translated anew without success; the earlier translation is kept "
+                            "and tried again in the next run\n\n" + "\n\n".join(kept_after_failure))
+        report.write_text("\n\n".join(sections) + "\n", encoding="utf-8")
     elif report.exists():
         report.unlink()
     return dict(counts)
@@ -1102,8 +1115,8 @@ def main() -> int:
                                     retranslate=args.retranslate, docstrings=args.docstrings)
         summary = ", ".join(f"{value} {key}" for key, value in sorted(counts.items()))
         print(f"[{lang}] {summary or 'nothing to do'} ({time.time() - started:.0f} s)", flush=True)
-        if counts.get("failed"):
-            print(f"[{lang}] left in English: see {args.pot.parent / f'failed-{lang}.txt'}")
+        if counts.get("failed") or counts.get("failed, earlier translation kept"):
+            print(f"[{lang}] failed translations: see {args.pot.parent / f'failed-{lang}.txt'}")
     return 0
 
 

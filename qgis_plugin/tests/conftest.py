@@ -51,4 +51,5 @@ def _published_documentation(monkeypatch):
     from axqua_plugin.gui import help as help_pages
 
     monkeypatch.setattr(help_pages, "_location", {})
+    monkeypatch.setattr(help_pages, "_asking", None, raising=False)
     monkeypatch.setattr(help_pages, "language", lambda: "en")

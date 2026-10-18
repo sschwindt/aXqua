@@ -219,6 +219,12 @@ def test_recapitalizing_leaves_literals_links_and_gui_labels_as_they_are():
     assert tr.recapitalize(text, nouns) == (
         "mit ``axqua status <config>`` zeigt der Eintrag den Status, und *load results* "
         "lädt die Ergebnisse, siehe `seite <https://axqua.eu/status>`_ zum Tippfehler.")
+    # markup that holds a full stop or a colon itself is not cut at it (re-review of 2026-10-18)
+    text = ("nach `celik et al. 2008 status <https://doi.org/x>`_ zeigt der eintrag mit ``a. status`` "
+            "den status und die ergebnisse.")
+    assert tr.recapitalize(text, nouns) == (
+        "nach `celik et al. 2008 status <https://doi.org/x>`_ zeigt der Eintrag mit ``a. status`` "
+        "den Status und die Ergebnisse.")
 
 
 def test_a_catalog_reads_back_what_was_written(tmp_path):
@@ -359,6 +365,9 @@ def test_a_translation_that_fails_again_keeps_the_earlier_one(tmp_path):
     assert counts.get("failed, earlier translation kept") == 1 and "failed" not in counts
     after = {e.msgid: e for e in tr.read_catalog(po)}["Run ``axqua build`` first."]
     assert (after.msgstr, after.comments) == (before.msgstr, before.comments)
+    # and it is named in the report, which would otherwise not say that it fails in every run
+    report = (pot.parent / "failed-de.txt").read_text(encoding="utf-8")
+    assert "earlier translation is kept" in report and "Run ``axqua build`` first." in report
 
 
 def test_without_an_engine_the_catalogs_are_updated_and_nothing_is_translated(tmp_path):

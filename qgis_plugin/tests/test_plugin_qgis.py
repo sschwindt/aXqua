@@ -2190,6 +2190,37 @@ def test_help_asks_the_axqua_of_the_settings_in_the_background(qgis_app, monkeyp
     assert asked == [1]
 
 
+def test_an_answer_of_the_program_set_before_the_settings_changed_is_dropped(qgis_app, monkeypatch, tmp_path):
+    """Re-review of 2026-10-18: the answer of the old program could arrive after the settings changed and stop the new program from being asked."""
+    from axqua_plugin.core import tasks
+    from axqua_plugin.gui import help as help_pages
+
+    pending = []
+    monkeypatch.setattr(tasks, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        pending.append((call, on_success, on_error)))
+
+    class Client:
+        def __init__(self, folder):
+            self.folder = folder
+
+        def docs(self):
+            return {"local": str(self.folder), "languages": ["en"], "readable": True}
+
+    old, new = tmp_path / "old", tmp_path / "new"
+    help_pages.configure(None)
+    help_pages.ask(Client(old))
+    help_pages.ask(Client(old))                            # on its way already: not asked twice
+    assert len(pending) == 1
+    help_pages.configure(None)                             # the settings changed
+    help_pages.ask(Client(new))
+    assert len(pending) == 2
+    _now(*pending[0])                                      # the old program answers after the change
+    assert help_pages.location() == {}
+    _now(*pending[1])
+    assert help_pages.url_for("case").startswith(new.as_uri())
+
+
 def test_the_space_a_result_keeps_of_its_time_steps():
     from axqua_plugin.gui import cleanup_dialog
 

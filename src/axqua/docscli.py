@@ -30,6 +30,8 @@ _FLATPAK = re.compile(r"^(org|com|io|net)\.[\w.-]+\.desktop$")
 _SNAP = re.compile(r"^[a-z0-9-]+_[\w-]+\.desktop$")
 #: Folders in the path of a desktop file that a snap or a Flatpak exports.
 _SANDBOX_FOLDERS = {"flatpak", "snapd"}
+#: How a desktop file starts a snap (/snap/bin/firefox) or a Flatpak (flatpak run org.chromium.Chromium).
+_SANDBOX_EXEC = re.compile(r"/snap/bin/|\bflatpak\s+run\b")
 
 
 def checkout() -> Path | None:
@@ -80,28 +82,40 @@ def application_folders() -> list[Path]:
     return [folder / "applications" for folder in [home, *data, *exports]]
 
 
-def desktop_file(browser: str, folders: list[Path] | None = None) -> Path | None:
-    """The desktop file named *browser*, the first one found; None where there is none."""
-    for folder in application_folders() if folders is None else folders:
-        candidate = folder / browser
-        if candidate.is_file():
-            return candidate
-    return None
+def desktop_files(browser: str, folders: list[Path] | None = None) -> list[Path]:
+    """The desktop files named *browser*, in the order the desktop looks for them (the first one is the one it uses)."""
+    return [folder / browser for folder in (application_folders() if folders is None else folders)
+            if (folder / browser).is_file()]
+
+
+def _exec_line(path: Path) -> str:
+    """The command a desktop file starts, '' where it cannot be read."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    return next((line[5:] for line in text.splitlines() if line.startswith("Exec=")), "")
 
 
 def sandboxed(browser: str, folders: list[Path] | None = None) -> bool:
-    """Whether a browser (its desktop file) runs in a snap or Flatpak sandbox."""
+    """Whether a browser (its desktop file) runs in a snap or Flatpak sandbox.
+
+    Told by the desktop files of that name: one in a folder that snap or Flatpak export, or the one the desktop uses (the first found) starting a snap or a Flatpak. A copy in ``~/.local/share/applications``, which a menu editor writes, loses the folder but keeps the command, and the file of the snap itself is still there; on Ubuntu even ``/usr/bin/firefox`` starts the snap, so a copy is never taken for a browser of the system while a sandboxed file of its name exists.
+    """
     if not browser:
         return False
-    found = desktop_file(browser, folders)
-    if found is not None:
-        parts = set(found.parts)
+    found = desktop_files(browser, folders)
+    if not found:
+        return bool(_SNAP.match(browser) or _FLATPAK.match(browser))
+    for path in found:
+        parts = set(path.parts)
         try:
-            parts |= set(found.resolve().parts)
+            parts |= set(path.resolve().parts)
         except OSError:
             pass
-        return bool(parts & _SANDBOX_FOLDERS)
-    return bool(_SNAP.match(browser) or _FLATPAK.match(browser))
+        if parts & _SANDBOX_FOLDERS:
+            return True
+    return bool(_SANDBOX_EXEC.search(_exec_line(found[0])))
 
 
 def readable_by_sandbox(folder: Path, home: Path | None = None) -> bool:

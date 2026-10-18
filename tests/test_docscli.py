@@ -27,16 +27,25 @@ def test_the_folder_of_the_desktop_file_tells_a_sandboxed_browser_from_one_of_th
     system = tmp_path / "usr" / "share" / "applications"
     flatpak = tmp_path / "var" / "lib" / "flatpak" / "exports" / "share" / "applications"
     snap = tmp_path / "var" / "lib" / "snapd" / "desktop" / "applications"
-    for folder, name in [(system, "org.gnome.Epiphany.desktop"),
-                         (flatpak, "org.chromium.Chromium.desktop"),
-                         (snap, "firefox_firefox.desktop"), (system, "firefox-esr.desktop")]:
+    user = tmp_path / "home" / ".local" / "share" / "applications"
+    for folder, name, command in [
+            (system, "org.gnome.Epiphany.desktop", "epiphany %U"),
+            (flatpak, "org.chromium.Chromium.desktop", "/usr/bin/flatpak run org.chromium.Chromium"),
+            (snap, "firefox_firefox.desktop", "env BAMF_DESKTOP_FILE_HINT=x /snap/bin/firefox %u"),
+            (system, "firefox-esr.desktop", "/usr/lib/firefox-esr/firefox-esr %u"),
+            # a copy a menu editor wrote: the folder is gone, the command is still the snap
+            (user, "chromium_chromium.desktop", "/snap/bin/chromium %U")]:
         folder.mkdir(parents=True, exist_ok=True)
-        (folder / name).write_text("[Desktop Entry]\n")
-    folders = [system, flatpak, snap]
+        (folder / name).write_text(f"[Desktop Entry]\nName=x\nExec={command}\n")
+    folders = [user, system, flatpak, snap]
     assert not docscli.sandboxed("org.gnome.Epiphany.desktop", folders)
     assert docscli.sandboxed("org.chromium.Chromium.desktop", folders)
     assert docscli.sandboxed("firefox_firefox.desktop", folders)
     assert not docscli.sandboxed("firefox-esr.desktop", folders)
+    assert docscli.sandboxed("chromium_chromium.desktop", folders)
+    # a copy that names /usr/bin/firefox (on Ubuntu a wrapper of the snap) beside the file of the snap
+    (user / "firefox_firefox.desktop").write_text("[Desktop Entry]\nExec=/usr/bin/firefox %u\n")
+    assert docscli.sandboxed("firefox_firefox.desktop", folders)
 
 
 def test_a_sandboxed_browser_reads_the_home_folder_but_no_hidden_folder_in_it(tmp_path):

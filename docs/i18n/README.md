@@ -84,7 +84,7 @@ A change to either file translates again only the messages it concerns, at the n
 
 Things Argos does that `translate.py` repairs or catches, each found in the first full translation:
 
-- It spaces out or loses parts of the placeholders that stand for masked text (`@ @ 2 @ @`, `@1@@`). Those are restored; a placeholder that lost its number fails the message, which is then sent again with the bold text translated on its own, and then sentence by sentence. What still fails stays in English and is listed in `docs/_build/i18n/failed-<lang>.txt`.
+- It spaces out or loses parts of the placeholders that stand for masked text (`@ @ 2 @ @`, `@1@@`). Those are restored; a placeholder that lost its number fails the message, which is then sent again with the bold text translated on its own, and then sentence by sentence. What still fails stays in English and is listed in `docs/_build/i18n/failed-<lang>.txt`; a message that had a translation and fails when it is translated anew keeps the earlier one, is listed there as well, and is tried again in the next run.
 - It invents a sentence around messages that are only code and *or* (`@@0@@ or @@1@@` came back as *À l'adresse suivante:*). These are put together without the engine. A masked part at the start or the end of a paragraph is not sent either (*Autres* instead of a label in italics).
 - It writes a German sentence entirely in lower case now and then. A sentence of eight words or more without a capital gets the capitals of the words that the German pages write with a capital elsewhere.
 - French needs a non-breaking space before `: ; ! ?`, which is added.
