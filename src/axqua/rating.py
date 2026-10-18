@@ -152,7 +152,7 @@ def synthesize_outflow_rating(cfg, discharge, *, side_slope: float = 0.0,
     slope from a linear fit of the DEM along ``geodata.channel_centerline``. The
     roughness defaults to the lateral-boundary friction in the config
     (``friction.boundary_law``/``boundary_coefficient``; Strickler or Manning).
-    Writes a one-row ``Q,WSE,depth`` CSV to *out* (default ``boundaries.stage_discharge``).
+    *discharge* is one discharge or several; writes a ``Q,WSE,depth`` CSV with one row per discharge to *out* (default ``boundaries.stage_discharge``).
     """
     import geopandas as gpd
     import numpy as np
@@ -322,8 +322,7 @@ def section_rating(out, discharges, *, station, bed, ks, slope, log_label=""):
     """
     station, bed, ks = _sorted_section(station, bed, ks, slope)
 
-    qs = [float(discharges)] if isinstance(discharges, (int, float)) else \
-        sorted(float(q) for q in discharges)
+    qs = _discharges(discharges)
     rows = []
     lo0 = float(bed.min())
     for q in qs:

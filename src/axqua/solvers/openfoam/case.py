@@ -272,6 +272,12 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         notes.append(f"limitVelocity cap {cap:.2f} m/s "
                      f"({DEFAULT_VELOCITY_CAP_FACTOR:g}x the reach's p95 water speed)")
 
+    # the results of an earlier build cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would otherwise go on
+    from axqua.solvers.openfoam.runtime import clear_runs
+
+    removed = clear_runs(case_dir)
+    if removed:
+        notes.append("removed the results of the earlier build: " + ", ".join(removed))
     polymesh_dir = write_polymesh(of_mesh.polymesh, case_dir)
     # which column each cell is in and how thick it is: what a view of the result
     # from above needs, saved here so that it never depends on a second build

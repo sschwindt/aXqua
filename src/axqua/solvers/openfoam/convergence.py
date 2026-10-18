@@ -71,15 +71,9 @@ def make_openfoam_simulator(cfg, discharge: float | None, *, base_dir: Path,
                             seed: Any = None, n_processors: int | None = None,
                             check_cancelled=None, backend=None, plan_view=None,
                             spacing: float | None = None):
-    """A ``simulate(label, dx, dx, probes, quantities) -> LevelResult`` that builds
-    the OpenFOAM case at the plan spacing *dx*, runs it, and samples the result seen
-    from above at the probe points.
+    """A ``simulate(label, dx, dx, probes, quantities) -> LevelResult`` that builds the OpenFOAM case at the plan spacing *dx*, runs it, and samples the result seen from above at the probe points.
 
-    *seed* is the 2D result every level starts from; *spacing* is the plan spacing
-    the case asks for, against which the size scale of a level is given (read from
-    the case when not given). *backend* replaces the OpenFOAM backend and *plan_view*
-    the writer of the result seen from above, ``(cfg, folder) -> (path, summary)``
-    (both for tests).
+    *seed* is the 2D result every level starts from; *spacing* is the plan spacing the case asks for, against which the size scale of a level is given (read from the case when not given). *backend* replaces the OpenFOAM backend and *plan_view* the writer of the result seen from above, ``(cfg, folder) -> (path, summary)`` (both for tests).
     """
     if backend is None:
         from axqua.solvers.openfoam.backend import BACKEND as backend

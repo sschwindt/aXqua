@@ -400,6 +400,7 @@ class MeasurementTable(QWidget):
         situation_edit.editingFinished.connect(lambda e=entry: self._joined(e))
         discharge.textChanged.connect(lambda text, e=entry: self._discharge_changed(e, text))
         self._role_changed(entry, quiet=True)
+        entry["joined"] = self._situation_of(entry)       # the situation its discharge is of
 
     def _role_changed(self, entry: dict, *, quiet: bool = False) -> None:
         validation = entry["use"].currentData() == "validation"
@@ -446,12 +447,16 @@ class MeasurementTable(QWidget):
         self.editor.changed()
 
     def _joined(self, entry: dict) -> None:
-        """A file that joins a validation situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's."""
+        """A file that joins a validation situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's, unless the file comes from another situation, whose discharge is not this one's."""
+        name = self._situation_of(entry)
+        if name is not None and entry.get("joined") not in (None, name):
+            self._show(entry, "")
+        entry["joined"] = name
         given = next((o["discharge"].text() for o in self._others(entry)
                       if o["discharge"].text().strip()), None)
         if given is not None:
             self._show(entry, given)
-        elif self._situation_of(entry) is not None and entry["discharge"].text().strip():
+        elif name is not None and entry["discharge"].text().strip():
             for other in self._others(entry):
                 self._show(other, entry["discharge"].text())
         self.editor.changed()
@@ -480,11 +485,7 @@ class MeasurementTable(QWidget):
     def set_role(self, row: int, role: str, situation: str = "",
                  discharge: str = "") -> None:
         entry = self._rows[row]
-        before = self._situation_of(entry)
-        after = (situation.strip() or "validation") if role == "validation" else None
         entry["situation"].setText(situation)
-        if after is not None and after != before:
-            self._show(entry, "")     # the discharge of its former situation is not this one's
         if entry["use"].currentData() == role:
             self._joined(entry)
         else:   # clears the discharge of a file of the calibration, joins a validation situation
@@ -834,9 +835,7 @@ class CaseEditor(EditorDialog):
                    for c in meta.get("required_when") or [])
 
     def missing_required(self, required: dict[str, bool] | None = None) -> list[str]:
-        """Required settings that are still empty. A default fills a setting: the
-        purple label says that it matters, not that it has to be typed. *required* is
-        what :meth:`is_required` said of each row, for a caller that asked already."""
+        """Required settings that are still empty. A default fills a setting: the purple label says that it matters, not that it has to be typed. *required* is what :meth:`is_required` said of each row, for a caller that asked already."""
         if required is None:
             required = {key: self.is_required(key) for key in self.rows}
         missing = [key for key in self.rows

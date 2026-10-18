@@ -164,6 +164,11 @@ def test_stage_for_discharge_matches_section_rating(tmp_path):
     for q, wse in zip(df["Q"], df["WSE"]):
         direct = stage_for_discharge(q, station=station, bed=bed, ks=ks, slope=slope)
         assert abs(direct - wse) < 1e-3
+    # one discharge also as a numpy number, as the case's discharge often is
+    for one in (np.int64(5), np.array(5.0)):
+        single = pd.read_csv(section_rating(tmp_path / "one.csv", one, station=station,
+                                            bed=bed, ks=ks, slope=slope))
+        assert list(single["Q"]) == [5.0]
 
 
 def test_stage_for_discharge_is_monotonic_and_validated():

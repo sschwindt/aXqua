@@ -151,10 +151,8 @@ class OpenFoamBackend(BaseBackend):
                 # survey steps and seams. That is the terrain, not a meshing fault.
                 log.info("checkMesh: runnable, with marginal faces: %s", "; ".join(failed))
 
+        # The ranks of the job, not the number the case was built with: the decomposition has to give each rank its domain, or mpirun stops at once with "Number of processor directories = 1 is not equal to the number of ranks" (found by the mesh study of 2026-10-17, and the same for the MPI ranks option of an openfoam-run job). Each stage splits the case for them where it has to (run_stage), with a dictionary of the run's own where the case's file names another count, so the case's file is never changed.
         nprocs = n_processors if n_processors is not None else cfg.openfoam.n_processors
-        if nprocs and nprocs > 1:
-            # The ranks of the job, not the number the case was built with: the decomposition has to give each rank its domain, or mpirun stops at once with "Number of processor directories = 1 is not equal to the number of ranks" (found by the mesh study of 2026-10-17, and the same for the MPI ranks option of an openfoam-run job). The runtime uses a dictionary of the run's own where the case's file names another count, so the case's file is never changed.
-            runtime.decompose(case_dir, n_processors=int(nprocs))
 
         for stage in dicts.stages(cfg):
             if ctx is not None:
@@ -355,21 +353,14 @@ class OpenFoamBackend(BaseBackend):
             except OSError:
                 return []
 
-        times: list[float] = []
-        # the top level, else the first domain of a parallel run (also of a collated one)
-        for root in (case_dir, case_dir / "processor0",
-                     *sorted(case_dir.glob("processors[0-9]*"))):
-            if not root.is_dir():
-                continue
-            for entry in root.iterdir():
-                if not entry.is_dir():
-                    continue
-                try:
-                    times.append(float(entry.name))
-                except ValueError:
-                    continue
-            if times:
-                break
+        # The times of the case itself, which is what VisIt and ParaView open: a result that only the processor folders hold (a run not reconstructed, also a collated one) is not in the figure, and the note says so.
+        times = _times(case_dir)
+        parallel = max((t for root in (case_dir / "processor0",
+                                       *sorted(case_dir.glob("processors[0-9]*")))
+                        for t in _times(root)), default=None)
+        pending = ()
+        if parallel is not None and parallel > max(times, default=0.0):
+            pending = (f"the result up to t = {parallel:g} s is in the processor folders of a parallel run only; reconstructPar puts it together for a figure",)
 
         fields: set[str] = set()
         zero = case_dir / "0"
@@ -401,7 +392,7 @@ class OpenFoamBackend(BaseBackend):
             times=tuple(sorted(times)), fields=frozenset(fields),
             patches=frozenset(patches),
             vector_fields={"U": ("U_x", "U_y", "U_z")},
-            notes=notes,
+            notes=notes + pending,
         )]
 
     def export_qgis_results(self, cfg, ctx: Any = None):
@@ -482,6 +473,19 @@ class OpenFoamBackend(BaseBackend):
 
 
 BACKEND = OpenFoamBackend()
+
+
+def _times(folder: Path) -> list[float]:
+    """The numeric time folders in *folder* (none for a folder that does not exist)."""
+    times = []
+    for entry in folder.iterdir() if folder.is_dir() else ():
+        try:
+            value = float(entry.name)
+        except ValueError:
+            continue
+        if entry.is_dir():
+            times.append(value)
+    return times
 
 
 def _is_sediment(ctx: Any) -> bool:

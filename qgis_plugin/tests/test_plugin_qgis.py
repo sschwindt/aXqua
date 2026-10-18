@@ -1787,6 +1787,13 @@ def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_di
     # a row moved to a situation without a discharge does not take its old one along
     table.set_role(3, "validation", "Summer")
     assert entry["discharge"].text() == "" and table.missing_discharge() == ["Summer"]
+    # nor when its new name is typed, and the rows it left keep theirs
+    moved = table._rows[2]
+    moved["situation"].setText("Autumn")
+    moved["situation"].editingFinished.emit()
+    assert moved["discharge"].text() == "" and table._rows[1]["discharge"].text() == "6.1"
+    moved["situation"].editingFinished.emit()                   # left again, unchanged
+    assert sorted(table.missing_discharge()) == ["Autumn", "Summer"]
     # with the calibration switched off, nothing of the situations is saved or warned of
     editor.switches["calibration"].setChecked(False)
     editor.save()

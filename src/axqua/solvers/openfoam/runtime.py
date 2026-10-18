@@ -186,22 +186,32 @@ class OpenFoamRuntime(ShellRuntime):
         return self.run(f"decomposePar{flag}{_dictionary_option(case_dir, dictionary)}",
                         cwd=case_dir, check=True)
 
-    def _prepare_split(self, case_dir: Path, n: int, layout: "Layout") -> None:
-        """Split the case for the *n* ranks of the stage whose controlDict is active, where it is not split for them. ``decomposePar`` carries over the one top-level time the active controlDict starts from: the start for a stage that starts afresh, the latest time for one that continues."""
+    def _prepare(self, case_dir: Path, n: int, layout: "Layout") -> None:
+        """Make the case ready for the stage whose controlDict is active, on *n* ranks. ``decomposePar`` carries over the one top-level time the active controlDict starts from: the start for a stage that starts afresh, the latest time for one that continues.
+
+        A stage that starts afresh replaces what earlier runs left (:func:`clear_runs`), because a later time at the top level or in the processor folders is where the next stage would continue from; on several ranks the case is then split anew. A stage that continues runs on results that only the processor folders hold, and stops where they were split for other ranks or where it runs on one processor, which does not read them. Where the top level holds the latest time (after ``reconstructPar``), the case is split again from it.
+        """
         if not layout.continues:
-            # a stage that starts afresh needs the start time and nothing of an earlier run: a later time left in the processor folders would be where the next stage continues from
-            if layout.count != n or layout.parallel is not None:
+            removed = clear_runs(case_dir)
+            if removed:
+                log.info("the stage starts afresh: removed what an earlier run left (%s)", ", ".join(removed))
+            if n > 1:
                 log.info("splitting the case for %d ranks, from the start time", n)
                 self._decompose(case_dir, n)
             return
         if layout.only_in_processor_folders:
+            if n <= 1:
+                raise errors.SolverError(
+                    f"the processor folders hold the result of an earlier stage at t = {layout.parallel:g} s, which a run on one processor does not read; it would start from t = {layout.top or 0:g} s",
+                    subject=str(case_dir),
+                    remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
             if layout.count != n:
                 raise errors.SolverError(
                     f"the case is split into {layout.count} domains and its processor folders hold the result of an earlier stage at t = {layout.parallel:g} s that the case itself does not; splitting it for {n} ranks would delete it",
                     subject=str(case_dir),
                     remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
             return                                   # continued where the earlier stage ended
-        if layout.count != n or (layout.top or 0) > (layout.parallel or 0):
+        if n > 1 and (layout.count != n or (layout.top or 0) > (layout.parallel or 0)):
             log.info("splitting the case for %d ranks, from its latest time (t = %g s)", n, layout.top or 0)
             self._decompose(case_dir, n)
 
@@ -237,14 +247,13 @@ class OpenFoamRuntime(ShellRuntime):
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
 
-        A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks), and the case is split for them where it is not (:meth:`_prepare_split`). A stage that continues from results that only the processor folders hold runs on them, and stops with a message where they were split for other ranks or where it runs on one processor, which would not read them.
+        The case is made ready for the stage first (:meth:`_prepare`): a stage that starts afresh replaces what earlier runs left and is split anew for its ranks, a stage that continues runs on what the stage before it left, also where only the processor folders hold it. A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks).
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
-        n = n_processors if n_processors is not None else self.of.n_processors
-        layout = Layout.of(case_dir)
-        if n and n > 1:
-            self._prepare_split(case_dir, n, layout)
+        n = int((n_processors if n_processors is not None else self.of.n_processors) or 1)
+        self._prepare(case_dir, n, Layout.of(case_dir))
+        if n > 1:
             decomposition = dicts.decomposition_for(case_dir, n)
             # Through the environment, not a hard-coded "mpirun": MS-MPI on Windows
             # provides `mpiexec`, and a profile may point at `srun` on a cluster. The
@@ -252,11 +261,6 @@ class OpenFoamRuntime(ShellRuntime):
             command = self.environment.mpi_command(
                 f"{self.of.solver} -parallel{_dictionary_option(case_dir, decomposition)}", n)
         else:
-            if layout.continues and layout.only_in_processor_folders:
-                raise errors.SolverError(
-                    f"the processor folders hold the result of an earlier stage at t = {layout.parallel:g} s, which a run on one processor does not read; it would start from t = {layout.top or 0:g} s",
-                    subject=str(case_dir),
-                    remedy=f"Run this stage on {layout.count} ranks, or put the result together with reconstructPar first.")
             command = self.of.solver
 
         progress = (OpenFoamProgress(end_time, start_time=start_time,
@@ -346,6 +350,28 @@ class Layout:
     def only_in_processor_folders(self) -> bool:
         """The processor folders hold a later time than the case itself: results of a stage that was not reconstructed."""
         return self.parallel is not None and self.parallel > (self.top or 0)
+
+
+def clear_runs(case_dir: str | Path) -> list[str]:
+    """Remove what earlier runs left in the case: the time folders after the start and the processor folders. Returns the names removed.
+
+    A stage that starts afresh needs this (a later time would be where the next stage continues from), and so does a case built anew (the results of another mesh cannot be continued, and the processor folders hold the old mesh itself, on which a parallel run would otherwise go on).
+    """
+    import shutil
+
+    case_dir = Path(case_dir)
+    removed = []
+    for path in sorted(case_dir.iterdir()) if case_dir.is_dir() else ():
+        if not path.is_dir():
+            continue
+        try:
+            later = float(path.name) > 0
+        except ValueError:
+            later = False
+        if later or _PROCESSOR.fullmatch(path.name) or _COLLATED.fullmatch(path.name):
+            shutil.rmtree(path)
+            removed.append(path.name)
+    return removed
 
 
 def processor_count(case_dir: str | Path) -> int:

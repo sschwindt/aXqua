@@ -210,6 +210,15 @@ def test_a_rigid_lid_case_does_not_advertise_alpha_water(tmp_path):
     cfg.openfoam.mode = "vof"
     assert "alpha.water" in OpenFoamBackend().describe_results(cfg)[0].fields
 
+    # the times are those of the case, which a visualizer opens; a later result left in the processor folders is named
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert dataset.times == (0.0, 120.0) and not dataset.notes
+    for folder in ("processor0/0", "processor0/150", "processors4/0", "processors4/180"):
+        (case / folder).mkdir(parents=True)
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert dataset.times == (0.0, 120.0)
+    assert any("t = 180 s is in the processor folders" in note for note in dataset.notes)
+
 
 def test_profiles_emits_one_lineout_per_vertical(tmp_path):
     points = [{"id": "01", "x": 10.0, "y": 20.0, "z_bed": 370.0, "z_top": 370.5},
@@ -372,8 +381,7 @@ def test_a_dataset_is_not_assumed_hashable(tmp_path):
 
 
 def test_an_empty_scene_list_renders_no_figure(tmp_path, monkeypatch, capsys):
-    """Every box of *VisIt figures* unchecked writes ``scenes: []``: a choice, not
-    "every scene"."""
+    """Every box of *VisIt figures* unchecked writes ``scenes: []``: a choice, not "every scene"."""
     from axqua import cli
     from axqua.postproc import render as render_mod
 

@@ -174,7 +174,7 @@ def test_a_run_on_more_ranks_than_the_case_was_built_for_is_decomposed_for_them(
                           hydrodynamics=Hydrodynamics(), openfoam_case_dir=case,
                           log_file="axqua.log")
     BACKEND.run(cfg, None, n_processors=4)
-    assert seen["decomposed for"] == 4
+    assert "decomposed for" not in seen                    # each stage splits the case itself
     assert set(seen["ranks"]) == {4} and seen["reconstructed"]
     assert cfg.openfoam.n_processors == 1                  # the case is not changed
 
@@ -231,9 +231,8 @@ def _spun_up(case, time="8.5"):
 
 
 def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
-    """What the backend does, the per-case openfoam_run.py scripts get as well."""
+    """What the backend does, the per-case openfoam_run.py scripts get as well: the stages split the case, once."""
     runtime, case, commands = _runtime(tmp_path, monkeypatch)
-    runtime.decompose(case, n_processors=4)                 # the tracked scripts
     _stage(runtime, case, "spinup", 4)
     _spun_up(case)
     _stage(runtime, case, "run", 4)
@@ -255,7 +254,6 @@ def test_the_runtime_decomposes_for_the_ranks_it_runs_on(tmp_path, monkeypatch):
 
 def test_a_case_whose_file_names_the_ranks_is_run_with_it(tmp_path, monkeypatch):
     runtime, case, commands = _runtime(tmp_path, monkeypatch, case_file_names=4)
-    runtime.decompose(case, n_processors=4)
     _stage(runtime, case, "run", 4)
     assert commands[0] == "decomposePar -force"
     assert commands[1].endswith("interFoam -parallel")
@@ -264,13 +262,12 @@ def test_a_case_whose_file_names_the_ranks_is_run_with_it(tmp_path, monkeypatch)
 
 def test_a_stage_continues_from_results_only_the_processor_folders_hold(tmp_path,
                                                                         monkeypatch):
-    """The scripts allow a spin-up without reconstructing and the production stage in a second call, which decomposes before its stages: that call used to delete the spin-up."""
+    """The scripts allow a spin-up without reconstructing and the production stage in a second call; a script that decomposes before its stages (munich-vsf's) used to delete the spin-up in that call."""
     import pytest
 
     from axqua.core.errors import SolverError
 
     runtime, case, commands = _runtime(tmp_path, monkeypatch)
-    runtime.decompose(case, n_processors=8)
     _stage(runtime, case, "spinup", 8)
     _spun_up(case)
     # the second call of the script
@@ -292,13 +289,44 @@ def test_a_stage_continues_from_results_only_the_processor_folders_hold(tmp_path
 
 def test_a_reconstructed_result_is_split_again_from_its_latest_time(tmp_path, monkeypatch):
     runtime, case, commands = _runtime(tmp_path, monkeypatch, case_file_names=4)
-    runtime.decompose(case, n_processors=4)
     _stage(runtime, case, "spinup", 4)
     _spun_up(case, "10")
     (case / "10").mkdir()                                      # reconstructPar
     _stage(runtime, case, "run", 8)                            # other ranks: nothing is lost
     assert commands[-2] == "decomposePar -force -decomposeParDict system/decomposeParDict-8"
     assert (case / "processor7" / "10").is_dir()
+
+
+def test_a_stage_that_starts_afresh_replaces_what_earlier_runs_left(tmp_path, monkeypatch):
+    """A later time from an earlier run, at the top level or in the processor folders, would be where the stage after it continues from."""
+    # a parallel run that was cancelled, run again on one processor
+    runtime, case, commands = _runtime(tmp_path, monkeypatch)
+    _stage(runtime, case, "spinup", 4)
+    _spun_up(case, "5")
+    _stage(runtime, case, "spinup", 1)
+    assert not list(case.glob("processor*")) and commands[-1].endswith("interFoam")
+    (case / "0.1").mkdir()                                      # what the serial spin-up writes
+    _stage(runtime, case, "run", 1)                             # continues from it
+    # an earlier run that was put together, run again in parallel
+    runtime, case, commands = _runtime(tmp_path / "again", monkeypatch)
+    for time in ("0.1", "300"):
+        (case / time).mkdir()
+    _stage(runtime, case, "spinup", 4)
+    assert sorted(p.name for p in case.iterdir() if p.name[0].isdigit()) == ["0"]
+    _spun_up(case, "0.1")
+    _stage(runtime, case, "run", 4)                             # from the spin-up, not from 300
+    assert sum(c.startswith("decomposePar") for c in commands) == 1
+
+
+def test_clearing_the_runs_keeps_the_case(tmp_path):
+    from axqua.solvers.openfoam.runtime import clear_runs
+
+    for name in ("0", "0.orig", "2.5", "processor0/2.5", "processors4/2.5", "system", "constant"):
+        (tmp_path / name).mkdir(parents=True)
+    (tmp_path / "3").write_text("a file, not a time folder")
+    assert clear_runs(tmp_path) == ["2.5", "processor0", "processors4"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["0", "0.orig", "3", "constant", "system"]
+    assert clear_runs(tmp_path / "missing") == []
 
 
 def test_a_collated_decomposition_is_counted_by_its_folder(tmp_path):

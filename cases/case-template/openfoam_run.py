@@ -92,10 +92,8 @@ def main() -> None:
     else:
         print("checkMesh: Mesh OK")
 
+    # each stage splits the case for these ranks where it has to (run_stage)
     nprocs = NPROCS if NPROCS is not None else cfg.openfoam.n_processors
-    if nprocs and nprocs > 1:
-        print(f"\ndecomposing over {nprocs} subdomains ...")
-        runtime.decompose(case_dir, n_processors=nprocs)
 
     from axqua.solvers.openfoam.dicts import stages
 

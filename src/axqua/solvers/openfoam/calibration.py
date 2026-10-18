@@ -345,9 +345,7 @@ def _prespin_template(case_dir: Path, cfg: Config) -> None:
              "campaign)", of.spinup_time)
     runtime = OpenFoamRuntime(of)
     nprocs = int(getattr(of, "n_processors", 1) or 1)
-    if nprocs > 1:
-        runtime.decompose(case_dir)
-    proc = runtime.run_stage(case_dir, "spinup", end_time=of.spinup_time, cfg=cfg)
+    proc = runtime.run_stage(case_dir, "spinup", end_time=of.spinup_time, cfg=cfg)  # splits the case for nprocs
     if getattr(proc, "returncode", 0) != 0:
         raise SystemExit(
             f"the pre-spin of the calibration template failed (exit "
