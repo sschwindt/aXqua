@@ -201,10 +201,8 @@ def _probe(path: str) -> str:
     return version
 
 
-#: The oldest axqua that speaks the JSON envelope this plugin reads. Documented as a
-#: requirement since the first release, and until now never actually checked - so an
-#: older one presented as a series of unexplained parse failures instead.
-MINIMUM_VERSION = (0, 3)
+#: The oldest axqua this plugin works with. An older one presented as a series of unexplained parse failures; since 1.0 the plugin also calls commands that 0.5 does not have (``docs``, ``cleanup``), so plugin and program are released together.
+MINIMUM_VERSION = (1, 0)
 
 
 def _require_minimum(version: str) -> None:

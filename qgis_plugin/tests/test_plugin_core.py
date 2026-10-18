@@ -128,7 +128,7 @@ def test_the_plugin_never_imports_axqua():
 # ----------------------------------------------------------- executable discovery
 
 
-def _fake_axqua(tmp_path: Path, *, version: str = "axqua 0.3.5",
+def _fake_axqua(tmp_path: Path, *, version: str = "axqua 1.0.2",
                     exit_code: int = 0) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "axqua"
@@ -178,25 +178,23 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_axqua_too_old_for_this_plugin_is_refused_by_name(tmp_path, monkeypatch):
-    """The documentation has required aXqua 0.3 since the first release, and nothing
-    checked - so an older one presented as a series of unexplained parse failures at
-    every verb rather than as one sentence here."""
-    old = _fake_axqua(tmp_path, version="axqua 0.2.0")
+    """An older aXqua presented as a series of unexplained parse failures at every verb rather than as one sentence here. Since 1.0 the plugin also calls commands 0.5 does not have."""
+    old = _fake_axqua(tmp_path, version="axqua 0.5.0")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
     with pytest.raises(runner_client.RunnerNotFound) as excinfo:
         runner_client.find_executable(str(old))
-    assert "0.3 or newer" in str(excinfo.value)
+    assert "1.0 or newer" in str(excinfo.value)
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_unusual_version_string_is_accepted(tmp_path, monkeypatch):
     """Refusing to run something because its version is a git describe string would be
     worse than the problem the check exists for."""
-    dev = _fake_axqua(tmp_path, version="axqua 0.4.0.dev3+g1a2b3c4")
+    dev = _fake_axqua(tmp_path, version="axqua 1.0.1.dev3+g1a2b3c4")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
-    assert runner_client.find_executable(str(dev)).version.startswith("0.4.0")
+    assert runner_client.find_executable(str(dev)).version.startswith("1.0.1")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
@@ -254,7 +252,7 @@ def test_a_structured_failure_reaches_the_user_with_its_remedy():
 def test_output_that_is_not_json_is_reported_as_such(tmp_path, monkeypatch):
     script = tmp_path / "axqua"
     script.write_text("#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo "
-                      "'axqua 0.3.5'; else echo 'Segmentation fault'; fi\n",
+                      "'axqua 1.0.0'; else echo 'Segmentation fault'; fi\n",
                       encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     client = runner_client.RunnerClient(str(script))

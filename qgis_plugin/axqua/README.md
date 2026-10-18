@@ -1,102 +1,41 @@
 # aXqua for QGIS
 
-Set up, run and monitor TELEMAC and OpenFOAM river models from QGIS — with simulations
-that **keep running after you close QGIS**.
+Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS. Simulations run as jobs of their own and keep running when QGIS is closed.
 
-## What it is
+The documentation is at [axqua.eu](https://axqua.eu), also in [German](https://axqua.eu/de/) and [French](https://axqua.eu/fr/). *Help* in the plugin opens the page of the tab that is showing.
 
-A frontend. The plugin does not run solvers and does not do heavy numerics; it talks to
-the separately installed [`axqua`](https://github.com/sschwindt/aXqua)
-command-line tool, which owns the model build, the solver runs and the calibration.
+## What the plugin is
 
-That separation is the whole design. QGIS ships its own Python, while aXqua needs
-gmsh, rasterio, geopandas and a TELEMAC or OpenFOAM environment. Forcing those into the
-QGIS interpreter would make installation fragile and would break on every QGIS update, so
-the boundary is a subprocess and a JSON document — **the plugin never imports aXqua**.
+The plugin is the user interface. The model build, the solver runs and the calibration are the work of the **aXqua program**, which is installed separately and which the plugin starts as a separate process; the plugin never imports it. QGIS ships its own Python, while aXqua needs gmsh, rasterio, geopandas and a TELEMAC or OpenFOAM installation, and keeping the two apart lets each be updated without the other.
 
-The second consequence is the important one: because the plugin does not own the solver
-process, closing QGIS does not stop your simulation. Jobs are launched as detached system
-jobs (a systemd user unit on Linux, a Job Object on Windows, a detached session inside the
-distro under WSL). Reopen QGIS days later, open your `.axqua-prj`, and the jobs are
-rediscovered with whatever state they have actually reached.
+Because QGIS does not own the solver process, closing QGIS does not stop a simulation. When QGIS is opened again, the job list shows each job with the state it has reached.
 
 ## Requirements
 
 | | |
 |---|---|
-| QGIS | 3.44 or newer, including QGIS 4.x |
-| aXqua | `pip install git+https://github.com/sschwindt/aXqua.git` (0.3 or newer), in an environment that can reach your solver. Not on PyPI yet. |
-| TELEMAC | any version reachable through its `pysource.*.sh` (Linux/macOS) or `pysource.bat` (Windows) |
-| OpenFOAM | Foundation build (openfoam.org); on Windows this means WSL |
+| QGIS | 3.44 or newer, QGIS 4 included |
+| aXqua program | 1.0 or newer, see [Installation](https://axqua.eu/installation/qgis-plugin.html) |
+| TELEMAC and/or OpenFOAM | the *Configuration* tab installs TELEMAC v9.1 and OpenFOAM v2406 with the sediment solvers, or finds existing installations |
+| ParaView, VisIt | optional, for 3D postprocessing; the *Configuration* tab installs them too |
 
-Nothing is bundled: no TELEMAC, no OpenFOAM, no MPI, no scientific Python stack.
+On Windows, TELEMAC and OpenFOAM run in the Windows Subsystem for Linux (WSL 2), see [Simulation software](https://axqua.eu/installation/simulation-software.html).
 
-## Setting it up
+## Getting started
 
-1. Install aXqua in the environment that already has your solver tooling, and check
-   it works: `axqua --version`.
-2. In QGIS, install this plugin, then open **aXqua** from the toolbar.
-3. On the **Setup** tab, press **Check**. If aXqua is not on `PATH`, set its path in
-   **Settings…** — this is validated immediately, so a wrong path is caught here rather
-   than when you submit a six-hour run.
-4. **Add case…** and pick a case file (`*.axq-case`), then **Save as…** to write a
-   `.axqua-prj` next to it.
+1. Install the aXqua program and check it with `axqua --version`.
+2. Open the aXqua panel. On the *Configuration* tab, *Check* finds the program (or set its path in *Settings*), and the profile of the computer names where TELEMAC, OpenFOAM, ParaView and VisIt are installed.
+3. On the *Case Setup* tab, create a case, add an existing case file (`*.axq-case`), or download the Isar example case with its data.
+4. Build the model on *Preprocessing*, run it on *Simulations*, calibrate and validate it on *Calibration & validation*, and load the results on *Postprocessing* into QGIS, ParaView or VisIt.
 
-Optionally describe your solver installs once, in `~/.config/axqua/profiles.yml`, and
-select the profile on the Setup tab. Run `axqua profiles validate` to check them.
-
-## Using it
-
-The tabs between **Setup** and **Jobs** are **generated from what aXqua says your case
-can do**, not hardcoded. A capability that does not apply to your solver is hidden; one
-aXqua has not implemented yet is shown disabled with the reason. Add a capability to
-aXqua and it appears here with no plugin update.
-
-Submit from a capability tab, then watch the **Jobs** tab: job id, solver, kind, state,
-progress and best objective, refreshing while something is running and going quiet when
-nothing is. From there you can cancel (which stops the whole process tree, MPI ranks
-included), view either log, open the job folder, or load the results.
-
-Results arrive as styled layers under `axqua/<job id>`: water depth on a white-to-blue
-ramp with everything below your minimum depth transparent, and velocity as arrows on a
-reversed *plasma* ramp capped at 5 m/s. Everything else points you at Layer Symbology,
-because a plausible-looking wrong scale is harder to spot than an obviously default one.
-
-**Processing**: `Submit a simulation job`, `Check job status` and `Import job results` are
-available in the Processing toolbox and the Graphical Modeler. `Submit` returns a job id
-in about a second — it never blocks on the simulation.
-
-## Where things live
-
-| what | where | who writes it |
-|---|---|---|
-| the model | the case file (`*.axq-case`) | you (or aXqua) |
-| which cases and where jobs go | `<name>.axqua-prj` | this plugin |
-| your solver installs | `~/.config/axqua/profiles.yml` | you |
-| what a job was asked to do | `<job>/job.json` | aXqua, once |
-| what a job is doing now | `<job>/status.json` | aXqua's runner |
-
-The project file deliberately carries **no simulation status**. The runner writes status
-while QGIS is closed, so a copy here would be stale — and two open QGIS windows would
-fight over it.
+*Clean Up*, left of *Help*, removes files a case no longer needs: working folders of interrupted runs, listings, earlier time steps of results and exports. It never lists the inputs, the case file, the built model or the last time step of a result.
 
 ## Troubleshooting
 
-**"aXqua could not be found"** — the message lists all three places it looked (the
-plugin setting, `$AXQUA_EXE`, `PATH`). Set the path in Settings and press Test.
-
-**A job shows FAILED immediately** — open **View logs**. `runner.log` is aXqua's
-narration and carries the error with a suggested remedy; the solver's own listing is
-behind the toggle.
-
-**A job is stuck in RUNNING** — it will not be. aXqua reconciles a recorded process
-that is gone (including after a reboot or `wsl --shutdown`) and reports FAILED rather than
-leaving a job that can never finish. Press **Refresh**.
-
-**No movie was produced** — install `ffmpeg`. Without it the PNG frames are kept and the
-dialog shows the command to encode them later.
+* **"aXqua could not be found"**: the message lists every place the plugin looked (the plugin setting, `$AXQUA_EXE`, `PATH`). Set the path in *Settings*.
+* **A job failed**: open its logs from the job list. `runner.log` carries the error with what to do about it; the listing of the solver is beside it.
+* More in [Tips and log files](https://axqua.eu/troubleshooting/tips-logfiles.html).
 
 ## License
 
-GPL-2.0-or-later, because it links PyQGIS. The `axqua` package it drives is
-BSD-3-Clause and remains usable on its own.
+The plugin is licensed under GPL-2.0-or-later, because it uses PyQGIS. The aXqua program it drives is licensed under BSD-3-Clause and can be used on its own.

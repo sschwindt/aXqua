@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install git+https://github.com/sschwindt/aXqua.git', and needs a working TELEMAC and/or OpenFOAM installation.
-version=0.5.0
+version=1.0.0
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -20,14 +20,34 @@ category=Plugins
 icon=resources/axqua.png
 tags=hydraulics,hydrodynamics,telemac,openfoam,cfd,river,lake,reservoir,hydraulic structures,mesh,simulation,calibration,morphodynamics
 
-# First release: flagged experimental so it is opt-in while the job runner is
-# exercised against more installations.
-experimental=True
+experimental=False
 deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=0.5.0
+changelog=1.0.0
+    - The first stable release. It needs the aXqua program 1.0 or newer.
+    - Documentation in English, German and French at https://axqua.eu. Help opens
+      a copy built on this computer when there is one, else the published pages,
+      in the language of QGIS.
+    - Clean Up, left of Help, removes what a case no longer needs: working folders
+      of interrupted runs, listings, earlier time steps of results, processor
+      folders of reconstructed OpenFOAM runs and exports. Inputs, the case file,
+      the built model and the last time step of a result are never offered, and
+      nothing is removed while a run may still use it.
+    - One Simulations tab with Baseline (Telemac), OpenFOAM, Mesh convergence and
+      Morphodynamics, and a mesh convergence study for OpenFOAM.
+    - Case settings replace the project file: the cases are kept in the QGIS
+      settings, required entries are marked, and a table lists the measurements
+      for calibration and validation.
+    - The outlet of an OpenFOAM model can follow a stage-discharge relation (the
+      boundary condition of BAW).
+    - OpenFOAM runs on any number of processes; the results of an earlier run are
+      set aside in previous-run instead of being deleted.
+    - Calibration against the targets of the case file, water depth and velocity.
+    - The installation wizards are tabs, run the fixes they ask for, and install
+      again on request.
+    0.5.0
     - Installation wizards for TELEMAC, OpenFOAM with the sediment solvers, ParaView
       and VisIt, for you alone or for all users of the computer.
     - The OpenFOAM installation no longer depends on the website of the sediment

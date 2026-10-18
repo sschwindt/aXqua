@@ -20,7 +20,6 @@ Install the aXqua plugin (QGIS)
 Open **QGIS**, then:
 
 * Go to *Plugins > Manage and Install Plugins*.
-* In the *Settings* tab, tick *Show also experimental plugins*.
 * Search for **aXqua**, click *Install Plugin*.
 
 Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `releases page <https://github.com/sschwindt/aXqua/releases>`_ and use *Install from ZIP*.
