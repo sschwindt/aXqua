@@ -48,6 +48,7 @@ from axqua.calibration import build_calibration_csv, merged_parameters
 from axqua.config import Config
 from axqua.solvers.openfoam import dicts
 from axqua.solvers.openfoam.case import build_case
+from axqua.solvers.openfoam.layout import PREVIOUS_RUN
 from axqua.solvers.openfoam.spec import OPENFOAM_PARAMETERS
 
 log = logging.getLogger("axqua")
@@ -138,7 +139,8 @@ def campaign_config(cfg: Config, *, cell_size_factor: float, end_time: float,
 def _clean_template(case_dir: Path) -> None:
     """Strip a built case down to what is worth copying once per run."""
     for pattern in ("processor*", "VTK", "postProcessing", "log.*", "*.log",
-                    "system/decomposeParDict-*"):         # the dictionaries of earlier runs
+                    "system/decomposeParDict-*",          # the dictionaries of earlier runs
+                    PREVIOUS_RUN):                        # what a rebuild of the template set aside
         for path in case_dir.glob(pattern):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
     for path in case_dir.iterdir():

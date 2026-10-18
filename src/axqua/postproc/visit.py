@@ -168,7 +168,13 @@ def visit_target(dataset: Dataset) -> Path:
 
 def _open(dataset: Dataset) -> str:
     target = visit_target(dataset)
-    return f'''
+    # VisIt's OpenFOAM reader opens a case reconstructed by default, which for a parallel run that was not reconstructed is t = 0 alone; "Case Type" 0 reads the processor folders (measured with VisIt 3.5.0)
+    decomposed = '''
+_options = GetDefaultFileOpenOptions("OpenFOAM")
+_options["Case Type"] = 0
+SetDefaultFileOpenOptions("OpenFOAM", _options)
+''' if dataset.kind == "openfoam" and dataset.decomposed else ""
+    return decomposed + f'''
 try:
     OpenDatabase({str(target)!r})
 except Exception as exc:

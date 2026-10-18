@@ -25,6 +25,9 @@ from axqua.core import errors
 from axqua.core.environment import SolverEnvironment
 from axqua.env import ShellRuntime
 from axqua.solvers.openfoam import dicts
+# Layout and processor_count lived here, and are reachable here still
+from axqua.solvers.openfoam.layout import (Layout, processor_count,  # noqa: F401
+                                           set_aside_runs, time_folders)
 
 log = logging.getLogger("axqua")
 
@@ -189,12 +192,10 @@ class OpenFoamRuntime(ShellRuntime):
     def _prepare(self, case_dir: Path, n: int, layout: "Layout") -> None:
         """Make the case ready for the stage whose controlDict is active, on *n* ranks. ``decomposePar`` carries over the one top-level time the active controlDict starts from: the start for a stage that starts afresh, the latest time for one that continues.
 
-        A stage that starts afresh replaces what earlier runs left (:func:`clear_runs`), because a later time at the top level or in the processor folders is where the next stage would continue from; on several ranks the case is then split anew. A stage that continues runs on results that only the processor folders hold, and stops where they were split for other ranks or where it runs on one processor, which does not read them. Where the top level holds the latest time (after ``reconstructPar``), the case is split again from it.
+        A stage that starts afresh moves what earlier runs left into ``previous-run/`` (:func:`~axqua.solvers.openfoam.layout.set_aside_runs`), because a later time at the top level or in the processor folders is where the next stage would continue from; on several ranks the case is then split anew. A stage that continues runs on results that only the processor folders hold, and stops where they were split for other ranks or where it runs on one processor, which does not read them. Where the top level holds the latest time (after ``reconstructPar``), the case is split again from it.
         """
         if not layout.continues:
-            removed = clear_runs(case_dir)
-            if removed:
-                log.info("the stage starts afresh: removed what an earlier run left (%s)", ", ".join(removed))
+            set_aside_runs(case_dir)
             if n > 1:
                 log.info("splitting the case for %d ranks, from the start time", n)
                 self._decompose(case_dir, n)
@@ -247,7 +248,7 @@ class OpenFoamRuntime(ShellRuntime):
         Returns the ``CompletedProcess``; a non-zero exit is returned rather than
         raised, so a caller running both stages can report which one failed.
 
-        The case is made ready for the stage first (:meth:`_prepare`): a stage that starts afresh replaces what earlier runs left and is split anew for its ranks, a stage that continues runs on what the stage before it left, also where only the processor folders hold it. A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks).
+        The case is made ready for the stage first (:meth:`_prepare`): a stage that starts afresh moves what earlier runs left into ``previous-run/`` and is split anew for its ranks, a stage that continues runs on what the stage before it left, also where only the processor folders hold it. A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks).
         """
         case_dir = Path(case_dir)
         dicts.activate(case_dir, stage, cfg)
@@ -277,13 +278,8 @@ class OpenFoamRuntime(ShellRuntime):
 
     def latest_time(self, case_dir: str | Path) -> float:
         """Largest numeric time directory in the case (0 when only ``0/`` exists)."""
-        times = []
-        for entry in Path(case_dir).iterdir():
-            try:
-                times.append(float(entry.name))
-            except ValueError:
-                continue
-        return max(times) if times else 0.0
+        times = time_folders(case_dir)
+        return times[-1][0] if times else 0.0
 
 
 def _dictionary_option(case_dir: str | Path, dictionary: str | Path | None) -> str:
@@ -296,84 +292,3 @@ def _dictionary_option(case_dir: str | Path, dictionary: str | Path | None) -> s
     except ValueError:
         pass
     return f" -decomposeParDict {shlex.quote(path.as_posix())}"
-
-
-_PROCESSOR = re.compile(r"processor(\d+)")
-#: The single folder of a collated decomposition (``processors4``, or ``processors4_0-3`` per host).
-_COLLATED = re.compile(r"processors(\d+)(_\d+-\d+)?")
-
-
-def _latest_time(folders) -> float | None:
-    """The latest time after the start among the time folders in *folders*, None without one."""
-    latest = None
-    for folder in folders:
-        for path in folder.iterdir():
-            try:
-                value = float(path.name)
-            except ValueError:
-                continue
-            if value > 0 and path.is_dir() and (latest is None or value > latest):
-                latest = value
-    return latest
-
-
-class Layout:
-    """How a case lies on disk for a parallel run, read in one pass: the number of domains it is split into (the ``processor<N>`` folders, or the ``processors<N>`` folder of a collated decomposition), the latest time in them and at the top level, and whether the active controlDict continues from the latest time."""
-
-    def __init__(self, count: int, folders: list[Path], parallel: float | None,
-                 top: float | None, continues: bool) -> None:
-        self.count, self.folders = count, folders
-        self.parallel, self.top, self.continues = parallel, top, continues
-
-    @classmethod
-    def of(cls, case_dir: str | Path) -> "Layout":
-        case_dir = Path(case_dir)
-        if not case_dir.is_dir():
-            return cls(0, [], None, None, False)
-        single, collated, count = [], [], 0
-        for path in case_dir.iterdir():
-            if not path.is_dir():
-                continue
-            if _PROCESSOR.fullmatch(path.name):
-                single.append(path)
-            elif (found := _COLLATED.fullmatch(path.name)):
-                collated.append(path)
-                count = max(count, int(found.group(1)))
-        count, folders = (count, collated) if collated else (len(single), single)
-        control = case_dir / "system" / "controlDict"
-        text = control.read_text(errors="replace") if control.is_file() else ""
-        continues = re.search(r"^\s*startFrom\s+latestTime\s*;", text, re.M) is not None
-        return cls(count, folders, _latest_time(folders), _latest_time([case_dir]),
-                   continues)
-
-    @property
-    def only_in_processor_folders(self) -> bool:
-        """The processor folders hold a later time than the case itself: results of a stage that was not reconstructed."""
-        return self.parallel is not None and self.parallel > (self.top or 0)
-
-
-def clear_runs(case_dir: str | Path) -> list[str]:
-    """Remove what earlier runs left in the case: the time folders after the start and the processor folders. Returns the names removed.
-
-    A stage that starts afresh needs this (a later time would be where the next stage continues from), and so does a case built anew (the results of another mesh cannot be continued, and the processor folders hold the old mesh itself, on which a parallel run would otherwise go on).
-    """
-    import shutil
-
-    case_dir = Path(case_dir)
-    removed = []
-    for path in sorted(case_dir.iterdir()) if case_dir.is_dir() else ():
-        if not path.is_dir():
-            continue
-        try:
-            later = float(path.name) > 0
-        except ValueError:
-            later = False
-        if later or _PROCESSOR.fullmatch(path.name) or _COLLATED.fullmatch(path.name):
-            shutil.rmtree(path)
-            removed.append(path.name)
-    return removed
-
-
-def processor_count(case_dir: str | Path) -> int:
-    """The number of domains the case is split into (0 when it is not split)."""
-    return Layout.of(case_dir).count

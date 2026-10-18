@@ -447,9 +447,14 @@ class MeasurementTable(QWidget):
         self.editor.changed()
 
     def _joined(self, entry: dict) -> None:
-        """A file that joins a validation situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's, unless the file comes from another situation, whose discharge is not this one's."""
+        """A file that joins a validation situation, by its name or by its role, shows the discharge of the situation; a situation without one takes the file's.
+
+        A file that leaves a situation other files stay in leaves the discharge with them. A file alone in its situation renames it, and the discharge goes along: a first name typed over the default, or a misspelled name corrected row by row, where the last row corrected carries the discharge to the others.
+        """
         name = self._situation_of(entry)
-        if name is not None and entry.get("joined") not in (None, name):
+        former = entry.get("joined")
+        if name is not None and former not in (None, name) and any(
+                self._situation_of(other) == former for other in self._rows if other is not entry):
             self._show(entry, "")
         entry["joined"] = name
         given = next((o["discharge"].text() for o in self._others(entry)

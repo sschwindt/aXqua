@@ -297,14 +297,17 @@ def test_a_reconstructed_result_is_split_again_from_its_latest_time(tmp_path, mo
     assert (case / "processor7" / "10").is_dir()
 
 
-def test_a_stage_that_starts_afresh_replaces_what_earlier_runs_left(tmp_path, monkeypatch):
-    """A later time from an earlier run, at the top level or in the processor folders, would be where the stage after it continues from."""
+def test_a_stage_that_starts_afresh_sets_aside_what_earlier_runs_left(tmp_path, monkeypatch):
+    """A later time from an earlier run, at the top level or in the processor folders, would be where the stage after it continues from, and its monitors would be joined to the new ones. They are kept in previous-run/: the processor folders may hold the only copy of a result."""
     # a parallel run that was cancelled, run again on one processor
     runtime, case, commands = _runtime(tmp_path, monkeypatch)
     _stage(runtime, case, "spinup", 4)
     _spun_up(case, "5")
+    (case / "postProcessing" / "Q_inlet_1" / "0").mkdir(parents=True)
     _stage(runtime, case, "spinup", 1)
     assert not list(case.glob("processor*")) and commands[-1].endswith("interFoam")
+    assert not (case / "postProcessing").exists()
+    assert (case / "previous-run" / "processor0" / "5").is_dir()
     (case / "0.1").mkdir()                                      # what the serial spin-up writes
     _stage(runtime, case, "run", 1)                             # continues from it
     # an earlier run that was put together, run again in parallel
@@ -313,20 +316,34 @@ def test_a_stage_that_starts_afresh_replaces_what_earlier_runs_left(tmp_path, mo
         (case / time).mkdir()
     _stage(runtime, case, "spinup", 4)
     assert sorted(p.name for p in case.iterdir() if p.name[0].isdigit()) == ["0"]
+    assert (case / "previous-run" / "300").is_dir()
     _spun_up(case, "0.1")
     _stage(runtime, case, "run", 4)                             # from the spin-up, not from 300
     assert sum(c.startswith("decomposePar") for c in commands) == 1
 
 
-def test_clearing_the_runs_keeps_the_case(tmp_path):
-    from axqua.solvers.openfoam.runtime import clear_runs
+def test_setting_the_runs_aside_keeps_the_case_and_the_run_before(tmp_path):
+    from axqua.solvers.openfoam import planview
+    from axqua.solvers.openfoam.layout import RUN_PRODUCTS, set_aside_runs
 
-    for name in ("0", "0.orig", "2.5", "processor0/2.5", "processors4/2.5", "system", "constant"):
+    assert planview.RESULT_NAME in RUN_PRODUCTS
+    for name in ("0", "0.orig", "2.5", "nan", "processor0/2.5", "processors4/2.5", "system",
+                 "constant", "postProcessing/Q_outlet_1/0", "VTK"):
         (tmp_path / name).mkdir(parents=True)
-    (tmp_path / "3").write_text("a file, not a time folder")
-    assert clear_runs(tmp_path) == ["2.5", "processor0", "processors4"]
-    assert sorted(p.name for p in tmp_path.iterdir()) == ["0", "0.orig", "3", "constant", "system"]
-    assert clear_runs(tmp_path / "missing") == []
+    for name in ("3", "depth-averaged.slf", "discharge-convergence.csv", "axqua-build.json"):
+        (tmp_path / name).write_text("")                         # "3" is a file, not a time
+    assert set_aside_runs(tmp_path) == ["2.5", "processor0", "processors4", "postProcessing",
+                                        "VTK", "depth-averaged.slf",
+                                        "discharge-convergence.csv"]
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "0", "0.orig", "3", "axqua-build.json", "constant", "nan", "previous-run", "system"]
+    assert (tmp_path / "previous-run" / "processor0" / "2.5").is_dir()
+    # nothing to set aside keeps the run before; the next run replaces it
+    assert set_aside_runs(tmp_path) == [] and (tmp_path / "previous-run" / "2.5").is_dir()
+    (tmp_path / "7").mkdir()
+    assert set_aside_runs(tmp_path) == ["7"]
+    assert sorted(p.name for p in (tmp_path / "previous-run").iterdir()) == ["7"]
+    assert set_aside_runs(tmp_path / "missing") == []
 
 
 def test_a_collated_decomposition_is_counted_by_its_folder(tmp_path):

@@ -37,6 +37,8 @@ class Dataset:
     bounds: tuple[float, ...] | None = None
     vector_fields: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     notes: tuple[str, ...] = ()
+    #: An OpenFOAM case whose result only the processor folders of a parallel run hold: a reader has to open it as a decomposed case, or it sees t = 0 alone.
+    decomposed: bool = False
 
     def has(self, capability: str) -> bool:
         """Whether this dataset satisfies one scene requirement.

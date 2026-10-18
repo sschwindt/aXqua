@@ -69,6 +69,7 @@ from typing import Any
 import numpy as np
 
 from axqua.core import errors
+from axqua.solvers.openfoam.layout import time_folders
 
 log = logging.getLogger("axqua")
 
@@ -961,22 +962,15 @@ def _clear_case(case_dir: Path) -> None:
     """
     import shutil
 
+    times = {path for _, path in time_folders(case_dir)}
     for entry in case_dir.iterdir():
-        numbered = entry.is_dir() and _is_time(entry.name)
+        numbered = entry in times
         if entry.is_dir() and (numbered or entry.name in ("constant", "system")):
             shutil.rmtree(entry)
         elif entry.is_file() and entry.name in (
                 BUILD_RECORD, BED_LAYER_NAME, BUDGET_NAME, LOG_NAME, "case.foam",
                 "scour.txt"):
             entry.unlink()
-
-
-def _is_time(name: str) -> bool:
-    try:
-        float(name)
-    except ValueError:
-        return False
-    return True
 
 
 def is_built(case_dir: Path) -> bool:
@@ -988,12 +982,9 @@ def is_built(case_dir: Path) -> bool:
 
 def latest_time(case_dir: Path) -> str | None:
     """Name of the last time folder a run wrote, ``None`` before the first."""
-    best: tuple[float, str] | None = None
-    for entry in Path(case_dir).iterdir():
-        if entry.is_dir() and _is_time(entry.name) and float(entry.name) > 0:
-            if (entry / "Conc").is_file() and (best is None or float(entry.name) > best[0]):
-                best = (float(entry.name), entry.name)
-    return best[1] if best else None
+    later = [path for value, path in time_folders(case_dir)
+             if value > 0 and (path / "Conc").is_file()]
+    return later[-1].name if later else None
 
 
 # --------------------------------------------------------------------------- #
@@ -1434,8 +1425,8 @@ def run_case(cfg, *, case_dir: str | Path | None = None, runtime=None,
 
     import shutil
 
-    for entry in case_dir.iterdir():           # a run starts from the first iteration
-        if entry.is_dir() and _is_time(entry.name) and float(entry.name) > 0:
+    for value, entry in time_folders(case_dir):   # a run starts from the first iteration
+        if value > 0:
             shutil.rmtree(entry)
     for name in (BED_LAYER_NAME, BUDGET_NAME):
         (case_dir / name).unlink(missing_ok=True)

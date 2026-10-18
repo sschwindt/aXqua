@@ -353,14 +353,14 @@ class OpenFoamBackend(BaseBackend):
             except OSError:
                 return []
 
-        # The times of the case itself, which is what VisIt and ParaView open: a result that only the processor folders hold (a run not reconstructed, also a collated one) is not in the figure, and the note says so.
-        times = _times(case_dir)
-        parallel = max((t for root in (case_dir / "processor0",
-                                       *sorted(case_dir.glob("processors[0-9]*")))
-                        for t in _times(root)), default=None)
-        pending = ()
-        if parallel is not None and parallel > max(times, default=0.0):
-            pending = (f"the result up to t = {parallel:g} s is in the processor folders of a parallel run only; reconstructPar puts it together for a figure",)
+        # The times of the case itself, unless the result is in the processor folders only (a parallel run that was not reconstructed): VisIt and ParaView open the case reconstructed unless told otherwise, and a reconstructed case without a result shows nothing but t = 0 (VisIt 3.5.0, measured 2026-10-18). Such a case is described as decomposed, with the times of its first domain, and the VisIt script opens it so.
+        from axqua.solvers.openfoam.layout import Layout, time_folders
+
+        layout = Layout.of(case_dir)
+        decomposed = layout.only_in_processor_folders
+        times = [value for value, _ in time_folders(layout.folders[0] if decomposed else case_dir)]
+        pending = (("the result is in the processor folders of a parallel run, not reconstructed; ParaView reads it with the case type Decomposed Case",)
+                   if decomposed else ())
 
         fields: set[str] = set()
         zero = case_dir / "0"
@@ -392,7 +392,7 @@ class OpenFoamBackend(BaseBackend):
             times=tuple(sorted(times)), fields=frozenset(fields),
             patches=frozenset(patches),
             vector_fields={"U": ("U_x", "U_y", "U_z")},
-            notes=notes + pending,
+            notes=notes + pending, decomposed=decomposed,
         )]
 
     def export_qgis_results(self, cfg, ctx: Any = None):
@@ -473,19 +473,6 @@ class OpenFoamBackend(BaseBackend):
 
 
 BACKEND = OpenFoamBackend()
-
-
-def _times(folder: Path) -> list[float]:
-    """The numeric time folders in *folder* (none for a folder that does not exist)."""
-    times = []
-    for entry in folder.iterdir() if folder.is_dir() else ():
-        try:
-            value = float(entry.name)
-        except ValueError:
-            continue
-        if entry.is_dir():
-            times.append(value)
-    return times
 
 
 def _is_sediment(ctx: Any) -> bool:

@@ -9,6 +9,7 @@ condition while looking perfectly well-formed.
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -210,14 +211,26 @@ def test_a_rigid_lid_case_does_not_advertise_alpha_water(tmp_path):
     cfg.openfoam.mode = "vof"
     assert "alpha.water" in OpenFoamBackend().describe_results(cfg)[0].fields
 
-    # the times are those of the case, which a visualizer opens; a later result left in the processor folders is named
+    # the times are those of the case, which a visualizer opens
     dataset = OpenFoamBackend().describe_results(cfg)[0]
-    assert dataset.times == (0.0, 120.0) and not dataset.notes
-    for folder in ("processor0/0", "processor0/150", "processors4/0", "processors4/180"):
+    assert dataset.times == (0.0, 120.0) and not dataset.notes and not dataset.decomposed
+    # ...unless the result is in the processor folders only: a decomposed case, opened as one
+    for folder in ("processor0/0", "processor0/150", "processor1/0", "processor1/150"):
         (case / folder).mkdir(parents=True)
     dataset = OpenFoamBackend().describe_results(cfg)[0]
-    assert dataset.times == (0.0, 120.0)
-    assert any("t = 180 s is in the processor folders" in note for note in dataset.notes)
+    assert dataset.decomposed and dataset.times == (0.0, 150.0)
+    assert any("Decomposed Case" in note for note in dataset.notes)
+    from axqua.postproc.visit import _open
+    assert '_options["Case Type"] = 0' in _open(dataset)
+    shutil.rmtree(case / "processor0")
+    shutil.rmtree(case / "processor1")
+    (case / "processors2" / "180").mkdir(parents=True)          # a collated decomposition
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert dataset.decomposed and dataset.times == (180.0,)
+    (case / "200").mkdir()                                        # reconstructed
+    dataset = OpenFoamBackend().describe_results(cfg)[0]
+    assert not dataset.decomposed and dataset.times == (0.0, 120.0, 200.0)
+    assert "Case Type" not in _open(dataset)
 
 
 def test_profiles_emits_one_lineout_per_vertical(tmp_path):

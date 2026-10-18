@@ -1794,6 +1794,21 @@ def test_the_measurement_table_keeps_the_kind_reads_edited_paths_and_shares_a_di
     assert moved["discharge"].text() == "" and table._rows[1]["discharge"].text() == "6.1"
     moved["situation"].editingFinished.emit()                   # left again, unchanged
     assert sorted(table.missing_discharge()) == ["Autumn", "Summer"]
+    # a file alone in its situation renames it and keeps the discharge: a name typed over the default, a misspelling corrected row by row
+    table.add("gt/flood-a.gpkg")
+    table.add("gt/flood-b.gpkg")
+    first, second = table._rows[-2:]
+    table.set_role(len(table._rows) - 2, "validation")          # named "validation" for now
+    first["discharge"].setText("9.5")
+    first["situation"].setText("Fluod")
+    first["situation"].editingFinished.emit()
+    assert first["discharge"].text() == "9.5"
+    table.set_role(len(table._rows) - 1, "validation", "Fluod")
+    assert second["discharge"].text() == "9.5"
+    for row in (first, second):
+        row["situation"].setText("Flood")
+        row["situation"].editingFinished.emit()
+    assert first["discharge"].text() == second["discharge"].text() == "9.5"
     # with the calibration switched off, nothing of the situations is saved or warned of
     editor.switches["calibration"].setChecked(False)
     editor.save()
