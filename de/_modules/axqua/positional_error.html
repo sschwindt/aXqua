@@ -1,0 +1,533 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.positional_error &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/positional_error.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../genindex.html" />
+    <link rel="search" title="Suche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/positional_error.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/positional_error.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/positional_error.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/positional_error.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="de" data-root="../../../" data-page="_modules/axqua/positional_error.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/positional_error.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../fr/_modules/axqua/positional_error.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.positional_error</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../_modules/axqua/positional_error.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.positional_error</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""How much of a model-data mismatch is just not knowing where the point is.</span>
+
+<span class="sd">A calibration compares a measured value against the model sampled **at the</span>
+<span class="sd">measurement's coordinates**. That comparison silently assumes the coordinates are</span>
+<span class="sd">exact. When they are not, the model is read at the wrong place and the difference</span>
+<span class="sd">is charged to the model - or, worse, to whichever parameter happens to move it.</span>
+
+<span class="sd">This is not a hypothetical. Inn KB15's September-2025 survey was positioned with</span>
+<span class="sd">an **RTK float** solution rather than a fixed one, which is decimeter-to-metre</span>
+<span class="sd">horizontal rather than centimeter. On that reach the modeled water depth at the</span>
+<span class="sd">survey verticals is 0.374 m while the deepest node within 3 m is 0.648 m, so a</span>
+<span class="sd">position error of a few meters moves the modeled depth by more than the entire</span>
+<span class="sd">model-data discrepancy being calibrated against.</span>
+
+<span class="sd">**The fix is not to relocate the points.** Their true positions are unknown, and</span>
+<span class="sd">snapping them to wherever the model happens to agree would manufacture agreement</span>
+<span class="sd">and calibrate nothing. The fix is to state the uncertainty honestly: if the point</span>
+<span class="sd">is known only to within sigma, then the model value at that point is uncertain by</span>
+<span class="sd">however much the model varies over sigma. That uncertainty is added in quadrature</span>
+<span class="sd">to the measurement error, so a target sitting on a steep gradient carries wide</span>
+<span class="sd">error bars and a target in a uniform patch carries narrow ones - which is exactly</span>
+<span class="sd">the weighting a likelihood should give them.</span>
+
+<span class="sd">The spread is measured by **sampling**, not by a gradient. A gradient is a local</span>
+<span class="sd">linearisation, and the fields that make this matter - depth near a bank, velocity</span>
+<span class="sd">at a shear layer - are precisely the ones where a linearisation is worst over a</span>
+<span class="sd">meter-scale radius. Sampling a ring at the uncertainty radius costs nothing here</span>
+<span class="sd">(the sampler is a KD-tree lookup) and stays honest on a step.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1">#: Horizontal sigma [m] for common GNSS solution qualities. These are working</span>
+<span class="c1">#: figures for judging a survey, not a specification of anyone's receiver: a float</span>
+<span class="c1">#: solution in particular degrades with baseline, sky view and occupation time, and</span>
+<span class="c1">#: is the one quality where quoting a single number is least defensible.</span>
+<span class="n">GNSS_SIGMA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"rtk-fixed"</span><span class="p">:</span> <span class="mf">0.03</span><span class="p">,</span>
+    <span class="s2">"rtk-float"</span><span class="p">:</span> <span class="mf">1.00</span><span class="p">,</span>
+    <span class="s2">"dgps"</span><span class="p">:</span> <span class="mf">1.00</span><span class="p">,</span>
+    <span class="s2">"standalone"</span><span class="p">:</span> <span class="mf">3.00</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1">#: Points on the sampling ring(s). Eight is enough to catch a one-sided step</span>
+<span class="c1">#: without making the sampler the cost of the calibration.</span>
+<span class="n">RING_POINTS</span> <span class="o">=</span> <span class="mi">8</span>
+
+
+<div class="viewcode-block" id="sample_spread">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.positional_error.sample_spread">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sample_spread</span><span class="p">(</span><span class="n">sample</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+                  <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                  <span class="n">radii</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span>
+                  <span class="n">ring_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">RING_POINTS</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Spread of *sample* over the positional uncertainty, per point.</span>
+
+<span class="sd">    *sample* maps ``(xs, ys)`` to model values. The field is read at each point and</span>
+<span class="sd">    on rings at ``radii`` multiples of *sigma*; the returned value is the standard</span>
+<span class="sd">    deviation over those samples - an estimate of how much the model value could</span>
+<span class="sd">    differ purely because the coordinates are uncertain.</span>
+
+<span class="sd">    Non-finite samples (a point that falls dry, or outside the mesh) are dropped</span>
+<span class="sd">    rather than propagated, so a vertical near the waterline still gets a spread</span>
+<span class="sd">    from the samples that did land in water.</span>
+<span class="sd">    """</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sigma</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="n">offsets</span> <span class="o">=</span> <span class="p">[(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">radius</span> <span class="ow">in</span> <span class="n">radii</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ring_points</span><span class="p">):</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">k</span> <span class="o">/</span> <span class="n">ring_points</span>
+            <span class="n">offsets</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">sigma</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span>
+                            <span class="n">sigma</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">)))</span>
+
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">offsets</span><span class="p">),</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">offsets</span><span class="p">):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sample</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="n">dy</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">stack</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">values</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="n">counted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">stack</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
+        <span class="c1"># nanstd warns on an all-NaN column; those are exactly the columns the</span>
+        <span class="c1"># count below discards, so the warning is noise rather than information</span>
+        <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">)</span>
+            <span class="n">spread</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">(</span><span class="n">stack</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># a point with fewer than three usable samples cannot support a spread; leave</span>
+    <span class="c1"># it at zero rather than inventing one from two numbers</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">counted</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">spread</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="telemac_sampler">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.positional_error.telemac_sampler">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">telemac_sampler</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">variable</span><span class="p">:</span> <span class="nb">str</span>
+                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""A nearest-node sampler for one SELAFIN variable.</span>
+
+<span class="sd">    Nearest-node rather than P1: a result merged from a parallel run is not a clean</span>
+<span class="sd">    triangulation (it carries coincident nodes and zero-area triangles at the</span>
+<span class="sd">    subdomain interfaces), and the question here is how much the field varies over</span>
+<span class="sd">    meters - which nearest-node answers perfectly well on a sub-metre mesh.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial</span><span class="w"> </span><span class="kn">import</span> <span class="n">cKDTree</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_slf</span>
+
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">read_slf</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">read_slf</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">variable</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s2">"values"</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">variable</span><span class="si">!r}</span><span class="s2"> is not in the result (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s1">'values'</span><span class="p">]))</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"values"</span><span class="p">][</span><span class="n">variable</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"values"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WATER DEPTH"</span><span class="p">,</span> <span class="n">values</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">cKDTree</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">geom</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="n">geom</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]]))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">]),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="c1"># a dry node carries no meaningful depth or velocity; report it as missing</span>
+        <span class="c1"># so sample_spread drops it instead of averaging a zero into the spread</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sample</span></div>
+
+
+
+<div class="viewcode-block" id="describe">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.positional_error.describe">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">quality</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One line naming the uncertainty and where it came from."""</span>
+    <span class="k">if</span> <span class="n">quality</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"positional uncertainty sigma = </span><span class="si">{</span><span class="n">sigma</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m "</span>
+                <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">quality</span><span class="si">}</span><span class="s2"> GNSS solution)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"positional uncertainty sigma = </span><span class="si">{</span><span class="n">sigma</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m"</span></div>
+
+
+
+<div class="viewcode-block" id="resolve_sigma">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.positional_error.resolve_sigma">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_sigma</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(sigma, quality)`` from ``ground_truth.position_quality`` / ``position_sigma``.</span>
+
+<span class="sd">    An explicit sigma wins over a named quality, so a survey whose real accuracy is</span>
+<span class="sd">    known does not have to be described by a lookup table.</span>
+<span class="sd">    """</span>
+    <span class="n">gt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"ground_truth"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span> <span class="s2">"position_sigma"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">gt</span><span class="p">,</span> <span class="s2">"position_quality"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">sigma</span><span class="p">),</span> <span class="n">quality</span>
+    <span class="k">if</span> <span class="n">quality</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">quality</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">GNSS_SIGMA</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"unknown ground_truth.position_quality </span><span class="si">{</span><span class="n">quality</span><span class="si">!r}</span><span class="s2">; expected one "</span>
+                <span class="sa">f</span><span class="s2">"of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">GNSS_SIGMA</span><span class="p">))</span><span class="si">}</span><span class="s2">, or set "</span>
+                <span class="s2">"ground_truth.position_sigma to a number of meters."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">GNSS_SIGMA</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">key</span>
+    <span class="k">return</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

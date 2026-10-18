@@ -9,7 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
@@ -23,9 +23,9 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
-</head>
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/openfoam/runtime.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/openfoam/runtime.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/runtime.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/openfoam/runtime.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="en" data-root="../../../../" data-page="_modules/axqua/solvers/openfoam/runtime.html"></script></head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>EN</span></summary><ul role="menu"><li><strong aria-current="true" lang="en">English</strong></li><li><a href="../../../../de/_modules/axqua/solvers/openfoam/runtime.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><a href="../../../../fr/_modules/axqua/solvers/openfoam/runtime.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -257,6 +257,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Languages and publication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
 </ul>
 </li>
@@ -266,6 +267,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freeing disk space</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
 </ul>
 </li>
@@ -352,6 +354,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverEnvironment</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShellRuntime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam</span><span class="w"> </span><span class="kn">import</span> <span class="n">dicts</span>
+<span class="c1"># Layout and processor_count lived here, and are reachable here still</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.layout</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Layout</span><span class="p">,</span> <span class="n">processor_count</span><span class="p">,</span>  <span class="c1"># noqa: F401</span>
+                                           <span class="n">set_aside_runs</span><span class="p">,</span> <span class="n">time_folders</span><span class="p">)</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
 
@@ -536,12 +541,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="s2">"Layout"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make the case ready for the stage whose controlDict is active, on *n* ranks. ``decomposePar`` carries over the one top-level time the active controlDict starts from: the start for a stage that starts afresh, the latest time for one that continues.</span>
 
-<span class="sd">        A stage that starts afresh replaces what earlier runs left (:func:`clear_runs`), because a later time at the top level or in the processor folders is where the next stage would continue from; on several ranks the case is then split anew. A stage that continues runs on results that only the processor folders hold, and stops where they were split for other ranks or where it runs on one processor, which does not read them. Where the top level holds the latest time (after ``reconstructPar``), the case is split again from it.</span>
+<span class="sd">        A stage that starts afresh moves what earlier runs left into ``previous-run/`` (:func:`~axqua.solvers.openfoam.layout.set_aside_runs`), because a later time at the top level or in the processor folders is where the next stage would continue from; on several ranks the case is then split anew. A stage that continues runs on results that only the processor folders hold, and stops where they were split for other ranks or where it runs on one processor, which does not read them. Where the top level holds the latest time (after ``reconstructPar``), the case is split again from it.</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">layout</span><span class="o">.</span><span class="n">continues</span><span class="p">:</span>
-            <span class="n">removed</span> <span class="o">=</span> <span class="n">clear_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">removed</span><span class="p">:</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"the stage starts afresh: removed what an earlier run left (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">removed</span><span class="p">))</span>
+            <span class="n">set_aside_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"splitting the case for </span><span class="si">%d</span><span class="s2"> ranks, from the start time"</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_decompose</span><span class="p">(</span><span class="n">case_dir</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
@@ -602,7 +605,7 @@
 <span class="sd">        Returns the ``CompletedProcess``; a non-zero exit is returned rather than</span>
 <span class="sd">        raised, so a caller running both stages can report which one failed.</span>
 
-<span class="sd">        The case is made ready for the stage first (:meth:`_prepare`): a stage that starts afresh replaces what earlier runs left and is split anew for its ranks, a stage that continues runs on what the stage before it left, also where only the processor folders hold it. A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks).</span>
+<span class="sd">        The case is made ready for the stage first (:meth:`_prepare`): a stage that starts afresh moves what earlier runs left into ``previous-run/`` and is split anew for its ranks, a stage that continues runs on what the stage before it left, also where only the processor folders hold it. A parallel run gets the decomposition dictionary of its ranks (a parallel solver reads it as well and refuses one that names more domains than it has ranks).</span>
 <span class="sd">        """</span>
         <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
         <span class="n">dicts</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="n">case_dir</span><span class="p">,</span> <span class="n">stage</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
@@ -635,13 +638,8 @@
 <a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.runtime.OpenFoamRuntime.latest_time">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">latest_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Largest numeric time directory in the case (0 when only ``0/`` exists)."""</span>
-        <span class="n">times</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">continue</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="k">if</span> <span class="n">times</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">time_folders</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">times</span> <span class="k">else</span> <span class="mf">0.0</span></div>
 </div>
 
 
@@ -656,99 +654,6 @@
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">" -decomposeParDict </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span><span class="si">}</span><span class="s2">"</span>
-
-
-<span class="n">_PROCESSOR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"processor(\d+)"</span><span class="p">)</span>
-<span class="c1">#: The single folder of a collated decomposition (``processors4``, or ``processors4_0-3`` per host).</span>
-<span class="n">_COLLATED</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"processors(\d+)(_\d+-\d+)?"</span><span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_latest_time</span><span class="p">(</span><span class="n">folders</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""The latest time after the start among the time folders in *folders*, None without one."""</span>
-    <span class="n">latest</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">folder</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">latest</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">latest</span><span class="p">):</span>
-                <span class="n">latest</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="k">return</span> <span class="n">latest</span>
-
-
-<div class="viewcode-block" id="Layout">
-<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.runtime.Layout">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">Layout</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""How a case lies on disk for a parallel run, read in one pass: the number of domains it is split into (the ``processor&lt;N&gt;`` folders, or the ``processors&lt;N&gt;`` folder of a collated decomposition), the latest time in them and at the top level, and whether the active controlDict continues from the latest time."""</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">folders</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">],</span> <span class="n">parallel</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">top</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">continues</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">folders</span> <span class="o">=</span> <span class="n">count</span><span class="p">,</span> <span class="n">folders</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">continues</span> <span class="o">=</span> <span class="n">parallel</span><span class="p">,</span> <span class="n">top</span><span class="p">,</span> <span class="n">continues</span>
-
-<div class="viewcode-block" id="Layout.of">
-<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.runtime.Layout.of">[docs]</a>
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">of</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Layout"</span><span class="p">:</span>
-        <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">case_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
-        <span class="n">single</span><span class="p">,</span> <span class="n">collated</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">case_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-                <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">_PROCESSOR</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-                <span class="n">single</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="n">found</span> <span class="o">:=</span> <span class="n">_COLLATED</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)):</span>
-                <span class="n">collated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-                <span class="n">count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
-        <span class="n">count</span><span class="p">,</span> <span class="n">folders</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">collated</span><span class="p">)</span> <span class="k">if</span> <span class="n">collated</span> <span class="k">else</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">single</span><span class="p">),</span> <span class="n">single</span><span class="p">)</span>
-        <span class="n">control</span> <span class="o">=</span> <span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"system"</span> <span class="o">/</span> <span class="s2">"controlDict"</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">control</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span> <span class="k">if</span> <span class="n">control</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="s2">""</span>
-        <span class="n">continues</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\s*startFrom\s+latestTime\s*;"</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">M</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">_latest_time</span><span class="p">(</span><span class="n">folders</span><span class="p">),</span> <span class="n">_latest_time</span><span class="p">([</span><span class="n">case_dir</span><span class="p">]),</span>
-                   <span class="n">continues</span><span class="p">)</span></div>
-
-
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">only_in_processor_folders</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""The processor folders hold a later time than the case itself: results of a stage that was not reconstructed."""</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="clear_runs">
-<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.runtime.clear_runs">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">clear_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Remove what earlier runs left in the case: the time folders after the start and the processor folders. Returns the names removed.</span>
-
-<span class="sd">    A stage that starts afresh needs this (a later time would be where the next stage continues from), and so does a case built anew (the results of another mesh cannot be continued, and the processor folders hold the old mesh itself, on which a parallel run would otherwise go on).</span>
-<span class="sd">    """</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
-
-    <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
-    <span class="n">removed</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">case_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span> <span class="k">if</span> <span class="n">case_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">():</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-            <span class="k">continue</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">later</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">later</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">later</span> <span class="ow">or</span> <span class="n">_PROCESSOR</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_COLLATED</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-            <span class="n">removed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">removed</span></div>
-
-
-
-<div class="viewcode-block" id="processor_count">
-<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.runtime.processor_count">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">processor_count</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""The number of domains the case is split into (0 when it is not split)."""</span>
-    <span class="k">return</span> <span class="n">Layout</span><span class="o">.</span><span class="n">of</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span><span class="o">.</span><span class="n">count</span></div>
-
 </pre></div>
 
            </div>

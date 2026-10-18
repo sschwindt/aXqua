@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
@@ -26,9 +26,9 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Building the documentation" href="build-docs.html" />
     <link rel="prev" title="Command line" href="cli.html" /> 
-</head>
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/code/plugin.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/code/plugin.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/code/plugin.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/code/plugin.html"><link rel="stylesheet" href="../_i18n/lang.css"><script src="../_i18n/lang.js" data-lang="en" data-root="../" data-page="code/plugin.html"></script></head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>EN</span></summary><ul role="menu"><li><strong aria-current="true" lang="en">English</strong></li><li><a href="../de/code/plugin.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><a href="../fr/code/plugin.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -260,6 +260,7 @@
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">QGIS plugin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build-docs.html#languages-and-publication">Languages and publication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
 </ul>
 </li>
@@ -269,6 +270,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#freeing-disk-space">Freeing disk space</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
 </ul>
 </li>
@@ -373,7 +375,7 @@
 <td><p>The table of the tabs and sub-tabs: their order, the capabilities each one shows, and the documentation page and label that <em>Help</em> opens for it.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui/dock.py</span></code></p></td>
-<td><p>The panel: the fixed tabs, the job list below them, and <em>Help</em>.</p></td>
+<td><p>The panel: the fixed tabs, the job list below them, <em>Clean Up</em> and <em>Help</em>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/configuration_tab.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/profile_editor.py</span></code></p></td>
 <td><p>The <em>Configuration</em> tab and the editor of the profile of this computer.</p></td>
@@ -388,12 +390,15 @@
 <td><p>The <em>Case Setup</em> tab and the pages of the workflow tabs.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/findings.py</span></code>, <code class="docutils literal notranslate"><span class="pre">gui/help.py</span></code></p></td>
-<td><p>The warning triangles, and the addresses of the online documentation that the plugin opens. <code class="docutils literal notranslate"><span class="pre">gui/style.py</span></code> holds the colors: the dark purple of the aXqua icon for what is required, dark green for what was found.</p></td>
+<td><p>The warning triangles, and the addresses of the documentation that the plugin opens (a local copy or the published one, in the language of QGIS). <code class="docutils literal notranslate"><span class="pre">gui/style.py</span></code> holds the colors: the dark purple of the aXqua icon for what is required, dark green for what was found.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui/</span></code> (other files)</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">gui/cleanup_dialog.py</span></code></p></td>
+<td><p>The window of <em>Clean Up</em>, around <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">cleanup</span></code>: what a case can do without, ticked by category, and its removal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gui/</span></code> (other files)</p></td>
 <td><p>The job table, the log viewer, the settings dialog, the print layout and the movie export.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">processing/</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">processing/</span></code></p></td>
 <td><p>The algorithms for the QGIS Processing Toolbox.</p></td>
 </tr>
 </tbody>
@@ -408,7 +413,7 @@ scripts/qgis_dev.sh
 </pre></div>
 </div>
 <p>QGIS lists a plugin only if it can read <code class="docutils literal notranslate"><span class="pre">metadata.txt</span></code>. The command <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">scripts/build_plugin_zip.py</span> <span class="pre">--check</span></code> reads the file in the same way as QGIS.</p>
-<p><em>Help</em> in the plugin opens the online documentation at the section of the tab that is showing. The plugin archive carries no copy of the documentation.</p>
+<p><em>Help</em> in the plugin opens the documentation at the section of the tab that is showing. The plugin archive carries no copy of the documentation: <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">docs</span></code> names a copy built on this computer (<code class="docutils literal notranslate"><span class="pre">$AXQUA_DOCS</span></code>, else <code class="docutils literal notranslate"><span class="pre">docs/_build/site</span></code> or <code class="docutils literal notranslate"><span class="pre">docs/_build/html</span></code> of the source checkout) and whether the default browser can read it, and the plugin opens the published documentation otherwise. A local page is opened through a small forwarding page (<code class="docutils literal notranslate"><span class="pre">_help/open.html</span></code> beside the copy), because <code class="docutils literal notranslate"><span class="pre">xdg-open</span></code> and Chromium drop the section part (<code class="docutils literal notranslate"><span class="pre">#...</span></code>) of a file address.</p>
 <p>The tests of the plugin are in <code class="docutils literal notranslate"><span class="pre">qgis_plugin/tests/</span></code>. The tests that require QGIS are skipped when the Python module <code class="docutils literal notranslate"><span class="pre">qgis</span></code> is not available. The script <code class="docutils literal notranslate"><span class="pre">scripts/build_plugin_zip.py</span></code> builds the plugin archive and verifies the requirements of the QGIS plugin repository.</p>
 </section>
 

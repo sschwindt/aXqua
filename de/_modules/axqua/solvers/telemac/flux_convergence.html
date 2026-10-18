@@ -1,0 +1,866 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.flux_convergence &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/flux_convergence.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/telemac/flux_convergence.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/flux_convergence.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/flux_convergence.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/telemac/flux_convergence.html"><link rel="stylesheet" href="../../../../../_i18n/lang.css"><script src="../../../../../_i18n/lang.js" data-lang="de" data-root="../../../../../" data-page="_modules/axqua/solvers/telemac/flux_convergence.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../../_modules/axqua/solvers/telemac/flux_convergence.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../../fr/_modules/axqua/solvers/telemac/flux_convergence.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.flux_convergence</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../../_modules/axqua/solvers/telemac/flux_convergence.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.solvers.telemac.flux_convergence</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Temporal (flux / mass-balance) convergence analysis of the steady test run.</span>
+
+<span class="sd">The ``initial_run.py`` test run serves two purposes: confirm the built case does</span>
+<span class="sd">not crash, and -- because that same steady result is the **hotstart** seed for the</span>
+<span class="sd">HydroBayesCal calibration -- find the simulation time at which the model has</span>
+<span class="sd">reached a steady, mass-conservative state. Calibrating against a not-yet-converged</span>
+<span class="sd">hotstart would bake a transient bias into every perturbed run.</span>
+
+<span class="sd">Convergence criterion (after ``mass-balance-bc.md`` / ``convergence.md`` in the</span>
+<span class="sd">hyhome numerics notes): a **steady** Telemac2d run is converged when the liquid</span>
+<span class="sd">boundaries are in mass balance, i.e. total inflow equals total outflow. We track</span>
+<span class="sd">the dimensionless *relative flux imbalance* per listing printout::</span>
+
+<span class="sd">    eps_t = | |Q_in,t| - |Q_out,t| | / |Q_in,t|</span>
+
+<span class="sd">(magnitudes because Telemac reports inflow positive, outflow negative; normalizing</span>
+<span class="sd">by the inflow makes it dimensionless), and take the run as converged at the first</span>
+<span class="sd">printout beyond which ``eps_t`` stays permanently below a target tolerance. For a</span>
+<span class="sd">steady run this mass-flux balance is the governing criterion: once it holds, the</span>
+<span class="sd">depth and velocity *fields* have stopped evolving as well. (Pointwise depth /</span>
+<span class="sd">velocity grid-convergence at the measurement probes is a different question,</span>
+<span class="sd">handled by the mesh-convergence study.)</span>
+
+<span class="sd">**The tolerance depends on what the result is for**, and the imbalance being a</span>
+<span class="sd">*relative* measure is what makes that judgment possible: the discharge, depth and</span>
+<span class="sd">velocity read off a steady run inherit it directly. ``1e-3`` (0.1%) is therefore the</span>
+<span class="sd">default -- a tenth of a percent moves Q, h or U by far less than the uncertainty of</span>
+<span class="sd">the field data they are compared against, and by far less than the 5% the</span>
+<span class="sd">mesh-convergence study accepts as grid-independent. The stricter ``1e-4`` is reserved</span>
+<span class="sd">for a **hotstart seed**, where a residual transient is not averaged out but inherited</span>
+<span class="sd">by every one of the dozens of perturbed calibration runs restarted from it; ``1e-6``</span>
+<span class="sd">is a validation grade whose slow asymptote is rarely worth the simulated time.</span>
+<span class="sd">Set it per case with ``hydrodynamics.flux_tolerance``, or pass ``tolerance=`` to</span>
+<span class="sd">:func:`analyze_flux_convergence`.</span>
+
+<span class="sd">This module is **self-contained**: the listing is parsed by :mod:`axqua.solvers.telemac.sortie`</span>
+<span class="sd">and the convergence maths and plots are below. It previously delegated to the</span>
+<span class="sd">``pythomac`` package, whose analysis this reproduces (and whose four output files it</span>
+<span class="sd">still writes, with the same names, so existing workflows and documentation are</span>
+<span class="sd">unaffected). pythomac is GPL-3 and derives its listing parser from TELEMAC's own</span>
+<span class="sd">GPL-3 ``postel`` code, which cannot be vendored into BSD-3-licensed axqua; and</span>
+<span class="sd">having the maths here removes a set of adapters that existed only to work around the</span>
+<span class="sd">package boundary -- the printout spacing had to be back-calculated because a</span>
+<span class="sd">CFL-adaptive run has no fixed time step, the rate plot had to be replaced whenever</span>
+<span class="sd">the rate was still undefined, and ``convergence-rate.csv`` had to be written</span>
+<span class="sd">separately because only the ``.png`` was produced.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.sortie</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sortie</span><span class="p">,</span> <span class="n">latest_sortie</span><span class="p">,</span> <span class="n">processor_sorties</span><span class="p">,</span> <span class="n">read_sortie</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># Tolerance grades for the relative flux imbalance (see the module docstring).</span>
+<span class="c1">#</span>
+<span class="c1"># Which one applies depends on WHAT the result is used for, because the imbalance is</span>
+<span class="c1"># a *relative* measure and the quantities read off a steady run inherit it directly:</span>
+<span class="c1">#</span>
+<span class="c1">#   1e-3  HYDRAULIC_TOLERANCE - the default. Adequate whenever the result is read as</span>
+<span class="c1">#         discharge, water depth or velocity: a 0.1% flux imbalance moves those by</span>
+<span class="c1">#         far less than the measurement uncertainty of any field campaign (a</span>
+<span class="c1">#         FlowTracker vertical is good to a few percent), and well below the</span>
+<span class="c1">#         discretization error the mesh-convergence study accepts (5%).</span>
+<span class="c1">#   1e-4  HOTSTART_TOLERANCE - the strict grade for a hotstart *seed*. A calibration</span>
+<span class="c1">#         fleet restarts from this state a few dozen times, so any residual</span>
+<span class="c1">#         transient is inherited by every perturbed run rather than averaged out.</span>
+<span class="c1">#   1e-6  validation grade; reaching it costs a very long simulated time (the</span>
+<span class="c1">#         imbalance asymptotes slowly) and is rarely worth it.</span>
+<span class="n">HYDRAULIC_TOLERANCE</span> <span class="o">=</span> <span class="mf">1.0e-3</span>
+<span class="n">HOTSTART_TOLERANCE</span> <span class="o">=</span> <span class="mf">1.0e-4</span>
+
+<span class="c1"># absolute steady-state criterion for the hotstart end time: the run counts as steady</span>
+<span class="c1"># from the first listing printout at which the ABSOLUTE flux imbalance</span>
+<span class="c1"># ||Q_in| - |Q_out|| stays below STEADY_ABS_TOLERANCE (m3/s) for STEADY_WINDOW</span>
+<span class="c1"># consecutive printouts; that time becomes the DURATION of the generated hotstart case</span>
+<span class="n">STEADY_ABS_TOLERANCE</span> <span class="o">=</span> <span class="mf">1.0e-3</span>
+<span class="n">STEADY_WINDOW</span> <span class="o">=</span> <span class="mi">10</span>
+
+
+<div class="viewcode-block" id="FluxConvergence">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.FluxConvergence">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FluxConvergence</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Outcome of the flux/mass-balance convergence analysis."""</span>
+
+    <span class="n">converged</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">final_imbalance</span><span class="p">:</span> <span class="nb">float</span>                 <span class="c1"># last relative flux imbalance eps_t</span>
+    <span class="n">converged_time_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span>       <span class="c1"># recommended NUMBER OF TIME STEPS (or None)</span>
+    <span class="n">converged_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>        <span class="c1"># the same, in simulation seconds</span>
+    <span class="n">listing_printout_period</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">fluxes_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">flux_plot</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">rate_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">rate_plot</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">steady_seconds</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>    <span class="c1"># first time of the steady abs-imbalance window</span>
+    <span class="n">steady_abs_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">STEADY_ABS_TOLERANCE</span>
+    <span class="n">steady_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">STEADY_WINDOW</span>
+    <span class="n">steady_strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>             <span class="c1"># False: window-mean fallback, not per-printout</span>
+    <span class="n">hotstart_cas</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># generated hotstart steering file</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># convergence maths</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<div class="viewcode-block" id="relative_imbalance">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.relative_imbalance">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">relative_imbalance</span><span class="p">(</span><span class="n">gross_in</span><span class="p">,</span> <span class="n">gross_out</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Relative flux imbalance ``eps_t = ||Q_in| - |Q_out|| / |Q_in|`` per printout.</span>
+
+<span class="sd">    Telemac reports boundary fluxes signed (inflow positive, outflow negative), so</span>
+<span class="sd">    the *magnitudes* are differenced: balance means ``|Q_in| == |Q_out|``, hence</span>
+<span class="sd">    ``eps_t -&gt; 0`` at steady state. Using magnitudes also keeps the metric robust to</span>
+<span class="sd">    a boundary that momentarily reverses.</span>
+<span class="sd">    """</span>
+    <span class="n">q_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gross_in</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">q_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gross_out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">q_in</span> <span class="o">-</span> <span class="n">q_out</span><span class="p">)</span> <span class="o">/</span> <span class="n">q_in</span></div>
+
+
+
+<div class="viewcode-block" id="convergence_rate">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.convergence_rate">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convergence_rate</span><span class="p">(</span><span class="n">imbalance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convergence rate ``iota_t = log_{eps_t}(eps_{t+1})``, aligned with ``eps[1:]``.</span>
+
+<span class="sd">    A rate of 1 means the imbalance is shrinking at a constant order; above 1 it is</span>
+<span class="sd">    accelerating. It is **undefined wherever the imbalance is flat or not yet</span>
+<span class="sd">    decaying** (``log`` of a base near 1, or of a non-positive value), which is the</span>
+<span class="sd">    normal state during the filling/transient phase - those entries come back as NaN</span>
+<span class="sd">    rather than raising, and the plots below simply show gaps there.</span>
+<span class="sd">    """</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">imbalance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">eps</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">base</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">eps</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">eps</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="p">(</span><span class="n">base</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">base</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-12</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">"ignore"</span><span class="p">):</span>
+        <span class="n">out</span><span class="p">[</span><span class="n">ok</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">ok</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">base</span><span class="p">[</span><span class="n">ok</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="convergence_index">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.convergence_index">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convergence_index</span><span class="p">(</span><span class="n">imbalance</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">HOTSTART_TOLERANCE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""First index beyond which *imbalance* stays **permanently** below *tolerance*.</span>
+
+<span class="sd">    "Permanently" matters: a transient dip below the tolerance during the filling</span>
+<span class="sd">    phase is not convergence. Returns ``None`` when the tolerance is never reached,</span>
+<span class="sd">    or is reached but later lost again.</span>
+<span class="sd">    """</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">imbalance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">below</span> <span class="o">=</span> <span class="n">eps</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">below</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">below</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">above</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="o">~</span><span class="n">below</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">above</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">above</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="find_steady_window">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.find_steady_window">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_steady_window</span><span class="p">(</span>
+    <span class="n">times</span><span class="p">,</span>
+    <span class="n">gross_in</span><span class="p">,</span>
+    <span class="n">gross_out</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">abs_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">STEADY_ABS_TOLERANCE</span><span class="p">,</span>
+    <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">STEADY_WINDOW</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Simulated time [s] at which the boundary fluxes reach a *sustained* balance.</span>
+
+<span class="sd">    Returns the time of the first listing printout whose absolute flux imbalance</span>
+<span class="sd">    ``||Q_in| - |Q_out||`` is below *abs_tolerance* (m3/s) **and stays below it for</span>
+<span class="sd">    *window* consecutive printouts** (so a momentary crossing of the oscillating</span>
+<span class="sd">    imbalance does not count), or ``None`` if no such window exists. This time is</span>
+<span class="sd">    the end time (``DURATION``) for the generated hotstart case: continuing from</span>
+<span class="sd">    the steady result, the flow re-equilibrates well within the span the initial</span>
+<span class="sd">    run needed to balance its fluxes.</span>
+<span class="sd">    """</span>
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gross_in</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+                  <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gross_out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)))</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">diff</span> <span class="o">&lt;</span> <span class="n">abs_tolerance</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ok</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">window</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mean_balance_time</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">gross_in</span><span class="p">,</span> <span class="n">gross_out</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">abs_tolerance</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fallback steady time when the strict per-printout window never occurs.</span>
+
+<span class="sd">    A CFL-marched steady state keeps oscillating around perfect balance (wetting/</span>
+<span class="sd">    drying + turbulence noise), so the *instantaneous* imbalance can sit above</span>
+<span class="sd">    *abs_tolerance* at every single printout even though the run is steady. The</span>
+<span class="sd">    robust statistic is then the imbalance **averaged over the window**: returns the</span>
+<span class="sd">    time of the first *window*-printout rolling mean of the signed imbalance</span>
+<span class="sd">    ``Q_in - Q_out`` whose magnitude is below *abs_tolerance* and stays there for the</span>
+<span class="sd">    next *window* means (so a single lucky window does not count), or ``None``.</span>
+<span class="sd">    """</span>
+    <span class="n">signed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gross_in</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gross_out</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">signed</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">window</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">roll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">signed</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">window</span><span class="p">)</span> <span class="o">/</span> <span class="n">window</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"valid"</span><span class="p">)</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">roll</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">abs_tolerance</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ok</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">window</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">window</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># plots</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_new_axes</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.2</span><span class="p">,</span> <span class="mf">4.3</span><span class="p">)):</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="k">return</span> <span class="n">plt</span><span class="p">,</span> <span class="o">*</span><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_boundary_fluxes">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.plot_boundary_fluxes">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_boundary_fluxes</span><span class="p">(</span><span class="n">sortie</span><span class="p">:</span> <span class="n">Sortie</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``flux-convergence.png``: the signed flux at every liquid boundary over time,</span>
+<span class="sd">    with the gross inflow/outflow totals the convergence metric is built from."""</span>
+    <span class="n">plt</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">_new_axes</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sortie</span><span class="o">.</span><span class="n">n_boundaries</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sortie</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">sortie</span><span class="o">.</span><span class="n">fluxes</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"boundary </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sortie</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">sortie</span><span class="o">.</span><span class="n">gross_in</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1F4E78"</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">"gross inflow"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sortie</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="o">-</span><span class="n">sortie</span><span class="o">.</span><span class="n">gross_out</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.6</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#A6300F"</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">"gross outflow"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"0.6"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Simulated time (s)"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Flux (m$^3$/s)"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Boundary fluxes"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<div class="viewcode-block" id="plot_convergence">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.plot_convergence">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_convergence</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">imbalance</span><span class="p">,</span> <span class="n">rate</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">HOTSTART_TOLERANCE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``convergence-rate.png``: the relative flux imbalance (log scale, with the</span>
+<span class="sd">    tolerance marked) and, where it is defined, the convergence rate beneath it.</span>
+
+<span class="sd">    Drawing the imbalance unconditionally is the point: during the filling phase the</span>
+<span class="sd">    rate is undefined everywhere, and a rate-only figure would then be empty exactly</span>
+<span class="sd">    when one most wants to see how far from balance the run still is.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
+    <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s2">"Agg"</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">top</span><span class="p">,</span> <span class="n">bottom</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.2</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">imbalance</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">eps</span><span class="p">,</span> <span class="s2">"-o"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#1F4E78"</span><span class="p">)</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">tolerance</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#A6300F"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"tolerance </span><span class="si">{</span><span class="n">tolerance</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">eps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">top</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">"log"</span><span class="p">)</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Relative imbalance $\Delta_{Q,t}$"</span><span class="p">)</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Boundary-flux convergence"</span><span class="p">)</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">"both"</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">top</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">finite</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">finite</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">bottom</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="mi">1</span><span class="p">:][</span><span class="n">finite</span><span class="p">],</span> <span class="n">rate</span><span class="p">[</span><span class="n">finite</span><span class="p">],</span>
+                    <span class="s2">"-o"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#2E6E4E"</span><span class="p">)</span>
+        <span class="n">bottom</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"0.5"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bottom</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="s2">"convergence rate not yet defined</span><span class="se">\n</span><span class="s2">"</span>
+                              <span class="s2">"(imbalance still flat - filling/transient phase)"</span><span class="p">,</span>
+                    <span class="n">ha</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s2">"center"</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">bottom</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                    <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"0.35"</span><span class="p">)</span>
+    <span class="n">bottom</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Simulated time (s)"</span><span class="p">)</span>
+    <span class="n">bottom</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Convergence rate $\iota_t$"</span><span class="p">)</span>
+    <span class="n">bottom</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the analysis</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_remove_processor_sorties</span><span class="p">(</span><span class="n">model_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Delete the per-processor listing copies of a parallel run.</span>
+
+<span class="sd">    A parallel run leaves one ``&lt;cas&gt;_&lt;timestamp&gt;_p0000N.sortie`` per MPI rank next</span>
+<span class="sd">    to the merged main listing; only the main ``.sortie`` carries the flux printouts</span>
+<span class="sd">    analyzed here, so the per-rank copies are just clutter."""</span>
+    <span class="n">removed</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">processor_sorties</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">):</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+        <span class="n">removed</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">removed</span>
+
+
+<div class="viewcode-block" id="analyze_flux_convergence">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.flux_convergence.analyze_flux_convergence">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_flux_convergence</span><span class="p">(</span>
+    <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">abs_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">steady_window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">STEADY_WINDOW</span><span class="p">,</span>
+    <span class="n">write_hotstart</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">pythomac_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FluxConvergence</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Analyze boundary-flux convergence of the steady run in ``cfg.model_dir``.</span>
+
+<span class="sd">    Reads the latest ``&lt;cas&gt;_&lt;timestamp&gt;.sortie`` listing (so the run must have used</span>
+<span class="sd">    the ``-s`` flag and ``PRINTING CUMULATED FLOWRATES : YES``) and writes four files</span>
+<span class="sd">    into ``model_dir`` - ``extracted-fluxes.csv`` + ``flux-convergence.png`` (the</span>
+<span class="sd">    per-boundary fluxes) and ``convergence-rate.csv`` + ``convergence-rate.png`` (the</span>
+<span class="sd">    relative imbalance and convergence rate). Returns the converged ``NUMBER OF TIME</span>
+<span class="sd">    STEPS`` (the time at which the relative flux imbalance drops permanently below</span>
+<span class="sd">    *tolerance*).</span>
+
+<span class="sd">    On top of the relative-imbalance criterion, the *absolute* steady window is</span>
+<span class="sd">    detected (``find_steady_window``: ``||Q_in|-|Q_out|| &lt; abs_tolerance`` m3/s over</span>
+<span class="sd">    *steady_window* consecutive printouts); when found and *write_hotstart* is on, a</span>
+<span class="sd">    ``hotstart2d.cas`` continuing from the steady results file with that time as</span>
+<span class="sd">    ``DURATION`` is written next to the steady case (``steering.write_hotstart_cas``).</span>
+<span class="sd">    The per-processor ``*_p0000N.sortie`` copies of a parallel run are deleted after</span>
+<span class="sd">    a successful extraction (only the merged main listing is analyzed and kept).</span>
+
+<span class="sd">    *pythomac_dir* is accepted and ignored; the analysis no longer shells out to that</span>
+<span class="sd">    package (see the module docstring).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">pythomac_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"pythomac_dir=</span><span class="si">%s</span><span class="s2"> ignored: the flux analysis is now built in"</span><span class="p">,</span>
+                  <span class="n">pythomac_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tolerance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="p">,</span> <span class="s2">"flux_tolerance"</span><span class="p">,</span>
+                                  <span class="n">HYDRAULIC_TOLERANCE</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">abs_tolerance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># keep the absolute criterion consistent with the relative one: the same</span>
+        <span class="c1"># fraction of the discharge actually being routed. A fixed 1e-3 m3/s means</span>
+        <span class="c1"># something quite different on a 2 m3/s side channel than on a 200 m3/s</span>
+        <span class="c1"># river, and the hotstart would be gated by the case size rather than by</span>
+        <span class="c1"># how steady the run is.</span>
+        <span class="n">discharge</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="p">,</span> <span class="s2">"prescribed_flowrate"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> \
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"boundaries"</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">abs_tolerance</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tolerance</span><span class="p">)</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">discharge</span><span class="p">)</span>
+                         <span class="k">if</span> <span class="n">discharge</span> <span class="k">else</span> <span class="n">STEADY_ABS_TOLERANCE</span><span class="p">)</span>
+
+    <span class="n">model_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">period</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">listing_printout_period</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"flux-convergence analysis (relative tolerance </span><span class="si">%.0e</span><span class="s2">, absolute </span><span class="si">%.1e</span><span class="s2"> m3/s) "</span>
+             <span class="s2">"on </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">abs_tolerance</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
+    <span class="n">listing</span> <span class="o">=</span> <span class="n">latest_sortie</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">listing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no '</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="si">}</span><span class="s2">_&lt;timestamp&gt;.sortie' listing in </span><span class="si">{</span><span class="n">model_dir</span><span class="si">}</span><span class="s2">: run the "</span>
+            <span class="s2">"solver with the -s flag so it writes one."</span><span class="p">)</span>
+    <span class="n">sortie</span> <span class="o">=</span> <span class="n">read_sortie</span><span class="p">(</span><span class="n">listing</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  </span><span class="si">%s</span><span class="s2">: study </span><span class="si">%r</span><span class="s2">, </span><span class="si">%d</span><span class="s2"> liquid boundaries, </span><span class="si">%d</span><span class="s2"> printouts over </span><span class="si">%.0f</span><span class="s2"> s "</span>
+             <span class="s2">"(</span><span class="si">%.1f</span><span class="s2"> s apart), solver time </span><span class="si">%.0f</span><span class="s2"> s"</span><span class="p">,</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sortie</span><span class="o">.</span><span class="n">study</span><span class="p">,</span>
+             <span class="n">sortie</span><span class="o">.</span><span class="n">n_boundaries</span><span class="p">,</span> <span class="n">sortie</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">sortie</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+             <span class="n">sortie</span><span class="o">.</span><span class="n">printout_interval</span><span class="p">,</span> <span class="n">sortie</span><span class="o">.</span><span class="n">exec_seconds</span><span class="p">)</span>
+
+    <span class="n">fluxes_csv</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s2">"extracted-fluxes.csv"</span><span class="p">)</span>
+    <span class="n">flux_plot</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s2">"flux-convergence.png"</span><span class="p">)</span>
+    <span class="n">rate_csv</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s2">"convergence-rate.csv"</span><span class="p">)</span>
+    <span class="n">rate_plot</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s2">"convergence-rate.png"</span><span class="p">)</span>
+
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+    <span class="n">frame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">fluxes_csv</span><span class="p">)</span>
+    <span class="n">plot_boundary_fluxes</span><span class="p">(</span><span class="n">sortie</span><span class="p">,</span> <span class="n">flux_plot</span><span class="p">)</span>
+
+    <span class="n">removed</span> <span class="o">=</span> <span class="n">_remove_processor_sorties</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">removed</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  removed </span><span class="si">%d</span><span class="s2"> per-processor .sortie file(s); kept the main listing"</span><span class="p">,</span>
+                 <span class="n">removed</span><span class="p">)</span>
+
+    <span class="c1"># printouts before any inflow has established (a dry start) have an undefined</span>
+    <span class="c1"># imbalance - drop them rather than dividing by zero</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">gross_in</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+    <span class="n">times</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">iterations</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">iteration</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="n">gross_in</span><span class="p">,</span> <span class="n">gross_out</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">gross_in</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">sortie</span><span class="o">.</span><span class="n">gross_out</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">gross_in</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"only </span><span class="si">{</span><span class="n">gross_in</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2"> usable flux printout(s) -- the run is too short to "</span>
+            <span class="s2">"assess convergence (need several listing printouts with inflow)."</span><span class="p">)</span>
+
+    <span class="n">imbalance</span> <span class="o">=</span> <span class="n">relative_imbalance</span><span class="p">(</span><span class="n">gross_in</span><span class="p">,</span> <span class="n">gross_out</span><span class="p">)</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">convergence_rate</span><span class="p">(</span><span class="n">imbalance</span><span class="p">)</span>
+    <span class="n">final_imbalance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">imbalance</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+    <span class="n">rates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">"Relative imbalance"</span><span class="p">:</span> <span class="n">imbalance</span><span class="p">,</span>
+         <span class="s2">"Convergence rate"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="n">rate</span><span class="p">])},</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"time (s)"</span><span class="p">))</span>
+    <span class="n">rates</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">rate_csv</span><span class="p">)</span>
+    <span class="n">plot_convergence</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">imbalance</span><span class="p">,</span> <span class="n">rate</span><span class="p">,</span> <span class="n">rate_plot</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">)</span>
+
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">convergence_index</span><span class="p">(</span><span class="n">imbalance</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">)</span>
+    <span class="n">converged</span> <span class="o">=</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">converged</span><span class="p">:</span>
+        <span class="c1"># the converged time and iteration count are read straight off the listing at</span>
+        <span class="c1"># that printout - not estimated from a nominal spacing, which a CFL-adaptive</span>
+        <span class="c1"># run does not have</span>
+        <span class="n">conv_secs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="n">conv_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">iterations</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  fluxes converged to &lt;</span><span class="si">%.0e</span><span class="s2"> at printout </span><span class="si">%d</span><span class="s2"> -&gt; </span><span class="si">%.0f</span><span class="s2"> s simulated "</span>
+                 <span class="s2">"(solver iteration </span><span class="si">%d</span><span class="s2">); final imbalance </span><span class="si">%.2e</span><span class="s2">"</span><span class="p">,</span>
+                 <span class="n">tolerance</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">conv_secs</span><span class="p">,</span> <span class="n">conv_steps</span><span class="p">,</span> <span class="n">final_imbalance</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  as a manual cap use DURATION : </span><span class="si">%.0f</span><span class="s2"> (or NUMBER OF TIME STEPS : </span><span class="si">%d</span><span class="s2"> "</span>
+                 <span class="s2">"for a fixed-step run)."</span><span class="p">,</span> <span class="n">conv_secs</span><span class="p">,</span> <span class="n">conv_steps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">conv_steps</span> <span class="o">=</span> <span class="n">conv_secs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"  fluxes did NOT reach the </span><span class="si">%.0e</span><span class="s2"> imbalance tolerance within the "</span>
+                    <span class="s2">"run (final imbalance </span><span class="si">%.2e</span><span class="s2">). Increase DURATION or relax the "</span>
+                    <span class="s2">"tolerance."</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">final_imbalance</span><span class="p">)</span>
+
+    <span class="c1"># absolute steady window -&gt; hotstart end time + generated hotstart2d.cas</span>
+    <span class="n">steady_secs</span> <span class="o">=</span> <span class="n">find_steady_window</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">gross_in</span><span class="p">,</span> <span class="n">gross_out</span><span class="p">,</span>
+                                     <span class="n">abs_tolerance</span><span class="o">=</span><span class="n">abs_tolerance</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="n">steady_window</span><span class="p">)</span>
+    <span class="n">steady_strict</span> <span class="o">=</span> <span class="n">steady_secs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">steady_strict</span><span class="p">:</span>
+        <span class="n">steady_secs</span> <span class="o">=</span> <span class="n">_mean_balance_time</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">gross_in</span><span class="p">,</span> <span class="n">gross_out</span><span class="p">,</span>
+                                         <span class="n">abs_tolerance</span><span class="o">=</span><span class="n">abs_tolerance</span><span class="p">,</span>
+                                         <span class="n">window</span><span class="o">=</span><span class="n">steady_window</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">steady_secs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"  the instantaneous flux imbalance never stayed below </span><span class="si">%.0e</span><span class="s2"> "</span>
+                        <span class="s2">"m3/s for </span><span class="si">%d</span><span class="s2"> consecutive printouts (steady-state noise floor "</span>
+                        <span class="s2">"above the tolerance); falling back to the </span><span class="si">%d</span><span class="s2">-printout MEAN "</span>
+                        <span class="s2">"balance, first sustained at </span><span class="si">%.1f</span><span class="s2"> s."</span><span class="p">,</span>
+                        <span class="n">abs_tolerance</span><span class="p">,</span> <span class="n">steady_window</span><span class="p">,</span> <span class="n">steady_window</span><span class="p">,</span> <span class="n">steady_secs</span><span class="p">)</span>
+    <span class="n">hotstart_cas</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">steady_secs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"  the absolute flux imbalance never stayed below </span><span class="si">%.0e</span><span class="s2"> m3/s for "</span>
+                    <span class="s2">"</span><span class="si">%d</span><span class="s2"> consecutive printouts - no hotstart end time; extend the run "</span>
+                    <span class="s2">"or relax abs_tolerance."</span><span class="p">,</span> <span class="n">abs_tolerance</span><span class="p">,</span> <span class="n">steady_window</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">steady_strict</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  sustained flux balance (&lt;</span><span class="si">%.0e</span><span class="s2"> m3/s over </span><span class="si">%d</span><span class="s2"> printouts) from "</span>
+                     <span class="s2">"</span><span class="si">%.1f</span><span class="s2"> s simulated"</span><span class="p">,</span> <span class="n">abs_tolerance</span><span class="p">,</span> <span class="n">steady_window</span><span class="p">,</span> <span class="n">steady_secs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">write_hotstart</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.steering</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_hotstart_cas</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">hotstart_cas</span> <span class="o">=</span> <span class="n">write_hotstart_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">steady_secs</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - keep the analysis result usable</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"  could not write the hotstart steering file: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FluxConvergence</span><span class="p">(</span>
+        <span class="n">converged</span><span class="o">=</span><span class="n">converged</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
+        <span class="n">final_imbalance</span><span class="o">=</span><span class="n">final_imbalance</span><span class="p">,</span>
+        <span class="n">converged_time_steps</span><span class="o">=</span><span class="n">conv_steps</span><span class="p">,</span>
+        <span class="n">converged_seconds</span><span class="o">=</span><span class="n">conv_secs</span><span class="p">,</span>
+        <span class="n">listing_printout_period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+        <span class="n">fluxes_csv</span><span class="o">=</span><span class="n">fluxes_csv</span> <span class="k">if</span> <span class="n">fluxes_csv</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">flux_plot</span><span class="o">=</span><span class="n">flux_plot</span> <span class="k">if</span> <span class="n">flux_plot</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rate_csv</span><span class="o">=</span><span class="n">rate_csv</span> <span class="k">if</span> <span class="n">rate_csv</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rate_plot</span><span class="o">=</span><span class="n">rate_plot</span> <span class="k">if</span> <span class="n">rate_plot</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">steady_seconds</span><span class="o">=</span><span class="n">steady_secs</span><span class="p">,</span>
+        <span class="n">steady_abs_tolerance</span><span class="o">=</span><span class="n">abs_tolerance</span><span class="p">,</span>
+        <span class="n">steady_window</span><span class="o">=</span><span class="n">steady_window</span><span class="p">,</span>
+        <span class="n">steady_strict</span><span class="o">=</span><span class="n">steady_strict</span><span class="p">,</span>
+        <span class="n">hotstart_cas</span><span class="o">=</span><span class="n">hotstart_cas</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

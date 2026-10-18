@@ -1,0 +1,500 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.jobs.reaper &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/reaper.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/jobs/reaper.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/jobs/reaper.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/jobs/reaper.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/jobs/reaper.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="fr" data-root="../../../../" data-page="_modules/axqua/jobs/reaper.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../../../_modules/axqua/jobs/reaper.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../../../de/_modules/axqua/jobs/reaper.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">axqua.jobs.reaper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../../../_modules/axqua/jobs/reaper.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <h1>Code source de axqua.jobs.reaper</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Reconciling a job's recorded state with reality.</span>
+
+<span class="sd">A detached job can die in ways it cannot report: the machine reboots, ``wsl --shutdown``</span>
+<span class="sd">takes the distro with every job in it, an OOM killer removes the runner, someone runs</span>
+<span class="sd">``kill -9``. In all of those the last thing written to ``status.json`` says ``RUNNING``,</span>
+<span class="sd">and it will keep saying so forever.</span>
+
+<span class="sd">A job **stuck in RUNNING is worse than a job marked FAILED**: the dashboard keeps polling</span>
+<span class="sd">it, the user keeps waiting for it, and nothing ever prompts a resubmission. So every read</span>
+<span class="sd">path that shows state to a human goes through here first, and one implementation covers</span>
+<span class="sd">the POSIX fallback, systemd, WSL and Windows because they all reduce to the same</span>
+<span class="sd">question - is the recorded process still the process we launched?</span>
+
+<span class="sd">The one thing this must not do is guess about **another machine**. On a shared job root a</span>
+<span class="sd">PID from another host says nothing here, so such a job is reported unchanged.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorRecord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs</span><span class="w"> </span><span class="kn">import</span> <span class="n">procs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.lock</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobLock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobState</span><span class="p">,</span> <span class="n">JobStatus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobDir</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_status</span><span class="p">,</span> <span class="n">write_status</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua.jobs.reaper"</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"reconcile"</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="reconcile">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.reaper.reconcile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">reconcile</span><span class="p">(</span><span class="n">job_dir</span><span class="p">:</span> <span class="n">JobDir</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+              <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobStatus</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the job's true state, correcting ``status.json`` when it is wrong.</span>
+
+<span class="sd">    *write* exists for read-only callers (a listing over a mounted archive) that still</span>
+<span class="sd">    want the corrected answer in memory.</span>
+<span class="sd">    """</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="n">job_dir</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">job_dir</span><span class="p">,</span> <span class="n">JobDir</span><span class="p">)</span> <span class="k">else</span> <span class="n">JobDir</span><span class="p">(</span><span class="n">job_dir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">read_status</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                       <span class="c1"># noqa: BLE001 - never take a list down</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"cannot read status of </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span>
+
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">launcher</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="c1"># Nothing was ever launched. QUEUED is honest; so is a CANCEL_REQUESTED that</span>
+        <span class="c1"># never got as far as a process.</span>
+        <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_settle</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">,</span>
+                           <span class="s2">"cancelled before the job was launched"</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="n">write</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">status</span>
+
+    <span class="k">if</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"host"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">handle</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span> <span class="o">!=</span> <span class="n">procs</span><span class="o">.</span><span class="n">host_id</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">status</span>                              <span class="c1"># another machine: not ours to judge</span>
+
+    <span class="n">recorded_boot</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"boot_id"</span><span class="p">)</span>
+    <span class="n">current_boot</span> <span class="o">=</span> <span class="n">procs</span><span class="o">.</span><span class="n">boot_id</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">recorded_boot</span> <span class="ow">and</span> <span class="n">current_boot</span> <span class="ow">and</span> <span class="n">recorded_boot</span> <span class="o">!=</span> <span class="n">current_boot</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_settle</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">_resolution</span><span class="p">(</span><span class="n">jd</span><span class="p">),</span>
+                       <span class="s2">"the machine restarted while the job was running"</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="n">write</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">_still_running</span><span class="p">(</span><span class="n">handle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">status</span>
+
+    <span class="c1"># The process is gone but the job never wrote a terminal state, so it died without</span>
+    <span class="c1"># getting the chance. Whether that reads as CANCELLED or FAILED is decided by</span>
+    <span class="c1"># whether a cancellation had been asked for - which is exactly what cancel.request</span>
+    <span class="c1"># records.</span>
+    <span class="k">return</span> <span class="n">_settle</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">_resolution</span><span class="p">(</span><span class="n">jd</span><span class="p">),</span>
+                   <span class="sa">f</span><span class="s2">"the runner process (</span><span class="si">{</span><span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'pid'</span><span class="p">)</span><span class="si">}</span><span class="s2">) is gone and the job never "</span>
+                   <span class="s2">"reported a result"</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="n">write</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_still_running</span><span class="p">(</span><span class="n">handle</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Ask the launcher that started it, falling back to the recorded PID."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.launcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">LaunchHandle</span><span class="p">,</span> <span class="n">LaunchState</span><span class="p">,</span> <span class="n">launcher_for</span>
+        <span class="n">parsed</span> <span class="o">=</span> <span class="n">LaunchHandle</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">launcher_for</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="n">LaunchState</span><span class="o">.</span><span class="n">UNKNOWN</span><span class="p">:</span>
+            <span class="c1"># "Cannot tell" must not be read as "dead" - a systemd unit on a machine</span>
+            <span class="c1"># whose user manager is momentarily unreachable is still probably running.</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                       <span class="c1"># noqa: BLE001</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"launcher status unavailable, falling back to pid: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="n">pid</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"pid"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">pid</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">procs</span><span class="o">.</span><span class="n">pid_alive</span><span class="p">(</span><span class="n">pid</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">recorded</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"proc_started"</span><span class="p">)</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">procs</span><span class="o">.</span><span class="n">process_start_time</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">recorded</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">now</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="n">recorded</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">1e-6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>                               <span class="c1"># pid reuse: a different process</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolution</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobState</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span> <span class="k">if</span> <span class="n">jd</span><span class="o">.</span><span class="n">cancel_request</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_settle</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">JobStatus</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">JobState</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+            <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobStatus</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span> <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="n">JobState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">:</span>
+        <span class="c1"># RUNNING cannot go straight to CANCELLED; pass through the request state so the</span>
+        <span class="c1"># history reads truthfully rather than skipping a step.</span>
+        <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">)</span>
+    <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span> <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">error</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">status</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">ErrorRecord</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="s2">"axqua.job.abandoned"</span><span class="p">,</span>
+            <span class="n">message</span><span class="o">=</span><span class="n">reason</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Check runner.log for how far it got, then resubmit."</span><span class="p">,</span>
+            <span class="n">details</span><span class="o">=</span><span class="p">{</span><span class="s2">"detected_by"</span><span class="p">:</span> <span class="s2">"reconcile"</span><span class="p">},</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"job </span><span class="si">%s</span><span class="s2"> reconciled to </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">lock</span> <span class="o">=</span> <span class="n">JobLock</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span>
+            <span class="n">stale</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">is_stale</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">lock</span><span class="o">.</span><span class="n">holding</span><span class="p">(</span><span class="n">purpose</span><span class="o">=</span><span class="s2">"reconcile"</span><span class="p">,</span> <span class="n">break_stale</span><span class="o">=</span><span class="n">stale</span><span class="p">):</span>
+                <span class="n">write_status</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                   <span class="c1"># noqa: BLE001</span>
+            <span class="c1"># Reporting the corrected state matters more than persisting it; a read-only</span>
+            <span class="c1"># or contended directory must not turn a listing into an error.</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"could not persist reconciled status for </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

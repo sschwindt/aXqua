@@ -1,0 +1,852 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.openfoam.potential &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/potential.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=e6b791cb"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/openfoam/potential.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/openfoam/potential.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/potential.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/openfoam/potential.html"><link rel="stylesheet" href="../../../../../_i18n/lang.css"><script src="../../../../../_i18n/lang.js" data-lang="fr" data-root="../../../../../" data-page="_modules/axqua/solvers/openfoam/potential.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../../../../_modules/axqua/solvers/openfoam/potential.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../../../../de/_modules/axqua/solvers/openfoam/potential.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.openfoam.potential</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../../../../_modules/axqua/solvers/openfoam/potential.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <h1>Code source de axqua.solvers.openfoam.potential</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Leg C: a free surface with **no air phase at all** (``potentialFreeSurfaceFoam``).</span>
+
+<span class="sd">Why it is worth the trouble on this case. The two-phase runs spend four cells in</span>
+<span class="sd">five on air: munich-vsf leg A is 582,924 cells of which 22% hold water, and the</span>
+<span class="sd">time step is set by the air's velocity cap, not by the water. lww-134 measured the</span>
+<span class="sd">cost of making that case *correct* - doubling the freeboard so the lid stops</span>
+<span class="sd">clipping the surface, and adding the layers that go with it - at **3.3x the</span>
+<span class="sd">per-step cost for 1.5x the cells**. Resolving the air better is the expensive</span>
+<span class="sd">direction. This solver deletes it.</span>
+
+<span class="sd">HOW IT WORKS. The domain is water only, as under aXqua's rigid lid, and the mesh</span>
+<span class="sd">top is a real boundary. The free surface is not meshed: it is carried as a</span>
+<span class="sd">displacement field ``zeta`` on that boundary, entering the pressure equation</span>
+<span class="sd">through ``waveSurfacePressure`` as ``p_gh = -(g &amp; zeta)``. So the surface moves</span>
+<span class="sd">while the mesh does not - which is the whole difference from ``mode: rigid-lid``,</span>
+<span class="sd">where the surface is frozen at whatever the 2D seed said.</span>
+
+<span class="sd">THE TRAP, AND WHY ``0/zeta`` IS WRITTEN. ``p_gh`` is an ABSOLUTE gauge:</span>
+<span class="sd">``createFields`` sets ``p_gh = p - (g &amp; mesh.C())``, so hydrostatic equilibrium</span>
+<span class="sd">with the surface at ``z_s`` needs ``p_gh = |g| z_s`` on the top. The boundary</span>
+<span class="sd">condition instead imposes ``p_gh = |g| zeta_z``, and ``zeta`` defaults to **zero**</span>
+<span class="sd">- which asserts the undisturbed surface lies at ``z = 0``. On a wave tank or a</span>
+<span class="sd">ship hull that is true by construction and nobody notices. On this fish pass the</span>
+<span class="sd">surface falls **1.4 m** over 25 m, so the default datum would impose a pressure</span>
+<span class="sd">error of ``|g| * 1.4 = 13.7 m2/s2`` along the pass and drive a flow that is pure</span>
+<span class="sd">gauge.</span>
+
+<span class="sd">``zeta`` is ``READ_IF_PRESENT``, so the datum is fixable without touching</span>
+<span class="sd">OpenFOAM: seed its boundary values on the top patch with the local lid elevation.</span>
+<span class="sd">``zeta`` then means "where the surface actually is" rather than "how far it has</span>
+<span class="sd">moved from z=0", the linearisation is about the 2D surface, and the quantity that</span>
+<span class="sd">has to stay small is the 3D *correction* to it rather than the whole fall.</span>
+<span class="sd">Verified on the v2406 oscillatingBox tutorial, which ships no ``0/zeta``: seeding</span>
+<span class="sd">one reports ``min/max zetap = 0.5, 0.5`` on the first step and evolves from there,</span>
+<span class="sd">so the value is read and used rather than reset.</span>
+
+<span class="sd">WHAT IS STILL AN APPROXIMATION, stated rather than buried. The surface condition</span>
+<span class="sd">is linearised: the pressure is applied on the mesh top, not on the displaced</span>
+<span class="sd">surface, so it is only right while ``|zeta - z_lid|`` is small against the depth.</span>
+<span class="sd">A plunging jet, an overturning wave and air entrainment are all outside it, and a</span>
+<span class="sd">vertical-slot pass has jets through every slot. That is a question for the</span>
+<span class="sd">measurement, not for this docstring - which is why leg C is a leg of a comparison</span>
+<span class="sd">rather than a replacement.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">SOLVER</span> <span class="o">=</span> <span class="s2">"potentialFreeSurfaceFoam"</span>
+
+<span class="c1">#: Patch name the water-only mesh gives its top (see mesh.LID_PATCH).</span>
+<span class="n">TOP_PATCH</span> <span class="o">=</span> <span class="s2">"lid"</span>
+
+
+<div class="viewcode-block" id="is_potential">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.is_potential">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""True when this case is leg C rather than a two-phase or rigid-lid run."""</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="p">,</span> <span class="s2">"solver"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="o">==</span> <span class="n">SOLVER</span></div>
+
+
+
+<span class="c1">#: Fraction of top faces that may be steeper than 45 degrees before the surface</span>
+<span class="c1">#: condition stops meaning anything. `waveSurfacePressure` advances the surface as</span>
+<span class="c1">#: `zeta += dt * nf * phi/|Sf|` - ALONG THE FACE NORMAL - and then imposes</span>
+<span class="c1">#: `p_gh = -(g &amp; zeta)`, which reads only the vertical component. On a near-horizontal</span>
+<span class="c1">#: top face those are the same thing. On a steep one the displacement is mostly</span>
+<span class="c1">#: HORIZONTAL, which is not a free-surface motion at all, and the vertical part that</span>
+<span class="c1">#: survives is whatever the slope leaves behind.</span>
+<span class="n">STEEP_FACE_FRACTION</span> <span class="o">=</span> <span class="mf">0.005</span>
+<span class="n">STEEP_COS</span> <span class="o">=</span> <span class="mf">0.707</span>                 <span class="c1"># 45 degrees from horizontal</span>
+
+
+<div class="viewcode-block" id="check_lid_is_flat_enough">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.check_lid_is_flat_enough">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_lid_is_flat_enough</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``(steep fraction, flattest |n_z|)`` for the top patch, and log the verdict.</span>
+
+<span class="sd">    Measured on munich-vsf, whose lid follows a 14-slot stepped 2D surface: 4.1% of</span>
+<span class="sd">    top faces steeper than 45 degrees, the worst at |n_z| = 0.068 - 86 degrees from</span>
+<span class="sd">    horizontal, effectively a vertical wall being asked to behave as a free surface.</span>
+<span class="sd">    The consequence was not subtle once found: zeta collapsed from its seeded 0.33 m</span>
+<span class="sd">    to -2.9 m within one second of simulated time, monotonically, on a column 0.2 m</span>
+<span class="sd">    deep. The giveaway was that the first reported `min/max zetap` was 0.0479 in</span>
+<span class="sd">    every run regardless of what else changed, and `z * |n_z|` over the lid</span>
+<span class="sd">    reproduces 0.0479 / 2.7512 exactly - so what the BC reports, and works with, is</span>
+<span class="sd">    the projection onto the face normal.</span>
+<span class="sd">    """</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">patch_face_ids</span><span class="p">(</span><span class="n">TOP_PATCH</span><span class="p">)</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">faces</span><span class="p">)[</span><span class="n">ids</span><span class="p">]</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">pts</span><span class="p">[</span><span class="n">q</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">pts</span><span class="p">[</span><span class="n">q</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">pts</span><span class="p">[</span><span class="n">q</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]]</span> <span class="o">-</span> <span class="n">pts</span><span class="p">[</span><span class="n">q</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]])</span> <span class="o">/</span> <span class="mf">2.0</span>
+    <span class="n">nz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">n</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">steep</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">nz</span> <span class="o">&lt;</span> <span class="n">STEEP_COS</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"lid faces: </span><span class="si">%.1f%%</span><span class="s2"> steeper than 45 deg, flattest |n_z| = </span><span class="si">%.3f</span><span class="s2">"</span><span class="p">,</span>
+             <span class="mi">100</span> <span class="o">*</span> <span class="n">steep</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">nz</span><span class="o">.</span><span class="n">min</span><span class="p">()))</span>
+    <span class="k">if</span> <span class="n">steep</span> <span class="o">&gt;</span> <span class="n">STEEP_FACE_FRACTION</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"THE SURFACE CONDITION DOES NOT APPLY TO THIS LID: </span><span class="si">%.1f%%</span><span class="s2"> of its faces "</span>
+            <span class="s2">"are steeper than 45 degrees (worst </span><span class="si">%.0f</span><span class="s2"> deg from horizontal). "</span>
+            <span class="s2">"waveSurfacePressure moves the surface along the FACE NORMAL, so on "</span>
+            <span class="s2">"those faces it displaces water sideways rather than up, and the run "</span>
+            <span class="s2">"drains - measured, zeta 0.33 m to -2.9 m in one second. Smoothing the "</span>
+            <span class="s2">"lid (openfoam.lid_smoothing) makes the faces flat but then zeta has to "</span>
+            <span class="s2">"carry the whole fall of the reach, which the linearisation cannot do "</span>
+            <span class="s2">"either. On a stepped surface - a fish pass, a cascade, a chute - this "</span>
+            <span class="s2">"solver is the wrong tool and mode: vof is the right one."</span><span class="p">,</span>
+            <span class="mi">100</span> <span class="o">*</span> <span class="n">steep</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">nz</span><span class="o">.</span><span class="n">min</span><span class="p">()))))</span>
+    <span class="k">return</span> <span class="n">steep</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">nz</span><span class="o">.</span><span class="n">min</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="check_applicable">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.check_applicable">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_applicable</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Refuse the combinations that would run and be wrong.</span>
+
+<span class="sd">    A two-phase mesh has an air region this solver has no equation for, and it</span>
+<span class="sd">    would fill with water and report a plausible answer. Better to stop here.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_potential</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"rigid-lid"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"openfoam.solver </span><span class="si">{</span><span class="n">SOLVER</span><span class="si">}</span><span class="s2"> needs a water-only domain, so "</span>
+            <span class="sa">f</span><span class="s2">"openfoam.mode must be 'rigid-lid' (got </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">). "</span>
+            <span class="s2">"The mode names the MESH - water only, top boundary at the free "</span>
+            <span class="s2">"surface - and the solver decides whether that top is a frozen lid "</span>
+            <span class="s2">"or carries a moving surface through zeta."</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="lid_elevation_by_column">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.lid_elevation_by_column">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">lid_elevation_by_column</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Free-surface elevation per plan COLUMN, indexed by column id.</span>
+
+<span class="sd">    Built from the top faces themselves, via each face's owner cell, so it needs no</span>
+<span class="sd">    assumption about patch face ordering. The first version indexed the lid patch's</span>
+<span class="sd">    face list as though it were in column order; that happens to be true for this</span>
+<span class="sd">    mesher, but it is not stated anywhere and `p`, `zeta` and the outlet condition</span>
+<span class="sd">    all depend on it agreeing. Reading the owner is one array lookup and removes the</span>
+<span class="sd">    question.</span>
+
+<span class="sd">    Not `of_mesh.lid` (per plan VERTEX) and not `column_wse` (the 2D seed, which the</span>
+<span class="sd">    mesher may have clipped): the reference has to be the elevation of the very</span>
+<span class="sd">    faces `waveSurfacePressure` acts on.</span>
+<span class="sd">    """</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">patch_face_ids</span><span class="p">(</span><span class="n">TOP_PATCH</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">face_centres</span><span class="p">(</span><span class="n">ids</span><span class="p">)[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">cell_column</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">owner</span><span class="p">)[</span><span class="n">ids</span><span class="p">]]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">columns</span><span class="o">.</span><span class="n">max</span><span class="p">())</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+
+<div class="viewcode-block" id="top_face_elevation">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.top_face_elevation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">top_face_elevation</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Top-patch face-centre elevations, in the patch's own face order.</span>
+
+<span class="sd">    This is what `0/zeta` needs: the boundary value list is read in patch order.</span>
+<span class="sd">    """</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span>
+    <span class="k">return</span> <span class="n">pm</span><span class="o">.</span><span class="n">face_centres</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">patch_face_ids</span><span class="p">(</span><span class="n">TOP_PATCH</span><span class="p">))[:,</span> <span class="mi">2</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="surface_pgh_on_patch">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.surface_pgh_on_patch">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">surface_pgh_on_patch</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">patch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``p_gh`` per face on a lateral patch, from the free surface above it.</span>
+
+<span class="sd">    ``p_gh = |g| z_s`` IS the statement "the free surface here is at z_s", so a</span>
+<span class="sd">    lateral boundary that wants a prescribed tailwater has to say it face by face.</span>
+<span class="sd">    Writing ONE value over the whole patch asserts a single level across a face</span>
+<span class="sd">    whose own lid varies - on munich-vsf the outlet spans z 0.321 to 0.823 - and</span>
+<span class="sd">    the mismatch is a sustained head error that drains the domain. That is what</span>
+<span class="sd">    collapsed zeta from 0.33 to -3.0 m in the first second of the first run that</span>
+<span class="sd">    got as far as running.</span>
+<span class="sd">    """</span>
+    <span class="n">pm</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">patch_face_ids</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">cell_column</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pm</span><span class="o">.</span><span class="n">owner</span><span class="p">)[</span><span class="n">ids</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">g</span> <span class="o">*</span> <span class="n">lid_elevation_by_column</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)[</span><span class="n">columns</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="hydrostatic_pressure">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.hydrostatic_pressure">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">hydrostatic_pressure</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">9.81</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Kinematic ``p`` whose ``p_gh`` puts the surface on the mesh top.</span>
+
+<span class="sd">    ``createFields`` recomputes ``p_gh = p - (g &amp; C)`` from the ``p`` on disk, so</span>
+<span class="sd">    ``p`` is what actually sets the initial state - writing ``p_gh`` values alone</span>
+<span class="sd">    would be silently overwritten and only its boundary TYPES would survive.</span>
+<span class="sd">    ``p = |g| (z_lid - z)`` gives ``p_gh = |g| z_lid``: hydrostatic, with the</span>
+<span class="sd">    surface exactly where the 2D seed put it.</span>
+<span class="sd">    """</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">cell_centres</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[:,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">by_column</span> <span class="o">=</span> <span class="n">lid_elevation_by_column</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g</span> <span class="o">*</span> <span class="p">(</span><span class="n">by_column</span><span class="p">[</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">cell_column</span><span class="p">]</span> <span class="o">-</span> <span class="n">z</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the four fields: p, p_gh, U, zeta - and no alpha anywhere</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="write_potential_fields">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.write_potential_fields">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_potential_fields</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""``0/`` for leg C. Returns the files written."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">fields</span> <span class="k">as</span> <span class="n">F</span>
+
+    <span class="n">check_applicable</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">gravity</span><span class="p">))</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="p">,</span> <span class="s2">"gravity"</span><span class="p">)</span> <span class="k">else</span> <span class="mf">9.81</span>
+    <span class="n">case_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="n">zero</span> <span class="o">=</span> <span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"0"</span>
+    <span class="n">zero</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">written</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">walls</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">wall_patches</span><span class="p">]</span>
+    <span class="n">inlets</span><span class="p">,</span> <span class="n">outlets</span> <span class="o">=</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">inlet_patches</span><span class="p">,</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span>
+    <span class="n">stages</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">outlet_stages</span><span class="p">(</span><span class="n">_outflow_stage</span><span class="p">(</span><span class="n">cfg</span><span class="p">),</span> <span class="n">outlets</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">check_lid_is_flat_enough</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span>
+    <span class="n">lid_z</span> <span class="o">=</span> <span class="n">top_face_elevation</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">)</span>      <span class="c1"># patch face order, for 0/zeta</span>
+
+    <span class="c1"># ---- p: kinematic, and the field that actually sets the initial state ----</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">hydrostatic_pressure</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="n">bc</span> <span class="o">=</span> <span class="p">{</span><span class="n">w</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"fixedFluxPressure"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform 0"</span><span class="p">}</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">walls</span><span class="p">}</span>
+    <span class="n">bc</span><span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"waveSurfacePressure"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform 0"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inlets</span><span class="p">:</span>
+        <span class="n">bc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"fixedFluxPressure"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform 0"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">outlets</span><span class="p">:</span>
+        <span class="c1"># A prescribed tailwater IS a prescribed p_gh here: p_gh = |g| z_s says</span>
+        <span class="c1"># "the free surface at this face is at z_s", with no depth to interpolate</span>
+        <span class="c1"># and no alpha profile to get wrong. PER FACE, not one value for the patch:</span>
+        <span class="c1"># see surface_pgh_on_patch for what one value did.</span>
+        <span class="n">pgh</span> <span class="o">=</span> <span class="n">surface_pgh_on_patch</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+        <span class="n">bc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"fixedValue"</span><span class="p">,</span>
+                    <span class="s2">"value"</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">scalar_list</span><span class="p">(</span><span class="n">pgh</span><span class="p">)}</span>
+        <span class="c1"># ...and the configured stage is kept as a CHECK rather than as the value.</span>
+        <span class="c1"># If the two disagree the lid and the tailwater are describing different</span>
+        <span class="c1"># water surfaces, which is a config error the run would otherwise absorb as</span>
+        <span class="c1"># a slow drain.</span>
+        <span class="n">want</span> <span class="o">=</span> <span class="n">stages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">want</span><span class="p">:</span>
+            <span class="n">got</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">pgh</span><span class="p">))</span> <span class="o">/</span> <span class="n">g</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">got</span> <span class="o">-</span> <span class="n">want</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">"</span><span class="si">%s</span><span class="s2">: openfoam.outlet_stage says </span><span class="si">%.3f</span><span class="s2"> m a.s.l. but the lid above "</span>
+                    <span class="s2">"that patch sits at a median </span><span class="si">%.3f</span><span class="s2"> m - a </span><span class="si">%.3f</span><span class="s2"> m disagreement "</span>
+                    <span class="s2">"about where the free surface is. The lid wins (it is what the "</span>
+                    <span class="s2">"surface condition references); check outlet_stage against the "</span>
+                    <span class="s2">"2D result the mesh was built from."</span><span class="p">,</span>
+                    <span class="n">name</span><span class="p">,</span> <span class="n">want</span><span class="p">,</span> <span class="n">got</span><span class="p">,</span> <span class="nb">abs</span><span class="p">(</span><span class="n">got</span> <span class="o">-</span> <span class="n">want</span><span class="p">))</span>
+    <span class="c1"># p gets PLAIN boundary conditions, and this is not cosmetic. `p` is read but</span>
+    <span class="c1"># never solved - only `p_gh` is - and `waveSurfacePressure` is not a passive</span>
+    <span class="c1"># value: its updateCoeffs INTEGRATES zeta from the patch flux. Attaching it to</span>
+    <span class="c1"># both fields advances the free surface TWICE per time step.</span>
+    <span class="n">pbc</span> <span class="o">=</span> <span class="p">{</span><span class="n">q</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"calculated"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform 0"</span><span class="p">}</span>
+           <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">walls</span> <span class="o">+</span> <span class="n">inlets</span> <span class="o">+</span> <span class="n">outlets</span> <span class="o">+</span> <span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]}</span>
+    <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"p"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+        <span class="s2">"volScalarField"</span><span class="p">,</span> <span class="s2">"p"</span><span class="p">,</span> <span class="s2">"[0 2 -2 0 0 0 0]"</span><span class="p">,</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">scalar_list</span><span class="p">(</span><span class="n">p</span><span class="p">),</span> <span class="n">pbc</span><span class="p">)))</span>
+
+    <span class="c1"># p_gh carries the same boundary TYPES; its internal values are recomputed</span>
+    <span class="c1"># from p on startup, so they are a placeholder on purpose.</span>
+    <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"p_gh"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+        <span class="s2">"volScalarField"</span><span class="p">,</span> <span class="s2">"p_gh"</span><span class="p">,</span> <span class="s2">"[0 2 -2 0 0 0 0]"</span><span class="p">,</span> <span class="s2">"uniform 0"</span><span class="p">,</span> <span class="n">bc</span><span class="p">)))</span>
+
+    <span class="c1"># ---- U: the depth-averaged hotstart, as the two-phase path uses ----</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">initial_velocity</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="p">),</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+    <span class="n">ubc</span> <span class="o">=</span> <span class="p">{</span><span class="n">w</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"noSlip"</span><span class="p">}</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">walls</span><span class="p">}</span>
+    <span class="c1"># Par-slip, not slip: the surface carries negligible shear but is free to move</span>
+    <span class="c1"># in its own plane, and the solver's own tutorial uses this.</span>
+    <span class="n">ubc</span><span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"pressureInletOutletParSlipVelocity"</span><span class="p">,</span>
+                      <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform (0 0 0)"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inlets</span><span class="p">:</span>
+        <span class="c1"># THE WHOLE POINT, for the discharge: with no alpha there is no</span>
+        <span class="c1"># &lt;alpha^2&gt;/&lt;alpha&gt; to lose. flowRateInletVelocity delivers the volumetric</span>
+        <span class="c1"># rate exactly, where variableHeightFlowRateInletVelocity delivered 82-96%.</span>
+        <span class="n">ubc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"flowRateInletVelocity"</span><span class="p">,</span>
+                     <span class="s2">"volumetricFlowRate"</span><span class="p">:</span>
+                         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">inlet_discharge</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                     <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform (0 0 0)"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">outlets</span><span class="p">:</span>
+        <span class="n">ubc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"pressureInletOutletVelocity"</span><span class="p">,</span>
+                     <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform (0 0 0)"</span><span class="p">}</span>
+    <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"U"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+        <span class="s2">"volVectorField"</span><span class="p">,</span> <span class="s2">"U"</span><span class="p">,</span> <span class="s2">"[0 1 -1 0 0 0 0]"</span><span class="p">,</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">vector_list</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="n">ubc</span><span class="p">)))</span>
+
+    <span class="c1"># ---- zeta: the datum, which is the whole reason this case can be built ----</span>
+    <span class="n">zbc</span> <span class="o">=</span> <span class="p">{</span><span class="n">w</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"calculated"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform (0 0 0)"</span><span class="p">}</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">walls</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inlets</span> <span class="o">+</span> <span class="n">outlets</span><span class="p">:</span>
+        <span class="n">zbc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"calculated"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform (0 0 0)"</span><span class="p">}</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">lid_z</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">vec</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">lid_z</span>
+    <span class="n">zbc</span><span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"calculated"</span><span class="p">,</span>
+                      <span class="s2">"value"</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">vector_list</span><span class="p">(</span><span class="n">vec</span><span class="p">)}</span>
+    <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"zeta"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+        <span class="s2">"volVectorField"</span><span class="p">,</span> <span class="s2">"zeta"</span><span class="p">,</span> <span class="s2">"[0 1 0 0 0 0 0]"</span><span class="p">,</span> <span class="s2">"uniform (0 0 0)"</span><span class="p">,</span>
+        <span class="n">zbc</span><span class="p">)))</span>
+
+    <span class="c1"># ---- turbulence: the two-phase path's conditions, not reinvented ----------</span>
+    <span class="c1"># Seeding the WALL values at 1e-8 instead of the seed scale put omega at</span>
+    <span class="c1"># effectively zero there, and kOmegaSST divides by it: the first attempt died</span>
+    <span class="c1"># with SIGFPE inside kOmegaSSTBase::correct(). The wall functions want the same</span>
+    <span class="c1"># scale as the interior.</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">turbulence</span> <span class="o">!=</span> <span class="s2">"laminar"</span><span class="p">:</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">_epsilon</span><span class="p">,</span> <span class="n">omega</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">turbulence_scales</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+
+        <span class="n">nbc</span> <span class="o">=</span> <span class="p">{</span><span class="n">q</span><span class="p">:</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"calculated"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="s2">"uniform 0"</span><span class="p">}</span>
+               <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">inlets</span> <span class="o">+</span> <span class="n">outlets</span> <span class="o">+</span> <span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]}</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">walls</span><span class="p">:</span>
+            <span class="n">nbc</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">_wall_entries</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"nut"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+            <span class="s2">"volScalarField"</span><span class="p">,</span> <span class="s2">"nut"</span><span class="p">,</span> <span class="s2">"[0 2 -1 0 0 0 0]"</span><span class="p">,</span> <span class="s2">"uniform 0"</span><span class="p">,</span> <span class="n">nbc</span><span class="p">)))</span>
+
+        <span class="n">kbc</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inlets</span><span class="p">:</span>
+            <span class="n">kbc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"turbulentIntensityKineticEnergyInlet"</span><span class="p">,</span>
+                         <span class="s2">"intensity"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">F</span><span class="o">.</span><span class="n">TURBULENT_INTENSITY</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                         <span class="s2">"value"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">outlets</span> <span class="o">+</span> <span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]:</span>
+            <span class="n">kbc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"inletOutlet"</span><span class="p">,</span> <span class="s2">"inletValue"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                         <span class="s2">"value"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">walls</span><span class="p">:</span>
+            <span class="n">kbc</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"kqRWallFunction"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"k"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+            <span class="s2">"volScalarField"</span><span class="p">,</span> <span class="s2">"k"</span><span class="p">,</span> <span class="s2">"[0 2 -2 0 0 0 0]"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">k</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">kbc</span><span class="p">)))</span>
+
+        <span class="n">obc</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inlets</span> <span class="o">+</span> <span class="n">outlets</span> <span class="o">+</span> <span class="p">[</span><span class="n">TOP_PATCH</span><span class="p">]:</span>
+            <span class="n">obc</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"inletOutlet"</span><span class="p">,</span>
+                         <span class="s2">"inletValue"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">omega</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                         <span class="s2">"value"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">omega</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">walls</span><span class="p">:</span>
+            <span class="n">obc</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"type"</span><span class="p">:</span> <span class="s2">"omegaWallFunction"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">omega</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">}</span>
+        <span class="n">written</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">zero</span> <span class="o">/</span> <span class="s2">"omega"</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">render_field</span><span class="p">(</span>
+            <span class="s2">"volScalarField"</span><span class="p">,</span> <span class="s2">"omega"</span><span class="p">,</span> <span class="s2">"[0 0 -1 0 0 0 0]"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"uniform </span><span class="si">{</span><span class="n">omega</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">obc</span><span class="p">)))</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"0/ fields written for </span><span class="si">%s</span><span class="s2">: no alpha, </span><span class="si">%d</span><span class="s2"> cells all water, "</span>
+             <span class="s2">"zeta seeded to the lid (</span><span class="si">%.3f</span><span class="s2"> .. </span><span class="si">%.3f</span><span class="s2"> m a.s.l.)"</span><span class="p">,</span>
+             <span class="n">SOLVER</span><span class="p">,</span> <span class="n">of_mesh</span><span class="o">.</span><span class="n">n_cells</span><span class="p">,</span> <span class="n">lid_z</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">lid_z</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">written</span></div>
+
+
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_outflow_stage</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="p">,</span> <span class="s2">"outlet_stage"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># constant/ and system/ for a single-phase run</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="transport_properties">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.transport_properties">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transport_properties</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Single phase: one kinematic viscosity, no phase pair, no surface tension."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.dicts</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dict_file</span>
+
+    <span class="n">nu</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="p">,</span> <span class="s2">"water_viscosity"</span><span class="p">,</span> <span class="mf">1.3e-06</span><span class="p">))</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"transportModel  Newtonian;</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="s2">"// There is no second phase and no sigma: the interface is a boundary</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"// condition here, not a field.</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"nu              </span><span class="si">{</span><span class="n">nu</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">;</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"transportProperties"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"constant"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fv_schemes">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.fv_schemes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fv_schemes</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""No alpha equation, so no compression scheme and no MULES limiter.</span>
+
+<span class="sd">    ``ddtSchemes default Euler`` matters more than it looks: ``waveSurfacePressure``</span>
+<span class="sd">    reads the ddt scheme registered for ``zeta`` to decide how to integrate the</span>
+<span class="sd">    surface displacement, and aborts on anything it does not recognize.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.dicts</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dict_file</span>
+
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"fvSchemes"</span><span class="p">,</span> <span class="s2">"""ddtSchemes</span>
+<span class="s2">{</span>
+<span class="s2">    default         Euler;</span>
+<span class="s2">}</span>
+
+<span class="s2">gradSchemes</span>
+<span class="s2">{</span>
+<span class="s2">    default         Gauss linear;</span>
+<span class="s2">}</span>
+
+<span class="s2">divSchemes</span>
+<span class="s2">{</span>
+<span class="s2">    default         none;</span>
+<span class="s2">    div(phi,U)      Gauss limitedLinearV 1;</span>
+<span class="s2">    div(phi,k)      Gauss limitedLinear 1;</span>
+<span class="s2">    div(phi,omega)  Gauss limitedLinear 1;</span>
+<span class="s2">    div((nuEff*dev2(T(grad(U))))) Gauss linear;</span>
+<span class="s2">}</span>
+
+<span class="s2">laplacianSchemes</span>
+<span class="s2">{</span>
+<span class="s2">    default         Gauss linear corrected;</span>
+<span class="s2">}</span>
+
+<span class="s2">interpolationSchemes</span>
+<span class="s2">{</span>
+<span class="s2">    default         linear;</span>
+<span class="s2">}</span>
+
+<span class="s2">snGradSchemes</span>
+<span class="s2">{</span>
+<span class="s2">    default         corrected;</span>
+<span class="s2">}</span>
+
+<span class="s2">// kOmegaSST blends on the distance to the nearest wall, so it needs this even</span>
+<span class="s2">// though nothing else in a single-phase case does.</span>
+<span class="s2">wallDist</span>
+<span class="s2">{</span>
+<span class="s2">    method          meshWave;</span>
+<span class="s2">}</span>
+<span class="s2">"""</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fv_solution">
+<a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.potential.fv_solution">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fv_solution</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``p_gh`` in place of ``p_rgh``, and nothing at all for alpha."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.dicts</span><span class="w"> </span><span class="kn">import</span> <span class="n">_dict_file</span>
+
+    <span class="n">body</span> <span class="o">=</span> <span class="s2">"""solvers</span>
+<span class="s2">{</span>
+<span class="s2">    p_gh</span>
+<span class="s2">    {</span>
+<span class="s2">        solver          GAMG;</span>
+<span class="s2">        tolerance       1e-8;</span>
+<span class="s2">        relTol          0.01;</span>
+<span class="s2">        smoother        DIC;</span>
+<span class="s2">    }</span>
+
+<span class="s2">    p_ghFinal</span>
+<span class="s2">    {</span>
+<span class="s2">        $p_gh;</span>
+<span class="s2">        tolerance       1e-8;</span>
+<span class="s2">        relTol          0;</span>
+<span class="s2">    }</span>
+
+<span class="s2">    "(U|k|omega)"</span>
+<span class="s2">    {</span>
+<span class="s2">        solver          smoothSolver;</span>
+<span class="s2">        smoother        symGaussSeidel;</span>
+<span class="s2">        tolerance       1e-7;</span>
+<span class="s2">        relTol          0.1;</span>
+<span class="s2">    }</span>
+
+<span class="s2">    "(U|k|omega)Final"</span>
+<span class="s2">    {</span>
+<span class="s2">        $U;</span>
+<span class="s2">        tolerance       1e-7;</span>
+<span class="s2">        relTol          0;</span>
+<span class="s2">    }</span>
+<span class="s2">}</span>
+
+<span class="s2">PIMPLE</span>
+<span class="s2">{</span>
+<span class="s2">    momentumPredictor yes;</span>
+<span class="s2">    nOuterCorrectors  2;</span>
+<span class="s2">    nCorrectors       2;</span>
+<span class="s2">    // a terrain-following mesh IS non-orthogonal; same value the two-phase path</span>
+<span class="s2">    // uses, for the same reason</span>
+<span class="s2">    nNonOrthogonalCorrectors 2;</span>
+<span class="s2">}</span>
+<span class="s2">"""</span>
+    <span class="k">return</span> <span class="n">_dict_file</span><span class="p">(</span><span class="s2">"fvSolution"</span><span class="p">,</span> <span class="n">body</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">"system"</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

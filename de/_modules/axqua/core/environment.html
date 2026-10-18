@@ -1,0 +1,926 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.core.environment &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/core/environment.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/core/environment.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/core/environment.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/core/environment.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/core/environment.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="de" data-root="../../../../" data-page="_modules/axqua/core/environment.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../_modules/axqua/core/environment.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../fr/_modules/axqua/core/environment.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.core.environment</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../_modules/axqua/core/environment.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.core.environment</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Entering a solver's environment, on Linux, on Windows, or through WSL.</span>
+
+<span class="sd">Both TELEMAC and OpenFOAM are entered by *sourcing a setup script* that exports a</span>
+<span class="sd">large environment - ``HOMETEL`` and a Fortran toolchain for one, ``WM_PROJECT_DIR``</span>
+<span class="sd">and a long ``PATH``/``LD_LIBRARY_PATH`` for the other. axqua used to do that one</span>
+<span class="sd">way only::</span>
+
+<span class="sd">    ["bash", "-lc", f"set -e; source {script}; {command}"]</span>
+
+<span class="sd">which is three Linux assumptions in one line: that ``source`` is a command, that</span>
+<span class="sd">``bash`` is on ``PATH``, and that the setup script is a shell script. None holds on</span>
+<span class="sd">Windows, where TELEMAC is configured through a ``.bat`` and MS-MPI provides</span>
+<span class="sd">``mpiexec`` rather than ``mpirun``.</span>
+
+<span class="sd">Three kinds, chosen per solver</span>
+<span class="sd">------------------------------</span>
+<span class="sd">``posix``</span>
+<span class="sd">    ``bash -lc 'source &lt;script&gt;; &lt;cmd&gt;'``. Linux and macOS; the historic behavior.</span>
+
+<span class="sd">``windows``</span>
+<span class="sd">    ``cmd /c 'call &lt;script&gt;.bat &amp;&amp; &lt;cmd&gt;'`` for a native install, or the same shape as</span>
+<span class="sd">    ``posix`` against a **bundled** shell - blueCFD-Core and the ESI OpenFOAM package</span>
+<span class="sd">    both ship their own MSYS bash, and entering their environment means using *that*</span>
+<span class="sd">    bash rather than the system one. ``shell`` selects it.</span>
+
+<span class="sd">``wsl``</span>
+<span class="sd">    ``wsl.exe -d &lt;distro&gt; -- bash -lc '...'``, with path translation across the</span>
+<span class="sd">    boundary. This is the route for **Foundation** OpenFOAM on Windows, which has no</span>
+<span class="sd">    native build.</span>
+
+<span class="sd">Capture, don't wrap</span>
+<span class="sd">-------------------</span>
+<span class="sd">The primary mechanism is :meth:`SolverEnvironment.capture`: run the setup script once,</span>
+<span class="sd">read the resulting environment back as a dictionary, then launch the solver **directly**</span>
+<span class="sd">in it. That is preferred over wrapping every command in a shell for three reasons:</span>
+
+<span class="sd">* it is the same design on all three kinds (``env -0`` under bash, ``set`` under cmd),</span>
+<span class="sd">  rather than three;</span>
+<span class="sd">* it lets a detached launcher put the environment straight onto the process, so no</span>
+<span class="sd">  intermediate shell sits inside the job's process tree - which is what makes</span>
+<span class="sd">  process-tree cancellation clean, since there are fewer layers between the unit and the</span>
+<span class="sd">  MPI ranks;</span>
+<span class="sd">* it doubles as validation. A profile is correct when capturing it yields the variables</span>
+<span class="sd">  the solver needs, and that can be checked when the profile is configured rather than</span>
+<span class="sd">  when a multi-hour job is submitted.</span>
+
+<span class="sd">:meth:`SolverEnvironment.command` remains for WSL - a captured Linux environment cannot</span>
+<span class="sd">launch a Windows process, so those commands must go through ``wsl.exe`` regardless - and</span>
+<span class="sd">for the streaming path, where a shell is wanted anyway.</span>
+
+<span class="sd">Path translation lives here and nowhere else. Scattering ``wslpath`` calls through the</span>
+<span class="sd">meshers and steering writers is how a codebase acquires a second, subtly different</span>
+<span class="sd">notion of what a path is.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">PurePosixPath</span><span class="p">,</span> <span class="n">PureWindowsPath</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># Variables a capture must produce for the environment to count as working.</span>
+<span class="c1"># Chosen by *inspecting real installations*, not from documentation: the v9.1.1</span>
+<span class="c1"># pysource exports HOMETEL and SOURCEFILE but NOT SYSTELCFG, so requiring the latter</span>
+<span class="c1"># rejected a perfectly good TELEMAC.</span>
+<span class="n">SENTINELS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"telemac"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"HOMETEL"</span><span class="p">,),</span>
+    <span class="s2">"openfoam"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"WM_PROJECT_DIR"</span><span class="p">,</span> <span class="s2">"WM_PROJECT_VERSION"</span><span class="p">,</span> <span class="s2">"FOAM_APPBIN"</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1"># Printed on its own before the environment dump, so anything the setup script says</span>
+<span class="c1"># on the way (TELEMAC's pysource emits "[WARN] SALOME ..." and a "TELEMAC set: ..."</span>
+<span class="c1"># banner) can be discarded rather than parsed as a variable. Without this the first</span>
+<span class="c1"># captured "variable" is the script's own chatter, and a stray '=' in it would shadow</span>
+<span class="c1"># a real entry.</span>
+<span class="n">_MARKER</span> <span class="o">=</span> <span class="s2">"__AXQUA_ENV_BEGIN__"</span>
+
+<span class="c1">#: Exported onto a detached job by the launcher. Its presence tells the child axqua</span>
+<span class="c1">#: that the solver environment is already on the process, so it must not source the setup</span>
+<span class="c1">#: script again and put a shell back inside the job's process tree.</span>
+<span class="n">ENTERED_MARKER</span> <span class="o">=</span> <span class="s2">"AXQUA_ENV_CAPTURED"</span>
+
+<span class="c1"># sentinel for "argument not given", so None can mean "deliberately no script"</span>
+<span class="n">_UNSET</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="EnvironmentKind">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.EnvironmentKind">[Doku]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnvironmentKind</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""How a solver's environment is entered on this machine."""</span>
+
+    <span class="n">POSIX</span> <span class="o">=</span> <span class="s2">"posix"</span>
+    <span class="n">WINDOWS</span> <span class="o">=</span> <span class="s2">"windows"</span>
+    <span class="n">WSL</span> <span class="o">=</span> <span class="s2">"wsl"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="default_kind">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.default_kind">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_kind</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">EnvironmentKind</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The kind that matches the host, used when a config does not say.</span>
+
+<span class="sd">    Windows defaults to ``windows`` rather than ``wsl``: a native install is the</span>
+<span class="sd">    simpler thing to get working, and a user who needs WSL (Foundation OpenFOAM) has</span>
+<span class="sd">    to name a distro anyway, so it cannot be inferred.</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WINDOWS</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="k">else</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">POSIX</span></div>
+
+
+
+<div class="viewcode-block" id="default_mpi_launcher">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.default_mpi_launcher">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_mpi_launcher</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="n">EnvironmentKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``mpiexec`` on native Windows (MS-MPI), ``mpirun`` elsewhere."""</span>
+    <span class="k">return</span> <span class="s2">"mpiexec"</span> <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WINDOWS</span> <span class="k">else</span> <span class="s2">"mpirun"</span></div>
+
+
+
+<div class="viewcode-block" id="EnvStatus">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.EnvStatus">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnvStatus</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The result of probing an environment. Never raises; reports."""</span>
+
+    <span class="n">ok</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">missing</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="c1"># Sentinels that were already in the ambient environment before the setup script</span>
+    <span class="c1"># ran. Present is not the same as provided: this machine has</span>
+    <span class="c1"># /etc/profile.d/openfoam9.sh, so WM_PROJECT_VERSION is inherited by every process</span>
+    <span class="c1"># and a validation would pass even against a script that does nothing. A detached</span>
+    <span class="c1"># job does not inherit an interactive environment, so that is precisely the</span>
+    <span class="c1"># "works in my terminal, fails in the runner" trap.</span>
+    <span class="n">ambient</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ok</span></div>
+
+
+
+<div class="viewcode-block" id="SolverEnvironment">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SolverEnvironment</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How to reach one solver installation."""</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="n">EnvironmentKind</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">default_kind</span><span class="p">)</span>
+    <span class="n">setup_script</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">shell</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>        <span class="c1"># bundled bash (blueCFD / ESI / TELEMAC-Windows)</span>
+    <span class="n">distro</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># WSL only</span>
+    <span class="n">mpi_launcher</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># extra variables forced onto the captured environment (rarely needed)</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1">#: Tri-state. ``None`` defers to the ``AXQUA_ENV_CAPTURED`` marker, which is how</span>
+    <span class="c1">#: a detached child inherits the answer; True/False override it explicitly.</span>
+    <span class="n">_assume_entered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">EnvironmentKind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mpi_launcher</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mpi_launcher</span> <span class="o">=</span> <span class="n">default_mpi_launcher</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">)</span>
+
+    <span class="c1"># ------------------------------------------------------------------ paths</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">script</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The setup script as the *target* environment spells it."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SolverEnvironment.translate">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.translate">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A host path as the target environment spells it.</span>
+
+<span class="sd">        Only the WSL boundary actually translates: ``C:\\scratch\\case`` becomes</span>
+<span class="sd">        ``/mnt/c/scratch/case``. Everything else is the identity, which is why this is</span>
+<span class="sd">        safe to call unconditionally at every boundary - and why it must exist in one</span>
+<span class="sd">        place rather than being reinvented per call site.</span>
+<span class="sd">        """</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">text</span>
+        <span class="k">return</span> <span class="n">windows_to_wsl</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SolverEnvironment.untranslate">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.untranslate">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">untranslate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A target-environment path as the host spells it (the WSL inverse)."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span>
+        <span class="k">return</span> <span class="n">wsl_to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+    <span class="c1"># --------------------------------------------------------------- launching</span>
+<div class="viewcode-block" id="SolverEnvironment.command">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.command">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""The argv that runs *command* inside this environment.</span>
+
+<span class="sd">        A list, never a shell string: the only place a shell parses anything is inside</span>
+<span class="sd">        the quoted payload we build ourselves, so user-supplied paths cannot reach a</span>
+<span class="sd">        command line unquoted.</span>
+
+<span class="sd">        When the environment has **already been entered** (see :attr:`assume_entered`)</span>
+<span class="sd">        the setup script is skipped. That is not an optimization: a detached job is</span>
+<span class="sd">        launched with a captured environment set directly on the process, so re-sourcing</span>
+<span class="sd">        would both be redundant and put a shell back inside the job's process tree -</span>
+<span class="sd">        which is exactly the layer that makes tree-kill unreliable.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">assume_entered</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bare_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WINDOWS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_bash</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_windows_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bash_command</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">assume_entered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""True when this process already carries the solver environment.</span>
+
+<span class="sd">        Set explicitly on the dataclass, or inherited from the marker a detached</span>
+<span class="sd">        launcher exports - so the child axqua discovers it without being told.</span>
+<span class="sd">        WSL is excluded unconditionally: a captured *Linux* environment cannot launch a</span>
+<span class="sd">        Windows process, so those commands must go through ``wsl.exe`` regardless.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_assume_entered</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_assume_entered</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENTERED_MARKER</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"1"</span>
+
+    <span class="nd">@assume_entered</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">assume_entered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assume_entered</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bare_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Run *command* with no setup script and no login shell.</span>
+
+<span class="sd">        A shell is still involved because the payload is a shell string (it uses</span>
+<span class="sd">        ``command -v`` and quoting), but it is a plain non-login ``-c``: one thin layer,</span>
+<span class="sd">        not a login shell re-reading profile scripts that could contradict the captured</span>
+<span class="sd">        environment.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_bash</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Windows only</span>
+            <span class="k">return</span> <span class="p">[</span><span class="s2">"cmd"</span><span class="p">,</span> <span class="s2">"/c"</span><span class="p">,</span> <span class="n">command</span><span class="p">]</span>
+        <span class="n">shell</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="k">else</span> <span class="s2">"bash"</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">shell</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="n">command</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_uses_bash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A Windows install may ship its own bash (blueCFD, ESI, MSYS TELEMAC)."""</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"bash"</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">))</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_bash_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">_UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""*script* defaults to this environment's own; pass ``None`` for a baseline</span>
+<span class="sd">        shell that sources nothing (see :meth:`capture`)."""</span>
+        <span class="n">shell</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shell</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shell</span> <span class="k">else</span> <span class="s2">"bash"</span>
+        <span class="k">if</span> <span class="n">script</span> <span class="ow">is</span> <span class="n">_UNSET</span><span class="p">:</span>
+            <span class="n">script</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span>
+        <span class="k">if</span> <span class="n">script</span><span class="p">:</span>
+            <span class="c1"># The guard is `test -r`, not `set -e` around the source itself.</span>
+            <span class="c1"># `set -e; source &lt;script&gt;` looked equivalent but is not: OpenFOAM</span>
+            <span class="c1"># Foundation's etc/bashrc returns non-zero from a benign bash warning</span>
+            <span class="c1"># ("pop_var_context: head of shell_variables not a function context")</span>
+            <span class="c1"># when sourced in a non-interactive login shell, so `set -e` aborted</span>
+            <span class="c1"># before the command ever ran and every OpenFOAM call reported the</span>
+            <span class="c1"># environment as broken. An unreadable script still fails loudly - that</span>
+            <span class="c1"># is what the guard was for - while a noisy but working one proceeds,</span>
+            <span class="c1"># and the command itself still runs under `set -e`.</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"set -e; test -r </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">script</span><span class="p">)</span><span class="si">}</span><span class="s2">; set +e; "</span>
+                       <span class="sa">f</span><span class="s2">"source </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">script</span><span class="p">)</span><span class="si">}</span><span class="s2">; set -e; </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">command</span>
+        <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="n">shell</span><span class="p">,</span> <span class="s2">"-lc"</span><span class="p">,</span> <span class="n">payload</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wsl_prefix</span><span class="p">()</span> <span class="o">+</span> <span class="n">argv</span>
+        <span class="k">return</span> <span class="n">argv</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_windows_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'call "</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="si">}</span><span class="s1">" &amp;&amp; </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s1">'</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">command</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">"cmd"</span><span class="p">,</span> <span class="s2">"/c"</span><span class="p">,</span> <span class="n">payload</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_wsl_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"wsl.exe"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"-d"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">prefix</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"--"</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SolverEnvironment.mpi_command">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.mpi_command">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mpi_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">processes</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Prefix *command* with this environment's MPI launcher.</span>
+
+<span class="sd">        ``mpirun`` is not universal - MS-MPI provides ``mpiexec`` - so the launcher is</span>
+<span class="sd">        a property of the installation rather than a constant in the solver code.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">processes</span> <span class="ow">or</span> <span class="n">processes</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">command</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mpi_launcher</span><span class="si">}</span><span class="s2"> -np </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">command</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+    <span class="c1"># --------------------------------------------------------------- capturing</span>
+<div class="viewcode-block" id="SolverEnvironment.capture">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.capture">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">120.0</span><span class="p">,</span>
+                <span class="n">with_script</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Source the setup script once and return the resulting environment.</span>
+
+<span class="sd">        The dictionary can then be handed to a detached process directly, with no</span>
+<span class="sd">        shell left inside its tree.</span>
+
+<span class="sd">        *with_script* False runs the same shell **without** sourcing anything, giving</span>
+<span class="sd">        the baseline the shell provides on its own. That is what makes provenance</span>
+<span class="sd">        answerable: a login shell reads ``/etc/profile.d``, so a machine with a</span>
+<span class="sd">        system-wide OpenFOAM hands every capture ``WM_PROJECT_VERSION`` whether the</span>
+<span class="sd">        configured script did anything or not.</span>
+<span class="sd">        """</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span> <span class="k">if</span> <span class="n">with_script</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">script</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">with_script</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WINDOWS</span> \
+                <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_bash</span><span class="p">:</span>
+            <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"cmd"</span><span class="p">,</span> <span class="s2">"/c"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"echo </span><span class="si">{</span><span class="n">_MARKER</span><span class="si">}</span><span class="s2">&amp;&amp; set"</span><span class="p">]</span>
+            <span class="n">parse</span> <span class="o">=</span> <span class="n">_parse_set</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">script</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">with_script</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
+            <span class="n">argv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bash_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">"printf '%s' </span><span class="si">{</span><span class="n">_MARKER</span><span class="si">}</span><span class="s2">; env -0"</span><span class="p">,</span> <span class="n">script</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">parse</span> <span class="o">=</span> <span class="n">_parse_env0</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WINDOWS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uses_bash</span><span class="p">:</span>
+            <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"cmd"</span><span class="p">,</span> <span class="s2">"/c"</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'call "</span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s1">" &amp;&amp; echo </span><span class="si">{</span><span class="n">_MARKER</span><span class="si">}</span><span class="s1">&amp;&amp; set'</span><span class="p">]</span>
+            <span class="n">parse</span> <span class="o">=</span> <span class="n">_parse_set</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NUL-delimited: a value may legitimately contain newlines, and PATH-like</span>
+            <span class="c1"># variables do often enough that line-splitting silently truncates them</span>
+            <span class="n">argv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bash_command</span><span class="p">(</span><span class="sa">f</span><span class="s2">"printf '%s' </span><span class="si">{</span><span class="n">_MARKER</span><span class="si">}</span><span class="s2">; env -0"</span><span class="p">)</span>
+            <span class="n">parse</span> <span class="o">=</span> <span class="n">_parse_env0</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">EnvironmentCaptureError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"could not enter the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2"> environment via </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="si">}</span><span class="s2">: "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[:</span><span class="mi">400</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">captured</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">_after_marker</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+        <span class="n">captured</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">captured</span></div>
+
+
+<div class="viewcode-block" id="SolverEnvironment.validate">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.validate">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                 <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">120.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnvStatus</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Probe the environment. Never raises - a broken install is an answer.</span>
+
+<span class="sd">        With *solver* (``"telemac"`` / ``"openfoam"``) the capture is additionally</span>
+<span class="sd">        checked for that solver's sentinel variables, which is what turns "the script</span>
+<span class="sd">        ran" into "this is a working installation".</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_script_exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">EnvStatus</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"setup script not found: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">captured</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - reporting, not control flow</span>
+            <span class="k">return</span> <span class="n">EnvStatus</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="n">sentinels</span> <span class="o">=</span> <span class="n">SENTINELS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">solver</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span> <span class="p">())</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sentinels</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">captured</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">EnvStatus</span><span class="p">(</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"entered the environment, but </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'is'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'are'</span><span class="si">}</span><span class="s2"> unset - is "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="si">}</span><span class="s2"> the right script for </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">?"</span><span class="p">,</span>
+                <span class="n">variables</span><span class="o">=</span><span class="n">captured</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">)</span>
+
+        <span class="c1"># Provenance. Comparing against os.environ is not enough: `bash -lc` is a</span>
+        <span class="c1"># LOGIN shell and reads /etc/profile.d, so on a machine with a system-wide</span>
+        <span class="c1"># OpenFOAM the sentinels arrive whether the configured script did anything or</span>
+        <span class="c1"># not. The baseline therefore goes through the same shell, minus the source.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">with_script</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - provenance is a nicety, not a gate</span>
+            <span class="n">baseline</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">ambient</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sentinels</span> <span class="k">if</span> <span class="n">baseline</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s2">""</span>
+        <span class="k">if</span> <span class="n">solver</span> <span class="o">==</span> <span class="s2">"openfoam"</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"OpenFOAM </span><span class="si">{</span><span class="n">captured</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'WM_PROJECT_VERSION'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">elif</span> <span class="n">solver</span> <span class="o">==</span> <span class="s2">"telemac"</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"TELEMAC at </span><span class="si">{</span><span class="n">captured</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'HOMETEL'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">ambient</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">ambient</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">sentinels</span><span class="p">):</span>
+            <span class="n">detail</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">" - NOTE: already present in the ambient environment, so this "</span>
+                       <span class="s2">"setup script may not be what provides it. A detached job does "</span>
+                       <span class="s2">"not inherit your shell."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EnvStatus</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">variables</span><span class="o">=</span><span class="n">captured</span><span class="p">,</span> <span class="n">ambient</span><span class="o">=</span><span class="n">ambient</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_script_exists</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether the setup script is present, as the *host* can see it.</span>
+
+<span class="sd">        Under WSL the script path is a Linux path the host cannot stat, so existence</span>
+<span class="sd">        is left to the capture to discover - claiming "not found" for a path that is</span>
+<span class="sd">        simply on the other side of the boundary would be worse than not checking.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">WSL</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">))</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+
+    <span class="c1"># ---------------------------------------------------------------- reporting</span>
+<div class="viewcode-block" id="SolverEnvironment.describe">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.describe">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""One line for a status report or a ``MODEL=`` marker."""</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">distro</span><span class="p">:</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">distro</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">:</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">))</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">" / "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SolverEnvironment.from_config">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.SolverEnvironment.from_config">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">legacy_script</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SolverEnvironment"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Build from a config block, honoring the pre-environment spelling.</span>
+
+<span class="sd">        A config that only carries ``telemac.pysource`` (every case written before this</span>
+<span class="sd">        existed) resolves to a POSIX environment against that script, so nothing has to</span>
+<span class="sd">        be migrated for it to keep working.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="n">EnvironmentKind</span><span class="o">.</span><span class="n">POSIX</span><span class="p">,</span> <span class="n">setup_script</span><span class="o">=</span><span class="n">legacy_script</span><span class="p">)</span>
+        <span class="n">as_dict</span> <span class="o">=</span> <span class="n">block</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">block</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">default_kind</span><span class="p">(),</span>
+            <span class="n">setup_script</span><span class="o">=</span><span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"setup_script"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">legacy_script</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">=</span><span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"shell"</span><span class="p">),</span>
+            <span class="n">distro</span><span class="o">=</span><span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"distro"</span><span class="p">),</span>
+            <span class="n">mpi_launcher</span><span class="o">=</span><span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mpi_launcher"</span><span class="p">),</span>
+            <span class="n">overrides</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">as_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overrides"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="EnvironmentCaptureError">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.EnvironmentCaptureError">[Doku]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EnvironmentCaptureError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised when a setup script cannot be entered."""</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># parsing captured environments</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_after_marker</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Everything the setup script printed before the dump, discarded.</span>
+
+<span class="sd">    A setup script is entitled to talk - TELEMAC's prints warnings and a banner - and</span>
+<span class="sd">    that output is not environment. Splitting on the last occurrence is deliberate:</span>
+<span class="sd">    the marker string could legitimately appear inside an exported value.</span>
+<span class="sd">    """</span>
+    <span class="n">head</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="n">_MARKER</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tail</span> <span class="k">if</span> <span class="n">sep</span> <span class="k">else</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_env0</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Parse ``env -0`` output (NUL-separated ``NAME=value`` records)."""</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"</span><span class="se">\0</span><span class="s2">"</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"="</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sep</span> <span class="ow">and</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_set</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Parse ``cmd /c set`` output (``NAME=value`` per line).</span>
+
+<span class="sd">    Multi-line values cannot be represented by ``set`` at all, so a line without an</span>
+<span class="sd">    ``=`` is a continuation of the previous value rather than a new variable - which is</span>
+<span class="sd">    how ``PATH`` survives on a machine with an unusual entry.</span>
+<span class="sd">    """</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">last</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">"="</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sep</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">" "</span><span class="p">):</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">elif</span> <span class="n">last</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">last</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="n">line</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># WSL path translation</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+
+<div class="viewcode-block" id="windows_to_wsl">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.windows_to_wsl">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">windows_to_wsl</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``C:\\scratch\\case`` -&gt; ``/mnt/c/scratch/case``.</span>
+
+<span class="sd">    Done arithmetically rather than by shelling out to ``wslpath``: this is called for</span>
+<span class="sd">    every path crossing the boundary, and a subprocess per path would dominate the cost</span>
+<span class="sd">    of building a case. A path that is already POSIX passes through unchanged, so the</span>
+<span class="sd">    function is idempotent.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"/"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">path</span> <span class="k">else</span> <span class="n">path</span>
+    <span class="n">pure</span> <span class="o">=</span> <span class="n">PureWindowsPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">drive</span> <span class="o">=</span> <span class="n">pure</span><span class="o">.</span><span class="n">drive</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">drive</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)</span>
+    <span class="n">rest</span> <span class="o">=</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pure</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"/mnt/</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">rest</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">rest</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"/mnt/</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">"</span></div>
+
+
+
+<div class="viewcode-block" id="wsl_to_windows">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.wsl_to_windows">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wsl_to_windows</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``/mnt/c/scratch/case`` -&gt; ``C:\\scratch\\case`` (the inverse)."""</span>
+    <span class="n">pure</span> <span class="o">=</span> <span class="n">PurePosixPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">pure</span><span class="o">.</span><span class="n">parts</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"/"</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"mnt"</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">drive</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">:</span><span class="se">\\</span><span class="si">{</span><span class="n">rest</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">rest</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">drive</span><span class="si">}</span><span class="s2">:</span><span class="se">\\</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<div class="viewcode-block" id="wsl_available">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.wsl_available">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wsl_available</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``wsl.exe`` can be found (Windows only, and cheap to ask)."""</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="ow">and</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"wsl.exe"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="host_summary">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.environment.host_summary">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">host_summary</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One line describing the host, for logs and status reports."""</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">), default environment kind: </span><span class="si">{</span><span class="n">default_kind</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

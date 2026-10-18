@@ -9,7 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
@@ -23,9 +23,9 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
-</head>
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/openfoam/case.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/openfoam/case.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/case.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/openfoam/case.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="en" data-root="../../../../" data-page="_modules/axqua/solvers/openfoam/case.html"></script></head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>EN</span></summary><ul role="menu"><li><strong aria-current="true" lang="en">English</strong></li><li><a href="../../../../de/_modules/axqua/solvers/openfoam/case.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><a href="../../../../fr/_modules/axqua/solvers/openfoam/case.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -257,6 +257,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Languages and publication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
 </ul>
 </li>
@@ -266,6 +267,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freeing disk space</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
 </ul>
 </li>
@@ -359,6 +361,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">dicts</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">mesh</span> <span class="k">as</span> <span class="n">ofmesh</span><span class="p">,</span>
                                     <span class="n">planview</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">quality</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.hotstart</span><span class="w"> </span><span class="kn">import</span> <span class="n">State2D</span><span class="p">,</span> <span class="n">load_hotstart</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.layout</span><span class="w"> </span><span class="kn">import</span> <span class="n">PREVIOUS_RUN</span><span class="p">,</span> <span class="n">set_aside_runs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.polymesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_polymesh</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
@@ -610,12 +613,6 @@
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"limitVelocity cap </span><span class="si">{</span><span class="n">cap</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s "</span>
                      <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">DEFAULT_VELOCITY_CAP_FACTOR</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">x the reach's p95 water speed)"</span><span class="p">)</span>
 
-    <span class="c1"># the results of an earlier build cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would otherwise go on</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_runs</span>
-
-    <span class="n">removed</span> <span class="o">=</span> <span class="n">clear_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">removed</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"removed the results of the earlier build: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">removed</span><span class="p">))</span>
     <span class="n">polymesh_dir</span> <span class="o">=</span> <span class="n">write_polymesh</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">polymesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">)</span>
     <span class="c1"># which column each cell is in and how thick it is: what a view of the result</span>
     <span class="c1"># from above needs, saved here so that it never depends on a second build</span>
@@ -633,6 +630,10 @@
                                           <span class="n">uniform_bed_ks</span><span class="o">=</span><span class="n">uniform_bed_ks</span><span class="p">,</span> <span class="n">rating</span><span class="o">=</span><span class="n">rating</span><span class="p">)</span>
     <span class="n">dict_files</span> <span class="o">=</span> <span class="n">dicts</span><span class="o">.</span><span class="n">write_dicts</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="n">cap</span><span class="p">)</span>
     <span class="p">(</span><span class="n">case_dir</span> <span class="o">/</span> <span class="s2">"case.foam"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>     <span class="c1"># so ParaView can open the folder</span>
+    <span class="c1"># Once the new case is written, not before: a build that fails leaves the results of the earlier one where they were. They cannot be continued on this mesh, and its processor folders hold the old mesh itself, on which a parallel stage would go on.</span>
+    <span class="n">moved</span> <span class="o">=</span> <span class="n">set_aside_runs</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">moved</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the results of the earlier build were moved to </span><span class="si">{</span><span class="n">PREVIOUS_RUN</span><span class="si">}</span><span class="s2">/ (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">moved</span><span class="p">)</span><span class="si">}</span><span class="s2">); the build before that is no longer kept"</span><span class="p">)</span>
     <span class="n">_write_build_record</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">of_mesh</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">,</span> <span class="n">velocity_cap</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cap</span><span class="p">))</span>
 
     <span class="n">report</span> <span class="o">=</span> <span class="n">quality</span><span class="o">.</span><span class="n">assess</span><span class="p">(</span><span class="n">of_mesh</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">,</span>

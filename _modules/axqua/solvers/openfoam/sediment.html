@@ -9,7 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=77d0db7a" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
 
   
     <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
@@ -23,9 +23,9 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
-</head>
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/openfoam/sediment.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/openfoam/sediment.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/sediment.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/openfoam/sediment.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="en" data-root="../../../../" data-page="_modules/axqua/solvers/openfoam/sediment.html"></script></head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>EN</span></summary><ul role="menu"><li><strong aria-current="true" lang="en">English</strong></li><li><a href="../../../../de/_modules/axqua/solvers/openfoam/sediment.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><a href="../../../../fr/_modules/axqua/solvers/openfoam/sediment.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -257,6 +257,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS plugin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Languages and publication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
 </ul>
 </li>
@@ -266,6 +267,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freeing disk space</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
 </ul>
 </li>
@@ -396,6 +398,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam.layout</span><span class="w"> </span><span class="kn">import</span> <span class="n">time_folders</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
 
@@ -1348,22 +1351,15 @@
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 
+    <span class="n">times</span> <span class="o">=</span> <span class="p">{</span><span class="n">path</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">time_folders</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)}</span>
     <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">case_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-        <span class="n">numbered</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_is_time</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">numbered</span> <span class="o">=</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">times</span>
         <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">numbered</span> <span class="ow">or</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"constant"</span><span class="p">,</span> <span class="s2">"system"</span><span class="p">)):</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="n">BUILD_RECORD</span><span class="p">,</span> <span class="n">BED_LAYER_NAME</span><span class="p">,</span> <span class="n">BUDGET_NAME</span><span class="p">,</span> <span class="n">LOG_NAME</span><span class="p">,</span> <span class="s2">"case.foam"</span><span class="p">,</span>
                 <span class="s2">"scour.txt"</span><span class="p">):</span>
             <span class="n">entry</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_is_time</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="nb">float</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="is_built">
@@ -1380,12 +1376,9 @@
 <a class="viewcode-back" href="../../../../code/openfoam.html#axqua.solvers.openfoam.sediment.latest_time">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">latest_time</span><span class="p">(</span><span class="n">case_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Name of the last time folder a run wrote, ``None`` before the first."""</span>
-    <span class="n">best</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_is_time</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">entry</span> <span class="o">/</span> <span class="s2">"Conc"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-                <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">best</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">best</span> <span class="k">else</span> <span class="kc">None</span></div>
+    <span class="n">later</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span> <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">time_folders</span><span class="p">(</span><span class="n">case_dir</span><span class="p">)</span>
+             <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">"Conc"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="n">later</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">later</span> <span class="k">else</span> <span class="kc">None</span></div>
 
 
 
@@ -1862,8 +1855,8 @@
 
     <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 
-    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">case_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>           <span class="c1"># a run starts from the first iteration</span>
-        <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_is_time</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">time_folders</span><span class="p">(</span><span class="n">case_dir</span><span class="p">):</span>   <span class="c1"># a run starts from the first iteration</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">BED_LAYER_NAME</span><span class="p">,</span> <span class="n">BUDGET_NAME</span><span class="p">):</span>
         <span class="p">(</span><span class="n">case_dir</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

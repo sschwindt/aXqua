@@ -1,0 +1,931 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.jobs.executor &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/jobs/executor.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/jobs/executor.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/jobs/executor.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/jobs/executor.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/jobs/executor.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="fr" data-root="../../../../" data-page="_modules/axqua/jobs/executor.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../../../_modules/axqua/jobs/executor.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../../../de/_modules/axqua/jobs/executor.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">axqua.jobs.executor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../../../_modules/axqua/jobs/executor.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <h1>Code source de axqua.jobs.executor</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Running one job: dispatch, state, and turning any failure into a record.</span>
+
+<span class="sd">This is the only module in :mod:`axqua.jobs` that touches a solver, and it touches</span>
+<span class="sd">it through exactly one seam - ``registry.get(solver).load()``. There is no</span>
+<span class="sd">``if solver == "telemac"`` here and there must never be (plan §12): the kind table says</span>
+<span class="sd">which *verb* to call, the backend decides what that verb means, and adding a third solver</span>
+<span class="sd">is a `pip install`, not an edit to this file.</span>
+
+<span class="sd">The shape of a run::</span>
+
+<span class="sd">    lock -&gt; runner.log -&gt; load the frozen config -&gt; rebase the workspace</span>
+<span class="sd">         -&gt; disk check -&gt; STARTING -&gt; RUNNING -&gt; backend.&lt;verb&gt;(...)</span>
+<span class="sd">         -&gt; POSTPROCESSING -&gt; backend.postprocess / export_qgis_results</span>
+<span class="sd">         -&gt; results.json -&gt; COMPLETED</span>
+
+<span class="sd">Every failure becomes a :class:`~axqua.core.errors.ErrorRecord` in ``status.json``</span>
+<span class="sd">*and* an ``ERROR`` line in ``runner.log``. Plan §24 requires both, and the reason is</span>
+<span class="sd">practical: the record is what a GUI can act on, the log is what a human can read.</span>
+
+<span class="sd">Cancellation is cooperative first. ``cancel`` writes a request file; the token below is</span>
+<span class="sd">checked between steps and inside the streaming callback, so the job tears itself down and</span>
+<span class="sd">writes ``CANCELLED`` on its own. The launcher's tree-kill is the fallback for a job that</span>
+<span class="sd">is too busy or too stuck to notice.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExitStack</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span><span class="p">,</span> <span class="n">registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">Capability</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ErrorRecord</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs</span><span class="w"> </span><span class="kn">import</span> <span class="n">events</span><span class="p">,</span> <span class="n">logs</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">workspace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.interaction</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolicyAsk</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.lock</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobLock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">KIND_META</span><span class="p">,</span> <span class="n">JobKind</span><span class="p">,</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">JobState</span><span class="p">,</span> <span class="n">JobStatus</span><span class="p">,</span>
+                                  <span class="n">utc_now</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">JobDir</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobs.store</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_spec</span><span class="p">,</span> <span class="n">read_status</span><span class="p">,</span> <span class="n">write_status</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua.jobs.executor"</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"CancelToken"</span><span class="p">,</span> <span class="s2">"ExecutionContext"</span><span class="p">,</span> <span class="s2">"JobCancelled"</span><span class="p">,</span> <span class="s2">"execute"</span><span class="p">]</span>
+
+<span class="c1">#: How often the cancel token re-reads the request file. A stat per second is free and</span>
+<span class="c1">#: makes cancellation feel immediate without polling anything expensive.</span>
+<span class="n">CANCEL_POLL_INTERVAL</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+
+<div class="viewcode-block" id="JobCancelled">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.JobCancelled">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JobCancelled</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised inside the job when a cancellation request is noticed."""</span></div>
+
+
+
+<div class="viewcode-block" id="CancelToken">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.CancelToken">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CancelToken</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Cooperative cancellation, driven by a file.</span>
+
+<span class="sd">    A file rather than a signal because the request comes from a *different process*</span>
+<span class="sd">    (possibly a different QGIS session, possibly days later), and because it preserves</span>
+<span class="sd">    the one-writer-per-file rule: ``cancel`` never touches ``status.json``.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_dir</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">CANCEL_POLL_INTERVAL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">job_dir</span> <span class="o">=</span> <span class="n">job_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">requested</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">now</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last</span> <span class="o">=</span> <span class="n">now</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_dir</span><span class="o">.</span><span class="n">cancel_request</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set</span>
+
+<div class="viewcode-block" id="CancelToken.check">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.CancelToken.check">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">JobCancelled</span><span class="p">(</span><span class="s2">"cancellation requested"</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Usable directly as a ``should_stop`` callback."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested</span></div>
+
+
+
+<div class="viewcode-block" id="ExecutionContext">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExecutionContext</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Everything a backend needs that is not the case configuration.</span>
+
+<span class="sd">    Passed as ``ctx=`` rather than as loose keyword arguments so a backend can grow a new</span>
+<span class="sd">    need without every caller changing, and so the standalone case scripts - which pass</span>
+<span class="sd">    no context at all - keep working against the same backend methods.</span>
+<span class="sd">    """</span>
+
+    <span class="n">job_dir</span><span class="p">:</span> <span class="n">JobDir</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span>
+    <span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">sink</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">events</span><span class="o">.</span><span class="n">NullSink</span><span class="p">)</span>
+    <span class="n">cancel</span><span class="p">:</span> <span class="n">CancelToken</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">manifest</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultManifest</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">log</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="o">=</span> <span class="n">log</span>
+    <span class="n">_ask</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_open_sinks</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="c1"># -- helpers a backend calls --------------------------------------------------</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">capability</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Capability</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">capability</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span>
+
+<div class="viewcode-block" id="ExecutionContext.should_stop">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.should_stop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">should_stop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cancel</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cancel</span><span class="o">.</span><span class="n">requested</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.check_cancelled">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.check_cancelled">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_cancelled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cancel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cancel</span><span class="o">.</span><span class="n">check</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.ask">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.ask">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Answer a study's question from the job record. Never reads stdin."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">answers</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="s2">"answers"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ask</span> <span class="o">=</span> <span class="n">PolicyAsk</span><span class="p">(</span><span class="n">answers</span><span class="p">,</span> <span class="n">sink</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sink</span><span class="p">,</span>
+                                  <span class="n">answer_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">job_dir</span><span class="o">.</span><span class="n">answers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ask</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.progress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.progress">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">progress</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sink</span><span class="o">.</span><span class="n">progress</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.solver_sink">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.solver_sink">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">solver_sink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A rotating text sink for one solver invocation's raw output."""</span>
+        <span class="n">sink</span> <span class="o">=</span> <span class="n">logs</span><span class="o">.</span><span class="n">RotatingTextSink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_dir</span><span class="o">.</span><span class="n">solver_logs</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.log"</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_sinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sink</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.record">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.record">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Add an artifact to the result manifest."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">manifest</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">job_dir</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ExecutionContext.close">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.ExecutionContext.close">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sink</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_open_sinks</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">sink</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                       <span class="c1"># noqa: BLE001 - pragma: no cover</span>
+                <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_open_sinks</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+</div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------------ workspace</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">rebase</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">job_dir</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Point the case's four phase directories inside the job.</span>
+
+<span class="sd">    Four assignments and nothing else, because every path in axqua already resolves</span>
+<span class="sd">    through ``cfg.model_path()`` and its siblings - which is exactly why the plan's</span>
+<span class="sd">    "job-oriented working directories" is a small change rather than a rewrite.</span>
+<span class="sd">    """</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_dir</span> <span class="o">=</span> <span class="n">job_dir</span><span class="o">.</span><span class="n">preprocessing</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">job_dir</span><span class="o">.</span><span class="n">simulation</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">postprocessing_dir</span> <span class="o">=</span> <span class="n">job_dir</span><span class="o">.</span><span class="n">results</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span> <span class="o">=</span> <span class="n">job_dir</span><span class="o">.</span><span class="n">calibration</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_workspace</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">job_dir</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">mode</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"job"</span><span class="p">:</span>
+        <span class="n">rebase</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">job_dir</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"link"</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">JobDir</span><span class="p">(</span><span class="n">job_dir</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">source_job</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">source</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"job </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">source_job</span><span class="si">}</span><span class="s2"> was named as this job's workspace, "</span>
+                <span class="s2">"but it is not there"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="s2">"workspace.source_job"</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run 'axqua list' to see the jobs that exist."</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># Point at the parent's build without copying a byte of it (plan §26).</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">simulation</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_dir</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">preprocessing</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">postprocessing_dir</span> <span class="o">=</span> <span class="n">job_dir</span><span class="o">.</span><span class="n">results</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span> <span class="o">=</span> <span class="n">job_dir</span><span class="o">.</span><span class="n">calibration</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="c1"># mode "case": leave the case's own directories alone. This is the only mode under</span>
+    <span class="c1"># which a run can hotstart from an r2d.slf the standalone scripts produced, and it</span>
+    <span class="c1"># is why run kinds default to it.</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------- dispatch</span>
+
+
+<div class="viewcode-block" id="execute">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.executor.execute">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="n">job_dir</span><span class="p">:</span> <span class="n">JobDir</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sink</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">console</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">break_stale_lock</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run the job in *job_dir* to completion. Returns a process exit code.</span>
+
+<span class="sd">    Synchronous by design - this is what ``axqua execute`` calls, and what every</span>
+<span class="sd">    detached launcher ultimately starts. Keeping the detached path and the debugging</span>
+<span class="sd">    path identical means a failure reproduces under a terminal.</span>
+<span class="sd">    """</span>
+    <span class="n">jd</span> <span class="o">=</span> <span class="n">job_dir</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">job_dir</span><span class="p">,</span> <span class="n">JobDir</span><span class="p">)</span> <span class="k">else</span> <span class="n">JobDir</span><span class="p">(</span><span class="n">job_dir</span><span class="p">)</span>
+    <span class="n">lock</span> <span class="o">=</span> <span class="n">JobLock</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span>
+    <span class="n">stale</span><span class="p">,</span> <span class="n">_reason</span> <span class="o">=</span> <span class="n">lock</span><span class="o">.</span><span class="n">is_stale</span><span class="p">()</span>
+    <span class="k">with</span> <span class="n">lock</span><span class="o">.</span><span class="n">holding</span><span class="p">(</span><span class="n">purpose</span><span class="o">=</span><span class="s2">"execute"</span><span class="p">,</span> <span class="n">break_stale</span><span class="o">=</span><span class="n">break_stale_lock</span> <span class="ow">and</span> <span class="n">stale</span><span class="p">):</span>
+        <span class="c1"># *console* is off by default: the CLI has already attached a console handler,</span>
+        <span class="c1"># and adding a second one makes every line appear twice - which, for a detached</span>
+        <span class="c1"># job whose stdout is redirected to a file, doubles the size of that file too.</span>
+        <span class="k">with</span> <span class="n">logs</span><span class="o">.</span><span class="n">runner_log</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">runner_log</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="n">console</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_run</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">sink</span><span class="o">=</span><span class="n">sink</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sink</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">read_spec</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">read_status</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span> <span class="ow">or</span> <span class="n">JobStatus</span><span class="o">.</span><span class="n">initial</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    <span class="n">status</span><span class="o">.</span><span class="n">launcher</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">launcher</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">meta</span>
+
+    <span class="n">status_sink</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">StatusFileSink</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+    <span class="n">sinks</span> <span class="o">=</span> <span class="p">[</span><span class="n">status_sink</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">sink</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sinks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sink</span><span class="p">)</span>
+    <span class="n">combined</span> <span class="o">=</span> <span class="n">events</span><span class="o">.</span><span class="n">TeeSink</span><span class="p">(</span><span class="o">*</span><span class="n">sinks</span><span class="p">)</span>
+
+    <span class="n">manifest</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultManifest</span><span class="p">(</span><span class="n">job_id</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+                                      <span class="n">kind</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="n">cancel</span> <span class="o">=</span> <span class="n">CancelToken</span><span class="p">(</span><span class="n">jd</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="p">:</span> <span class="n">ExecutionContext</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"job </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
+    <span class="c1"># Entered inside the block below and left after it, so that the simulation folder</span>
+    <span class="c1"># of the case stays held until the final state of the job has been written.</span>
+    <span class="k">with</span> <span class="n">events</span><span class="o">.</span><span class="n">using_sink</span><span class="p">(</span><span class="n">combined</span><span class="p">),</span> <span class="n">ExitStack</span><span class="p">()</span> <span class="k">as</span> <span class="n">held</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cancel</span><span class="o">.</span><span class="n">requested</span><span class="p">:</span>
+                <span class="c1"># Cancelled before it ever really started: there is nothing to tear down.</span>
+                <span class="n">_finish</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">status_sink</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+
+            <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">frozen_config</span><span class="p">)</span>
+            <span class="n">apply_workspace</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">jd</span><span class="p">)</span>
+            <span class="c1"># a result file carries no CRS of its own; whoever opens it needs the case's</span>
+            <span class="n">manifest</span><span class="o">.</span><span class="n">crs_epsg</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">_epsg</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"crs_epsg"</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+            <span class="n">logs</span><span class="o">.</span><span class="n">require_free_space</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">min_free_bytes</span><span class="p">)</span>
+
+            <span class="n">ctx</span> <span class="o">=</span> <span class="n">ExecutionContext</span><span class="p">(</span><span class="n">job_dir</span><span class="o">=</span><span class="n">jd</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="n">spec</span><span class="p">,</span> <span class="n">cfg</span><span class="o">=</span><span class="n">cfg</span><span class="p">,</span> <span class="n">sink</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span>
+                                   <span class="n">cancel</span><span class="o">=</span><span class="n">cancel</span><span class="p">,</span> <span class="n">manifest</span><span class="o">=</span><span class="n">manifest</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+
+            <span class="c1"># Another job of this case may be working in the same folder. This one</span>
+            <span class="c1"># waits for it, still QUEUED, and says whom it waits for.</span>
+            <span class="n">held</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">workspace</span><span class="o">.</span><span class="n">held_for</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">cancel</span><span class="o">=</span><span class="n">cancel</span><span class="p">,</span>
+                                                  <span class="n">sink</span><span class="o">=</span><span class="n">combined</span><span class="p">,</span> <span class="n">job_dir</span><span class="o">=</span><span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+
+            <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">JobState</span><span class="o">.</span><span class="n">STARTING</span><span class="p">)</span>
+            <span class="n">status_sink</span><span class="o">.</span><span class="n">state_changed</span><span class="p">()</span>
+
+            <span class="n">backend</span> <span class="o">=</span> <span class="n">_load_backend</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">meta</span><span class="o">.</span><span class="n">needs_environment</span><span class="p">:</span>
+                <span class="n">_check_environment</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+
+            <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">JobState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">)</span>
+            <span class="n">status_sink</span><span class="o">.</span><span class="n">state_changed</span><span class="p">()</span>
+
+            <span class="n">verb</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">verb</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">SolverError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> backend cannot </span><span class="si">{</span><span class="n">meta</span><span class="o">.</span><span class="n">verb</span><span class="si">}</span><span class="s2"> "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">meta</span><span class="o">.</span><span class="n">capability</span><span class="o">.</span><span class="n">value</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">meta</span><span class="o">.</span><span class="n">capability</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="n">subject</span><span class="o">=</span><span class="s2">"kind"</span><span class="p">,</span>
+                    <span class="n">component</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"running </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">verb</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">as_kwargs</span><span class="p">())</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_pre_step</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">))</span>
+            <span class="n">artifacts</span> <span class="o">=</span> <span class="n">verb</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">capability</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">cancel</span><span class="o">.</span><span class="n">check</span><span class="p">()</span>
+
+            <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">JobState</span><span class="o">.</span><span class="n">POSTPROCESSING</span><span class="p">)</span>
+            <span class="n">status_sink</span><span class="o">.</span><span class="n">state_changed</span><span class="p">()</span>
+            <span class="n">_postprocess</span><span class="p">(</span><span class="n">backend</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">manifest</span><span class="p">,</span> <span class="n">artifacts</span><span class="p">)</span>
+
+            <span class="n">results</span><span class="o">.</span><span class="n">write_manifest</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">manifest</span><span class="p">)</span>
+            <span class="n">status</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_artifact_map</span><span class="p">(</span><span class="n">jd</span><span class="p">))</span>
+            <span class="n">_finish</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="n">status_sink</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"job </span><span class="si">%s</span><span class="s2"> COMPLETED"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+
+        <span class="k">except</span> <span class="n">JobCancelled</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"job </span><span class="si">%s</span><span class="s2"> cancelled"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">:</span>
+                <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">)</span>
+            <span class="n">_finish</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">status_sink</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">130</span>                      <span class="c1"># the conventional "terminated by request"</span>
+
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>        <span class="c1"># noqa: BLE001 - every failure is recorded</span>
+            <span class="n">record</span> <span class="o">=</span> <span class="n">_classify</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">spec</span><span class="p">)</span>
+            <span class="c1"># Both, always: the record is what a GUI can act on, the log is what a</span>
+            <span class="c1"># person can read (plan §24).</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"job </span><span class="si">%s</span><span class="s2"> FAILED [</span><span class="si">%s</span><span class="s2">]: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">remedy</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"  remedy: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">record</span><span class="o">.</span><span class="n">remedy</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"traceback"</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">status</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+            <span class="n">status</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_artifact_map</span><span class="p">(</span><span class="n">jd</span><span class="p">))</span>
+            <span class="n">_finish</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">,</span> <span class="n">status_sink</span><span class="p">,</span>
+                    <span class="n">exit_code</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"return_code"</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="ne">KeyboardInterrupt</span><span class="p">):</span>
+                <span class="k">raise</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ctx</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">status_sink</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_pre_step</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ExecutionContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Cross-backend orchestration that must not live inside either backend.</span>
+
+<span class="sd">    Only one case so far, and it is instructive: an OpenFOAM build is seeded from a</span>
+<span class="sd">    converged **TELEMAC** result. Obtaining that seed from inside the OpenFOAM backend</span>
+<span class="sd">    would make one backend reach into its sibling - forbidden by</span>
+<span class="sd">    ``tests/test_capabilities.py``, and wrong regardless. So it happens here, above both,</span>
+<span class="sd">    which is exactly where ``prerun.py`` already documents that such orchestration</span>
+<span class="sd">    belongs. The case of the fine sediment simulation takes its water surface from the</span>
+<span class="sd">    same result.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">kind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_BUILD</span><span class="p">,</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_BUILD</span><span class="p">,</span>
+                         <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="n">named</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="s2">"hotstart"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">named</span><span class="p">:</span>
+        <span class="c1"># The job names the result to start from (a 2D result of another situation,</span>
+        <span class="c1"># or the view from above of a coarser 3D run), and the build takes it in</span>
+        <span class="c1"># place of the seed. Preparing the seed anyway reported a result that was not</span>
+        <span class="c1"># used and, in a case without one, started a TELEMAC pre-run for nothing.</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"seed: the result named in the job, </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">named</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">sink</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">"seed"</span><span class="p">,</span> <span class="n">done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># the study builds its levels itself and takes the result as their seed</span>
+        <span class="k">return</span> <span class="p">({</span><span class="s2">"seed"</span><span class="p">:</span> <span class="n">named</span><span class="p">}</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span>
+                <span class="k">else</span> <span class="p">{})</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">prerun</span>
+    <span class="n">enabled</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">options</span><span class="p">,</span> <span class="s2">"pre_run"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">prerun</span><span class="o">.</span><span class="n">ensure_seed</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="n">enabled</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                        <span class="c1"># noqa: BLE001</span>
+        <span class="c1"># A missing seed costs accuracy, not the build: the case still meshes under a</span>
+        <span class="c1"># flat lid, which is the documented --no-pre-run behavior.</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"no 2D seed for the OpenFOAM build (</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">); building cold"</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">seed</span><span class="o">.</span><span class="n">summary</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"seed: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">sink</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="s2">"seed"</span><span class="p">,</span> <span class="n">done</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"seed"</span><span class="p">:</span> <span class="n">seed</span><span class="o">.</span><span class="n">path</span><span class="p">}</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_finish</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">,</span> <span class="n">status</span><span class="p">:</span> <span class="n">JobStatus</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">JobState</span><span class="p">,</span> <span class="n">sink</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+            <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Record the terminal state, unconditionally.</span>
+
+<span class="sd">    Written through ``write_status`` rather than through the sink on purpose. The sink</span>
+<span class="sd">    throttles and only writes when it believes something changed, and the fields set here</span>
+<span class="sd">    - ``error``, ``exit_code``, the final transition - are assigned on the status object</span>
+<span class="sd">    directly, so the sink would consider itself clean and skip the write. The job would</span>
+<span class="sd">    then finish with the runner log carrying the real failure while ``status.json`` still</span>
+<span class="sd">    said RUNNING, and the reaper would later relabel it as abandoned - losing the actual</span>
+<span class="sd">    error. This is the one write that must never be skipped.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">status</span><span class="o">.</span><span class="n">transition</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">errors</span><span class="o">.</span><span class="n">AxquaError</span><span class="p">:</span>
+        <span class="c1"># A terminal state we cannot legally reach means the job already settled, which</span>
+        <span class="c1"># is not worth failing over at the very end of a run.</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"could not record final state </span><span class="si">%s</span><span class="s2"> from </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exit_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">status</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="n">exit_code</span>
+    <span class="n">status</span><span class="o">.</span><span class="n">updated</span> <span class="o">=</span> <span class="n">utc_now</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">write_status</span><span class="p">(</span><span class="n">jd</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                               <span class="c1"># noqa: BLE001</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">"could not write the final status for </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c1"># Keep the sink from re-writing a now-stale copy over what we just wrote.</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="s2">"_dirty"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_backend</span><span class="p">(</span><span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no solver backend named </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"solver"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Registered solvers: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">backends</span><span class="p">()),</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">EnvironmentError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> backend could not be loaded"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"solver"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Reinstall axqua, or check the plugin providing this backend."</span><span class="p">,</span>
+            <span class="n">cause</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_environment</span><span class="p">(</span><span class="n">backend</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fail before the solver, not during it."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">check_environment</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                        <span class="c1"># noqa: BLE001</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">EnvironmentError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> environment could not be checked"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"telemac.pysource"</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="s2">"telemac"</span> <span class="k">else</span> <span class="s2">"openfoam.bashrc"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Run 'axqua profiles validate' to see what is missing."</span><span class="p">,</span>
+            <span class="n">cause</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">if</span> <span class="n">ok</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">EnvironmentError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> environment is not available on this machine"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"telemac.pysource"</span> <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="s2">"telemac"</span> <span class="k">else</span> <span class="s2">"openfoam.bashrc"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Check the setup script in the solver profile, then run "</span>
+                   <span class="s2">"'axqua profiles validate'."</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_postprocess</span><span class="p">(</span><span class="n">backend</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">ExecutionContext</span><span class="p">,</span>
+                 <span class="n">manifest</span><span class="p">:</span> <span class="n">results</span><span class="o">.</span><span class="n">ResultManifest</span><span class="p">,</span> <span class="n">artifacts</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Postprocess, extract, export - each guarded separately.</span>
+
+<span class="sd">    A failure here must not discard a run that already succeeded: hours of solver time</span>
+<span class="sd">    are worth more than a missing figure, so each step is reported and the job still</span>
+<span class="sd">    completes. A failing *solver* is a different matter and is not caught here.</span>
+<span class="sd">    """</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">call</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s2">"postprocess"</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">backend</span><span class="o">.</span><span class="n">postprocess</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"export_qgis_results"</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">backend</span><span class="o">.</span><span class="n">export_qgis_results</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)),</span>
+    <span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">call</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                    <span class="c1"># noqa: BLE001</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> failed (the run itself succeeded): </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                        <span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="n">manifest</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"warnings"</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">manifest</span><span class="o">.</span><span class="n">objective</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">extract_objective</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">ctx</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                        <span class="c1"># noqa: BLE001</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"objective extraction failed: </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">artifacts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">manifest</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"artifacts"</span><span class="p">):</span>
+        <span class="n">manifest</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s2">"artifacts"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_describe</span><span class="p">(</span><span class="n">artifacts</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_describe</span><span class="p">(</span><span class="n">artifacts</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Summarize whatever a backend verb returned, without serializing bulk data."""</span>
+    <span class="k">if</span> <span class="n">artifacts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">artifacts</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">artifacts</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">artifacts</span><span class="p">,</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">artifacts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">artifacts</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">_describe</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">artifacts</span><span class="o">.</span><span class="n">items</span><span class="p">())[:</span><span class="mi">50</span><span class="p">]}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">artifacts</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">_describe</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">artifacts</span><span class="p">)[:</span><span class="mi">50</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">artifacts</span><span class="p">,</span> <span class="s2">"__dataclass_fields__"</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">_describe</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">artifacts</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">artifacts</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="p">}</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">artifacts</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_artifact_map</span><span class="p">(</span><span class="n">jd</span><span class="p">:</span> <span class="n">JobDir</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"runner_log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">runner_log</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">))}</span>
+    <span class="k">if</span> <span class="n">jd</span><span class="o">.</span><span class="n">results_json</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">"results_json"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">results_json</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">jd</span><span class="o">.</span><span class="n">qgis</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">"qgis"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">qgis</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+    <span class="n">listings</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">solver_logs</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.log"</span><span class="p">))</span> <span class="k">if</span> <span class="n">jd</span><span class="o">.</span><span class="n">solver_logs</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">listings</span><span class="p">:</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">"solver_log"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">listings</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">jd</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="c1">#: How an exception becomes a stable code. The mapping is a table rather than a chain of</span>
+<span class="c1">#: ``isinstance`` checks so plan §24's failure list is visibly covered.</span>
+<span class="n">_FAILURE_HINTS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="ne">BaseException</span><span class="p">],</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="s2">"axqua.config"</span><span class="p">,</span>
+     <span class="s2">"A file the job needs is missing. Check the paths in the frozen "</span>
+     <span class="s2">"input/case-config.yml."</span><span class="p">),</span>
+    <span class="p">(</span><span class="ne">PermissionError</span><span class="p">,</span> <span class="s2">"axqua.environment"</span><span class="p">,</span>
+     <span class="s2">"axqua could not read or write a path the job needs."</span><span class="p">),</span>
+    <span class="p">(</span><span class="ne">MemoryError</span><span class="p">,</span> <span class="s2">"axqua.environment"</span><span class="p">,</span>
+     <span class="s2">"The machine ran out of memory. Reduce the mesh resolution or the process count."</span><span class="p">),</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_classify</span><span class="p">(</span><span class="n">exc</span><span class="p">:</span> <span class="ne">BaseException</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ErrorRecord</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">errors</span><span class="o">.</span><span class="n">AxquaError</span><span class="p">):</span>
+        <span class="n">record</span> <span class="o">=</span> <span class="n">ErrorRecord</span><span class="o">.</span><span class="n">from_exception</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+        <span class="n">record</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"component"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">record</span>
+    <span class="k">for</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">remedy</span> <span class="ow">in</span> <span class="n">_FAILURE_HINTS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exc</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ErrorRecord</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                               <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">,</span>
+                               <span class="n">details</span><span class="o">=</span><span class="p">{</span><span class="s2">"component"</span><span class="p">:</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+                                        <span class="s2">"type"</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">})</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">ErrorRecord</span><span class="o">.</span><span class="n">from_exception</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+    <span class="n">record</span><span class="o">.</span><span class="n">details</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"component"</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">record</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">capability_for</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="n">JobKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Capability</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">KIND_META</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span><span class="o">.</span><span class="n">capability</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">verb_for</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="n">JobKind</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">KIND_META</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span><span class="o">.</span><span class="n">verb</span>
+
+
+<span class="c1"># Re-exported so callers do not have to reach into ``model`` for the dispatch table.</span>
+<span class="n">Dispatch</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

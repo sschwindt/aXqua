@@ -1,0 +1,1064 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.boundary &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/boundary.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/telemac/boundary.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/boundary.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/boundary.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/telemac/boundary.html"><link rel="stylesheet" href="../../../../../_i18n/lang.css"><script src="../../../../../_i18n/lang.js" data-lang="de" data-root="../../../../../" data-page="_modules/axqua/solvers/telemac/boundary.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../../_modules/axqua/solvers/telemac/boundary.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../../fr/_modules/axqua/solvers/telemac/boundary.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.boundary</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../../_modules/axqua/solvers/telemac/boundary.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.solvers.telemac.boundary</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Stage 3 - boundary conditions (.cli).</span>
+
+<span class="sd">Classifies each contour node (in IPOBO order) against the user's liquid-boundary</span>
+<span class="sd">lines and writes the TELEMAC boundary-conditions file. Codes:</span>
+
+<span class="sd">* solid wall                       -&gt; ``2 2 2``  (every non-liquid outer bound)</span>
+<span class="sd">* inflow  (prescribed flowrate)    -&gt; ``4 5 5``  (depth free, velocity from Q)</span>
+<span class="sd">* outflow, prescribed elevation    -&gt; ``5 4 4``  (``outflow_condition: stage_discharge``</span>
+<span class="sd">                                                  [default] or ``elevation``)</span>
+<span class="sd">* outflow, free / Neumann          -&gt; ``4 4 4``  (``outflow_condition: free``)</span>
+
+<span class="sd">The liquid-boundary lines come from ``boundaries.liquid_boundaries`` (a line layer</span>
+<span class="sd">whose ``Type (inflow/outflow)`` field tags each line ``inflow`` or ``outflow``;</span>
+<span class="sd">there may be several of each). They **must coincide with the outer bounds of the</span>
+<span class="sd">mesh zones** so that contour nodes fall on them. Liquid boundaries are numbered</span>
+<span class="sd">exactly the way TELEMAC's ``FRONT2`` does - per contour loop, starting at the</span>
+<span class="sd">south-westernmost node and walking the contour with the domain on its left,</span>
+<span class="sd">merging a run that wraps the loop start (see :func:`_front2_runs`) - so the</span>
+<span class="sd">PRESCRIBED FLOWRATES / PRESCRIBED ELEVATIONS line up with the boundary numbering</span>
+<span class="sd">TELEMAC derives from the geometry.</span>
+
+<span class="sd">For numerical stability the total inflow-node count should be within ~10% of the</span>
+<span class="sd">total outflow-node count; otherwise a stability-risk warning is logged (raise the</span>
+<span class="sd">mesh resolution near the boundaries or adjust the line lengths to rebalance).</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="c1"># The liquid-boundary readers are shared with the OpenFOAM backend, so they</span>
+<span class="c1"># live in the core; re-exported here because this module published them.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
+    <span class="n">_flow_column</span><span class="p">,</span> <span class="n">_is_internal</span><span class="p">,</span> <span class="n">_normalise_kind</span><span class="p">,</span> <span class="n">_type_column</span><span class="p">,</span>
+    <span class="n">liquid_line_details</span><span class="p">,</span> <span class="n">liquid_lines</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">_anisotropic_enabled</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">WALL</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="c1"># prescribed-discharge inflow: LIHBOR=4 (depth FREE, computed), LIUBOR/LIVBOR=5</span>
+<span class="c1"># (velocity prescribed from the imposed Q + profile). LIHBOR must be 4, not 5:</span>
+<span class="c1"># a 5 prescribes the depth from PRESCRIBED ELEVATIONS, which is 0 for an inflow,</span>
+<span class="c1"># so the inflow would be forced to a zero water surface (dry) and TELEMAC's</span>
+<span class="c1"># DEBIMP aborts ("PROBLEM ON BOUNDARY ... CHECK THE WATER DEPTHS").</span>
+<span class="n">INFLOW</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">OUTFLOW_FREE</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>   <span class="c1"># Neumann / free outflow: nothing prescribed</span>
+<span class="n">OUTFLOW_ELEV</span> <span class="o">=</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>   <span class="c1"># prescribed downstream water level</span>
+
+<span class="c1"># inflow/outflow node SPACING differing by more than this fraction triggers a</span>
+<span class="c1"># stability-risk warning (a resolution mismatch matters; unequal raw counts on</span>
+<span class="c1"># boundaries of different physical width do not)</span>
+<span class="n">SPACING_BALANCE_TOL</span> <span class="o">=</span> <span class="mf">0.35</span>
+<span class="c1"># a liquid boundary with fewer nodes than this is flagged as under-resolved</span>
+<span class="n">MIN_BOUNDARY_NODES</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="c1"># cap on the exterior vertices of an internal source-region polygon: TELEMAC's</span>
+<span class="c1"># region reader checks each node against the vertex list (INPOLY), and the .cas</span>
+<span class="c1"># must carry MAXIMUM NUMBER OF POINTS FOR SOURCES REGIONS &gt;= this</span>
+<span class="n">MAX_REGION_VERTICES</span> <span class="o">=</span> <span class="mi">16</span>
+
+
+<div class="viewcode-block" id="LiquidBoundary">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.LiquidBoundary">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LiquidBoundary</span><span class="p">:</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>        <span class="c1"># 1-based, in contour-appearance order</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>         <span class="c1"># "inflow" | "outflow"</span>
+    <span class="n">n_nodes</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># per-line prescribed Q [m3/s]; None -&gt; split the</span></div>
+
+                                     <span class="c1"># total reach discharge across inflows by node share</span>
+
+
+<div class="viewcode-block" id="InternalSourceRegion">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.InternalSourceRegion">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InternalSourceRegion</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""An internal source/sink REGION for a losing-gaining reach.</span>
+
+<span class="sd">    A 2D depth-averaged model has no subsurface, so hyporheic / underflow exchange</span>
+<span class="sd">    where the surface flow *loses* water in one place and *gains* it back downstream</span>
+<span class="sd">    is represented as TELEMAC **source regions** (``SOURCE REGIONS DATA FILE``): a</span>
+<span class="sd">    withdrawal (``discharge &lt; 0``) over the losing polygon and an injection</span>
+<span class="sd">    (``discharge &gt; 0``) over the gaining polygon. TELEMAC spreads each region's Q</span>
+<span class="sd">    uniformly over the mesh nodes inside the polygon (Q/area as a depth rate,</span>
+<span class="sd">    ``prosou.f``), so the exchange acts as a gentle distributed flux instead of</span>
+<span class="sd">    hammering the few nodes under the line - a sink concentrated on single nodes</span>
+<span class="sd">    dries them, spikes velocities and collapses the CFL-adaptive time step</span>
+<span class="sd">    (TELEMAC has **no depth guard on negative sources**).</span>
+<span class="sd">    """</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span>   <span class="c1"># signed m3/s: &lt; 0 withdraws (losing), &gt; 0 injects (gaining)</span>
+    <span class="n">polygon</span><span class="p">:</span> <span class="nb">object</span>    <span class="c1"># shapely Polygon (region outline, EPSG per config)</span>
+    <span class="n">area</span><span class="p">:</span> <span class="nb">float</span>        <span class="c1"># polygon area [m2]</span>
+    <span class="n">n_nodes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># mesh nodes inside (0 when counted without a mesh)</span>
+    <span class="c1"># thickness [m] of the porous layer the exchange passes through, from the</span>
+    <span class="c1"># percolation patch's depth field. Only used by the conductivity (Green-Ampt)</span>
+    <span class="c1"># exchange mode; None when no patch applies.</span>
+    <span class="n">porous_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="dump_liquid_boundaries">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.dump_liquid_boundaries">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dump_liquid_boundaries</span><span class="p">(</span><span class="n">liquids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">"LiquidBoundary"</span><span class="p">],</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Serialize the FRONT2-ordered liquid boundaries to JSON.</span>
+
+<span class="sd">    Written during the build (:mod:`axqua.solvers.telemac.pipeline`) so the standalone unsteady /</span>
+<span class="sd">    3D scripts recover the exact TELEMAC boundary numbering (index/kind/node count,</span>
+<span class="sd">    and any per-line discharge) without rebuilding the mesh - all</span>
+<span class="sd">    :func:`load_liquid_boundaries` needs to write the hydrograph liquid-boundaries</span>
+<span class="sd">    file and the prescribed-value arrays.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+        <span class="p">[{</span><span class="s2">"index"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="s2">"n_nodes"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span>
+          <span class="s2">"discharge"</span><span class="p">:</span> <span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="p">}</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span><span class="p">],</span>
+        <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<div class="viewcode-block" id="load_liquid_boundaries">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.load_liquid_boundaries">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_liquid_boundaries</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s2">"LiquidBoundary"</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Load the liquid boundaries dumped by :func:`dump_liquid_boundaries`."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"index"</span><span class="p">]),</span> <span class="n">kind</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]),</span>
+                           <span class="n">n_nodes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"n_nodes"</span><span class="p">]),</span>
+                           <span class="n">discharge</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"discharge"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+                                      <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"discharge"</span><span class="p">])))</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_outflow_code</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Free/Neumann outflow -&gt; 4 4 4; stage_discharge / elevation -&gt; 5 4 4."""</span>
+    <span class="k">return</span> <span class="n">OUTFLOW_FREE</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span> <span class="k">else</span> <span class="n">OUTFLOW_ELEV</span>
+
+
+
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_internal_sign</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Sign of an internal exchange: -1 loses (withdraws), +1 gains (injects)."""</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"lose"</span><span class="p">,</span> <span class="s2">"loss"</span><span class="p">,</span> <span class="s2">"sink"</span><span class="p">,</span> <span class="s2">"withdraw"</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">k</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"gain"</span><span class="p">,</span> <span class="s2">"source"</span><span class="p">,</span> <span class="s2">"inject"</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mf">1.0</span> <span class="k">if</span> <span class="s2">"out"</span> <span class="ow">in</span> <span class="n">s</span> <span class="k">else</span> <span class="mf">1.0</span>   <span class="c1"># surface sense: internal OUTflow loses</span>
+
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_simplify_region</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">max_vertices</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">MAX_REGION_VERTICES</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Reduce *polygon* to at most *max_vertices* exterior vertices.</span>
+
+<span class="sd">    TELEMAC reads the region outline as a plain vertex list (INPOLY), so a light</span>
+<span class="sd">    outline is enough; iteratively coarser Douglas-Peucker until it fits. Returns</span>
+<span class="sd">    (polygon, exterior_coords_without_closing_duplicate).</span>
+<span class="sd">    """</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">poly</span> <span class="o">=</span> <span class="n">polygon</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_vertices</span> <span class="ow">and</span> <span class="n">tol</span> <span class="o">&lt;</span> <span class="mf">1e3</span><span class="p">:</span>
+        <span class="n">poly</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">tol</span><span class="p">,</span> <span class="n">preserve_topology</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">poly</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">tol</span> <span class="o">*=</span> <span class="mf">2.0</span>
+    <span class="k">return</span> <span class="n">poly</span><span class="p">,</span> <span class="n">coords</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_count_nodes_inside</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="s2">"Mesh"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Number of mesh nodes strictly inside *polygon* (bbox-prefiltered)."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">minx</span><span class="p">,</span> <span class="n">miny</span><span class="p">,</span> <span class="n">maxx</span><span class="p">,</span> <span class="n">maxy</span> <span class="o">=</span> <span class="n">polygon</span><span class="o">.</span><span class="n">bounds</span>
+    <span class="n">cand</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">minx</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">maxx</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;=</span> <span class="n">miny</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">maxy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cand</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">contains_xy</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">cand</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">cand</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_percolation_patches</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Percolation patch polygons: ``{name, geom, porous_depth}`` (empty if unset)."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">zone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">zone</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
+    <span class="n">name_col</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span>
+                     <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">name_field</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">depth_col</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">columns</span>
+                      <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">depth_field</span><span class="o">.</span><span class="n">lower</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">patches</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">"name"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">name_col</span><span class="p">])</span> <span class="k">if</span> <span class="n">name_col</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"patch-</span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"geom"</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+            <span class="s2">"porous_depth"</span><span class="p">:</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">depth_col</span><span class="p">])</span> <span class="k">if</span> <span class="n">depth_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                             <span class="ow">and</span> <span class="n">row</span><span class="p">[</span><span class="n">depth_col</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="n">patches</span>
+
+
+<div class="viewcode-block" id="exchange_regions">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.exchange_regions">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">exchange_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="s2">"Mesh | None"</span> <span class="o">=</span> <span class="kc">None</span>
+                     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s2">"InternalSourceRegion"</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The internal exchange a build applies: the ``int-*`` lines, if the case asks.</span>
+
+<span class="sd">    The lines are a property of the boundary layer, and a layer is shared between</span>
+<span class="sd">    cases. They used to be applied whenever the layer held them, so a case that said</span>
+<span class="sd">    nothing about an exchange got one anyway, in its least stable form: a fixed-rate</span>
+<span class="sd">    source region on a thin strip. On the isar-2025 reach that ends a run at its first</span>
+<span class="sd">    time step. An exchange now needs the case to ask for it, with a ``gain_lose`` block</span>
+<span class="sd">    or with ``boundaries.internal_sources: true`` for the fixed-rate regions. Without</span>
+<span class="sd">    either, the lines are reported and left out.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">internal_sources</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">load_internal_source_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># without the mesh: nothing is checked that only matters when they are applied</span>
+        <span class="n">ignored</span> <span class="o">=</span> <span class="n">load_internal_source_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                        <span class="c1"># noqa: BLE001 - they are unused</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"internal lines not read (</span><span class="si">%s</span><span class="s2">); they are not applied anyway"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">ignored</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">discharge</span><span class="si">:</span><span class="s2">+g</span><span class="si">}</span><span class="s2"> m3/s)"</span>
+                          <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">ignored</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"the liquid-boundary layer holds </span><span class="si">%d</span><span class="s2"> internal exchange line(s): </span><span class="si">%s</span><span class="s2">. This "</span>
+            <span class="s2">"case has no gain_lose block, so NO exchange is modeled. Add "</span>
+            <span class="s2">"'gain_lose: {enabled: true, zone: &lt;porous body&gt;}' to model it, or "</span>
+            <span class="s2">"'boundaries.internal_sources: true' for fixed-rate source regions."</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">ignored</span><span class="p">),</span> <span class="n">names</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+
+
+<div class="viewcode-block" id="load_internal_source_regions">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.load_internal_source_regions">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_internal_source_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+                                 <span class="n">mesh</span><span class="p">:</span> <span class="s2">"Mesh | None"</span> <span class="o">=</span> <span class="kc">None</span>
+                                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s2">"InternalSourceRegion"</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Internal losing/gaining lines -&gt; TELEMAC source regions (see</span>
+<span class="sd">    :class:`InternalSourceRegion`). A line whose type tag starts with 'int'</span>
+<span class="sd">    becomes a withdrawal (``lose``) or injection (``gain``) of its flow-column</span>
+<span class="sd">    discharge, spread over a polygon region. Empty when the layer has no internal</span>
+<span class="sd">    lines.</span>
+
+<span class="sd">    The region polygon is the line buffered to a strip of</span>
+<span class="sd">    ``boundaries.internal_source_region_width`` - except in ``percolation.mode:</span>
+<span class="sd">    region``, where a **losing** line whose line intersects a percolation patch</span>
+<span class="sd">    uses the whole patch polygon instead (same -Q over a far larger area, so the</span>
+<span class="sd">    per-node depth rate drops by orders of magnitude).</span>
+
+<span class="sd">    With a *mesh* the nodes inside each region are counted; a region containing no</span>
+<span class="sd">    node raises (TELEMAC aborts on it at run time).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+
+    <span class="n">gdf</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">gdf</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+        <span class="n">gdf</span> <span class="o">=</span> <span class="n">gdf</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
+    <span class="n">type_col</span> <span class="o">=</span> <span class="n">_type_column</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">type_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">flow_col</span> <span class="o">=</span> <span class="n">_flow_column</span><span class="p">(</span><span class="n">gdf</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+    <span class="c1"># In percolation mode the LOSING exchange may spread over the patch polygon</span>
+    <span class="c1"># (mode 'region': TELEMAC source region; mode 'fortran': USER_RAIN domain).</span>
+    <span class="c1"># With losing_region='line' it instead stays on the buffered line strip - use</span>
+    <span class="c1"># that when the modeled water surface does not actually cover the patch, or</span>
+    <span class="c1"># the withdrawal concentrates on a shrinking wet remnant (see the isar-2025</span>
+    <span class="c1"># test-approaches.md: the patch holds only ~88 m2 of wet area at steady state,</span>
+    <span class="c1"># against ~183 m2 for a 12 m strip along the line).</span>
+    <span class="c1"># all patches are read whenever percolation is active (the conductivity mode</span>
+    <span class="c1"># needs their porous depth even when the region stays on the line); `patches`</span>
+    <span class="c1"># is the subset actually used AS the losing region.</span>
+    <span class="n">all_patches</span> <span class="o">=</span> <span class="p">(</span><span class="n">_percolation_patches</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+                   <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">patches</span> <span class="o">=</span> <span class="p">(</span><span class="n">all_patches</span>
+               <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">losing_region</span> <span class="o">==</span> <span class="s2">"patch"</span> <span class="k">else</span> <span class="p">[])</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">internal_source_region_width</span><span class="p">)</span>
+    <span class="n">regions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">InternalSourceRegion</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">gdf</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">type_col</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_internal</span><span class="p">(</span><span class="n">raw</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">flow_col</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"liquid_boundaries </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> has an internal source line </span><span class="si">{</span><span class="n">raw</span><span class="si">!r}</span><span class="s2"> but "</span>
+                <span class="s2">"no discharge/flow column to size it (add a 'Target flow' column with "</span>
+                <span class="s2">"the exchange in m3/s)."</span>
+            <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">magnitude</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">flow_col</span><span class="p">]))</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"internal source line </span><span class="si">{</span><span class="n">raw</span><span class="si">!r}</span><span class="s2"> has no numeric </span><span class="si">{</span><span class="n">flow_col</span><span class="si">!r}</span><span class="s2"> value."</span>
+            <span class="p">)</span>
+        <span class="n">signed</span> <span class="o">=</span> <span class="n">_internal_sign</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">*</span> <span class="n">magnitude</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">geometry</span>
+        <span class="c1"># default region: the line buffered to a thin strip (flat caps)</span>
+        <span class="n">polygon</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">width</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">cap_style</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">region_name</span> <span class="o">=</span> <span class="n">raw</span>
+        <span class="n">porous</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">signed</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># the porous layer thickness belongs to the LOSING side; take it from</span>
+            <span class="c1"># whichever patch the line touches (needed by the conductivity mode</span>
+            <span class="c1"># even when the region itself stays on the line)</span>
+            <span class="n">near</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">all_patches</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">]</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">geom</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">near</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">porous</span> <span class="o">=</span> <span class="n">near</span><span class="p">[</span><span class="s2">"porous_depth"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">patches</span><span class="p">:</span>
+                <span class="n">hit</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">patches</span> <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">]</span><span class="o">.</span><span class="n">intersects</span><span class="p">(</span><span class="n">geom</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">hit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">polygon</span> <span class="o">=</span> <span class="n">hit</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">]</span>
+                    <span class="n">region_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">raw</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">hit</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s2">"  percolation region mode: losing line </span><span class="si">%r</span><span class="s2"> spread over patch </span><span class="si">%r</span><span class="s2">"</span>
+                        <span class="s2">" (</span><span class="si">%.0f</span><span class="s2"> m2</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">hit</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span> <span class="n">polygon</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+                        <span class="s2">""</span> <span class="k">if</span> <span class="n">hit</span><span class="p">[</span><span class="s2">"porous_depth"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="sa">f</span><span class="s2">", porous depth </span><span class="si">{</span><span class="n">hit</span><span class="p">[</span><span class="s1">'porous_depth'</span><span class="p">]</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m"</span><span class="p">)</span>
+        <span class="n">polygon</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_simplify_region</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
+        <span class="n">n_nodes</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">mesh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">_count_nodes_inside</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_nodes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"internal source region </span><span class="si">{</span><span class="n">region_name</span><span class="si">!r}</span><span class="s2"> contains no mesh node "</span>
+                    <span class="s2">"- TELEMAC aborts on an empty source region. Widen "</span>
+                    <span class="s2">"boundaries.internal_source_region_width or check the geometry."</span>
+                <span class="p">)</span>
+        <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">InternalSourceRegion</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">region_name</span><span class="p">,</span> <span class="n">discharge</span><span class="o">=</span><span class="n">signed</span><span class="p">,</span> <span class="n">polygon</span><span class="o">=</span><span class="n">polygon</span><span class="p">,</span>
+            <span class="n">area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">polygon</span><span class="o">.</span><span class="n">area</span><span class="p">),</span> <span class="n">n_nodes</span><span class="o">=</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">porous_depth</span><span class="o">=</span><span class="n">porous</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">regions</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_match_tolerance</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Distance below which a contour node is taken to lie on a liquid line.</span>
+
+<span class="sd">    Measured from the **mesh that was actually built** wherever possible: two median</span>
+<span class="sd">    boundary edges, which is what "on the line" means for a node. The configured sizes</span>
+<span class="sd">    are only a fallback for callers without a mesh, and a poor one - taking the largest</span>
+<span class="sd">    of them (``breakline_size`` defaults to 3 m, deliberately coarser than a fine</span>
+<span class="sd">    ``default_size``) yields a tolerance of meters on a centimeter mesh, which quietly</span>
+<span class="sd">    swallows meters of wall either side of a short inflow line and prescribes the</span>
+<span class="sd">    discharge across all of it.</span>
+<span class="sd">    """</span>
+    <span class="n">scale</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span>
+    <span class="k">if</span> <span class="n">_anisotropic_enabled</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="n">configured</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">floodplain_size</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">channel_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">*</span> <span class="mf">2.0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">configured</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">default_size</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">breakline_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">scale</span> <span class="o">*</span> <span class="mf">1.5</span>
+    <span class="k">if</span> <span class="n">mesh</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">configured</span>
+    <span class="n">edge</span> <span class="o">=</span> <span class="n">_median_boundary_edge</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">edge</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">configured</span>
+    <span class="c1"># Clamped by the mesh, never widened by it: the configured sizes are what a case</span>
+    <span class="c1"># has always been matched with, and only the case where they are far coarser than</span>
+    <span class="c1"># the mesh is a bug. Here breakline_size (3 m by default, deliberately coarse) beat</span>
+    <span class="c1"># a 5 cm default_size and produced a 4.5 m tolerance on a 5 cm mesh, which swallowed</span>
+    <span class="c1"># meters of wall either side of a 0.6 m inlet.</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">configured</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">edge</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_solid_footprint</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Union of the case's solid structure footprints, or None when it has none."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.structures</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_structures</span><span class="p">,</span> <span class="n">solid_footprint</span>
+
+        <span class="k">return</span> <span class="n">solid_footprint</span><span class="p">(</span><span class="n">load_structures</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>                       <span class="c1"># report-only: never block a build</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"no solid footprints available for boundary classification: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_on_solid</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Nodes a solid structure stands on, by the element rule the bed raise uses.</span>
+
+<span class="sd">    Testing a node's own center is not enough. A wall thinner than an element raises</span>
+<span class="sd">    the bed of every node of the elements it crosses, so a node can end up standing on</span>
+<span class="sd">    a crest while its center falls outside the footprint. Keeping such a node as a</span>
+<span class="sd">    liquid boundary prescribes a discharge or a stage on top of the wall.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.structures</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">blanking_area</span><span class="p">,</span> <span class="n">load_structures</span><span class="p">,</span>
+                                           <span class="n">solid_mask</span><span class="p">)</span>
+
+        <span class="n">structures</span> <span class="o">=</span> <span class="n">load_structures</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>                       <span class="c1"># report-only: never block a build</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"no solid footprints available for boundary classification: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">structures</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">solid_mask</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">triangles</span><span class="o">=</span><span class="n">mesh</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span>
+                      <span class="n">min_area</span><span class="o">=</span><span class="n">blanking_area</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_median_boundary_edge</span><span class="p">(</span><span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Median distance between consecutive contour nodes of the mesh."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nodes</span><span class="o">.</span><span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">)[</span><span class="n">nodes</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)[</span><span class="n">nodes</span><span class="p">]</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="n">steps</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">steps</span><span class="p">))</span> <span class="k">if</span> <span class="n">steps</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_contour_length</span><span class="p">(</span><span class="n">node_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Length along the contour of a run of consecutive boundary node ids."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">xs</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">ys</span><span class="p">))))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_warn_node_balance</span><span class="p">(</span><span class="n">liquids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">],</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span>
+                       <span class="n">node_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stability check on liquid-boundary *resolution* (node spacing), not raw counts.</span>
+
+<span class="sd">    Comparing total inflow vs total outflow node counts mislabels a legitimately</span>
+<span class="sd">    narrower outflow - or an inflow split across several lines - as a risk. What</span>
+<span class="sd">    actually matters numerically is that each boundary is adequately resolved and</span>
+<span class="sd">    that inflow and outflow share a comparable node **spacing**, so this compares</span>
+<span class="sd">    mean node spacing (and flags any under-resolved boundary) instead.</span>
+<span class="sd">    """</span>
+    <span class="n">inflow</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">]</span>
+    <span class="n">outflow</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"outflow"</span><span class="p">]</span>
+    <span class="n">n_in</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflow</span><span class="p">)</span>
+    <span class="n">n_out</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">outflow</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_in</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_out</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"STABILITY RISK: liquid boundaries have </span><span class="si">%d</span><span class="s2"> inflow and </span><span class="si">%d</span><span class="s2"> outflow "</span>
+            <span class="s2">"nodes - a model needs at least one of each. Check that the "</span>
+            <span class="s2">"liquid-boundary lines are tagged and coincide with the mesh bounds."</span><span class="p">,</span>
+            <span class="n">n_in</span><span class="p">,</span> <span class="n">n_out</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_spacing</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">group</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">_contour_length</span><span class="p">(</span><span class="n">node_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">[]),</span> <span class="n">mesh</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">group</span><span class="p">)</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">group</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="p">(</span><span class="n">length</span> <span class="o">/</span> <span class="n">segments</span> <span class="k">if</span> <span class="n">segments</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">ni</span><span class="p">,</span> <span class="n">li</span><span class="p">,</span> <span class="n">si</span> <span class="o">=</span> <span class="n">_spacing</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span>
+    <span class="n">no</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">so</span> <span class="o">=</span> <span class="n">_spacing</span><span class="p">(</span><span class="n">outflow</span><span class="p">)</span>
+
+    <span class="n">thin</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">&lt;</span> <span class="n">MIN_BOUNDARY_NODES</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">thin</span><span class="p">:</span>
+        <span class="n">lb</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">thin</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"STABILITY RISK: </span><span class="si">%s</span><span class="s2"> boundary </span><span class="si">%d</span><span class="s2"> has only </span><span class="si">%d</span><span class="s2"> node(s) (&lt; </span><span class="si">%d</span><span class="s2">) - too coarse "</span>
+            <span class="s2">"to resolve the flux profile. Refine the mesh near it or lengthen the line."</span><span class="p">,</span>
+            <span class="n">lb</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">MIN_BOUNDARY_NODES</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">spread</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">si</span> <span class="o">-</span> <span class="n">so</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">so</span><span class="p">)</span> <span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">so</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">spread</span> <span class="o">&gt;</span> <span class="n">SPACING_BALANCE_TOL</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"STABILITY RISK: inflow and outflow are resolved at different node "</span>
+            <span class="s2">"spacings (inflow ~</span><span class="si">%.2f</span><span class="s2"> m over </span><span class="si">%d</span><span class="s2"> nodes, outflow ~</span><span class="si">%.2f</span><span class="s2"> m over </span><span class="si">%d</span><span class="s2"> nodes; "</span>
+            <span class="s2">"</span><span class="si">%.0f%%</span><span class="s2"> apart, &gt; </span><span class="si">%.0f%%</span><span class="s2">). Refine the coarser side so both carry a "</span>
+            <span class="s2">"comparable node density."</span><span class="p">,</span>
+            <span class="n">si</span><span class="p">,</span> <span class="n">ni</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span> <span class="n">no</span><span class="p">,</span> <span class="n">spread</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">SPACING_BALANCE_TOL</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">thin</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">"liquid-boundary resolution OK: inflow </span><span class="si">%d</span><span class="s2"> nodes over </span><span class="si">%.1f</span><span class="s2"> m (~</span><span class="si">%.2f</span><span class="s2"> m "</span>
+            <span class="s2">"spacing) vs outflow </span><span class="si">%d</span><span class="s2"> nodes over </span><span class="si">%.1f</span><span class="s2"> m (~</span><span class="si">%.2f</span><span class="s2"> m spacing)"</span><span class="p">,</span>
+            <span class="n">ni</span><span class="p">,</span> <span class="n">li</span><span class="p">,</span> <span class="n">si</span><span class="p">,</span> <span class="n">no</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">so</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_front2_runs</span><span class="p">(</span><span class="n">loop_nodes</span><span class="p">,</span> <span class="n">loop_kinds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">"""Liquid/wall runs of one closed contour loop, in TELEMAC ``FRONT2`` order.</span>
+
+<span class="sd">    TELEMAC numbers liquid boundaries (``bief/front2.f``) by starting at each</span>
+<span class="sd">    loop's **south-westernmost** node (min ``x+y``, ties broken by min ``y``) and</span>
+<span class="sd">    walking the contour with the domain on its left (the outer loop is traversed</span>
+<span class="sd">    counter-clockwise, as ``KP1BOR`` follows the CCW element node order), counting</span>
+<span class="sd">    a new liquid boundary at every transition into a liquid segment and merging a</span>
+<span class="sd">    run that wraps the loop start. We replay exactly that here so our liquid-</span>
+<span class="sd">    boundary numbering matches the order TELEMAC assigns - otherwise the</span>
+<span class="sd">    PRESCRIBED FLOWRATES / ELEVATIONS land on the wrong boundary (inflow Q and</span>
+<span class="sd">    outflow H swapped) or a single boundary that straddles the loop start is split</span>
+<span class="sd">    into two.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">loop_nodes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">loop_nodes</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="n">nodes</span><span class="p">]</span>
+    <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)[</span><span class="n">nodes</span><span class="p">]</span>
+
+    <span class="c1"># orient domain-on-left (outer loop CCW, signed area &gt; 0); islands are all</span>
+    <span class="c1"># wall, so their orientation does not affect liquid numbering.</span>
+    <span class="n">area2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">xs</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">ys</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">ys</span><span class="p">))</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">area2</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">oxs</span><span class="p">,</span> <span class="n">oys</span> <span class="o">=</span> <span class="n">xs</span><span class="p">[</span><span class="n">order</span><span class="p">],</span> <span class="n">ys</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+    <span class="n">okinds</span> <span class="o">=</span> <span class="p">[</span><span class="n">loop_kinds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">order</span><span class="p">]</span>
+    <span class="n">onodes</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">order</span><span class="p">]</span>
+
+    <span class="c1"># south-westernmost start (FRONT2's IDEP): min x+y, ties broken by min y</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">oxs</span> <span class="o">+</span> <span class="n">oys</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">key</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1e-4</span>
+    <span class="n">cand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">key</span> <span class="o">-</span> <span class="n">key</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cand</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">oys</span><span class="p">[</span><span class="n">cand</span><span class="p">])])</span>
+    <span class="n">rkinds</span> <span class="o">=</span> <span class="p">[</span><span class="n">okinds</span><span class="p">[(</span><span class="n">start</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="n">rnodes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">onodes</span><span class="p">[(</span><span class="n">start</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+
+    <span class="n">runs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">nd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rkinds</span><span class="p">,</span> <span class="n">rnodes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">runs</span> <span class="ow">and</span> <span class="n">runs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">:</span>
+            <span class="n">runs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nd</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">runs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">k</span><span class="p">,</span> <span class="p">[</span><span class="n">nd</span><span class="p">]])</span>
+    <span class="c1"># the loop is cyclic: a run that wraps the start is one boundary, not two</span>
+    <span class="c1"># (the wrapping tail precedes the head along the contour)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">runs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">runs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">runs</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">runs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">nd</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">nd</span> <span class="ow">in</span> <span class="n">runs</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_number_liquid_boundaries</span><span class="p">(</span>
+        <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">kinds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">],</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">"""Number the liquid boundaries per contour loop in TELEMAC ``FRONT2`` order.</span>
+
+<span class="sd">    Returns the boundaries and a map ``index -&gt; contour node ids`` (used to match</span>
+<span class="sd">    each boundary to its source line for per-line discharge assignment).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="n">bn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="p">)</span>
+    <span class="n">loops</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"boundary_loops"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">loop_lengths</span> <span class="o">=</span> <span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">bn</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span> <span class="k">if</span> <span class="n">loops</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">loops</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+                    <span class="k">else</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">loops</span><span class="p">])</span>
+
+    <span class="n">liquids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">off</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">loop_lengths</span><span class="p">:</span>
+        <span class="n">loop_nodes</span> <span class="o">=</span> <span class="n">bn</span><span class="p">[</span><span class="n">off</span><span class="p">:</span><span class="n">off</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span>
+        <span class="n">loop_kinds</span> <span class="o">=</span> <span class="n">kinds</span><span class="p">[</span><span class="n">off</span><span class="p">:</span><span class="n">off</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span>
+        <span class="n">off</span> <span class="o">+=</span> <span class="n">length</span>
+        <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">node_ids</span> <span class="ow">in</span> <span class="n">_front2_runs</span><span class="p">(</span><span class="n">loop_nodes</span><span class="p">,</span> <span class="n">loop_kinds</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"inflow"</span><span class="p">,</span> <span class="s2">"outflow"</span><span class="p">):</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">liquids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">liquids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LiquidBoundary</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)))</span>
+                <span class="n">node_map</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_ids</span>
+    <span class="k">return</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">node_map</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_assign_line_discharges</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">],</span>
+                            <span class="n">node_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Attach each inflow boundary its own prescribed Q from the liquid-boundary</span>
+<span class="sd">    layer's flow column, by matching the boundary's node centroid to the nearest</span>
+<span class="sd">    inflow line. No-op (leaves ``discharge=None``) when the layer has no flow column,</span>
+<span class="sd">    so a single total inflow Q is split by node share (the historical behavior).</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+
+    <span class="n">details</span> <span class="o">=</span> <span class="n">liquid_line_details</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">details</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">inflow_lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">details</span>
+                    <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"inflow"</span> <span class="ow">and</span> <span class="n">d</span><span class="p">[</span><span class="s2">"discharge"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inflow_lines</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="s2">"inflow"</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">nds</span> <span class="o">=</span> <span class="n">node_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nds</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">centroid</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nds</span><span class="p">])),</span>
+                         <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nds</span><span class="p">])))</span>
+        <span class="n">nearest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">inflow_lines</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">"geom"</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">centroid</span><span class="p">))</span>
+        <span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nearest</span><span class="p">[</span><span class="s2">"discharge"</span><span class="p">])</span>
+
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span>
+                <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span> <span class="ow">and</span> <span class="n">lb</span><span class="o">.</span><span class="n">discharge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">cfg_q</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span>
+    <span class="n">shares</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">lb</span><span class="o">.</span><span class="n">discharge</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cfg_q</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg_q</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg_q</span><span class="p">)):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"per-line inflow discharges (</span><span class="si">%s</span><span class="s2">) sum to </span><span class="si">%.4f</span><span class="s2"> m3/s but "</span>
+                    <span class="s2">"boundaries.prescribed_flowrate is </span><span class="si">%.4f</span><span class="s2"> m3/s - reconcile them so "</span>
+                    <span class="s2">"the total reach discharge is consistent."</span><span class="p">,</span> <span class="n">shares</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg_q</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"per-line inflow discharges: </span><span class="si">%s</span><span class="s2"> m3/s (sum </span><span class="si">%.4f</span><span class="s2">)"</span><span class="p">,</span> <span class="n">shares</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="classify_nodes">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.classify_nodes">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">classify_nodes</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""Classify contour nodes; return per-node kind list and liquid boundaries.</span>
+
+<span class="sd">    ``kinds`` stays in ``mesh.boundary_nodes`` order (so it drives the ``.cli`` row</span>
+<span class="sd">    order, which must match the geometry's IPOBO). The returned ``LiquidBoundary``</span>
+<span class="sd">    list is numbered the way TELEMAC's ``FRONT2`` does (see</span>
+<span class="sd">    :func:`_front2_runs`), so the steering file's per-boundary prescribed values</span>
+<span class="sd">    line up with the boundary numbering TELEMAC derives from the geometry.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">tol</span> <span class="o">=</span> <span class="n">_match_tolerance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  liquid-boundary matching tolerance </span><span class="si">%.3f</span><span class="s2"> m (two median contour edges)"</span><span class="p">,</span>
+             <span class="n">tol</span><span class="p">)</span>
+    <span class="n">on_solid_node</span> <span class="o">=</span> <span class="n">_on_solid</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+
+    <span class="n">kinds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">on_solid</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">mesh</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">node</span><span class="p">],</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">node</span><span class="p">])</span>
+        <span class="n">best_kind</span><span class="p">,</span> <span class="n">best_dist</span> <span class="o">=</span> <span class="s2">"wall"</span><span class="p">,</span> <span class="n">tol</span>
+        <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">geom</span> <span class="ow">in</span> <span class="n">lines</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">d</span> <span class="o">&lt;</span> <span class="n">best_dist</span><span class="p">:</span>
+                <span class="n">best_kind</span><span class="p">,</span> <span class="n">best_dist</span> <span class="o">=</span> <span class="n">kind</span><span class="p">,</span> <span class="n">d</span>
+        <span class="c1"># A node standing inside a solid structure is not a way in or out, whatever it</span>
+        <span class="c1"># is near: the structure is burned into the bed, so the node's bed sits a meter</span>
+        <span class="c1"># or more above the opening beside it, and prescribing a discharge or a stage</span>
+        <span class="c1"># there pours water onto the crest. It shows up as a single node meters deep at</span>
+        <span class="c1"># the boundary while its neighbors run at several m/s.</span>
+        <span class="k">if</span> <span class="n">best_kind</span> <span class="o">!=</span> <span class="s2">"wall"</span> <span class="ow">and</span> <span class="n">on_solid_node</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">on_solid_node</span><span class="p">[</span><span class="n">node</span><span class="p">]:</span>
+            <span class="n">best_kind</span> <span class="o">=</span> <span class="s2">"wall"</span>
+            <span class="n">on_solid</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">kinds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_kind</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">on_solid</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  </span><span class="si">%d</span><span class="s2"> contour node(s) excluded from the liquid boundaries: they stand "</span>
+                 <span class="s2">"on a solid structure"</span><span class="p">,</span> <span class="n">on_solid</span><span class="p">)</span>
+
+    <span class="n">liquids</span><span class="p">,</span> <span class="n">node_map</span> <span class="o">=</span> <span class="n">_number_liquid_boundaries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">kinds</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">liquids</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"No contour nodes matched the liquid-boundary lines. Check that the "</span>
+            <span class="s2">"liquid_boundaries lines coincide with the mesh-zone outer bounds and "</span>
+            <span class="sa">f</span><span class="s2">"the matching tolerance (~</span><span class="si">{</span><span class="n">tol</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> m) suits the mesh resolution."</span>
+        <span class="p">)</span>
+    <span class="n">_assign_line_discharges</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">node_map</span><span class="p">)</span>
+    <span class="n">_warn_node_balance</span><span class="p">(</span><span class="n">liquids</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">node_map</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">kinds</span><span class="p">,</span> <span class="n">liquids</span></div>
+
+
+
+<div class="viewcode-block" id="write_cli">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.boundary.write_cli">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_cli</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">]]:</span>
+    <span class="n">kinds</span><span class="p">,</span> <span class="n">liquids</span> <span class="o">=</span> <span class="n">classify_nodes</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"wall"</span><span class="p">:</span> <span class="n">WALL</span><span class="p">,</span> <span class="s2">"inflow"</span><span class="p">:</span> <span class="n">INFLOW</span><span class="p">,</span> <span class="s2">"outflow"</span><span class="p">:</span> <span class="n">_outflow_code</span><span class="p">(</span><span class="n">cfg</span><span class="p">)}</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rank</span><span class="p">,</span> <span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="p">,</span> <span class="n">kinds</span><span class="p">),</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">code</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span>
+        <span class="n">n_global</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>  <span class="c1"># SELAFIN/TELEMAC 1-based</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">"wall"</span> <span class="k">else</span> <span class="n">kind</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s2">  0.000 0.000 0.000 0.000  2  0.000 0.000 0.000  "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">n_global</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">rank</span><span class="si">:</span><span class="s2">&gt;10</span><span class="si">}</span><span class="s2">   # </span><span class="si">{</span><span class="n">comment</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundary_cli</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span><span class="p">,</span> <span class="n">liquids</span></div>
+
+
+
+<span class="c1"># Public since the OpenFOAM extension classifies its lateral faces against the very</span>
+<span class="c1"># same lines that drive the .cli; the underscore spellings stay as aliases.</span>
+<span class="n">_load_liquid_lines</span> <span class="o">=</span> <span class="n">liquid_lines</span>
+<span class="n">_boundary_line_details</span> <span class="o">=</span> <span class="n">liquid_line_details</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

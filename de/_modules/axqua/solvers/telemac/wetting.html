@@ -1,0 +1,821 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.wetting &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/wetting.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/telemac/wetting.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/wetting.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/wetting.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/telemac/wetting.html"><link rel="stylesheet" href="../../../../../_i18n/lang.css"><script src="../../../../../_i18n/lang.js" data-lang="de" data-root="../../../../../" data-page="_modules/axqua/solvers/telemac/wetting.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../../_modules/axqua/solvers/telemac/wetting.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../../fr/_modules/axqua/solvers/telemac/wetting.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.wetting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../../_modules/axqua/solvers/telemac/wetting.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.solvers.telemac.wetting</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Wetted-extent diagnostics for a converged 2D result.</span>
+
+<span class="sd">A steady run can balance its boundary fluxes perfectly and still be wrong about</span>
+<span class="sd">*where* the water is. The two failure modes this module measures are:</span>
+
+<span class="sd">**Stagnant film.** A 2D model has neither infiltration nor evaporation, so any water</span>
+<span class="sd">that ends up somewhere the flow cannot carry it away from stays there for the rest of</span>
+<span class="sd">the run. That happens when the initial condition seeds a water surface above the one</span>
+<span class="sd">the run converges to: the excess drains only where it can flow, and on flat ground</span>
+<span class="sd">over coarse gravel it stops as a one-to-five-centimetre immobile film. The film does</span>
+<span class="sd">not shrink with a longer run - on isar-2025 it fell by 1.8 % over the last 3100 s -</span>
+<span class="sd">so it has to be measured, not waited out. :func:`wetting_report` splits the wetted</span>
+<span class="sd">area into what is *active* (deep and moving), what is *film* (wet but at a standstill)</span>
+<span class="sd">and what is an *isolated puddle* (wet but not connected to the main water body), and</span>
+<span class="sd">reports how much of each the initial condition put there.</span>
+
+<span class="sd">**A mis-set outflow stage.** A prescribed-elevation outlet that sits above the reach's</span>
+<span class="sd">own level backs water up over ground that should be dry; one that sits below pulls the</span>
+<span class="sd">flow into a drawdown and can drive it supercritical. Either shows up as an anomaly in</span>
+<span class="sd">the free-surface slope over the last few meters before the boundary, which</span>
+<span class="sd">:func:`outlet_profile` measures against the slope of the reach above it.</span>
+
+<span class="sd">Both write a CSV next to the result so successive runs can be compared directly.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1">#: below this depth [m] a node counts as dry</span>
+<span class="n">WET_DEPTH</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="c1">#: an *active* node is at least this deep [m] ...</span>
+<span class="n">ACTIVE_DEPTH</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="c1">#: ... and moving at least this fast [m/s]</span>
+<span class="n">ACTIVE_VELOCITY</span> <span class="o">=</span> <span class="mf">0.15</span>
+<span class="c1">#: a *film* node is wet but slower than this [m/s]</span>
+<span class="n">FILM_VELOCITY</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="c1">#: distance bands from the outflow line [m] used by :func:`outlet_profile`</span>
+<span class="n">OUTLET_BANDS</span> <span class="o">=</span> <span class="p">((</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">20.0</span><span class="p">),</span>
+                <span class="p">(</span><span class="mf">20.0</span><span class="p">,</span> <span class="mf">40.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">40.0</span><span class="p">,</span> <span class="mf">70.0</span><span class="p">),</span> <span class="p">(</span><span class="mf">70.0</span><span class="p">,</span> <span class="mf">120.0</span><span class="p">))</span>
+<span class="c1">#: a near-boundary surface slope this many times the reach slope is an anomaly</span>
+<span class="n">OUTLET_SLOPE_FACTOR</span> <span class="o">=</span> <span class="mf">1.5</span>
+
+
+<div class="viewcode-block" id="WettingReport">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.wetting.WettingReport">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">WettingReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where the water sits at the end of a run (see :func:`wetting_report`)."""</span>
+
+    <span class="n">time</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">wet_area</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">wet_volume</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">active_area</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">active_volume</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">film_area</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">film_volume</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">isolated_area</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">isolated_volume</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">isolated_count</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="c1">#: water an external source holds in place (a groundwater-fed pool on a bar):</span>
+    <span class="c1">#: legitimately wet, so it is reported on its own and kept out of film/puddles</span>
+    <span class="n">supported_area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">supported_volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">seeded_area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># area the initial condition wetted</span>
+    <span class="n">seeded_volume</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">film_seeded_area</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># of the film, how much was seeded</span>
+    <span class="c1">#: (time, film area) of the sampled frames - a flat tail means it will not drain</span>
+    <span class="n">film_history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">film_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Film as a share of the wetted area."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_area</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">wet_area</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">wet_area</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">film_seeded_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_seeded_area</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_area</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_seeded_area</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_area</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">film_trend</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Relative change of the film area over the sampled history (negative =</span>
+<span class="sd">        still draining). ``None`` when fewer than two frames were sampled."""</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">film_history</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">first</span><span class="p">,</span> <span class="n">last</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_history</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">last</span> <span class="o">-</span> <span class="n">first</span><span class="p">)</span> <span class="o">/</span> <span class="n">first</span> <span class="k">if</span> <span class="n">first</span> <span class="k">else</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="WettingReport.summary">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.wetting.WettingReport.summary">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""User-facing report lines."""</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">"wetted </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wet_area</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m2 / </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">wet_volume</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m3 at "</span>
+             <span class="sa">f</span><span class="s2">"t=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">),</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">"  active (H&gt;</span><span class="si">{</span><span class="n">ACTIVE_DEPTH</span><span class="si">}</span><span class="s2"> m, |U|&gt;</span><span class="si">{</span><span class="n">ACTIVE_VELOCITY</span><span class="si">}</span><span class="s2"> m/s): "</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">active_area</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m2 / </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">active_volume</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m3"</span><span class="p">),</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">"  stagnant film (|U|&lt;</span><span class="si">{</span><span class="n">FILM_VELOCITY</span><span class="si">}</span><span class="s2"> m/s): </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">film_area</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m2 / "</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">film_volume</span><span class="si">:</span><span class="s2">,.1f</span><span class="si">}</span><span class="s2"> m3 (</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">film_fraction</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">% of wetted)"</span><span class="p">),</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">"  isolated puddles: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isolated_count</span><span class="si">}</span><span class="s2"> patches, "</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isolated_area</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m2 / </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isolated_volume</span><span class="si">:</span><span class="s2">,.1f</span><span class="si">}</span><span class="s2"> m3"</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_area</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  water-table pools (externally held, not a defect): "</span>
+                         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_area</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m2 / "</span>
+                         <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_volume</span><span class="si">:</span><span class="s2">,.1f</span><span class="si">}</span><span class="s2"> m3"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seeded_area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  seeded by the initial condition: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seeded_area</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m2 "</span>
+                         <span class="sa">f</span><span class="s2">"/ </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">seeded_volume</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> m3"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">share</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_seeded_fraction</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  of the film, </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">share</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">% was seeded "</span>
+                         <span class="s2">"(the rest the flow spread itself)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">trend</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">film_trend</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">verdict</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"still draining"</span> <span class="k">if</span> <span class="n">trend</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.05</span>
+                       <span class="k">else</span> <span class="s2">"PLATEAUED - a longer run will not remove it"</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  film over the sampled frames: </span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">trend</span><span class="si">:</span><span class="s2">+.1f</span><span class="si">}</span><span class="s2">% "</span>
+                         <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">verdict</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lines</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_nodal_areas</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Per-node share of the mesh area [m2] (a third of each incident triangle)."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="n">tri</span><span class="p">]</span>
+    <span class="n">twice</span> <span class="o">=</span> <span class="p">((</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+             <span class="o">-</span> <span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="n">tri</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">twice</span><span class="p">)</span> <span class="o">/</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">area</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_components</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">wet</span><span class="p">,</span> <span class="n">n_nodes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Label the connected components of the wet sub-graph of the mesh."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse</span><span class="w"> </span><span class="kn">import</span> <span class="n">coo_matrix</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.csgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">connected_components</span>
+
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">tri</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">tri</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="n">tri</span><span class="p">[:,</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]]])</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">wet</span><span class="p">[</span><span class="n">edges</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">&amp;</span> <span class="n">wet</span><span class="p">[</span><span class="n">edges</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]]</span>
+    <span class="n">adj</span> <span class="o">=</span> <span class="n">coo_matrix</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)),</span> <span class="p">(</span><span class="n">edges</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">edges</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])),</span>
+                     <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">n_nodes</span><span class="p">))</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">connected_components</span><span class="p">(</span><span class="n">adj</span> <span class="o">+</span> <span class="n">adj</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">directed</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">wet</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fields</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Coordinates + element table + the last frame's H, |U| of *results*."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.sections</span><span class="w"> </span><span class="kn">import</span> <span class="n">_read_fields</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">_read_fields</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="n">geometry</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="wetting_report">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.wetting.wetting_report">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">wetting_report</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_conditions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">supported</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">wet_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">WET_DEPTH</span><span class="p">,</span> <span class="n">active_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ACTIVE_DEPTH</span><span class="p">,</span>
+                   <span class="n">active_velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ACTIVE_VELOCITY</span><span class="p">,</span>
+                   <span class="n">film_velocity</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">FILM_VELOCITY</span><span class="p">,</span>
+                   <span class="n">history_frames</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WettingReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Split the wetted area of a result into active flow, film and puddles.</span>
+
+<span class="sd">    *results* is the run's SELAFIN, *geometry* the build's double-precision geometry</span>
+<span class="sd">    (its coordinates are used, as in :mod:`axqua.solvers.telemac.sections`), and</span>
+<span class="sd">    *initial_conditions* the pre-wet SELAFIN, which lets the report attribute the</span>
+<span class="sd">    film to the seed rather than to the flow. *history_frames* earlier frames are</span>
+<span class="sd">    re-read to show whether the film is still shrinking; pass 0 to skip that (it is</span>
+<span class="sd">    the expensive part on a many-frame result).</span>
+
+<span class="sd">    *supported* is an optional boolean node mask (or a depth array) marking water an</span>
+<span class="sd">    external source holds in place - a pool fed by the water table under a gravel bar</span>
+<span class="sd">    (:mod:`axqua.solvers.telemac.watertable`). Such water is standing and disconnected by</span>
+<span class="sd">    construction, so without the mask it would be counted as film and as an isolated</span>
+<span class="sd">    puddle, i.e. reported as a defect when it is exactly what the model intends.</span>
+
+<span class="sd">    Writes ``wetting-report.csv`` to *out* (a directory or an explicit file path) when</span>
+<span class="sd">    given.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_slf</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">speed</span> <span class="o">=</span> <span class="n">_fields</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">_nodal_areas</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">)</span>
+    <span class="n">wet</span> <span class="o">=</span> <span class="n">h</span> <span class="o">&gt;</span> <span class="n">wet_depth</span>
+    <span class="n">active</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">active_depth</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">speed</span> <span class="o">&gt;</span> <span class="n">active_velocity</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">_components</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">wet</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">wet</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">sizes</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">area</span><span class="p">[</span><span class="n">labels</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">wet</span><span class="p">])}</span>
+        <span class="n">main</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">sizes</span><span class="o">.</span><span class="n">get</span><span class="p">)</span>
+        <span class="n">isolated</span> <span class="o">=</span> <span class="n">wet</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">labels</span> <span class="o">!=</span> <span class="n">main</span><span class="p">)</span>
+        <span class="n">active</span> <span class="o">&amp;=</span> <span class="n">labels</span> <span class="o">==</span> <span class="n">main</span>       <span class="c1"># only the connected body carries the flow</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">isolated</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">wet</span><span class="p">)</span>
+    <span class="n">film</span> <span class="o">=</span> <span class="n">wet</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">speed</span> <span class="o">&lt;</span> <span class="n">film_velocity</span><span class="p">)</span>
+
+    <span class="n">held</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">supported</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">held</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">supported</span><span class="p">)</span>
+        <span class="n">held</span> <span class="o">=</span> <span class="p">(</span><span class="n">held</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">held</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="nb">bool</span> <span class="k">else</span> <span class="n">held</span>
+        <span class="k">if</span> <span class="n">held</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"supported mask has </span><span class="si">%d</span><span class="s2"> entries but the mesh has </span><span class="si">%d</span><span class="s2"> "</span>
+                        <span class="s2">"- ignoring it"</span><span class="p">,</span> <span class="n">held</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+            <span class="n">held</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">held</span> <span class="o">&amp;=</span> <span class="n">wet</span>
+            <span class="n">film</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">held</span>          <span class="c1"># externally held water is not stagnant film ...</span>
+            <span class="n">isolated</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">held</span>      <span class="c1"># ... nor an unwanted puddle</span>
+
+    <span class="n">rep</span> <span class="o">=</span> <span class="n">WettingReport</span><span class="p">(</span>
+        <span class="n">time</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">read_slf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">))[</span><span class="s2">"time"</span><span class="p">]),</span>
+        <span class="n">wet_area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">wet</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="n">wet_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">area</span><span class="p">)[</span><span class="n">wet</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">active_area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">active</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">active_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">area</span><span class="p">)[</span><span class="n">active</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">film_area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">film</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="n">film_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">area</span><span class="p">)[</span><span class="n">film</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">isolated_area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">isolated</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">isolated_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">area</span><span class="p">)[</span><span class="n">isolated</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">isolated_count</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="n">isolated</span><span class="p">]))</span> <span class="k">if</span> <span class="n">isolated</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">supported_area</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">held</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+        <span class="n">supported_volume</span><span class="o">=</span><span class="nb">float</span><span class="p">((</span><span class="n">h</span> <span class="o">*</span> <span class="n">area</span><span class="p">)[</span><span class="n">held</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">initial_conditions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">initial_conditions</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">read_slf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">initial_conditions</span><span class="p">))[</span><span class="s2">"values"</span><span class="p">]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">ic</span> <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"WATER DEPTH"</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">ic</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">seed</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+                <span class="n">seeded</span> <span class="o">=</span> <span class="n">seed</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+                <span class="n">rep</span><span class="o">.</span><span class="n">seeded_area</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">seeded</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="n">rep</span><span class="o">.</span><span class="n">seeded_volume</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">seed</span> <span class="o">*</span> <span class="n">area</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="n">rep</span><span class="o">.</span><span class="n">film_seeded_area</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">film</span> <span class="o">&amp;</span> <span class="n">seeded</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"initial conditions have </span><span class="si">%d</span><span class="s2"> nodes but the result has </span><span class="si">%d</span><span class="s2"> "</span>
+                            <span class="s2">"- not attributing the film to the seed"</span><span class="p">,</span>
+                            <span class="n">seed</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">history_frames</span><span class="p">:</span>
+        <span class="n">rep</span><span class="o">.</span><span class="n">film_history</span> <span class="o">=</span> <span class="n">_film_history</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">wet_depth</span><span class="p">,</span>
+                                         <span class="n">film_velocity</span><span class="p">,</span> <span class="n">history_frames</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_write_report_csv</span><span class="p">(</span><span class="n">rep</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rep</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_film_history</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">wet_depth</span><span class="p">,</span> <span class="n">film_velocity</span><span class="p">,</span> <span class="n">frames</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Film area at the last *frames* frames, oldest first."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_slf</span>
+
+    <span class="n">n_times</span> <span class="o">=</span> <span class="n">read_slf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">))[</span><span class="s2">"n_times"</span><span class="p">]</span>
+    <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_times</span> <span class="o">-</span> <span class="n">frames</span><span class="p">),</span> <span class="n">n_times</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">read_slf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="n">frame</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>                     <span class="c1"># pragma: no cover - IO guard</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"film history frame </span><span class="si">%d</span><span class="s2"> unreadable: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="s2">"values"</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">}</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="s2">"WATER DEPTH"</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">speed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="s2">"VELOCITY U"</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="s2">"VELOCITY V"</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+        <span class="n">film</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">wet_depth</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">speed</span> <span class="o">&lt;</span> <span class="n">film_velocity</span><span class="p">)</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">"time"</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">film</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+    <span class="k">return</span> <span class="n">history</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_report_csv</span><span class="p">(</span><span class="n">rep</span><span class="p">:</span> <span class="n">WettingReport</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="s2">"wetting-report.csv"</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="n">out</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">"time_s"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"wet_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">wet_area</span><span class="p">),</span> <span class="p">(</span><span class="s2">"wet_volume_m3"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">wet_volume</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"active_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">active_area</span><span class="p">),</span> <span class="p">(</span><span class="s2">"active_volume_m3"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">active_volume</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"film_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_area</span><span class="p">),</span> <span class="p">(</span><span class="s2">"film_volume_m3"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_volume</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"film_fraction"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_fraction</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"isolated_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">isolated_area</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"isolated_volume_m3"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">isolated_volume</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"isolated_count"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">isolated_count</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"supported_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">supported_area</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"supported_volume_m3"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">supported_volume</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"seeded_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">seeded_area</span><span class="p">),</span> <span class="p">(</span><span class="s2">"seeded_volume_m3"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">seeded_volume</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"film_seeded_area_m2"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_seeded_area</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"film_seeded_fraction"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_seeded_fraction</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"film_trend"</span><span class="p">,</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_trend</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">"quantity"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="s2">""</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">])</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([])</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">"film_history_time_s"</span><span class="p">,</span> <span class="s2">"film_history_area_m2"</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">rep</span><span class="o">.</span><span class="n">film_history</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">a</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">path</span>
+
+
+<div class="viewcode-block" id="OutletProfile">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.wetting.OutletProfile">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OutletProfile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Free-surface profile approaching the outflow boundary."""</span>
+
+    <span class="n">bands</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span>        <span class="c1"># one per distance band, ordered outward from the outlet</span>
+    <span class="n">reach_slope</span><span class="p">:</span> <span class="nb">float</span>       <span class="c1"># surface slope of the reach above the boundary [-]</span>
+    <span class="n">outlet_slope</span><span class="p">:</span> <span class="nb">float</span>      <span class="c1"># surface slope over the last band(s) [-]</span>
+    <span class="n">verdict</span><span class="p">:</span> <span class="nb">str</span>             <span class="c1"># "backwater" | "drawdown" | "neutral"</span>
+
+<div class="viewcode-block" id="OutletProfile.summary">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.wetting.OutletProfile.summary">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">"outlet profile: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">verdict</span><span class="si">}</span><span class="s2"> (near-boundary surface slope "</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="mi">1000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">outlet_slope</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> permille vs "</span>
+             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="mi">1000</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">reach_slope</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> permille in the reach above)"</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bands</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="s1">'from_m'</span><span class="p">]</span><span class="si">:</span><span class="s2">5.0f</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="s1">'to_m'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;5.0f</span><span class="si">}</span><span class="s2"> m: WSE </span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="s1">'wse'</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">  "</span>
+                <span class="sa">f</span><span class="s2">"H </span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="s1">'depth'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m  |U| </span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="s1">'velocity'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m/s  Fr </span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="s1">'froude'</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verdict</span> <span class="o">==</span> <span class="s2">"backwater"</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  -&gt; the prescribed outflow stage sits ABOVE the reach's own "</span>
+                         <span class="s2">"level: it is holding water back over ground that would "</span>
+                         <span class="s2">"otherwise be dry. Lower it (or use outflow_condition: free)."</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">verdict</span> <span class="o">==</span> <span class="s2">"drawdown"</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  -&gt; the flow accelerates into the boundary; the prescribed "</span>
+                         <span class="s2">"stage is at or slightly below the reach's own level. Check "</span>
+                         <span class="s2">"the Froude number stays below 1."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">lines</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="outlet_profile">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.wetting.outlet_profile">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">outlet_profile</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bands</span><span class="o">=</span><span class="n">OUTLET_BANDS</span><span class="p">,</span>
+                   <span class="n">out</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutletProfile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Measure the free-surface profile approaching the outflow boundary.</span>
+
+<span class="sd">    Bins the **actively flowing** nodes by their distance from the ``outflow`` liquid</span>
+<span class="sd">    boundary and reports, per band, the discharge-weighted free surface plus the mean</span>
+<span class="sd">    depth, speed and Froude number. Comparing the surface slope over the last few</span>
+<span class="sd">    meters with the slope of the reach above it distinguishes</span>
+
+<span class="sd">    * **backwater** - the boundary holds the level above the reach's own, the surface</span>
+<span class="sd">      flattens or rises into it, and the extra depth floods ground near the outlet;</span>
+<span class="sd">    * **drawdown** - the boundary sits at or below the reach's level and the surface</span>
+<span class="sd">      steepens into it (mild is normal, especially where the section narrows);</span>
+<span class="sd">    * **neutral** - the boundary continues the reach profile.</span>
+
+<span class="sd">    Writes ``outlet-profile.csv`` to *out* when given.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">shapely</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">liquid_lines</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"outflow"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"outlet_profile needs an 'outflow' line in "</span>
+                         <span class="s2">"boundaries.liquid_boundaries"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.selafin</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_slf</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">speed</span> <span class="o">=</span> <span class="n">_fields</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">_nodal_areas</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">tri</span><span class="p">)</span>
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">shapely</span><span class="o">.</span><span class="n">points</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">lines</span><span class="p">[</span><span class="s2">"outflow"</span><span class="p">]))</span>
+
+    <span class="c1"># the result carries FREE SURFACE directly; fall back to bottom + depth</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">read_slf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">))[</span><span class="s2">"values"</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">}</span>
+    <span class="k">if</span> <span class="s2">"FREE SURFACE"</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="s2">"FREE SURFACE"</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="s2">"BOTTOM"</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">surface</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="s2">"BOTTOM"</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="n">h</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has neither FREE SURFACE nor BOTTOM "</span>
+                         <span class="s2">"(add 'S' or 'B' to VARIABLES FOR GRAPHIC PRINTOUTS)"</span><span class="p">)</span>
+
+    <span class="n">active</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span> <span class="o">&gt;</span> <span class="n">ACTIVE_DEPTH</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">speed</span> <span class="o">&gt;</span> <span class="n">ACTIVE_VELOCITY</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="ow">in</span> <span class="n">bands</span><span class="p">:</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">active</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dist</span> <span class="o">&gt;=</span> <span class="n">lo</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dist</span> <span class="o">&lt;</span> <span class="n">hi</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sel</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span> <span class="o">*</span> <span class="n">speed</span> <span class="o">*</span> <span class="n">area</span><span class="p">)[</span><span class="n">sel</span><span class="p">]</span>
+        <span class="n">weight</span> <span class="o">=</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">weight</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">if</span> <span class="n">weight</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">wse</span> <span class="o">=</span> <span class="nb">float</span><span class="p">((</span><span class="n">surface</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span> <span class="o">*</span> <span class="n">weight</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span> <span class="k">if</span> <span class="n">weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">surface</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="n">froude</span> <span class="o">=</span> <span class="n">speed</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">9.81</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="n">sel</span><span class="p">],</span> <span class="mf">1e-3</span><span class="p">))</span>
+        <span class="c1"># the band's lever arm is where the water actually is, not the nominal</span>
+        <span class="c1"># midpoint: on a partly wet band those differ enough to bias the slope</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"from_m"</span><span class="p">:</span> <span class="n">lo</span><span class="p">,</span> <span class="s2">"to_m"</span><span class="p">:</span> <span class="n">hi</span><span class="p">,</span>
+                     <span class="s2">"centre_m"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+                     <span class="s2">"nodes"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">sel</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="s2">"area_m2"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span>
+                     <span class="s2">"wse"</span><span class="p">:</span> <span class="n">wse</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+                     <span class="s2">"velocity"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">speed</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()),</span>
+                     <span class="s2">"froude"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">froude</span><span class="o">.</span><span class="n">mean</span><span class="p">())})</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"too few wetted bands near the outflow to profile it "</span>
+                         <span class="sa">f</span><span class="s2">"(got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="si">}</span><span class="s2">); is the outlet wet?"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">slope_between</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="n">run</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="s2">"centre_m"</span><span class="p">]</span> <span class="o">-</span> <span class="n">rows</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="s2">"centre_m"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="n">b</span><span class="p">][</span><span class="s2">"wse"</span><span class="p">]</span> <span class="o">-</span> <span class="n">rows</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="s2">"wse"</span><span class="p">])</span> <span class="o">/</span> <span class="n">run</span> <span class="k">if</span> <span class="n">run</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+    <span class="n">outlet</span> <span class="o">=</span> <span class="n">slope_between</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">reach</span> <span class="o">=</span> <span class="n">slope_between</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">outlet</span> <span class="o">&lt;</span> <span class="n">reach</span> <span class="o">/</span> <span class="n">OUTLET_SLOPE_FACTOR</span><span class="p">:</span>
+        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">"backwater"</span>
+    <span class="k">elif</span> <span class="n">outlet</span> <span class="o">&gt;</span> <span class="n">reach</span> <span class="o">*</span> <span class="n">OUTLET_SLOPE_FACTOR</span><span class="p">:</span>
+        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">"drawdown"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">"neutral"</span>
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">OutletProfile</span><span class="p">(</span><span class="n">bands</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="n">reach_slope</span><span class="o">=</span><span class="n">reach</span><span class="p">,</span> <span class="n">outlet_slope</span><span class="o">=</span><span class="n">outlet</span><span class="p">,</span>
+                            <span class="n">verdict</span><span class="o">=</span><span class="n">verdict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_write_profile_csv</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">profile</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_profile_csv</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">OutletProfile</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">out</span> <span class="o">/</span> <span class="s2">"outlet-profile.csv"</span> <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="n">out</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"from_m"</span><span class="p">,</span> <span class="s2">"to_m"</span><span class="p">,</span> <span class="s2">"centre_m"</span><span class="p">,</span> <span class="s2">"nodes"</span><span class="p">,</span> <span class="s2">"area_m2"</span><span class="p">,</span> <span class="s2">"wse"</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">,</span>
+              <span class="s2">"velocity"</span><span class="p">,</span> <span class="s2">"froude"</span><span class="p">]</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="s2">"# verdict"</span><span class="p">,</span> <span class="n">profile</span><span class="o">.</span><span class="n">verdict</span><span class="p">,</span>
+                         <span class="s2">"outlet_slope"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">outlet_slope</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                         <span class="s2">"reach_slope"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">reach_slope</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span><span class="p">])</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">profile</span><span class="o">.</span><span class="n">bands</span><span class="p">:</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">([</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="si">:</span><span class="s2">.6g</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">f</span><span class="p">],</span> <span class="nb">float</span><span class="p">)</span> <span class="k">else</span> <span class="n">row</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>
+                             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">path</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

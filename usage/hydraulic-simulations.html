@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
@@ -26,9 +26,9 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Mesh convergence" href="mesh-convergence.html" />
     <link rel="prev" title="Preprocessing" href="preprocessing.html" /> 
-</head>
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/usage/hydraulic-simulations.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/usage/hydraulic-simulations.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/usage/hydraulic-simulations.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/usage/hydraulic-simulations.html"><link rel="stylesheet" href="../_i18n/lang.css"><script src="../_i18n/lang.js" data-lang="en" data-root="../" data-page="usage/hydraulic-simulations.html"></script></head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>EN</span></summary><ul role="menu"><li><strong aria-current="true" lang="en">English</strong></li><li><a href="../de/usage/hydraulic-simulations.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><a href="../fr/usage/hydraulic-simulations.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -260,6 +260,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">QGIS plugin</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#languages-and-publication">Languages and publication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Rules for the structure</a></li>
 </ul>
 </li>
@@ -269,6 +270,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#freeing-disk-space">Freeing disk space</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
 </ul>
 </li>
@@ -425,6 +427,7 @@ axqua submit &lt;case-file&gt; --kind openfoam-run
 </pre></div>
 </div>
 <p>Before the first <code class="docutils literal notranslate"><span class="pre">vof</span></code> run of a new case, run the model once in the mode <code class="docutils literal notranslate"><span class="pre">rigid-lid</span></code> with a coarse mesh (<code class="docutils literal notranslate"><span class="pre">cell_size_factor</span></code> of 3 to 5). This run takes minutes and reveals most setup errors.</p>
+<p><strong>A new run or a new build replaces the earlier results.</strong> A run starts from the initial state. Before it starts, aXqua therefore moves the results of the earlier run into the folder <code class="docutils literal notranslate"><span class="pre">previous-run/</span></code> in the folder of the OpenFOAM model: the time folders, the processor folders of a parallel run, <code class="docutils literal notranslate"><span class="pre">postProcessing/</span></code> with the discharge records, <code class="docutils literal notranslate"><span class="pre">VTK/</span></code>, <code class="docutils literal notranslate"><span class="pre">depth-averaged.slf</span></code> and the reports. A new build does the same, because a result cannot be continued on another mesh. Only one earlier run is kept, and the next run or build replaces the folder, so copy a result that is to be kept to another place first. A parallel run that was not reconstructed keeps its result in the processor folders. The predefined figures read it from there, and ParaView reads it with the case type <em>Decomposed Case</em>.</p>
 <p><strong>The result seen from above.</strong> After a run, aXqua sums the water of each column of the mesh and writes the water depth and the depth-averaged velocity of the last time step into the file <code class="docutils literal notranslate"><span class="pre">depth-averaged.slf</span></code> in the folder of the OpenFOAM model. The file has the same variables as a TELEMAC result. <em>Load results</em> on the sub-tab <em>OpenFOAM</em> adds it to the map with the same styles as a 2D result, so that the two models can be compared directly. The complete three-dimensional result is opened in ParaView with the file <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> in the same folder.</p>
 <p><strong>Starting a fine model from a coarse one.</strong> A three-dimensional model often has a lower or higher resistance than the 2D model it starts from, so that the water level of the whole reach has to adjust. That takes thousands of seconds of simulated time, and on a fine mesh, this costs days. It is faster to let a coarse model reach the steady state first and to start the fine model from its result:</p>
 <ol class="arabic">

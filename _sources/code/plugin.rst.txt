@@ -30,7 +30,7 @@ The plugin lives in ``qgis_plugin/axqua/`` and is compatible with QGIS 3.44 and 
    * - ``gui/sections.py``
      - The table of the tabs and sub-tabs: their order, the capabilities each one shows, and the documentation page and label that *Help* opens for it.
    * - ``gui/dock.py``
-     - The panel: the fixed tabs, the job list below them, and *Help*.
+     - The panel: the fixed tabs, the job list below them, *Clean Up* and *Help*.
    * - ``gui/configuration_tab.py``, ``gui/profile_editor.py``
      - The *Configuration* tab and the editor of the profile of this computer.
    * - ``gui/install_wizard.py``, ``gui/report_issue.py``
@@ -40,7 +40,9 @@ The plugin lives in ``qgis_plugin/axqua/`` and is compatible with QGIS 3.44 and 
    * - ``gui/case_tab.py``, ``gui/section_pages.py``
      - The *Case Setup* tab and the pages of the workflow tabs.
    * - ``gui/findings.py``, ``gui/help.py``
-     - The warning triangles, and the addresses of the online documentation that the plugin opens. ``gui/style.py`` holds the colors: the dark purple of the aXqua icon for what is required, dark green for what was found.
+     - The warning triangles, and the addresses of the documentation that the plugin opens (a local copy or the published one, in the language of QGIS). ``gui/style.py`` holds the colors: the dark purple of the aXqua icon for what is required, dark green for what was found.
+   * - ``gui/cleanup_dialog.py``
+     - The window of *Clean Up*, around ``axqua cleanup``: what a case can do without, ticked by category, and its removal.
    * - ``gui/`` (other files)
      - The job table, the log viewer, the settings dialog, the print layout and the movie export.
    * - ``processing/``
@@ -61,6 +63,6 @@ Where the installed QGIS is older than version 3.44, the script ``scripts/qgis_d
 
 QGIS lists a plugin only if it can read ``metadata.txt``. The command ``python scripts/build_plugin_zip.py --check`` reads the file in the same way as QGIS.
 
-*Help* in the plugin opens the online documentation at the section of the tab that is showing. The plugin archive carries no copy of the documentation.
+*Help* in the plugin opens the documentation at the section of the tab that is showing. The plugin archive carries no copy of the documentation: ``axqua docs`` names a copy built on this computer (``$AXQUA_DOCS``, else ``docs/_build/site`` or ``docs/_build/html`` of the source checkout) and whether the default browser can read it, and the plugin opens the published documentation otherwise. A local page is opened through a small forwarding page (``_help/open.html`` beside the copy), because ``xdg-open`` and Chromium drop the section part (``#...``) of a file address.
 
 The tests of the plugin are in ``qgis_plugin/tests/``. The tests that require QGIS are skipped when the Python module ``qgis`` is not available. The script ``scripts/build_plugin_zip.py`` builds the plugin archive and verifies the requirements of the QGIS plugin repository.

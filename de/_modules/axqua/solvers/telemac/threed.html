@@ -1,0 +1,974 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.threed &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/threed.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/telemac/threed.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/threed.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/threed.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/telemac/threed.html"><link rel="stylesheet" href="../../../../../_i18n/lang.css"><script src="../../../../../_i18n/lang.js" data-lang="de" data-root="../../../../../" data-page="_modules/axqua/solvers/telemac/threed.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../../_modules/axqua/solvers/telemac/threed.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../../fr/_modules/axqua/solvers/telemac/threed.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.threed</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../../_modules/axqua/solvers/telemac/threed.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.solvers.telemac.threed</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Extrude the calibrated 2D case into a non-hydrostatic TELEMAC-3D run.</span>
+
+<span class="sd">``add3d.build_3d_cas`` turns the converged 2D steady result (the ``initial_run``</span>
+<span class="sd">output ``r2d.slf``) into a ``&lt;case-name&gt;3d.cas`` for ``telemac3d.py``:</span>
+
+<span class="sd">* **Hotstart from the 2D run (TELEMAC v9+)** - by default ``FILE FOR 2D CONTINUATION``</span>
+<span class="sd">  reads the final 2D state and initializes the 3D free surface + horizontal velocities</span>
+<span class="sd">  from it (vertical velocity 0; horizontal velocity copied up each column). In v9 this</span>
+<span class="sd">  keyword alone triggers the continuation (the old ``2D CONTINUATION`` flag is gone).</span>
+<span class="sd">  If a thin/supercritical 2D inflow makes ``telemac3d`` abort with ``DEBIMP_3D`` on the</span>
+<span class="sd">  inflow boundary, swap in the commented-out cold-start ``CONSTANT DEPTH`` seed (median</span>
+<span class="sd">  wetted 2D depth) - the ``hotstart="constant_depth"`` mode the vertical convergence</span>
+<span class="sd">  study uses, which over-wets the inflow so the prescribed-Q boundary stays subcritical.</span>
+<span class="sd">  ``INITIAL GUESS FOR DEPTH`` reuses the previous depth and a ``MINIMAL VALUE FOR</span>
+<span class="sd">  DEPTH`` floor guards the sigma transform against dry (zero-depth) columns.</span>
+<span class="sd">* **Vertical discretization** - TELEMAC has **no Delft3D-style constant-dz Z-layer**</span>
+<span class="sd">  option; the vertical mesh is **sigma planes** (``NUMBER OF HORIZONTAL LEVELS`` +</span>
+<span class="sd">  ``MESH TRANSFORMATION : 1``), so each water column is split into equal sigma</span>
+<span class="sd">  slices and the physical ``dz`` is proportional to the local depth. We therefore</span>
+<span class="sd">  *infer the level count* from the 2D results so a representative ``dz`` lands near</span>
+<span class="sd">  the horizontal cell size: ``dz ~ dx/2`` (:data:`TARGET_ASPECT`) while never</span>
+<span class="sd">  letting ``dz`` get more than 4x finer than ``dx`` (:data:`MAX_ASPECT`, the user's</span>
+<span class="sd">  "max 4 times less" rule), clamped to a sane level count for a workable 3D mesh.</span>
+<span class="sd">* **Turbulence** - the same quality-checked selection as 2D</span>
+<span class="sd">  (:func:`axqua.steering.select_turbulence_model`), mapped onto the TELEMAC-3D</span>
+<span class="sd">  numbering (k-epsilon 3, Smagorinski 4, Spalart-Allmaras **5** - note 3D numbers</span>
+<span class="sd">  S-A 5, not the 2D 6). A vertical closure is paired with it (mixing length, or</span>
+<span class="sd">  k-epsilon when the horizontal model is k-epsilon).</span>
+<span class="sd">* **Non-hydrostatic** - ``NON-HYDROSTATIC VERSION : YES`` (with the pressure-Poisson</span>
+<span class="sd">  solver), since a depth-resolved river model wants the non-hydrostatic pressure.</span>
+<span class="sd">  ``non_hydrostatic=False`` writes the cheaper hydrostatic solver instead (no PPE</span>
+<span class="sd">  keywords) - used for the long steady flux-convergence check ``add3d.py`` emits.</span>
+<span class="sd">* **Courant** - TELEMAC-3D has **no** ``DESIRED COURANT NUMBER`` / variable time</span>
+<span class="sd">  step, so we size the fixed ``TIME STEP`` to hit a target Courant of</span>
+<span class="sd">  :data:`TARGET_COURANT` (0.6) from the 2D velocity and the cell sizes.</span>
+
+<span class="sd">TELEMAC-3D cannot run with finite volumes, so the 3D case is always the</span>
+<span class="sd">finite-element kernel (the 2D ``finite_volumes`` flag is irrelevant here). Zonal</span>
+<span class="sd">friction is not carried over - TELEMAC-3D has no ``FRICTION DATA FILE`` - so a</span>
+<span class="sd">single representative bottom-friction law/coefficient is written instead.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.steering</span><span class="w"> </span><span class="kn">import</span> <span class="n">TURB_NAMES</span><span class="p">,</span> <span class="n">_global_friction</span><span class="p">,</span> <span class="n">select_turbulence_model</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># 2D turbulence-model number -&gt; TELEMAC-3D HORIZONTAL TURBULENCE MODEL number.</span>
+<span class="c1"># Note: Spalart-Allmaras is 5 in 3D (it is 6 in 2D); constant/Elder fall back to</span>
+<span class="c1"># k-epsilon so the 3D run always carries a real turbulence closure.</span>
+<span class="n">_TURB_2D_TO_3D</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span>
+<span class="n">TURB3D_NAMES</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="s2">"constant viscosity"</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">"mixing length"</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s2">"k-epsilon"</span><span class="p">,</span>
+                <span class="mi">4</span><span class="p">:</span> <span class="s2">"Smagorinski"</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="s2">"Spalart-Allmaras"</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="s2">"k-omega"</span><span class="p">}</span>
+
+<span class="n">N_LEVELS_MIN</span> <span class="o">=</span> <span class="mi">5</span>         <span class="c1"># a workable 3D water column needs a handful of planes</span>
+<span class="n">N_LEVELS_MAX</span> <span class="o">=</span> <span class="mi">21</span>        <span class="c1"># cap the vertical resolution (cost / stiffness)</span>
+<span class="n">TARGET_ASPECT</span> <span class="o">=</span> <span class="mf">2.0</span>      <span class="c1"># desired horizontal:vertical cell ratio dx/dz</span>
+<span class="n">MAX_ASPECT</span> <span class="o">=</span> <span class="mf">4.0</span>         <span class="c1"># dz must stay &gt;= dx / MAX_ASPECT (the "max 4x finer" rule)</span>
+<span class="n">TARGET_COURANT</span> <span class="o">=</span> <span class="mf">0.6</span>     <span class="c1"># target advective Courant number for the fixed 3D time step</span>
+<span class="n">WET</span> <span class="o">=</span> <span class="mf">0.05</span>               <span class="c1"># [m] depth above which a node counts as wetted</span>
+
+<span class="c1"># the three steering files add3d.py emits (see build_3d_cases)</span>
+<span class="n">HYDROSTATIC_CAS</span> <span class="o">=</span> <span class="s2">"hotstart3d_hydrostatic.cas"</span>
+<span class="c1"># The hydrostatic run's own results. Named rather than inlined because the seed</span>
+<span class="c1"># orchestration (axqua.prerun) has to find them without re-deriving the string.</span>
+<span class="n">HYDROSTATIC_RESULT_3D</span> <span class="o">=</span> <span class="s2">"r3d-hydrostatic.slf"</span>
+<span class="n">HYDROSTATIC_RESULT_2D</span> <span class="o">=</span> <span class="s2">"r3d-2d-hydrostatic.slf"</span>
+<span class="n">HYDRODYN_CAS</span> <span class="o">=</span> <span class="s2">"hotstart3d_hydrodyn.cas"</span>
+<span class="n">UNSTEADY3D_CAS</span> <span class="o">=</span> <span class="s2">"unsteady3d.cas"</span>
+<span class="n">HYDROSTATIC_N_STEPS</span> <span class="o">=</span> <span class="mi">30_000</span>       <span class="c1"># fixed step count of the flux-convergence run</span>
+<span class="n">HYDROSTATIC_LISTING_PERIOD</span> <span class="o">=</span> <span class="mi">100</span>   <span class="c1"># listing spacing -&gt; ~300 flux printouts</span>
+
+
+<div class="viewcode-block" id="VerticalDiscretization">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.VerticalDiscretization">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VerticalDiscretization</span><span class="p">:</span>
+    <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span>        <span class="c1"># NUMBER OF HORIZONTAL LEVELS (sigma planes)</span>
+    <span class="n">dz</span><span class="p">:</span> <span class="nb">float</span>            <span class="c1"># representative layer thickness [m] at the typical depth</span>
+    <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span>            <span class="c1"># representative horizontal cell size [m]</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="nb">float</span>         <span class="c1"># representative (median wetted) flow depth [m]</span>
+    <span class="n">aspect</span><span class="p">:</span> <span class="nb">float</span>        <span class="c1"># dx / dz at that depth</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+
+<div class="viewcode-block" id="ThreeDSetup">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.ThreeDSetup">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ThreeDSetup</span><span class="p">:</span>
+    <span class="n">cas</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">dz</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">depth</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">n_time_steps</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">h_turbulence</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">v_turbulence</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">courant</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">turbulence_reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">layers_reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">non_hydrostatic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># reading the 2D result</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="o">*</span><span class="n">needles</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return the first result variable whose (lower-cased) name contains a needle."""</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"var_names"</span><span class="p">]:</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">n</span> <span class="ow">in</span> <span class="n">low</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">needles</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">"values"</span><span class="p">][</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_depth</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"water depth"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">depth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fs</span><span class="p">,</span> <span class="n">bot</span> <span class="o">=</span> <span class="n">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"free surface"</span><span class="p">),</span> <span class="n">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"bottom"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">fs</span> <span class="o">-</span> <span class="n">bot</span>
+    <span class="k">return</span> <span class="n">depth</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_median_edge</span><span class="p">(</span><span class="n">tri</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">tri</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">tri</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">tri</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">tri</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">tri</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">tri</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">])</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">size</span> <span class="k">else</span> <span class="mf">0.0</span>
+
+
+<div class="viewcode-block" id="representative_scales">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.representative_scales">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">representative_scales</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""(median wetted depth h, representative wetted horizontal cell size dx) [m]."""</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">_depth</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">tri</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"ikle"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"y"</span><span class="p">]</span>
+    <span class="n">wet</span> <span class="o">=</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">WET</span> <span class="k">if</span> <span class="n">depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="n">wet</span><span class="p">]))</span> <span class="k">if</span> <span class="p">(</span><span class="n">wet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">wet</span><span class="o">.</span><span class="n">any</span><span class="p">())</span> <span class="k">else</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">wet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">wet</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+        <span class="n">sel</span> <span class="o">=</span> <span class="n">wet</span><span class="p">[</span><span class="n">tri</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>            <span class="c1"># triangles fully in the wetted area</span>
+        <span class="k">if</span> <span class="n">sel</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">tri</span> <span class="o">=</span> <span class="n">tri</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">_median_edge</span><span class="p">(</span><span class="n">tri</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>
+    <span class="k">return</span> <span class="n">h</span><span class="p">,</span> <span class="n">dx</span></div>
+
+
+
+<div class="viewcode-block" id="characteristic_velocity">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.characteristic_velocity">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">characteristic_velocity</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A high-percentile wetted flow speed [m/s] (for the Courant time step),</span>
+<span class="sd">    floored at the configured velocity guess."""</span>
+    <span class="n">sv</span> <span class="o">=</span> <span class="n">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"scalar velocity"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"velocity u"</span><span class="p">),</span> <span class="n">_fetch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">"velocity v"</span><span class="p">)</span>
+        <span class="n">sv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hypot</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">u</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">floor</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">initial_velocity_guess</span><span class="p">))</span> <span class="ow">or</span> <span class="mf">1.0</span>
+    <span class="k">if</span> <span class="n">sv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">floor</span>
+    <span class="n">depth</span> <span class="o">=</span> <span class="n">_depth</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">wet</span> <span class="o">=</span> <span class="n">depth</span> <span class="o">&gt;</span> <span class="n">WET</span> <span class="k">if</span> <span class="n">depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="n">sv</span><span class="p">[</span><span class="n">wet</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">wet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">wet</span><span class="o">.</span><span class="n">any</span><span class="p">())</span> <span class="k">else</span> <span class="n">sv</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="mi">95</span><span class="p">)),</span> <span class="n">floor</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># inference</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="infer_vertical_layers">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.infer_vertical_layers">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">infer_vertical_layers</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VerticalDiscretization</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Infer ``NUMBER OF HORIZONTAL LEVELS`` from the 2D results.</span>
+
+<span class="sd">    The sigma layer thickness at the representative depth ``h`` is ``dz = h/(n-1)``.</span>
+<span class="sd">    We aim for ``dz ~ dx/2`` (TARGET_ASPECT) but never thinner than ``dx/4``</span>
+<span class="sd">    (MAX_ASPECT - the user's "max 4x finer than dx/dy" rule), and keep the level</span>
+<span class="sd">    count within ``[N_LEVELS_MIN, N_LEVELS_MAX]`` so the 3D mesh stays workable.</span>
+<span class="sd">    """</span>
+    <span class="n">h</span><span class="p">,</span> <span class="n">dx</span> <span class="o">=</span> <span class="n">representative_scales</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1"># most levels allowed before dz drops below dx/MAX_ASPECT</span>
+    <span class="n">n_aspect_cap</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="p">(</span><span class="n">dx</span> <span class="o">/</span> <span class="n">MAX_ASPECT</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">n_target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="p">(</span><span class="n">dx</span> <span class="o">/</span> <span class="n">TARGET_ASPECT</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">n_target</span><span class="p">,</span> <span class="n">N_LEVELS_MIN</span><span class="p">,</span> <span class="n">N_LEVELS_MAX</span><span class="p">))</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">n_aspect_cap</span><span class="p">))</span>
+    <span class="n">dz</span> <span class="o">=</span> <span class="n">h</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">aspect</span> <span class="o">=</span> <span class="n">dx</span> <span class="o">/</span> <span class="n">dz</span>
+    <span class="n">note</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">N_LEVELS_MIN</span><span class="p">:</span>
+        <span class="n">note</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"; aspect cap limits to </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> (&lt;</span><span class="si">{</span><span class="n">N_LEVELS_MIN</span><span class="si">}</span><span class="s2">) - cells are flat "</span>
+                <span class="sa">f</span><span class="s2">"(dx=</span><span class="si">{</span><span class="n">dx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m &gt;&gt; h=</span><span class="si">{</span><span class="n">h</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m)"</span><span class="p">)</span>
+    <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"depth h~</span><span class="si">{</span><span class="n">h</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m, dx~</span><span class="si">{</span><span class="n">dx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m -&gt; </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> sigma levels "</span>
+              <span class="sa">f</span><span class="s2">"(dz~</span><span class="si">{</span><span class="n">dz</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m, dx/dz~</span><span class="si">{</span><span class="n">aspect</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> &lt;= </span><span class="si">{</span><span class="n">MAX_ASPECT</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">)</span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VerticalDiscretization</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">aspect</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="select_3d_turbulence">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.select_3d_turbulence">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_3d_turbulence</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""(horizontal model, vertical model, rationale) for TELEMAC-3D.</span>
+
+<span class="sd">    Reuses the 2D mesh-resolution/velocity selection and maps it onto the 3D</span>
+<span class="sd">    numbering; pairs a vertical closure (k-epsilon when horizontal is k-epsilon,</span>
+<span class="sd">    else a mixing-length model, which is robust for the vertical log profile)."""</span>
+    <span class="n">base</span><span class="p">,</span> <span class="n">why</span> <span class="o">=</span> <span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="n">h3d</span> <span class="o">=</span> <span class="n">_TURB_2D_TO_3D</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="c1"># TELEMAC-3D constrains the vertical model: Spalart-Allmaras (5) must be used in</span>
+    <span class="c1"># BOTH directions; k-epsilon (3) pairs with k-epsilon; Smagorinski (4) pairs with</span>
+    <span class="c1"># a vertical mixing-length model (2), the robust choice for the vertical profile.</span>
+    <span class="n">v3d</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span> <span class="mi">5</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">h3d</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">reason</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">TURB3D_NAMES</span><span class="p">[</span><span class="n">h3d</span><span class="p">]</span><span class="si">}</span><span class="s2"> (from 2D </span><span class="si">{</span><span class="n">TURB_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base</span><span class="p">,</span><span class="w"> </span><span class="n">base</span><span class="p">)</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="n">h3d</span><span class="p">,</span> <span class="n">v3d</span><span class="p">,</span> <span class="n">reason</span></div>
+
+
+
+<div class="viewcode-block" id="courant_time_step">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.courant_time_step">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">courant_time_step</span><span class="p">(</span><span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dz</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">u_char</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                      <span class="n">courant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">TARGET_COURANT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Fixed time step [s] giving an advective Courant ~ *courant* on the limiting</span>
+<span class="sd">    (smallest) cell dimension. TELEMAC-3D has no DESIRED COURANT NUMBER keyword, so</span>
+<span class="sd">    this is how the requested Courant is honored."""</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dz</span><span class="p">),</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">courant</span> <span class="o">*</span> <span class="n">length</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">u_char</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dt</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.1</span>
+    <span class="c1"># round to 2 significant figures for a tidy steering value</span>
+    <span class="n">ndigits</span> <span class="o">=</span> <span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">dt</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">ndigits</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># writing the 3D steering</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_cas_values</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="n">keywords</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``),</span>
+<span class="sd">    ignoring comment lines - one file read/pass for all keywords."""</span>
+    <span class="n">pats</span> <span class="o">=</span> <span class="p">{</span><span class="n">kw</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"^\s*</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">kw</span><span class="p">)</span><span class="si">}</span><span class="s2">\s*[:=]\s*(.+?)\s*$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">}</span>
+    <span class="n">found</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">)):</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">kw</span><span class="p">,</span> <span class="n">pat</span> <span class="ow">in</span> <span class="n">pats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">found</span><span class="p">[</span><span class="n">kw</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="n">found</span><span class="p">[</span><span class="n">kw</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">found</span>
+
+
+<div class="viewcode-block" id="cas3d_name">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.cas3d_name">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cas3d_name</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``&lt;case-name&gt;3d&lt;suffix&gt;.cas`` with a filesystem-safe case name.</span>
+
+<span class="sd">    *suffix* distinguishes variants written next to each other (e.g.</span>
+<span class="sd">    ``"-unsteady"`` -&gt; ``&lt;case-name&gt;3d-unsteady.cas``)."""</span>
+    <span class="n">slug</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="ow">in</span> <span class="s2">"-_"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"_"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">slug</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'case'</span><span class="p">)</span><span class="si">}</span><span class="s2">3d</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">.cas"</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_force_levels</span><span class="p">(</span><span class="n">vd</span><span class="p">:</span> <span class="n">VerticalDiscretization</span><span class="p">,</span> <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VerticalDiscretization</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A VerticalDiscretization with a forced level count (e.g. for the vertical</span>
+<span class="sd">    convergence study), recomputing dz/aspect from the same depth and cell size."""</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_levels</span><span class="p">))</span>
+    <span class="n">dz</span> <span class="o">=</span> <span class="n">vd</span><span class="o">.</span><span class="n">depth</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">VerticalDiscretization</span><span class="p">(</span>
+        <span class="n">n</span><span class="p">,</span> <span class="n">dz</span><span class="p">,</span> <span class="n">vd</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">vd</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span> <span class="n">vd</span><span class="o">.</span><span class="n">dx</span> <span class="o">/</span> <span class="n">dz</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"forced to </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> sigma levels (dz~</span><span class="si">{</span><span class="n">dz</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m, dx/dz~</span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">dx</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">dz</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="build_3d_cas">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.build_3d_cas">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_3d_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">results_2d</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">cas_2d</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">total_time_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+                 <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"continuation"</span><span class="p">,</span>
+                 <span class="n">unsteady</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">liquid_boundaries_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">gaia_cas</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">out_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">results3d_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">results2d_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">non_hydrostatic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                 <span class="n">n_time_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">listing_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">graphic_period</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">min_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ThreeDSetup</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write ``&lt;case-name&gt;3d.cas`` next to the 2D case and return the setup summary.</span>
+
+<span class="sd">    *results_2d* defaults to ``&lt;model_dir&gt;/&lt;results_slf&gt;`` (the ``initial_run``</span>
+<span class="sd">    output); *cas_2d* to the steady 2D steering, whose prescribed boundary values</span>
+<span class="sd">    are reused. *total_time_factor* sets the simulated duration as that many reach</span>
+<span class="sd">    flow-through times (length / characteristic velocity). *n_levels* overrides the</span>
+<span class="sd">    inferred ``NUMBER OF HORIZONTAL LEVELS`` (used by the vertical convergence study;</span>
+<span class="sd">    the time step then adapts to the resulting layer thickness).</span>
+
+<span class="sd">    With *unsteady* and a *liquid_boundaries_file* the run is hydrograph-driven: the</span>
+<span class="sd">    ``LIQUID BOUNDARIES FILE`` supplies Q(t)/SL(t) and the step count spans *duration*</span>
+<span class="sd">    (TELEMAC-3D has no DURATION keyword, so ``NUMBER OF TIME STEPS = duration / dt``);</span>
+<span class="sd">    the hotstart still lifts the initial 3D field from the 2D result. *gaia_cas*</span>
+<span class="sd">    couples GAIA morphodynamics. *out_name* / *results3d_name* / *results2d_name*</span>
+<span class="sd">    override the output filenames so an unsteady variant does not clobber the steady</span>
+<span class="sd">    3D run's files.</span>
+
+<span class="sd">    *non_hydrostatic* toggles ``NON-HYDROSTATIC VERSION`` (``False`` writes the</span>
+<span class="sd">    hydrostatic solver and drops the pressure-Poisson keywords - the cheap variant</span>
+<span class="sd">    for a long boundary-flux convergence run). *n_time_steps* forces the step count</span>
+<span class="sd">    (overriding the flow-through/duration sizing); *listing_period* /</span>
+<span class="sd">    *graphic_period* override the printout spacing (e.g. a short listing period so</span>
+<span class="sd">    the flux-convergence analysis gets enough printouts). *data* is an optional</span>
+<span class="sd">    pre-read 2D result (``selafin.read_slf``) so several variants can be built from</span>
+<span class="sd">    one read of a large results file.</span>
+
+<span class="sd">    *hotstart* selects how the 3D run is initialized from the 2D result:</span>
+
+<span class="sd">    * ``"continuation"`` (default) - the TELEMAC v9+ true 2D-&gt;3D hotstart</span>
+<span class="sd">      (``FILE FOR 2D CONTINUATION``): the 3D free surface + horizontal velocities are</span>
+<span class="sd">      lifted from the final 2D state. The most faithful start, but a thin/supercritical</span>
+<span class="sd">      2D inflow can make ``telemac3d`` abort with ``DEBIMP_3D: PROBLEM ON BOUNDARY``;</span>
+<span class="sd">      the ``CONSTANT DEPTH`` fallback is then emitted commented-out to swap in.</span>
+<span class="sd">    * ``"constant_depth"`` - a cold start at the median wetted 2D depth (uniform), so</span>
+<span class="sd">      the prescribed-Q inflow is deeply wet and robust. Used by the vertical</span>
+<span class="sd">      convergence study, where every per-layer run must reach steady state.</span>
+<span class="sd">    """</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">results_2d</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">results_2d</span><span class="p">)</span> <span class="k">if</span> <span class="n">results_2d</span> <span class="k">else</span> <span class="n">model</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span>
+    <span class="n">cas_2d</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cas_2d</span><span class="p">)</span> <span class="k">if</span> <span class="n">cas_2d</span> <span class="k">else</span> <span class="n">model</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">results_2d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"2D result not found: </span><span class="si">{</span><span class="n">results_2d</span><span class="si">}</span><span class="s2">. Run initial_run.py first so the 3D "</span>
+            <span class="s2">"case can hotstart from the converged 2D field."</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">results_2d</span><span class="p">)</span>
+    <span class="n">vd</span> <span class="o">=</span> <span class="n">infer_vertical_layers</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">vd</span> <span class="o">=</span> <span class="n">_force_levels</span><span class="p">(</span><span class="n">vd</span><span class="p">,</span> <span class="n">n_levels</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleNamespace</span>
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">SimpleNamespace</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"y"</span><span class="p">],</span> <span class="n">triangles</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"ikle"</span><span class="p">])</span>
+    <span class="n">h_turb</span><span class="p">,</span> <span class="n">v_turb</span><span class="p">,</span> <span class="n">turb_reason</span> <span class="o">=</span> <span class="n">select_3d_turbulence</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
+    <span class="n">u_char</span> <span class="o">=</span> <span class="n">characteristic_velocity</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">courant_time_step</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">vd</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span> <span class="n">u_char</span><span class="p">)</span>
+
+    <span class="c1"># duration: for an unsteady run, span the supplied hydrograph *duration* (3D has</span>
+    <span class="c1"># no DURATION keyword, so convert to a step count at the fixed dt); otherwise a</span>
+    <span class="c1"># few reach flow-through times so the 3D field settles from the 2D hotstart.</span>
+    <span class="n">reach_len</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"y"</span><span class="p">])))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">u_char</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n_time_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">unsteady</span> <span class="ow">and</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">total_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">total_time</span> <span class="o">=</span> <span class="n">total_time_factor</span> <span class="o">*</span> <span class="n">reach_len</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">u_char</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">total_time</span> <span class="o">/</span> <span class="n">dt</span><span class="p">),</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200_000</span><span class="p">))</span>
+    <span class="c1"># 3D result writing is expensive; keep only a handful of frames over the spin-up</span>
+    <span class="n">graphic</span> <span class="o">=</span> <span class="n">graphic_period</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_steps</span> <span class="o">//</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="n">listing</span> <span class="o">=</span> <span class="n">listing_period</span> <span class="ow">or</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_steps</span> <span class="o">//</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">law</span><span class="p">,</span> <span class="n">coef</span> <span class="o">=</span> <span class="n">_global_friction</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="c1"># positive depth floor (~5% of a layer) so dry hotstart columns don't divide by 0;</span>
+    <span class="c1"># callers can raise it (e.g. 0.10 m for the KB15 continuation runs, which need a</span>
+    <span class="c1"># firmer floor to keep the sigma transform / PPE stable on the dry floodplain).</span>
+    <span class="n">depth_floor</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">min_depth</span><span class="p">)</span> <span class="k">if</span> <span class="n">min_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                   <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">vd</span><span class="o">.</span><span class="n">dz</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="c1"># reuse the 2D prescriptions + horizontal velocity profiles verbatim (boundary</span>
+    <span class="c1"># consistency); one pass over the 2D steering for all three keywords</span>
+    <span class="n">vals</span> <span class="o">=</span> <span class="p">(</span><span class="n">_read_cas_values</span><span class="p">(</span><span class="n">cas_2d</span><span class="p">,</span> <span class="s2">"PRESCRIBED FLOWRATES"</span><span class="p">,</span> <span class="s2">"PRESCRIBED ELEVATIONS"</span><span class="p">,</span>
+                             <span class="s2">"VELOCITY PROFILES"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cas_2d</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">{})</span>
+    <span class="n">flow</span> <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PRESCRIBED FLOWRATES"</span><span class="p">)</span>
+    <span class="n">elev</span> <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PRESCRIBED ELEVATIONS"</span><span class="p">)</span>
+    <span class="n">prof</span> <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"VELOCITY PROFILES"</span><span class="p">)</span>
+    <span class="n">n_liquid</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prof</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">))</span> <span class="k">if</span> <span class="n">prof</span> <span class="k">else</span>
+                <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flow</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">))</span> <span class="k">if</span> <span class="n">flow</span> <span class="k">else</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">hotstart</span> <span class="o">==</span> <span class="s2">"constant_depth"</span><span class="p">:</span>
+        <span class="n">hotstart_lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"/ HOTSTART (cold start): seed a uniform depth = the median wetted 2D depth,"</span><span class="p">,</span>
+            <span class="s2">"/ so the prescribed-Q inflow starts deeply wet (robust) and the free surface"</span><span class="p">,</span>
+            <span class="s2">"/ follows the bed slope. Used by the vertical convergence study."</span><span class="p">,</span>
+            <span class="s2">"INITIAL CONDITIONS : 'CONSTANT DEPTH'"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"INITIAL DEPTH : </span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">depth</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"/ TELEMAC v9+ true hotstart instead: FILE FOR 2D CONTINUATION : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># "continuation" - TELEMAC v9+ true 2D -&gt; 3D hotstart</span>
+        <span class="n">hotstart_lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"/ HOTSTART from the 2D steady run (TELEMAC v9+): FILE FOR 2D CONTINUATION"</span><span class="p">,</span>
+            <span class="s2">"/ lifts the 3D free surface + horizontal velocities from the final 2D state"</span><span class="p">,</span>
+            <span class="s2">"/ (vertical velocity 0; horizontal velocity copied up each column). In v9"</span><span class="p">,</span>
+            <span class="s2">"/ this keyword alone triggers the continuation (no old '2D CONTINUATION')."</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"FILE FOR 2D CONTINUATION : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"FILE FOR 2D CONTINUATION FORMAT : 'SERAFIN'"</span><span class="p">,</span>
+            <span class="s2">"INITIAL TIME SET TO ZERO : YES"</span><span class="p">,</span>
+            <span class="s2">"/ FALLBACK if telemac3d aborts with 'DEBIMP_3D: PROBLEM ON BOUNDARY' (the"</span><span class="p">,</span>
+            <span class="s2">"/ continuation inflow depth is too thin/supercritical for the prescribed Q):"</span><span class="p">,</span>
+            <span class="s2">"/ comment the three lines above and uncomment this uniform cold-start seed:"</span><span class="p">,</span>
+            <span class="s2">"/ INITIAL CONDITIONS : 'CONSTANT DEPTH'"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"/ INITIAL DEPTH : </span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">depth</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">]</span>
+
+    <span class="n">pressure</span> <span class="o">=</span> <span class="s2">"non-hydrostatic"</span> <span class="k">if</span> <span class="n">non_hydrostatic</span> <span class="k">else</span> <span class="s2">"hydrostatic"</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">"/"</span> <span class="o">+</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="mi">68</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ TELEMAC3D steering generated by axqua for case '</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ </span><span class="si">{</span><span class="n">pressure</span><span class="si">}</span><span class="s2">; hotstarted from the 2D steady result; sigma layers"</span><span class="p">,</span>
+        <span class="s2">"/"</span> <span class="o">+</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="mi">68</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"TITLE : '</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> 3D </span><span class="si">{</span><span class="n">pressure</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="s2">"/ INPUT / OUTPUT FILES"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"GEOMETRY FILE : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"BOUNDARY CONDITIONS FILE : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundary_cli</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="c1"># user-fortran overrides (compiled + linked in) when a `user_fortran/`</span>
+        <span class="c1"># directory is present in the model dir - e.g. the KB15 Spalart-Allmaras</span>
+        <span class="c1"># source-term fix (sousa.f wall distance + dry-cell source clip) so 3D</span>
+        <span class="c1"># turbulence produces physical eddy viscosity. See user_fortran/README.</span>
+        <span class="o">*</span><span class="p">([</span><span class="sa">f</span><span class="s2">"FORTRAN FILE : </span><span class="si">{</span><span class="p">(</span><span class="n">model</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s1">'user_fortran'</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="s2">"user_fortran"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]),</span>
+        <span class="c1"># hydrograph forcing (Q(t)/SL(t)) for the unsteady run</span>
+        <span class="o">*</span><span class="p">([</span><span class="sa">f</span><span class="s2">"LIQUID BOUNDARIES FILE : </span><span class="si">{</span><span class="n">liquid_boundaries_file</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">unsteady</span> <span class="ow">and</span> <span class="n">liquid_boundaries_file</span><span class="p">)</span> <span class="k">else</span> <span class="p">[]),</span>
+        <span class="sa">f</span><span class="s2">"3D RESULT FILE : </span><span class="si">{</span><span class="n">results3d_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">cfg</span><span class="o">.</span><span class="n">results3d_slf</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"2D RESULT FILE : </span><span class="si">{</span><span class="n">results2d_name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">cfg</span><span class="o">.</span><span class="n">results2d_from_3d_slf</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"MASS-BALANCE : YES"</span><span class="p">,</span>
+        <span class="c1"># per-boundary flux printouts in the listing - what the boundary-flux</span>
+        <span class="c1"># convergence analysis (axqua.flux_convergence) reads</span>
+        <span class="s2">"PRINTING CUMULATED FLOWRATES : YES"</span><span class="p">,</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">hotstart_lines</span><span class="p">,</span>
+        <span class="s2">"VARIABLES FOR 2D GRAPHIC PRINTOUTS : 'U,V,H,S,B,F'"</span><span class="p">,</span>
+        <span class="s2">"VARIABLES FOR 3D GRAPHIC PRINTOUTS : 'Z,U,V,W,NUX,NUZ'"</span><span class="p">,</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="s2">"/ VERTICAL MESH (sigma planes - TELEMAC has no constant-dz z-layers; the"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ level count targets dz ~ dx/</span><span class="si">{</span><span class="n">TARGET_ASPECT</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> with dx/dz &lt;= </span><span class="si">{</span><span class="n">MAX_ASPECT</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ </span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"NUMBER OF HORIZONTAL LEVELS : </span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"MESH TRANSFORMATION : 1"</span><span class="p">,</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="s2">"/ TIME (3D has no DESIRED COURANT NUMBER; the fixed step targets Courant "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">TARGET_COURANT</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ dt = </span><span class="si">{</span><span class="n">TARGET_COURANT</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> * min(dx=</span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">dx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, dz=</span><span class="si">{</span><span class="n">vd</span><span class="o">.</span><span class="n">dz</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">) / "</span>
+        <span class="sa">f</span><span class="s2">"u~</span><span class="si">{</span><span class="n">u_char</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m/s"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"TIME STEP : </span><span class="si">{</span><span class="n">dt</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"NUMBER OF TIME STEPS : </span><span class="si">{</span><span class="n">n_steps</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"GRAPHIC PRINTOUT PERIOD : </span><span class="si">{</span><span class="n">graphic</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"LISTING PRINTOUT PERIOD : </span><span class="si">{</span><span class="n">listing</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="c1"># NB: TELEMAC-3D has NO steady-state auto-stop (the 2D 'STOP IF A STEADY STATE</span>
+        <span class="c1"># IS REACHED' / 'STOP CRITERIA' keywords do not exist here), so the run always</span>
+        <span class="c1"># marches the full NUMBER OF TIME STEPS above - size it for the spin-up.</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ PRESSURE (</span><span class="si">{</span><span class="n">pressure</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"NON-HYDROSTATIC VERSION : </span><span class="si">{</span><span class="s1">'YES'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">non_hydrostatic</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'NO'</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="c1"># the pressure-Poisson keywords only apply to the non-hydrostatic solver;</span>
+        <span class="c1"># 1e-4 is the documented v8.1+ default and is plenty for a spin-up/hotstart</span>
+        <span class="c1"># (tighter 1e-6/1e-8 tolerances just waste iterations).</span>
+        <span class="o">*</span><span class="p">([</span><span class="s2">"SOLVER FOR PPE : 7"</span><span class="p">,</span> <span class="s2">"ACCURACY FOR PPE : 1.E-4"</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">non_hydrostatic</span> <span class="k">else</span> <span class="p">[]),</span>
+        <span class="c1"># use the previous water depth as the initial guess to cut solver work</span>
+        <span class="s2">"INITIAL GUESS FOR DEPTH : 1"</span><span class="p">,</span>
+        <span class="c1"># segment-wise (edge-based) matrix storage - the recommended efficient option</span>
+        <span class="s2">"MATRIX STORAGE : 3"</span><span class="p">,</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="s2">"/ NUMERICS (finite elements - TELEMAC-3D has no finite-volume kernel)"</span><span class="p">,</span>
+        <span class="c1"># MURD PSI (5) with the locally-implicit option (4) is the consistent choice</span>
+        <span class="c1"># for wetting/drying (TIDAL FLATS: YES): robust on tidal flats without the</span>
+        <span class="c1"># sub-iteration blow-up the default MURD option hits on coarse/parallel meshes.</span>
+        <span class="s2">"SCHEME FOR ADVECTION OF VELOCITIES : 5"</span><span class="p">,</span>
+        <span class="s2">"SCHEME OPTION FOR ADVECTION OF VELOCITIES : 4"</span><span class="p">,</span>
+        <span class="s2">"SCHEME FOR ADVECTION OF K-EPSILON : 5"</span><span class="p">,</span>
+        <span class="s2">"SCHEME OPTION FOR ADVECTION OF K-EPSILON : 4"</span><span class="p">,</span>
+        <span class="s2">"SOLVER FOR PROPAGATION : 2"</span><span class="p">,</span>
+        <span class="c1"># relax the propagation solver tolerance from the 1e-8 default so the CG</span>
+        <span class="c1"># converges within its iteration budget on these meshes.</span>
+        <span class="s2">"ACCURACY FOR PROPAGATION : 1.E-6"</span><span class="p">,</span>
+        <span class="s2">"MAXIMUM NUMBER OF ITERATIONS FOR PROPAGATION : 200"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"FREE SURFACE GRADIENT COMPATIBILITY : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">free_surface_gradient_compat</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"IMPLICITATION FOR DEPTH : 0.55"</span><span class="p">,</span>
+        <span class="s2">"IMPLICITATION FOR VELOCITIES : 0.55"</span><span class="p">,</span>
+        <span class="s2">"TIDAL FLATS : YES"</span><span class="p">,</span>
+        <span class="c1"># mass-lumping + flux-controlled negative depths is the robust wetting/drying</span>
+        <span class="c1"># combination (treatment 2 requires mass-lumping on depth).</span>
+        <span class="s2">"MASS-LUMPING FOR DEPTH : 1."</span><span class="p">,</span>
+        <span class="s2">"MASS-LUMPING FOR VELOCITIES : 1."</span><span class="p">,</span>
+        <span class="s2">"TREATMENT OF NEGATIVE DEPTHS : 2"</span><span class="p">,</span>
+        <span class="c1"># clip the depth on dry nodes: the 2D hotstart carries zero-depth (dry)</span>
+        <span class="c1"># floodplain columns, and the sigma transform divides by the column depth -</span>
+        <span class="c1"># without a positive floor that is a division by zero (SIGFPE) at init.</span>
+        <span class="sa">f</span><span class="s2">"MINIMAL VALUE FOR DEPTH : </span><span class="si">{</span><span class="n">depth_floor</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"/ TURBULENCE (</span><span class="si">{</span><span class="n">turb_reason</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"HORIZONTAL TURBULENCE MODEL : </span><span class="si">{</span><span class="n">h_turb</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"VERTICAL TURBULENCE MODEL : </span><span class="si">{</span><span class="n">v_turb</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">([</span><span class="s2">"MIXING LENGTH MODEL : 3"</span><span class="p">]</span> <span class="k">if</span> <span class="n">v_turb</span> <span class="o">==</span> <span class="mi">2</span> <span class="k">else</span> <span class="p">[]),</span>
+        <span class="s2">"/"</span><span class="p">,</span>
+        <span class="s2">"/ FRICTION (single representative Nikuradse law; TELEMAC-3D has no zonal"</span><span class="p">,</span>
+        <span class="s2">"/ FRICTION DATA FILE, so the 2D per-zone roughness is collapsed to ONE ks -"</span><span class="p">,</span>
+        <span class="s2">"/ NOT spatially equivalent to the 2D setup; refine here if zonation matters)"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"LAW OF BOTTOM FRICTION : </span><span class="si">{</span><span class="n">law</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"FRICTION COEFFICIENT FOR THE BOTTOM : </span><span class="si">{</span><span class="n">coef</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">flow</span> <span class="ow">or</span> <span class="n">elev</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"/ BOUNDARY CONDITIONS (reused from the 2D steering for the"</span><span class="p">,</span>
+                  <span class="s2">"/ same horizontal inflow/outflow behavior)"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">flow</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PRESCRIBED FLOWRATES : </span><span class="si">{</span><span class="n">flow</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">elev</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"PRESCRIBED ELEVATIONS : </span><span class="si">{</span><span class="n">elev</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="c1"># continuation reuses the 2D horizontal velocity profiles; the cold-start</span>
+        <span class="c1"># mode leaves them at the constant-normal default (robust for the deep seed)</span>
+        <span class="k">if</span> <span class="n">hotstart</span> <span class="o">==</span> <span class="s2">"continuation"</span> <span class="ow">and</span> <span class="n">prof</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"VELOCITY PROFILES : </span><span class="si">{</span><span class="n">prof</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">n_liquid</span><span class="p">:</span>
+            <span class="c1"># logarithmic vertical velocity profile on every liquid boundary</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"VELOCITY VERTICAL PROFILES : "</span> <span class="o">+</span> <span class="s2">";"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">"2"</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_liquid</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">morphodynamics</span><span class="o">.</span><span class="n">enabled</span> <span class="ow">and</span> <span class="n">gaia_cas</span><span class="p">:</span>
+        <span class="c1"># GAIA couples to telemac3d the same way as 2D (bedload / suspended load);</span>
+        <span class="c1"># suspended sediment is carried as tracers declared through the coupling.</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"/ MORPHODYNAMICS (GAIA - bedload / suspended load)"</span><span class="p">,</span>
+                  <span class="s2">"COUPLING WITH : 'GAIA'"</span><span class="p">,</span>
+                  <span class="sa">f</span><span class="s2">"GAIA STEERING FILE : </span><span class="si">{</span><span class="n">gaia_cas</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                  <span class="sa">f</span><span class="s2">"COUPLING PERIOD FOR GAIA : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">morphodynamics</span><span class="o">.</span><span class="n">coupling_period</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"&amp;ETA"</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="p">(</span><span class="n">out_name</span> <span class="ow">or</span> <span class="n">cas3d_name</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ThreeDSetup</span><span class="p">(</span>
+        <span class="n">cas</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">n_levels</span><span class="o">=</span><span class="n">vd</span><span class="o">.</span><span class="n">n_levels</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="n">vd</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">vd</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">vd</span><span class="o">.</span><span class="n">depth</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> <span class="n">n_time_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">h_turbulence</span><span class="o">=</span><span class="n">h_turb</span><span class="p">,</span>
+        <span class="n">v_turbulence</span><span class="o">=</span><span class="n">v_turb</span><span class="p">,</span> <span class="n">courant</span><span class="o">=</span><span class="n">TARGET_COURANT</span><span class="p">,</span>
+        <span class="n">turbulence_reason</span><span class="o">=</span><span class="n">turb_reason</span><span class="p">,</span> <span class="n">layers_reason</span><span class="o">=</span><span class="n">vd</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span>
+        <span class="n">non_hydrostatic</span><span class="o">=</span><span class="n">non_hydrostatic</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="build_3d_cases">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.threed.build_3d_cases">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_3d_cases</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+                   <span class="n">hydrostatic_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">hydrostatic_listing</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the three 3D steering files ``add3d.py`` provides and return their</span>
+<span class="sd">    setups as ``{"hydrostatic": ThreeDSetup, "hydrodyn": ThreeDSetup,</span>
+<span class="sd">    "unsteady": Unsteady3DSetup | None}``.</span>
+
+<span class="sd">    1. ``hotstart3d_hydrostatic.cas`` - ``NON-HYDROSTATIC VERSION : NO`` (the cheap</span>
+<span class="sd">       hydrostatic solver), constant in-file Q/H, marching *hydrostatic_steps*</span>
+<span class="sd">       (default :data:`HYDROSTATIC_N_STEPS`) fixed steps with a short listing period</span>
+<span class="sd">       (*hydrostatic_listing*, default :data:`HYDROSTATIC_LISTING_PERIOD`) so the</span>
+<span class="sd">       sortie carries enough ``FLUX BOUNDARY`` printouts to check **when the boundary</span>
+<span class="sd">       fluxes converge** in a steady telemac3d run.</span>
+<span class="sd">    2. ``hotstart3d_hydrodyn.cas`` - the steady **non-hydrostatic** run with the same</span>
+<span class="sd">       in-file prescribed Q (inflow) and H (outflow).</span>
+<span class="sd">    3. ``unsteady3d.cas`` - non-hydrostatic, hydrograph-driven: Q(t) inflow and the</span>
+<span class="sd">       stage-discharge outflow SL(t) come from the same ``LIQUID BOUNDARIES FILE``</span>
+<span class="sd">       as ``unsteady2d.cas``. Requires a *varying* ``boundaries.inflow`` series;</span>
+<span class="sd">       ``None`` (with a log notice) otherwise.</span>
+
+<span class="sd">    All three hotstart from the 2D steady result (v9 2D-&gt;3D continuation) and share</span>
+<span class="sd">    the sigma-level count, turbulence closure and Courant-sized time step inferred</span>
+<span class="sd">    from **one** read of ``r2d.slf``.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.unsteady</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_unsteady_3d_case</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
+    <span class="n">setups</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"hydrostatic"</span><span class="p">:</span> <span class="n">build_3d_cas</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">non_hydrostatic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">n_time_steps</span><span class="o">=</span><span class="n">hydrostatic_steps</span> <span class="ow">or</span> <span class="n">HYDROSTATIC_N_STEPS</span><span class="p">,</span>
+            <span class="n">listing_period</span><span class="o">=</span><span class="n">hydrostatic_listing</span> <span class="ow">or</span> <span class="n">HYDROSTATIC_LISTING_PERIOD</span><span class="p">,</span>
+            <span class="n">out_name</span><span class="o">=</span><span class="n">HYDROSTATIC_CAS</span><span class="p">,</span>
+            <span class="n">results3d_name</span><span class="o">=</span><span class="n">HYDROSTATIC_RESULT_3D</span><span class="p">,</span>
+            <span class="n">results2d_name</span><span class="o">=</span><span class="n">HYDROSTATIC_RESULT_2D</span><span class="p">),</span>
+        <span class="s2">"hydrodyn"</span><span class="p">:</span> <span class="n">build_3d_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">out_name</span><span class="o">=</span><span class="n">HYDRODYN_CAS</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">setups</span><span class="p">[</span><span class="s2">"unsteady"</span><span class="p">]</span> <span class="o">=</span> <span class="n">build_unsteady_3d_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">out_name</span><span class="o">=</span><span class="n">UNSTEADY3D_CAS</span><span class="p">,</span>
+                                                    <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a missing hydrograph is a valid state</span>
+        <span class="n">setups</span><span class="p">[</span><span class="s2">"unsteady"</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> skipped: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">UNSTEADY3D_CAS</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">setups</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

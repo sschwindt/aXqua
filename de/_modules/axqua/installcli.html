@@ -1,0 +1,688 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.installcli &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/installcli.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../genindex.html" />
+    <link rel="search" title="Suche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/installcli.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/installcli.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/installcli.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/installcli.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="de" data-root="../../../" data-page="_modules/axqua/installcli.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/installcli.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../fr/_modules/axqua/installcli.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.installcli</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../_modules/axqua/installcli.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.installcli</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""``axqua install``: install TELEMAC, OpenFOAM and the postprocessors.</span>
+
+<span class="sd">``overview``   what this computer is, and what is installed, running or was tried</span>
+<span class="sd">``plan``       what an installation would do and what is missing; changes nothing</span>
+<span class="sd">``packages``   the system packages an installation needs; ``--elevate`` installs them</span>
+<span class="sd">``start``      run an installation, detached unless ``--foreground``</span>
+<span class="sd">``status``     how far an installation is, with the end of its log (``--tail``)</span>
+<span class="sd">``cancel``     stop an installation; what is already built stays</span>
+<span class="sd">``list``       every installation on record</span>
+<span class="sd">``telemac-examples``  download the files that TELEMAC's own example cases read</span>
+
+<span class="sd">The installation wizards of the QGIS plugin are these commands with a window around</span>
+<span class="sd">them. ``run`` is what a detached installation executes and is not meant to be typed.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobcli</span><span class="w"> </span><span class="kn">import</span> <span class="n">_common</span><span class="p">,</span> <span class="n">_setup_logging</span><span class="p">,</span> <span class="n">emit</span><span class="p">,</span> <span class="n">fail</span><span class="p">,</span> <span class="n">parse_args</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">ACTIONS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"overview"</span><span class="p">,</span> <span class="s2">"plan"</span><span class="p">,</span> <span class="s2">"packages"</span><span class="p">,</span> <span class="s2">"start"</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">,</span> <span class="s2">"cancel"</span><span class="p">,</span> <span class="s2">"list"</span><span class="p">,</span>
+           <span class="s2">"telemac-examples"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">host</span><span class="p">,</span> <span class="n">recipes</span>
+
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua install"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Install the simulation programs with the published installer "</span>
+                    <span class="s2">"scripts. 'plan' shows what would happen before anything is "</span>
+                    <span class="s2">"changed. An installation runs as the ordinary user; system "</span>
+                    <span class="s2">"packages are the one part that needs an administrator."</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"action"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"?"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"overview"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">ACTIONS</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"target"</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"?"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"what to install: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="s2">"; for status and cancel: the installation"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--folder"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"where to install"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--for-all-users"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"install below /opt for every user of this computer; needs "</span>
+                        <span class="s2">"the password of an administrator before and after the build. "</span>
+                        <span class="s2">"Without it, the program is installed for you alone in your "</span>
+                        <span class="s2">"home folder and needs no administrator"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--tag"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"TELEMAC: the version to build"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--salome"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"TELEMAC: a downloaded SALOME archive to install with it"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--telemac-examples"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">recipes</span><span class="o">.</span><span class="n">TELEMAC_EXAMPLES</span><span class="p">,</span>
+                   <span class="n">default</span><span class="o">=</span><span class="s2">"inputs"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"TELEMAC: what to download of its example cases. inputs "</span>
+                        <span class="s2">"(default): the files a run reads, about 460 MB; all: "</span>
+                        <span class="s2">"reference results and manuals as well, 1.65 GB in 1,500 "</span>
+                        <span class="s2">"files, which takes about an hour; none: steering files only"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-telemac-examples"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"the same as --telemac-examples none"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--reuse-openfoam"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">"BASHRC"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"OpenFOAM: the etc/bashrc of an installed v2406, 'auto' to "</span>
+                        <span class="s2">"look for one (default), or 'no' to compile OpenFOAM"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--jobs"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"processes for compiling"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-visualization"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"OpenFOAM: do not install ParaView and VisIt with it"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-visit"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"OpenFOAM and postprocessors: do not install VisIt. aXqua "</span>
+                        <span class="s2">"recommends VisIt, because its predefined figures of "</span>
+                        <span class="s2">"three-dimensional results are rendered with it"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--examples"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"OpenFOAM: also download the example case of the solver"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-smoke-test"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"OpenFOAM: skip the short test run at the end"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--installers"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"a local copy of the installer scripts, instead of a download"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--ref"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"another commit or branch of the installer scripts"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--base"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">host</span><span class="o">.</span><span class="n">BASES</span><span class="p">),</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"the release a derivative system is built on"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-bind"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"do not enter the installation in the profile"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--reinstall"</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"continue"</span><span class="p">,</span> <span class="s2">"replace"</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"what happens to an earlier installation in the folder: "</span>
+                        <span class="s2">"continue it, keeping what is downloaded and built (what the "</span>
+                        <span class="s2">"installers do by themselves), or replace it: remove it first "</span>
+                        <span class="s2">"and install anew"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--foreground"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"start: run here and print the log, instead of detached"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--elevate"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"packages: install the missing ones, asking for the "</span>
+                        <span class="s2">"administrator password in a dialog of the desktop"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--tail"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">"N"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"status: include the last N lines of the log"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_common</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_options</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">recipes</span>
+    <span class="k">return</span> <span class="n">recipes</span><span class="o">.</span><span class="n">Options</span><span class="p">(</span>
+        <span class="n">folder</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">"system"</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">for_all_users</span> <span class="k">else</span> <span class="s2">"user"</span><span class="p">,</span>
+        <span class="n">tag</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tag</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span> <span class="n">salome</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">salome</span><span class="p">,</span>
+        <span class="n">telemac_examples</span><span class="o">=</span><span class="s2">"none"</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">no_telemac_examples</span> <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">telemac_examples</span><span class="p">,</span>
+        <span class="n">reuse_openfoam</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">reuse_openfoam</span> <span class="ow">or</span> <span class="s2">"auto"</span><span class="p">,</span> <span class="n">jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">jobs</span><span class="p">,</span>
+        <span class="n">visualization</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_visualization</span><span class="p">,</span> <span class="n">visit</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_visit</span><span class="p">,</span>
+        <span class="n">examples</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">examples</span><span class="p">,</span>
+        <span class="n">smoke_test</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_smoke_test</span><span class="p">,</span> <span class="n">installers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">installers</span><span class="p">,</span>
+        <span class="n">ref</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ref</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">base</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">,</span> <span class="n">bind</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_bind</span><span class="p">,</span>
+        <span class="n">reinstall</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">reinstall</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_need_target</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">recipes</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">action</span><span class="si">}</span><span class="s2">' needs one of: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">),</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"target"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">args</span><span class="o">.</span><span class="n">target</span>
+
+
+<div class="viewcode-block" id="run_install">
+<a class="viewcode-back" href="../../code/cli.html#axqua.installcli.run_install">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_install</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"install"</span><span class="p">)</span>
+    <span class="n">_setup_logging</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"install.</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">action</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">recipes</span><span class="p">,</span> <span class="n">runner</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"run"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">runner</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span> <span class="ow">or</span> <span class="s2">"."</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"telemac-examples"</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">telemac_examples</span>
+
+            <span class="n">home</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">home</span> <span class="o">/</span> <span class="s2">"sources"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">home</span> <span class="o">/</span> <span class="s2">"examples"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">home</span><span class="si">}</span><span class="s2"> is not the folder of a TELEMAC installation"</span><span class="p">,</span>
+                    <span class="n">subject</span><span class="o">=</span><span class="s2">"target"</span><span class="p">,</span>
+                    <span class="n">remedy</span><span class="o">=</span><span class="s2">"Name the folder telemac-mascaret of the installation."</span><span class="p">)</span>
+            <span class="c1"># progress belongs on stderr when stdout carries the JSON document</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span> <span class="k">else</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="n">telemac_examples</span><span class="o">.</span><span class="n">fetch_inputs</span><span class="p">(</span>
+                <span class="n">home</span><span class="p">,</span> <span class="n">say</span><span class="o">=</span><span class="k">lambda</span> <span class="n">text</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+            <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="p">[])</span>
+            <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">done</span><span class="p">[</span><span class="s2">"missing"</span><span class="p">]</span> <span class="k">else</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"overview"</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">_overview</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">_overview_lines</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"list"</span><span class="p">:</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">list_all</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="p">{</span><span class="s2">"installs"</span><span class="p">:</span> <span class="n">found</span><span class="p">},</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                        <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="n">_status_line</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span> <span class="ow">or</span> <span class="p">[</span><span class="s2">"no installations"</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"status"</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">target</span> <span class="ow">in</span> <span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="p">{},</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                                <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="si">}</span><span class="s2"> was not installed with aXqua"</span><span class="p">])</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s2">"folder"</span><span class="p">],</span> <span class="n">lines</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+                <span class="n">status</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">runner</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">]</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">found</span> <span class="k">if</span> <span class="n">s</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="p">{</span><span class="s2">"installs"</span><span class="p">:</span> <span class="n">found</span><span class="p">},</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                            <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="n">_status_line</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
+                            <span class="ow">or</span> <span class="p">[</span><span class="s2">"no installations"</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                        <span class="n">lines</span><span class="o">=</span><span class="n">_status_lines</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"cancel"</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">target</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"'cancel' needs the installation to stop"</span><span class="p">,</span>
+                                  <span class="n">subject</span><span class="o">=</span><span class="s2">"target"</span><span class="p">,</span>
+                                  <span class="n">remedy</span><span class="o">=</span><span class="s2">"List them with 'axqua install list'."</span><span class="p">)</span>
+            <span class="n">ident</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">target</span>
+            <span class="k">if</span> <span class="n">ident</span> <span class="ow">in</span> <span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">:</span>
+                <span class="n">running</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">ident</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">running</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="p">{},</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                                <span class="n">lines</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"no installation of </span><span class="si">{</span><span class="n">ident</span><span class="si">}</span><span class="s2"> is running"</span><span class="p">])</span>
+                <span class="n">ident</span> <span class="o">=</span> <span class="n">running</span><span class="p">[</span><span class="s2">"folder"</span><span class="p">]</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">ident</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                        <span class="n">lines</span><span class="o">=</span><span class="n">_status_lines</span><span class="p">(</span><span class="n">status</span><span class="p">))</span>
+
+        <span class="n">target</span> <span class="o">=</span> <span class="n">_need_target</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="n">plan</span> <span class="o">=</span> <span class="n">recipes</span><span class="o">.</span><span class="n">plan</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">_options</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"plan"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">plan</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                        <span class="n">lines</span><span class="o">=</span><span class="n">_plan_lines</span><span class="p">(</span><span class="n">plan</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">"packages"</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()[</span><span class="s2">"packages"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">elevate</span> <span class="ow">and</span> <span class="n">plan</span><span class="o">.</span><span class="n">missing</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"installation"</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipes</span><span class="o">.</span><span class="n">install_packages</span><span class="p">(</span>
+                    <span class="n">target</span><span class="p">,</span> <span class="n">plan</span><span class="o">.</span><span class="n">missing</span><span class="p">,</span> <span class="n">runner</span><span class="o">.</span><span class="n">installs_root</span><span class="p">())</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"missing"</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s2">"unavailable"</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipes</span><span class="o">.</span><span class="n">packages_state</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">needed</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"command"</span><span class="p">]</span> <span class="o">=</span> <span class="n">recipes</span><span class="o">.</span><span class="n">admin_command</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s2">"missing"</span><span class="p">])</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">plan</span><span class="o">.</span><span class="n">needed</span><span class="p">)</span><span class="si">}</span><span class="s2"> system packages are needed, "</span>
+                     <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'missing'</span><span class="p">])</span><span class="si">}</span><span class="s2"> are not installed"</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">"missing"</span><span class="p">]:</span>
+                <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"An administrator installs them with:"</span><span class="p">,</span> <span class="s2">"  "</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s2">"command"</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"installation"</span><span class="p">):</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"installation"</span><span class="p">][</span><span class="s2">"message"</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="c1"># start</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">runner</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">plan</span><span class="p">,</span> <span class="n">detach</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">foreground</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">foreground</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">_status_lines</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">foreground</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"The installation runs by itself. Follow it with:"</span><span class="p">,</span>
+                      <span class="sa">f</span><span class="s2">"  axqua install status </span><span class="si">{</span><span class="n">status</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2"> --tail 20"</span><span class="p">]</span>
+        <span class="n">emit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">lines</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"queued"</span><span class="p">,</span> <span class="s2">"running"</span><span class="p">,</span> <span class="s2">"succeeded"</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+        <span class="k">return</span> <span class="n">fail</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------------- reporting</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_overview</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What a person needs to see before deciding to install anything."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">machine</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">host</span><span class="p">,</span> <span class="n">recipes</span><span class="p">,</span> <span class="n">runner</span>
+
+    <span class="n">here</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">detect</span><span class="p">()</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"telemac"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"telemac"</span><span class="p">,),</span> <span class="s2">"openfoam"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"openfoam"</span><span class="p">,),</span>
+            <span class="s2">"postprocessors"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"paraview"</span><span class="p">,</span> <span class="s2">"visit"</span><span class="p">)}</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">recipes</span><span class="o">.</span><span class="n">TARGETS</span><span class="p">:</span>
+        <span class="n">installed</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">[</span><span class="n">target</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                   <span class="c1"># noqa: BLE001 - a hint, never fatal</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">installed</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"paraview"</span><span class="p">,</span> <span class="s2">"visit"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">installed</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">targets</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s2">"target"</span><span class="p">:</span> <span class="n">target</span><span class="p">,</span> <span class="s2">"title"</span><span class="p">:</span> <span class="n">recipes</span><span class="o">.</span><span class="n">TITLES</span><span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="s2">"installed"</span><span class="p">:</span> <span class="n">installed</span><span class="p">,</span>
+            <span class="s2">"running"</span><span class="p">:</span> <span class="n">runner</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="s2">"last"</span><span class="p">:</span> <span class="n">runner</span><span class="o">.</span><span class="n">latest</span><span class="p">(</span><span class="n">target</span><span class="p">),</span>
+            <span class="s2">"existing"</span><span class="p">:</span> <span class="n">recipes</span><span class="o">.</span><span class="n">existing_installation</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">installed</span><span class="p">),</span>
+            <span class="s2">"default_folder"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipes</span><span class="o">.</span><span class="n">default_folder</span><span class="p">(</span><span class="n">target</span><span class="p">)),</span>
+            <span class="s2">"default_folders"</span><span class="p">:</span> <span class="p">{</span><span class="n">scope</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipes</span><span class="o">.</span><span class="n">default_folder</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">scope</span><span class="p">))</span>
+                                <span class="k">for</span> <span class="n">scope</span> <span class="ow">in</span> <span class="n">recipes</span><span class="o">.</span><span class="n">SCOPES</span><span class="p">},</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">"host"</span><span class="p">:</span> <span class="n">here</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="s2">"targets"</span><span class="p">:</span> <span class="n">targets</span><span class="p">,</span>
+            <span class="s2">"repository"</span><span class="p">:</span> <span class="n">recipes</span><span class="o">.</span><span class="n">REPOSITORY</span><span class="p">,</span> <span class="s2">"ref"</span><span class="p">:</span> <span class="n">recipes</span><span class="o">.</span><span class="n">PINNED</span><span class="p">,</span>
+            <span class="s2">"openfoam_found"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipes</span><span class="o">.</span><span class="n">find_openfoam</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="s2">"default_jobs"</span><span class="p">:</span> <span class="n">recipes</span><span class="o">.</span><span class="n">default_jobs</span><span class="p">()}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_overview_lines</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">"host"</span><span class="p">]</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">host</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="s2">""</span> <span class="k">if</span> <span class="n">host</span><span class="p">[</span><span class="s2">"supported"</span><span class="p">]</span> <span class="k">else</span>
+                                    <span class="s2">"  (no installer for this system)"</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"targets"</span><span class="p">]:</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"installed"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"running"</span><span class="p">]</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2">: "</span> <span class="o">+</span> <span class="p">(</span><span class="n">found</span> <span class="ow">or</span> <span class="s2">"not found on this computer"</span><span class="p">)</span>
+                     <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"  [installation </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">'id'</span><span class="p">]</span><span class="si">}</span><span class="s2"> is running]"</span> <span class="k">if</span> <span class="n">state</span> <span class="k">else</span> <span class="s2">""</span><span class="p">))</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Show what an installation would do: axqua install plan &lt;target&gt;"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_plan_lines</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">plan</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'title'</span><span class="p">]</span><span class="si">}</span><span class="s2"> on </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'host'</span><span class="p">][</span><span class="s1">'description'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+             <span class="sa">f</span><span class="s2">"folder: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'folder'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"notes"</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">"estimate"</span><span class="p">]:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"time: </span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="s1">'estimate'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">number</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"steps"</span><span class="p">],</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"step </span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">step</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  $ </span><span class="si">{</span><span class="n">step</span><span class="p">[</span><span class="s1">'command'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">"outputs"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"enters in the profile: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">line</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">plan</span><span class="o">.</span><span class="n">findings</span><span class="p">]</span>
+    <span class="n">scope</span> <span class="o">=</span> <span class="s2">" --for-all-users"</span> <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">scope</span> <span class="o">==</span> <span class="s2">"system"</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"ready to start: axqua install start "</span> <span class="o">+</span> <span class="n">plan</span><span class="o">.</span><span class="n">target</span> <span class="o">+</span> <span class="n">scope</span> <span class="k">if</span> <span class="n">plan</span><span class="o">.</span><span class="n">ready</span>
+                 <span class="k">else</span> <span class="s2">"this installation cannot be started as it is"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_status_line</span><span class="p">(</span><span class="n">status</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"running"</span> <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"steps"</span><span class="p">):</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"  step </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'step'</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s1">'steps'</span><span class="p">])</span><span class="si">}</span><span class="s2">: "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'step_name'</span><span class="p">,</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">minutes</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"elapsed"</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">/</span> <span class="mf">60.0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'id'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">  </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'state'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">minutes</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> min</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_status_lines</span><span class="p">(</span><span class="n">status</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">_status_line</span><span class="p">(</span><span class="n">status</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"message"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"running"</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">status</span><span class="p">[</span><span class="s2">"message"</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"outputs"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"bound"</span><span class="p">):</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"entered in the profile </span><span class="si">{</span><span class="n">status</span><span class="p">[</span><span class="s1">'bound'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">finding</span> <span class="ow">in</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"findings"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">finding</span><span class="p">[</span><span class="s1">'severity'</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">finding</span><span class="p">[</span><span class="s1">'code'</span><span class="p">]</span><span class="si">}</span><span class="s2">]: "</span>
+                     <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">finding</span><span class="p">[</span><span class="s1">'message'</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">finding</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'remedy'</span><span class="p">,</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"log_tail"</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"--- "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"log"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)),</span> <span class="n">status</span><span class="p">[</span><span class="s2">"log_tail"</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="n">lines</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"run_install"</span><span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

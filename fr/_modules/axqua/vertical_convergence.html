@@ -1,0 +1,850 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.vertical_convergence &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/vertical_convergence.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/vertical_convergence.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/vertical_convergence.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/vertical_convergence.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/vertical_convergence.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="fr" data-root="../../../" data-page="_modules/axqua/vertical_convergence.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/vertical_convergence.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../../de/_modules/axqua/vertical_convergence.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">axqua.vertical_convergence</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../../_modules/axqua/vertical_convergence.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <h1>Code source de axqua.vertical_convergence</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Vertical-layer convergence study for the TELEMAC-3D case.</span>
+
+<span class="sd">The 2D study (:mod:`axqua.convergence`) varies the *horizontal* cell size; this</span>
+<span class="sd">one varies the **number of sigma layers** (``NUMBER OF HORIZONTAL LEVELS``) on the</span>
+<span class="sd">*same* horizontal mesh, to demonstrate that the depth-resolved solution is</span>
+<span class="sd">independent of the vertical discretization. For a sequence of layer counts</span>
+<span class="sd">(coarse = few layers -&gt; fine = many) it runs the hotstarted non-hydrostatic 3D case</span>
+<span class="sd">(:func:`axqua.threed.build_3d_cas`), samples the depth-averaged quantities of</span>
+<span class="sd">interest (water depth, scalar velocity, from the 3D run's ``2D RESULT FILE``) at the</span>
+<span class="sd">ground-truth probe points, and reports the relative change between successive layer</span>
+<span class="sd">counts plus an observed order of convergence and a Grid Convergence Index.</span>
+
+<span class="sd">The "grid size" for the GCI is the layer thickness ``dz`` (which halves as the layer</span>
+<span class="sd">count roughly doubles), so the same Richardson/GCI maths as the 2D study apply - the</span>
+<span class="sd">report helpers are reused from :mod:`axqua.convergence`. The TELEMAC execution is</span>
+<span class="sd">injected (the ``simulate`` callable), so the report maths are unit-testable without</span>
+<span class="sd">the solver.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">threed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.convergence</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DEFAULT_QUANTITIES</span><span class="p">,</span> <span class="n">_gci_triplet</span><span class="p">,</span> <span class="n">_rel_change</span><span class="p">,</span> <span class="n">default_probes</span><span class="p">,</span>
+    <span class="n">extract_at_points</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># data model</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="VerticalLevel">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalLevel">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VerticalLevel</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One vertical resolution: its layer count, thickness and sampled QoI."""</span>
+
+    <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">dz</span><span class="p">:</span> <span class="nb">float</span>                              <span class="c1"># representative layer thickness [m]</span>
+    <span class="n">n_nodes3d</span><span class="p">:</span> <span class="nb">int</span>                         <span class="c1"># 3D prism mesh node count</span>
+    <span class="n">n_elem3d</span><span class="p">:</span> <span class="nb">int</span>                          <span class="c1"># 3D prism element count</span>
+    <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>                <span class="c1"># fixed dt sized for the target Courant [s]</span>
+    <span class="n">runtime_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">qoi</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>             <span class="c1"># {quantity: (n_probes,) values}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cell_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The grid size used for the GCI maths: the layer thickness."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dz</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2"> levels"</span>
+
+<div class="viewcode-block" id="VerticalLevel.repr_value">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalLevel.repr_value">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">repr_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">qty</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qoi</span><span class="p">[</span><span class="n">qty</span><span class="p">])))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="VerticalConvergenceReport">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalConvergenceReport">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VerticalConvergenceReport</span><span class="p">:</span>
+    <span class="n">levels</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">VerticalLevel</span><span class="p">]</span>            <span class="c1"># ordered coarse (few) -&gt; fine (many)</span>
+    <span class="n">quantities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">probes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">rel_change</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">observed_order</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">gci_fine</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">converged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">case</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+
+<div class="viewcode-block" id="VerticalConvergenceReport.format">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalConvergenceReport.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">))</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">"Vertical-layer convergence study (few -&gt; many layers)"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"  probes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probes</span><span class="p">)</span><span class="si">}</span><span class="s2">   tolerance: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'vertical levels'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">n_levels</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'layer thickness dz [m]'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">dz</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'3D nodes'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">n_nodes3d</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'3D elements'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">n_elem3d</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">d</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'time step dt [s]'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span>
+            <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">time_step</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">time_step</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'-'</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}}</span><span class="s2">"</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'runtime [s]'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span>
+            <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">runtime_s</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">runtime_s</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'-'</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}}</span><span class="s2">"</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+            <span class="s2">"  "</span> <span class="o">+</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="p">(</span><span class="mi">22</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">lv</span><span class="p">)),</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="s1">'quantity phi'</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">label</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">q</span><span class="si">:</span><span class="s2">&lt;22</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">x</span><span class="o">.</span><span class="n">repr_value</span><span class="p">(</span><span class="n">q</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">))</span>
+            <span class="n">rc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel_change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">cells</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">''</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="si">}}</span><span class="s2">"</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">e</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">&gt;</span><span class="si">{</span><span class="n">w</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%"</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">rc</span><span class="p">]</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="s1">'rel. change'</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cells</span><span class="p">))</span>
+            <span class="n">p</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observed_order</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci_fine</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"observed order p=</span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GCI(fine)=</span><span class="si">{</span><span class="n">g</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">extra</span><span class="p">:</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="s1">''</span><span class="si">:</span><span class="s2">&lt;20</span><span class="si">}</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extra</span><span class="p">))</span>
+        <span class="n">verdict</span> <span class="o">=</span> <span class="s2">"CONVERGED"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">converged</span> <span class="k">else</span> <span class="s2">"NOT converged"</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  =&gt; </span><span class="si">{</span><span class="n">verdict</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% "</span>
+                     <span class="s2">"(finest relative change vs. tolerance)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"     add layers (the finest still changes the QoI by more "</span>
+                         <span class="s2">"than the tolerance)."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VerticalConvergenceReport.save">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalConvergenceReport.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">()</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="VerticalConvergenceReport.recommendation">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalConvergenceReport.recommendation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recommendation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Recommend the **fewest** layers that are grid-independent (cheapest 3D run).</span>
+
+<span class="sd">        A vertical resolution is adequate when adding more layers changes every</span>
+<span class="sd">        quantity of interest by less than the tolerance; the coarsest such level is</span>
+<span class="sd">        the cheapest converged choice."""</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span>
+        <span class="n">chosen</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>                       <span class="c1"># few -&gt; many</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rel_change</span><span class="p">[</span><span class="n">q</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">):</span>
+                <span class="n">chosen</span> <span class="o">=</span> <span class="n">lv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">chosen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">chosen</span><span class="p">,</span> <span class="n">converged</span> <span class="o">=</span> <span class="n">lv</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="kc">False</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"no layer count met the </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">% tolerance; "</span>
+                      <span class="s2">"using the finest (add more layers to confirm independence)"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">converged</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"fewest layers whose depth-averaged depth and velocity stay "</span>
+                      <span class="sa">f</span><span class="s2">"within </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">% under vertical refinement "</span>
+                      <span class="s2">"(grid-independent and cheapest to run)"</span><span class="p">)</span>
+        <span class="n">finest</span> <span class="o">=</span> <span class="n">lv</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">speedup</span> <span class="o">=</span> <span class="p">(</span><span class="n">finest</span><span class="o">.</span><span class="n">runtime_s</span> <span class="o">/</span> <span class="n">chosen</span><span class="o">.</span><span class="n">runtime_s</span>
+                   <span class="k">if</span> <span class="n">chosen</span><span class="o">.</span><span class="n">runtime_s</span> <span class="ow">and</span> <span class="n">finest</span><span class="o">.</span><span class="n">runtime_s</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"level"</span><span class="p">:</span> <span class="n">chosen</span><span class="p">,</span> <span class="s2">"n_levels"</span><span class="p">:</span> <span class="n">chosen</span><span class="o">.</span><span class="n">n_levels</span><span class="p">,</span> <span class="s2">"dz"</span><span class="p">:</span> <span class="n">chosen</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span>
+                <span class="s2">"converged"</span><span class="p">:</span> <span class="n">converged</span><span class="p">,</span> <span class="s2">"reason"</span><span class="p">:</span> <span class="n">reason</span><span class="p">,</span>
+                <span class="s2">"speedup_vs_finest"</span><span class="p">:</span> <span class="n">speedup</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="VerticalConvergenceReport.to_xlsx">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.VerticalConvergenceReport.to_xlsx">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_xlsx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Write a styled .xlsx vertical-convergence report with the recommendation."""</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl</span><span class="w"> </span><span class="kn">import</span> <span class="n">Workbook</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl.styles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Alignment</span><span class="p">,</span> <span class="n">Border</span><span class="p">,</span> <span class="n">Font</span><span class="p">,</span> <span class="n">PatternFill</span><span class="p">,</span> <span class="n">Side</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">lv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">levels</span>
+        <span class="n">head_fill</span> <span class="o">=</span> <span class="n">PatternFill</span><span class="p">(</span><span class="s2">"solid"</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="s2">"1F4E78"</span><span class="p">)</span>
+        <span class="n">head_font</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"FFFFFF"</span><span class="p">)</span>
+        <span class="n">label_font</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">rec_fill</span> <span class="o">=</span> <span class="n">PatternFill</span><span class="p">(</span><span class="s2">"solid"</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="s2">"C6EFCE"</span><span class="p">)</span>
+        <span class="n">warn_fill</span> <span class="o">=</span> <span class="n">PatternFill</span><span class="p">(</span><span class="s2">"solid"</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="s2">"FFC7CE"</span><span class="p">)</span>
+        <span class="n">sub_fill</span> <span class="o">=</span> <span class="n">PatternFill</span><span class="p">(</span><span class="s2">"solid"</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="s2">"DDEBF7"</span><span class="p">)</span>
+        <span class="n">center</span> <span class="o">=</span> <span class="n">Alignment</span><span class="p">(</span><span class="n">horizontal</span><span class="o">=</span><span class="s2">"center"</span><span class="p">)</span>
+        <span class="n">thin</span> <span class="o">=</span> <span class="n">Side</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">"thin"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"BFBFBF"</span><span class="p">)</span>
+        <span class="n">border</span> <span class="o">=</span> <span class="n">Border</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="n">thin</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">thin</span><span class="p">)</span>
+
+        <span class="n">wb</span> <span class="o">=</span> <span class="n">Workbook</span><span class="p">()</span>
+        <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="o">.</span><span class="n">active</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">"vertical convergence"</span>
+        <span class="n">ncol</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">row</span><span class="p">(</span><span class="n">cells</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">cells</span><span class="p">))</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">max_row</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">cell</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">c</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">fill</span><span class="p">:</span>
+                    <span class="n">cell</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="n">fill</span>
+                <span class="k">if</span> <span class="n">font</span><span class="p">:</span>
+                    <span class="n">cell</span><span class="o">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">font</span>
+                <span class="k">if</span> <span class="n">fmt</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                    <span class="n">cell</span><span class="o">.</span><span class="n">number_format</span> <span class="o">=</span> <span class="n">fmt</span>
+                <span class="k">if</span> <span class="n">align</span> <span class="ow">and</span> <span class="n">c</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">cell</span><span class="o">.</span><span class="n">alignment</span> <span class="o">=</span> <span class="n">align</span>
+                <span class="n">cell</span><span class="o">.</span><span class="n">border</span> <span class="o">=</span> <span class="n">border</span>
+            <span class="k">return</span> <span class="n">r</span>
+
+        <span class="n">title</span> <span class="o">=</span> <span class="s2">"Vertical-layer convergence study"</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">" - case '</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="si">}</span><span class="s2">'"</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">title</span><span class="p">])</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="n">start_row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">start_column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_column</span><span class="o">=</span><span class="n">ncol</span><span class="p">)</span>
+        <span class="n">ws</span><span class="p">[</span><span class="s2">"A1"</span><span class="p">]</span><span class="o">.</span><span class="n">font</span> <span class="o">=</span> <span class="n">Font</span><span class="p">(</span><span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="sa">f</span><span class="s2">"probes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">probes</span><span class="p">)</span><span class="si">}</span><span class="s2">    tolerance: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span>
+                   <span class="sa">f</span><span class="s2">"    layer counts: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">lv</span><span class="p">)</span><span class="si">}</span><span class="s2"> (few to many)"</span><span class="p">])</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="n">start_row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">end_row</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">start_column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_column</span><span class="o">=</span><span class="n">ncol</span><span class="p">)</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+        <span class="n">row</span><span class="p">([</span><span class="s2">""</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">label</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span> <span class="n">fill</span><span class="o">=</span><span class="n">head_fill</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">head_font</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">([</span><span class="s2">"vertical levels"</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">n_levels</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span> <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s2">"0"</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">([</span><span class="s2">"layer thickness dz [m]"</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">dz</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span> <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s2">"0.000"</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">([</span><span class="s2">"3D nodes"</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">n_nodes3d</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span> <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">"#,##0"</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">([</span><span class="s2">"3D elements"</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">n_elem3d</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span> <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">"#,##0"</span><span class="p">,</span>
+            <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">([</span><span class="s2">"time step dt [s]"</span><span class="p">,</span> <span class="o">*</span><span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">time_step</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'nan'</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span>
+            <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">"0.0000"</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">([</span><span class="s2">"runtime [s]"</span><span class="p">,</span> <span class="o">*</span><span class="p">[(</span><span class="n">x</span><span class="o">.</span><span class="n">runtime_s</span> <span class="ow">or</span> <span class="nb">float</span><span class="p">(</span><span class="s1">'nan'</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span>
+            <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">"0.0"</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantities</span><span class="p">:</span>
+            <span class="n">row</span><span class="p">([</span><span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">repr_value</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lv</span><span class="p">]],</span> <span class="n">fill</span><span class="o">=</span><span class="n">sub_fill</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">,</span>
+                <span class="n">fmt</span><span class="o">=</span><span class="s2">"0.0000"</span><span class="p">,</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+            <span class="n">rc</span> <span class="o">=</span> <span class="p">[</span><span class="s2">""</span><span class="p">,</span> <span class="s2">""</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">e</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%"</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rel_change</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[])]</span>
+            <span class="n">row</span><span class="p">([</span><span class="s2">"  rel. change vs. fewer"</span><span class="p">,</span> <span class="o">*</span><span class="n">rc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]],</span> <span class="n">align</span><span class="o">=</span><span class="n">center</span><span class="p">)</span>
+            <span class="n">p</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observed_order</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">gci_fine</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">q</span><span class="p">)</span>
+            <span class="n">extra</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"observed order p = </span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">g</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">extra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"GCI(fine) = </span><span class="si">{</span><span class="n">g</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">extra</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">([</span><span class="s2">"  "</span> <span class="o">+</span> <span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">extra</span><span class="p">)])</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+        <span class="n">rec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recommendation</span><span class="p">()</span>
+        <span class="n">sp</span> <span class="o">=</span> <span class="n">rec</span><span class="p">[</span><span class="s2">"speedup_vs_finest"</span><span class="p">]</span>
+        <span class="n">sp_txt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" (~</span><span class="si">{</span><span class="n">sp</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">x faster than the finest)"</span> <span class="k">if</span> <span class="n">sp</span> <span class="ow">and</span> <span class="n">sp</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">""</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">row</span><span class="p">([</span><span class="sa">f</span><span class="s2">"RECOMMENDATION: </span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="s1">'n_levels'</span><span class="p">]</span><span class="si">}</span><span class="s2"> vertical levels "</span>
+                 <span class="sa">f</span><span class="s2">"(dz~</span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="s1">'dz'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m)"</span>
+                 <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">", runtime ~</span><span class="si">{</span><span class="n">rec</span><span class="p">[</span><span class="s1">'level'</span><span class="p">]</span><span class="o">.</span><span class="n">runtime_s</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> s</span><span class="si">{</span><span class="n">sp_txt</span><span class="si">}</span><span class="s2">"</span>
+                    <span class="k">if</span> <span class="n">rec</span><span class="p">[</span><span class="s1">'level'</span><span class="p">]</span><span class="o">.</span><span class="n">runtime_s</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)],</span>
+                <span class="n">fill</span><span class="o">=</span><span class="n">rec_fill</span> <span class="k">if</span> <span class="n">rec</span><span class="p">[</span><span class="s2">"converged"</span><span class="p">]</span> <span class="k">else</span> <span class="n">warn_fill</span><span class="p">,</span> <span class="n">font</span><span class="o">=</span><span class="n">label_font</span><span class="p">)</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="n">start_row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">end_row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">start_column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_column</span><span class="o">=</span><span class="n">ncol</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">row</span><span class="p">([</span><span class="n">rec</span><span class="p">[</span><span class="s2">"reason"</span><span class="p">]])</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">merge_cells</span><span class="p">(</span><span class="n">start_row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">end_row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">start_column</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">end_column</span><span class="o">=</span><span class="n">ncol</span><span class="p">)</span>
+
+        <span class="n">ws</span><span class="o">.</span><span class="n">column_dimensions</span><span class="p">[</span><span class="s2">"A"</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">28</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncol</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">ws</span><span class="o">.</span><span class="n">column_dimensions</span><span class="p">[</span><span class="nb">chr</span><span class="p">(</span><span class="mi">64</span> <span class="o">+</span> <span class="n">c</span><span class="p">)]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">13</span>
+        <span class="n">wb</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+</div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># orchestration</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<div class="viewcode-block" id="layer_levels">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.layer_levels">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">layer_levels</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">counts</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Layer counts to test, ascending (few -&gt; many).</span>
+
+<span class="sd">    With explicit *counts* they are used as-is; otherwise a ladder is derived from</span>
+<span class="sd">    the inferred baseline so the layer thickness roughly halves each step (a</span>
+<span class="sd">    refinement ratio ~2 for the GCI): ~half, baseline, ~double and ~triple the</span>
+<span class="sd">    baseline number of intervals."""</span>
+    <span class="k">if</span> <span class="n">counts</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">({</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">})</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">infer_vertical_layers</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">n_levels</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">base</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>                                  <span class="c1"># intervals at the baseline</span>
+    <span class="n">intervals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">m</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span> <span class="n">m</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">m</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">m</span><span class="p">})</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">]</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_report</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">quantities</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">probes</span><span class="p">,</span> <span class="n">case</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">VerticalConvergenceReport</span><span class="p">:</span>
+    <span class="n">rep</span> <span class="o">=</span> <span class="n">VerticalConvergenceReport</span><span class="p">(</span>
+        <span class="n">levels</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">levels</span><span class="p">),</span> <span class="n">quantities</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">quantities</span><span class="p">),</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">tolerance</span><span class="p">,</span>
+        <span class="n">probes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">probes</span><span class="p">),</span> <span class="n">case</span><span class="o">=</span><span class="n">case</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">:</span>
+        <span class="n">rep</span><span class="o">.</span><span class="n">rel_change</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">_rel_change</span><span class="p">(</span><span class="n">levels</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">qoi</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">levels</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">qoi</span><span class="p">[</span><span class="n">q</span><span class="p">])</span>
+                             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="n">_gci_triplet</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+        <span class="n">rep</span><span class="o">.</span><span class="n">observed_order</span><span class="p">[</span><span class="n">q</span><span class="p">],</span> <span class="n">rep</span><span class="o">.</span><span class="n">gci_fine</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">gci_fine</span>
+    <span class="n">rep</span><span class="o">.</span><span class="n">converged</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">rep</span><span class="o">.</span><span class="n">rel_change</span><span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="ow">and</span> <span class="n">rep</span><span class="o">.</span><span class="n">rel_change</span><span class="p">[</span><span class="n">q</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">tolerance</span>
+                        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">quantities</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rep</span>
+
+
+<div class="viewcode-block" id="make_telemac3d_simulator">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.make_telemac3d_simulator">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_telemac3d_simulator</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">results_2d</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">base_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                             <span class="n">runtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">total_time_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+                             <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"constant_depth"</span><span class="p">,</span>
+                             <span class="n">n_time_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">target_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">min_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Build a ``simulate(n_levels, probes, quantities) -&gt; VerticalLevel``.</span>
+
+<span class="sd">    Each layer count runs in its own ``base_dir/L&lt;n&gt;/`` folder (the fixed geometry</span>
+<span class="sd">    and boundary files are symlinked in, so the horizontal mesh is *not* rebuilt),</span>
+<span class="sd">    launches ``telemac3d.py`` once and samples the depth-averaged QoI from the run's</span>
+<span class="sd">    2D result.</span>
+
+<span class="sd">    *target_time* (s), when set, holds the **simulated physical time constant** across</span>
+<span class="sd">    all layer counts: each level's ``NUMBER OF TIME STEPS`` is scaled to</span>
+<span class="sd">    ``round(target_time / dt_level)`` (``dt`` shrinks with the layer count for a fixed</span>
+<span class="sd">    Courant, so a finer grid takes proportionally more steps). This removes the</span>
+<span class="sd">    fixed-step-count confound where finer levels reach a much *earlier* transient state</span>
+<span class="sd">    (and so appear "not converged" for reasons of unequal spin-up, not resolution). It</span>
+<span class="sd">    overrides *n_time_steps*."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelemacRuntime</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_solver_streaming</span>
+
+    <span class="n">rt</span> <span class="o">=</span> <span class="n">runtime</span> <span class="ow">or</span> <span class="n">TelemacRuntime</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">base_dir</span><span class="p">)</span>
+    <span class="c1"># the built 2D steering carries the PRESCRIBED FLOWRATES/ELEVATIONS/VELOCITY</span>
+    <span class="c1"># PROFILES that build_3d_cas copies into each 3D run. It lives in the ORIGINAL</span>
+    <span class="c1"># model dir; since each level runs in its own L&lt;n&gt;/ subdir (lc.model_dir = d),</span>
+    <span class="c1"># build_3d_cas's default (lc.model_dir / cas_file) would miss it and silently drop</span>
+    <span class="c1"># the prescribed inflow discharge - leaving the inflow unforced. Pin it explicitly.</span>
+    <span class="n">cas_2d_src</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="n">n_levels</span><span class="p">,</span> <span class="n">probes</span><span class="p">,</span> <span class="n">quantities</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"L</span><span class="si">{</span><span class="n">n_levels</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># the 3D case reads the same horizontal mesh + boundary file as the 2D case;</span>
+        <span class="c1"># a user_fortran/ dir (e.g. the KB15 Spalart-Allmaras source-term fix) is</span>
+        <span class="c1"># symlinked in too so FORTRAN FILE resolves and the patch compiles per run</span>
+        <span class="n">links</span> <span class="o">=</span> <span class="p">[</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundary_cli</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">model</span> <span class="o">/</span> <span class="s2">"user_fortran"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"user_fortran"</span><span class="p">)</span>
+        <span class="c1"># the continuation hotstart reads FILE FOR 2D CONTINUATION (r2d.slf) from</span>
+        <span class="c1"># the run dir, so it must be linked in too</span>
+        <span class="k">if</span> <span class="n">hotstart</span> <span class="o">==</span> <span class="s2">"continuation"</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">results_2d</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">:</span>
+            <span class="n">links</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">links</span><span class="p">:</span>
+            <span class="n">src</span><span class="p">,</span> <span class="n">dst</span> <span class="o">=</span> <span class="n">model</span> <span class="o">/</span> <span class="n">fname</span><span class="p">,</span> <span class="n">d</span> <span class="o">/</span> <span class="n">fname</span>
+            <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dst</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="n">dst</span><span class="o">.</span><span class="n">symlink_to</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+        <span class="n">lc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">lc</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="c1"># hotstart: "constant_depth" (default) is a robust uniform seed so every</span>
+        <span class="c1"># per-layer run reaches steady state; "continuation" lifts the equilibrium 2D</span>
+        <span class="c1"># field for a far shorter spin-up (paired with an explicit n_time_steps cap).</span>
+        <span class="c1"># The seed only affects the transient, not the converged depth-averaged QoI.</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="n">n_time_steps</span>
+        <span class="k">if</span> <span class="n">target_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># dt is sized from the Courant target + cell sizes, independent of the step</span>
+            <span class="c1"># count, so build once to read it, then scale steps to hold time constant.</span>
+            <span class="n">probe</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">build_3d_cas</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">results_2d</span><span class="o">=</span><span class="n">results_2d</span><span class="p">,</span> <span class="n">cas_2d</span><span class="o">=</span><span class="n">cas_2d_src</span><span class="p">,</span>
+                                        <span class="n">n_levels</span><span class="o">=</span><span class="n">n_levels</span><span class="p">,</span>
+                                        <span class="n">total_time_factor</span><span class="o">=</span><span class="n">total_time_factor</span><span class="p">,</span>
+                                        <span class="n">hotstart</span><span class="o">=</span><span class="n">hotstart</span><span class="p">,</span> <span class="n">n_time_steps</span><span class="o">=</span><span class="n">n_time_steps</span><span class="p">,</span>
+                                        <span class="n">min_depth</span><span class="o">=</span><span class="n">min_depth</span><span class="p">)</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">target_time</span><span class="p">)</span> <span class="o">/</span> <span class="n">probe</span><span class="o">.</span><span class="n">time_step</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  L</span><span class="si">%d</span><span class="s2">: dt~</span><span class="si">%.4f</span><span class="s2"> s -&gt; </span><span class="si">%d</span><span class="s2"> steps to reach </span><span class="si">%.0f</span><span class="s2"> s simulated time"</span><span class="p">,</span>
+                     <span class="n">n_levels</span><span class="p">,</span> <span class="n">probe</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">target_time</span><span class="p">))</span>
+        <span class="n">setup</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">build_3d_cas</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">results_2d</span><span class="o">=</span><span class="n">results_2d</span><span class="p">,</span> <span class="n">cas_2d</span><span class="o">=</span><span class="n">cas_2d_src</span><span class="p">,</span>
+                                    <span class="n">n_levels</span><span class="o">=</span><span class="n">n_levels</span><span class="p">,</span>
+                                    <span class="n">total_time_factor</span><span class="o">=</span><span class="n">total_time_factor</span><span class="p">,</span>
+                                    <span class="n">hotstart</span><span class="o">=</span><span class="n">hotstart</span><span class="p">,</span> <span class="n">n_time_steps</span><span class="o">=</span><span class="n">steps</span><span class="p">,</span>
+                                    <span class="n">min_depth</span><span class="o">=</span><span class="n">min_depth</span><span class="p">)</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="c1"># stream the telemac3d listing live with the simulated-time progress bar</span>
+        <span class="c1"># (same look as initial_run.py); 3D has no DURATION keyword, so the bar's</span>
+        <span class="c1"># end time is the fixed step count times the per-layer time step</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">run_solver_streaming</span><span class="p">(</span>
+            <span class="n">rt</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">cas_file</span><span class="o">=</span><span class="n">setup</span><span class="o">.</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="s2">"telemac3d"</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">ncsize</span><span class="o">=</span><span class="p">(</span><span class="n">n_processors</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span><span class="p">),</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">setup</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="n">setup</span><span class="o">.</span><span class="n">n_time_steps</span><span class="p">)</span>
+        <span class="n">runtime_s</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+        <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"telemac3d failed for </span><span class="si">{</span><span class="n">n_levels</span><span class="si">}</span><span class="s2"> levels (rc=</span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">); "</span>
+                <span class="sa">f</span><span class="s2">"see the listing under </span><span class="si">{</span><span class="n">d</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">res2d</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="n">lc</span><span class="o">.</span><span class="n">results2d_from_3d_slf</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">res2d</span><span class="p">,</span> <span class="n">frame</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">VerticalLevel</span><span class="p">(</span>
+            <span class="n">n_levels</span><span class="o">=</span><span class="n">n_levels</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="n">setup</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span>
+            <span class="n">n_nodes3d</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">*</span> <span class="n">n_levels</span><span class="p">,</span>
+            <span class="n">n_elem3d</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s2">"ikle"</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="n">time_step</span><span class="o">=</span><span class="n">setup</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span> <span class="n">runtime_s</span><span class="o">=</span><span class="n">runtime_s</span><span class="p">,</span>
+            <span class="n">qoi</span><span class="o">=</span><span class="n">extract_at_points</span><span class="p">(</span><span class="n">res2d</span><span class="p">,</span> <span class="n">quantities</span><span class="p">,</span> <span class="n">probes</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">simulate</span></div>
+
+
+
+<div class="viewcode-block" id="run_vertical_convergence">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.vertical_convergence.run_vertical_convergence">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_vertical_convergence</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">results_2d</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">counts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quantities</span><span class="o">=</span><span class="n">DEFAULT_QUANTITIES</span><span class="p">,</span> <span class="n">probes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.02</span><span class="p">,</span> <span class="n">simulate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">base_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                             <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">total_time_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+                             <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"constant_depth"</span><span class="p">,</span>
+                             <span class="n">n_time_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">target_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">min_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">on_level</span><span class="o">=</span><span class="kc">None</span>
+                             <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">VerticalConvergenceReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Run the vertical-layer convergence study and return the report.</span>
+
+<span class="sd">    *on_level(done, total, label)* is called before the first run and after each, so</span>
+<span class="sd">    that a job can report which layer count is running.</span>
+
+<span class="sd">    Needs the converged 2D result (``initial_run`` output) for the hotstart, the</span>
+<span class="sd">    horizontal mesh and the probe points. *counts* overrides the auto-derived layer</span>
+<span class="sd">    ladder; *simulate* overrides the TELEMAC runner (used in tests).</span>
+
+<span class="sd">    *target_time* (s) holds the simulated physical time constant across layer counts</span>
+<span class="sd">    (steps scaled per level's ``dt``), removing the fixed-step-count spin-up confound;</span>
+<span class="sd">    it overrides *n_time_steps*."""</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="n">results_2d</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">results_2d</span><span class="p">)</span> <span class="k">if</span> <span class="n">results_2d</span> <span class="k">else</span> <span class="n">model</span> <span class="o">/</span> <span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"2D result not found: </span><span class="si">{</span><span class="n">results_2d</span><span class="si">}</span><span class="s2">. Run preprocessing.py + initial_run.py "</span>
+        <span class="s2">"first (the vertical study hotstarts the 3D runs from the 2D result)."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">counts</span><span class="p">:</span>                                       <span class="c1"># explicit ladder: no 2D read needed</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results_2d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">layer_levels</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">results_2d</span><span class="p">,</span> <span class="n">frame</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">quantities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">quantities</span><span class="p">)</span>
+    <span class="n">probes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">probes</span> <span class="k">if</span> <span class="n">probes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default_probes</span><span class="p">(</span><span class="n">cfg</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">simulate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                             <span class="c1"># real runs need the 2D result + dirs</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">results_2d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">base_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">base_dir</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">postprocessing_path</span><span class="p">(</span><span class="s2">"vertical-convergence"</span><span class="p">)</span>
+        <span class="n">simulate</span> <span class="o">=</span> <span class="n">make_telemac3d_simulator</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">results_2d</span><span class="o">=</span><span class="n">results_2d</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">runtime</span><span class="o">=</span><span class="n">runtime</span><span class="p">,</span>
+            <span class="n">n_processors</span><span class="o">=</span><span class="n">n_processors</span><span class="p">,</span> <span class="n">total_time_factor</span><span class="o">=</span><span class="n">total_time_factor</span><span class="p">,</span>
+            <span class="n">hotstart</span><span class="o">=</span><span class="n">hotstart</span><span class="p">,</span> <span class="n">n_time_steps</span><span class="o">=</span><span class="n">n_time_steps</span><span class="p">,</span> <span class="n">target_time</span><span class="o">=</span><span class="n">target_time</span><span class="p">,</span>
+            <span class="n">min_depth</span><span class="o">=</span><span class="n">min_depth</span><span class="p">)</span>
+
+    <span class="n">results</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">VerticalLevel</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_report_level</span><span class="p">(</span><span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">on_level</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">on_level</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">),</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>                <span class="c1"># noqa: BLE001 - reporting must not stop a study</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"the level listener failed"</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">_report_level</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> levels"</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">counts</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"vertical convergence: running </span><span class="si">%d</span><span class="s2"> sigma levels"</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simulate</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">probes</span><span class="p">,</span> <span class="n">quantities</span><span class="p">))</span>
+        <span class="n">_report_level</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2"> levels"</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  </span><span class="si">%d</span><span class="s2"> levels: dz~</span><span class="si">%.3f</span><span class="s2"> m, </span><span class="si">%d</span><span class="s2"> 3D nodes, dt~</span><span class="si">%s</span><span class="s2"> s, runtime </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                 <span class="n">n</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">dz</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">n_nodes3d</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">runtime_s</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">s"</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">runtime_s</span> <span class="k">else</span> <span class="s2">"?"</span><span class="p">)</span>
+    <span class="n">rep</span> <span class="o">=</span> <span class="n">_build_report</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">quantities</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">,</span> <span class="n">probes</span><span class="p">,</span>
+                        <span class="n">case</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">rep</span><span class="o">.</span><span class="n">recommendation</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"vertical convergence: </span><span class="si">%s</span><span class="s2"> at </span><span class="si">%.1f%%</span><span class="s2"> tolerance; recommended </span><span class="si">%d</span><span class="s2"> levels"</span><span class="p">,</span>
+             <span class="s2">"CONVERGED"</span> <span class="k">if</span> <span class="n">rep</span><span class="o">.</span><span class="n">converged</span> <span class="k">else</span> <span class="s2">"NOT converged"</span><span class="p">,</span> <span class="n">tolerance</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+             <span class="n">rec</span><span class="p">[</span><span class="s2">"n_levels"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">rep</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

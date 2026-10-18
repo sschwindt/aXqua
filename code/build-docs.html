@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
-      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=77d0db7a" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
 
   
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
@@ -26,9 +26,9 @@
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Troubleshooting" href="../troubleshooting/index.html" />
     <link rel="prev" title="QGIS plugin" href="plugin.html" /> 
-</head>
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/code/build-docs.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/code/build-docs.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/code/build-docs.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/code/build-docs.html"><link rel="stylesheet" href="../_i18n/lang.css"><script src="../_i18n/lang.js" data-lang="en" data-root="../" data-page="code/build-docs.html"></script></head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>EN</span></summary><ul role="menu"><li><strong aria-current="true" lang="en">English</strong></li><li><a href="../de/code/build-docs.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><a href="../fr/code/build-docs.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
   <div class="wy-grid-for-nav">
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
@@ -260,6 +260,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="plugin.html">QGIS plugin</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Building the documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#languages-and-publication">Languages and publication</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rules-for-the-structure">Rules for the structure</a></li>
 </ul>
 </li>
@@ -269,6 +270,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">General tips &amp; logfiles</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Tips</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#freeing-disk-space">Freeing disk space</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Reporting a problem</a></li>
 </ul>
 </li>
@@ -336,6 +338,18 @@ sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w
 </pre></div>
 </div>
 <p>Open <code class="docutils literal notranslate"><span class="pre">docs/_build/html/index.html</span></code> in a web browser to read the result. The output folder <code class="docutils literal notranslate"><span class="pre">docs/_build/</span></code> is excluded from version control.</p>
+<section id="languages-and-publication">
+<h2>Languages and publication<a class="headerlink" href="#languages-and-publication" title="Link to this heading"></a></h2>
+<p>The documentation is published twice. <a class="reference external" href="https://axqua.readthedocs.io">Read the Docs</a> builds the English pages from the branch <code class="docutils literal notranslate"><span class="pre">main</span></code> by itself, with the commands above, and serves them at <code class="docutils literal notranslate"><span class="pre">axqua.readthedocs.io</span></code>. <a class="reference external" href="https://axqua.eu">GitHub Pages</a> serves the English pages at <code class="docutils literal notranslate"><span class="pre">axqua.eu</span></code> together with a German translation at <code class="docutils literal notranslate"><span class="pre">axqua.eu/de/</span></code> and a French one at <code class="docutils literal notranslate"><span class="pre">axqua.eu/fr/</span></code>; <code class="docutils literal notranslate"><span class="pre">axqua.de</span></code> and <code class="docutils literal notranslate"><span class="pre">axqua.ch</span></code> forward to the German pages and <code class="docutils literal notranslate"><span class="pre">axqua.fr</span></code> to the French ones. A button in the top right corner of every page switches the language. The German and French pages are machine translations, and every page says so.</p>
+<p>The translations are kept per page in <code class="docutils literal notranslate"><span class="pre">docs/locale/&lt;language&gt;/LC_MESSAGES/</span></code>, in the gettext format that Sphinx reads. They require a separate environment with the offline translation engine Argos Translate, and they are published with one script in the root folder of the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>docs/i18n/environment.yml
+bash<span class="w"> </span>deploy.sh<span class="w">           </span><span class="c1"># build the three languages into docs/_build/site</span>
+bash<span class="w"> </span>deploy.sh<span class="w"> </span>--push<span class="w">    </span><span class="c1"># publish</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">deploy.sh</span></code> builds the English pages, translates only the paragraphs that are new or changed since the last publication, builds the German and French pages, and copies the result into the worktree of the branch <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code>. With <code class="docutils literal notranslate"><span class="pre">--push</span></code>, it commits the updated translations on <code class="docutils literal notranslate"><span class="pre">main</span></code>, pushes <code class="docutils literal notranslate"><span class="pre">main</span></code> (which also updates Read the Docs), and commits and pushes <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code>. It refuses to publish uncommitted changes.</p>
+<p>A glossary of technical terms for each language (<code class="docutils literal notranslate"><span class="pre">docs/i18n/glossary.de.tsv</span></code> and <code class="docutils literal notranslate"><span class="pre">glossary.fr.tsv</span></code>) makes the engine use the terms of hydraulic engineering, for example <em>Abflusskurve</em> and <em>courbe de tarage</em> for rating curve. Labels of the plugin in single asterisks, code in double backquotes, and titles of papers in the lists of references are never translated. A translation that was corrected by hand in a catalog is kept as long as the English text does not change. <code class="docutils literal notranslate"><span class="pre">docs/i18n/README.md</span></code> explains the glossaries, the corrections by hand and the settings of the scripts.</p>
+</section>
 <section id="rules-for-the-structure">
 <h2>Rules for the structure<a class="headerlink" href="#rules-for-the-structure" title="Link to this heading"></a></h2>
 <ul class="simple">

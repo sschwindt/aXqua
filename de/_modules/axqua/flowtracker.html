@@ -1,0 +1,738 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.flowtracker &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/flowtracker.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../genindex.html" />
+    <link rel="search" title="Suche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/flowtracker.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/flowtracker.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/flowtracker.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/flowtracker.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="de" data-root="../../../" data-page="_modules/axqua/flowtracker.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/flowtracker.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../fr/_modules/axqua/flowtracker.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.flowtracker</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../_modules/axqua/flowtracker.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.flowtracker</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""FlowTracker2 -&gt; calibration-target hydraulics tab.</span>
+
+<span class="sd">Reads SonTek FlowTracker2 exports and writes one row per measurement point into</span>
+<span class="sd">the ``hydraulics`` tab of a ``calibration-target-data.xlsx`` template, keyed by</span>
+<span class="sd">each point's own ID (which then joins the DGPS point layer in</span>
+<span class="sd">``user-sources/geodata/``, see :mod:`axqua.targets`).</span>
+
+<span class="sd">Per point it extracts the three velocity components and their turbulent RMS</span>
+<span class="sd">fluctuations:</span>
+
+<span class="sd">* ``u_x, u_y, u_z``  &lt;- the reported mean components ``VelX/VelY/VelZ`` (aka</span>
+<span class="sd">  ``v(x)/v(y)/v(z)``).</span>
+<span class="sd">* ``u_x', u_y', u_z'`` (RMS fluctuations)  &lt;- the sample **standard deviation**</span>
+<span class="sd">  ``u std`` / ``Std Dev v'(x)`` / ``sigma_x``. **These are NOT the ``VxErr``</span>
+<span class="sd">  columns:** ``VxErr`` is the FlowTracker *standard error of the mean* (the</span>
+<span class="sd">  velocity measurement uncertainty), i.e. ~``std / sqrt(Npts)``. When only a</span>
+<span class="sd">  plain ``.ft.sum`` summary is available (``VxErr`` + ``Npts`` but no std-dev</span>
+<span class="sd">  column), the RMS is reconstructed as ``u' ~ VxErr * sqrt(Npts)``.</span>
+
+<span class="sd">``TKE`` is taken from a measured column when present, else left to the</span>
+<span class="sd">template's live formula ``0.5*(u_x'^2 + u_y'^2 + u_z'^2)``; the water depth is</span>
+<span class="sd">the local total/final depth. ``U_h`` and ``U_h'`` recompute from the components.</span>
+
+<span class="sd">Three export layouts are auto-detected by their headers:</span>
+
+<span class="sd">1. **SonTek ``.ft.sum``** (``ID, MeasD, Npts, VelX/VelY/VelZ, VxErr/VyErr/VzErr,</span>
+<span class="sd">   FinalD``): only stderr -&gt; RMS reconstructed.</span>
+<span class="sd">2. **TKE-stats export** (``VelX...`` plus ``u std/v std/w std``): real RMS.</span>
+<span class="sd">3. **FT_TKE_Summary** (``Point, v(x)..., Std Dev v'(x)..., TKE [m2/s2]``): real</span>
+<span class="sd">   RMS + measured TKE; multiple worksheets scanned.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.ground_truth</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_xlsx_sheet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">_norm_header</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># Header classification (robust to the three FlowTracker layouts)</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_norm</span><span class="p">(</span><span class="n">h</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Lower-case a header and drop trailing unit annotations.</span>
+
+<span class="sd">    Strips ``[m/s]``-style brackets and known unit parentheses (``(m/s)``,</span>
+<span class="sd">    ``(deg)``, ...) but keeps a component parenthesis like ``(x)`` so that</span>
+<span class="sd">    ``v(x)``/``v(y)``/``v(z)`` stay distinct.</span>
+<span class="sd">    """</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\[[^\]]*\]"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s2">"\((?:m/s|m2/s2|m²/s²|m|deg|°c|db|-|°|s|"</span>
+        <span class="sa">r</span><span class="s2">"ellipsoidal[^)]*|wgs[^)]*|dgps[^)]*)\)"</span><span class="p">,</span>
+        <span class="s2">""</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s+"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+
+<span class="c1"># canonical field -&gt; the normalized headers that map to it, in priority order</span>
+<span class="n">_FIELD_HEADERS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"u"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"velx"</span><span class="p">,</span> <span class="s2">"v(x)"</span><span class="p">,</span> <span class="s2">"vx"</span><span class="p">,</span> <span class="s2">"u average"</span><span class="p">,</span> <span class="s2">"average v(x)"</span><span class="p">),</span>
+    <span class="s2">"v"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"vely"</span><span class="p">,</span> <span class="s2">"v(y)"</span><span class="p">,</span> <span class="s2">"vy"</span><span class="p">,</span> <span class="s2">"v average"</span><span class="p">,</span> <span class="s2">"average v(y)"</span><span class="p">),</span>
+    <span class="s2">"w"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"velz"</span><span class="p">,</span> <span class="s2">"v(z)"</span><span class="p">,</span> <span class="s2">"vz"</span><span class="p">,</span> <span class="s2">"w average"</span><span class="p">,</span> <span class="s2">"average v(z)"</span><span class="p">),</span>
+    <span class="s2">"u_std"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"u std"</span><span class="p">,</span> <span class="s2">"std dev v’(x)"</span><span class="p">,</span> <span class="s2">"std dev v'(x)"</span><span class="p">,</span> <span class="s2">"σx"</span><span class="p">,</span> <span class="s2">"sigmax"</span><span class="p">),</span>
+    <span class="s2">"v_std"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"v std"</span><span class="p">,</span> <span class="s2">"std dev v’(y)"</span><span class="p">,</span> <span class="s2">"std dev v'(y)"</span><span class="p">,</span> <span class="s2">"σy"</span><span class="p">,</span> <span class="s2">"sigmay"</span><span class="p">),</span>
+    <span class="s2">"w_std"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"w std"</span><span class="p">,</span> <span class="s2">"std dev v’(z)"</span><span class="p">,</span> <span class="s2">"std dev v'(z)"</span><span class="p">,</span> <span class="s2">"σz"</span><span class="p">,</span> <span class="s2">"sigmaz"</span><span class="p">),</span>
+    <span class="s2">"u_err"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"vxerr"</span><span class="p">,</span> <span class="s2">"v_err(x)"</span><span class="p">,</span> <span class="s2">"u stderr"</span><span class="p">),</span>
+    <span class="s2">"v_err"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"vyerr"</span><span class="p">,</span> <span class="s2">"v_err(y)"</span><span class="p">,</span> <span class="s2">"v stderr"</span><span class="p">),</span>
+    <span class="s2">"w_err"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"vzerr"</span><span class="p">,</span> <span class="s2">"v_err(z)"</span><span class="p">,</span> <span class="s2">"w stderr"</span><span class="p">),</span>
+    <span class="s2">"npts"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"npts"</span><span class="p">,),</span>
+    <span class="s2">"tke"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"tke"</span><span class="p">,),</span>                       <span class="c1"># measured 3D TKE in m2/s2 (exact)</span>
+    <span class="s2">"meas_depth"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"measd"</span><span class="p">,</span> <span class="s2">"meas. depth"</span><span class="p">,</span> <span class="s2">"meas depth"</span><span class="p">),</span>
+    <span class="s2">"depth"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"finald"</span><span class="p">,</span> <span class="s2">"total depth"</span><span class="p">),</span>
+    <span class="s2">"id"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"point"</span><span class="p">,</span> <span class="s2">"#"</span><span class="p">,</span> <span class="s2">"st"</span><span class="p">,</span> <span class="s2">"st (dgps point id)"</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">_VEL_HEADERS</span> <span class="o">=</span> <span class="p">{</span><span class="n">h</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">_FIELD_HEADERS</span><span class="p">[</span><span class="n">f</span><span class="p">]}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_column_map</span><span class="p">(</span><span class="n">header_cells</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Map canonical fields to column indices for one header row."""</span>
+    <span class="n">normed</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">_norm</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">header_cells</span><span class="p">)}</span>
+    <span class="n">colmap</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">candidates</span> <span class="ow">in</span> <span class="n">_FIELD_HEADERS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">cand</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="n">hit</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">normed</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="n">cand</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">hit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">colmap</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">hit</span>
+                <span class="k">break</span>
+    <span class="k">return</span> <span class="n">colmap</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_to_float</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clean_id</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Integral floats -&gt; int (so 3.0 joins '3'); text IDs kept verbatim."""</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span> <span class="ow">or</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">else</span> <span class="n">f</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># Reading</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_sheet_count</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">z</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">z</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span>
+                   <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="sa">r</span><span class="s2">"xl/worksheets/sheet\d+\.xml"</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_read_sheet_points</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">reconstruct_rms</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Extract per-point velocities/fluctuations from one raw worksheet frame."""</span>
+    <span class="n">header_idx</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">))</span>
+         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">_norm</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_VEL_HEADERS</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">])),</span>
+        <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">header_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">colmap</span> <span class="o">=</span> <span class="n">_build_column_map</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">header_idx</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span> <span class="ow">in</span> <span class="n">colmap</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1"># a genuine summary/point table always carries a per-point error, std-dev or</span>
+    <span class="c1"># TKE column; this rejects raw per-sample time-series sheets (which expose</span>
+    <span class="c1"># only u/v/w) that a multi-sheet workbook may also contain.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span> <span class="ow">in</span> <span class="n">colmap</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u_err"</span><span class="p">,</span> <span class="s2">"v_err"</span><span class="p">,</span> <span class="s2">"w_err"</span><span class="p">,</span>
+                                     <span class="s2">"u_std"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">,</span> <span class="s2">"tke"</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># data starts after the header, skipping a units row (non-numeric velocity)</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">header_idx</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">_to_float</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">start</span><span class="p">,</span> <span class="n">colmap</span><span class="p">[</span><span class="s2">"u"</span><span class="p">]])):</span>
+        <span class="n">start</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">records</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)):</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">colmap</span><span class="p">[</span><span class="s2">"u"</span><span class="p">]])</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">u</span><span class="p">):</span>
+            <span class="k">continue</span>                        <span class="c1"># blank / trailing row</span>
+        <span class="n">rec</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"u"</span><span class="p">:</span> <span class="n">u</span><span class="p">,</span>
+                                  <span class="s2">"v"</span><span class="p">:</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">colmap</span><span class="p">[</span><span class="s2">"v"</span><span class="p">]]),</span>
+                                  <span class="s2">"w"</span><span class="p">:</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">colmap</span><span class="p">[</span><span class="s2">"w"</span><span class="p">]])}</span>
+        <span class="n">rid</span> <span class="o">=</span> <span class="n">_clean_id</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">colmap</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]])</span> <span class="k">if</span> <span class="s2">"id"</span> <span class="ow">in</span> <span class="n">colmap</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">rec</span><span class="p">[</span><span class="s2">"ID"</span><span class="p">]</span> <span class="o">=</span> <span class="n">rid</span> <span class="k">if</span> <span class="n">rid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u_std"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">,</span> <span class="s2">"u_err"</span><span class="p">,</span> <span class="s2">"v_err"</span><span class="p">,</span> <span class="s2">"w_err"</span><span class="p">,</span>
+                  <span class="s2">"npts"</span><span class="p">,</span> <span class="s2">"tke"</span><span class="p">,</span> <span class="s2">"meas_depth"</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">colmap</span><span class="p">:</span>
+                <span class="n">rec</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">_to_float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">colmap</span><span class="p">[</span><span class="n">f</span><span class="p">]])</span>
+        <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">records</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
+
+    <span class="c1"># RMS fluctuations: prefer the measured std dev; else reconstruct from the</span>
+    <span class="c1"># standard error of the mean and the sample count (u' ~ stderr * sqrt(Npts)).</span>
+    <span class="n">npts</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"npts"</span><span class="p">]</span> <span class="k">if</span> <span class="s2">"npts"</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">):</span>
+        <span class="n">std_col</span><span class="p">,</span> <span class="n">err_col</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">_std"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">comp</span><span class="si">}</span><span class="s2">_err"</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">std_col</span><span class="p">]</span> <span class="k">if</span> <span class="n">std_col</span> <span class="ow">in</span> <span class="n">df</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reconstruct_rms</span> <span class="ow">and</span> <span class="n">err_col</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
+            <span class="n">reconstructed</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">err_col</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">npts</span><span class="p">)</span>
+            <span class="n">std</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">std</span><span class="o">.</span><span class="n">notna</span><span class="p">(),</span> <span class="n">reconstructed</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">std_col</span><span class="p">]</span> <span class="o">=</span> <span class="n">std</span>
+
+    <span class="n">keep</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"ID"</span><span class="p">,</span> <span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="s2">"u_std"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">,</span> <span class="s2">"tke"</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="read_flowtracker">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.flowtracker.read_flowtracker">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_flowtracker</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sheet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">reconstruct_rms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read one FlowTracker2 export -&gt; per-point velocity/fluctuation table.</span>
+
+<span class="sd">    Returns columns ``ID, u, v, w, u_std, v_std, w_std, tke, depth`` (one row</span>
+<span class="sd">    per measurement point). All worksheets that look like a FlowTracker table</span>
+<span class="sd">    are scanned and concatenated unless ``sheet`` restricts to one (name or</span>
+<span class="sd">    0-based index). With ``reconstruct_rms`` the RMS fluctuations are filled</span>
+<span class="sd">    from ``VxErr * sqrt(Npts)`` where a direct std-dev column is absent.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sheet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">read_xlsx_sheet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">_read_sheet_points</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">reconstruct_rms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no FlowTracker velocity table found in </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> "</span>
+                             <span class="sa">f</span><span class="s2">"sheet </span><span class="si">{</span><span class="n">sheet</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_sheet_count</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">_read_sheet_points</span><span class="p">(</span><span class="n">read_xlsx_sheet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sheet</span><span class="o">=</span><span class="n">i</span><span class="p">),</span> <span class="n">reconstruct_rms</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  </span><span class="si">%s</span><span class="s2"> sheet </span><span class="si">%d</span><span class="s2">: </span><span class="si">%d</span><span class="s2"> FlowTracker point(s)"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parts</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no FlowTracker velocity table found in </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">parts</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="read_flowtrackers">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.flowtracker.read_flowtrackers">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_flowtrackers</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">reconstruct_rms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read and concatenate several FlowTracker2 exports (e.g. day1 + day2)."""</span>
+    <span class="n">frames</span> <span class="o">=</span> <span class="p">[</span><span class="n">read_flowtracker</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">reconstruct_rms</span><span class="o">=</span><span class="n">reconstruct_rms</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">frames</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">frames</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># Writing into the calibration-target hydraulics tab</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<div class="viewcode-block" id="fill_template_hydraulics">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.flowtracker.fill_template_hydraulics">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fill_template_hydraulics</span><span class="p">(</span><span class="n">template</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"hydraulics"</span><span class="p">,</span>
+                             <span class="n">start_row</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">reconstruct_rms</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write FlowTracker points into the template's hydraulics tab, keyed by ID.</span>
+
+<span class="sd">    ``sources`` is one path or a list of FlowTracker2 exports. Existing rows in</span>
+<span class="sd">    the tab are cleared first (so re-running is idempotent). ``u_x/u_y/u_z`` and</span>
+<span class="sd">    ``u_x'/u_y'/u_z'`` are written; ``U_h``, ``U_h'`` and (unless a measured TKE</span>
+<span class="sd">    is present) ``TKE`` keep their live formulas; the water depth is filled.</span>
+<span class="sd">    Returns the number of points written.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_workbook</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">openpyxl.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_column_letter</span>
+
+    <span class="n">template</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">template</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"template not found: </span><span class="si">{</span><span class="n">template</span><span class="si">}</span><span class="s2">. Run `axqua targets &lt;config&gt;` first."</span><span class="p">)</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">sources</span><span class="p">)]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">]</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">read_flowtrackers</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="n">reconstruct_rms</span><span class="o">=</span><span class="n">reconstruct_rms</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"no FlowTracker points found in </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">])</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="n">wb</span> <span class="o">=</span> <span class="n">load_workbook</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sheet_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">wb</span><span class="o">.</span><span class="n">sheetnames</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"template </span><span class="si">{</span><span class="n">template</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has no </span><span class="si">{</span><span class="n">sheet_name</span><span class="si">!r}</span><span class="s2"> sheet"</span><span class="p">)</span>
+    <span class="n">ws</span> <span class="o">=</span> <span class="n">wb</span><span class="p">[</span><span class="n">sheet_name</span><span class="p">]</span>
+
+    <span class="c1"># locate columns from the header row (robust to any future reordering)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">{(</span><span class="n">_norm_header</span><span class="p">(</span><span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)):</span> <span class="n">c</span>
+              <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">max_column</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)}</span>
+    <span class="n">need</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"id"</span><span class="p">,</span> <span class="s2">"u"</span><span class="p">:</span> <span class="s2">"u_x"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">:</span> <span class="s2">"u_y"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">:</span> <span class="s2">"u_z"</span><span class="p">,</span>
+            <span class="s2">"u_std"</span><span class="p">:</span> <span class="s2">"u_x'"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">:</span> <span class="s2">"u_y'"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">:</span> <span class="s2">"u_z'"</span><span class="p">,</span>
+            <span class="s2">"u_h"</span><span class="p">:</span> <span class="s2">"u_h"</span><span class="p">,</span> <span class="s2">"u_h_std"</span><span class="p">:</span> <span class="s2">"u_h'"</span><span class="p">,</span> <span class="s2">"tke"</span><span class="p">:</span> <span class="s2">"tke"</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">:</span> <span class="s2">"water depth"</span><span class="p">}</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">need</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">h</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">template</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">sheet_name</span><span class="si">!r}</span><span class="s2"> tab is missing columns </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">header</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">need</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">letter</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">get_column_letter</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">col</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="c1"># clear any previously-written rows (data columns only; keep the formulas)</span>
+    <span class="n">data_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"id"</span><span class="p">,</span> <span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="s2">"u_std"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">)]</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">start_row</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_row</span><span class="p">,</span> <span class="n">ws</span><span class="o">.</span><span class="n">max_row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">[</span><span class="s2">"id"</span><span class="p">])</span><span class="o">.</span><span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span>
+            <span class="n">last</span> <span class="o">=</span> <span class="n">r</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_row</span><span class="p">,</span> <span class="n">last</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">data_cols</span><span class="p">:</span>
+            <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">c</span><span class="p">)</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cell</span><span class="p">(</span><span class="n">r</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">value</span><span class="p">)):</span>
+            <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">[</span><span class="n">key</span><span class="p">])</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mi">6</span><span class="p">)</span> \
+                <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s2">"id"</span> <span class="k">else</span> <span class="n">value</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">start_row</span> <span class="o">+</span> <span class="n">i</span>
+        <span class="n">_cell</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s2">"id"</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s2">"ID"</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"u"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">,</span> <span class="s2">"u_std"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">,</span> <span class="s2">"depth"</span><span class="p">):</span>
+            <span class="n">_cell</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="c1"># (re)write the derived-quantity formulas so they are correct regardless</span>
+        <span class="c1"># of the tab's prior state</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">[</span><span class="s2">"u_h"</span><span class="p">])</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'=IF(OR(</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"u"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">="",</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"v"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">=""),"",'</span>
+            <span class="sa">f</span><span class="s1">'SQRT(</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"u"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2+</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"v"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2))'</span><span class="p">)</span>
+        <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">[</span><span class="s2">"u_h_std"</span><span class="p">])</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'=IF(OR(</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"u_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">="",</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"v_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">=""),"",'</span>
+            <span class="sa">f</span><span class="s1">'SQRT(</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"u_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2+</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"v_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2))'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="s2">"tke"</span><span class="p">]):</span>
+            <span class="n">_cell</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="s2">"tke"</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="s2">"tke"</span><span class="p">])</span>       <span class="c1"># measured TKE wins over the proxy</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ws</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">col</span><span class="p">[</span><span class="s2">"tke"</span><span class="p">])</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'=IF(OR(</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"u_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">="",</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"v_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">="",'</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"w_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">=""),"",0.5*(</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"u_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2+'</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"v_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2+</span><span class="si">{</span><span class="n">letter</span><span class="p">[</span><span class="s2">"w_std"</span><span class="p">]</span><span class="si">}{</span><span class="n">r</span><span class="si">}</span><span class="s1">^2))'</span><span class="p">)</span>
+
+    <span class="n">wb</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+    <span class="n">n_rms</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">points</span><span class="p">[[</span><span class="s2">"u_std"</span><span class="p">,</span> <span class="s2">"v_std"</span><span class="p">,</span> <span class="s2">"w_std"</span><span class="p">]]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"wrote </span><span class="si">%d</span><span class="s2"> FlowTracker point(s) into </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%r</span><span class="s2"> tab); </span><span class="si">%d</span><span class="s2"> with full RMS "</span>
+             <span class="s2">"fluctuations"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">),</span> <span class="n">template</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sheet_name</span><span class="p">,</span> <span class="n">n_rms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># thin runnable driver dropped next to the generated template (see</span>
+<span class="c1"># axqua.targets.write_target_template) so users get a co-located script.</span>
+<span class="n">DRIVER_SCRIPT</span> <span class="o">=</span> <span class="s1">'''#!/usr/bin/env python</span>
+<span class="s1">"""Extract FlowTracker2 velocities + RMS fluctuations into the hydraulics tab of</span>
+<span class="s1">calibration-target-data.xlsx (this folder), keyed by each point's ID.</span>
+
+<span class="s1">Run in the axqua env, from this folder:</span>
+
+<span class="s1">    mamba run -n axqua-env python extract_flowtracker.py FILE1.xlsx [FILE2.xlsx ...]</span>
+
+<span class="s1">With no arguments it picks up *FlowTracker*/*ft*sum* .xlsx files in this folder.</span>
+<span class="s1">Each point becomes one row keyed by its ID (must match the ID field of the</span>
+<span class="s1">ground_truth.targets.hydraulics_positions layer). u_x/u_y/u_z come from</span>
+<span class="s1">VelX/VelY/VelZ; the RMS fluctuations u_x'/u_y'/u_z' come from the sample standard</span>
+<span class="s1">deviation (u std / Std Dev v'(x) / sigma) - NOT VxErr, which is the standard</span>
+<span class="s1">error of the mean (reconstructed as VxErr*sqrt(Npts) only when no std-dev column</span>
+<span class="s1">exists). U_h, U_h' and TKE recompute from these in the sheet.</span>
+<span class="s1">"""</span>
+<span class="s1">import sys</span>
+<span class="s1">from pathlib import Path</span>
+
+<span class="s1">from axqua.flowtracker import fill_template_hydraulics</span>
+
+<span class="s1">HERE = Path(__file__).resolve().parent</span>
+<span class="s1">TEMPLATE = HERE / "calibration-target-data.xlsx"</span>
+
+
+<span class="s1">def main(argv):</span>
+<span class="s1">    files = [Path(a) for a in argv]</span>
+<span class="s1">    if not files:</span>
+<span class="s1">        files = sorted(HERE.glob("*[Ff]low[Tt]racker*.xlsx")) + sorted(HERE.glob("*ft*sum*"))</span>
+<span class="s1">    if not files:</span>
+<span class="s1">        print("usage: python extract_flowtracker.py &lt;flowtracker2 xlsx&gt; [more ...]")</span>
+<span class="s1">        return 1</span>
+<span class="s1">    n = fill_template_hydraulics(TEMPLATE, files)</span>
+<span class="s1">    print(f"wrote </span><span class="si">{n}</span><span class="s1"> FlowTracker point(s) into </span><span class="si">{TEMPLATE.name}</span><span class="s1">")</span>
+<span class="s1">    return 0</span>
+
+
+<span class="s1">if __name__ == "__main__":</span>
+<span class="s1">    raise SystemExit(main(sys.argv[1:]))</span>
+<span class="s1">'''</span>
+
+
+<div class="viewcode-block" id="write_driver_script">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.flowtracker.write_driver_script">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_driver_script</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Drop the ``extract_flowtracker.py`` driver next to the template."""</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">DRIVER_SCRIPT</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

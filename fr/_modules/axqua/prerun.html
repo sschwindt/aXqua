@@ -1,0 +1,904 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.prerun &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/prerun.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/prerun.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/prerun.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/prerun.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/prerun.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="fr" data-root="../../../" data-page="_modules/axqua/prerun.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/prerun.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../../de/_modules/axqua/prerun.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">axqua.prerun</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../../_modules/axqua/prerun.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <h1>Code source de axqua.prerun</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Run the cheap solver first, so the expensive one starts from an informed guess.</span>
+
+<span class="sd">An OpenFOAM free-surface run of a water body is expensive in a way a 2D</span>
+<span class="sd">depth-averaged run is not - and almost everything it needs to know at ``t = 0`` is</span>
+<span class="sd">something TELEMAC already answers in minutes: where the water is, how deep it is, how</span>
+<span class="sd">fast it moves, and roughly where its surface sits. Starting ``interFoam`` without that</span>
+<span class="sd">means meshing air that will never be wet, paying for the whole filling transient, and</span>
+<span class="sd">doing both in the slowest model in the chain.</span>
+
+<span class="sd">This module is the orchestration that makes the seed automatic rather than a</span>
+<span class="sd">prerequisite the user has to remember. :func:`ensure_seed` returns a path to a TELEMAC</span>
+<span class="sd">result for :func:`axqua.solvers.openfoam.hotstart.load_hotstart` to read, having</span>
+<span class="sd">either found one, produced one, or been told not to.</span>
+
+<span class="sd">Three ways it can get there, in order of preference</span>
+<span class="sd">---------------------------------------------------</span>
+<span class="sd">1. **An existing converged result.** ``simulation/r2d.slf`` from the real 2D study is</span>
+<span class="sd">   a better seed than anything this module would generate, and it is already paid for.</span>
+<span class="sd">2. **A dedicated coarse pre-run.** A copy of the case at ``pre_run.size_scale`` times</span>
+<span class="sd">   the cell size, pre-wetted and marched at a higher Courant number, into its own</span>
+<span class="sd">   folder. Minutes, not hours, and it exists so that a case which has never been</span>
+<span class="sd">   through the 2D study can still go straight to OpenFOAM.</span>
+<span class="sd">3. **Nothing**, when the user unchecks ``pre_run.enabled``. The caller then builds cold</span>
+<span class="sd">   under a flat lid, exactly as before this module existed.</span>
+
+<span class="sd">Why it lives here and not in the OpenFOAM backend</span>
+<span class="sd">-------------------------------------------------</span>
+<span class="sd">``tests/test_capabilities.py::test_openfoam_does_not_import_the_telemac_backend``</span>
+<span class="sd">enforces that the two backends are siblings: OpenFOAM is *hotstarted from* a TELEMAC</span>
+<span class="sd">result, but it reads that through the shared SERAFIN codec in</span>
+<span class="sd">:mod:`axqua.core.selafin`, never by reaching into the other backend. Orchestration</span>
+<span class="sd">that must drive both therefore belongs above both, next to</span>
+<span class="sd">:mod:`axqua.workflow` - which is where it is.</span>
+
+<span class="sd">The seed is an approximation, and is treated as one</span>
+<span class="sd">---------------------------------------------------</span>
+<span class="sd">TELEMAC is a model too, and it can be wrong. Nothing here freezes the 3D free surface</span>
+<span class="sd">onto the 2D answer: the surface is still solved, the lid stands a freeboard above it</span>
+<span class="sd">with room to rise, and the footprint is dilated past the wetted edge.</span>
+<span class="sd">:func:`axqua.solvers.openfoam.report.surface_freedom` checks afterwards whether the</span>
+<span class="sd">run ever needed more room than it was given. (The one exception is</span>
+<span class="sd">``openfoam.mode: rigid-lid``, where the surface really is prescribed - which is the</span>
+<span class="sd">trade that mode exists to make, and it says so.)</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># Where a seed came from. Kept as strings rather than an enum because they are printed</span>
+<span class="c1"># in build reports and written into logs far more often than they are branched on.</span>
+<span class="n">EXISTING</span> <span class="o">=</span> <span class="s2">"existing"</span>      <span class="c1"># the case's own converged 2D result</span>
+<span class="n">PRE_RUN</span> <span class="o">=</span> <span class="s2">"pre-run"</span>        <span class="c1"># a dedicated coarse run made here</span>
+<span class="n">PRE_RUN_3D</span> <span class="o">=</span> <span class="s2">"pre-run-3d"</span>  <span class="c1"># ...followed by a TELEMAC-3D run, so the seed has a profile</span>
+<span class="n">DISABLED</span> <span class="o">=</span> <span class="s2">"disabled"</span>      <span class="c1"># pre_run.enabled is false</span>
+<span class="n">NONE</span> <span class="o">=</span> <span class="s2">"none"</span>              <span class="c1"># nothing available; the caller builds cold</span>
+
+
+<div class="viewcode-block" id="SeedResult">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.prerun.SeedResult">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SeedResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The 2D (or 3D) state an OpenFOAM case will be seeded from."""</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">NONE</span>
+    <span class="n">converged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>       <span class="c1"># None: not judged (no listing to read)</span>
+    <span class="n">imbalance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1"># relative |Qin|-|Qout| / |Qin| at the seed</span>
+    <span class="n">runtime_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ok</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SeedResult.summary">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.prerun.SeedResult.summary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">summary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Printable account of what happened, for a build report."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+            <span class="n">why</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"pre_run.enabled is false"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="n">DISABLED</span>
+                   <span class="k">else</span> <span class="s2">"no 2D result was found and no pre-run was made"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"seed: none (</span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+                    <span class="s2">"  the case will be built COLD under a flat lid - many times more "</span>
+                    <span class="s2">"air cells, plus the whole filling transient to pay for in 3D."</span><span class="p">]</span>
+        <span class="n">how</span> <span class="o">=</span> <span class="p">{</span><span class="n">EXISTING</span><span class="p">:</span> <span class="s2">"the case's own converged 2D result"</span><span class="p">,</span>
+               <span class="n">PRE_RUN</span><span class="p">:</span> <span class="s2">"a dedicated coarse TELEMAC pre-run"</span><span class="p">,</span>
+               <span class="n">PRE_RUN_3D</span><span class="p">:</span> <span class="s2">"a TELEMAC-3D pre-run"</span><span class="p">,</span>
+               <span class="n">DISABLED</span><span class="p">:</span> <span class="s2">"an existing 2D result (pre-run disabled)"</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"seed: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">how</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">runtime_s</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  pre-run took </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runtime_s</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">converged</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  flux balance reached (relative imbalance "</span>
+                       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">imbalance</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imbalance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                       <span class="k">else</span> <span class="s2">"  flux balance reached"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">converged</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  ? the seed's flux balance could not be judged - there is no "</span>
+                       <span class="s2">"readable listing beside it. It may or may not be steady."</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">converged</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"  ! the run behind this seed had NOT reached flux balance"</span>
+                       <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" (relative imbalance </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">imbalance</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">)"</span>
+                          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">imbalance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+                       <span class="o">+</span> <span class="s2">". The seed is still far better than a cold start, but the "</span>
+                       <span class="s2">"surface it carries is a transient one."</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_require_converged</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">SeedResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stop the build when the seed is not steady and the user asked to be stopped.</span>
+
+<span class="sd">    Applied wherever a seed is adopted - a reused ``r2d.slf``, a coarse pre-run, or a</span>
+<span class="sd">    3D pre-run - rather than only where one is produced. It used to live inside</span>
+<span class="sd">    :func:`_coarse_pre_run` alone, which meant ``require: error`` could not fire for</span>
+<span class="sd">    the two commonest seeds there are: the existing result that ``reuse`` picks up,</span>
+<span class="sd">    and the 3D result the seed is replaced by. Under ``dimension: 3d`` it could not</span>
+<span class="sd">    fire at all.</span>
+
+<span class="sd">    ``converged is None`` - no listing, or one this cannot read - deliberately does</span>
+<span class="sd">    **not** raise. A result carried in from another machine has no ``.sortie`` beside</span>
+<span class="sd">    it and refusing to build on it would be obstructive; the summary says out loud</span>
+<span class="sd">    that it could not be judged.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">converged</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">pre_run</span><span class="o">.</span><span class="n">require</span> <span class="o">!=</span> <span class="s2">"error"</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">where</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">path</span> <span class="k">else</span> <span class="s2">"the TELEMAC pre-run"</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"the seed </span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2"> has not reached flux balance"</span>
+        <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" (relative imbalance </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">imbalance</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, tolerance "</span>
+           <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">flux_tolerance</span><span class="si">:</span><span class="s2">.1e</span><span class="si">}</span><span class="s2">)"</span>
+           <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">imbalance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="o">+</span> <span class="s2">". openfoam.pre_run.require is 'error'; set it to 'warn' to seed from the "</span>
+        <span class="s2">"transient state anyway, lengthen hydrodynamics.duration, or coarsen "</span>
+        <span class="s2">"openfoam.pre_run.size_scale further so the run reaches steady state."</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ensure_seed">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.prerun.ensure_seed">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ensure_seed</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">validate_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SeedResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Find or produce the TELEMAC result an OpenFOAM build should be seeded from.</span>
+
+<span class="sd">    Never raises for an absent or unconverged seed - a cold build is a legitimate</span>
+<span class="sd">    outcome and the caller reports it - except under ``pre_run.require: error``, where</span>
+<span class="sd">    an unconverged pre-run is exactly what the user asked to be stopped for.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    enabled : bool, optional</span>
+<span class="sd">        Per-invocation override of ``openfoam.pre_run.enabled``. ``None`` follows the</span>
+<span class="sd">        config; ``False`` is the "uncheck the box for this run" path used by</span>
+<span class="sd">        ``--no-pre-run`` and the case scripts' module-level switch.</span>
+<span class="sd">    validate_env : bool</span>
+<span class="sd">        Passed to :func:`axqua.pipeline.run` for the pre-run.</span>
+<span class="sd">    """</span>
+    <span class="n">pre</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">pre_run</span>
+    <span class="n">on</span> <span class="o">=</span> <span class="n">pre</span><span class="o">.</span><span class="n">enabled</span> <span class="k">if</span> <span class="n">enabled</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+    <span class="n">existing</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">on</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">_judge</span><span class="p">(</span><span class="n">SeedResult</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">existing</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">DISABLED</span><span class="p">),</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span>
+                            <span class="n">cfg</span><span class="p">)</span>
+            <span class="n">_require_converged</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"TELEMAC pre-run disabled and no </span><span class="si">%s</span><span class="s2">: building cold"</span><span class="p">,</span> <span class="n">existing</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SeedResult</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">DISABLED</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">pre</span><span class="o">.</span><span class="n">reuse</span> <span class="ow">and</span> <span class="n">existing</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"seeding from the existing 2D result </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">existing</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_judge</span><span class="p">(</span><span class="n">SeedResult</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">existing</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">EXISTING</span><span class="p">),</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_coarse_pre_run</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">validate_env</span><span class="o">=</span><span class="n">validate_env</span><span class="p">)</span>
+    <span class="c1"># Gate here as well as after the 3D step, so an unconverged 2D seed stops the</span>
+    <span class="c1"># build before it spends hours of telemac3d on top of it.</span>
+    <span class="n">_require_converged</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># The 3D extension applies to whichever 2D result we ended up with - including a</span>
+    <span class="c1"># reused one. Hanging it off the coarse-pre-run branch alone (as it first was)</span>
+    <span class="c1"># made `dimension: 3d` silently do nothing on every case that already had an</span>
+    <span class="c1"># r2d.slf, which with `reuse: true` is the normal one.</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">ok</span> <span class="ow">and</span> <span class="n">pre</span><span class="o">.</span><span class="n">dimension</span> <span class="o">==</span> <span class="s2">"3d"</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">_extend_to_3d</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">_require_converged</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the dedicated coarse pre-run</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_coarse_pre_run</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">validate_env</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SeedResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build and run a coarsened copy of the case purely to produce a seed.</span>
+
+<span class="sd">    Deliberately the same shape as the mesh-convergence study's per-level runs</span>
+<span class="sd">    (:func:`axqua.convergence._level_simulator`): deep-copy the config, scale the</span>
+<span class="sd">    whole sizing field through ``mesh.size_scale``, point ``model_dir`` at a folder of</span>
+<span class="sd">    its own, and send the build's other products to a scratch directory that is thrown</span>
+<span class="sd">    away. A seed needs a mesh, a steering file and a result - not a DEM clip, a ground</span>
+<span class="sd">    truth table or a calibration config.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipeline</span>
+
+    <span class="n">pre</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">pre_run</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">pre</span><span class="o">.</span><span class="n">directory</span><span class="p">)</span>
+    <span class="n">lc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="c1"># Scale the WHOLE sizing field, config values and the per-zone `Max Edge Length (m)`</span>
+    <span class="c1"># carried in the mesh-zones gpkg alike. Scaling only channel_size/floodplain_size</span>
+    <span class="c1"># silently does nothing when the gpkg sets that field - the bug that invalidated</span>
+    <span class="c1"># the first ering convergence study.</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">pre</span><span class="o">.</span><span class="n">size_scale</span><span class="p">)</span>
+    <span class="c1"># Pre-wet the channel: this run exists to find a surface, not to reproduce the</span>
+    <span class="c1"># production run's dry-start wetting front, and seeding it saves most of the cost.</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pre</span><span class="o">.</span><span class="n">prewet_depth</span><span class="p">)</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">variable_timestep</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">desired_courant</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pre</span><span class="o">.</span><span class="n">courant</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pre</span><span class="o">.</span><span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lc</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pre</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pre</span><span class="o">.</span><span class="n">n_processors</span><span class="p">:</span>
+        <span class="n">lc</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pre</span><span class="o">.</span><span class="n">n_processors</span><span class="p">)</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">target</span>
+
+    <span class="n">scratch</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"axqua-prerun-"</span><span class="p">))</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">preprocessing_dir</span> <span class="o">=</span> <span class="n">scratch</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">postprocessing_dir</span> <span class="o">=</span> <span class="n">scratch</span>
+    <span class="n">lc</span><span class="o">.</span><span class="n">calibration_dir</span> <span class="o">=</span> <span class="n">scratch</span>
+
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">channel_size</span> <span class="o">*</span> <span class="n">lc</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">size_scale</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"no 2D result to seed from: running a coarse TELEMAC pre-run "</span>
+             <span class="s2">"(channel ~</span><span class="si">%.2f</span><span class="s2"> m, x</span><span class="si">%.2f</span><span class="s2">) into </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="n">pre</span><span class="o">.</span><span class="n">size_scale</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lc</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+        <span class="c1"># dry_run=True builds AND launches the solver once - which for a steady case</span>
+        <span class="c1"># driven by DURATION is the whole run, not a smoke test.</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">validate_env</span><span class="o">=</span><span class="n">validate_env</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log_to_file</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a failed pre-run must not lose the build</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the TELEMAC pre-run failed (</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">); the OpenFOAM case will be "</span>
+                    <span class="s2">"built cold"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SeedResult</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">NONE</span><span class="p">,</span> <span class="n">runtime_s</span><span class="o">=</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">,</span>
+                          <span class="n">notes</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"pre-run failed: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">])</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">scratch</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
+    <span class="n">produced</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">lc</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">produced</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">SeedResult</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">NONE</span><span class="p">,</span> <span class="n">runtime_s</span><span class="o">=</span><span class="n">runtime</span><span class="p">,</span>
+                          <span class="n">notes</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s2">"the pre-run produced no </span><span class="si">{</span><span class="n">lc</span><span class="o">.</span><span class="n">results_slf</span><span class="si">}</span><span class="s2">"</span><span class="p">])</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">_judge</span><span class="p">(</span><span class="n">SeedResult</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">produced</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="n">PRE_RUN</span><span class="p">,</span> <span class="n">runtime_s</span><span class="o">=</span><span class="n">runtime</span><span class="p">),</span>
+                    <span class="n">target</span><span class="p">,</span> <span class="n">lc</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"coarsened x</span><span class="si">{</span><span class="n">pre</span><span class="o">.</span><span class="n">size_scale</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> (channel ~</span><span class="si">{</span><span class="n">dx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m), "</span>
+                           <span class="sa">f</span><span class="s2">"pre-wetted </span><span class="si">{</span><span class="n">pre</span><span class="o">.</span><span class="n">prewet_depth</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m, Courant "</span>
+                           <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">pre</span><span class="o">.</span><span class="n">courant</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_listing_for</span><span class="p">(</span><span class="n">model_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">SeedResult</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The solver listing that belongs to *result*, not merely to the case's steering.</span>
+
+<span class="sd">    ``cfg.cas_file`` names the case's nominal ``.cas``, but the result being judged is</span>
+<span class="sd">    often the output of something else - a continuation, a re-run under another</span>
+<span class="sd">    steering file - and the listing beside it then describes a different run. Reporting</span>
+<span class="sd">    that run's flux imbalance against this result is how a converged seed gets</span>
+<span class="sd">    announced as unconverged, which is exactly what happened on the Munich fish pass:</span>
+<span class="sd">    the continuation closed to 3.7e-4 and the message quoted the first attempt's</span>
+<span class="sd">    2.4e-2. So the listing is chosen by proximity in time to the result it judges.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">sortie</span>
+
+    <span class="n">named</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">latest_sortie</span><span class="p">(</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">named</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">named</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model_dir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.sortie"</span><span class="p">)</span> <span class="k">if</span> <span class="s2">"_p0"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">named</span>
+    <span class="n">best</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">candidates</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">-</span> <span class="n">target</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">named</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">best</span> <span class="o">!=</span> <span class="n">named</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"judging </span><span class="si">%s</span><span class="s2"> against </span><span class="si">%s</span><span class="s2"> rather than the case's </span><span class="si">%s</span><span class="s2"> listing"</span><span class="p">,</span>
+                  <span class="n">Path</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">best</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">best</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_judge</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">SeedResult</span><span class="p">,</span> <span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SeedResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read the run's listing, if there is one, to say whether the seed is steady.</span>
+
+<span class="sd">    Best-effort by design: a result handed over by a user, or copied in from another</span>
+<span class="sd">    machine, has no ``.sortie`` beside it, and "I cannot tell" (``converged=None``)</span>
+<span class="sd">    is the honest answer there rather than a failure.</span>
+
+<span class="sd">    **A listing that exists but will not parse is a different thing entirely, and is</span>
+<span class="sd">    no longer silent.** That case used to be swallowed at ``log.debug`` alongside the</span>
+<span class="sd">    legitimate one, which is how a whole class of seed went unjudged without anyone</span>
+<span class="sd">    noticing: :func:`axqua.sortie.read_sortie` could not read a TELEMAC-3D listing at</span>
+<span class="sd">    all, so every ``dimension: 3d`` seed returned ``converged=None`` and</span>
+<span class="sd">    ``pre_run.require: error`` could never fire. The 3D block is read now, and if a</span>
+<span class="sd">    listing still defeats the reader it is warned about and recorded on the seed.</span>
+<span class="sd">    """</span>
+    <span class="n">listing</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">flux_convergence</span><span class="p">,</span> <span class="n">sortie</span>
+
+        <span class="n">listing</span> <span class="o">=</span> <span class="n">_listing_for</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">model_dir</span><span class="p">),</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">listing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"no listing beside </span><span class="si">%s</span><span class="s2">: its convergence cannot be judged"</span><span class="p">,</span>
+                      <span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sortie</span><span class="o">.</span><span class="n">read_sortie</span><span class="p">(</span><span class="n">listing</span><span class="p">)</span>
+        <span class="n">imbalance</span> <span class="o">=</span> <span class="n">flux_convergence</span><span class="o">.</span><span class="n">relative_imbalance</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">gross_in</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">gross_out</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">imbalance</span><span class="p">):</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">imbalance</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">imbalance</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">converged</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">imbalance</span> <span class="o">&lt;=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">flux_tolerance</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> judged against </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">): imbalance </span><span class="si">%.2e</span><span class="s2">, converged </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                      <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">path</span><span class="p">),</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                      <span class="n">data</span><span class="o">.</span><span class="n">dimension</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">imbalance</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">converged</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a diagnostic must not break the build</span>
+        <span class="k">if</span> <span class="n">listing</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"could not judge the seed's convergence: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"could not judge the seed against </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">); its flux "</span>
+                        <span class="s2">"balance is unknown"</span><span class="p">,</span> <span class="n">listing</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"the listing </span><span class="si">{</span><span class="n">listing</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> could not be read "</span>
+                <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">), so the seed's flux balance is unknown"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># the optional 3D pre-run</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+
+<span class="c1"># Below this many sigma planes a TELEMAC-3D run has one layer, which is a</span>
+<span class="c1"># depth-averaged answer computed at 3D cost. 3 is the first count that has an</span>
+<span class="c1"># interior level and therefore a profile to speak of.</span>
+<span class="n">MIN_USEFUL_LEVELS</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1"># Fixed step count for the 3D seed run - TELEMAC-3D has no DURATION keyword, so a</span>
+<span class="c1"># run is bounded by steps alone. Far fewer than add3d.py's 30,000-step</span>
+<span class="c1"># flux-convergence case: a seed does not have to reach steady state, it has to</span>
+<span class="c1"># produce a plausible profile for OpenFOAM to develop from.</span>
+<span class="n">DEFAULT_3D_STEPS</span> <span class="o">=</span> <span class="mi">3_000</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extend_to_3d</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">SeedResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SeedResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Follow the 2D pre-run with a hydrostatic TELEMAC-3D run.</span>
+
+<span class="sd">    The point is the **vertical velocity profile**: a 2D seed necessarily starts every</span>
+<span class="sd">    OpenFOAM column with the same velocity from bed to surface, and a 3D TELEMAC run is</span>
+<span class="sd">    still cheap enough to do better. The 3D case is itself hotstarted from the 2D</span>
+<span class="sd">    result, which is why this can only run after the step above.</span>
+
+<span class="sd">    **It is not always possible, and the check happens before the solver.** TELEMAC-3D</span>
+<span class="sd">    has only sigma planes, and axqua sizes their count from the depth against the</span>
+<span class="sd">    horizontal cell size, refusing cells more than four times taller than wide. On a</span>
+<span class="sd">    shallow reach meshed fine in plan there is no room for an interior level at all -</span>
+<span class="sd">    isar-2025 is 0.26 m deep with 0.62 m cells and gets exactly 2 planes, i.e. one</span>
+<span class="sd">    layer - so the run would cost 3D time to produce a depth-averaged answer. Measured</span>
+<span class="sd">    there: it also diverges (``GRACJG ... RELATIVE PRECISION NaN``), which is what a</span>
+<span class="sd">    single sigma layer over a wetting-drying bed tends to do. So this refuses, says</span>
+<span class="sd">    why, and keeps the 2D seed.</span>
+
+<span class="sd">    Falls back to the 2D seed on any failure - a depth-uniform seed is a mild</span>
+<span class="sd">    approximation, not a reason to lose the build.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">threed</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelemacRuntime</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_solver_streaming</span>
+
+        <span class="c1"># The 3D case hotstarts from the 2D result BY NAME (`FILE FOR 2D</span>
+        <span class="c1"># CONTINUATION`), so it has to be built and run in the folder that actually</span>
+        <span class="c1"># holds it - which is the pre-run subfolder when the seed was made here, not</span>
+        <span class="c1"># the main model dir.</span>
+        <span class="n">lc</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">lc</span><span class="o">.</span><span class="n">model_dir</span> <span class="o">=</span> <span class="n">seed</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span>
+
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">lc</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_3D</span>
+        <span class="k">if</span> <span class="n">_reusable_3d</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="n">seed</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"3D pre-run: reusing </span><span class="si">%s</span><span class="s2"> (newer than the 2D seed and finite)"</span><span class="p">,</span>
+                     <span class="n">existing</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">seed</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">existing</span><span class="p">,</span> <span class="n">PRE_RUN_3D</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"reused the existing 3D pre-run </span><span class="si">{</span><span class="n">existing</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">converged</span><span class="p">,</span> <span class="n">seed</span><span class="o">.</span><span class="n">imbalance</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">_judge</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">lc</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">lc</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">seed</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">vertical</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">infer_vertical_layers</span><span class="p">(</span><span class="n">lc</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">pinned</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">pre_run</span><span class="o">.</span><span class="n">n_levels</span>
+        <span class="k">if</span> <span class="n">pinned</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"3D pre-run: </span><span class="si">%d</span><span class="s2"> sigma planes pinned by openfoam.pre_run.n_levels "</span>
+                     <span class="s2">"(the mesh itself suggests </span><span class="si">%d</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                     <span class="n">pinned</span><span class="p">,</span> <span class="n">vertical</span><span class="o">.</span><span class="n">n_levels</span><span class="p">,</span> <span class="n">vertical</span><span class="o">.</span><span class="n">reason</span><span class="p">)</span>
+            <span class="n">vertical</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">vertical</span><span class="p">,</span> <span class="n">n_levels</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">pinned</span><span class="p">),</span>
+                               <span class="n">reason</span><span class="o">=</span><span class="sa">f</span><span class="s2">"pinned by openfoam.pre_run.n_levels "</span>
+                                      <span class="sa">f</span><span class="s2">"(inference said </span><span class="si">{</span><span class="n">vertical</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vertical</span><span class="o">.</span><span class="n">n_levels</span> <span class="o">&lt;</span> <span class="n">MIN_USEFUL_LEVELS</span><span class="p">:</span>
+            <span class="n">note</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"3D pre-run skipped: this mesh supports only "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">vertical</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2"> sigma planes (</span><span class="si">{</span><span class="n">vertical</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">), which is "</span>
+                    <span class="s2">"one layer - a depth-averaged answer at 3D cost. Seeding from 2D."</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">note</span><span class="p">)</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">note</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">seed</span>
+
+        <span class="n">_make_3d_robust</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span>
+        <span class="c1"># build_3d_cas, not build_3d_cases: the seed needs exactly one case - the</span>
+        <span class="c1"># cheap hydrostatic one - and it needs it cold-started, which the three-case</span>
+        <span class="c1"># helper (written for add3d.py's continuation workflow) does not offer.</span>
+        <span class="n">case</span> <span class="o">=</span> <span class="n">threed</span><span class="o">.</span><span class="n">build_3d_cas</span><span class="p">(</span>
+            <span class="n">lc</span><span class="p">,</span> <span class="n">n_levels</span><span class="o">=</span><span class="n">vertical</span><span class="o">.</span><span class="n">n_levels</span><span class="p">,</span> <span class="n">non_hydrostatic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">hotstart</span><span class="o">=</span><span class="s2">"constant_depth"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">out_name</span><span class="o">=</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_CAS</span><span class="p">,</span>
+            <span class="n">results3d_name</span><span class="o">=</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_3D</span><span class="p">,</span>
+            <span class="n">results2d_name</span><span class="o">=</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_2D</span><span class="p">,</span>
+            <span class="n">n_time_steps</span><span class="o">=</span><span class="n">DEFAULT_3D_STEPS</span><span class="p">,</span>
+            <span class="n">listing_period</span><span class="o">=</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_LISTING_PERIOD</span><span class="p">)</span>
+        <span class="n">runtime</span> <span class="o">=</span> <span class="n">TelemacRuntime</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="p">)</span>
+        <span class="c1"># The hydrostatic case is the cheap one and the only one written with a</span>
+        <span class="c1"># listing period short enough to see its fluxes converge; the profile it</span>
+        <span class="c1"># gives is what the seed is after, not the non-hydrostatic detail.</span>
+        <span class="n">run_solver_streaming</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">lc</span><span class="p">,</span> <span class="n">cas_file</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">case</span><span class="o">.</span><span class="n">cas</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                             <span class="n">solver</span><span class="o">=</span><span class="s2">"telemac3d"</span><span class="p">,</span>
+                             <span class="n">duration</span><span class="o">=</span><span class="n">case</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="n">case</span><span class="o">.</span><span class="n">n_time_steps</span><span class="p">)</span>
+        <span class="n">produced</span> <span class="o">=</span> <span class="n">lc</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">threed</span><span class="o">.</span><span class="n">HYDROSTATIC_RESULT_3D</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">produced</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_is_finite</span><span class="p">(</span><span class="n">produced</span><span class="p">):</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">produced</span>
+            <span class="c1"># The imbalance carried here so far is the 2D run's. Re-judge against the</span>
+            <span class="c1"># 3D listing, which `_listing_for` now picks by proximity to this result -</span>
+            <span class="c1"># otherwise the seed reports a number belonging to a different run, and</span>
+            <span class="c1"># on the Munich fish pass the two were 3.7e-4 and 2.4e+0.</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">converged</span><span class="p">,</span> <span class="n">seed</span><span class="o">.</span><span class="n">imbalance</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="n">_judge</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="n">lc</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">lc</span><span class="p">)</span>
+            <span class="c1"># not PRE_RUN: the 2D result may well have been reused, and only the 3D</span>
+            <span class="c1"># run is new. Saying "a dedicated coarse pre-run" there would claim work</span>
+            <span class="c1"># that did not happen.</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">PRE_RUN_3D</span>
+            <span class="n">seed</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"3D pre-run: </span><span class="si">{</span><span class="n">vertical</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2"> sigma planes, so the seed carries a "</span>
+                <span class="s2">"vertical velocity profile rather than one depth-averaged value"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">seed</span>
+        <span class="n">why</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"diverged (its result is not finite)"</span> <span class="k">if</span> <span class="n">produced</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+               <span class="k">else</span> <span class="sa">f</span><span class="s2">"produced no </span><span class="si">{</span><span class="n">produced</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">seed</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the 3D pre-run </span><span class="si">{</span><span class="n">why</span><span class="si">}</span><span class="s2">; seeding from 2D"</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the 3D pre-run </span><span class="si">%s</span><span class="s2">; seeding from the 2D result"</span><span class="p">,</span> <span class="n">why</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - 2D is a perfectly good seed</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the 3D pre-run failed (</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">); seeding from the 2D result"</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="n">seed</span><span class="o">.</span><span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"3D pre-run failed (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">); seeding from 2D"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">seed</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_reusable_3d</span><span class="p">(</span><span class="n">existing</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">seed_2d</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether a previous 3D pre-run can stand in for running one again.</span>
+
+<span class="sd">    ``pre_run.reuse`` used to cover only the 2D result, so any failure *after* the 3D</span>
+<span class="sd">    extension - a missing sub-model boundary line, a bad ROI, a typo in a stage name -</span>
+<span class="sd">    cost a full re-run of a solver step that had been correct the first time. On the</span>
+<span class="sd">    Munich fish pass that was 3 h 15 min per attempt.</span>
+
+<span class="sd">    Reused only when it is finite and **newer than the 2D result it was derived from**,</span>
+<span class="sd">    so a re-converged 2D run still invalidates it.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">pre_run</span><span class="o">.</span><span class="n">reuse</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">existing</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">existing</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span> <span class="o">&lt;</span> <span class="n">Path</span><span class="p">(</span><span class="n">seed_2d</span><span class="p">)</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">_is_finite</span><span class="p">(</span><span class="n">existing</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_finite</span><span class="p">(</span><span class="n">result</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether a solver result is usable at all.</span>
+
+<span class="sd">    A diverged TELEMAC run does not necessarily fail loudly - it can march to the end</span>
+<span class="sd">    and write a file full of NaN. Seeding an OpenFOAM case from that would put NaN</span>
+<span class="sd">    into ``U`` at t=0 and produce a run that dies with no obvious cause, so the seed</span>
+<span class="sd">    is checked before it is adopted rather than after it has done damage.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">result</span><span class="p">)[</span><span class="s2">"values"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - unreadable is also unusable</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"could not validate </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_3d_robust</span><span class="p">(</span><span class="n">lc</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Two overrides the 3D *seed* run needs, both measured on isar-2025.</span>
+
+<span class="sd">    **Do not hotstart from the 2D continuation.** `FILE FOR 2D CONTINUATION` lifts the</span>
+<span class="sd">    2D free surface onto the sigma mesh, and on a braided reach that surface comes with</span>
+<span class="sd">    a great many dry and near-dry columns. TELEMAC-3D diverges on the very first solve</span>
+<span class="sd">    there (``GRACJG ... RELATIVE PRECISION NaN`` immediately after ``DEPTH IS READ IN</span>
+<span class="sd">    THE BINARY FILE``), on the coarse pre-run mesh and on the fine production mesh</span>
+<span class="sd">    alike. A ``CONSTANT DEPTH`` cold start at the reach's own median depth runs clean.</span>
+<span class="sd">    This is the same choice the vertical-convergence study already makes, for the same</span>
+<span class="sd">    reason - and it costs nothing here, because a seed does not need the 3D run to</span>
+<span class="sd">    agree with the 2D one about the surface. It needs a plausible *profile*.</span>
+
+<span class="sd">    **Do not take Spalart-Allmaras into 3D.** The 2D closure is auto-selected and on a</span>
+<span class="sd">    coarse mesh that is S-A, which maps to 3D model 5 - where it diverges in the</span>
+<span class="sd">    velocity-diffusion solve on a wetting/drying bed unless a source-term patch is</span>
+<span class="sd">    linked in (see any case's ``user_fortran/README``). Measured: NaN with S-A on two</span>
+<span class="sd">    different meshes, clean with k-epsilon. A seed is not a turbulence study, so the</span>
+<span class="sd">    robust closure is the right one to spend the run on.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">steering</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pick</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">lc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - the override is a safety net, not a need</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"could not read the turbulence pick: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">pick</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>                      <span class="c1"># 2D Spalart-Allmaras -&gt; 3D model 5</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"3D pre-run: using k-epsilon instead of Spalart-Allmaras, which "</span>
+                 <span class="s2">"diverges in 3D on a wetting/drying bed without a source-term patch"</span><span class="p">)</span>
+        <span class="n">lc</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">turbulence_model</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

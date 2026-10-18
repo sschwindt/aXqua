@@ -1,0 +1,1182 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Post-traitement &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/code/postprocessing.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Ligne de commande" href="cli.html" />
+    <link rel="prev" title="Installation du logiciel de simulation" href="install.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/code/postprocessing.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/code/postprocessing.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/code/postprocessing.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/code/postprocessing.html"><link rel="stylesheet" href="../../_i18n/lang.css"><script src="../../_i18n/lang.js" data-lang="fr" data-root="../../" data-page="code/postprocessing.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../code/postprocessing.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../de/code/postprocessing.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usage/case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Documentation du code</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Documentation du code</a></li>
+      <li class="breadcrumb-item active">Post-traitement</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/code/postprocessing.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../code/postprocessing.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <section id="postprocessing">
+<h1>Post-traitement<a class="headerlink" href="#postprocessing" title="Lien vers cette rubrique"></a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">axqua.postproc</span></code> rend les chiffres à partir des résultats de chaque moteur. Un moteur décrit ce qu’il a produit (fichiers, champs, temps), et ce paquet le dessine. Il n’importe pas de moteur.</p>
+<section id="module-axqua.postproc.dataset">
+<span id="result-description"></span><h2>Description du résultat<a class="headerlink" href="#module-axqua.postproc.dataset" title="Lien vers cette rubrique"></a></h2>
+<p>What a visualizer can open, described without naming a solver.</p>
+<p>Standard library only, deliberately: a solver backend has to build these to answer
+<a class="reference internal" href="core.html#axqua.core.registry.SolverBackend.describe_results" title="axqua.core.registry.SolverBackend.describe_results"><code class="xref py py-meth docutils literal notranslate"><span class="pre">axqua.core.registry.SolverBackend.describe_results()</span></code></a>, and that call must stay
+cheap enough to make from a capability listing. Anything heavier belongs in the
+renderer, not in the description of what there is to render.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.postproc.dataset.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solver</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patches</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vector_fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decomposed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/dataset.html#Dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.dataset.Dataset" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>One openable result.</p>
+<p><em>kind</em> is how a reader should open it, not what produced it:</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">openfoam</span></code></dt><dd><p>a <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> handle - VisIt and ParaView both read the case directory
+natively, so nothing is converted.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">vtu</span></code> / <code class="docutils literal notranslate"><span class="pre">pvd</span></code></dt><dd><p>a VTK XML file. This is the TELEMAC route, because no visualizer reads
+SERAFIN and there is no <code class="docutils literal notranslate"><span class="pre">foamToVTK</span></code> analogue for it (see
+<a class="reference internal" href="#module-axqua.postproc.selafin_vtk" title="axqua.postproc.selafin_vtk"><code class="xref py py-mod docutils literal notranslate"><span class="pre">axqua.postproc.selafin_vtk</span></code></a>).</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>solver</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>times</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>, </em><em>...</em><em>]</em>)</p></li>
+<li><p><strong>fields</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(dans Python v3.15)"><em>frozenset</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>patches</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(dans Python v3.15)"><em>frozenset</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>bounds</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>, </em><em>...</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>vector_fields</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(dans Python v3.15)"><em>Mapping</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><em>...</em><em>]</em><em>]</em>)</p></li>
+<li><p><strong>notes</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><em>...</em><em>]</em>)</p></li>
+<li><p><strong>decomposed</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.solver">
+<span class="sig-name descname"><span class="pre">solver</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.solver" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.kind" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.path">
+<span class="sig-name descname"><span class="pre">path</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><span class="pre">Path</span></a></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.path" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.times">
+<span class="sig-name descname"><span class="pre">times</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.times" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(dans Python v3.15)"><span class="pre">frozenset</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">frozenset({})</span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.fields" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.patches">
+<span class="sig-name descname"><span class="pre">patches</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(dans Python v3.15)"><span class="pre">frozenset</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">frozenset({})</span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.patches" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.bounds">
+<span class="sig-name descname"><span class="pre">bounds</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.bounds" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.vector_fields">
+<span class="sig-name descname"><span class="pre">vector_fields</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Mapping" title="(dans Python v3.15)"><span class="pre">Mapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.vector_fields" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.notes" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.decomposed">
+<span class="sig-name descname"><span class="pre">decomposed</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><span class="pre">bool</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.decomposed" title="Lien vers cette définition"></a></dt>
+<dd><p>a reader has to open it as a decomposed case, or it sees t = 0 alone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An OpenFOAM case whose result only the processor folders of a parallel run hold</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.has">
+<span class="sig-name descname"><span class="pre">has</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">capability</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/dataset.html#Dataset.has"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.dataset.Dataset.has" title="Lien vers cette définition"></a></dt>
+<dd><p>Whether this dataset satisfies one scene requirement.</p>
+<p>The vocabulary is deliberately tiny and string-based so a scene can declare
+what it needs without importing anything: <code class="docutils literal notranslate"><span class="pre">field:U</span></code>, <code class="docutils literal notranslate"><span class="pre">patch:lid</span></code>,
+<code class="docutils literal notranslate"><span class="pre">times&gt;1</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>capability</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="axqua.postproc.dataset.Dataset.last_time">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">last_time</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(dans Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#axqua.postproc.dataset.Dataset.last_time" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-axqua.postproc.scenes">
+<span id="figures"></span><h2>Chiffres<a class="headerlink" href="#module-axqua.postproc.scenes" title="Lien vers cette rubrique"></a></h2>
+<p>What to draw: the scene registry, and why a scene is or is not available.</p>
+<p>Standard library only. A <a class="reference internal" href="#axqua.postproc.scenes.Scene" title="axqua.postproc.scenes.Scene"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scene</span></code></a> declares its requirements in the small
+vocabulary <a class="reference internal" href="#axqua.postproc.dataset.Dataset.has" title="axqua.postproc.dataset.Dataset.has"><code class="xref py py-meth docutils literal notranslate"><span class="pre">axqua.postproc.dataset.Dataset.has()</span></code></a> understands, so
+<a class="reference internal" href="#axqua.postproc.scenes.plan" title="axqua.postproc.scenes.plan"><code class="xref py py-func docutils literal notranslate"><span class="pre">plan()</span></code></a> can say <em>why</em> a figure cannot be made instead of failing somewhere
+inside a renderer - which, for a tool that shells out to VisIt, is the difference
+between a useful message and a silent empty PNG.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Scene.render</span></code> names a renderer rather than holding a function, so the same
+scene definition serves any backend that implements that name.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.postproc.scenes.</span></span><span class="sig-name descname"><span class="pre">Scene</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name:</span> <span class="pre">'str',</span> <span class="pre">title:</span> <span class="pre">'str',</span> <span class="pre">solvers:</span> <span class="pre">'frozenset[str]',</span> <span class="pre">requires:</span> <span class="pre">'tuple[str,</span> <span class="pre">...]',</span> <span class="pre">render:</span> <span class="pre">'str',</span> <span class="pre">options:</span> <span class="pre">'Mapping[str,</span> <span class="pre">Any]'</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">fallbacks:</span> <span class="pre">'tuple[tuple[str,</span> <span class="pre">...],</span> <span class="pre">...]'</span> <span class="pre">=</span> <span class="pre">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/scenes.html#Scene"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.scenes.Scene" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>solvers</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(dans Python v3.15)"><em>frozenset</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>requires</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><em>...</em><em>]</em>)</p></li>
+<li><p><strong>render</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>options</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(dans Python v3.15)"><em>Mapping</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(dans Python v3.15)"><em>Any</em></a><em>]</em>)</p></li>
+<li><p><strong>fallbacks</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>...</em><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.name" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.title">
+<span class="sig-name descname"><span class="pre">title</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.title" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.solvers">
+<span class="sig-name descname"><span class="pre">solvers</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#frozenset" title="(dans Python v3.15)"><span class="pre">frozenset</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.solvers" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.requires">
+<span class="sig-name descname"><span class="pre">requires</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.requires" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.render">
+<span class="sig-name descname"><span class="pre">render</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.render" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.options">
+<span class="sig-name descname"><span class="pre">options</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(dans Python v3.15)"><span class="pre">Mapping</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(dans Python v3.15)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.options" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.Scene.fallbacks">
+<span class="sig-name descname"><span class="pre">fallbacks</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></span><a class="headerlink" href="#axqua.postproc.scenes.Scene.fallbacks" title="Lien vers cette définition"></a></dt>
+<dd><p>Alternative requirement sets, tried in order when <code class="docutils literal notranslate"><span class="pre">requires</span></code> is unmet.
+This is how one scene covers both the two-phase and the rigid-lid case:
+under a rigid lid there is no <code class="docutils literal notranslate"><span class="pre">alpha.water</span></code> to contour, but there IS a lid
+patch carrying the (prescribed) surface.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.available_names">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.scenes.</span></span><span class="sig-name descname"><span class="pre">available_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/scenes.html#available_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.scenes.available_names" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.resolve">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.scenes.</span></span><span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/scenes.html#resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.scenes.resolve" title="Lien vers cette définition"></a></dt>
+<dd><p>Scenes by name, in the order given. <code class="docutils literal notranslate"><span class="pre">None</span></code> means every scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference internal" href="#axqua.postproc.scenes.Scene" title="axqua.postproc.scenes.Scene"><em>Scene</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.check">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.scenes.</span></span><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/scenes.html#check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.scenes.check" title="Lien vers cette définition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(available,</span> <span class="pre">reason)</span></code> for one scene against one dataset.</p>
+<p><em>extras</em> are requirements satisfied by something other than the dataset itself -
+<code class="docutils literal notranslate"><span class="pre">groundtruth:hydraulics</span></code> comes from the case, not from the result file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scene</strong> (<a class="reference internal" href="#axqua.postproc.scenes.Scene" title="axqua.postproc.scenes.Scene"><em>Scene</em></a>)</p></li>
+<li><p><strong>extras</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(dans Python v3.15)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)">bool</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.resolved_requirements">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.scenes.</span></span><span class="sig-name descname"><span class="pre">resolved_requirements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/scenes.html#resolved_requirements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.scenes.resolved_requirements" title="Lien vers cette définition"></a></dt>
+<dd><p>Which requirement set this dataset actually satisfies.</p>
+<p>The renderer needs to know: a rigid-lid case reaches <code class="docutils literal notranslate"><span class="pre">free-surface</span></code> through
+the lid-patch fallback, and must be drawn - and captioned - differently from a
+two-phase case that has a real interface to contour.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scene</strong> (<a class="reference internal" href="#axqua.postproc.scenes.Scene" title="axqua.postproc.scenes.Scene"><em>Scene</em></a>)</p></li>
+<li><p><strong>extras</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(dans Python v3.15)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>, …]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.scenes.plan">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.scenes.</span></span><span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasets</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/scenes.html#plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.scenes.plan" title="Lien vers cette définition"></a></dt>
+<dd><p>For every requested scene: the dataset that can draw it, or the reason none can.</p>
+<p>Reported rather than raised, so <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">postproc</span> <span class="pre">--list</span></code> can show a whole case
+at once - the same idea as <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">case-status</span></code> for capabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>extras</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable" title="(dans Python v3.15)"><em>Iterable</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference internal" href="#axqua.postproc.scenes.Scene" title="axqua.postproc.scenes.Scene"><em>Scene</em></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)">object</a> | None, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-axqua.postproc.render">Orchestration: config -&gt; datasets -&gt; scenes -&gt; files.</p>
+<p>The only module here that knows about both halves. It asks each enabled backend
+what it has produced (<a class="reference internal" href="core.html#axqua.core.registry.SolverBackend.describe_results" title="axqua.core.registry.SolverBackend.describe_results"><code class="xref py py-meth docutils literal notranslate"><span class="pre">axqua.core.registry.SolverBackend.describe_results()</span></code></a>),
+matches that against the requested scenes, and hands the pairs to a rendering
+backend.</p>
+<p>It does <strong>not</strong> import a solver: the datasets arrive through the registry as
+plain data, which is the whole point of the <code class="docutils literal notranslate"><span class="pre">describe_results</span></code> seam.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.render.datasets">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.render.</span></span><span class="sig-name descname"><span class="pre">datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/render.html#datasets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.render.datasets" title="Lien vers cette définition"></a></dt>
+<dd><p>Every result this case can show, across the enabled backends.</p>
+<p>Never raises for one misbehaving backend: a listing that dies because a solver
+it does not care about has a broken case directory is useless.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>solver</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference internal" href="#axqua.postproc.dataset.Dataset" title="axqua.postproc.dataset.Dataset"><em>Dataset</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.render.case_extras">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.render.</span></span><span class="sig-name descname"><span class="pre">case_extras</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/render.html#case_extras"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.render.case_extras" title="Lien vers cette définition"></a></dt>
+<dd><p>Requirements satisfied by the case rather than by a result file.</p>
+<p>Currently just the ground truth, which is what the <code class="docutils literal notranslate"><span class="pre">profiles</span></code> scene compares
+against - it is a property of the case, not of the SELAFIN or the OpenFOAM
+directory, so a dataset could never report it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.render.measurement_points">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.render.</span></span><span class="sig-name descname"><span class="pre">measurement_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/render.html#measurement_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.render.measurement_points" title="Lien vers cette définition"></a></dt>
+<dd><p>The verticals the <code class="docutils literal notranslate"><span class="pre">profiles</span></code> scene samples along.</p>
+<p>Each carries the bed elevation and the measured depth, so the lineout spans
+the actual water column rather than a guessed range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)">dict</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.render.plan">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.render.</span></span><span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/render.html#plan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.render.plan" title="Lien vers cette définition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(scene,</span> <span class="pre">dataset|None,</span> <span class="pre">reason)</span></code> for every requested scene.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>solver</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.render.plan_lines">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.render.</span></span><span class="sig-name descname"><span class="pre">plan_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/render.html#plan_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.render.plan_lines" title="Lien vers cette définition"></a></dt>
+<dd><p>The plan as text, for <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">postproc</span> <span class="pre">--list</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>solver</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.render.render">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.render.</span></span><span class="sig-name descname"><span class="pre">render</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">script_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/render.html#render"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.render.render" title="Lien vers cette définition"></a></dt>
+<dd><p>Render the requested scenes. Returns a process exit code.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>solver</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>script_only</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<p id="module-axqua.postproc.profiles">Modeled vertical velocity profiles against the measured verticals.</p>
+<p>The scientific payoff of the 3D model, and the figure that closes the loop with
+the OpenFOAM calibration: run it once at the prior center and once at the
+posterior best, and the two panels <em>are</em> the calibration result.</p>
+<p><strong>VisIt samples, matplotlib draws.</strong> VisIt’s <code class="docutils literal notranslate"><span class="pre">Lineout</span></code> produces one curve per
+vertical (<code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.postproc.visit._render_profiles()</span></code>); this module reads those
+curves and plots them. The split is deliberate - the measured overlay needs error
+bars, the figure has to match aXqua’s other figures
+(<code class="docutils literal notranslate"><span class="pre">report._write_plot</span></code>, <code class="docutils literal notranslate"><span class="pre">flux_convergence</span></code>), and once the curves exist the
+comparison must stay reproducible on a machine with no VisIt at all.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.postproc.profiles.MEASUREMENT_FRACTION">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.profiles.</span></span><span class="sig-name descname"><span class="pre">MEASUREMENT_FRACTION</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.4</span></span><a class="headerlink" href="#axqua.postproc.profiles.MEASUREMENT_FRACTION" title="Lien vers cette définition"></a></dt>
+<dd><p>Fallback height above the BED, as a fraction of the depth, when the ground truth
+does not say where the probe sat. <strong>The « 0.6 depth » convention measures DOWN FROM
+THE SURFACE</strong> (verified on this dataset: MeasD/FinalD has median 0.59), so the
+probe is at 0.4 of the depth ABOVE the bed. This constant was 0.6 and documented
+as « from the BED », which placed every comparison 0.2*h too high. Prefer the
+per-row value from ground_truth.relative_height, which reads MeasD/FinalD.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.profiles.read_curve">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.profiles.</span></span><span class="sig-name descname"><span class="pre">read_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/profiles.html#read_curve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.profiles.read_curve" title="Lien vers cette définition"></a></dt>
+<dd><p>One VisIt Curve2D export as <code class="docutils literal notranslate"><span class="pre">(distance_along_line,</span> <span class="pre">value)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(dans Python v3.15)">tuple</a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(dans NumPy v2.5)">numpy.ndarray</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.profiles.compare">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.profiles.</span></span><span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">curves_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/profiles.html#compare"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.profiles.compare" title="Lien vers cette définition"></a></dt>
+<dd><p>Plot modeled profiles against the measurements; write the figure and a CSV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curves_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.postproc.visit">
+<span id="visit"></span><h2>VisIt<a class="headerlink" href="#module-axqua.postproc.visit" title="Lien vers cette rubrique"></a></h2>
+<p>The VisIt backend: generate a script, run it in VisIt’s own Python.</p>
+<p>VisIt ships its own interpreter, so <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">visit</span></code> from aXqua’s environment is
+not possible - and unlike ParaView there is no importable module to fall back on.
+The backend therefore <strong>writes a script and executes it with</strong>
+<code class="docutils literal notranslate"><span class="pre">visit</span> <span class="pre">-cli</span> <span class="pre">-nowin</span> <span class="pre">-s</span></code>, which is the same shape as
+<a class="reference internal" href="openfoam.html#axqua.solvers.openfoam.runtime.OpenFoamRuntime" title="axqua.solvers.openfoam.runtime.OpenFoamRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">axqua.solvers.openfoam.runtime.OpenFoamRuntime</span></code></a> sourcing <code class="docutils literal notranslate"><span class="pre">etc/bashrc</span></code>:
+aXqua never imports the tool’s Python, it invokes it.</p>
+<p>Everything the script needs is <strong>baked in as a literal</strong>. No <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code>, no
+environment lookups: argument forwarding after <code class="docutils literal notranslate"><span class="pre">-s</span></code> differs between VisIt
+versions, and a self-contained script is also the reproducible record of how a
+figure was made. The generated scripts are kept under
+<code class="docutils literal notranslate"><span class="pre">&lt;postprocessing_dir&gt;/visit/</span></code> for exactly that reason.</p>
+<p>Three details are load-bearing and each is pinned by a test:</p>
+<ul class="simple">
+<li><p><strong>the script ends with</strong> <code class="docutils literal notranslate"><span class="pre">exit(0)</span></code>. Without it <code class="docutils literal notranslate"><span class="pre">visit</span> <span class="pre">-cli</span> <span class="pre">-nowin</span></code> drops
+into an interactive loop and the subprocess hangs forever - the single most
+likely silent failure in this whole path.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">outputToCurrentDirectory</span> <span class="pre">=</span> <span class="pre">0</span></code> plus an explicit <code class="docutils literal notranslate"><span class="pre">outputDirectory</span></code>, or the
+PNG lands wherever VisIt happened to start.</p></li>
+<li><p>errors inside the script print <code class="docutils literal notranslate"><span class="pre">AXQUA-VISIT-ERROR:</span></code> and exit non-zero,
+because VisIt’s CLI exit status alone is not reliable enough to judge a run by.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="axqua.postproc.visit.VisitRuntime">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.postproc.visit.</span></span><span class="sig-name descname"><span class="pre">VisitRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">postproc_config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#VisitRuntime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.VisitRuntime" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <a class="reference internal" href="configuration.html#axqua.env.ShellRuntime" title="axqua.env.ShellRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShellRuntime</span></code></a></p>
+<p>Run a generated script in VisIt’s own Python.</p>
+<p>Normally there is nothing to source - VisIt ships a self-contained launcher -
+so the environment degrades to a plain <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">-lc</span></code>. <code class="docutils literal notranslate"><span class="pre">postproc.environment</span></code>
+covers the installs that do need a setup script, and is what makes this work
+through WSL on Windows.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="axqua.postproc.visit.VisitRuntime.check_available">
+<span class="sig-name descname"><span class="pre">check_available</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#VisitRuntime.check_available"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.VisitRuntime.check_available" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="axqua.postproc.visit.VisitRuntime.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_line</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#VisitRuntime.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.VisitRuntime.execute" title="Lien vers cette définition"></a></dt>
+<dd><p>Run one generated script. Never raises on a non-zero exit - see
+<a class="reference internal" href="#axqua.postproc.visit.failed" title="axqua.postproc.visit.failed"><code class="xref py py-func docutils literal notranslate"><span class="pre">failed()</span></code></a>, which reads the output rather than the status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>script</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess" title="(dans Python v3.15)"><em>CompletedProcess</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.visit.failed">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.visit.</span></span><span class="sig-name descname"><span class="pre">failed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#failed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.failed" title="Lien vers cette définition"></a></dt>
+<dd><p>The error a VisIt run reported, or <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>VisIt’s CLI exit status is unreliable, so the marker the generated script
+prints is what is trusted; the status is only a fallback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>proc</strong> (<a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.CompletedProcess" title="(dans Python v3.15)"><em>CompletedProcess</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.visit.available">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.visit.</span></span><span class="sig-name descname"><span class="pre">available</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">visit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#available"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.available" title="Lien vers cette définition"></a></dt>
+<dd><p>The VisIt version, or <code class="docutils literal notranslate"><span class="pre">None</span></code>. Never raises - this is a probe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>visit</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.visit.visit_target">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.visit.</span></span><span class="sig-name descname"><span class="pre">visit_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#visit_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.visit_target" title="Lien vers cette définition"></a></dt>
+<dd><p>The path VisIt’s own readers open, which is not always the canonical one.</p>
+<p>For an OpenFOAM case that is <code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code>, <strong>not</strong> the <code class="docutils literal notranslate"><span class="pre">case.foam</span></code>
+marker: unlike ParaView, VisIt’s OpenFOAM reader cannot open a zero-byte
+<code class="docutils literal notranslate"><span class="pre">.foam</span></code> handle and reports the file as invalid. Measured against VisIt 3.5.0
+- <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> yields 0 meshes and 0 variables, <code class="docutils literal notranslate"><span class="pre">system/controlDict</span></code> yields
+the full case. The <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> keeps <code class="docutils literal notranslate"><span class="pre">case.foam</span></code> because that is what
+ParaView and the QGIS manifest want; knowing how <em>VisIt</em> opens a case is this
+module’s business.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataset</strong> (<a class="reference internal" href="#axqua.postproc.dataset.Dataset" title="axqua.postproc.dataset.Dataset"><em>Dataset</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.visit.render_script">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.visit.</span></span><span class="sig-name descname"><span class="pre">render_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scene</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'last'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extras</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#render_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.render_script" title="Lien vers cette définition"></a></dt>
+<dd><p>The complete VisIt script for one scene against one dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="#axqua.postproc.dataset.Dataset" title="axqua.postproc.dataset.Dataset"><em>Dataset</em></a>)</p></li>
+<li><p><strong>scene</strong> (<a class="reference internal" href="#axqua.postproc.scenes.Scene" title="axqua.postproc.scenes.Scene"><em>Scene</em></a>)</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+<li><p><strong>extras</strong> (<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.visit.write_script">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.visit.</span></span><span class="sig-name descname"><span class="pre">write_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/visit.html#write_script"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.visit.write_script" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-axqua.postproc.selafin_vtk">
+<span id="export-of-telemac-results"></span><h2>Exportation des résultats de TELEMAC<a class="headerlink" href="#module-axqua.postproc.selafin_vtk" title="Lien vers cette rubrique"></a></h2>
+<p>TELEMAC results for ParaView and VisIt.</p>
+<p>Neither program reads SERAFIN, the result format of TELEMAC (checked with ParaView
+6.1 and VisIt 3.5), and both read VTK. This module converts a result file into VTK
+without TELEMAC and without the <code class="docutils literal notranslate"><span class="pre">vtk</span></code> package: the unstructured-grid format is a small
+XML header followed by the arrays, which numpy writes directly.</p>
+<p>One result becomes one folder:</p>
+<p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.pvd</span></code>          what ParaView opens: the list of time steps with their times
+<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.visit</span></code>        what VisIt opens: the same list in VisIt’s own form
+<code class="docutils literal notranslate"><span class="pre">&lt;name&gt;/&lt;name&gt;_0000.vtu</span></code> …   one file per printout</p>
+<p><strong>A 2D result</strong> becomes a surface of triangles in the plane, as the model has it. The
+fields are the variables of the result under their TELEMAC names (<code class="docutils literal notranslate"><span class="pre">WATER</span> <span class="pre">DEPTH</span></code>,
+<code class="docutils literal notranslate"><span class="pre">FREE</span> <span class="pre">SURFACE</span></code>). The nodes stand at elevation zero by default, and that is deliberate:
+an area or a volume integrated over the surface is then the one of the model, and a
+streamline stays in the plane the depth-averaged velocity lives in. With the nodes at
+the bed elevation the same integral runs over the <em>sloping</em> bed, which on the Isar
+example is 1.4 % more area and 1.7 % more water than the model holds. The relief is one
+filter away where it is wanted for a picture (<em>Warp By Scalar</em> with <code class="docutils literal notranslate"><span class="pre">BOTTOM</span></code> in
+ParaView, <em>Elevate</em> in VisIt), and <code class="docutils literal notranslate"><span class="pre">zsource=&quot;bed&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;surface&quot;</span></code> writes it into the
+files for those who prefer that.</p>
+<p><strong>A 3D result</strong> becomes a volume of prisms between the planes of the TELEMAC-3D mesh,
+at the elevations of each printout (<code class="docutils literal notranslate"><span class="pre">ELEVATION</span> <span class="pre">Z</span></code>): the mesh moves with the water
+surface from frame to frame, as it does in the simulation.</p>
+<p>Components that belong together are also written as a vector (<code class="docutils literal notranslate"><span class="pre">VELOCITY</span></code> from
+<code class="docutils literal notranslate"><span class="pre">VELOCITY</span> <span class="pre">U</span></code>, <code class="docutils literal notranslate"><span class="pre">V</span></code> and, in 3D, <code class="docutils literal notranslate"><span class="pre">W</span></code>), because arrows and streamlines need one.</p>
+<p><strong>Coordinates come from the geometry file of the model, not from the result.</strong> TELEMAC
+writes its results in single precision, coordinates included, and a number near five
+million has a resolution of half a meter there: in a result file of a reach in UTM
+every northing is a multiple of 0.5 m. The simulation is not affected, since TELEMAC
+computes with the double-precision geometry, but the mesh <em>stored in the result</em> is.
+On the full-resolution Isar model (0.5 m channel cells) 14 % of its cells have no area
+left and 70 % have changed their area by more than a quarter. The fields are stored per
+node, in the numbering of the geometry, so they are simply put on the nodes of the
+geometry file (<code class="docutils literal notranslate"><span class="pre">geometry=</span></code>; <a class="reference internal" href="workflow.html#axqua.model_column.safe_triangulation" title="axqua.model_column.safe_triangulation"><code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.model_column.safe_triangulation()</span></code></a> states the
+same rule for sampling). Without a geometry file the coordinates of the result are
+used, and <a class="reference internal" href="#axqua.postproc.selafin_vtk.Export.notes" title="axqua.postproc.selafin_vtk.Export.notes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Export.notes</span></code></a> says how coarse they are. The files are written in
+double precision either way.</p>
+<p>Each file carries its time twice, as <code class="docutils literal notranslate"><span class="pre">TimeValue</span></code> (which ParaView reads) and as
+<code class="docutils literal notranslate"><span class="pre">TIME</span></code> and <code class="docutils literal notranslate"><span class="pre">CYCLE</span></code> (which VisIt reads), so that a single <code class="docutils literal notranslate"><span class="pre">.vtu</span></code> opened by itself
+still knows when it is.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">axqua.postproc.selafin_vtk.</span></span><span class="sig-name descname"><span class="pre">Export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pvd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">files</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vectors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'2d'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cells</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'result'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/selafin_vtk.html#Export"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases : <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(dans Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>What a conversion wrote.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>pvd</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>visit</strong> (<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>files</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em>]</em>)</p></li>
+<li><p><strong>times</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>]</em>)</p></li>
+<li><p><strong>fields</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>vectors</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>n_points</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>n_cells</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>coordinates</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>notes</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.source">
+<span class="sig-name descname"><span class="pre">source</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><span class="pre">Path</span></a></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.source" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.folder">
+<span class="sig-name descname"><span class="pre">folder</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><span class="pre">Path</span></a></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.folder" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.pvd">
+<span class="sig-name descname"><span class="pre">pvd</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><span class="pre">Path</span></a></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.pvd" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.visit">
+<span class="sig-name descname"><span class="pre">visit</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><span class="pre">Path</span></a></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.visit" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.files">
+<span class="sig-name descname"><span class="pre">files</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><span class="pre">Path</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.files" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.times">
+<span class="sig-name descname"><span class="pre">times</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.times" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.fields" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.vectors">
+<span class="sig-name descname"><span class="pre">vectors</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.vectors" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'2d'</span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.kind" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.n_points">
+<span class="sig-name descname"><span class="pre">n_points</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.n_points" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.n_cells">
+<span class="sig-name descname"><span class="pre">n_cells</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.n_cells" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.coordinates">
+<span class="sig-name descname"><span class="pre">coordinates</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'result'</span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.coordinates" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.notes">
+<span class="sig-name descname"><span class="pre">notes</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.notes" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.Export.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/selafin_vtk.html#Export.as_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.selafin_vtk.Export.as_dict" title="Lien vers cette définition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(dans Python v3.15)"><em>Any</em></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.ZSOURCES">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.selafin_vtk.</span></span><span class="sig-name descname"><span class="pre">ZSOURCES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('flat',</span> <span class="pre">'bed',</span> <span class="pre">'surface')</span></span><a class="headerlink" href="#axqua.postproc.selafin_vtk.ZSOURCES" title="Lien vers cette définition"></a></dt>
+<dd><p>in the plane, at the bed, at the water surface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Where the nodes of a 2D result stand</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.coordinate_resolution">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.selafin_vtk.</span></span><span class="sig-name descname"><span class="pre">coordinate_resolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">slf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/selafin_vtk.html#coordinate_resolution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.selafin_vtk.coordinate_resolution" title="Lien vers cette définition"></a></dt>
+<dd><p>The spacing [m] of the numbers a result stores its coordinates with.</p>
+<p>Zero for a double-precision file. For single precision it is the distance between
+two neighboring representable numbers at the largest coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>slf</strong> (<a class="reference internal" href="core.html#axqua.core.selafin.SelafinFile" title="axqua.core.selafin.SelafinFile"><em>SelafinFile</em></a>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.export_selafin">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.selafin_vtk.</span></span><span class="sig-name descname"><span class="pre">export_selafin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zsource</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_frame</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/selafin_vtk.html#export_selafin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.selafin_vtk.export_selafin" title="Lien vers cette définition"></a></dt>
+<dd><p>Convert a TELEMAC result into VTK files for ParaView and VisIt.</p>
+<p><em>geometry</em> is the geometry file of the model, whose coordinates are exact where
+those of a result are rounded (see the module text); <em>frames</em> selects the
+printouts (<a class="reference internal" href="#axqua.postproc.selafin_vtk.select_frames" title="axqua.postproc.selafin_vtk.select_frames"><code class="xref py py-func docutils literal notranslate"><span class="pre">select_frames()</span></code></a>); <em>zsource</em> is where the nodes of a 2D result
+stand (<a class="reference internal" href="#axqua.postproc.selafin_vtk.ZSOURCES" title="axqua.postproc.selafin_vtk.ZSOURCES"><code class="xref py py-data docutils literal notranslate"><span class="pre">ZSOURCES</span></code></a>); <em>on_frame</em> is called with <code class="docutils literal notranslate"><span class="pre">(done,</span> <span class="pre">total,</span> <span class="pre">time)</span></code> after
+each file, for a progress display.</p>
+<p>The folder of a result is rewritten whole: files of an earlier export of the same
+result that the new one does not write are removed, so that the <code class="docutils literal notranslate"><span class="pre">.pvd</span></code> and the
+folder never disagree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a>)</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>geometry</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(dans Python v3.15)"><em>Path</em></a><em> | </em><em>None</em>)</p></li>
+<li><p><strong>frames</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(dans Python v3.15)"><em>Any</em></a>)</p></li>
+<li><p><strong>zsource</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a>)</p></li>
+<li><p><strong>compress</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(dans Python v3.15)"><em>bool</em></a>)</p></li>
+<li><p><strong>on_frame</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(dans Python v3.15)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em>]</em><em>, </em><em>None</em><em>] </em><em>| </em><em>None</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#axqua.postproc.selafin_vtk.Export" title="axqua.postproc.selafin_vtk.Export"><em>Export</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.select_frames">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.selafin_vtk.</span></span><span class="sig-name descname"><span class="pre">select_frames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_frames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/selafin_vtk.html#select_frames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.selafin_vtk.select_frames" title="Lien vers cette définition"></a></dt>
+<dd><p>The indices a caller asked for: <code class="docutils literal notranslate"><span class="pre">&quot;all&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;last&quot;</span></code>, one number, or a list.</p>
+<p>A number counts from the end when negative. <code class="docutils literal notranslate"><span class="pre">&quot;every</span> <span class="pre">N&quot;</span></code> takes each N-th frame
+and always the last one, which is the state a steady run was run for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_frames</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>frames</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(dans Python v3.15)"><em>Any</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.postproc.selafin_vtk.vector_groups">
+<span class="sig-prename descclassname"><span class="pre">axqua.postproc.selafin_vtk.</span></span><span class="sig-name descname"><span class="pre">vector_groups</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/postproc/selafin_vtk.html#vector_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.postproc.selafin_vtk.vector_groups" title="Lien vers cette définition"></a></dt>
+<dd><p>Variables that are the components of one vector: <code class="docutils literal notranslate"><span class="pre">{vector:</span> <span class="pre">[components]}</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">VELOCITY</span> <span class="pre">U</span></code> and <code class="docutils literal notranslate"><span class="pre">VELOCITY</span> <span class="pre">V</span></code> (and <code class="docutils literal notranslate"><span class="pre">VELOCITY</span> <span class="pre">W</span></code>) become <code class="docutils literal notranslate"><span class="pre">VELOCITY</span></code>. A name
+is only grouped when its first two components both exist, so <code class="docutils literal notranslate"><span class="pre">FRICTION</span> <span class="pre">VELOCITY</span></code>
+or a tracer called <code class="docutils literal notranslate"><span class="pre">TRACER</span> <span class="pre">X</span></code> alone stays what it is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>names</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(dans Python v3.15)"><em>Sequence</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)"><em>str</em></a><em>]</em>)</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(dans Python v3.15)">dict</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(dans Python v3.15)">list</a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(dans Python v3.15)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="install.html" class="btn btn-neutral float-left" title="Installation du logiciel de simulation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="cli.html" class="btn btn-neutral float-right" title="Ligne de commande" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

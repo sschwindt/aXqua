@@ -1,0 +1,522 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Warnmeldungen &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/troubleshooting/warnings.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/translations.js?v=9bf55d28"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../genindex.html" />
+    <link rel="search" title="Suche" href="../search.html" />
+    <link rel="next" title="Fehlermeldungen" href="errors.html" />
+    <link rel="prev" title="Allgemeine Tipps &amp; Logfiles" href="tips-logfiles.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/troubleshooting/warnings.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/troubleshooting/warnings.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/troubleshooting/warnings.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/troubleshooting/warnings.html"><link rel="stylesheet" href="../../_i18n/lang.css"><script src="../../_i18n/lang.js" data-lang="de" data-root="../../" data-page="troubleshooting/warnings.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../troubleshooting/warnings.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../fr/troubleshooting/warnings.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Fehlerbehebung</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Fehlerbehebung</a></li>
+      <li class="breadcrumb-item active">Warnmeldungen</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/troubleshooting/warnings.rst.txt" rel="nofollow"> Quelltext anzeigen</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../troubleshooting/warnings.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <section id="warning-messages">
+<h1>Warnmeldungen<a class="headerlink" href="#warning-messages" title="Link to this heading"></a></h1>
+<p>Eine Warnung bedeutet, dass aXqua einen Schritt abgeschlossen hat, aber etwas gefunden hat, das das Ergebnis beeinflussen könnte. Warnungen erscheinen in den Protokolldateien mit der Ebene <code class="docutils literal notranslate"><span class="pre">WARNING</span></code> (<a class="reference internal" href="tips-logfiles.html"><span class="doc">Allgemeine Tipps &amp; Logfiles</span></a>). Diese Seite listet die häufigsten Warnungen mit ihrer Bedeutung und ihrem Heilmittel auf. Die Nachrichten werden zitiert, wie sie im Protokoll erscheinen, mit <code class="docutils literal notranslate"><span class="pre">...</span></code> anstelle der Werte eines bestimmten Falls.</p>
+<div class="admonition note">
+<p class="admonition-title">Bemerkung</p>
+<p>Einzigartige Codes für alle Warnungen, die jede Nachricht mit ihrer Erklärung verknüpfen, sind in dieser Version noch nicht verfügbar.</p>
+</div>
+<section id="case-file">
+<h2>Fall-Datei<a class="headerlink" href="#case-file" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">deprecated</span> <span class="pre">config</span> <span class="pre">keys</span> <span class="pre">...,</span> <span class="pre">still</span> <span class="pre">loaded</span> <span class="pre">but</span> <span class="pre">rename</span> <span class="pre">them</span></code></dt><dd><p>Die Fall-Datei verwendet Einträge einer älteren aXqua-Version. Das Fall wird korrekt gelesen. Führen Sie <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">migrate</span> <span class="pre">&lt;case-file&gt;</span> <span class="pre">--to-case</span></code> aus, um eine Fall-Datei des aktuellen Typs daneben zu schreiben.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">using</span> <span class="pre">the</span> <span class="pre">pre-rename</span> <span class="pre">artifact</span> <span class="pre">folder</span> <span class="pre">hydromate-case/</span></code></dt><dd><p>Der Fall wurde mit einer früheren Version erstellt, in der der Ausgabeordner einen anderen Namen hatte. aXqua verwendet weiterhin den vorhandenen Ordner. Benennen Sie den Ordner in <code class="docutils literal notranslate"><span class="pre">axqua-case</span></code>, wenn kein Job dieses Herbstes ausgeführt wird.</p>
+</dd>
+</dl>
+</section>
+<section id="preprocessing">
+<h2>Preprocessing<a class="headerlink" href="#preprocessing" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">BAMG</span> <span class="pre">meshing</span> <span class="pre">failed</span> <span class="pre">(...);</span> <span class="pre">retrying</span> <span class="pre">with</span> <span class="pre">a</span> <span class="pre">coarser</span> <span class="pre">background</span> <span class="pre">metric</span> <span class="pre">grid</span></code></dt><dd><p>Der Rechennetz-Generator war mit seinen ersten Einstellungen nicht erfolgreich und wiederholt das Verzahnen mit angepassten Einstellungen. Wenn kein Fehler folgt, ist das Rechennetz gültig und es ist keine Aktion erforderlich. Fällt die Verzahnung wiederholt aus, ist der Unterschied zwischen den Kantenlängen benachbarter Rechennetzzonen zu groß. Erhöhen Sie die kleinste Kantenlänge oder vergrößern Sie die Veredelungszone.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">STABILITY</span> <span class="pre">RISK:</span> <span class="pre">inflow</span> <span class="pre">and</span> <span class="pre">outflow</span> <span class="pre">are</span> <span class="pre">resolved</span> <span class="pre">at</span> <span class="pre">different</span> <span class="pre">node</span> <span class="pre">spacings</span></code></dt><dd><p>Das Rechennetz ist an einem offenen Rand viel feiner als am anderen, was zu einer instabilen Simulation führen kann. Weisen Sie den Rechennetzzonen am Zufluss und am Ausfluss eine ähnliche Kantenlänge zu.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">STABILITY</span> <span class="pre">RISK:</span> <span class="pre">liquid</span> <span class="pre">boundaries</span> <span class="pre">have</span> <span class="pre">...</span> <span class="pre">inflow</span> <span class="pre">and</span> <span class="pre">...</span> <span class="pre">outflow</span> <span class="pre">nodes</span></code></dt><dd><p>Auf einer Zufluss- oder Ausflusslinie wurden keine Rechennetzknoten gefunden. Stellen Sie sicher, dass die Zeilen auf dem Umriss des Untersuchungsgebiets liegen und dass ihr Typfeld <code class="docutils literal notranslate"><span class="pre">inflow</span></code> oder <code class="docutils literal notranslate"><span class="pre">outflow</span></code> enthält.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">liquid_boundaries</span> <span class="pre">...</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">inflow/outflow</span> <span class="pre">type</span> <span class="pre">column;</span> <span class="pre">treating</span> <span class="pre">every</span> <span class="pre">line</span> <span class="pre">as</span> <span class="pre">inflow</span></code></dt><dd><p>Der Linienlayer hat kein Attributfeld, das Zufluss und Ausfluss identifiziert. Fügen Sie das Feld <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">(inflow/outflow)</span></code> (<a class="reference internal" href="../usage/case-setup.html#case-boundaries"><span class="std std-ref">Offene Ränder</span></a>) hinzu.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">ground-truth</span> <span class="pre">data</span> <span class="pre">do</span> <span class="pre">not</span> <span class="pre">match;</span> <span class="pre">skipping</span> <span class="pre">HydroBayesCal</span> <span class="pre">setup</span></code></dt><dd><p>Das Modell wurde gebaut, aber die Messtabellen für die Kalibrierung wurden nicht geschrieben, weil die Feldmessungen nicht gelesen werden konnten oder nicht zu ihrem Punktlayer passen. Der Grund folgt in derselben Botschaft. Korrigieren Sie die Messdateien und wiederholen Sie Preprocessing, bevor Sie eine Kalibrierung starten.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">finite</span> <span class="pre">volumes</span> <span class="pre">accept</span> <span class="pre">only</span> <span class="pre">TURBULENCE</span> <span class="pre">MODEL</span> <span class="pre">1</span> <span class="pre">(constant</span> <span class="pre">viscosity)</span></code></dt><dd><p>Die Finite-Volumen-Methode wurde zusammen mit einem anderen Turbulenzmodell ausgewählt. aXqua verwendet stattdessen das konstante Viskositätsmodell. Wählen Sie endliche Elemente, wenn ein Turbulenzmodell erforderlich ist (<a class="reference internal" href="../usage/preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC-Entscheidungen</span></a>).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">morphodynamics.enabled</span> <span class="pre">but</span> <span class="pre">neither</span> <span class="pre">bedload</span> <span class="pre">nor</span> <span class="pre">suspended_load</span> <span class="pre">is</span> <span class="pre">on</span></code></dt><dd><p>Die morphodynamische Simulation würde kein Sediment transportieren. Aktivieren Sie mindestens einen Transportmodus (<a class="reference internal" href="../usage/morphodynamic-simulations.html#help-morphodynamics-telemac"><span class="std std-ref">Einrichtung von TELEMAC-GAIA</span></a>).</p>
+</dd>
+</dl>
+</section>
+<section id="simulations">
+<h2>Simulationen<a class="headerlink" href="#simulations" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">fluxes</span> <span class="pre">did</span> <span class="pre">NOT</span> <span class="pre">reach</span> <span class="pre">the</span> <span class="pre">...</span> <span class="pre">imbalance</span> <span class="pre">tolerance</span> <span class="pre">within</span> <span class="pre">the</span> <span class="pre">run</span></code></dt><dd><p>Zufluss und Ausfluss unterschieden sich am Ende des Laufs noch, so dass der Fluss nicht stetig ist. Erhöhen Sie <code class="docutils literal notranslate"><span class="pre">hydrodynamics.duration</span></code> und wiederholen Sie den Lauf. Wenn die Differenz nicht mehr abnimmt, überprüfen Sie den nachgelagerten Wasserstand und den Benetzungsbericht (<a class="reference internal" href="../usage/hydraulic-simulations.html#hydraulics-dry-runs"><span class="std std-ref">TELEMAC Trockenläufe 2D/3D</span></a>).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">hotstart</span> <span class="pre">end</span> <span class="pre">time;</span> <span class="pre">extend</span> <span class="pre">the</span> <span class="pre">run</span> <span class="pre">or</span> <span class="pre">relax</span> <span class="pre">abs_tolerance</span></code></dt><dd><p>Der Unterschied zwischen Zufluss und Ausfluss blieb nicht lange genug klein. Die Hotstart-Datei, die die Kalibrierung erfordert, wurde daher nicht geschrieben. Erhöhen Sie <code class="docutils literal notranslate"><span class="pre">hydrodynamics.duration</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">GRACJG:</span> <span class="pre">EXCEEDING</span> <span class="pre">MAXIMUM</span> <span class="pre">ITERATIONS</span></code> (in der TELEMAC-Auflistung)</dt><dd><p>Ein lineares Solver von TELEMAC hat seine Genauigkeit nicht innerhalb der erlaubten Anzahl von Iterationen flussabschnittiert. Während des Befüllens eines trockenen Flussabschnitts ist diese Nachricht üblich und harmlos, sofern sie nach dem Befüllen des Flussabschnitts verschwindet. Wenn es bis zum Ende des Laufs anhält, sollte das Ergebnis nicht verwendet werden.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">2D</span> <span class="pre">result</span> <span class="pre">at</span> <span class="pre">...:</span> <span class="pre">the</span> <span class="pre">OpenFOAM</span> <span class="pre">case</span> <span class="pre">will</span> <span class="pre">use</span> <span class="pre">a</span> <span class="pre">flat</span> <span class="pre">lid</span> <span class="pre">and</span> <span class="pre">a</span> <span class="pre">cold</span> <span class="pre">start</span></code></dt><dd><p>Das OpenFOAM-Modell ist ohne ein TELEMAC-Warm-up aufgebaut, was die Rechenzeit erheblich erhöht. Führen Sie zuerst die stetige TELEMAC-Simulation aus (<a class="reference internal" href="../usage/hydraulic-simulations.html#warm-up-concept"><span class="std std-ref">aXqua Warm-up Konzept</span></a>).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">checkMesh</span> <span class="pre">flagged</span> <span class="pre">marginal</span> <span class="pre">faces</span> <span class="pre">(the</span> <span class="pre">mesh</span> <span class="pre">is</span> <span class="pre">still</span> <span class="pre">runnable)</span></code></dt><dd><p>Der Rechennetz-Check von OpenFOAM fand eine kleine Anzahl von Zellen von geringer Qualität, typischerweise an Stufen im Gelände. Die Simulation kann durchgeführt werden. Wenn es instabil wird, erhöhen Sie die Zellgröße oder glätten Sie das Gelände an den gemeldeten Orten.</p>
+</dd>
+</dl>
+</section>
+<section id="check-of-a-case">
+<h2>Kontrolle eines Falls<a class="headerlink" href="#check-of-a-case" title="Link to this heading"></a></h2>
+<p>Die Überprüfung eines Falls (<em>Check</em> auf der Registerkarte <em>Case Setup</em>, <em>Save</em> in den Falleinstellungen oder <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code>) meldet die folgenden Warnungen. Das Plugin zeigt jeden von ihnen als orangefarbenes Dreieck neben der betreffenden Einstellung.</p>
+<dl class="simple" id="axqua-config-no-solver">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">case</span> <span class="pre">names</span> <span class="pre">no</span> <span class="pre">simulation</span> <span class="pre">program,</span> <span class="pre">so</span> <span class="pre">nothing</span> <span class="pre">can</span> <span class="pre">be</span> <span class="pre">built</span> <span class="pre">or</span> <span class="pre">run</span></code></dt><dd><p>Die Fall-Datei enthält weder einen <code class="docutils literal notranslate"><span class="pre">telemac</span></code> noch einen <code class="docutils literal notranslate"><span class="pre">openfoam</span></code>-Block. Fügen Sie den Block des zu verwendenden Programms hinzu, zum Beispiel mit dem Schalter <em>Simulate with TELEMAC</em> auf der Seite <em>TELEMAC</em> der Fall-Einstellungen.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-config-incomplete">
+<dt><code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">discharge</span> <span class="pre">is</span> <span class="pre">set,</span> <span class="pre">so</span> <span class="pre">the</span> <span class="pre">steady</span> <span class="pre">simulation</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">inflow</span></code></dt><dd><p>Der Fall kann gespeichert werden, aber der nächste Schritt des Workflows benötigt diese Einstellung. Geben Sie den Abfluss auf der Seite <em>Liquid boundaries</em> der Fall-Einstellungen ein (<a class="reference internal" href="../usage/case-setup.html#case-boundaries"><span class="std std-ref">Offene Ränder</span></a>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-config-discharge-conflict">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">files</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">validation</span> <span class="pre">situation</span> <span class="pre">'High</span> <span class="pre">flow'</span> <span class="pre">show</span> <span class="pre">different</span> <span class="pre">discharges;</span> <span class="pre">the</span> <span class="pre">last</span> <span class="pre">one</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">table</span> <span class="pre">was</span> <span class="pre">saved.</span></code></dt><dd><p>Eine Validierungssituation hat einen Abfluss, und die Tabelle <em>Measurement files</em> der Fall-Einstellungen zeigt sie in jeder Zeile der Situation an. Wo die Zeilen noch unterschiedliche Werte zeigen, wurde der letzte in der Tabelle gespeichert. Geben Sie den Abfluss der Situation in einer ihrer Zeilen ein; die anderen Zeilen folgen (<a class="reference internal" href="../usage/calibration-validation.html#validation-setup"><span class="std std-ref">Validierungssituation</span></a>).</p>
+</dd>
+</dl>
+</section>
+<section id="profile-of-this-computer">
+<h2>Profil dieses Computers<a class="headerlink" href="#profile-of-this-computer" title="Link to this heading"></a></h2>
+<p>Die Überprüfung des Profils (<em>Check</em> auf der Registerkarte <em>Configuration</em> oder <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">profile</span> <span class="pre">check</span></code>) meldet die folgenden Warnungen. Das Plugin zeigt jeden von ihnen als orangefarbenes Dreieck neben dem betreffenden Eintrag. Ein Klick auf das Dreieck öffnet die Nachricht. Eine Warnung verhindert nicht das Speichern des Profils.</p>
+<dl class="simple" id="axqua-environment-solver-unbound">
+<dt><code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">environment</span> <span class="pre">script</span> <span class="pre">is</span> <span class="pre">set</span> <span class="pre">for</span> <span class="pre">...,</span> <span class="pre">so</span> <span class="pre">simulations</span> <span class="pre">with</span> <span class="pre">it</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">started</span></code></dt><dd><p>Im Profil ist nicht angegeben, wo TELEMAC oder OpenFOAM installiert ist. Wählen Sie den Installationsordner oder das Umgebungsskript der Installation im Profileditor (<a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Definieren Sie Solver Bindungen</span></a>). Lassen Sie beide Einträge leer, wenn das Programm nicht auf diesem Computer verwendet wird.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">installation</span> <span class="pre">folder</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">holds</span> <span class="pre">several</span> <span class="pre">environment</span> <span class="pre">scripts</span></code> oder <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">environment</span> <span class="pre">script</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">was</span> <span class="pre">found</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">installation</span> <span class="pre">folder</span></code></dt><dd><p>Das Profil benennt den Installationsordner eines Simulationscodes und kein Umgebungsskript, und aXqua kann das Skript nicht aus dem Ordner bestimmen. Eine TELEMAC-Installation kann ein Umgebungsskript pro Compiler-Konfiguration enthalten. Wählen Sie das Umgebungsskript selbst im Profileditor aus.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-environment-installation-missing">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">installation</span> <span class="pre">folder</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">exist</span></code></dt><dd><p>Das Profil benennt einen Ordner, der sich nicht auf diesem Computer befindet, beispielsweise weil das Programm verschoben oder entfernt wurde. Wählen Sie den Ordner im Profileditor erneut aus oder löschen Sie den Eintrag. Ein Programm, dessen Umgebungsskript oder Programmdatei in das Profil eingegeben wird, funktioniert weiterhin.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-environment-installation-mismatch">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">environment</span> <span class="pre">script</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">Installation</span> <span class="pre">folder</span> <span class="pre">entered</span> <span class="pre">for</span> <span class="pre">it</span></code> oder <code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">program</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">installation</span> <span class="pre">folder</span> <span class="pre">entered</span> <span class="pre">for</span> <span class="pre">it</span></code></dt><dd><p>Die beiden Einträge eines Programms weisen auf unterschiedliche Anlagen hin. aXqua verwendet das Umgebungsskript oder die Programmdatei, und der Ordner hat keine Wirkung. Wählen Sie den Ordner aus, zu dem die Datei gehört, oder löschen Sie den Ordner.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-config-unknown-entry">
+<dt><code class="docutils literal notranslate"><span class="pre">this</span> <span class="pre">version</span> <span class="pre">of</span> <span class="pre">aXqua</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">know</span> <span class="pre">the</span> <span class="pre">entry</span> <span class="pre">...;</span> <span class="pre">it</span> <span class="pre">is</span> <span class="pre">kept</span> <span class="pre">as</span> <span class="pre">it</span> <span class="pre">is</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">used</span></code></dt><dd><p>Das Profil enthält einen Eintrag, den die installierte Version von aXqua nicht kennt. Wenn eine neuere Version von aXqua oder des Plugins den Eintrag geschrieben hat, aktualisieren Sie aXqua und der Eintrag wird wirksam. Wenn es sich bei dem Eintrag um einen tippfehler in einem von Hand bearbeiteten Profil handelt, benennt die Nachricht den Eintrag, der wahrscheinlich gemeint ist. Korrigieren Sie den Namen in der Profildatei. Die restlichen Einträge des Profils werden in jedem Fall verwendet, und das Speichern des Profils behält den Eintrag.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-environment-ambient">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">variables</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">were</span> <span class="pre">already</span> <span class="pre">set</span> <span class="pre">before</span> <span class="pre">its</span> <span class="pre">environment</span> <span class="pre">script</span> <span class="pre">ran</span></code></dt><dd><p>Die Terminal oder QGIS-Sitzung enthielt bereits die Einstellungen des Simulationsprogramms, bevor aXqua das Umgebungsskript geladen hat, typischerweise weil eine systemweite Startdatei sie lädt. Ein Job erbt diese Einstellungen nicht. Stellen Sie sicher, dass das Umgebungsskript des Profils allein die Installation einrichtet, insbesondere wenn mehrere Versionen des Programms installiert sind.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-environment-too-many-processes">
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">processes</span> <span class="pre">are</span> <span class="pre">requested</span> <span class="pre">for</span> <span class="pre">...,</span> <span class="pre">but</span> <span class="pre">this</span> <span class="pre">computer</span> <span class="pre">has</span> <span class="pre">...</span> <span class="pre">logical</span> <span class="pre">cores</span></code></dt><dd><p>Mehr Prozesse als Prozessorkerne verlangsamen eine Simulation. Reduzieren Sie die Anzahl der Prozessorkerne im Profil.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-environment-openfoam-version">
+<dt><code class="docutils literal notranslate"><span class="pre">this</span> <span class="pre">is</span> <span class="pre">OpenFOAM</span> <span class="pre">...;</span> <span class="pre">aXqua</span> <span class="pre">writes</span> <span class="pre">input</span> <span class="pre">files</span> <span class="pre">for</span> <span class="pre">v2406</span></code></dt><dd><p>Das Umgebungsskript gehört zu einer anderen OpenFOAM-Version. aXqua schreibt seine Eingabedateien für die Version v2406, und andere Versionen können sie ablehnen. Geben Sie das Umgebungsskript von OpenFOAM v2406 im Profil ein.</p>
+</dd>
+</dl>
+</section>
+<section id="installation-of-the-simulation-software">
+<h2>Installation der Simulationssoftware<a class="headerlink" href="#installation-of-the-simulation-software" title="Link to this heading"></a></h2>
+<p>Die Registerkarte <em>Check</em> eines Installationsassistenten, die Registerkarte <em>Installation</em> einer fertigen Installation und <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">plan</span></code> melden die folgenden Warnungen. Eine Installation kann mit einer Warnung gestartet werden.</p>
+<dl class="simple" id="axqua-install-packages-missing">
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">of</span> <span class="pre">...</span> <span class="pre">system</span> <span class="pre">packages</span> <span class="pre">are</span> <span class="pre">not</span> <span class="pre">installed</span></code></dt><dd><p>Die Installation erfordert Pakete des Betriebssystems, die fehlen. Die Nachricht listet sie auf und gibt den Befehl, der sie installiert, was Administratorrechte erfordert. Klicken Sie im Assistenten auf <em>Install the packages…</em> oder kopieren Sie den Befehl in ein Terminal und klicken Sie auf <em>Check again</em> (<a class="reference internal" href="../installation/simulation-software.html"><span class="doc">Simulationssoftware</span></a>). Für OpenFOAM mit einer vorhandenen OpenFOAM v2406 werden die meisten der aufgeführten Pakete nur zum Kompilieren von OpenFOAM selbst benötigt, und die Installation funktioniert normalerweise ohne sie.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-packages-unavailable">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">package</span> <span class="pre">sources</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">system</span> <span class="pre">do</span> <span class="pre">not</span> <span class="pre">offer:</span> <span class="pre">...</span></code></dt><dd><p>Das Betriebssystem kennt kein Paket, das der Installer benennt, in der Regel, weil das System älter oder neuer ist als das, für das der Installer geschrieben wurde. Die Installation funktioniert möglicherweise weiterhin, wenn ein anderes Paket die gleichen Dateien bereitstellt. Andernfalls muss ein Administrator eine Paketquelle hinzufügen.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-packages-unknown">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">system</span> <span class="pre">packages</span> <span class="pre">could</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">read</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">installer</span></code></dt><dd><p>aXqua liest die Liste der erforderlichen Pakete aus dem Installationsskript und hat sie in dieser Version des Skripts nicht gefunden. Die Installation kann gestartet werden. Es endet mit einer eigenen Nachricht, wenn ein Paket fehlt.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-little-space">
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">GiB</span> <span class="pre">are</span> <span class="pre">free</span> <span class="pre">in</span> <span class="pre">...;</span> <span class="pre">the</span> <span class="pre">installation</span> <span class="pre">needs</span> <span class="pre">about</span> <span class="pre">...</span> <span class="pre">GiB</span></code></dt><dd><p>Der Antrieb des Installationsordners kann zu klein sein. Wählen Sie einen Ordner auf einem Laufwerk mit mehr freiem Speicherplatz auf der <em>Settings</em> Registerkarte des Assistenten.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-folder-in-home">
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">is</span> <span class="pre">inside</span> <span class="pre">your</span> <span class="pre">home</span> <span class="pre">folder,</span> <span class="pre">which</span> <span class="pre">other</span> <span class="pre">users</span> <span class="pre">usually</span> <span class="pre">cannot</span> <span class="pre">open</span></code></dt><dd><p>Eine Installation für alle Benutzer wurde mit einem Ordner in Ihrem Home-Ordner versehen. Andere Benutzerkonten haben normalerweise keinen Zugriff auf einen Home-Ordner, so dass sie die Programme nicht ausführen können. Wählen Sie einen Ordner außerhalb, wie <code class="docutils literal notranslate"><span class="pre">/opt/openfoam-sediment-v2406</span></code>.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-folder-exists">
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">exists</span> <span class="pre">already</span></code> oder <code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">holds</span> <span class="pre">an</span> <span class="pre">installation</span> <span class="pre">of</span> <span class="pre">this</span> <span class="pre">installer,</span> <span class="pre">which</span> <span class="pre">is</span> <span class="pre">continued</span></code></dt><dd><p>Der Installationsordner enthält eine frühere Installation. Der Installer fährt damit fort: Er behält, was heruntergeladen wird, und baut das Programm erneut auf. Wählen Sie einen anderen Ordner aus, um die frühere Installation unberührt zu lassen.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-compiles-openfoam">
+<dt><code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">OpenFOAM</span> <span class="pre">v2406</span> <span class="pre">was</span> <span class="pre">found</span> <span class="pre">on</span> <span class="pre">this</span> <span class="pre">computer,</span> <span class="pre">so</span> <span class="pre">it</span> <span class="pre">is</span> <span class="pre">compiled</span> <span class="pre">from</span> <span class="pre">its</span> <span class="pre">source</span> <span class="pre">code</span></code></dt><dd><p>Die Zusammenstellung von OpenFOAM dauert mehrere Stunden und etwa 20 GB. Wenn OpenFOAM v2406 installiert ist, wählen Sie die Datei <code class="docutils literal notranslate"><span class="pre">etc/bashrc</span></code> auf der Registerkarte <em>Settings</em> des Assistenten aus. Ein verpacktes OpenFOAM v2406, das ein Administrator in wenigen Minuten installiert, vermeidet die Zusammenstellung (<a class="reference internal" href="../installation/simulation-software.html#install-openfoam"><span class="std std-ref">OpenFOAM</span></a>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-paraview-missing">
+<dt><code class="docutils literal notranslate"><span class="pre">ParaView</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">installed</span></code></dt><dd><p>Die Assistenten verwenden das ParaView-Paket des Betriebssystems und es ist nicht installiert. VisIt ist trotzdem installiert. Installieren Sie die auf der Registerkarte <em>Check</em> aufgeführten Systempakete oder geben Sie eine andere ParaView im Profileditor (<a class="reference internal" href="../installation/postprocessors.html#install-paraview"><span class="std std-ref">Paraview</span></a>) ein.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-visit-missing">
+<dt><code class="docutils literal notranslate"><span class="pre">VisIt</span> <span class="pre">was</span> <span class="pre">not</span> <span class="pre">installed,</span> <span class="pre">so</span> <span class="pre">it</span> <span class="pre">was</span> <span class="pre">not</span> <span class="pre">entered</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">profile</span></code></dt><dd><p>OpenFOAM und der Sediment Solver werden installiert und in das Profil eingegeben, aber der Installateur hat VisIt nicht dort verlassen, wo aXqua es erwartet. Die Simulationssoftware funktioniert ohne VisIt. Installieren Sie VisIt allein mit dem Assistenten für ParaView und VisIt auf der Registerkarte <em>Configuration</em> oder mit <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">start</span> <span class="pre">postprocessors</span></code> (<a class="reference internal" href="../installation/postprocessors.html#install-visit"><span class="std std-ref">VisIt</span></a>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-step-incomplete">
+<dt><code class="docutils literal notranslate"><span class="pre">'Download</span> <span class="pre">the</span> <span class="pre">input</span> <span class="pre">files</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">example</span> <span class="pre">cases'</span> <span class="pre">did</span> <span class="pre">not</span> <span class="pre">complete</span></code></dt><dd><p>TELEMAC ist installiert und funktioniert, aber die Eingabedateien seines Beispiels Fälle wurden nicht vollständig heruntergeladen. Die Nachricht zitiert die letzten Zeilen des Installationsprotokolls. Die übliche Ursache ist der Download-Server von TELEMAC, der weitere Anfragen nach vielen Downloads aus einem Netzwerk (<code class="docutils literal notranslate"><span class="pre">Rate</span> <span class="pre">limit</span> <span class="pre">exceeded</span></code>, <code class="docutils literal notranslate"><span class="pre">error:</span> <span class="pre">429</span></code>) für eine Weile ablehnt. Wiederholen Sie den Download später mit dem Befehl, dass die Nachrichtennamen <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">install</span> <span class="pre">telemac-examples</span> <span class="pre">&lt;folder&gt;</span></code>. Es holt nur die Dateien, die noch fehlen.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-install-not-bound">
+<dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">installation</span> <span class="pre">could</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">entered</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">profile</span></code></dt><dd><p>Das Programm ist installiert, aber das Profil des Computers konnte nicht geschrieben werden, in der Regel, weil das vorhandene Profil einen Fehler enthält, oder weil eine andere Installation das Profil im gleichen Moment schrieb und nicht beendet wurde. Die Nachricht listet die Einträge auf. Öffnen Sie den Profileditor auf der Registerkarte <em>Configuration</em>, korrigieren Sie das Profil und geben Sie sie dort ein (<a class="reference internal" href="../installation/plugin-setup.html#plugin-profile"><span class="std std-ref">Plugin-Profil</span></a>).</p>
+</dd>
+</dl>
+</section>
+<section id="simulation-software">
+<h2>Simulationssoftware<a class="headerlink" href="#simulation-software" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">NOTE:</span> <span class="pre">already</span> <span class="pre">present</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">ambient</span> <span class="pre">environment</span></code></dt><dd><p>Die Variablen eines Simulationscodes wurden bereits im Terminal gesetzt, bevor aXqua das Umgebungsskript gelesen hat. Ein Job erbt nicht die Einstellungen eines Terminal. Stellen Sie sicher, dass die Bindung Solver das korrekte Umgebungsskript (<a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Definieren Sie Solver Bindungen</span></a>) benennt. Andernfalls kann eine Simulation im Terminal funktionieren und als Job fehlschlagen.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tips-logfiles.html" class="btn btn-neutral float-left" title="Allgemeine Tipps &amp; Logfiles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Zurück</a>
+        <a href="errors.html" class="btn btn-neutral float-right" title="Fehlermeldungen" accesskey="n" rel="next">Weiter <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

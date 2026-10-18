@@ -1,0 +1,784 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.postproc.visit &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/postproc/visit.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/postproc/visit.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/postproc/visit.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/postproc/visit.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/postproc/visit.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="de" data-root="../../../../" data-page="_modules/axqua/postproc/visit.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../_modules/axqua/postproc/visit.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../fr/_modules/axqua/postproc/visit.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.postproc.visit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../_modules/axqua/postproc/visit.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.postproc.visit</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The VisIt backend: generate a script, run it in VisIt's own Python.</span>
+
+<span class="sd">VisIt ships its own interpreter, so ``import visit`` from aXqua's environment is</span>
+<span class="sd">not possible - and unlike ParaView there is no importable module to fall back on.</span>
+<span class="sd">The backend therefore **writes a script and executes it with**</span>
+<span class="sd">``visit -cli -nowin -s``, which is the same shape as</span>
+<span class="sd">:class:`axqua.solvers.openfoam.runtime.OpenFoamRuntime` sourcing ``etc/bashrc``:</span>
+<span class="sd">aXqua never imports the tool's Python, it invokes it.</span>
+
+<span class="sd">Everything the script needs is **baked in as a literal**. No ``sys.argv``, no</span>
+<span class="sd">environment lookups: argument forwarding after ``-s`` differs between VisIt</span>
+<span class="sd">versions, and a self-contained script is also the reproducible record of how a</span>
+<span class="sd">figure was made. The generated scripts are kept under</span>
+<span class="sd">``&lt;postprocessing_dir&gt;/visit/`` for exactly that reason.</span>
+
+<span class="sd">Three details are load-bearing and each is pinned by a test:</span>
+
+<span class="sd">* **the script ends with** ``exit(0)``. Without it ``visit -cli -nowin`` drops</span>
+<span class="sd">  into an interactive loop and the subprocess hangs forever - the single most</span>
+<span class="sd">  likely silent failure in this whole path.</span>
+<span class="sd">* ``outputToCurrentDirectory = 0`` plus an explicit ``outputDirectory``, or the</span>
+<span class="sd">  PNG lands wherever VisIt happened to start.</span>
+<span class="sd">* errors inside the script print ``AXQUA-VISIT-ERROR:`` and exit non-zero,</span>
+<span class="sd">  because VisIt's CLI exit status alone is not reliable enough to judge a run by.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverEnvironment</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShellRuntime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.postproc.dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.postproc.scenes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">resolved_requirements</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">ERROR_MARKER</span> <span class="o">=</span> <span class="s2">"AXQUA-VISIT-ERROR:"</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># running</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<div class="viewcode-block" id="VisitRuntime">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.VisitRuntime">[Doku]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VisitRuntime</span><span class="p">(</span><span class="n">ShellRuntime</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run a generated script in VisIt's own Python.</span>
+
+<span class="sd">    Normally there is nothing to source - VisIt ships a self-contained launcher -</span>
+<span class="sd">    so the environment degrades to a plain ``bash -lc``. ``postproc.environment``</span>
+<span class="sd">    covers the installs that do need a setup script, and is what makes this work</span>
+<span class="sd">    through WSL on Windows.</span>
+<span class="sd">    """</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">postproc_config</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">postproc_config</span><span class="p">,</span> <span class="s2">"environment"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">script</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s2">"setup_script"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="n">SolverEnvironment</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span>
+            <span class="n">block</span><span class="p">,</span> <span class="n">legacy_script</span><span class="o">=</span><span class="n">script</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">visit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">postproc_config</span><span class="o">.</span><span class="n">visit</span> <span class="ow">or</span> <span class="s2">"visit"</span><span class="p">)</span>
+
+<div class="viewcode-block" id="VisitRuntime.check_available">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.VisitRuntime.check_available">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_available</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">)</span><span class="si">}</span><span class="s2"> -version"</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="s2">"VisIt"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Could not run VisIt via </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"Point postproc.visit at the `visit` launcher of your install, e.g.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="s2">"    postproc:</span><span class="se">\n</span><span class="s2">      visit: /home/IWS/public/visit/bin/visit</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"stdout:</span><span class="se">\n</span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="si">}</span><span class="se">\n</span><span class="s2">stderr:</span><span class="se">\n</span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="VisitRuntime.execute">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.VisitRuntime.execute">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">on_line</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Run one generated script. Never raises on a non-zero exit - see</span>
+<span class="sd">        :func:`failed`, which reads the output rather than the status."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">)</span><span class="si">}</span><span class="s2"> -cli -nowin -s </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">script</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">on_line</span><span class="o">=</span><span class="n">on_line</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="failed">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.failed">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">failed</span><span class="p">(</span><span class="n">proc</span><span class="p">:</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CompletedProcess</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The error a VisIt run reported, or ``None``.</span>
+
+<span class="sd">    VisIt's CLI exit status is unreliable, so the marker the generated script</span>
+<span class="sd">    prints is what is trusted; the status is only a fallback.</span>
+<span class="sd">    """</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">ERROR_MARKER</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">ERROR_MARKER</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"visit exited with code </span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="available">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.available">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">available</span><span class="p">(</span><span class="n">visit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The VisIt version, or ``None``. Never raises - this is a probe."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">visit</span><span class="p">),</span> <span class="s2">"-version"</span><span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">SubprocessError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="s2">"VisIt"</span> <span class="ow">in</span> <span class="n">text</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># script generation</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_header</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">scenes</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Scene</span><span class="p">],</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">version</span>
+
+    <span class="n">names</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scenes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''"""Generated by axqua </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s1"> - do not edit; regenerate with `axqua postproc`.</span>
+
+<span class="s1">scene(s): </span><span class="si">{</span><span class="n">names</span><span class="si">}</span>
+<span class="s1">dataset : </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">path</span><span class="si">}</span>
+<span class="s1">output  : </span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span>
+
+<span class="s1">Run standalone with:  visit -cli -nowin -s &lt;this file&gt;</span>
+<span class="s1">"""</span>
+<span class="s1">import sys</span>
+
+<span class="s1">AXQUA_ERROR = "</span><span class="si">{</span><span class="n">ERROR_MARKER</span><span class="si">}</span><span class="s1">"</span>
+
+
+<span class="s1">def _fail(message):</span>
+<span class="s1">    # VisIt's CLI exit status is not reliable on its own, so say so in the output</span>
+<span class="s1">    # too - axqua greps for this marker.</span>
+<span class="s1">    print(AXQUA_ERROR + " " + str(message))</span>
+<span class="s1">    sys.exit(1)</span>
+
+
+<span class="s1">def _guard(exc_type, exc, tb):</span>
+<span class="s1">    """Never fall through to the interactive prompt.</span>
+
+<span class="s1">    `visit -cli -nowin` drops to `&gt;&gt;&gt;` on an unhandled exception and waits there</span>
+<span class="s1">    forever - the subprocess hangs with no output and no exit. Routing the hook</span>
+<span class="s1">    through _fail() turns any escape into a marked, non-zero exit instead.</span>
+<span class="s1">    """</span>
+<span class="s1">    import traceback</span>
+<span class="s1">    print(AXQUA_ERROR + " " + "".join(traceback.format_exception(exc_type, exc, tb)))</span>
+<span class="s1">    sys.exit(1)</span>
+
+
+<span class="s1">sys.excepthook = _guard</span>
+<span class="s1">'''</span>
+
+
+<div class="viewcode-block" id="visit_target">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.visit_target">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">visit_target</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The path VisIt's own readers open, which is not always the canonical one.</span>
+
+<span class="sd">    For an OpenFOAM case that is ``system/controlDict``, **not** the ``case.foam``</span>
+<span class="sd">    marker: unlike ParaView, VisIt's OpenFOAM reader cannot open a zero-byte</span>
+<span class="sd">    ``.foam`` handle and reports the file as invalid. Measured against VisIt 3.5.0</span>
+<span class="sd">    - ``case.foam`` yields 0 meshes and 0 variables, ``system/controlDict`` yields</span>
+<span class="sd">    the full case. The ``Dataset`` keeps ``case.foam`` because that is what</span>
+<span class="sd">    ParaView and the QGIS manifest want; knowing how *VisIt* opens a case is this</span>
+<span class="sd">    module's business.</span>
+<span class="sd">    """</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"openfoam"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"system"</span> <span class="o">/</span> <span class="s2">"controlDict"</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_open</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">visit_target</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+    <span class="c1"># VisIt's OpenFOAM reader opens a case reconstructed by default, which for a parallel run that was not reconstructed is t = 0 alone; "Case Type" 0 reads the processor folders (measured with VisIt 3.5.0)</span>
+    <span class="n">decomposed</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">_options = GetDefaultFileOpenOptions("OpenFOAM")</span>
+<span class="s1">_options["Case Type"] = 0</span>
+<span class="s1">SetDefaultFileOpenOptions("OpenFOAM", _options)</span>
+<span class="s1">'''</span> <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"openfoam"</span> <span class="ow">and</span> <span class="n">dataset</span><span class="o">.</span><span class="n">decomposed</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="k">return</span> <span class="n">decomposed</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">try:</span>
+<span class="s1">    OpenDatabase(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="si">!r}</span><span class="s1">)</span>
+<span class="s1">except Exception as exc:</span>
+<span class="s1">    _fail("could not open </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s1">: %s" % exc)</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_expressions</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Define the derived quantities explicitly.</span>
+
+<span class="sd">    VisIt does not create a ``_magnitude`` variable automatically, and the mesh</span>
+<span class="sd">    prefix differs between its OpenFOAM and VTK readers - so the expressions are</span>
+<span class="sd">    written out rather than guessed at, which also makes them greppable in the</span>
+<span class="sd">    kept script.</span>
+<span class="sd">    """</span>
+    <span class="c1"># VisIt namespaces an OpenFOAM case's variables by mesh ("internalMesh/U"),</span>
+    <span class="c1"># so a bare "&lt;U&gt;" does not resolve. Verified against VisIt 3.5.0.</span>
+    <span class="n">vector</span> <span class="o">=</span> <span class="s2">"internalMesh/U"</span> <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"openfoam"</span> <span class="k">else</span> <span class="s2">"velocity"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">DefineScalarExpression("axqua_Umag", "magnitude(&lt;</span><span class="si">{</span><span class="n">vector</span><span class="si">}</span><span class="s1">&gt;)")</span>
+<span class="s1">DefineVectorExpression("axqua_U", "&lt;</span><span class="si">{</span><span class="n">vector</span><span class="si">}</span><span class="s1">&gt;")</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_time_state</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Move the time slider before drawing.</span>
+
+<span class="sd">    Not cosmetic. VisIt opens a database on its FIRST state, which for a solver</span>
+<span class="sd">    case is t=0 - the initial condition, where the velocity field is identically</span>
+<span class="sd">    zero. A figure made without this shows a blank result and a 0.000 color bar</span>
+<span class="sd">    while looking perfectly well-formed, which is the same failure the</span>
+<span class="sd">    ``mean_last`` -&gt; ``last`` extraction patch exists to prevent on the</span>
+<span class="sd">    calibration side.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="o">==</span> <span class="s2">"last"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">'''</span>
+<span class="s1">n_states = TimeSliderGetNStates()</span>
+<span class="s1">if n_states &gt; 1:</span>
+<span class="s1">    SetTimeSliderState(n_states - 1)</span>
+<span class="s1">'''</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"first"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1"># nearest state to the requested simulated time</span>
+<span class="s1">_target = float(</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="si">!r}</span><span class="s1">)</span>
+<span class="s1">_times = list(GetDatabaseNStates() and [])</span>
+<span class="s1">n_states = TimeSliderGetNStates()</span>
+<span class="s1">SetTimeSliderState(max(0, min(n_states - 1, int(round(_target)))))</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_settings</span><span class="p">(</span><span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">s = SaveWindowAttributes()</span>
+<span class="s1">s.format = s.PNG</span>
+<span class="s1">s.outputToCurrentDirectory = 0          # or the PNG lands wherever visit started</span>
+<span class="s1">s.outputDirectory = </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span><span class="si">!r}</span>
+<span class="s1">s.fileName = </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span>
+<span class="s1">s.family = 0</span>
+<span class="s1">s.width, s.height = </span><span class="si">{</span><span class="n">width</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">height</span><span class="si">}</span>
+<span class="s1">s.resConstraint = s.NoConstraint</span>
+<span class="s1">SetSaveWindowAttributes(s)</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render_free_surface</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                         <span class="o">*</span><span class="p">,</span> <span class="n">used</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">**</span><span class="n">_kw</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Isosurface of alpha.water, or the lid patch when the surface is prescribed."""</span>
+    <span class="k">if</span> <span class="s2">"field:alpha.water"</span> <span class="ow">in</span> <span class="n">used</span><span class="p">:</span>
+        <span class="c1"># namespaced by mesh, exactly like the velocity: a bare "alpha.water" is</span>
+        <span class="c1"># rejected with InvalidVariableException by VisIt's OpenFOAM reader.</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"internalMesh/alpha.water"</span> <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"openfoam"</span>
+                 <span class="k">else</span> <span class="s2">"alpha.water"</span><span class="p">)</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">AddPlot("Pseudocolor", "axqua_Umag")</span>
+<span class="s1">AddOperator("Isosurface")</span>
+<span class="s1">iso = IsosurfaceAttributes()</span>
+<span class="s1">iso.variable = "</span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s1">"</span>
+<span class="s1">iso.contourMethod = iso.Value</span>
+<span class="s1">iso.contourValue = (</span><span class="si">{</span><span class="n">scene</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"iso_value"</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="si">}</span><span class="s1">,)</span>
+<span class="s1">SetOperatorOptions(iso)</span>
+<span class="s1">'''</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="s2">"free surface (alpha.water = </span><span class="si">%.2f</span><span class="s2">)"</span> <span class="o">%</span> <span class="n">scene</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"iso_value"</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># rigid lid: the surface was PRESCRIBED from the 2D result, not solved, so</span>
+        <span class="c1"># say so on the figure rather than letting it read as a computed surface</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="s1">'''</span>
+<span class="s1">AddPlot("Pseudocolor", "axqua_Umag")</span>
+<span class="s1">'''</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="s2">"lid patch - the surface is PRESCRIBED by the 2D seed, not solved"</span>
+
+    <span class="k">return</span> <span class="n">body</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">DrawPlots()</span>
+<span class="s1">banner = CreateAnnotationObject("Text2D")</span>
+<span class="s1">banner.text = </span><span class="si">{</span><span class="n">caption</span><span class="si">!r}</span>
+<span class="s1">banner.position = (0.02, 0.06)   # bottom-left: the top-left carries VisIt's DB/time header</span>
+<span class="s1">banner.height = 0.02</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render_velocity_plan</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+                          <span class="o">*</span><span class="p">,</span> <span class="n">used</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">**</span><span class="n">_kw</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Plan view colored by speed, with vector glyphs over it."""</span>
+    <span class="n">slice_block</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"openfoam"</span> <span class="ow">and</span> <span class="n">dataset</span><span class="o">.</span><span class="n">bounds</span><span class="p">:</span>
+        <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">dataset</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">fraction</span> <span class="o">=</span> <span class="n">scene</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"depth_fraction"</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">)</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">zmin</span> <span class="o">+</span> <span class="n">fraction</span> <span class="o">*</span> <span class="p">(</span><span class="n">zmax</span> <span class="o">-</span> <span class="n">zmin</span><span class="p">)</span>
+        <span class="c1"># sampled at the same relative depth the FlowTracker measures at, so the</span>
+        <span class="c1"># figure and the calibration are looking at the same thing</span>
+        <span class="n">slice_block</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">AddOperator("Slice")</span>
+<span class="s1">sl = SliceAttributes()</span>
+<span class="s1">sl.originType = sl.Point</span>
+<span class="s1">sl.originPoint = (0, 0, </span><span class="si">{</span><span class="n">level</span><span class="si">!r}</span><span class="s1">)</span>
+<span class="s1">sl.normal = (0, 0, 1)</span>
+<span class="s1">sl.axisType = sl.ZAxis</span>
+<span class="s1">sl.project2d = 0</span>
+<span class="s1">SetOperatorOptions(sl)</span>
+<span class="s1">'''</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">AddPlot("Pseudocolor", "axqua_Umag")</span>
+<span class="si">{</span><span class="n">slice_block</span><span class="si">}</span>
+<span class="s1">AddPlot("Vector", "axqua_U")</span>
+<span class="s1">v = VectorAttributes()</span>
+<span class="s1">v.useStride = 1</span>
+<span class="s1">v.stride = 4</span>
+<span class="s1">v.scale = 0.5</span>
+<span class="s1">SetPlotOptions(v)</span>
+<span class="s1">DrawPlots()</span>
+<span class="s1">'''</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_render_profiles</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">used</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">points</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+                     <span class="o">**</span><span class="n">_kw</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A bed-to-surface Lineout at each measurement vertical, exported as a curve.</span>
+
+<span class="sd">    VisIt samples, matplotlib draws (see :mod:`axqua.postproc.profiles`). The</span>
+<span class="sd">    measured overlay needs error bars, the figure has to match aXqua's other</span>
+<span class="sd">    figures, and the comparison must stay reproducible from the exported curves</span>
+<span class="sd">    once VisIt is no longer involved.</span>
+<span class="sd">    """</span>
+    <span class="n">data_dir</span> <span class="o">=</span> <span class="n">out_dir</span> <span class="o">/</span> <span class="s2">"data"</span>
+    <span class="c1"># The z span comes from the MESH, not from the survey. On inn-KB15 the</span>
+    <span class="c1"># ground-truth bed elevations sit ~2.1 m ABOVE the model bed at the same (x, y)</span>
+    <span class="c1"># - a known bathymetry/datum discrepancy on this reach - so a lineout run from</span>
+    <span class="c1"># the surveyed bed upward misses the water column entirely and VisIt returns</span>
+    <span class="c1"># "Curve plot yielded no data" for every vertical. Asking VisIt for the spatial</span>
+    <span class="c1"># extents costs nothing, works whatever the datum, and lets profiles.compare</span>
+    <span class="c1"># normalize on the modeled column.</span>
+    <span class="n">blocks</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">import os</span>
+<span class="s1">os.makedirs(</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span><span class="si">!r}</span><span class="s1">, exist_ok=True)</span>
+<span class="s1">AddPlot("Pseudocolor", "axqua_Umag")</span>
+<span class="s1">DrawPlots()</span>
+<span class="s1">Query("SpatialExtents")</span>
+<span class="s1">_ext = GetQueryOutputValue()</span>
+<span class="s1">_zmin, _zmax = _ext[4], _ext[5]</span>
+<span class="s1">_pad = 0.01 * (_zmax - _zmin)</span>
+<span class="s1">print("axqua: mesh z extent %.3f .. %.3f" % (_zmin, _zmax))</span>
+<span class="s1">'''</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+        <span class="n">pid</span> <span class="o">=</span> <span class="n">point</span><span class="p">[</span><span class="s2">"id"</span><span class="p">]</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="s2">"y"</span><span class="p">])</span>
+        <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'''</span>
+<span class="s1">try:</span>
+<span class="s1">    Lineout((</span><span class="si">{</span><span class="n">x</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">y</span><span class="si">!r}</span><span class="s1">, _zmin - _pad), (</span><span class="si">{</span><span class="n">x</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">y</span><span class="si">!r}</span><span class="s1">, _zmax + _pad), ("axqua_Umag",))</span>
+<span class="s1">    SetActiveWindow(2)</span>
+<span class="s1">    e = ExportDBAttributes()</span>
+<span class="s1">    e.db_type = "Curve2D"</span>
+<span class="s1">    e.filename = "profile-</span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s1">"</span>
+<span class="s1">    e.dirname = </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">data_dir</span><span class="p">)</span><span class="si">!r}</span>
+<span class="s1">    ExportDatabase(e)</span>
+<span class="s1">    DeleteAllPlots()</span>
+<span class="s1">    SetActiveWindow(1)</span>
+<span class="s1">except Exception as exc:</span>
+<span class="s1">    print("axqua: profile </span><span class="si">{</span><span class="n">pid</span><span class="si">}</span><span class="s1"> failed: %s" % exc)</span>
+<span class="s1">'''</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
+
+
+<span class="n">_RENDERERS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"free_surface"</span><span class="p">:</span> <span class="n">_render_free_surface</span><span class="p">,</span>
+    <span class="s2">"velocity_plan"</span><span class="p">:</span> <span class="n">_render_velocity_plan</span><span class="p">,</span>
+    <span class="s2">"profiles"</span><span class="p">:</span> <span class="n">_render_profiles</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="render_script">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.render_script">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">render_script</span><span class="p">(</span><span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">scene</span><span class="p">:</span> <span class="n">Scene</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                  <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1600</span><span class="p">,</span> <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+                  <span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">=</span> <span class="s2">"last"</span><span class="p">,</span>
+                  <span class="n">extras</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The complete VisIt script for one scene against one dataset."""</span>
+    <span class="n">renderer</span> <span class="o">=</span> <span class="n">_RENDERERS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">renderer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"the visit backend has no renderer named </span><span class="si">{</span><span class="n">scene</span><span class="o">.</span><span class="n">render</span><span class="si">!r}</span><span class="s2">; "</span>
+                         <span class="sa">f</span><span class="s2">"it implements </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">_RENDERERS</span><span class="p">))</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">used</span> <span class="o">=</span> <span class="n">resolved_requirements</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">extras</span><span class="o">=</span><span class="n">extras</span><span class="p">)</span>
+    <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_header</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">[</span><span class="n">scene</span><span class="p">],</span> <span class="n">out_dir</span><span class="p">),</span>
+        <span class="n">_open</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span>
+        <span class="n">_time_state</span><span class="p">(</span><span class="n">time</span><span class="p">),</span>
+        <span class="n">_expressions</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span>
+        <span class="n">renderer</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">out_dir</span><span class="p">,</span> <span class="n">used</span><span class="o">=</span><span class="n">used</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">scene</span><span class="o">.</span><span class="n">render</span> <span class="o">!=</span> <span class="s2">"profiles"</span><span class="p">:</span>
+        <span class="n">parts</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="n">_save_settings</span><span class="p">(</span><span class="n">out_dir</span><span class="p">,</span> <span class="n">scene</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span>
+            <span class="s1">'</span><span class="se">\n</span><span class="s1">SaveWindow()</span><span class="se">\n</span><span class="s1">'</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="c1"># Without this a `-nowin` CLI run never returns.</span>
+    <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">exit(0)</span><span class="se">\n</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="write_script">
+<a class="viewcode-back" href="../../../code/postprocessing.html#axqua.postproc.visit.write_script">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">write_script</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

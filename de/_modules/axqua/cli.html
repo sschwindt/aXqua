@@ -1,0 +1,1179 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.cli &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/cli.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../genindex.html" />
+    <link rel="search" title="Suche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/cli.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/cli.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/cli.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/cli.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="de" data-root="../../../" data-page="_modules/axqua/cli.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/cli.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../fr/_modules/axqua/cli.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.cli</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../_modules/axqua/cli.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.cli</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Command-line entry point: ``axqua``.</span>
+
+<span class="sd">Two forms:</span>
+
+<span class="sd">* ``axqua &lt;config.yml&gt; [--check|--dry-run]`` - build a full TELEMAC case</span>
+<span class="sd">  (default; the configuration path is positional).</span>
+<span class="sd">* ``axqua clip &lt;raster&gt; -b &lt;boundary&gt; -o &lt;out&gt;`` - clip a single raster to a</span>
+<span class="sd">  region-of-interest polygon, without needing a full configuration.</span>
+<span class="sd">* ``axqua rating -o &lt;out.csv&gt; --manning &lt;n&gt;|--strickler &lt;Kst&gt; --slope &lt;S0&gt;</span>
+<span class="sd">  --width &lt;b&gt; [--side-slope &lt;m&gt;] [--bed-elevation &lt;z&gt;] --q &lt;Q...&gt;`` - synthesize a</span>
+<span class="sd">  normal-flow outflow stage-discharge curve to use as ``boundaries.stage_discharge``.</span>
+<span class="sd">* ``axqua targets &lt;config.yml&gt; [-o &lt;out.xlsx&gt;] [--force]`` - generate the</span>
+<span class="sd">  user-fillable ``calibration-target-data.xlsx`` template (hydraulics /</span>
+<span class="sd">  morphodynamics ground truth + calibration-parameter ranges) for a case.</span>
+<span class="sd">* ``axqua openfoam &lt;config.yml&gt; [--check] [--cell-size &lt;m&gt;] [--layers &lt;n&gt;]`` -</span>
+<span class="sd">  build the OpenFOAM (interFoam) free-surface case: a terrain-following</span>
+<span class="sd">  all-hexahedral mesh, fields seeded from the converged TELEMAC 2D result, and both</span>
+<span class="sd">  staged dictionary sets. ``--check`` only reports the cell count.</span>
+<span class="sd">* ``axqua case-status &lt;config.yml&gt; [--check-env] [--full] [--json]`` - report what</span>
+<span class="sd">  the case can do (implemented / configured / built / run, per solver) and refresh its</span>
+<span class="sd">  ``MODEL=&lt;SOLVER&gt;_&lt;ENABLED|DISABLED&gt;`` marker files. ``--json`` is what a QGIS plugin</span>
+<span class="sd">  reads to decide which tabs to show.</span>
+
+<span class="sd">Job verbs (see :mod:`axqua.jobcli`), which run work that outlives this shell:</span>
+
+<span class="sd">* ``axqua submit &lt;config.yml&gt; --kind &lt;kind&gt;`` - create a persistent job and start</span>
+<span class="sd">  it detached; prints the job id.</span>
+<span class="sd">* ``axqua execute &lt;job&gt;`` - run a job synchronously here (the debugging path).</span>
+<span class="sd">* ``axqua status &lt;JOB_ID&gt;`` / ``cancel`` / ``logs`` / ``list`` / ``profiles``.</span>
+
+<span class="sd">``status`` is overloaded, and the argument decides: an existing **path** means the case</span>
+<span class="sd">(the historic meaning, kept working), while an argument matching the job-id grammar means</span>
+<span class="sd">the job. The two cannot collide - a job id is never a path.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.jobcli</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_args</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.logsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_logging</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Build a calibration-ready TELEMAC-2D/GAIA case from a YAML "</span>
+                    <span class="s2">"config and emit a HydroBayesCal config. Use the 'clip' "</span>
+                    <span class="s2">"subcommand to only crop a raster to a ROI."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-validate-env"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"skip checking that the TELEMAC environment can be sourced"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--dry-run"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"launch the solver once after building to validate the case"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--check"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"only load and validate the config, then exit"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--version"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"version"</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="sa">f</span><span class="s2">"axqua </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clip_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua clip"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Clip a raster to a region-of-interest polygon. The raster is "</span>
+                    <span class="s2">"cropped in its own grid/CRS by default; if it has no CRS the "</span>
+                    <span class="s2">"boundary's CRS is assumed and stamped onto the output."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"raster"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"input raster (GeoTIFF)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-b"</span><span class="p">,</span> <span class="s2">"--boundary"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"ROI polygon (shapefile/GeoPackage/...)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-o"</span><span class="p">,</span> <span class="s2">"--out"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"output raster path"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--epsg"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"reproject the raster to this EPSG before clipping "</span>
+                        <span class="s2">"(default: keep the source CRS)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--all-touched"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"keep pixels touched by the polygon edge (default: center-in)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_rating_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua rating"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Generate a normal-flow (uniform Manning/Strickler) outflow "</span>
+                    <span class="s2">"stage-discharge curve for a prismatic trapezoidal channel and "</span>
+                    <span class="s2">"write it as a Q,WSE,depth CSV to use as boundaries.stage_discharge."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-o"</span><span class="p">,</span> <span class="s2">"--out"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"output CSV path"</span><span class="p">)</span>
+    <span class="n">rough</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rough</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--manning"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Manning's n (e.g. 0.03)"</span><span class="p">)</span>
+    <span class="n">rough</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--strickler"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Strickler Kst = 1/n (e.g. 33)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--slope"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"longitudinal bed slope S0 (m/m, &gt; 0)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--width"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"channel bottom width b (m)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--side-slope"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"bank side slope m = horizontal:vertical (0 = rectangular)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--bed-elevation"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"outflow bed elevation z (m a.s.l.); WSE = z + normal depth"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--q"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s2">"+"</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"discharge(s) m3/s; one (the steady Q) is enough for a steady run"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_rating</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_rating_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"rating"</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.rating</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_stage_discharge</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">generate_stage_discharge</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">manning</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">manning</span><span class="p">,</span> <span class="n">strickler</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">strickler</span><span class="p">,</span>
+            <span class="n">slope</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="n">bottom_width</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">side_slope</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">side_slope</span><span class="p">,</span>
+            <span class="n">bed_elevation</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">bed_elevation</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"wrote stage-discharge rating -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_targets_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua targets"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Generate the calibration-target-data.xlsx template for a case: "</span>
+                    <span class="s2">"a hydraulics tab (velocities, fluctuations, TKE, depth, bed "</span>
+                    <span class="s2">"elevation), a morphodynamics tab (grain sizes + DoD targets) - "</span>
+                    <span class="s2">"both keyed by unique IDs joining a point layer in "</span>
+                    <span class="s2">"user-sources/geodata/ - and a parameters tab with drop-down "</span>
+                    <span class="s2">"calibration parameters, min/max test ranges and range tips."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-o"</span><span class="p">,</span> <span class="s2">"--out"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"output .xlsx (default: ground_truth.targets.file from the "</span>
+                        <span class="s2">"config, else user-sources/ground-truth/calibration-target-data.xlsx)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--force"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"overwrite an existing (possibly filled-in) template"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_targets</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_targets_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"targets"</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.targets</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_target_template</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">write_target_template</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"fill in </span><span class="si">%s</span><span class="s2">, reference it under ground_truth.targets in </span><span class="si">%s</span><span class="s2">, then "</span>
+             <span class="s2">"re-run the build to refresh the calibration CSV + HydroBayesCal config"</span><span class="p">,</span>
+             <span class="n">out</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_surface_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua surface"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Turn the CAD surfaces of a case into the geodata the rest of the "</span>
+                    <span class="s2">"workflow expects: a DEM from the bed parts, an ROI polygon from "</span>
+                    <span class="s2">"their coverage, liquid-boundary lines from the inlet/outlet "</span>
+                    <span class="s2">"patches, structure footprints with crests from the walls, and "</span>
+                    <span class="s2">"roughness zones from the materials. Runs automatically as stage 0 "</span>
+                    <span class="s2">"of a build; this verb is for inspecting the result first."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--force"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"rebuild even when the artifacts are newer than the CAD parts"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--json"</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">"as_json"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"emit the artifacts as JSON - what a QGIS plugin reads to "</span>
+                        <span class="s2">"offer the CAD-derived geodata before a build is spent"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_surface</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_surface_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"surface"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">jobcli</span><span class="p">,</span> <span class="n">surface_stage</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+        <span class="c1"># Narration to stderr so stdout carries the document alone.</span>
+        <span class="n">jobcli</span><span class="o">.</span><span class="n">_setup_logging</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+            <span class="c1"># Raised rather than returned, so it goes out through the same envelope and</span>
+            <span class="c1"># the same exit code as every other configuration error. It used to return</span>
+            <span class="c1"># a bare 2, which collides with EXIT_CONFIG only by coincidence.</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="si">}</span><span class="s2"> declares no surfaces block with parts - nothing to "</span>
+                <span class="s2">"derive"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"surfaces"</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"See the CAD drawings part of docs/usage/case-setup.rst."</span><span class="p">)</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+        <span class="n">produced</span> <span class="o">=</span> <span class="n">surface_stage</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">"surface"</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"surface"</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s2">"skipped"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">produced</span><span class="o">.</span><span class="n">skipped</span><span class="p">),</span>
+            <span class="s2">"artifacts"</span><span class="p">:</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="s2">"dem"</span><span class="p">,</span> <span class="n">produced</span><span class="o">.</span><span class="n">dem</span><span class="p">),</span> <span class="p">(</span><span class="s2">"roi"</span><span class="p">,</span> <span class="n">produced</span><span class="o">.</span><span class="n">roi</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"liquid_boundaries"</span><span class="p">,</span> <span class="n">produced</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"structures"</span><span class="p">,</span> <span class="n">produced</span><span class="o">.</span><span class="n">structures</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"roughness_zones"</span><span class="p">,</span> <span class="n">produced</span><span class="o">.</span><span class="n">roughness_zones</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">"roughness_table"</span><span class="p">,</span> <span class="n">produced</span><span class="o">.</span><span class="n">roughness_table</span><span class="p">))},</span>
+            <span class="s2">"paths"</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">produced</span><span class="o">.</span><span class="n">paths</span><span class="p">()],</span>
+            <span class="s2">"reports"</span><span class="p">:</span> <span class="n">produced</span><span class="o">.</span><span class="n">reports</span><span class="p">,</span>
+        <span class="p">},</span> <span class="n">as_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">produced</span><span class="o">.</span><span class="n">paths</span><span class="p">():</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"wrote </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"inspect these in QGIS, then build the case with `axqua </span><span class="si">%s</span><span class="s2">`"</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_georef_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua georef"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Propose the transform that places CAD-local STL geometry on the "</span>
+                    <span class="s2">"map, by matching its footprint against a georeferenced DXF of the "</span>
+                    <span class="s2">"same structure. Reports the scale, the rotation candidates and "</span>
+                    <span class="s2">"the translation for you to check, and prints the config block to "</span>
+                    <span class="s2">"paste - it changes nothing on its own."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--stl"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"an STL part, ideally the one covering the whole structure"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--dxf"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"the georeferenced drawing of the same structure (not needed "</span>
+                        <span class="s2">"when --control-point pairs are given)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--layer"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"append"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"restrict the drawing to this layer (repeatable); without it "</span>
+                        <span class="s2">"the extent is the whole sheet, title block included"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--list-layers"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"list the drawing's layers with their feature counts and exit"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--rotation"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"pick one of the reported rotation candidates [degrees]"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--control-point"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"append"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">metavar</span><span class="o">=</span><span class="s2">"CADX,CADY:MAPX,MAPY"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"a point identified in both the CAD and the map, repeatable. "</span>
+                        <span class="s2">"Two of them fix the transform exactly and bypass the "</span>
+                        <span class="s2">"bounding-box match entirely - which is what a drawing sheet "</span>
+                        <span class="s2">"holding several views needs. --dxf is then optional."</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--dz"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"vertical shift [m], if the drawing's datum differs"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--json"</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">"as_json"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"emit the proposed transform as JSON"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_georef</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_georef_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"georef"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">georef</span><span class="p">,</span> <span class="n">jobcli</span>
+
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+        <span class="n">jobcli</span><span class="o">.</span><span class="n">_setup_logging</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list_layers</span><span class="p">:</span>
+            <span class="n">layers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">georef</span><span class="o">.</span><span class="n">dxf_layers</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dxf</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"georef.layers"</span><span class="p">,</span>
+                                   <span class="p">[{</span><span class="s2">"layer"</span><span class="p">:</span> <span class="n">n</span><span class="p">,</span> <span class="s2">"features"</span><span class="p">:</span> <span class="n">c</span><span class="p">}</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">],</span>
+                                   <span class="n">as_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%8d</span><span class="s2">  </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">control_point</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">georef</span><span class="o">.</span><span class="n">match_control_points</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">stl</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">control_point</span><span class="p">,</span>
+                                                 <span class="n">dz</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dz</span><span class="p">)</span>
+            <span class="n">georef</span><span class="o">.</span><span class="n">log_control_points</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">stl</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">georef</span><span class="o">.</span><span class="n">log_match</span><span class="p">(</span><span class="n">georef</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">stl</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">dxf</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">layer</span><span class="p">,</span> <span class="n">rotation_deg</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">rotation</span><span class="p">,</span>
+                <span class="n">dz</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dz</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">"georef"</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+        <span class="n">transform</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">transform</span>
+        <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"georef"</span><span class="p">,</span> <span class="p">{</span>
+            <span class="s2">"verdict"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">verdict</span><span class="p">,</span>
+            <span class="s2">"message"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">message</span><span class="p">,</span>
+            <span class="s2">"recommendation"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">recommendation</span><span class="p">,</span>
+            <span class="s2">"transform"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"scale"</span><span class="p">:</span> <span class="n">transform</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                          <span class="s2">"rotation_deg"</span><span class="p">:</span> <span class="n">transform</span><span class="o">.</span><span class="n">rotation_deg</span><span class="p">,</span>
+                          <span class="s2">"dx"</span><span class="p">:</span> <span class="n">transform</span><span class="o">.</span><span class="n">dx</span><span class="p">,</span> <span class="s2">"dy"</span><span class="p">:</span> <span class="n">transform</span><span class="o">.</span><span class="n">dy</span><span class="p">,</span> <span class="s2">"dz"</span><span class="p">:</span> <span class="n">transform</span><span class="o">.</span><span class="n">dz</span><span class="p">},</span>
+            <span class="s2">"rotation_candidates"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">rotation_candidates</span><span class="p">),</span>
+            <span class="s2">"config_block"</span><span class="p">:</span> <span class="n">result</span><span class="o">.</span><span class="n">as_yaml</span><span class="p">(),</span>
+        <span class="p">},</span> <span class="n">as_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">verdict</span> <span class="o">==</span> <span class="s2">"match"</span> <span class="k">else</span> <span class="mi">1</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_status_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua status"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Report what this case can do, and write its "</span>
+                    <span class="s2">"MODEL=&lt;SOLVER&gt;_&lt;ENABLED|DISABLED&gt; marker files. Each capability "</span>
+                    <span class="s2">"is reported on three axes: implemented (does axqua support "</span>
+                    <span class="s2">"it for that solver), configured (does this case ask for it), and "</span>
+                    <span class="s2">"built/run (do the artifacts exist)."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--check-env"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"also probe whether each solver's environment can be sourced "</span>
+                        <span class="s2">"on THIS machine (spawns a shell per solver)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--full"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"print the full marker tables instead of the short summary"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-write"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"report only; do not write the marker files"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--json"</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">"as_json"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"emit the capability matrix as JSON - what a QGIS plugin reads "</span>
+                        <span class="s2">"to decide which tabs to show"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_status</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_status_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"case-status"</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">jobcli</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaseStatus</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+        <span class="c1"># Narration to stderr so stdout carries the document alone.</span>
+        <span class="n">jobcli</span><span class="o">.</span><span class="n">_setup_logging</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">CaseStatus</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">check_env</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">check_env</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s2">"case-status"</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">,</span>
+                           <span class="n">verbose</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+
+    <span class="n">written</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">no_write</span> <span class="k">else</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">status</span><span class="o">.</span><span class="n">write_markers</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">as_json</span><span class="p">:</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">"markers"</span><span class="p">]</span> <span class="o">=</span> <span class="n">written</span>
+        <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">"case-status"</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">as_json</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">render</span><span class="p">()</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">full</span> <span class="k">else</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">summary</span><span class="p">()))</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">written</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_openfoam_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua openfoam"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Build the OpenFOAM (interFoam) free-surface case for a reach: a "</span>
+                    <span class="s2">"terrain-following all-hexahedral mesh written straight to "</span>
+                    <span class="s2">"constant/polyMesh (no snappyHexMesh), fields seeded from the "</span>
+                    <span class="s2">"converged TELEMAC 2D result, and the two staged dictionary sets "</span>
+                    <span class="s2">"for the spin-up and production runs."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--check"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"report the cell count the current settings would produce, "</span>
+                        <span class="s2">"then exit without building"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--hotstart"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"2D result to seed from (default: the case's own r2d.slf)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--pre-run"</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">"pre_run"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"run TELEMAC first to produce the seed (the default; see "</span>
+                        <span class="s2">"openfoam.pre_run)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--no-pre-run"</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">"pre_run"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_false"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"never start TELEMAC: seed from an existing r2d.slf if there "</span>
+                        <span class="s2">"is one, else build cold under a flat lid"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--cell-size"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"override openfoam.cell_size [m] for this build"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--layers"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"override openfoam.n_layers for this build"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_openfoam</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_openfoam_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_case</span><span class="p">,</span> <span class="n">estimate_cells</span><span class="p">,</span> <span class="n">load_hotstart</span><span class="p">,</span> <span class="n">summarise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">cell_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">cell_size</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">cell_size</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">layers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">layers</span>
+        <span class="c1"># An explicit --hotstart is the user naming the seed, so no pre-run is run</span>
+        <span class="c1"># or needed; otherwise find or produce one.</span>
+        <span class="n">seed</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">hotstart</span>
+        <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">check</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.prerun</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_seed</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">ensure_seed</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">pre_run</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="p">():</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">load_hotstart</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">check</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">estimate_cells</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"a </span><span class="si">%g</span><span class="s2"> m lattice with </span><span class="si">%d</span><span class="s2"> layers gives about </span><span class="si">%s</span><span class="s2"> cells"</span><span class="p">,</span>
+                     <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">cell_size</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">n_layers</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">art</span> <span class="o">=</span> <span class="n">build_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="n">state</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">summarise</span><span class="p">(</span><span class="n">art</span><span class="p">):</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"run it with  python cases/&lt;your-case&gt;/openfoam_run.py"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_build</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_build_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">)</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>            <span class="c1"># console now; compound logfile once config loads</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">setup_logging</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">log_file</span><span class="p">),</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>  <span class="c1"># -&gt; &lt;model_dir&gt;/axqua.log</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">check</span><span class="p">:</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"config OK: case '</span><span class="si">%s</span><span class="s2">', model_dir=</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="n">art</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">validate_env</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_validate_env</span><span class="p">,</span> <span class="n">dry_run</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">dry_run</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># surface a clean message, full trace in verbose mode</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"done. Produced case in </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"geometry_slf"</span><span class="p">,</span> <span class="s2">"boundary_cli"</span><span class="p">,</span> <span class="s2">"friction_tbl"</span><span class="p">,</span> <span class="s2">"initial_conditions"</span><span class="p">,</span>
+                 <span class="s2">"cas_file"</span><span class="p">,</span> <span class="s2">"unsteady_cas"</span><span class="p">,</span> <span class="s2">"liquid_boundaries"</span><span class="p">,</span> <span class="s2">"gaia_cas"</span><span class="p">,</span>
+                 <span class="s2">"ground_truth"</span><span class="p">,</span> <span class="s2">"calibration_csv"</span><span class="p">,</span> <span class="s2">"hbc_config"</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  </span><span class="si">%-16s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"next: cd </span><span class="si">%s</span><span class="s2"> &amp;&amp; python bal_telemac.py --config </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+             <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hbc_config</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_clip</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_clip_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"clip"</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.dem</span><span class="w"> </span><span class="kn">import</span> <span class="n">clip_to_roi</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">clip_to_roi</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">raster</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">boundary</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">,</span>
+            <span class="n">target_epsg</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">epsg</span><span class="p">,</span> <span class="n">all_touched</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">all_touched</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"clipped </span><span class="si">%s</span><span class="s2"> -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">raster</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_migrate_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua migrate"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Rewrite a case config in the current schema. Loading a config "</span>
+                    <span class="s2">"already applies every compatibility mapping (a `percolation:` "</span>
+                    <span class="s2">"block becomes `gain_lose:`, `work_dir` becomes "</span>
+                    <span class="s2">"`preprocessing_dir`, and so on); this writes the result back, so "</span>
+                    <span class="s2">"the deprecation warnings stop and the file says what axqua "</span>
+                    <span class="s2">"actually read. NOTE that comments are not preserved - the config "</span>
+                    <span class="s2">"is written from the loaded schema, so a comment cannot survive an "</span>
+                    <span class="s2">"edit it no longer describes. Keep the annotated original if you "</span>
+                    <span class="s2">"want the prose (cases/case-template/case-config.yml has it all)."</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"path to the YAML configuration file"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-o"</span><span class="p">,</span> <span class="s2">"--out"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"write here (default: print to stdout)"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--in-place"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"overwrite the config, keeping a .bak copy beside it"</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--to-case"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                   <span class="n">help</span><span class="o">=</span><span class="s2">"write an .axq-case file beside the config (or to --out): the "</span>
+                        <span class="s2">"same case without the settings that describe this computer, "</span>
+                        <span class="s2">"which belong to its profile ('axqua profile'). The original "</span>
+                        <span class="s2">"file is left as it is. An .axq-case file of that name that "</span>
+                        <span class="s2">"exists already is not replaced unless --out names it. For a "</span>
+                        <span class="s2">"config that is an .axq-case file itself, this is --in-place."</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_migrate</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">_migrate_parser</span><span class="p">(),</span> <span class="n">argv</span><span class="p">,</span> <span class="s2">"migrate"</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">dump_config</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">casefile</span><span class="p">,</span> <span class="n">schema</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">to_case</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">in_place</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"--to-case writes a new file and cannot be combined with --in-place"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">to_case</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">:</span>
+        <span class="c1"># Named after the case folder, so a folder of cases is a folder of files that</span>
+        <span class="c1"># say which reach they are. A variant keeps its own name (case-config-vof.yml</span>
+        <span class="c1"># becomes case-config-vof.axq-case), since that is what tells variants apart.</span>
+        <span class="n">stem</span> <span class="o">=</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">casefile</span><span class="o">.</span><span class="n">LEGACY_NAMES</span> <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+        <span class="n">derived</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">stem</span> <span class="o">+</span> <span class="n">casefile</span><span class="o">.</span><span class="n">SUFFIX</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">derived</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">resolve</span><span class="p">():</span>
+            <span class="c1"># The config is a case file already, so there is no second file to write:</span>
+            <span class="c1"># it is brought up to date where it is, with the copy --in-place keeps.</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">in_place</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">derived</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="c1"># A name nobody typed must not cost a file that may have been edited since</span>
+            <span class="c1"># it was written. Naming it is the way to say that it may be replaced.</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> exists already and was left as it is. To replace it, name "</span>
+                      <span class="s2">"it: -o </span><span class="si">%s</span><span class="s2">. To keep both, name another file."</span><span class="p">,</span> <span class="n">derived</span><span class="p">,</span> <span class="n">derived</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">out</span> <span class="o">=</span> <span class="n">derived</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">in_place</span> <span class="k">else</span> <span class="n">args</span><span class="o">.</span><span class="n">out</span>
+    <span class="c1"># A file of the case type never carries machine settings, however it was asked for.</span>
+    <span class="n">portable</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">to_case</span> <span class="ow">or</span> <span class="p">(</span><span class="n">target</span> <span class="ow">and</span> <span class="n">casefile</span><span class="o">.</span><span class="n">is_case_file</span><span class="p">(</span><span class="n">target</span><span class="p">)))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="c1"># Written relative to where the file will LIVE, not where it came from, so</span>
+        <span class="c1"># `-o elsewhere/case.yml` does not silently break every relative data path.</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="k">if</span> <span class="n">target</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">config_dir</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">dump_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">,</span> <span class="n">portable</span><span class="o">=</span><span class="n">portable</span><span class="p">)</span>
+        <span class="n">moved</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">strip_machine_fields</span><span class="p">(</span><span class="n">_raw_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">))</span> <span class="k">if</span> <span class="n">portable</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">in_place</span><span class="p">:</span>
+        <span class="n">backup</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">suffix</span> <span class="o">+</span> <span class="s2">".bak"</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">backup</span><span class="p">)</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"migrated </span><span class="si">%s</span><span class="s2"> (original kept as </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">backup</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">:</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"wrote </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">moved</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"left out, because they describe this computer and belong to its "</span>
+                 <span class="s2">"profile: </span><span class="si">%s</span><span class="s2">. Run 'axqua profile init' if it has none yet."</span><span class="p">,</span>
+                 <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">moved</span><span class="p">))</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_raw_config</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The config as written, to report which machine settings a case file carried."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span> <span class="k">as</span> <span class="n">handle</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">handle</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_job</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Late-bind a job verb.</span>
+
+<span class="sd">    Imported on call rather than at module scope so ``axqua --check`` on a case does</span>
+<span class="sd">    not pay for the job machinery, and so a broken job module could never stop the build</span>
+<span class="sd">    commands from working.</span>
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">jobcli</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">jobcli</span><span class="p">,</span> <span class="n">name</span><span class="p">)(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">run</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_case_cli</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The verbs an editor of a case file uses (:mod:`axqua.casecli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">casecli</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">casecli</span><span class="p">,</span> <span class="n">name</span><span class="p">)(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_validation</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua validation`` - what a case has for one (:mod:`axqua.validationcli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">validationcli</span>
+    <span class="k">return</span> <span class="n">validationcli</span><span class="o">.</span><span class="n">run_validation</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_example</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua example`` - the example cases (:mod:`axqua.examplecli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">examplecli</span>
+    <span class="k">return</span> <span class="n">examplecli</span><span class="o">.</span><span class="n">run_example</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_export</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua export`` - results for ParaView and VisIt (:mod:`axqua.exportcli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">exportcli</span>
+    <span class="k">return</span> <span class="n">exportcli</span><span class="o">.</span><span class="n">run_export</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_install</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua install`` - the simulation programs (:mod:`axqua.installcli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">installcli</span>
+    <span class="k">return</span> <span class="n">installcli</span><span class="o">.</span><span class="n">run_install</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_docs</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua docs`` - where the documentation is (:mod:`axqua.docscli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">docscli</span>
+    <span class="k">return</span> <span class="n">docscli</span><span class="o">.</span><span class="n">run_docs</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_cleanup</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua cleanup`` - files of a case that can go (:mod:`axqua.cleanupcli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">cleanupcli</span>
+    <span class="k">return</span> <span class="n">cleanupcli</span><span class="o">.</span><span class="n">run_cleanup</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_profile</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua profile`` - late-bound like the job verbs, and for the same reason."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">profilecli</span>
+    <span class="k">return</span> <span class="n">profilecli</span><span class="o">.</span><span class="n">run_profile</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<span class="c1">#: The whole command surface, as a table. A verb is one entry here plus its ``_run_*``;</span>
+<span class="c1">#: the alternative - ``argparse`` subparsers - cannot express the default form</span>
+<span class="c1">#: (``axqua &lt;config.yml&gt;``, with no verb at all) without a pre-pass on ``argv[0]``,</span>
+<span class="c1">#: so the chain would survive the conversion anyway and only the help output would churn.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_postproc_parser</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua postproc"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Render figures from a case's solver results (VisIt)."</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"case-config.yml"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--scene"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"append"</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">"scenes"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"scene to render (repeatable); default: postproc.scenes"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--solver"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">"openfoam"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">),</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"only draw results from this solver"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--backend"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"override postproc.backend"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--time"</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">"last"</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"'last' (default), 'first', or a time-slider state"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-o"</span><span class="p">,</span> <span class="s2">"--out"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"output directory (default: &lt;postprocessing_dir&gt;/figures)"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--list"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"report which scenes are available, and why not"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--script-only"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"write the generated scripts and stop (needs no VisIt)"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_postproc</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">_postproc_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.postproc</span><span class="w"> </span><span class="kn">import</span> <span class="n">render</span> <span class="k">as</span> <span class="n">render_mod</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">backend</span><span class="p">:</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">postproc</span><span class="o">.</span><span class="n">backend</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">backend</span>
+        <span class="c1"># an empty postproc.scenes (every box unchecked) is a choice, not "all"</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">scenes</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">scenes</span> <span class="k">else</span> <span class="n">cfg</span><span class="o">.</span><span class="n">postproc</span><span class="o">.</span><span class="n">scenes</span>
+
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">render_mod</span><span class="o">.</span><span class="n">plan_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">solver</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"postproc.scenes asks for no figure: nothing to render."</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">render_mod</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+                                 <span class="n">out_dir</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">out</span><span class="p">,</span> <span class="n">script_only</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">script_only</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_check_gt</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s2">"axqua check-gt"</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">"Check the compiled ground-truth elevations against the model."</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"config"</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">Path</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"--strict"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">"exit non-zero on an error finding"</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--verbose"</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">"store_true"</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">setup_logging</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.ground_truth_qa</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_ground_truth_elevations</span><span class="p">,</span> <span class="n">report</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">findings</span> <span class="o">=</span> <span class="n">check_ground_truth_elevations</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">report</span><span class="p">(</span><span class="n">findings</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">strict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">strict</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">severity</span> <span class="o">==</span> <span class="s2">"error"</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">findings</span><span class="p">))</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">except</span> <span class="ne">SystemExit</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+
+<span class="n">_DISPATCH</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"clip"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_clip</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"check-gt"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_check_gt</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"postproc"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_postproc</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"rating"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_rating</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"migrate"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_migrate</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"targets"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_targets</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"surface"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_surface</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"georef"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_georef</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"openfoam"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_openfoam</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"case-status"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_status</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"submit"</span><span class="p">:</span> <span class="n">_job</span><span class="p">(</span><span class="s2">"run_submit"</span><span class="p">),</span>
+    <span class="s2">"execute"</span><span class="p">:</span> <span class="n">_job</span><span class="p">(</span><span class="s2">"run_execute"</span><span class="p">),</span>
+    <span class="s2">"cancel"</span><span class="p">:</span> <span class="n">_job</span><span class="p">(</span><span class="s2">"run_cancel"</span><span class="p">),</span>
+    <span class="s2">"logs"</span><span class="p">:</span> <span class="n">_job</span><span class="p">(</span><span class="s2">"run_logs"</span><span class="p">),</span>
+    <span class="s2">"list"</span><span class="p">:</span> <span class="n">_job</span><span class="p">(</span><span class="s2">"run_list"</span><span class="p">),</span>
+    <span class="s2">"profiles"</span><span class="p">:</span> <span class="n">_job</span><span class="p">(</span><span class="s2">"run_profiles"</span><span class="p">),</span>
+    <span class="s2">"profile"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_profile</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"install"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_install</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"export"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_export</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"validation"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_validation</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"example"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_example</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"schema"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_case_cli</span><span class="p">(</span><span class="s2">"run_schema"</span><span class="p">,</span> <span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"case"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_case_cli</span><span class="p">(</span><span class="s2">"run_case"</span><span class="p">,</span> <span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"check"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_case_cli</span><span class="p">(</span><span class="s2">"run_check"</span><span class="p">,</span> <span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"docs"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_docs</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"cleanup"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_cleanup</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<span class="c1">#: Flags of either ``status`` form that take a separate value. The token after one of</span>
+<span class="c1">#: them is that value, not the subject of the command - without this,</span>
+<span class="c1">#: ``axqua status --job-root /scratch JOB-123`` dispatched on ``/scratch``, which exists,</span>
+<span class="c1">#: and so reported the *case* status of a directory. The dispatch was correct only for</span>
+<span class="c1">#: as long as nobody put a flag first.</span>
+<span class="n">_STATUS_VALUE_FLAGS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"--job-root"</span><span class="p">,</span> <span class="s2">"--timeout"</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_first_positional</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The first token that is a subject rather than a flag or a flag's value."""</span>
+    <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">argv</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
+            <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"-"</span><span class="p">):</span>
+            <span class="n">skip</span> <span class="o">=</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">_STATUS_VALUE_FLAGS</span>      <span class="c1"># --flag=value needs no skip</span>
+            <span class="k">continue</span>
+        <span class="k">return</span> <span class="n">token</span>
+    <span class="k">return</span> <span class="s2">""</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dispatch_status</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``status`` means the case or the job, decided by the argument.</span>
+
+<span class="sd">    An existing path is a case configuration - the historic meaning, which keeps every</span>
+<span class="sd">    script and doc snippet written against it working, with a notice pointing at the new</span>
+<span class="sd">    spelling. Anything matching the job-id grammar is a job. Neither can be mistaken for</span>
+<span class="sd">    the other, so there is no guess here, only a rule.</span>
+<span class="sd">    """</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">_first_positional</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">first</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"'axqua status &lt;config&gt;' now also accepts a job id; the case form is "</span>
+            <span class="s2">"spelled 'axqua case-status &lt;config&gt;'. Both work."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_run_status</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">jobcli</span>
+    <span class="k">return</span> <span class="n">jobcli</span><span class="o">.</span><span class="n">run_job_status</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="main">
+<a class="viewcode-back" href="../../code/cli.html#axqua.cli.main">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">argv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">argv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argv</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">argv</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"status"</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_dispatch_status</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">_DISPATCH</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="n">_run_build</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

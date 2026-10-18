@@ -1,0 +1,1287 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.core.profile &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/core/profile.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/core/profile.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/core/profile.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/core/profile.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/core/profile.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="de" data-root="../../../../" data-page="_modules/axqua/core/profile.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../_modules/axqua/core/profile.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../fr/_modules/axqua/core/profile.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.core.profile</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../_modules/axqua/core/profile.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.core.profile</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The plugin profile: this computer, described in one file (``*.axq-profile``).</span>
+
+<span class="sd">A case describes a free-surface water body and has to travel. Where Python is, where TELEMAC and</span>
+<span class="sd">OpenFOAM are installed, which program draws the figures and which drive takes the</span>
+<span class="sd">results describe a *computer*, and they used to be spread over three places: the solver</span>
+<span class="sd">settings of :mod:`axqua.core.machine` (``solvers.yml``), the solver profiles of</span>
+<span class="sd">:mod:`axqua.jobs.profiles` (``profiles.yml``) and the QGIS settings of the plugin. A user</span>
+<span class="sd">setting up a second computer had to know all three.</span>
+
+<span class="sd">The profile is the one file that replaces them as the documented way. It is what the</span>
+<span class="sd">*Configuration* tab of the plugin edits, and it is plain YAML, so it can be written by</span>
+<span class="sd">hand on a machine without QGIS::</span>
+
+<span class="sd">    schema_version: 1</span>
+<span class="sd">    name: workstation</span>
+<span class="sd">    python:</span>
+<span class="sd">      executable: /opt/miniforge3/envs/axqua-env/bin/python</span>
+<span class="sd">      axqua: /opt/miniforge3/envs/axqua-env/bin/axqua</span>
+<span class="sd">    installations:</span>
+<span class="sd">      telemac: /opt/telemac-mascaret</span>
+<span class="sd">      openfoam: /usr/lib/openfoam/openfoam2406</span>
+<span class="sd">      paraview: /opt/ParaView</span>
+<span class="sd">      visit: /opt/visit</span>
+<span class="sd">    solvers:</span>
+<span class="sd">      telemac:</span>
+<span class="sd">        setup_script: /opt/telemac-mascaret/configs/pysource.debian12.sh</span>
+<span class="sd">        mpi_processes: 12</span>
+<span class="sd">      openfoam:</span>
+<span class="sd">        setup_script: /usr/lib/openfoam/openfoam2406/etc/bashrc</span>
+<span class="sd">        mpi_processes: 16</span>
+<span class="sd">    postprocessors:</span>
+<span class="sd">      paraview: /opt/ParaView/bin/paraview</span>
+<span class="sd">      visit: /opt/visit/bin/visit</span>
+<span class="sd">    jobs:</span>
+<span class="sd">      root: /scratch/axqua-jobs</span>
+<span class="sd">      launcher: auto</span>
+<span class="sd">    display:</span>
+<span class="sd">      min_depth: 0.01</span>
+<span class="sd">      velocity_cap: 5.0</span>
+
+<span class="sd">Which profile is active</span>
+<span class="sd">-----------------------</span>
+<span class="sd">First hit wins: an explicit path (``--profile``), the environment variable</span>
+<span class="sd">``AXQUA_PROFILE``, then ``default.axq-profile`` in the aXqua configuration folder. No</span>
+<span class="sd">profile at all is a supported state - the older mechanisms keep working, which is what</span>
+<span class="sd">lets every existing installation continue unchanged.</span>
+
+<span class="sd">The older files are not deleted and not rewritten. :func:`detect` reads them, so a</span>
+<span class="sd">profile for an existing installation is one command (``axqua profile init``).</span>
+
+<span class="sd">Installation folders</span>
+<span class="sd">--------------------</span>
+<span class="sd">``installations`` names the folder each program is installed in. What aXqua runs is the</span>
+<span class="sd">environment script of a simulation code and the launcher of a postprocessor; where the</span>
+<span class="sd">profile names the folder only, that file is looked for in it (:func:`locate`), so a</span>
+<span class="sd">profile of four folders is a complete one. An entry under ``solvers`` or</span>
+<span class="sd">``postprocessors`` is used as it is and outranks what the folder holds.</span>
+
+<span class="sd">A profile outlives the version that wrote it</span>
+<span class="sd">--------------------------------------------</span>
+<span class="sd">The profile belongs to the user and is kept in their configuration folder, outside of</span>
+<span class="sd">aXqua and outside of the QGIS plugin, so that updating or reinstalling either leaves it</span>
+<span class="sd">where it is. Three rules keep it readable afterwards:</span>
+
+<span class="sd">* The layout only grows. A key is not renamed or removed, and a new key is optional,</span>
+<span class="sd">  so every profile ever written keeps loading.</span>
+<span class="sd">* An entry this version does not know is kept and written back (``extra``), and</span>
+<span class="sd">  reported as a warning by :func:`check`. A newer plugin or a newer aXqua may have</span>
+<span class="sd">  written it, and the rest of the profile stays in use.</span>
+<span class="sd">* ``schema_version`` is raised only for a change an older aXqua would misread. Such a</span>
+<span class="sd">  file is refused, and :func:`save` never writes over a file it could not read without</span>
+<span class="sd">  keeping it under another name.</span>
+
+<span class="sd">Standard library plus PyYAML, and nothing from a solver backend or the job system: the</span>
+<span class="sd">profile is read by :func:`axqua.core.machine.resolve` on every case load.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fields</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.diagnostics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ERROR</span><span class="p">,</span> <span class="n">WARNING</span><span class="p">,</span> <span class="n">Finding</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="n">SUFFIX</span> <span class="o">=</span> <span class="s2">".axq-profile"</span>
+<span class="n">ENV_VAR</span> <span class="o">=</span> <span class="s2">"AXQUA_PROFILE"</span>
+<span class="n">DEFAULT_NAME</span> <span class="o">=</span> <span class="s2">"default"</span> <span class="o">+</span> <span class="n">SUFFIX</span>
+<span class="n">SCHEMA_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1">#: The codes a profile can bind, and the programs it can name for figures.</span>
+<span class="n">SOLVERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">)</span>
+<span class="n">POSTPROCESSORS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"paraview"</span><span class="p">,</span> <span class="s2">"visit"</span><span class="p">)</span>
+<span class="n">PROGRAMS</span> <span class="o">=</span> <span class="n">SOLVERS</span> <span class="o">+</span> <span class="n">POSTPROCESSORS</span>
+
+<span class="c1">#: Where a program keeps the file a profile names, relative to the folder it is</span>
+<span class="c1">#: installed in: the environment script of a simulation code, the launcher of a</span>
+<span class="c1">#: postprocessor. For OpenFOAM the script of aXqua's own installation comes first,</span>
+<span class="c1">#: because it also sets up the sediment solvers.</span>
+<span class="n">LAYOUT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"telemac"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"configs/pysource.*.sh"</span><span class="p">,),</span>
+    <span class="s2">"openfoam"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"shell-rc.sh"</span><span class="p">,</span> <span class="s2">"etc/bashrc"</span><span class="p">),</span>
+    <span class="s2">"paraview"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bin/paraview"</span><span class="p">,),</span>
+    <span class="s2">"visit"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"bin/visit"</span><span class="p">,),</span>
+<span class="p">}</span>
+
+<span class="c1">#: Sub-folders that are searched when the folder itself holds none of these files: the</span>
+<span class="c1">#: folder an installation wizard was given holds the installation one level below.</span>
+<span class="n">NESTED</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"*"</span><span class="p">,</span> <span class="s2">"apps/*"</span><span class="p">)</span>
+
+<span class="c1">#: Folders that say nothing about where a program is installed.</span>
+<span class="n">SYSTEM_PREFIXES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"/usr"</span><span class="p">,</span> <span class="s2">"/usr/local"</span><span class="p">)</span>
+
+<span class="c1">#: The blocks of a profile and the keys of each. An entry that is not listed is kept</span>
+<span class="c1">#: as it is (see the module docstring), so this table is what "known" means.</span>
+<span class="n">BLOCKS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"python"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"executable"</span><span class="p">,</span> <span class="s2">"axqua"</span><span class="p">),</span>
+    <span class="s2">"installations"</span><span class="p">:</span> <span class="n">PROGRAMS</span><span class="p">,</span>
+    <span class="s2">"solvers"</span><span class="p">:</span> <span class="n">SOLVERS</span><span class="p">,</span>
+    <span class="s2">"postprocessors"</span><span class="p">:</span> <span class="n">POSTPROCESSORS</span><span class="p">,</span>
+    <span class="s2">"jobs"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"root"</span><span class="p">,</span> <span class="s2">"launcher"</span><span class="p">),</span>
+    <span class="s2">"display"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"min_depth"</span><span class="p">,</span> <span class="s2">"velocity_cap"</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">TOP_LEVEL</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"schema_version"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">,</span> <span class="o">*</span><span class="n">BLOCKS</span><span class="p">)</span>
+<span class="n">ENVIRONMENTS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"posix"</span><span class="p">,</span> <span class="s2">"windows"</span><span class="p">,</span> <span class="s2">"wsl"</span><span class="p">)</span>
+<span class="n">LAUNCHERS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"auto"</span><span class="p">,</span> <span class="s2">"systemd"</span><span class="p">,</span> <span class="s2">"posix"</span><span class="p">,</span> <span class="s2">"windows"</span><span class="p">,</span> <span class="s2">"wsl"</span><span class="p">)</span>
+
+<span class="c1">#: The OpenFOAM release aXqua writes dictionaries for. Another one starts, reads a file</span>
+<span class="c1">#: it does not understand, and fails far from the cause.</span>
+<span class="n">OPENFOAM_RELEASE</span> <span class="o">=</span> <span class="s2">"2406"</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"AxquaProfile"</span><span class="p">,</span> <span class="s2">"SolverBinding"</span><span class="p">,</span> <span class="s2">"active_path"</span><span class="p">,</span> <span class="s2">"candidates"</span><span class="p">,</span> <span class="s2">"check"</span><span class="p">,</span>
+           <span class="s2">"default_path"</span><span class="p">,</span> <span class="s2">"detect"</span><span class="p">,</span> <span class="s2">"file_path"</span><span class="p">,</span> <span class="s2">"installation_of"</span><span class="p">,</span> <span class="s2">"load"</span><span class="p">,</span>
+           <span class="s2">"load_active"</span><span class="p">,</span> <span class="s2">"locate"</span><span class="p">,</span> <span class="s2">"save"</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_path</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">verbatim</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""*value* as a path, relative entries resolved against the profile's folder.</span>
+
+<span class="sd">    *verbatim* keeps the text as written. A path inside a WSL distribution is a Linux</span>
+<span class="sd">    path, and resolving it against a Windows folder would produce something that exists</span>
+<span class="sd">    on neither side.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">verbatim</span> <span class="ow">or</span> <span class="n">path</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">()</span> <span class="ow">or</span> <span class="n">base</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">path</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">base</span> <span class="o">/</span> <span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mapping</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">where</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""*value* as a dictionary; anything else is not a profile."""</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'the profile'</span><span class="si">}</span><span class="s2"> must be a mapping of keys to "</span>
+                          <span class="sa">f</span><span class="s2">"values, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">where</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unknown</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">known</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The entries of *data* that this version does not know, in their order."""</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_number</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""*value* as an ``int`` or ``float``. Text that is no number is not a crash."""</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">kind</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2"> must be a number, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+                          <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+
+
+<span class="c1"># ------------------------------------------------------------ installation folders</span>
+
+
+<div class="viewcode-block" id="candidates">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.candidates">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">candidates</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The files in *folder* that a profile can name for *key*.</span>
+
+<span class="sd">    The environment scripts of a simulation code, or the launcher of a postprocessor.</span>
+<span class="sd">    The folder itself is searched first and then one level below it, so that the</span>
+<span class="sd">    folder an installation was put in works as well as the folder of the program.</span>
+<span class="sd">    A TELEMAC installation ships a template beside its environment scripts, which is</span>
+<span class="sd">    left out.</span>
+<span class="sd">    """</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">patterns</span> <span class="o">=</span> <span class="n">LAYOUT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">())</span>
+    <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="o">*</span><span class="n">NESTED</span><span class="p">):</span>
+        <span class="n">found</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">folder</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">pattern</span><span class="si">}</span><span class="s2">"</span>
+                                                           <span class="k">if</span> <span class="n">prefix</span> <span class="k">else</span> <span class="n">pattern</span><span class="p">)</span>
+                               <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">"template"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">found</span>
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+
+
+<div class="viewcode-block" id="locate">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.locate">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">locate</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The one file in *folder* that a profile names for *key*, or ``None``.</span>
+
+<span class="sd">    ``None`` also where the folder holds several: which environment script of a</span>
+<span class="sd">    TELEMAC installation is meant is a decision, and aXqua does not take it.</span>
+<span class="sd">    """</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">found</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="installation_of">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.installation_of">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">installation_of</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The folder *key* is installed in, told from its script or launcher.</span>
+
+<span class="sd">    ``None`` for a file that does not lie where an installation keeps it, and for a</span>
+<span class="sd">    program of the operating system (``/usr/bin/paraview``): "installed in /usr" says</span>
+<span class="sd">    nothing. A launcher that is a link (``~/bin/visit``) is followed to the</span>
+<span class="sd">    installation it starts. Only the file is followed, not the folders above it, so</span>
+<span class="sd">    that a folder keeps the name its owner knows it by.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">fnmatch</span>
+
+    <span class="n">given</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="n">followed</span> <span class="o">=</span> <span class="n">given</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">):</span>                          <span class="c1"># a chain of links, never a loop</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">followed</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="n">followed</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">followed</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">target</span> <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">()</span>
+                                         <span class="k">else</span> <span class="n">followed</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">target</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">((</span><span class="n">followed</span><span class="p">,</span> <span class="n">given</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">LAYOUT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">()):</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span>
+            <span class="n">tail</span> <span class="o">=</span> <span class="n">candidate</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">):]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+                    <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">have</span><span class="p">,</span> <span class="n">want</span><span class="p">)</span> <span class="k">for</span> <span class="n">have</span><span class="p">,</span> <span class="n">want</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tail</span><span class="p">,</span> <span class="n">parts</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="o">*</span><span class="n">candidate</span><span class="o">.</span><span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)])</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">SYSTEM_PREFIXES</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">folder</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="SolverBinding">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.SolverBinding">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SolverBinding</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""How to reach one simulation code on this computer."""</span>
+
+    <span class="n">setup_script</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">environment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1"># posix | windows | wsl; None matches the host</span>
+    <span class="n">shell</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>            <span class="c1"># a bash that the installation ships</span>
+    <span class="n">distro</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>           <span class="c1"># WSL only</span>
+    <span class="n">config_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>      <span class="c1"># TELEMAC: the systel configuration</span>
+    <span class="n">mpi_launcher</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mpi_processes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">overrides</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1">#: Entries this version does not know. Kept and written back.</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SolverBinding.from_dict">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.SolverBinding.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                  <span class="n">base</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"SolverBinding"</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">environment</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">environment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">environment</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ENVIRONMENTS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.environment must be one of "</span>
+                <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ENVIRONMENTS</span><span class="p">)</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">", got </span><span class="si">{</span><span class="n">environment</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.environment"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">setup_script</span><span class="o">=</span><span class="n">_path</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"setup_script"</span><span class="p">),</span> <span class="n">base</span><span class="p">,</span>
+                               <span class="n">verbatim</span><span class="o">=</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">"wsl"</span><span class="p">),</span>
+            <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"shell"</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">distro</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"distro"</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">config_name</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"config_name"</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mpi_launcher</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mpi_launcher"</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">mpi_processes</span><span class="o">=</span><span class="n">_number</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mpi_processes"</span><span class="p">),</span> <span class="nb">int</span><span class="p">,</span>
+                                  <span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.mpi_processes"</span><span class="p">),</span>
+            <span class="n">overrides</span><span class="o">=</span><span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_mapping</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"overrides"</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.overrides"</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="n">extra</span><span class="o">=</span><span class="n">_unknown</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">known</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SolverBinding.keys">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.SolverBinding.keys">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""The keys a binding has in the file."""</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">"extra"</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SolverBinding.as_dict">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.SolverBinding.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Only what is set: a written profile records decisions, not defaults."""</span>
+        <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"setup_script"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setup_script</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"environment"</span><span class="p">,</span> <span class="s2">"shell"</span><span class="p">,</span> <span class="s2">"distro"</span><span class="p">,</span> <span class="s2">"config_name"</span><span class="p">,</span> <span class="s2">"mpi_launcher"</span><span class="p">,</span>
+                    <span class="s2">"mpi_processes"</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">""</span><span class="p">):</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"overrides"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">overrides</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AxquaProfile">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AxquaProfile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Everything aXqua needs to know about one computer."""</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>            <span class="c1"># where it was read from; never written out</span>
+    <span class="n">python</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>          <span class="c1"># the interpreter that runs aXqua</span>
+    <span class="n">axqua</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>           <span class="c1"># the program the plugin calls</span>
+    <span class="c1">#: program -&gt; the folder it is installed in on this computer.</span>
+    <span class="n">installations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">solvers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SolverBinding</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">postprocessors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">job_root</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">launcher</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span>
+    <span class="n">min_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>             <span class="c1"># [m] shallower water is drawn transparent</span>
+    <span class="n">velocity_cap</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span>           <span class="c1"># [m/s] upper end of the velocity color scale</span>
+    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">SCHEMA_VERSION</span>
+    <span class="c1">#: Entries this version does not know, by the block they stand in ("" is the top</span>
+    <span class="c1">#: level). Kept and written back, so that a profile a newer aXqua wrote loses</span>
+    <span class="c1">#: nothing when this one saves it.</span>
+    <span class="n">extra</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1">#: Set by :func:`save`: where a file that could not be read was kept. Never written.</span>
+    <span class="n">backup</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># -- reading -----------------------------------------------------------------</span>
+<div class="viewcode-block" id="AxquaProfile.from_dict">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"AxquaProfile"</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">_number</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"schema_version"</span><span class="p">),</span> <span class="nb">int</span><span class="p">,</span> <span class="s2">"schema_version"</span><span class="p">,</span>
+                          <span class="n">SCHEMA_VERSION</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">&gt;</span> <span class="n">SCHEMA_VERSION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"this profile was written by a newer aXqua (schema </span><span class="si">{</span><span class="n">version</span><span class="si">}</span><span class="s2">; this "</span>
+                <span class="sa">f</span><span class="s2">"version understands </span><span class="si">{</span><span class="n">SCHEMA_VERSION</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="s2">"schema_version"</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="s2">"Update aXqua."</span><span class="p">)</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">read</span> <span class="o">=</span> <span class="p">{</span><span class="n">block</span><span class="p">:</span> <span class="n">_mapping</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="p">),</span> <span class="n">block</span><span class="p">)</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">BLOCKS</span><span class="p">}</span>
+        <span class="n">extra</span> <span class="o">=</span> <span class="p">{</span><span class="s2">""</span><span class="p">:</span> <span class="n">_unknown</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">TOP_LEVEL</span><span class="p">))}</span>
+        <span class="n">extra</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">block</span><span class="p">:</span> <span class="n">_unknown</span><span class="p">(</span><span class="n">read</span><span class="p">[</span><span class="n">block</span><span class="p">],</span> <span class="nb">set</span><span class="p">(</span><span class="n">known</span><span class="p">))</span>
+                      <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">known</span> <span class="ow">in</span> <span class="n">BLOCKS</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+        <span class="n">python</span><span class="p">,</span> <span class="n">solvers</span><span class="p">,</span> <span class="n">post</span> <span class="o">=</span> <span class="n">read</span><span class="p">[</span><span class="s2">"python"</span><span class="p">],</span> <span class="n">read</span><span class="p">[</span><span class="s2">"solvers"</span><span class="p">],</span> <span class="n">read</span><span class="p">[</span><span class="s2">"postprocessors"</span><span class="p">]</span>
+        <span class="n">jobs</span><span class="p">,</span> <span class="n">display</span> <span class="o">=</span> <span class="n">read</span><span class="p">[</span><span class="s2">"jobs"</span><span class="p">],</span> <span class="n">read</span><span class="p">[</span><span class="s2">"display"</span><span class="p">]</span>
+
+        <span class="n">bindings</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">SolverBinding</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">solvers</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">SOLVERS</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">solvers</span><span class="p">}</span>
+        <span class="n">in_wsl</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">binding</span> <span class="ow">in</span> <span class="n">bindings</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="n">binding</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">"wsl"</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)),</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">if</span> <span class="n">path</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">python</span><span class="o">=</span><span class="n">_path</span><span class="p">(</span><span class="n">python</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"executable"</span><span class="p">),</span> <span class="n">base</span><span class="p">),</span>
+            <span class="n">axqua</span><span class="o">=</span><span class="n">_path</span><span class="p">(</span><span class="n">python</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">),</span> <span class="n">base</span><span class="p">),</span>
+            <span class="n">installations</span><span class="o">=</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">found</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">PROGRAMS</span>
+                           <span class="k">if</span> <span class="p">(</span><span class="n">found</span> <span class="o">:=</span> <span class="n">_path</span><span class="p">(</span><span class="n">read</span><span class="p">[</span><span class="s2">"installations"</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">base</span><span class="p">,</span>
+                                              <span class="n">verbatim</span><span class="o">=</span><span class="n">name</span> <span class="ow">in</span> <span class="n">in_wsl</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">},</span>
+            <span class="n">solvers</span><span class="o">=</span><span class="n">bindings</span><span class="p">,</span>
+            <span class="n">postprocessors</span><span class="o">=</span><span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">found</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">POSTPROCESSORS</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="n">found</span> <span class="o">:=</span> <span class="n">_path</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">base</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">},</span>
+            <span class="n">job_root</span><span class="o">=</span><span class="n">_path</span><span class="p">(</span><span class="n">jobs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"root"</span><span class="p">),</span> <span class="n">base</span><span class="p">),</span>
+            <span class="n">launcher</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">jobs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"launcher"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"auto"</span><span class="p">),</span>
+            <span class="n">min_depth</span><span class="o">=</span><span class="n">_number</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"min_depth"</span><span class="p">),</span> <span class="nb">float</span><span class="p">,</span> <span class="s2">"display.min_depth"</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">),</span>
+            <span class="n">velocity_cap</span><span class="o">=</span><span class="n">_number</span><span class="p">(</span><span class="n">display</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"velocity_cap"</span><span class="p">),</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="s2">"display.velocity_cap"</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span>
+            <span class="n">schema_version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">extra</span><span class="o">=</span><span class="p">{</span><span class="n">block</span><span class="p">:</span> <span class="n">found</span> <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">found</span><span class="p">},</span>
+        <span class="p">)</span></div>
+
+
+    <span class="c1"># -- writing -----------------------------------------------------------------</span>
+<div class="viewcode-block" id="AxquaProfile.as_dict">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""Plain data, shaped the way :meth:`from_dict` reads it back."""</span>
+        <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema_version"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_version</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">python</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"executable"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">python</span><span class="p">),</span>
+                                                     <span class="p">(</span><span class="s2">"axqua"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axqua</span><span class="p">))</span> <span class="k">if</span> <span class="n">value</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">python</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"python"</span><span class="p">]</span> <span class="o">=</span> <span class="n">python</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">installations</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"installations"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">folder</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">installations</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">solvers</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">binding</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">if</span> <span class="n">solvers</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"solvers"</span><span class="p">]</span> <span class="o">=</span> <span class="n">solvers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">postprocessors</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"postprocessors"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                                     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">postprocessors</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">jobs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_root</span><span class="p">:</span>
+            <span class="n">jobs</span><span class="p">[</span><span class="s2">"root"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">job_root</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span> <span class="o">!=</span> <span class="s2">"auto"</span><span class="p">:</span>
+            <span class="n">jobs</span><span class="p">[</span><span class="s2">"launcher"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span>
+        <span class="k">if</span> <span class="n">jobs</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">"jobs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">jobs</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">"display"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"min_depth"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_depth</span><span class="p">,</span> <span class="s2">"velocity_cap"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_cap</span><span class="p">}</span>
+        <span class="c1"># What this version does not know goes back where it was read, after the</span>
+        <span class="c1"># entries it does know and never in place of one.</span>
+        <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">entries</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="n">block</span> <span class="k">else</span> <span class="n">out</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">target</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+    <span class="c1"># -- use ---------------------------------------------------------------------</span>
+<div class="viewcode-block" id="AxquaProfile.script">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.script">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">script</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The setup script of a solver, or the launcher of a postprocessor.</span>
+
+<span class="sd">        The entry of the profile where there is one. Otherwise the file that the</span>
+<span class="sd">        installation folder of *key* holds, where it holds exactly one.</span>
+<span class="sd">        """</span>
+        <span class="n">named</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">named</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">named</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">named</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">installations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">locate</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span> <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="AxquaProfile.named">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.named">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">named</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The script or launcher the profile names itself for *key*, or ``None``."""</span>
+        <span class="n">binding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">binding</span><span class="o">.</span><span class="n">setup_script</span> <span class="k">if</span> <span class="n">binding</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">postprocessors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AxquaProfile.programs">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.programs">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">programs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""``program -&gt; the script or launcher aXqua runs``, where there is one."""</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">PROGRAMS</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">found</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">key</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="AxquaProfile.unknown_entries">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.unknown_entries">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unknown_entries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""The dotted names of the entries this version does not know."""</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">block</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">block</span> <span class="k">else</span> <span class="n">key</span>
+                 <span class="k">for</span> <span class="n">block</span><span class="p">,</span> <span class="n">entries</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">solver</span><span class="p">,</span> <span class="n">binding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                  <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">binding</span><span class="o">.</span><span class="n">extra</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">names</span></div>
+
+
+<div class="viewcode-block" id="AxquaProfile.describe">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.AxquaProfile.describe">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""One line for a status report."""</span>
+        <span class="n">bound</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">SOLVERS</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'profile'</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'not saved'</span><span class="si">}</span><span class="s2">): "</span>
+                <span class="o">+</span> <span class="p">(</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span> <span class="k">if</span> <span class="n">bound</span> <span class="k">else</span> <span class="s2">"no simulation software bound"</span><span class="p">))</span></div>
+</div>
+
+
+
+<span class="c1"># ----------------------------------------------------------------------- locating</span>
+
+
+<div class="viewcode-block" id="default_path">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.default_path">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_path</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where the default profile lives (whether or not it exists)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">machine</span>
+    <span class="k">return</span> <span class="n">machine</span><span class="o">.</span><span class="n">settings_path</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">DEFAULT_NAME</span></div>
+
+
+
+<div class="viewcode-block" id="file_path">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.file_path">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">file_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The file that a profile named *path* is kept in, whether or not it exists yet.</span>
+
+<span class="sd">    A file that exists is taken as it is named, so that a profile is written back to</span>
+<span class="sd">    the file it was read from. A name without a file gets the suffix. Reading, writing</span>
+<span class="sd">    and the question "is there one already?" all ask here, so that they cannot mean</span>
+<span class="sd">    two different files.</span>
+<span class="sd">    """</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="n">SUFFIX</span> <span class="ow">or</span> <span class="n">target</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">target</span>
+    <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">SUFFIX</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="active_path">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.active_path">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">active_path</span><span class="p">(</span><span class="n">explicit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The profile in force, or ``None`` when this computer has none."""</span>
+    <span class="k">if</span> <span class="n">explicit</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">file_path</span><span class="p">(</span><span class="n">explicit</span><span class="p">)</span>
+    <span class="n">named</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENV_VAR</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">named</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">file_path</span><span class="p">(</span><span class="n">named</span><span class="p">)</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">default_path</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">default</span> <span class="k">if</span> <span class="n">default</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------------ file I/O</span>
+
+
+<div class="viewcode-block" id="load">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.load">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AxquaProfile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Read a profile. Raises :class:`ConfigError` for anything that is not one."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">file_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"profile not found: </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">),</span>
+                          <span class="n">remedy</span><span class="o">=</span><span class="s2">"Create one with 'axqua profile init'."</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> is not valid YAML"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">),</span>
+                          <span class="n">cause</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> is not an aXqua profile"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">AxquaProfile</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">target</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#: path -&gt; (modification time, profile). A case load asks for the active profile once</span>
+<span class="c1">#: per solver, and a study loads the case once per mesh.</span>
+<span class="n">_CACHE</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">AxquaProfile</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">_WARNED</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="load_active">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.load_active">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_active</span><span class="p">(</span><span class="n">explicit</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AxquaProfile</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The active profile, or ``None``.</span>
+
+<span class="sd">    Not *strict* by default, because this runs inside every case load: a profile with a</span>
+<span class="sd">    typing error must not stop a build that the older settings can still serve. It is</span>
+<span class="sd">    reported once and skipped. The commands that are *about* the profile pass</span>
+<span class="sd">    ``strict=True`` and get the error.</span>
+<span class="sd">    """</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">active_path</span><span class="p">(</span><span class="n">explicit</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">stamp</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime_ns</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"profile not found: </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">),</span>
+                              <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Check </span><span class="si">{</span><span class="n">ENV_VAR</span><span class="si">}</span><span class="s2">, or create the profile with "</span>
+                                     <span class="s2">"'axqua profile init'."</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_WARNED</span><span class="p">:</span>
+            <span class="n">_WARNED</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">target</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the profile </span><span class="si">%s</span><span class="s2"> does not exist; ignoring it"</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">cached</span> <span class="o">=</span> <span class="n">_CACHE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cached</span> <span class="ow">and</span> <span class="n">cached</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">stamp</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">cached</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">ConfigError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">stamp</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_WARNED</span><span class="p">:</span>
+            <span class="n">_WARNED</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">target</span><span class="p">,</span> <span class="n">stamp</span><span class="p">))</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"could not read the profile </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">); ignoring it"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">unknown</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">unknown_entries</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">unknown</span> <span class="ow">and</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">stamp</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_WARNED</span><span class="p">:</span>
+        <span class="n">_WARNED</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">target</span><span class="p">,</span> <span class="n">stamp</span><span class="p">))</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"the profile </span><span class="si">%s</span><span class="s2"> has entries this version of aXqua does not know "</span>
+                    <span class="s2">"(</span><span class="si">%s</span><span class="s2">); they are kept and not used"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">))</span>
+    <span class="n">_CACHE</span><span class="p">[</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">stamp</span><span class="p">,</span> <span class="n">profile</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">profile</span></div>
+
+
+
+<div class="viewcode-block" id="save">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.save">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">AxquaProfile</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write the profile, atomically, and return where it went.</span>
+
+<span class="sd">    A file at that place which this version cannot read is not lost: it is moved to</span>
+<span class="sd">    ``&lt;name&gt;.&lt;date&gt;-&lt;time&gt;.bak`` beside it first, and ``profile.backup`` says where. It</span>
+<span class="sd">    may be the profile of a newer aXqua, or one with a typing error that its owner</span>
+<span class="sd">    would rather correct than retype.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">file_path</span><span class="p">(</span><span class="n">path</span> <span class="ow">or</span> <span class="n">profile</span><span class="o">.</span><span class="n">path</span> <span class="ow">or</span> <span class="n">default_path</span><span class="p">())</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">allow_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">".</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.tmp"</span><span class="p">)</span>
+    <span class="n">tmp</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+    <span class="n">profile</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">load</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ConfigError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="n">kept</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">'%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S'</span><span class="p">)</span><span class="si">}</span><span class="s2">.bak"</span><span class="p">)</span>
+            <span class="n">number</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="n">kept</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>                <span class="c1"># two saves within one second</span>
+                <span class="n">number</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">kept</span> <span class="o">=</span> <span class="n">kept</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">kept</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">number</span><span class="si">}</span><span class="s2">.bak"</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">kept</span><span class="p">)</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">backup</span> <span class="o">=</span> <span class="n">kept</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2"> could not be read (</span><span class="si">%s</span><span class="s2">) and was kept as </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span> <span class="n">kept</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="n">profile</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="n">_CACHE</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">target</span></div>
+
+
+
+<span class="c1"># ----------------------------------------------------------------------- detecting</span>
+
+
+<div class="viewcode-block" id="detect">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.detect">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AxquaProfile</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A profile for this computer, from what is already known and what can be found.</span>
+
+<span class="sd">    Reads the older settings (the environment variables, ``solvers.yml``, the usual</span>
+<span class="sd">    installation folders) through :func:`axqua.core.machine.resolve`, so a computer on</span>
+<span class="sd">    which aXqua already works gets a profile that describes exactly that. Nothing is</span>
+<span class="sd">    probed and nothing is written; :func:`check` and :func:`save` do those.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">machine</span>
+
+    <span class="n">profile</span> <span class="o">=</span> <span class="n">AxquaProfile</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="ow">or</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span> <span class="n">python</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">))</span>
+    <span class="n">program</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="n">sibling</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sibling</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">profile</span><span class="o">.</span><span class="n">axqua</span> <span class="o">=</span> <span class="n">sibling</span>
+    <span class="k">elif</span> <span class="n">program</span><span class="p">:</span>
+        <span class="n">profile</span><span class="o">.</span><span class="n">axqua</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">solver</span> <span class="ow">in</span> <span class="n">SOLVERS</span><span class="p">:</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">use_profile</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">solvers</span><span class="p">[</span><span class="n">solver</span><span class="p">]</span> <span class="o">=</span> <span class="n">SolverBinding</span><span class="p">(</span><span class="n">setup_script</span><span class="o">=</span><span class="n">found</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">program_name</span> <span class="ow">in</span> <span class="n">POSTPROCESSORS</span><span class="p">:</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">machine</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">program_name</span><span class="p">,</span> <span class="n">use_profile</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">postprocessors</span><span class="p">[</span><span class="n">program_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">found</span><span class="o">.</span><span class="n">path</span>
+        <span class="k">elif</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">program_name</span><span class="p">):</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">postprocessors</span><span class="p">[</span><span class="n">program_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">program_name</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">PROGRAMS</span><span class="p">:</span>
+        <span class="n">named</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">installation_of</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">named</span><span class="p">)</span> <span class="k">if</span> <span class="n">named</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">profile</span><span class="o">.</span><span class="n">installations</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">folder</span>
+    <span class="k">return</span> <span class="n">profile</span></div>
+
+
+
+<span class="c1"># ------------------------------------------------------------------------ checking</span>
+
+
+<div class="viewcode-block" id="check">
+<a class="viewcode-back" href="../../../code/configuration.html#axqua.core.profile.check">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">AxquaProfile</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">probe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">120.0</span>
+          <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Everything that is wrong with *profile*. Never raises.</span>
+
+<span class="sd">    Three tiers. *Files*: every named path exists. *Factual*: the values are possible.</span>
+<span class="sd">    *Functional* (only with *probe*, because it starts a shell per code): each</span>
+<span class="sd">    environment script can actually be entered and yields the code it claims to. The</span>
+<span class="sd">    last tier is the one that tells a working installation from a path that merely</span>
+<span class="sd">    exists, and it takes seconds - which is why a caller can leave it out.</span>
+<span class="sd">    """</span>
+    <span class="n">findings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">severity</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">remedy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">findings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span><span class="n">severity</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">what</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"python.executable"</span><span class="p">,</span> <span class="n">profile</span><span class="o">.</span><span class="n">python</span><span class="p">,</span> <span class="s2">"Python interpreter"</span><span class="p">),</span>
+                             <span class="p">(</span><span class="s2">"python.axqua"</span><span class="p">,</span> <span class="n">profile</span><span class="o">.</span><span class="n">axqua</span><span class="p">,</span> <span class="s2">"aXqua program"</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.program_missing"</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> does not exist"</span><span class="p">,</span>
+                <span class="s2">"Select the file again, or detect it with 'axqua profile detect'."</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">profile</span><span class="o">.</span><span class="n">unknown_entries</span><span class="p">():</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.config.unknown_entry"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"this version of aXqua does not know the entry </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">; it is kept as it "</span>
+            <span class="s2">"is and not used"</span><span class="p">,</span> <span class="n">_unknown_remedy</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="n">findings</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_check_installations</span><span class="p">(</span><span class="n">profile</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">solver</span> <span class="ow">in</span> <span class="n">SOLVERS</span><span class="p">:</span>
+        <span class="n">findings</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_check_binding</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">solver</span><span class="p">,</span> <span class="n">probe</span><span class="o">=</span><span class="n">probe</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">program</span> <span class="ow">in</span> <span class="n">POSTPROCESSORS</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"postprocessors.</span><span class="si">{</span><span class="n">program</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">folder</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">installations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.program_missing"</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">program</span><span class="si">}</span><span class="s2"> program was not found in the installation folder "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">"Select the program file itself."</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.program_missing"</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">program</span><span class="si">}</span><span class="s2"> launcher </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> does not exist"</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">):</span>
+            <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.program_missing"</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">program</span><span class="si">}</span><span class="s2"> launcher </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2"> is not executable"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">job_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">profile</span><span class="o">.</span><span class="n">job_root</span><span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="o">*</span><span class="n">root</span><span class="o">.</span><span class="n">parents</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">exists</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">existing</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="p">):</span>
+            <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.job_root_not_writable"</span><span class="p">,</span> <span class="s2">"jobs.root"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the job root </span><span class="si">{</span><span class="n">root</span><span class="si">}</span><span class="s2"> cannot be written to"</span><span class="p">,</span>
+                <span class="s2">"Select a folder on a drive with write access and sufficient space."</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">launcher</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LAUNCHERS</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.config.invalid_value"</span><span class="p">,</span> <span class="s2">"jobs.launcher"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"the launcher must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">LAUNCHERS</span><span class="p">)</span><span class="si">}</span><span class="s2">, "</span>
+            <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="n">profile</span><span class="o">.</span><span class="n">launcher</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">min_depth</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.config.invalid_value"</span><span class="p">,</span> <span class="s2">"display.min_depth"</span><span class="p">,</span>
+            <span class="s2">"the minimum water depth cannot be negative"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">velocity_cap</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">add</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.config.invalid_value"</span><span class="p">,</span> <span class="s2">"display.velocity_cap"</span><span class="p">,</span>
+            <span class="s2">"the upper limit of the velocity scale must be positive"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">findings</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_unknown_remedy</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""What to do about an entry that is not known: most often it is a typing error."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
+
+    <span class="n">place</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+    <span class="n">known</span> <span class="o">=</span> <span class="n">TOP_LEVEL</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">place</span> <span class="k">else</span> <span class="n">BLOCKS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">place</span><span class="p">)</span> <span class="ow">or</span> <span class="n">SolverBinding</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">close</span> <span class="o">=</span> <span class="n">difflib</span><span class="o">.</span><span class="n">get_close_matches</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">known</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="sa">f</span><span class="s2">"If </span><span class="si">{</span><span class="n">close</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> is meant, correct the name in the profile file. "</span>
+             <span class="k">if</span> <span class="n">close</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">"An entry that a newer aXqua or a newer plugin wrote is used once aXqua "</span>
+              <span class="s2">"is updated."</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_in_wsl</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">AxquaProfile</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""A path inside a WSL distribution cannot be looked at from Windows."""</span>
+    <span class="n">binding</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">binding</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">binding</span><span class="o">.</span><span class="n">environment</span> <span class="o">==</span> <span class="s2">"wsl"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_installations</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">AxquaProfile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The installation folders: each exists, and holds what the profile names."""</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">profile</span><span class="o">.</span><span class="n">installations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">_in_wsl</span><span class="p">(</span><span class="n">profile</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">subject</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"installations.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">folder</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
+                <span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.environment.installation_missing"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the installation folder of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> does not exist: </span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"Select the folder again, or clear the entry."</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="n">named</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">named</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">named</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">named</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">inside</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">named</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">folder</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span> \
+                <span class="ow">or</span> <span class="n">Path</span><span class="p">(</span><span class="n">named</span><span class="p">)</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inside</span><span class="p">:</span>
+            <span class="n">what</span> <span class="o">=</span> <span class="s2">"environment script"</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">SOLVERS</span> <span class="k">else</span> <span class="s2">"program"</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
+                <span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.environment.installation_mismatch"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"the </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">named</span><span class="si">}</span><span class="s2">) is not in the installation folder "</span>
+                <span class="sa">f</span><span class="s2">"entered for it (</span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">); aXqua uses the </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Select the folder the </span><span class="si">{</span><span class="n">what</span><span class="si">}</span><span class="s2"> belongs to, or clear the folder."</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_binding</span><span class="p">(</span><span class="n">profile</span><span class="p">:</span> <span class="n">AxquaProfile</span><span class="p">,</span> <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">probe</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span>
+                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]:</span>
+    <span class="n">subject</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.setup_script"</span>
+    <span class="n">binding</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">solvers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span> <span class="ow">or</span> <span class="n">SolverBinding</span><span class="p">()</span>
+    <span class="n">script</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">script</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">script</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">profile</span><span class="o">.</span><span class="n">installations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">solver</span><span class="p">)</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">candidates</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">folder</span><span class="p">)</span> <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"the installation folder of </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2"> holds several environment "</span>
+                       <span class="s2">"scripts ("</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">found</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"), so "</span>
+                       <span class="s2">"aXqua does not know which one to use"</span><span class="p">)</span>
+            <span class="n">remedy</span> <span class="o">=</span> <span class="s2">"Select one of them as the environment script."</span>
+        <span class="k">elif</span> <span class="n">folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"no environment script of </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2"> was found in the "</span>
+                       <span class="sa">f</span><span class="s2">"installation folder </span><span class="si">{</span><span class="n">folder</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">remedy</span> <span class="o">=</span> <span class="s2">"Select the environment script itself."</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"no environment script is set for </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">, so simulations "</span>
+                       <span class="s2">"with it cannot be started"</span><span class="p">)</span>
+            <span class="n">remedy</span> <span class="o">=</span> <span class="s2">"Leave it empty if this code is not used on this computer."</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Finding</span><span class="p">(</span><span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.environment.solver_unbound"</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span>
+                        <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">remedy</span><span class="o">=</span><span class="n">remedy</span><span class="p">)]</span>
+
+    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">script</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">script</span><span class="p">)</span>
+    <span class="n">on_host</span> <span class="o">=</span> <span class="n">binding</span><span class="o">.</span><span class="n">environment</span> <span class="o">!=</span> <span class="s2">"wsl"</span>      <span class="c1"># a WSL path cannot be checked from here</span>
+    <span class="k">if</span> <span class="n">on_host</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">script</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Finding</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.script_missing"</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"the environment script of </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2"> does not exist: </span><span class="si">{</span><span class="n">script</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                        <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                        <span class="n">remedy</span><span class="o">=</span><span class="s2">"Select the script of the installation on this computer."</span><span class="p">)]</span>
+
+    <span class="n">cores</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span> <span class="ow">or</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">binding</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">binding</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.config.invalid_value"</span><span class="p">,</span>
+                           <span class="s2">"the number of processes must be at least 1"</span><span class="p">,</span>
+                           <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.mpi_processes"</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">binding</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="ow">and</span> <span class="n">cores</span> <span class="ow">and</span> <span class="n">binding</span><span class="o">.</span><span class="n">mpi_processes</span> <span class="o">&gt;</span> <span class="n">cores</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
+            <span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.environment.too_many_processes"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">binding</span><span class="o">.</span><span class="n">mpi_processes</span><span class="si">}</span><span class="s2"> processes are requested for </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">, but this "</span>
+            <span class="sa">f</span><span class="s2">"computer has </span><span class="si">{</span><span class="n">cores</span><span class="si">}</span><span class="s2"> logical cores"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"solvers.</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">.mpi_processes"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"More processes than cores slow a simulation down."</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">probe</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_probe</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">binding</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">subject</span><span class="p">,</span> <span class="n">timeout</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_probe</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">binding</span><span class="p">:</span> <span class="n">SolverBinding</span><span class="p">,</span> <span class="n">script</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+           <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Enter the environment and see whether the code is really there."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.environment</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverEnvironment</span><span class="p">,</span> <span class="n">default_kind</span>
+
+    <span class="n">overrides</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">binding</span><span class="o">.</span><span class="n">overrides</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">binding</span><span class="o">.</span><span class="n">config_name</span><span class="p">:</span>
+        <span class="n">overrides</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"USETELCFG"</span><span class="p">,</span> <span class="n">binding</span><span class="o">.</span><span class="n">config_name</span><span class="p">)</span>
+    <span class="n">environment</span> <span class="o">=</span> <span class="n">SolverEnvironment</span><span class="p">(</span>
+        <span class="n">kind</span><span class="o">=</span><span class="n">binding</span><span class="o">.</span><span class="n">environment</span> <span class="ow">or</span> <span class="n">default_kind</span><span class="p">(),</span> <span class="n">setup_script</span><span class="o">=</span><span class="n">script</span><span class="p">,</span>
+        <span class="n">shell</span><span class="o">=</span><span class="n">binding</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span> <span class="n">distro</span><span class="o">=</span><span class="n">binding</span><span class="o">.</span><span class="n">distro</span><span class="p">,</span> <span class="n">mpi_launcher</span><span class="o">=</span><span class="n">binding</span><span class="o">.</span><span class="n">mpi_launcher</span><span class="p">,</span>
+        <span class="n">overrides</span><span class="o">=</span><span class="n">overrides</span><span class="p">)</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="n">environment</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">solver</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">status</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">Finding</span><span class="p">(</span><span class="n">ERROR</span><span class="p">,</span> <span class="s2">"axqua.environment.solver_unreachable"</span><span class="p">,</span>
+                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2"> cannot be reached: </span><span class="si">{</span><span class="n">status</span><span class="o">.</span><span class="n">detail</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                        <span class="n">remedy</span><span class="o">=</span><span class="s2">"Check that this is the environment script of a working "</span>
+                               <span class="s2">"installation."</span><span class="p">)]</span>
+    <span class="n">out</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Finding</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">status</span><span class="o">.</span><span class="n">ambient</span><span class="p">:</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
+            <span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.environment.ambient"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"the variables of </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2"> were already set before its environment script "</span>
+            <span class="s2">"ran, so the script may not be what provides them"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"A job does not inherit the settings of a terminal. Make sure the "</span>
+                   <span class="s2">"script itself sets up the installation."</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">solver</span> <span class="o">==</span> <span class="s2">"openfoam"</span><span class="p">:</span>
+        <span class="n">release</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"WM_PROJECT_VERSION"</span><span class="p">,</span> <span class="s2">""</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">OPENFOAM_RELEASE</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">release</span><span class="p">:</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Finding</span><span class="p">(</span>
+                <span class="n">WARNING</span><span class="p">,</span> <span class="s2">"axqua.environment.openfoam_version"</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">"this is OpenFOAM </span><span class="si">{</span><span class="n">release</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">'of an unknown version'</span><span class="si">}</span><span class="s2">; aXqua writes "</span>
+                <span class="sa">f</span><span class="s2">"input files for v</span><span class="si">{</span><span class="n">OPENFOAM_RELEASE</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Bind the environment script of OpenFOAM v</span><span class="si">{</span><span class="n">OPENFOAM_RELEASE</span><span class="si">}</span><span class="s2">."</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

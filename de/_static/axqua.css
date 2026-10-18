@@ -1,0 +1,74 @@
+/* Navigation menu of the aXqua documentation.
+
+   The menu lists the sections. The subsections of a section are folded until the section
+   is opened with its fold button or one of its pages is shown, and the subsubsections of
+   a subsection open in the same way. This is the folding of the theme itself, so no rule
+   here opens a level. docs/conf.py keeps the whole tree in every page, which is what
+   gives every section its fold button. */
+
+/* Level 1 (sections: Purpose, Installation & Configuration, ...) stands out in bold
+   capital letters, on every page and whether or not the section is the current one. */
+.wy-menu-vertical li.toctree-l1 > a,
+.wy-menu-vertical li.toctree-l1.current > a {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* The fold button of a closed section sits on the dark menu background, where the dark
+   gray that the theme gives it can hardly be seen. */
+.wy-menu-vertical li.toctree-l1:not(.current) > a > button.toctree-expand {
+    color: #b3b3b3;
+}
+
+/* Tables: the theme keeps every cell on one line and lets the table scroll sideways,
+   which hides the explanatory column of the settings tables. Cells wrap instead. */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+    white-space: normal;
+}
+
+.wy-table-responsive {
+    overflow: visible;
+}
+
+/* The mark above the project name, not beside it. The theme writes the name and then
+   the image inside one link, so the two sit on a line reading "aXqua [mark]";
+   column-reverse puts the mark on top without touching the HTML, which the theme owns.
+   The width cap matters: the file is 500 px square and the sidebar is about 300 px, so
+   uncapped it fills the whole header. */
+.wy-side-nav-search > a {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+}
+
+.wy-side-nav-search > a img.logo {
+    width: 110px;
+    max-width: 60%;
+    margin: 0 0 0.4em;
+    /* the theme gives the logo a white backing, which the drop shape does not need */
+    background: transparent;
+}
+
+/* Note and info boxes in the colors of aXqua: a frame and a title bar in the dark purple of the
+   icon (the AXQUA_PURPLE of the plugin, qgis_plugin/axqua/gui/style.py) on a light purple. An info
+   box is a free admonition with the class info:
+
+       .. admonition:: About
+          :class: info
+
+   The theme draws these boxes blue, like links, which makes a note look clickable. */
+.rst-content .note,
+.rst-content .admonition.note,
+.rst-content .admonition.info {
+    background: #f3eef8;
+    border: 1px solid #2e014b;
+}
+
+.rst-content .note .admonition-title,
+.rst-content .admonition.note .admonition-title,
+.rst-content .admonition.info .admonition-title {
+    background: #2e014b;
+    color: #ffffff;
+}

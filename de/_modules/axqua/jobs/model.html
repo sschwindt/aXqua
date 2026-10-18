@@ -1,0 +1,1356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.jobs.model &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/jobs/model.html" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/jobs/model.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/jobs/model.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/jobs/model.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/jobs/model.html"><link rel="stylesheet" href="../../../../_i18n/lang.css"><script src="../../../../_i18n/lang.js" data-lang="de" data-root="../../../../" data-page="_modules/axqua/jobs/model.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../_modules/axqua/jobs/model.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../fr/_modules/axqua/jobs/model.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.jobs.model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../_modules/axqua/jobs/model.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.jobs.model</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""The job model: states, kinds, options, progress, and the two records on disk.</span>
+
+<span class="sd">Two files describe a job, and the split is the whole point (plan §3):</span>
+
+<span class="sd">``job.json``</span>
+<span class="sd">    The **immutable submission record**. What was asked for, *resolved and frozen* at</span>
+<span class="sd">    submit time - including the entire case configuration, not a reference to it. If the</span>
+<span class="sd">    user edits ``case-config.yml`` afterwards, a running job must not change underneath</span>
+<span class="sd">    itself, and a finished job must stay reproducible from its own directory alone.</span>
+<span class="sd">    Written once, then made read-only.</span>
+
+<span class="sd">``status.json``</span>
+<span class="sd">    The **mutable state**. Written only by the runner, only by atomic replace. Readers</span>
+<span class="sd">    never lock; they read the last complete file.</span>
+
+<span class="sd">Progress is **nested and typed by job kind**, not flattened into the top level. Most jobs</span>
+<span class="sd">are not optimizations: a steady run reports simulated time against duration, a</span>
+<span class="sd">mesh-convergence study reports levels completed, a BAL run reports iterations and a best</span>
+<span class="sd">objective. Hoisting ``iteration`` and ``best_objective`` to the top level would force</span>
+<span class="sd">every other kind to publish nulls and would invite the dashboard to render meaningless</span>
+<span class="sd">zeros.</span>
+
+<span class="sd">Standard library only. The CLI touches this module on every job verb, and</span>
+<span class="sd">``tests/test_capabilities.py`` asserts from a subprocess that nothing heavy is pulled in.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_dt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">fields</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">Capability</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
+
+<span class="n">JOB_SCHEMA_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">STATUS_SCHEMA_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+
+
+<div class="viewcode-block" id="utc_now">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.utc_now">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">utc_now</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""One timestamp format everywhere: ISO-8601, seconds, with an offset."""</span>
+    <span class="k">return</span> <span class="n">_dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- states</span>
+
+
+<div class="viewcode-block" id="JobState">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobState">[Doku]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JobState</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Where a job is. ``str``-valued so it serializes without a converter."""</span>
+
+    <span class="n">QUEUED</span> <span class="o">=</span> <span class="s2">"QUEUED"</span>
+    <span class="n">STARTING</span> <span class="o">=</span> <span class="s2">"STARTING"</span>
+    <span class="n">RUNNING</span> <span class="o">=</span> <span class="s2">"RUNNING"</span>
+    <span class="n">POSTPROCESSING</span> <span class="o">=</span> <span class="s2">"POSTPROCESSING"</span>
+    <span class="n">COMPLETED</span> <span class="o">=</span> <span class="s2">"COMPLETED"</span>
+    <span class="n">FAILED</span> <span class="o">=</span> <span class="s2">"FAILED"</span>
+    <span class="n">CANCEL_REQUESTED</span> <span class="o">=</span> <span class="s2">"CANCEL_REQUESTED"</span>
+    <span class="n">CANCELLED</span> <span class="o">=</span> <span class="s2">"CANCELLED"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>  <span class="c1"># so f-strings and log lines read cleanly</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_terminal</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""A terminal job never changes again - which is what lets the dashboard stop</span>
+<span class="sd">        polling it (plan §18)."""</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">_TERMINAL</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_active</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">_ACTIVE</span>
+
+<div class="viewcode-block" id="JobState.can_go_to">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobState.can_go_to">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">can_go_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">"JobState"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">TRANSITIONS</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span></div>
+</div>
+
+
+
+<span class="n">_TERMINAL</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">})</span>
+<span class="n">_ACTIVE</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">STARTING</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">POSTPROCESSING</span><span class="p">})</span>
+
+<span class="c1">#: The legal edges. Two are worth spelling out because they look wrong at a glance:</span>
+<span class="c1">#:</span>
+<span class="c1">#: * ``QUEUED -&gt; CANCELLED`` directly - the job was cancelled before it ever launched, so</span>
+<span class="c1">#:   there is nothing to tear down and no reason to pass through CANCEL_REQUESTED.</span>
+<span class="c1">#: * ``CANCEL_REQUESTED -&gt; COMPLETED`` - a cancel is a *request*; a solver a few seconds</span>
+<span class="c1">#:   from finishing may well finish first, and reporting that as CANCELLED would be a lie.</span>
+<span class="n">TRANSITIONS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">JobState</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">[</span><span class="n">JobState</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">QUEUED</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">STARTING</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">,</span>
+                                <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">}),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">STARTING</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">,</span>
+                                  <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">}),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">RUNNING</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">POSTPROCESSING</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span>
+                                 <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">}),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">POSTPROCESSING</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">,</span>
+                                        <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">}),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">CANCEL_REQUESTED</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span><span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="n">JobState</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">,</span>
+                                          <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">}),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">COMPLETED</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">(),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">FAILED</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">(),</span>
+    <span class="n">JobState</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">(),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="IllegalTransition">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.IllegalTransition">[Doku]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IllegalTransition</span><span class="p">(</span><span class="n">ConfigError</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Raised rather than coerced.</span>
+
+<span class="sd">    Silently clamping an impossible transition is how a job ends up reporting RUNNING</span>
+<span class="sd">    forever, or COMPLETED after a crash. The state machine is small enough that any</span>
+<span class="sd">    violation is a bug in axqua, and it should be loud.</span>
+<span class="sd">    """</span>
+
+    <span class="n">code</span> <span class="o">=</span> <span class="s2">"axqua.job.transition"</span></div>
+
+
+
+<div class="viewcode-block" id="check_transition">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.check_transition">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_transition</span><span class="p">(</span><span class="n">current</span><span class="p">:</span> <span class="n">JobState</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">JobState</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="n">target</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">current</span><span class="o">.</span><span class="n">can_go_to</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">IllegalTransition</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"cannot move a job from </span><span class="si">{</span><span class="n">current</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">target</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="n">subject</span><span class="o">=</span><span class="s2">"state"</span><span class="p">,</span>
+            <span class="n">current</span><span class="o">=</span><span class="n">current</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">allowed</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">TRANSITIONS</span><span class="p">[</span><span class="n">current</span><span class="p">]),</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------- kinds</span>
+
+
+<div class="viewcode-block" id="JobKind">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobKind">[Doku]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">JobKind</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""One kind per case-template script.</span>
+
+<span class="sd">    The taxonomy is not invented here - ``cases/case-template/`` already contains it, one</span>
+<span class="sd">    script per unit of long-running work. Keeping the two in step means a user who knows</span>
+<span class="sd">    the scripts knows the job kinds, and the scripts stay the supported standalone path</span>
+<span class="sd">    (plan §29).</span>
+<span class="sd">    """</span>
+
+    <span class="n">PREPROCESSING</span> <span class="o">=</span> <span class="s2">"preprocessing"</span>
+    <span class="n">STEADY_RUN</span> <span class="o">=</span> <span class="s2">"steady"</span>
+    <span class="n">MESH_CONVERGENCE</span> <span class="o">=</span> <span class="s2">"mesh-convergence"</span>
+    <span class="n">BUILD_3D</span> <span class="o">=</span> <span class="s2">"build-3d"</span>
+    <span class="n">STEADY_RUN_3D</span> <span class="o">=</span> <span class="s2">"steady-3d"</span>
+    <span class="n">VERTICAL_CONVERGENCE</span> <span class="o">=</span> <span class="s2">"vertical-convergence"</span>
+    <span class="n">UNSTEADY_RUN</span> <span class="o">=</span> <span class="s2">"unsteady"</span>
+    <span class="n">OPENFOAM_BUILD</span> <span class="o">=</span> <span class="s2">"openfoam-build"</span>
+    <span class="n">OPENFOAM_RUN</span> <span class="o">=</span> <span class="s2">"openfoam-run"</span>
+    <span class="n">OPENFOAM_SEDIMENT_BUILD</span> <span class="o">=</span> <span class="s2">"openfoam-sediment-build"</span>
+    <span class="n">OPENFOAM_SEDIMENT_RUN</span> <span class="o">=</span> <span class="s2">"openfoam-sediment"</span>
+    <span class="n">OPENFOAM_MESH_CONVERGENCE</span> <span class="o">=</span> <span class="s2">"openfoam-mesh-convergence"</span>
+    <span class="n">CALIBRATION</span> <span class="o">=</span> <span class="s2">"calibration"</span>
+    <span class="n">CALIBRATION_MULTIFLOW</span> <span class="o">=</span> <span class="s2">"calibration-multiflow"</span>
+    <span class="n">VALIDATION</span> <span class="o">=</span> <span class="s2">"validation"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
+
+
+
+<div class="viewcode-block" id="parse_kind">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.parse_kind">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_kind</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">JobKind</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Accept the enum value, the enum name, or a few obvious aliases."""</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">JobKind</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="p">(</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">kind</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">kind</span>
+    <span class="n">aliases</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"preprocess"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">PREPROCESSING</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">PREPROCESSING</span><span class="p">,</span>
+               <span class="s2">"steady2d"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN</span><span class="p">,</span>
+               <span class="s2">"meshconv"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">MESH_CONVERGENCE</span><span class="p">,</span> <span class="s2">"3d"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">BUILD_3D</span><span class="p">,</span>
+               <span class="s2">"steady3d"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN_3D</span><span class="p">,</span> <span class="s2">"vertconv"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">VERTICAL_CONVERGENCE</span><span class="p">,</span>
+               <span class="s2">"bal"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span> <span class="s2">"balmf"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">CALIBRATION_MULTIFLOW</span><span class="p">,</span>
+               <span class="s2">"val"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">VALIDATION</span><span class="p">,</span>
+               <span class="s2">"of-build"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_BUILD</span><span class="p">,</span> <span class="s2">"of-run"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_RUN</span><span class="p">,</span>
+               <span class="s2">"fine-sediment-build"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_BUILD</span><span class="p">,</span>
+               <span class="s2">"fine-sediment"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_RUN</span><span class="p">,</span>
+               <span class="s2">"of-meshconv"</span><span class="p">:</span> <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">aliases</span><span class="p">[</span><span class="n">text</span><span class="p">]</span>
+    <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"unknown job kind </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="n">subject</span><span class="o">=</span><span class="s2">"kind"</span><span class="p">,</span>
+        <span class="n">remedy</span><span class="o">=</span><span class="s2">"Known kinds: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">JobKind</span><span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># -------------------------------------------------------------------------- options</span>
+<span class="c1">#</span>
+<span class="c1"># Each options dataclass is the schema of one case-template script's module-level</span>
+<span class="c1"># constants. That is the answer to "do not copy-paste the scripts": the knobs move into</span>
+<span class="c1"># the job record, the orchestration functions stay exactly where they are.</span>
+
+
+<div class="viewcode-block" id="Options">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Options">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Options</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Base for the per-kind option records.</span>
+
+<span class="sd">    A dataclass in its own right, with no fields, so that it also serves as the "no</span>
+<span class="sd">    options" case: :class:`JobSpec` defaults to one, and ``as_dict``/``as_kwargs`` then</span>
+<span class="sd">    return an empty mapping instead of raising.</span>
+
+<span class="sd">    ``from_dict`` refuses unknown keys. Plan §5 is explicit: never silently ignore an</span>
+<span class="sd">    unknown field, because that is how a job that *looks* submitted quietly runs</span>
+<span class="sd">    something else.</span>
+<span class="sd">    """</span>
+
+<div class="viewcode-block" id="Options.from_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Options.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">where</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"options"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Options"</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)}</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">known</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"unknown option</span><span class="si">{</span><span class="s1">'s'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2"> for this job kind: "</span>
+                <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">),</span>
+                <span class="n">subject</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">unknown</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"Known options: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">known</span><span class="p">)),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span></div>
+
+
+<div class="viewcode-block" id="Options.as_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Options.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>  <span class="c1"># type: ignore[arg-type]</span></div>
+
+
+<div class="viewcode-block" id="Options.as_kwargs">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Options.as_kwargs">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""What the executor splats into the backend verb."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PreprocessingOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.PreprocessingOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PreprocessingOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``cases/case-template/preprocessing.py``."""</span>
+
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">validate_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="SteadyRunOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.SteadyRunOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SteadyRunOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``initial_run.py`` - its ``NCSIZE`` and the hotstart tolerance."""</span>
+
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cas_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hotstart_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">report_wetting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">report_sections</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="MeshConvergenceOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.MeshConvergenceOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeshConvergenceOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``mesh_convergence_study.py``.</span>
+
+<span class="sd">    ``answers`` is what replaces the study's stdin prompt in a detached run; see</span>
+<span class="sd">    :mod:`axqua.jobs.interaction`.</span>
+<span class="sd">    """</span>
+
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">refinement_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.3</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">n_coarser</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">n_finer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">max_extra_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">auto_extend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">initial_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">answers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">"resume"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                                             <span class="s2">"extend"</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamMeshConvergenceOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamMeshConvergenceOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamMeshConvergenceOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The mesh convergence study of the OpenFOAM free-surface model.</span>
+
+<span class="sd">    *pre_run* and *hotstart* say where the 2D result every level starts from comes</span>
+<span class="sd">    from, as for ``openfoam-build``.</span>
+<span class="sd">    """</span>
+
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">refinement_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.3</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">n_coarser</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">n_finer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">max_extra_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">auto_extend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pre_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">answers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">"resume"</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                                             <span class="s2">"extend"</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span></div>
+
+
+
+<div class="viewcode-block" id="Build3DOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Build3DOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Build3DOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``add3d.py`` (build half)."""</span>
+
+    <span class="n">hydrostatic_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">n_levels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="Steady3DOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Steady3DOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Steady3DOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``add3d.py --run``."""</span>
+
+    <span class="n">variant</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"hydrostatic"</span>          <span class="c1"># hydrostatic | hydrodyn | unsteady</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="VerticalConvergenceOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.VerticalConvergenceOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">VerticalConvergenceOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``vertical_convergence_3d.py``."""</span>
+
+    <span class="n">layer_counts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="UnsteadyOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.UnsteadyOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">UnsteadyOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``unsteady_run.py`` and its in-script toggles."""</span>
+
+    <span class="n">mode_3d</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">control_sections</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">gaia_enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">gaia_bedload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">gaia_suspended</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamBuildOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamBuildOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamBuildOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``openfoam_preprocessing.py``."""</span>
+
+    <span class="n">pre_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cell_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamRunOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamRunOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamRunOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``openfoam_run.py``."""</span>
+
+    <span class="n">n_processors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">reconstruct</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">to_vtk</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">check_mesh</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamSedimentBuildOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamSedimentBuildOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamSedimentBuildOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The case of the fine sediment simulation.</span>
+
+<span class="sd">    *pre_run* and *hotstart* say where the water surface comes from, as for the build</span>
+<span class="sd">    of the free-surface case. The cell size is that of the block ``openfoam``.</span>
+<span class="sd">    """</span>
+
+    <span class="n">pre_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hotstart</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamSedimentRunOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamSedimentRunOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamSedimentRunOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The fine sediment simulation. *iterations* replaces ``fine_sediment.iterations``</span>
+<span class="sd">    for this run."""</span>
+
+    <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">check_mesh</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="CalibrationOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.CalibrationOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalibrationOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``run_Bayes_cal.py``."""</span>
+
+    <span class="n">prepare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">calibration_quantities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">extraction_quantities</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">vel_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">depth_err_floor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+
+<div class="viewcode-block" id="ValidationOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.ValidationOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ValidationOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The calibrated model, run for a validation situation and compared with it.</span>
+
+<span class="sd">    *situation* names an entry of ``calibration.validation`` in the case file and may</span>
+<span class="sd">    stay empty when the case has only one. *compare_only* repeats the comparison for a</span>
+<span class="sd">    run that exists, after the measurements were corrected for example.</span>
+<span class="sd">    """</span>
+
+    <span class="n">situation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">compare_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: What tells the study of the calibration capability that this is a validation.</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="MultiflowCalibrationOptions">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.MultiflowCalibrationOptions">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultiflowCalibrationOptions</span><span class="p">(</span><span class="n">Options</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""``run_Bayes_cal_multiflow.py``.</span>
+
+<span class="sd">    ``flows`` carries the ``FlowSpec`` fields as plain dicts; the backend rebuilds the</span>
+<span class="sd">    dataclasses. Keeping them dicts here is what lets ``job.json`` stay JSON.</span>
+<span class="sd">    """</span>
+
+    <span class="n">flows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="n">launch_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"run"</span>              <span class="c1"># prepare | smoke | run | resume</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<span class="c1"># -------------------------------------------------------------------------- progress</span>
+
+
+<div class="viewcode-block" id="Progress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Progress">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Progress</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Base for the kind-typed progress payloads.</span>
+
+<span class="sd">    The ``kind`` discriminator is written into the JSON so a reader can dispatch, and</span>
+<span class="sd">    :meth:`from_dict` keeps an **unknown** kind as a raw dict rather than discarding it -</span>
+<span class="sd">    a plugin built against an older axqua must degrade to showing nothing useful, not</span>
+<span class="sd">    to losing the field.</span>
+<span class="sd">    """</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"none"</span>
+
+<div class="viewcode-block" id="Progress.as_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Progress.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span>
+        <span class="n">out</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="Progress.merged">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Progress.merged">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">updates</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Progress"</span><span class="p">:</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span> <span class="o">-</span> <span class="p">{</span><span class="s2">"kind"</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">updates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">known</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="Progress.from_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Progress.from_dict">[Doku]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Progress | dict[str, Any] | None"</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">_PROGRESS_TYPES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>          <span class="c1"># forward compatible: keep what we cannot type</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)}</span> <span class="o">-</span> <span class="p">{</span><span class="s2">"kind"</span><span class="p">}</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">known</span><span class="p">})</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PreprocessingProgress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.PreprocessingProgress">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PreprocessingProgress</span><span class="p">(</span><span class="n">Progress</span><span class="p">):</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"preprocessing"</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">step_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span></div>
+
+
+
+<div class="viewcode-block" id="SolverRunProgress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.SolverRunProgress">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SolverRunProgress</span><span class="p">(</span><span class="n">Progress</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A TELEMAC or OpenFOAM march.</span>
+
+<span class="sd">    Progress is measured against *simulated time*, not step count: the CFL-adaptive time</span>
+<span class="sd">    step makes the number of steps unknown a priori, which is exactly why</span>
+<span class="sd">    ``axqua.progress.SolverProgress`` already works this way.</span>
+<span class="sd">    """</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"solver_run"</span>
+    <span class="n">simulated_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">time_step</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">courant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">flux_imbalance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulated_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulated_time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="LadderProgress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.LadderProgress">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LadderProgress</span><span class="p">(</span><span class="n">Progress</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""A convergence study: mesh levels or vertical layer counts."""</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ladder"</span>
+    <span class="n">levels_done</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">levels_total</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">current_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">converged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gci</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pending_question</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="CalibrationProgress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.CalibrationProgress">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalibrationProgress</span><span class="p">(</span><span class="n">Progress</span><span class="p">):</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"calibration"</span>
+    <span class="n">iteration</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">max_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">best_objective</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">flow</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">n_flows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="OpenFoamBuildProgress">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.OpenFoamBuildProgress">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OpenFoamBuildProgress</span><span class="p">(</span><span class="n">Progress</span><span class="p">):</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"openfoam_build"</span>
+    <span class="n">cells</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">stage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">mesh_usable</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+
+<span class="n">_PROGRESS_TYPES</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">Progress</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"none"</span><span class="p">:</span> <span class="n">Progress</span><span class="p">,</span>
+    <span class="s2">"preprocessing"</span><span class="p">:</span> <span class="n">PreprocessingProgress</span><span class="p">,</span>
+    <span class="s2">"solver_run"</span><span class="p">:</span> <span class="n">SolverRunProgress</span><span class="p">,</span>
+    <span class="s2">"ladder"</span><span class="p">:</span> <span class="n">LadderProgress</span><span class="p">,</span>
+    <span class="s2">"calibration"</span><span class="p">:</span> <span class="n">CalibrationProgress</span><span class="p">,</span>
+    <span class="s2">"openfoam_build"</span><span class="p">:</span> <span class="n">OpenFoamBuildProgress</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="c1"># ------------------------------------------------------------------------ kind meta</span>
+
+
+<div class="viewcode-block" id="KindMeta">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.KindMeta">[Doku]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">KindMeta</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Everything the system needs to know about a job kind, as data.</span>
+
+<span class="sd">    ``verb`` is the :class:`~axqua.core.registry.SolverBackend` method the executor</span>
+<span class="sd">    calls. Three verbs rather than one per kind: a convergence study is genuinely neither</span>
+<span class="sd">    a build nor a run, but adding a verb per kind would push the taxonomy into the</span>
+<span class="sd">    protocol and force every backend to grow with it.</span>
+<span class="sd">    """</span>
+
+    <span class="n">kind</span><span class="p">:</span> <span class="n">JobKind</span>
+    <span class="n">slug</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">capability</span><span class="p">:</span> <span class="n">Capability</span> <span class="o">|</span> <span class="kc">None</span>
+    <span class="n">verb</span><span class="p">:</span> <span class="nb">str</span>                             <span class="c1"># build | run | study</span>
+    <span class="n">options</span><span class="p">:</span> <span class="nb">type</span>
+    <span class="n">progress</span><span class="p">:</span> <span class="nb">type</span>
+    <span class="n">workspace_default</span><span class="p">:</span> <span class="nb">str</span>                <span class="c1"># job | case</span>
+    <span class="n">needs_environment</span><span class="p">:</span> <span class="nb">bool</span></div>
+
+
+
+<span class="c1">#: Every kind defaults to ``workspace: case``. Run kinds must: they hotstart from a</span>
+<span class="c1">#: result that already sits in the case's ``model_dir``, and copying it would violate</span>
+<span class="c1">#: the large-data rule (plan §26). The build did not use to - it defaulted to</span>
+<span class="c1">#: ``job``, a self-contained directory - and that made the default chain unusable:</span>
+<span class="c1">#: ``submit --kind preprocessing`` followed by ``submit --kind steady`` failed with "no</span>
+<span class="c1">#: built case", because the build sat in a job folder the run never looked in, and the</span>
+<span class="c1">#: case status kept reporting the case as unbuilt. That is the two buttons of the</span>
+<span class="c1">#: plugin's first tab. ``--workspace job`` still gives the self-contained build, and</span>
+<span class="c1">#: ``--from-job`` is how a run is pointed at it.</span>
+<span class="n">KIND_META</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">JobKind</span><span class="p">,</span> <span class="n">KindMeta</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">PREPROCESSING</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">PREPROCESSING</span><span class="p">,</span> <span class="s2">"preproc"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"Build the TELEMAC case"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">STEADY2D</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">,</span> <span class="n">PreprocessingOptions</span><span class="p">,</span> <span class="n">PreprocessingProgress</span><span class="p">,</span>
+        <span class="s2">"case"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN</span><span class="p">,</span> <span class="s2">"steady"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"Steady 2D run"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">STEADY2D</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span> <span class="n">SteadyRunOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">MESH_CONVERGENCE</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">MESH_CONVERGENCE</span><span class="p">,</span> <span class="s2">"meshconv"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"Mesh-convergence study"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">MESH_CONVERGENCE</span><span class="p">,</span> <span class="s2">"study"</span><span class="p">,</span> <span class="n">MeshConvergenceOptions</span><span class="p">,</span> <span class="n">LadderProgress</span><span class="p">,</span>
+        <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">BUILD_3D</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">BUILD_3D</span><span class="p">,</span> <span class="s2">"build3d"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"Write the TELEMAC-3D steering files"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">STEADY3D</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">,</span> <span class="n">Build3DOptions</span><span class="p">,</span> <span class="n">PreprocessingProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span>
+        <span class="kc">False</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN_3D</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">STEADY_RUN_3D</span><span class="p">,</span> <span class="s2">"steady3d"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"Steady 3D run"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">STEADY3D</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span> <span class="n">Steady3DOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">VERTICAL_CONVERGENCE</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">VERTICAL_CONVERGENCE</span><span class="p">,</span> <span class="s2">"vertconv"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span>
+        <span class="s2">"Vertical-layer convergence study"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">VERTICAL_CONVERGENCE</span><span class="p">,</span> <span class="s2">"study"</span><span class="p">,</span>
+        <span class="n">VerticalConvergenceOptions</span><span class="p">,</span> <span class="n">LadderProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">UNSTEADY_RUN</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">UNSTEADY_RUN</span><span class="p">,</span> <span class="s2">"unsteady"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"Unsteady (hydrograph) run"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">UNSTEADY2D</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span> <span class="n">UnsteadyOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_BUILD</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_BUILD</span><span class="p">,</span> <span class="s2">"ofbuild"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span> <span class="s2">"Build the OpenFOAM case"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">FREE_SURFACE_3D</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">,</span> <span class="n">OpenFoamBuildOptions</span><span class="p">,</span> <span class="n">OpenFoamBuildProgress</span><span class="p">,</span>
+        <span class="s2">"case"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_RUN</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_RUN</span><span class="p">,</span> <span class="s2">"ofrun"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span> <span class="s2">"OpenFOAM interFoam run"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">FREE_SURFACE_3D</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span> <span class="n">OpenFoamRunOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span>
+        <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_BUILD</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_BUILD</span><span class="p">,</span> <span class="s2">"ofsedbuild"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span>
+        <span class="s2">"Build the fine sediment case"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">MORPHODYNAMICS</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">,</span>
+        <span class="n">OpenFoamSedimentBuildOptions</span><span class="p">,</span> <span class="n">OpenFoamBuildProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_RUN</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_SEDIMENT_RUN</span><span class="p">,</span> <span class="s2">"ofsed"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span>
+        <span class="s2">"Fine sediment simulation (sediDriftFoam2)"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">MORPHODYNAMICS</span><span class="p">,</span> <span class="s2">"run"</span><span class="p">,</span>
+        <span class="n">OpenFoamSedimentRunOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">OPENFOAM_MESH_CONVERGENCE</span><span class="p">,</span> <span class="s2">"ofmeshconv"</span><span class="p">,</span> <span class="s2">"openfoam"</span><span class="p">,</span>
+        <span class="s2">"Mesh-convergence study of the OpenFOAM model"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">MESH_CONVERGENCE</span><span class="p">,</span>
+        <span class="s2">"study"</span><span class="p">,</span> <span class="n">OpenFoamMeshConvergenceOptions</span><span class="p">,</span> <span class="n">LadderProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span> <span class="s2">"bal"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span> <span class="s2">"HydroBayesCal calibration"</span><span class="p">,</span>
+        <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span> <span class="s2">"study"</span><span class="p">,</span> <span class="n">CalibrationOptions</span><span class="p">,</span> <span class="n">CalibrationProgress</span><span class="p">,</span>
+        <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">CALIBRATION_MULTIFLOW</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">CALIBRATION_MULTIFLOW</span><span class="p">,</span> <span class="s2">"balmf"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span>
+        <span class="s2">"HydroBayesCal multi-flow calibration"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span> <span class="s2">"study"</span><span class="p">,</span>
+        <span class="n">MultiflowCalibrationOptions</span><span class="p">,</span> <span class="n">CalibrationProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+    <span class="n">JobKind</span><span class="o">.</span><span class="n">VALIDATION</span><span class="p">:</span> <span class="n">KindMeta</span><span class="p">(</span>
+        <span class="n">JobKind</span><span class="o">.</span><span class="n">VALIDATION</span><span class="p">,</span> <span class="s2">"val"</span><span class="p">,</span> <span class="s2">"telemac"</span><span class="p">,</span>
+        <span class="s2">"Validation with data of another flow situation"</span><span class="p">,</span> <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span>
+        <span class="s2">"study"</span><span class="p">,</span> <span class="n">ValidationOptions</span><span class="p">,</span> <span class="n">SolverRunProgress</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="kinds_for">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.kinds_for">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">kinds_for</span><span class="p">(</span><span class="n">solver</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">JobKind</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">KIND_META</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="n">solver</span><span class="p">]</span></div>
+
+
+
+<span class="c1"># --------------------------------------------------------------------------- records</span>
+
+
+<div class="viewcode-block" id="Resources">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Resources">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Resources</span><span class="p">:</span>
+    <span class="n">mpi_processes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">working_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">time_limit_s</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#: Refuse to start below this much free space (plan §24). 5 GiB is a floor, not a</span>
+    <span class="c1">#: forecast - a real OpenFOAM run wants far more, but this catches the full volume.</span>
+    <span class="n">min_free_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">**</span> <span class="mi">3</span>
+
+<div class="viewcode-block" id="Resources.from_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Resources.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Resources"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span> <span class="ow">or</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                      <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)}})</span></div>
+
+
+<div class="viewcode-block" id="Resources.as_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Resources.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Workspace">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Workspace">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Workspace</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Where the job's working directories point.</span>
+
+<span class="sd">    ``job``</span>
+<span class="sd">        Rebase the case's four phase directories into ``&lt;job&gt;/input`` and</span>
+<span class="sd">        ``&lt;job&gt;/results``. Right for a build, which produces its own inputs.</span>
+<span class="sd">    ``case``</span>
+<span class="sd">        Leave them alone. Right for a run that hotstarts from an ``r2d.slf`` already</span>
+<span class="sd">        sitting in the case's ``model_dir`` - and the only mode under which the</span>
+<span class="sd">        standalone scripts and the job system operate on the same files.</span>
+<span class="sd">    ``link``</span>
+<span class="sd">        Point at a *previous job's* build. Copies nothing (plan §26).</span>
+<span class="sd">    """</span>
+
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"case"</span>
+    <span class="n">source_job</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Workspace.from_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Workspace.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"Workspace"</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">data</span> <span class="ow">or</span> <span class="p">{})</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"mode"</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">"job"</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="s2">"link"</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown workspace mode </span><span class="si">{</span><span class="n">mode</span><span class="si">!r}</span><span class="s2">"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"workspace.mode"</span><span class="p">,</span>
+                              <span class="n">remedy</span><span class="o">=</span><span class="s2">"Use one of: job, case, link"</span><span class="p">)</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"source_job"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"link"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span><span class="s2">"workspace mode 'link' needs a source_job"</span><span class="p">,</span>
+                              <span class="n">subject</span><span class="o">=</span><span class="s2">"workspace.source_job"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">source_job</span><span class="o">=</span><span class="n">source</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Workspace.as_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.Workspace.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">"mode"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="s2">"source_job"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_job</span><span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="JobSpec">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobSpec">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JobSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``job.json``: what was asked for, frozen."""</span>
+
+    <span class="n">job_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">JobKind</span>
+    <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">JOB_SCHEMA_VERSION</span>
+    <span class="n">solver_profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">created</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">utc_now</span><span class="p">)</span>
+    <span class="n">created_by</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">case</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">environment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">resources</span><span class="p">:</span> <span class="n">Resources</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Resources</span><span class="p">)</span>
+    <span class="n">workspace</span><span class="p">:</span> <span class="n">Workspace</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Workspace</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">Options</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Options</span><span class="p">)</span>
+    <span class="n">launcher</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">"requested"</span><span class="p">:</span> <span class="s2">"auto"</span><span class="p">})</span>
+
+    <span class="c1"># -- convenience ------------------------------------------------------------</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">meta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">KindMeta</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">KIND_META</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">case_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">source_config</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"source_config"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="c1"># -- serialization ----------------------------------------------------------</span>
+<div class="viewcode-block" id="JobSpec.as_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobSpec.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"schema_version"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_version</span><span class="p">,</span>
+            <span class="s2">"job_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"solver"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+            <span class="s2">"solver_profile"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_profile</span><span class="p">,</span>
+            <span class="s2">"created"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">created</span><span class="p">,</span>
+            <span class="s2">"created_by"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">created_by</span><span class="p">),</span>
+            <span class="s2">"case"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">case</span><span class="p">),</span>
+            <span class="s2">"workspace"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
+            <span class="s2">"environment"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environment</span><span class="p">),</span>
+            <span class="s2">"resources"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
+            <span class="s2">"options"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
+            <span class="s2">"launcher"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="JobSpec.from_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobSpec.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">"JobSpec"</span><span class="p">:</span>
+        <span class="n">known</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema_version"</span><span class="p">,</span> <span class="s2">"job_id"</span><span class="p">,</span> <span class="s2">"kind"</span><span class="p">,</span> <span class="s2">"solver"</span><span class="p">,</span> <span class="s2">"solver_profile"</span><span class="p">,</span>
+                 <span class="s2">"created"</span><span class="p">,</span> <span class="s2">"created_by"</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="s2">"workspace"</span><span class="p">,</span> <span class="s2">"environment"</span><span class="p">,</span>
+                 <span class="s2">"resources"</span><span class="p">,</span> <span class="s2">"options"</span><span class="p">,</span> <span class="s2">"launcher"</span><span class="p">}</span>
+        <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">known</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="s2">"job.json carries unknown field"</span> <span class="o">+</span> <span class="p">(</span><span class="s2">"s"</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">": "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">),</span>
+                <span class="n">subject</span><span class="o">=</span><span class="n">unknown</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"This job may have been written by a newer axqua. "</span>
+                       <span class="s2">"Check 'schema_version'."</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">parse_kind</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"kind"</span><span class="p">])</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">KIND_META</span><span class="p">[</span><span class="n">kind</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">job_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"job_id"</span><span class="p">]),</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">solver</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"solver"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">meta</span><span class="o">.</span><span class="n">solver</span><span class="p">),</span>
+            <span class="n">schema_version</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"schema_version"</span><span class="p">,</span> <span class="n">JOB_SCHEMA_VERSION</span><span class="p">)),</span>
+            <span class="n">solver_profile</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"solver_profile"</span><span class="p">),</span>
+            <span class="n">created</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">utc_now</span><span class="p">()),</span>
+            <span class="n">created_by</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"created_by"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="n">case</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"case"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="n">environment</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"environment"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="n">resources</span><span class="o">=</span><span class="n">Resources</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"resources"</span><span class="p">)),</span>
+            <span class="n">workspace</span><span class="o">=</span><span class="n">Workspace</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"workspace"</span><span class="p">)),</span>
+            <span class="n">options</span><span class="o">=</span><span class="n">meta</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"options"</span><span class="p">)),</span>
+            <span class="n">launcher</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"launcher"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{</span><span class="s2">"requested"</span><span class="p">:</span> <span class="s2">"auto"</span><span class="p">}),</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="JobStatus">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobStatus">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">JobStatus</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``status.json``: where the job is now.</span>
+
+<span class="sd">    Only a process holding ``job.lock`` writes this. That is the rule that makes plan</span>
+<span class="sd">    §3's "exactly one writer per file" testable rather than aspirational.</span>
+<span class="sd">    """</span>
+
+    <span class="n">job_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">state</span><span class="p">:</span> <span class="n">JobState</span> <span class="o">=</span> <span class="n">JobState</span><span class="o">.</span><span class="n">QUEUED</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="n">JobKind</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">schema_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">STATUS_SCHEMA_VERSION</span>
+    <span class="n">phase</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="n">progress</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">launcher</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">started</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">updated</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">utc_now</span><span class="p">)</span>
+    <span class="n">finished</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">error</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">artifacts</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">history</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="JobStatus.transition">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobStatus.transition">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">JobState</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">when</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"JobStatus"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Move to *target*, recording it. Raises on an illegal edge."""</span>
+        <span class="n">check_transition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+        <span class="n">stamp</span> <span class="o">=</span> <span class="n">when</span> <span class="ow">or</span> <span class="n">utc_now</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"state"</span><span class="p">:</span> <span class="n">target</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">"at"</span><span class="p">:</span> <span class="n">stamp</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updated</span> <span class="o">=</span> <span class="n">stamp</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">JobState</span><span class="o">.</span><span class="n">STARTING</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">started</span> <span class="o">=</span> <span class="n">stamp</span>
+        <span class="k">if</span> <span class="n">target</span><span class="o">.</span><span class="n">is_terminal</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finished</span> <span class="o">=</span> <span class="n">stamp</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="JobStatus.as_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobStatus.as_dict">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">progress</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">progress</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">progress</span><span class="p">,</span> <span class="n">Progress</span><span class="p">):</span>
+            <span class="n">progress</span> <span class="o">=</span> <span class="n">progress</span><span class="o">.</span><span class="n">as_dict</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">"schema_version"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema_version</span><span class="p">,</span>
+            <span class="s2">"job_id"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span>
+            <span class="s2">"state"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="s2">"kind"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">kind</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">"solver"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+            <span class="s2">"phase"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span>
+            <span class="s2">"progress"</span><span class="p">:</span> <span class="n">progress</span><span class="p">,</span>
+            <span class="s2">"launcher"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">launcher</span><span class="p">,</span>
+            <span class="s2">"started"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">started</span><span class="p">,</span>
+            <span class="s2">"updated"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">updated</span><span class="p">,</span>
+            <span class="s2">"finished"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">finished</span><span class="p">,</span>
+            <span class="s2">"exit_code"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span><span class="p">,</span>
+            <span class="s2">"error"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+            <span class="s2">"artifacts"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">artifacts</span><span class="p">),</span>
+            <span class="s2">"history"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="JobStatus.from_dict">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobStatus.from_dict">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">"JobStatus"</span><span class="p">:</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"kind"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">job_id</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"job_id"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)),</span>
+            <span class="n">state</span><span class="o">=</span><span class="n">JobState</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"state"</span><span class="p">,</span> <span class="s2">"QUEUED"</span><span class="p">))),</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">parse_kind</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span> <span class="k">if</span> <span class="n">kind</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">solver</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"solver"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="n">schema_version</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"schema_version"</span><span class="p">,</span> <span class="n">STATUS_SCHEMA_VERSION</span><span class="p">)),</span>
+            <span class="n">phase</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"phase"</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span><span class="p">),</span>
+            <span class="n">progress</span><span class="o">=</span><span class="n">Progress</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"progress"</span><span class="p">)),</span>
+            <span class="n">launcher</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"launcher"</span><span class="p">),</span>
+            <span class="n">started</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"started"</span><span class="p">),</span>
+            <span class="n">updated</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"updated"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">utc_now</span><span class="p">()),</span>
+            <span class="n">finished</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"finished"</span><span class="p">),</span>
+            <span class="n">exit_code</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"exit_code"</span><span class="p">),</span>
+            <span class="n">error</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">),</span>
+            <span class="n">artifacts</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"artifacts"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}),</span>
+            <span class="n">history</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"history"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]),</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="JobStatus.initial">
+<a class="viewcode-back" href="../../../code/jobs.html#axqua.jobs.model.JobStatus.initial">[Doku]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initial</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="n">JobSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"JobStatus"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">job_id</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">job_id</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">solver</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">solver</span><span class="p">,</span>
+                   <span class="n">state</span><span class="o">=</span><span class="n">JobState</span><span class="o">.</span><span class="n">QUEUED</span><span class="p">,</span>
+                   <span class="n">progress</span><span class="o">=</span><span class="n">spec</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">progress</span><span class="p">(),</span>
+                   <span class="n">history</span><span class="o">=</span><span class="p">[{</span><span class="s2">"state"</span><span class="p">:</span> <span class="n">JobState</span><span class="o">.</span><span class="n">QUEUED</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">"at"</span><span class="p">:</span> <span class="n">utc_now</span><span class="p">()}])</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

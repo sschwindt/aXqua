@@ -1,0 +1,660 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuration de aXqua cas &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/usage/case-setup.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=955b8100"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Prétraitement" href="preprocessing.html" />
+    <link rel="prev" title="Utilisation" href="index.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/usage/case-setup.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/usage/case-setup.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/usage/case-setup.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/usage/case-setup.html"><link rel="stylesheet" href="../../_i18n/lang.css"><script src="../../_i18n/lang.js" data-lang="fr" data-root="../../" data-page="usage/case-setup.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../usage/case-setup.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../de/usage/case-setup.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Utilisation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Utilisation</a></li>
+      <li class="breadcrumb-item active">Configuration de aXqua cas</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/case-setup.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../usage/case-setup.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <section id="axqua-case-setup">
+<span id="help-case-setup"></span><h1>Configuration de aXqua cas<a class="headerlink" href="#axqua-case-setup" title="Lien vers cette rubrique"></a></h1>
+<p>Un <strong>aXqua cas</strong> est la description complète d’un plan d’eau surface libre pour une tâche de modélisation, comme une rivière tronçon, un lac, un réservoir, ou les environs d’un ouvrage hydraulique : le terrain, les frontières du modèle, la rugosité du lit, les paramètres de la simulation, et les mesures de terrain pour le calage. La description est stockée dans un <strong>fichier de cas</strong>, dont le nom se termine par <code class="docutils literal notranslate"><span class="pre">.axq-case</span></code>. Toutes les étapes de simulation lisent ce fichier, de sorte qu’un modèle 2D TELEMAC et un modèle 3D OpenFOAM du même plan d’eau utilisent la même entrée.</p>
+<p>Un fichier de cas ne contient rien qui soit spécifique à un ordinateur. Où le logiciel de simulation est installé est stocké dans le profil de l’ordinateur (<a class="reference internal" href="../installation/plugin-setup.html#plugin-profile"><span class="std std-ref">Profil d’extension</span></a>). Un dossier cas peut donc être copié sur un autre ordinateur, ou publié avec une étude, et utilisé là sans changement.</p>
+<p id="help-example-case"><strong>Exemple cas.</strong> Un cas complet est disponible pour essayer chaque étape avant qu’un cas propre soit mis en place. Il décrit un tronçon tressé de la rivière Isar de 6,6 ha à un débit de 2,4 m3/s, avec un maillage grossier, de sorte que le modèle est construit en une minute et une simulation en régime permanent prend environ deux minutes. L’exemple est un dossier qui contient le fichier de cas, les données d’entrée dans le sous-dossier <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code>, et un guide (<code class="docutils literal notranslate"><span class="pre">README.md</span></code>) qui explique chaque étape de la construction au chargement du résultat dans QGIS. Le dossier a une taille d’environ 6 Mo. Son modèle de terrain est découpé dans le contour du modèle, ce qui est tout ce qu’aXqua lit d’un modèle de terrain. L’exemple comprend les mesures de vitesse et de profondeur de deux campagnes sur le terrain à deux débits, afin que le calage et la validation puissent également être essayés.</p>
+<p>Sur l’onglet <em>Case Setup</em>, <em>Example case…</em> ouvre une fenêtre qui énumère les exemples disponibles. Sélectionnez le dossier dans lequel le dossier de l’exemple doit être créé et cliquez sur <em>Download</em>. L’exemple est ensuite ajouté à la liste de cas, et l’étape suivante est <em>Build</em> sur l’onglet <em>Preprocessing</em>. Dans un terminal, la commande suivante fait la même chose :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua example get --folder &lt;folder&gt;
+</pre></div>
+</div>
+<p>L’exemple ne fait pas partie du programme installé. Il est téléchargé depuis le dépôt aXqua sur GitHub. Ses données d’entrée peuvent être réutilisées et adaptées à n’importe quelle fin, à condition que aXqua soit cité (Creative Commons Attribution 4.0 International License). Le fichier <code class="docutils literal notranslate"><span class="pre">LICENSE.md</span></code> dans le dossier de l’exemple indique les termes et la citation. Un dossier avec le nom de l’exemple qui existe déjà n’est jamais écrasé, car il peut contenir des résultats. Supprimer le dossier, ou sélectionner un autre, pour télécharger l’exemple à nouveau.</p>
+<p><strong>Dans le prolongement.</strong> L’onglet <em>Case Setup</em> a deux boîtes. La boîte <em>Cases</em> liste le cas que l’extension connaît. <em>New case…</em> crée un fichier de cas et ouvre ses paramètres, <em>Add case…</em> ajoute un fichier de cas existant, <em>Example case…</em> télécharge l’exemple, et <em>Remove from list</em> retire le cas actif de la liste sans supprimer son fichier. Le cas sélectionné est le cas actif auquel tous les autres onglets se réfèrent. L’extension se souvient de la liste lorsque QGIS est fermé ; il n’y a pas de fichier de projet distinct, car un cas est le projet. Un fichier de projet d’une version antérieure (<code class="docutils literal notranslate"><span class="pre">.axqua-prj</span></code>) peut encore être sélectionné avec <em>Add case…</em>, ce qui ajoute le cas qu’il énumère.</p>
+<p>La boîte <em>Case settings</em> montre le fichier du cas actif. <em>Open case settings…</em> ouvre les paramètres du cas actif dans une fenêtre de leur propre, et <em>Check</em> examine le cas sans ouvrir la fenêtre. La fenêtre affiche les paramètres sur les pages, qui sont listés à gauche dans l’ordre des sous-sections ci-dessous : <em>Project settings</em>, <em>Geodata</em>, <em>Liquid boundaries</em>, <em>Initial conditions</em>, <em>Mesh configuration</em>, <em>Wall roughness</em>, <em>Hydraulic simulation</em>, <em>Morphodynamic simulation</em>, <em>TELEMAC</em>, <em>OpenFOAM</em>, <em>Calibration and validation</em>, et <em>Post-processing</em>. Une page peut contenir plusieurs cadres : l’échange avec un corps poreux est un cadre de la page <em>Liquid boundaries</em>, le séchage des films minces un cadre de <em>Initial conditions</em>, le réseau du modèle OpenFOAM un cadre de <em>Mesh configuration</em>, et les structures et les surfaces de CAD sont des cadres de <em>OpenFOAM</em>. Sur chaque page, la fenêtre affiche les paramètres dont chaque cas a besoin et tous les paramètres que le fichier de cas contient déjà. Tous les autres réglages d’un cadre sont ajoutés avec <em>Add setting…</em>. Un tooltip explique chaque réglage, et un cadre dont le but n’est pas évident a une information bouton.</p>
+<p><strong>Les paramètres requis</strong> sont écrits en gras violet foncé, la couleur de l’icône aXqua. Pour un cas minimal, ce sont le nom et le système de coordonnées de référence, le modèle de terrain, le contour du modèle, les lignes d’entrée et de sortie et le débit, plus la sortie niveau d’eau alors que l’état de sortie est un niveau fixe. Une option qui est activée ajoute les réglages dont elle a besoin : une simulation en régime transitoire nécessite l’hydrographe, le transport des sédiments avec GAIA les classes de sédiments, les sédiments fins sur un lit fixe la taille des grains et la concentration à l’entrée, et le MNT de différence le modèle du second terrain. Les pages <em>TELEMAC</em>, <em>OpenFOAM</em> et <em>Calibration and validation</em> commencent par un commutateur (<em>Simulate with TELEMAC</em>, <em>Simulate with OpenFOAM</em>, <em>Calibrate and validate this case</em>). Un interrupteur qui est éteint laisse le bloc hors du fichier de cas et grise ses paramètres, aussi où ils sont affichés sur une autre page. Allumé, ses réglages requis deviennent violet aussi bien. Une page dont le réglage requis est toujours vide est marquée dans la liste de gauche, et l’enregistrement indique chaque réglage requis vide.</p>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../_images/gui-case-setup.png"><img alt="L'onglet Configuration cas de l'extension" src="../_images/gui-case-setup.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">L’onglet <em>Case Setup</em>. (1) <em>Add case…</em> et <em>Example case…</em>. (2) Le cas que l’extension connaît. Le cas sélectionné est le cas actif auquel tous les autres onglets se réfèrent. (3) Ce que le cas actif peut faire avec le logiciel de simulation de cet ordinateur. (4) <em>Open case settings…</em> ouvre les paramètres du cas actif, et <em>Check</em> examine le cas.</span><a class="headerlink" href="#id1" title="Lien vers cette image"></a></p>
+</figcaption>
+</figure>
+<p>Rien ne doit être tapé qui puisse être sélectionné. Chaque fichier a un bouton qui ouvre une boîte de dialogue de fichiers, et le bouton <em>Layers</em> offre les couches qui sont ouverts dans QGIS. Un fichier dans ou près du dossier cas est entré avec un chemin relatif au fichier de cas, de sorte que le cas peut être déplacé avec ses données.</p>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/gui-case-editor.png"><img alt="Les paramètres cas avec la page Geodata" src="../_images/gui-case-editor.png" style="width: 85%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Les paramètres cas avec la page <em>Geodata</em>. (1) Les pages des paramètres cas ; les paramètres requis sont gras violet foncé. (2) Un fichier est sélectionné avec le bouton <code class="docutils literal notranslate"><span class="pre">...</span></code> ou, avec <em>Layers</em>, des couches qui sont ouverts dans QGIS. (3) <em>Add setting…</em> ajoute un réglage du bloc qui n’est pas encore montré. (4) <em>Save</em>, <em>Cancel</em> et <em>Exit</em>.</span><a class="headerlink" href="#id2" title="Lien vers cette image"></a></p>
+</figcaption>
+</figure>
+<p>La fenêtre a trois boutons en bas à droite. <em>Save</em> écrit le fichier de cas et le vérifie, et la fenêtre reste ouverte. <em>Cancel</em> rejette les modifications depuis la dernière sauvegarde et ferme la fenêtre. <em>Exit</em> ferme la fenêtre et demande d’abord s’il y a des changements qui n’ont pas été enregistrés. La vérification n’empêche jamais l’enregistrement, car un cas est incomplet pendant sa configuration. Il marque chaque réglage qui n’est pas en ordre avec un triangle, orange pour un avertissement et rouge foncé pour une erreur, et marque la page dans la liste à gauche. Un clic sur un triangle ouvre le message avec son remède (<a class="reference internal" href="../troubleshooting/warnings.html"><span class="doc">Messages d’avertissement</span></a>, <a class="reference internal" href="../troubleshooting/errors.html"><span class="doc">Messages d’erreur</span></a>). Le bouton <em>Check</em> sur l’onglet <em>Case Setup</em> effectue la même vérification sans ouvrir la fenêtre. <em>Help</em> en bas à gauche ouvre la section de cette documentation qui appartient à la page qui apparaît.</p>
+<p>L’enregistrement depuis la fenêtre réécrit le fichier de cas depuis ses paramètres. Les commentaires d’un fichier de cas qui a été écrit à la main ne sont pas conservés. L’original est conservé comme <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.bak</span></code> la première fois que la fenêtre économise.</p>
+<p><strong>Dans un éditeur de texte.</strong> Le fichier de cas est un fichier texte au format YAML. Chaque bloc du fichier est expliqué dans une sous-section ci-dessous. Un modèle commenté est fourni dans le dossier <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code> du dépôt. Copiez ce dossier pour lancer un nouveau cas, et renommez le fichier de cas. La commande <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code> rapporte tout ce qui n’est pas en ordre.</p>
+<p>Fichiers de cas des versions précédentes aXqua sont nommées <code class="docutils literal notranslate"><span class="pre">case-config.yml</span></code> et peuvent contenir l’emplacement du logiciel de simulation. Ils sont encore lus. La commande suivante écrit un fichier de cas du type actuel à côté d’un tel fichier :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua migrate case-config.yml --to-case
+</pre></div>
+</div>
+<p>Le nouveau fichier est nommé d’après le dossier du cas. La commande ne remplace pas un fichier de cas de ce nom qui existe déjà, car il peut avoir été édité depuis qu’il a été écrit. Pour le remplacer, nommez-le par <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">&lt;file&gt;</span></code>. Appliquée à un fichier qui est déjà un fichier de cas du type courant, la commande réécrit ce fichier et conserve la version précédente comme <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.bak</span></code>.</p>
+<p>Un fichier de cas minimal semble comme suit :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-reach</span>
+<span class="w">  </span><span class="nt">crs_epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25832</span>
+<span class="nt">telemac</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">telemac2d</span>
+<span class="w">  </span><span class="nt">n_processors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="nt">geodata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dem_initial</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/dem.tif</span>
+<span class="w">  </span><span class="nt">boundary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/roi.gpkg</span>
+<span class="nt">boundaries</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">liquid_boundaries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/liquid-boundaries.gpkg</span>
+<span class="w">  </span><span class="nt">prescribed_flowrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">47.2</span><span class="w">      </span><span class="c1"># discharge at the inflow [m3/s]</span>
+<span class="w">  </span><span class="nt">outflow_condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevation</span>
+<span class="w">  </span><span class="nt">prescribed_elevation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">379.5</span><span class="w">    </span><span class="c1"># water surface elevation at the outflow [m]</span>
+</pre></div>
+</div>
+<section id="project-settings">
+<span id="case-project"></span><h2>Paramètres du projet<a class="headerlink" href="#project-settings" title="Lien vers cette rubrique"></a></h2>
+<p>Le bloc <code class="docutils literal notranslate"><span class="pre">project</span></code> nomme le cas, définit son système de coordonnées de référence et indique où aXqua écrit ses fichiers.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-reach</span>
+<span class="w">  </span><span class="nt">crs_epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25832</span><span class="w">          </span><span class="c1"># metric coordinate reference system (here: ETRS89 / UTM 32N)</span>
+<span class="w">  </span><span class="nt">sim_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">axqua-case</span><span class="w">      </span><span class="c1"># folder for everything that aXqua produces</span>
+</pre></div>
+</div>
+<p>Un cas dossier a deux parties avec des rôles différents. Le dossier <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code> contient les données d’entrée, comme les modèles de terrain, les couches vectorielles et les mesures. aXqua lit ces fichiers et ne les modifie jamais. Le dossier <code class="docutils literal notranslate"><span class="pre">axqua-case/</span></code> reçoit tout ce qu’aXqua produit, dans un sous-dossier par étape de workflow :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>my-reach/
+  my-reach.axq-case            the case file
+  user-sources/                input data (read only)
+  axqua-case/
+    preprocessing/             clipped terrain models, compiled measurements
+    simulation/                the TELEMAC model and its results
+    openfoam/                  the OpenFOAM model and its results
+    openfoam-sediment/         the fine sediment simulation and its results
+    postprocessing/            mesh convergence studies, figures
+    calibration-validation/    input and output of the calibration
+</pre></div>
+</div>
+<p>En raison de cette séparation, un cas peut être reconstruit à partir de ses entrées à tout moment, et le dossier <code class="docutils literal notranslate"><span class="pre">axqua-case/</span></code> peut être supprimé sans perdre des données qui ne peuvent pas être reproduites.</p>
+<p>Tous les chemins du fichier de cas sont interprétés par rapport au dossier du fichier de cas. <code class="docutils literal notranslate"><span class="pre">crs_epsg</span></code> doit être une mesure (prévue) système de coordonnées de référence. Input couches peut utiliser tout autre système de référence, car aXqua les convertit quand il les lit.</p>
+</section>
+<section id="geodata">
+<span id="case-geodata"></span><h2>Géodonnées<a class="headerlink" href="#geodata" title="Lien vers cette rubrique"></a></h2>
+<p>Le bloc <code class="docutils literal notranslate"><span class="pre">geodata</span></code> liste le modèle de terrain et les couches vectorielles qui décrivent le tronçon. Les noms des fichiers sont gratuits. Ce qui compte, c’est le type de géométrie et les champs d’attribut de chaque couche.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22.0%" />
+<col style="width: 14.0%" />
+<col style="width: 28.0%" />
+<col style="width: 36.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entrée</p></th>
+<th class="head"><p>Géométrie</p></th>
+<th class="head"><p>Champs d’attribut</p></th>
+<th class="head"><p>Objet</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dem_initial</span></code> (obligatoire)</p></td>
+<td><p>Détruire</p></td>
+<td><p>aucune</p></td>
+<td><p>Modèle numérique de terrain (MNT) du lit de la rivière et des lits majeurs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">boundary</span></code> (obligatoire)</p></td>
+<td><p>un polygone</p></td>
+<td><p>aucune</p></td>
+<td><p>Zone d’étude. Le modèle couvre la zone intérieure de ce polygone.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mesh_zones</span></code></p></td>
+<td><p>polygones</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Zone</span> <span class="pre">Name</span></code>, <code class="docutils literal notranslate"><span class="pre">Max</span> <span class="pre">Edge</span> <span class="pre">Length</span> <span class="pre">(m)</span></code></p></td>
+<td><p>Zones d’égale résolution du maillage. Le nom de la zone doit contenir <code class="docutils literal notranslate"><span class="pre">channel</span></code>, <code class="docutils literal notranslate"><span class="pre">floodplain</span></code> ou <code class="docutils literal notranslate"><span class="pre">refinement</span></code> (<a class="reference internal" href="#case-mesh"><span class="std std-ref">Maillage configuration</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">channel_centerline</span></code></p></td>
+<td><p>une ligne</p></td>
+<td><p>aucune</p></td>
+<td><p>Le cours des cellules chenal principal. Maillage dans les cellules chenal sont étirés le long de cette ligne.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">roughness_zones</span></code></p></td>
+<td><p>polygones</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Zone</span> <span class="pre">ID</span></code> (entier)</p></td>
+<td><p>Zones de rugosité égale (<a class="reference internal" href="#case-roughness"><span class="std std-ref">Rugosité des parois</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">roughness_table</span></code></p></td>
+<td><p>Tableau (CSV)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">zone_id</span></code>, <code class="docutils literal notranslate"><span class="pre">ks</span></code></p></td>
+<td><p>Valeur de la rugosité de chaque zone.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">structures</span></code></p></td>
+<td><p>polygones ou lignes</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Type</span></code>, <code class="docutils literal notranslate"><span class="pre">Crest</span> <span class="pre">(m)</span></code> ou <code class="docutils literal notranslate"><span class="pre">Height</span> <span class="pre">(m)</span></code>, <code class="docutils literal notranslate"><span class="pre">Width</span> <span class="pre">(m)</span></code></p></td>
+<td><p>Les barrages, les barrages, les murs et les bâtiments que le MNT ne contient pas.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">control_sections</span></code></p></td>
+<td><p>lignes</p></td>
+<td><p>un champ de nom</p></td>
+<td><p>Profils en travers où le débit est évalué après une simulation.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dem_target</span></code></p></td>
+<td><p>Détruire</p></td>
+<td><p>aucune</p></td>
+<td><p>MNT d’une enquête ultérieure, pour les simulations morphodynamiques (<a class="reference internal" href="#case-morphodynamics"><span class="std std-ref">Simulation morphodynamique</span></a>).</p></td>
+</tr>
+</tbody>
+</table>
+<p>Les lignes d’entrée et de sortie sont également un vecteur couche, qui appartient aux frontières (<a class="reference internal" href="#case-boundaries"><span class="std std-ref">Frontières liquides</span></a>).</p>
+<p>Les couches vectorielles doivent s’intégrer : les zones de maillage couvrent la zone d’étude sans failles, les lignes d’entrée et de sortie se trouvent sur son contour, et l’axe du chenal court à l’intérieur de la zone chenal. Dessinez les Couchs en QGIS sur un <strong>hillshade</strong> du MNT, qui montre clairement les berges, les barres de gravier et les structures (<em>Processing Toolbox &gt; GDAL &gt; Raster analysis &gt; Hillshade</em>).</p>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/inflow-bc.jpg"><img alt="Zones de maillage, zones de rugosité, ligne d'entrée et chenal axe du chenal dessinés sur un rainhade" src="../_images/inflow-bc.jpg" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Zones de maillage, zones de rugosité, la ligne d’entrée et le chenal axe du chenal à l’extrémité amont d’un modèle, dessinés sur un ombrage du MNT.</span><a class="headerlink" href="#id3" title="Lien vers cette image"></a></p>
+</figcaption>
+</figure>
+<p>Pour placer une petite zone de raffinement dans une zone plus grande, couper un trou de la même forme dans le polygone plus grand avec l’outil QGIS <em>Add Ring</em> (<em>Advanced Digitizing Toolbar</em>), de sorte que les deux polygones ne se chevauchent pas.</p>
+<p><strong>Les structures</strong> sont dessinées comme des caractéristiques ordinaires. Une ligne avec un <code class="docutils literal notranslate"><span class="pre">Width</span> <span class="pre">(m)</span></code> décrit un mur ou la crête d’un barrage. Un polygone décrit un bâtiment ou une jetée. <code class="docutils literal notranslate"><span class="pre">Crest</span> <span class="pre">(m)</span></code> donne une crête horizontale à une altitude absolue, et <code class="docutils literal notranslate"><span class="pre">Height</span> <span class="pre">(m)</span></code> donne une crête à une hauteur constante au-dessus du sol. Les structures que l’eau peut traverser (dam, étang, remblai) élèvent le lit de la rivière à la crête. Les structures qui ne sont jamais surmontées (mur, bâtiment, jetée) sont retirées de la zone d’écoulement. La distinction est faite à partir du texte dans le champ <code class="docutils literal notranslate"><span class="pre">Type</span></code>.</p>
+<p>Pour une simulation morphodynamique, aXqua peut calculer le changement d’altitude entre deux relevés lui-même à partir de <code class="docutils literal notranslate"><span class="pre">dem_initial</span></code> et <code class="docutils literal notranslate"><span class="pre">dem_target</span></code> (<a class="reference internal" href="#case-morphodynamics"><span class="std std-ref">Simulation morphodynamique</span></a>).</p>
+<p id="case-surfaces"><strong>Structures conçues à partir de dessins CAO.</strong> Une structure qui existe comme un dessin de construction et non comme un relevé, comme un passe de poisson ou un flume, peut être fournie comme un ensemble de fichiers STL. Le bloc <code class="docutils literal notranslate"><span class="pre">surfaces</span></code> nomme chaque fichier et indique son rôle. aXqua convertit les fichiers en entrées ordinaires d’un cas (un MNT, la zone d’étude, les lignes d’entrée et de sortie, les structures et les zones de rugosité), de sorte qu’aucune entrée n’est requise sous <code class="docutils literal notranslate"><span class="pre">geodata</span></code> pour eux.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">surfaces</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">resolution</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w">     </span><span class="c1"># [m] cell size of the DEM that is created</span>
+<span class="w">  </span><span class="nt">scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w">         </span><span class="c1"># the drawing is in millimeters</span>
+<span class="w">  </span><span class="nt">parts</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="nv">user-sources/cad/bed.stl</span><span class="p p-Indicator">,</span><span class="nt">    role</span><span class="p">:</span><span class="w"> </span><span class="nv">bed</span><span class="p p-Indicator">,</span><span class="nt"> zone_id</span><span class="p">:</span><span class="w"> </span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="nt"> ks</span><span class="p">:</span><span class="w"> </span><span class="nv">0.08</span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="nv">user-sources/cad/walls.stl</span><span class="p p-Indicator">,</span><span class="nt">  role</span><span class="p">:</span><span class="w"> </span><span class="nv">wall</span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="nv">user-sources/cad/inlet.stl</span><span class="p p-Indicator">,</span><span class="nt">  role</span><span class="p">:</span><span class="w"> </span><span class="nv">inflow</span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="nv">user-sources/cad/outlet.stl</span><span class="p p-Indicator">,</span><span class="nt"> role</span><span class="p">:</span><span class="w"> </span><span class="nv">outflow</span><span class="p p-Indicator">}</span>
+</pre></div>
+</div>
+<p>Les rôles sont : <code class="docutils literal notranslate"><span class="pre">bed</span></code> (terre, au moins un fichier), <code class="docutils literal notranslate"><span class="pre">wall</span></code> (structures qui ne sont jamais dépassées), <code class="docutils literal notranslate"><span class="pre">inflow</span></code> et <code class="docutils literal notranslate"><span class="pre">outflow</span></code> (ouverture frontières), <code class="docutils literal notranslate"><span class="pre">roi</span></code> (ligne du modèle) et <code class="docutils literal notranslate"><span class="pre">ignore</span></code>. Un fichier <code class="docutils literal notranslate"><span class="pre">bed</span></code> avec un <code class="docutils literal notranslate"><span class="pre">zone_id</span></code> et une valeur <code class="docutils literal notranslate"><span class="pre">ks</span></code> définit également une zone de rugosité. La commande <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">surface</span> <span class="pre">&lt;case-file&gt;</span></code> effectue la conversion seule, de sorte que le résultat peut être inspecté dans QGIS avant que le modèle soit construit. Parce qu’un MNT stocke une élévation par emplacement, des parties surplombant un dessin ne peuvent pas être représentées. aXqua rapporte leur part. Sélectionnez le <code class="docutils literal notranslate"><span class="pre">resolution</span></code> assez bien pour le mur le plus mince de la structure.</p>
+</section>
+<section id="liquid-boundaries">
+<span id="case-boundaries"></span><h2>Frontières liquides<a class="headerlink" href="#liquid-boundaries" title="Lien vers cette rubrique"></a></h2>
+<p>Aux frontières liquides du modèle, l’utilisateur indique où l’eau entre et sort et combien. Pour l’écoulement subcritique qui prévaut dans la plupart des rivières et dans les entrées et sorties des lacs et des réservoirs, le modèle exige le <strong>débit à l’écoulement</strong> et le <strong>cote de la surface libre à l’écoulement</strong>. Le débit détermine la quantité d’eau qui entre. Le niveau d’eau en aval détermine à quelle profondeur et à quelle vitesse l’eau quitte le modèle.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">boundaries</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">liquid_boundaries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/liquid-boundaries.gpkg</span>
+<span class="w">  </span><span class="nt">prescribed_flowrate</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">47.2</span><span class="w">       </span><span class="c1"># [m3/s]</span>
+<span class="w">  </span><span class="nt">outflow_condition</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">elevation</span><span class="w">    </span><span class="c1"># elevation | stage_discharge | free</span>
+<span class="w">  </span><span class="nt">prescribed_elevation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">379.5</span><span class="w">     </span><span class="c1"># [m]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">liquid_boundaries</span></code> est une couche de lignes avec une ligne par afflux et par sortie profil en travers. Un champ d’attribut nommé <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">(inflow/outflow)</span></code> contient le mot <code class="docutils literal notranslate"><span class="pre">inflow</span></code> ou <code class="docutils literal notranslate"><span class="pre">outflow</span></code> pour chaque ligne. Toutes les parties du contour du modèle qui ne sont pas couvertes par une telle ligne sont parois fermées.</p>
+<p><code class="docutils literal notranslate"><span class="pre">outflow_condition</span></code> sélectionne comment le niveau d’eau en aval est défini :</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">elevation</span></code> (par défaut)</dt><dd><p>Une cote de la surface libre constante, donnée par <code class="docutils literal notranslate"><span class="pre">prescribed_elevation</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code></dt><dd><p>La cote de la surface libre est lue d’une courbe de tarage pour le débit simulé. La courbe est une table avec les colonnes <code class="docutils literal notranslate"><span class="pre">Q</span></code> et <code class="docutils literal notranslate"><span class="pre">WSE</span></code>, nommé par <code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code>. Si aucune courbe mesurée n’est disponible, aXqua en estime une à partir de la largeur du chenal, de la pente du lit et de la rugosité à la ligne de sortie.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">free</span></code></dt><dd><p>Aucun niveau d’eau n’est prescrit. Ce choix est adapté pour une sortie sur une goutte ou un déversoir.</p>
+</dd>
+</dl>
+<p>Pour une simulation avec un débit qui varie dans le temps, <code class="docutils literal notranslate"><span class="pre">inflow</span></code> nomme une table avec une colonne de temps et une colonne débit, et <code class="docutils literal notranslate"><span class="pre">hydrodynamics.regime</span></code> est réglé à <code class="docutils literal notranslate"><span class="pre">unsteady</span></code>; les paramètres cas marquent alors l’hydrographe au besoin. L’échange avec un corps poreux, dans lequel l’eau quitte la surface à travers une barre de gravier et retourne plus loin en aval (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC choix</span></a>), est un cadre de la page <em>Liquid boundaries</em> dans les paramètres cas.</p>
+<p><strong>Station hydrométrique données.</strong> Le script <code class="docutils literal notranslate"><span class="pre">scripts/gauge_data.py</span></code> récupère les séries chronologiques débit et courbes de tarage de River stations hydrométriques et les sauve dans le format qu’aXqua lit. Il soutient les stations hydrométriques du Service bavarois d’information sur les inondations (HND) et de l’USGS. Il s’ouvre dans un navigateur Web et nécessite le paquet <code class="docutils literal notranslate"><span class="pre">streamlit</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;.[gui]&quot;</span></code>). Commencez à partir du dossier du dépôt, collez l’adresse ou le numéro d’une station hydrométrique, et enregistrez les deux tables dans <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/gauge_data.py
+</pre></div>
+</div>
+<p>La série débit exportée est la table <code class="docutils literal notranslate"><span class="pre">inflow</span></code>, et la courbe de tarage exportée est la table <code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code>. Entrez l’altitude de la station hydrométrique zéro pour convertir la station hydrométrique en une cote de la surface libre absolue, et vérifiez que cette altitude et le MNT se réfèrent au même système de hauteur.</p>
+</section>
+<section id="initial-conditions">
+<span id="case-initialization"></span><h2>Conditions initiales<a class="headerlink" href="#initial-conditions" title="Lien vers cette rubrique"></a></h2>
+<p>Une simulation nécessite un état à partir duquel elle commence. Le bloc <code class="docutils literal notranslate"><span class="pre">initialization</span></code> offre deux choix.</p>
+<p><strong>Démarrage à sec (par défaut).</strong> Le lit de la rivière est sèche, sauf pour une courte étirement à l’entrée qui est remplie d’eau à la profondeur <code class="docutils literal notranslate"><span class="pre">dry_start_depth</span></code> (par défaut 0,5 m). Le débit entrant remplit ensuite le tronçon en amont. Ce départ ne nécessite aucune hypothèse sur le niveau d’eau, mais le modèle doit simuler le remplissage du tronçon.</p>
+<p><strong>Préhumide chenal.</strong> Quand <code class="docutils literal notranslate"><span class="pre">prewet_depth</span></code> est réglé, les zones chenal commencent par l’eau. aXqua estime le niveau d’eau à profils en travers le long de l’axe du chenal pour le débit du cas et remplit le chenal à 70 % de ce niveau (<code class="docutils literal notranslate"><span class="pre">prewet_fill</span></code>). Le remplissage inférieur est prévu : un chenal avec trop peu d’eau se remplit en quelques secondes, alors que l’eau excédentaire sur sol plat peut rester comme un mince film jusqu’à la fin de la simulation, car un modèle 2D n’a ni infiltration ni évaporation. L’étude de convergence en maillage utilise le début préhumide pour économiser du temps de calcul.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">initialization</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dry_start_depth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w">     </span><span class="c1"># [m] water depth of the filled stretch at the inflow</span>
+<span class="w">  </span><span class="c1"># prewet_depth: 0.5      # [m] activates the pre-wetted start</span>
+</pre></div>
+</div>
+<p><strong>Passer des films minces.</strong> Sur un lit grossier, l’eau qui est plus mince que le grain rugosité ne coule pas sur le lit : elle se trouve dans les grains et, dans la nature, s’écoule dans le sol. Un modèle 2D n’a pas de sol sous le lit, donc un tel film reste là où il est et rend la zone mouillée beaucoup plus grande qu’il est. Sur le cas d’Isar, l’eau moins profonde que 1 cm couvrait 13 % de la surface mouillée et contenait 0,16 % de l’eau. Avec <code class="docutils literal notranslate"><span class="pre">drying.film_infiltration:</span> <span class="pre">true</span></code>, aXqua enlève l’eau qui est à la fois plus faible que <code class="docutils literal notranslate"><span class="pre">film_depth</span></code> (par défaut 0,01 m) et plus lente que <code class="docutils literal notranslate"><span class="pre">film_velocity</span></code> (par défaut 0,005 m/s), et la retourne là où le corps poreux rend l’eau, de sorte qu’aucune eau ne soit perdue. L’option nécessite donc l’échange avec un corps poreux (<code class="docutils literal notranslate"><span class="pre">gain_lose</span></code>). Dans les paramètres cas, c’est le cadre <em>Drying of thin films</em> de la page <em>Initial conditions</em>, dont l’information bouton l’explique.</p>
+</section>
+<section id="mesh-configuration">
+<span id="case-mesh"></span><h2>Maillage configuration<a class="headerlink" href="#mesh-configuration" title="Lien vers cette rubrique"></a></h2>
+<p>Le maillage computationnel divise la zone d’étude en triangles. Les petits triangles résolvent le flux plus en détail mais augmentent fortement le temps de calcul. aXqua utilise donc des résolutions différentes dans différentes zones :</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">channel</span></code> les zones reçoivent des triangles qui sont étirés le long de l’axe du chenal, parce que le débit varie moins le long du chenal qu’à travers lui ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">floodplain</span></code> les zones reçoivent de plus grands triangles de forme régulière ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">refinement</span></code> les zones reçoivent de petits triangles de forme régulière, par exemple autour d’une structure.</p></li>
+</ul>
+<p>La longueur des bords de chaque zone est lue à partir du champ <code class="docutils literal notranslate"><span class="pre">Max</span> <span class="pre">Edge</span> <span class="pre">Length</span> <span class="pre">(m)</span></code> de la zone de maillage couche, de sorte que la résolution est définie dans QGIS. Le bloc <code class="docutils literal notranslate"><span class="pre">mesh</span></code> fournit les valeurs qui s’appliquent lorsque ce champ est vide :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">mesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">channel_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w">         </span><span class="c1"># [m] edge length across the channel</span>
+<span class="w">  </span><span class="nt">floodplain_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.5</span><span class="w">      </span><span class="c1"># [m]</span>
+<span class="w">  </span><span class="nt">refinement_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w">      </span><span class="c1"># [m]</span>
+<span class="w">  </span><span class="nt">channel_anisotropy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4.0</span><span class="w">   </span><span class="c1"># ratio of the edge length along and across the channel</span>
+<span class="w">  </span><span class="nt">growth_ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.2</span><span class="w">         </span><span class="c1"># largest size ratio of neighboring triangles</span>
+</pre></div>
+</div>
+<p>Les valeurs par défaut produisent une fine maillage. Un tronçon de 0,3 km2 puis a plusieurs centaines de milliers de triangles. Utilisez des longueurs de bord plus grandes tandis que frontières et rugosité sont encore en cours de vérification, et affiner ensuite. L’étude de convergence en maillage détermine quelle résolution est suffisante (<a class="reference internal" href="mesh-convergence.html"><span class="doc">Convergence en maillage</span></a>).</p>
+<p>Sans zones de maillage et axe du chenal, aXqua crée un maillage de résolution uniforme (<code class="docutils literal notranslate"><span class="pre">default_size</span></code>).</p>
+<p><strong>OpenFOAM treillis.</strong> Le modèle OpenFOAM est construit sur un réseau de colonnes en plan avec couches dans la verticale (<a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">Choix OpenFOAM</span></a>). Sa résolution est définie sur la même page des paramètres cas, dans le cadre <em>OpenFOAM lattice</em>. Avec <code class="docutils literal notranslate"><span class="pre">openfoam.cell_size_factor</span></code>, la taille de maille du treillis suit la longueur de bord dans le chenal : 3 rend le treillis trois fois plus grossier que le TELEMAC maillage, de sorte qu’un changement du TELEMAC maillage se prolonge. Sans le facteur, <code class="docutils literal notranslate"><span class="pre">openfoam.cell_size</span></code> est utilisé tel quel. <code class="docutils literal notranslate"><span class="pre">openfoam.n_layers</span></code> est le nombre de couches dans la verticale.</p>
+</section>
+<section id="wall-roughness">
+<span id="case-roughness"></span><h2>Rugosité des parois<a class="headerlink" href="#wall-roughness" title="Lien vers cette rubrique"></a></h2>
+<p>L’eau qui coule connaît des forces de friction au lit de la rivière et sur les rives. Ces forces dépendent de la rugosité des surfaces mouillées, et elles déterminent la hauteur d’eau pour un débit donné. La rugosité est donc le paramètre le plus important d’un modèle hydraulique, et c’est le paramètre habituellement étalonné.</p>
+<p>aXqua décrit rugosité par la <strong>rugosité équivalente de sable</strong> <span class="math notranslate nohighlight">\(k_s\)</span> (en mètres) après Nikuradse, qui est une longueur de l’ordre des grains grossiers du lit. Chaque polygone de la couche <code class="docutils literal notranslate"><span class="pre">roughness_zones</span></code> porte un entier <code class="docutils literal notranslate"><span class="pre">Zone</span> <span class="pre">ID</span></code>, et le tableau <code class="docutils literal notranslate"><span class="pre">roughness_table</span></code> attribue une valeur <span class="math notranslate nohighlight">\(k_s\)</span> à chaque ID :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>zone_id,ks
+1,0.2
+2,0.5
+</pre></div>
+</div>
+<p>Dans cet exemple, la zone 1 est le lit de gravier de la chenal et la zone 2 est une végétation lit majeur. Le bloc <code class="docutils literal notranslate"><span class="pre">friction</span></code> contient le rugosité de la parois fermées à la contour du modèle et les valeurs qui s’appliquent sans zones de rugosité:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">friction</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">roughness_law</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">              </span><span class="c1"># 5 = Nikuradse (ks), 4 = Manning (n), 3 = Strickler</span>
+<span class="w">  </span><span class="nt">boundary_law</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="w">  </span><span class="nt">boundary_coefficient</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">38.0</span>
+</pre></div>
+</div>
+<p>Les valeurs <span class="math notranslate nohighlight">\(k_s\)</span> des zones sont des valeurs de départ. Le calage les ajuste dans les limites fixées par l’utilisateur (<a class="reference internal" href="calibration-validation.html"><span class="doc">Calage et validation</span></a>).</p>
+</section>
+<section id="hydraulic-simulation">
+<span id="case-hydraulics"></span><h2>Simulation hydraulique<a class="headerlink" href="#hydraulic-simulation" title="Lien vers cette rubrique"></a></h2>
+<p>Le bloc <code class="docutils literal notranslate"><span class="pre">hydrodynamics</span></code> contrôle la simulation hydraulique avec TELEMAC. La plupart des entrées ont des valeurs par défaut qui sont adaptées aux plans d’eau avec des zones sèches et humides. Les entrées qu’un utilisateur définit habituellement sont :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">hydrodynamics</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">duration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">7200</span><span class="w">           </span><span class="c1"># [s] simulated time</span>
+<span class="w">  </span><span class="nt">turbulence_model</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auto</span><span class="w">   </span><span class="c1"># auto, or the number of a TELEMAC turbulence model</span>
+<span class="w">  </span><span class="nt">flux_tolerance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0e-3</span><span class="w">   </span><span class="c1"># accepted relative difference of inflow and outflow</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">duration</span></code> doit être assez longue pour que le tronçon se remplisse et que le flux devienne stable. Un régime permanent est atteint lorsque le même débit quitte le modèle qui l’entre. aXqua évalue cet équilibre après chaque course et compare la différence relative avec <code class="docutils literal notranslate"><span class="pre">flux_tolerance</span></code>. La valeur par défaut de 0,1 % est bien inférieure à l’incertitude d’une mesure débit.</p>
+<p>Avec <code class="docutils literal notranslate"><span class="pre">turbulence_model:</span> <span class="pre">auto</span></code>, aXqua sélectionne le modèle de turbulence de la résolution du maillage par rapport à la hauteur d’eau. Le pas de temps est adapté automatiquement pendant la course, de sorte que la simulation reste stable (<code class="docutils literal notranslate"><span class="pre">desired_courant</span></code>).</p>
+<p>Le nombre de cœurs de processeur est une propriété de l’ordinateur et est défini dans son profil (<code class="docutils literal notranslate"><span class="pre">mpi_processes</span></code>, <a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Définir les liaisons solveur</span></a>). Lorsque le profil ne donne aucun numéro, <code class="docutils literal notranslate"><span class="pre">telemac.n_processors</span></code> du fichier de cas s’applique. Les paramètres de la simulation 3D avec OpenFOAM sont décrits dans <a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">Choix OpenFOAM</span></a>.</p>
+</section>
+<section id="morphodynamic-simulation">
+<span id="case-morphodynamics"></span><h2>Simulation morphodynamique<a class="headerlink" href="#morphodynamic-simulation" title="Lien vers cette rubrique"></a></h2>
+<p>Une simulation morphodynamique calcule le transport des sédiments et le changement résultant du lit (<a class="reference internal" href="morphodynamic-simulations.html"><span class="doc">Simulations morphodynamiques</span></a>). La page <em>Morphodynamic simulation</em> des paramètres cas comporte trois cadres : le transport des sédiments avec TELEMAC et GAIA (le bloc <code class="docutils literal notranslate"><span class="pre">morphodynamics</span></code>), les sédiments fins sur un lit fixe avec OpenFOAM (<code class="docutils literal notranslate"><span class="pre">fine_sediment</span></code>, <a class="reference internal" href="morphodynamic-simulations.html#help-morphodynamics-openfoam"><span class="std std-ref">Configuration OpenFOAM</span></a>), et le MNT de différence (<code class="docutils literal notranslate"><span class="pre">dem_of_difference</span></code>). Le transport des sédiments avec GAIA est activé dans le bloc <code class="docutils literal notranslate"><span class="pre">morphodynamics</span></code>, qui décrit les sédiments :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">morphodynamics</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">bedload</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">suspended_load</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">sediment_classes</span><span class="p">:</span><span class="w">             </span><span class="c1"># one entry per grain size class</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">diameter</span><span class="p">:</span><span class="w"> </span><span class="nv">0.0008</span><span class="p p-Indicator">,</span><span class="nt"> density</span><span class="p">:</span><span class="w"> </span><span class="nv">2650</span><span class="p p-Indicator">,</span><span class="nt"> shields</span><span class="p">:</span><span class="w"> </span><span class="nv">0.047</span><span class="p p-Indicator">}</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt">diameter</span><span class="p">:</span><span class="w"> </span><span class="nv">0.004</span><span class="p p-Indicator">,</span><span class="nt">  density</span><span class="p">:</span><span class="w"> </span><span class="nv">2650</span><span class="p p-Indicator">,</span><span class="nt"> shields</span><span class="p">:</span><span class="w"> </span><span class="nv">0.047</span><span class="p p-Indicator">}</span>
+<span class="w">  </span><span class="nt">active_layer_thickness</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w">   </span><span class="c1"># [m]</span>
+</pre></div>
+</div>
+<p>Chaque classe de sédiments est définie par son diamètre de grain (en mètres), sa densité et son paramètre critique Shields, qui est la contrainte de cisaillement sans dimension à laquelle les grains commencent à se déplacer.</p>
+<p>Le changement mesuré de lit de la rivière sert de référence pour le calage d’un modèle morphodynamique. C’est la différence de deux relevés de terrain, qui est appelé un <strong>MNT de différence</strong> (DoD). Avec le bloc suivant, aXqua calcule le DoD de <code class="docutils literal notranslate"><span class="pre">geodata.dem_target</span></code> et <code class="docutils literal notranslate"><span class="pre">geodata.dem_initial</span></code>:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dem_of_difference</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">uncertainty_initial</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.10</span><span class="w">   </span><span class="c1"># [m] vertical accuracy of the first survey</span>
+<span class="w">  </span><span class="nt">uncertainty_target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.05</span><span class="w">    </span><span class="c1"># [m] vertical accuracy of the second survey</span>
+<span class="w">  </span><span class="nt">confidence_level</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.95</span>
+</pre></div>
+</div>
+<p>Les changements d’élévation moins importants que l’incertitude combinée des deux enquêtes ne peuvent être distingués de l’erreur de mesure. aXqua les enlève du DoD. La limite est appelée le niveau de détection et les résultats des deux valeurs de précision et le niveau de confiance. Sinon, <code class="docutils literal notranslate"><span class="pre">min_lod</span></code> fixe la limite directement.</p>
+<p>Lorsque le lit de la rivière reste en place et que son contenu de sédiments fins change, la simulation est définie dans le bloc <code class="docutils literal notranslate"><span class="pre">fine_sediment</span></code>. Il nomme la taille des grains des sédiments fins et sa concentration dans l’eau qui entre dans le modèle :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">fine_sediment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">grain_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.00003</span><span class="w">          </span><span class="c1"># [m]</span>
+<span class="w">  </span><span class="nt">inflow_concentration</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.02</span><span class="w">   </span><span class="c1"># [kg/m3]</span>
+<span class="w">  </span><span class="nt">pick_up</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">off</span>
+</pre></div>
+</div>
+<p>Cette simulation est calculée avec OpenFOAM. Toutes les entrées du bloc sont expliquées à <a class="reference internal" href="morphodynamic-simulations.html#help-morphodynamics-openfoam"><span class="std std-ref">Configuration OpenFOAM</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="index.html" class="btn btn-neutral float-left" title="Utilisation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="preprocessing.html" class="btn btn-neutral float-right" title="Prétraitement" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

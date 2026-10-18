@@ -1,0 +1,663 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.solvers.telemac.pipeline &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/pipeline.html" />
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../../../genindex.html" />
+    <link rel="search" title="Suche" href="../../../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/solvers/telemac/pipeline.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/pipeline.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/pipeline.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/solvers/telemac/pipeline.html"><link rel="stylesheet" href="../../../../../_i18n/lang.css"><script src="../../../../../_i18n/lang.js" data-lang="de" data-root="../../../../../" data-page="_modules/axqua/solvers/telemac/pipeline.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../../../_modules/axqua/solvers/telemac/pipeline.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../../../fr/_modules/axqua/solvers/telemac/pipeline.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.solvers.telemac.pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../../../_modules/axqua/solvers/telemac/pipeline.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.solvers.telemac.pipeline</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""End-to-end orchestration of the TELEMAC case-build pipeline."""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">calibration</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">hydraulics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">fortran</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">steering</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">refresh_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelemacRuntime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.logsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_step</span><span class="p">,</span> <span class="n">setup_logging</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Artifacts">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.pipeline.Artifacts">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Artifacts</span><span class="p">:</span>
+    <span class="n">geometry_slf</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">boundary_cli</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">friction_tbl</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">initial_conditions</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cas_file</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">unsteady_cas</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">liquid_boundaries</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">liquid_boundaries_meta</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">gaia_cas</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">source_regions</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># SOURCE REGIONS DATA FILE (losing-gaining reach)</span>
+    <span class="n">user_fortran</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># FORTRAN FILE folder (percolation.mode: fortran)</span>
+    <span class="n">ground_truth</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">calibration_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hbc_config</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">rasters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="c1"># what stage 0 derived from CAD, when the case is built from surfaces</span>
+    <span class="n">surfaces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.pipeline.run">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">validate_env</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">log_to_file</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Artifacts</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Build the full case. Returns the produced :class:`Artifacts`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    validate_env : check that the TELEMAC environment can be sourced first.</span>
+<span class="sd">    dry_run : after building, launch the solver once to confirm the case is valid.</span>
+<span class="sd">    log_to_file : attach this build's ``&lt;model_dir&gt;/axqua.log`` (set False</span>
+<span class="sd">        when a caller already routes everything to its own compound log, e.g. the</span>
+<span class="sd">        mesh-convergence study logging the per-level builds to postprocessing/).</span>
+<span class="sd">    """</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">ensure_dirs</span><span class="p">()</span>
+    <span class="c1"># compound logfile for the build, in the simulation (model) output folder. Opened</span>
+    <span class="c1"># before anything else so that stage 0 and a validation failure are recorded too.</span>
+    <span class="k">if</span> <span class="n">log_to_file</span><span class="p">:</span>
+        <span class="n">setup_logging</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">log_file</span><span class="p">))</span>
+    <span class="n">art</span> <span class="o">=</span> <span class="n">Artifacts</span><span class="p">()</span>
+    <span class="c1"># 0) CAD surfaces -&gt; the geodata a surveyed case would have been given. Ahead of</span>
+    <span class="c1"># everything else, including the rating synthesis below, which reads the DEM and</span>
+    <span class="c1"># the outflow line that this stage writes.</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">surface_stage</span>
+
+        <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 0: derive geodata from the CAD surfaces"</span><span class="p">):</span>
+            <span class="n">produced</span> <span class="o">=</span> <span class="n">surface_stage</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">surfaces</span> <span class="o">=</span> <span class="n">produced</span><span class="o">.</span><span class="n">paths</span><span class="p">()</span>
+    <span class="c1"># synthesize a missing outflow rating before validating: with</span>
+    <span class="c1"># boundaries.rating_method set, leaving stage_discharge unset is a legitimate</span>
+    <span class="c1"># "derive it from the geodata at the simulated Q" (see workflow.</span>
+    <span class="c1"># synthesize_rating_if_missing), and it must land before validate() checks it.</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"stage_discharge"</span>
+            <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_rating_if_missing</span>
+        <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">))</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="n">t_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"build start: case '</span><span class="si">%s</span><span class="s2">' -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+
+    <span class="n">runtime</span> <span class="o">=</span> <span class="n">TelemacRuntime</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">validate_env</span> <span class="ow">or</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"validate TELEMAC environment"</span><span class="p">):</span>
+            <span class="n">version</span> <span class="o">=</span> <span class="n">runtime</span><span class="o">.</span><span class="n">check_available</span><span class="p">()</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"TELEMAC environment OK (python </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span>
+
+    <span class="c1"># 1) DEM -&gt; ROI</span>
+    <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 1/5: clip DEM(s) to the region of interest"</span><span class="p">):</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">rasters</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">dem_initial</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">rasters</span><span class="p">[</span><span class="s2">"dem_initial_roi"</span><span class="p">]</span>
+
+    <span class="c1"># 2) mesh + bathymetry + geometry SELAFIN</span>
+    <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 2/5: generate mesh, bathymetry and geometry SELAFIN"</span><span class="p">):</span>
+        <span class="n">the_mesh</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">geometry_slf</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem_initial</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  mesh: </span><span class="si">%d</span><span class="s2"> nodes, </span><span class="si">%d</span><span class="s2"> elements, </span><span class="si">%d</span><span class="s2"> boundary nodes"</span><span class="p">,</span>
+                 <span class="n">the_mesh</span><span class="o">.</span><span class="n">npoin</span><span class="p">,</span> <span class="n">the_mesh</span><span class="o">.</span><span class="n">nelem</span><span class="p">,</span> <span class="n">the_mesh</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="c1"># 3) boundary conditions</span>
+    <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 3/5: write boundary conditions (.cli)"</span><span class="p">):</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">boundary_cli</span><span class="p">,</span> <span class="n">liquids</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">write_cli</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  liquid boundary </span><span class="si">%d</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%d</span><span class="s2"> nodes)"</span><span class="p">,</span> <span class="n">lb</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">)</span>
+        <span class="c1"># persist the FRONT2 boundary numbering so the standalone unsteady / 3D</span>
+        <span class="c1"># scripts can drive the hydrograph without rebuilding the mesh</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries_meta</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">dump_liquid_boundaries</span><span class="p">(</span>
+            <span class="n">liquids</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">liquid_boundaries_json</span><span class="p">))</span>
+
+        <span class="c1"># boundary prescribed values. The inflow series is optional (it drives a</span>
+        <span class="c1"># later unsteady case); when given, read the full series (steady=False) so a</span>
+        <span class="c1"># hydrograph is detected regardless of regime. The steady initial run uses the</span>
+        <span class="c1"># scalar prescribed_flowrate, falling back to the series' representative value.</span>
+        <span class="n">inflow</span> <span class="o">=</span> <span class="p">(</span><span class="n">hydraulics</span><span class="o">.</span><span class="n">read_inflow</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span><span class="p">),</span> <span class="n">steady</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                  <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inflow_q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inflow_q</span> <span class="o">=</span> <span class="n">inflow</span><span class="o">.</span><span class="n">steady_value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"no steady discharge for the build: set boundaries.prescribed_flowrate "</span>
+                <span class="s2">"(m3/s) in case-config.yml, or provide boundaries.inflow."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
+            <span class="n">outflow_wse</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  prescribed inflow Q=</span><span class="si">%.3f</span><span class="s2"> m3/s, free (Neumann) outflow"</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outflow_wse</span> <span class="o">=</span> <span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  prescribed inflow Q=</span><span class="si">%.3f</span><span class="s2"> m3/s, outflow WSE=</span><span class="si">%.3f</span><span class="s2"> m (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                     <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span>
+
+    <span class="c1"># 4) steering files</span>
+    <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 4/5: write friction table and steering (.cas)"</span><span class="p">):</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">friction_tbl</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_friction_tbl</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_gaia_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">gaia_name</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="c1"># turbulence model selected from the actual mesh resolution + velocity guess</span>
+        <span class="n">turb_model</span><span class="p">,</span> <span class="n">turb_why</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  turbulence model </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">turb_model</span><span class="p">,</span>
+                 <span class="n">steering</span><span class="o">.</span><span class="n">TURB_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">turb_model</span><span class="p">,</span> <span class="s2">"?"</span><span class="p">),</span> <span class="n">turb_why</span><span class="p">)</span>
+        <span class="c1"># initial condition. Default is a DRY START - only a thin plug at the inflow</span>
+        <span class="c1"># is wetted (a fully dry bed makes DEBIMP abort at the prescribed-Q inflow);</span>
+        <span class="c1"># the channel-wide hotstart is used only when prewet_depth is set (e.g. the</span>
+        <span class="c1"># mesh-convergence study). Both continue from the written SELAFIN.</span>
+        <span class="n">prev_comp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_initial_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+            <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_dry_start_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+            <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="c1"># internal source/sink REGIONS for a losing-gaining reach (empty unless the</span>
+        <span class="c1"># liquid-boundary layer carries internal 'int-*' lines); shared by every .cas</span>
+        <span class="n">source_regions</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">exchange_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">source_regions</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  internal source region </span><span class="si">%s</span><span class="s2">: </span><span class="si">%+.4f</span><span class="s2"> m3/s over </span><span class="si">%d</span><span class="s2"> node(s), "</span>
+                     <span class="s2">"</span><span class="si">%.0f</span><span class="s2"> m2"</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">discharge</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+        <span class="c1"># The water table the generated routine uses as the drain's taper floor must</span>
+        <span class="c1"># be the one the pre-wet seeded the pools with, so it is re-fitted here from</span>
+        <span class="c1"># the initial-conditions file that was just written. With explicit</span>
+        <span class="c1"># percolation.water_table_levels both fits read the same numbers and are</span>
+        <span class="c1"># identical by construction; derived from the seeded surface they can differ</span>
+        <span class="c1"># by a centimeter or so near the internal lines.</span>
+        <span class="n">plane</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">water_table</span> <span class="o">==</span> <span class="s2">"phreatic"</span> <span class="ow">and</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">watertable</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+
+            <span class="n">ic</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="p">)[</span><span class="s2">"values"</span><span class="p">][</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span>
+            <span class="n">plane</span> <span class="o">=</span> <span class="n">watertable</span><span class="o">.</span><span class="n">fit_phreatic_plane</span><span class="p">(</span>
+                <span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">surface</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">the_mesh</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="n">ic</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">source_regions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span><span class="p">:</span>
+                <span class="c1"># USER_RAIN percolation: the generated routine withdraws over the</span>
+                <span class="c1"># patch depth-limited and reinjects at the gaining line; no</span>
+                <span class="c1"># SOURCE REGIONS file (the .cas carries FORTRAN FILE + RAIN keys).</span>
+                <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span> <span class="o">=</span> <span class="n">fortran</span><span class="o">.</span><span class="n">write_user_fortran</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">source_regions</span><span class="p">,</span>
+                                                              <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  percolation USER_RAIN routine -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">art</span><span class="o">.</span><span class="n">source_regions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_source_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">source_regions</span><span class="p">)</span>
+        <span class="c1"># the initial run is ALWAYS steady (steady2d.cas)</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">cas_file</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_cas</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">gaia_cas</span><span class="o">=</span><span class="n">gaia_name</span><span class="p">,</span>
+            <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">,</span> <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
+            <span class="n">source_regions</span><span class="o">=</span><span class="n">source_regions</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># additionally write the unsteady hydrograph case when a varying inflow</span>
+        <span class="c1"># series is available (a constant-Q inflow needs no unsteady run)</span>
+        <span class="k">if</span> <span class="n">_has_hydrograph</span><span class="p">(</span><span class="n">inflow</span><span class="p">):</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_liquid_boundaries</span><span class="p">(</span>
+                <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">_outflow_wse_fn</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">unsteady_cas</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_cas</span><span class="p">(</span>
+                <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">inflow</span><span class="o">.</span><span class="n">discharge</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">gaia_cas</span><span class="o">=</span><span class="n">gaia_name</span><span class="p">,</span>
+                <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">,</span> <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
+                <span class="n">unsteady</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">liquid_boundaries_file</span><span class="o">=</span><span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">duration</span><span class="o">=</span><span class="n">_hydrograph_duration</span><span class="p">(</span><span class="n">inflow</span><span class="p">),</span> <span class="n">out_name</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">unsteady_cas_file</span><span class="p">,</span>
+                <span class="n">source_regions</span><span class="o">=</span><span class="n">source_regions</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  unsteady hydrograph case -&gt; </span><span class="si">%s</span><span class="s2"> (Q(t) from </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                     <span class="n">art</span><span class="o">.</span><span class="n">unsteady_cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  inflow is a constant discharge; no unsteady2d.cas written"</span><span class="p">)</span>
+
+    <span class="c1"># 5) ground-truth -&gt; calibration CSV + HydroBayesCal config.</span>
+    <span class="c1"># The model setup (stages 1-4) is complete at this point. Ground-truth feeds</span>
+    <span class="c1"># only the calibration / HydroBayesCal setup, so any problem with it must NOT</span>
+    <span class="c1"># abort the build: warn and skip the HydroBayesCal setup, leaving the initial</span>
+    <span class="c1"># model setup intact so it can still be run/converged and calibrated later.</span>
+    <span class="c1"># Two failure modes: missing inputs (reported by cfg.ground_truth.problems()</span>
+    <span class="c1"># before we touch them) and data that do not match (e.g. FlowTracker verticals</span>
+    <span class="c1"># with no DGPS position, or no category supplying the calibration quantities),</span>
+    <span class="c1"># which surface as exceptions while compiling.</span>
+    <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 5/5: compile ground truth, calibration CSV and HydroBayesCal config"</span><span class="p">):</span>
+        <span class="n">gt_problems</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">ground_truth</span><span class="o">.</span><span class="n">problems</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">gt_problems</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">problem</span> <span class="ow">in</span> <span class="n">gt_problems</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">problem</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">"skipping HydroBayesCal setup; the model setup is complete and unaffected"</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">art</span><span class="o">.</span><span class="n">ground_truth</span> <span class="o">=</span> <span class="n">calibration</span><span class="o">.</span><span class="n">compile_ground_truth</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">ground_truth</span><span class="p">:</span>
+                    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  compiled tidy ground-truth table -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">ground_truth</span><span class="p">)</span>
+                <span class="n">art</span><span class="o">.</span><span class="n">calibration_csv</span> <span class="o">=</span> <span class="n">calibration</span><span class="o">.</span><span class="n">build_calibration_csv</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+                <span class="n">art</span><span class="o">.</span><span class="n">hbc_config</span> <span class="o">=</span> <span class="n">calibration</span><span class="o">.</span><span class="n">emit_hbc_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">calibration_csv</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - degrade gracefully, keep the model</span>
+                <span class="n">art</span><span class="o">.</span><span class="n">ground_truth</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">calibration_csv</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">hbc_config</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">"ground-truth data do not match; skipping HydroBayesCal setup "</span>
+                    <span class="s2">"(the model setup is complete and unaffected): </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">,</span>
+                <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="c1"># lazy import: axqua.workflow is a sibling that must not be pulled in at</span>
+        <span class="c1"># module import time (the package __init__ wires both up)</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_solver_streaming</span>
+
+        <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dry run: launch </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> once to validate the case"</span><span class="p">):</span>
+            <span class="c1"># stream the listing live with the simulated-time progress bar (same</span>
+            <span class="c1"># look as initial_run.py) on the configured core count - this is also</span>
+            <span class="c1"># the per-level solver run of the mesh-convergence study</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">run_solver_streaming</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"solver finished rc=</span><span class="si">%d</span><span class="s2">"</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> failed (rc=</span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">) on "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="si">}</span><span class="s2">; see the listing above / </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="c1"># refresh the case's MODEL= markers so the folder describes itself as it is now</span>
+    <span class="n">refresh_markers</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"build done: case '</span><span class="si">%s</span><span class="s2">' in </span><span class="si">%.2f</span><span class="s2">s"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">art</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_has_hydrograph</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""True when the inflow carries a genuinely varying time series (a hydrograph),</span>
+<span class="sd">    not a single value or a constant-Q placeholder."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="k">if</span> <span class="n">inflow</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">inflow</span><span class="o">.</span><span class="n">discharge</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">inflow</span><span class="o">.</span><span class="n">times_s</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">q</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">(</span><span class="n">q</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">1e-6</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hydrograph_duration</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Total simulated time [s] spanned by the inflow hydrograph."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">inflow</span><span class="o">.</span><span class="n">times_s</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="mf">3600.0</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_outflow_wse_fn</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Callable Q -&gt; outflow WSE for the hydrograph file, matching the outflow</span>
+<span class="sd">    condition (free outflow prescribes nothing)."""</span>
+    <span class="n">cond</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
+    <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"elevation"</span><span class="p">:</span>
+        <span class="n">wse</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">wse</span>
+    <span class="k">return</span> <span class="n">hydraulics</span><span class="o">.</span><span class="n">read_stage_discharge</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span><span class="p">))</span>
+
+
+
+
+<span class="c1"># Both backends prescribe the same downstream stage, so resolving it moved to</span>
+<span class="c1"># axqua.hydraulics; re-exported here (and under its old private spelling)</span>
+<span class="c1"># because this module published it.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>  <span class="c1"># noqa: E402</span>
+<span class="n">_resolve_outflow_wse</span> <span class="o">=</span> <span class="n">resolve_outflow_wse</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

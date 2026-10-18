@@ -1,0 +1,853 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="de" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>axqua.workflow &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/workflow.html" />
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=60a8b608"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/translations.js?v=9bf55d28"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Stichwortverzeichnis" href="../../genindex.html" />
+    <link rel="search" title="Suche" href="../../search.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/_modules/axqua/workflow.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/_modules/axqua/workflow.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/_modules/axqua/workflow.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/_modules/axqua/workflow.html"><link rel="stylesheet" href="../../../_i18n/lang.css"><script src="../../../_i18n/lang.js" data-lang="de" data-root="../../../" data-page="_modules/axqua/workflow.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>DE</span></summary><ul role="menu"><li><a href="../../../_modules/axqua/workflow.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><strong aria-current="true" lang="de">Deutsch</strong></li><li><a href="../../../fr/_modules/axqua/workflow.html" hreflang="fr" lang="fr" data-axqua-lang="fr">Français</a></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            aXqua
+              <img src="../../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Dokumentation durchsuchen" aria-label="Dokumentation durchsuchen" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Zweck</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation/index.html">Installation &amp; Konfiguration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/qgis-plugin.html">QGIS Plugin</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-qgis">Installieren Sie QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installieren Sie das aXqua Plugin (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#install-the-axqua-program-backend">Installieren Sie das aXqua Programm (Backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#upgrade-the-backend">Upgrade des Backends</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Verbinden Sie das Plugin mit dem aXqua Programm</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Finden Sie den Pfad des installierten Programms</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/qgis-plugin.html#axqua-panel-layout">aXqua Panel Layout</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/simulation-software.html">Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#installation-wizards-short-version">Installationsassistenten (Kurzfassung)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#user-rights">Nutzerrechte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/simulation-software.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/plugin-setup.html">Plugin Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#plugin-profile">Plugin-Profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#define-solver-bindings">Definieren Sie Solver Bindungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/plugin-setup.html#job-execution">Ausführung des Auftrags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../installation/postprocessors.html">Postprozessoren</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../installation/postprocessors.html#paraview">Paraview</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage/index.html">Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/case-setup.html">aXqua Fall Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#project-settings">Projekteinstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#geodata">Geodaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#liquid-boundaries">Offene Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#initial-conditions">Ausgangsbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/preprocessing.html">Preprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#axqua-workflow">aXqua Workflow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#meshing">Maschen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#pre-processing-checkup">Überprüfung vor der Verarbeitung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#telemac-choices">TELEMAC-Entscheidungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/preprocessing.html#openfoam-choices">OpenFOAM-Auswahl</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydraulic-simulations.html">Hydraulische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#axqua-warm-up-concept">aXqua Warm-up Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC Trockenläufe 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#telemac-hotstarts">TELEMAC-Hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydraulic-simulations.html#openfoam">OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/mesh-convergence.html">Netzkonvergenz</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#mesh-study-setup">Rechennetz-Studienaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#run-mesh-convergence-study">Lauf Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/mesh-convergence.html#study-report">Studienbericht</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/morphodynamic-simulations.html">Morphodynamische Simulationen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#introduction-to-bayesian-calibration">Einführung in die Bayessche Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#ground-truth-data-setup">Einrichtung von Referenzdaten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#bayesian-calibration-validation-setup">Bayessche Kalibrierung und Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#run-hydrobayescal">Lauf HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/calibration-validation.html#quality-analysis">Qualitätsanalyse</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#qgis-map-generation">QGIS-Kartenerzeugung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#paraview">Paraview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/batch-processing.html">Batch-processing (visuelle Automatisierung)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#a-sequence-of-steps">Eine Abfolge von Schritten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#detach-jobs-continue-without-qgis">Detach: Jobs gehen ohne QGIS weiter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/batch-processing.html#sequences-with-the-qgis-model-designer">Sequenzen mit dem QGIS Model Designer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../automation/index.html">Automatisierung &amp; Terminal Nutzung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/terminal-syntax.html">Terminalsyntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#open-a-terminal">Öffnen Sie ein Terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#commands">Befehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#options-for-scripts">Optionen für Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/terminal-syntax.html#scripts-in-the-case-folder">Skripte im Fall Ordner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../automation/batch-headless.html">Batch-processing (Kopflos)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#monitor-and-control-jobs">Überwachungs- und Kontrollaufgaben</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#sequences-of-jobs">Sequenzen von Arbeitsplätzen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../automation/batch-headless.html#how-jobs-are-detached">Wie Jobs losgelöst werden</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/index.html">Codedokumentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../code/structure-uml.html">Allgemeine Struktur &amp; UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#design-rules">Entwurfsregeln</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#packages">Packungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#capabilities">Kapazitäten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/structure-uml.html#licenses">Lizenzen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/configuration.html">Konfiguration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.config">Fallbeschreibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casefile">Art der Falldatei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema">Klassifizierung der Einstellungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.schema_meta">Tabelle der Einstellungen für Formulare</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.casecheck">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#profile-of-the-computer">Profil des Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.diagnostics">Kontrollergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.errors">Fehlerarten</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.machine">Standort der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/configuration.html#module-axqua.core.environment">Umgebungen der Simulationscodes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/core.html">Solver-Agnostischer Kern</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.geodata">Geodaten und Raster</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.boundaries">Ränder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.structures">Strukturen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.surfaces">Gelände von CAD-Oberflächen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.selafin">SELAFIN-Dateiformat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#module-axqua.core.examples">Beispielfälle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/core.html#capabilities-and-backend-registry">Kapazitäten und Backend-Register</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/telemac.html">TELEMAC Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.pipeline">Aufbausequenz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.mesh">Rechennetz und Rechennetz Qualität</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.boundary">Randbedingungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.steering">Akten über Lenkung und Reibung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.sortie">Bewertung von Läufen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.unsteady">Unterschiedlicher Abfluss</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.gainlose">Austausch mit einem porösen Körper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/telemac.html#module-axqua.solvers.telemac.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/openfoam.html">OpenFOAM Backend</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Rechennetz</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">Ausgangszustand aus einem TELEMAC-Ergebnis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Wörterbücher und Fall Assembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Lauf und Bewertung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.potential">Einphasige freie Oberfläche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Feinsediment über einem Festbett</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/openfoam.html#module-axqua.solvers.openfoam.backend">Backend Adapter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/workflow.html">Workflow, Studien und Kalibrierung</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.dem">Gelände</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.hydraulics">Abflussdaten und Abflusskurven</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.ground_truth">Feldmessungen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.workflow">Gemeinsame Schritte der Fall-Skripte</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.convergence">Netzkonvergenzstudie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.vertical_convergence">Studie der vertikalen Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.calibration">Kalibrierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.validation">Validierung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/workflow.html#module-axqua.progress">Fortschrittsanzeige und -protokollierung</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/jobs.html">Jobsystem</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.model">Stellenbeschreibung und Speicherung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.procs">Prozesse und Staatenabstimmung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.profiles">SolverProfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.events">Fortschrittsereignisse und Protokolle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.submit">Einreichung und Ausführung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/jobs.html#module-axqua.jobs.launcher">Abgestellte Trägerraketen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/install.html">Installation der Simulationssoftware</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.host">Betriebssystem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.recipes">Installationspläne</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.telemac_examples">Beispiel Fälle von TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/install.html#module-axqua.install.runner">Betrieb einer Anlage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/postprocessing.html">Postprocessing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.dataset">Beschreibung des Ergebnisses</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.scenes">Zahlen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Export von TELEMAC-Ergebnissen</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/cli.html">Kommandozeile</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.cli">Fallbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.jobcli">Auftragsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.profilecli">Profilbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.installcli">Installationsbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.exportcli">Ausfuhrbefehle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.casecli">Befehle für Falldateien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/cli.html#module-axqua.examplecli">Beispiel Fallbefehle</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/plugin.html">QGIS Plugin</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../code/build-docs.html">Aufbau der Dokumentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#languages-and-publication">Sprachen und Veröffentlichung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../code/build-docs.html#rules-for-the-structure">Vorschriften für die Struktur</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/index.html">Fehlerbehebung</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html">Allgemeine Tipps &amp; Logfiles</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#tips">Tipps</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#logfiles">Logfiles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#freeing-disk-space">Freigeben des Scheibenraums</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/tips-logfiles.html#reporting-a-problem">Melden eines Problems</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/warnings.html">Warnmeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../troubleshooting/errors.html">Fehlermeldungen</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#jobs">Arbeitsplätze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#plugin">Plugin</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../license.html">Lizenz und Disclaimer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#license">Lizenz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#disclaimer">Disclaimer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../license.html#third-party-software">Drittsoftware</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Modul-Quellcode</a></li>
+      <li class="breadcrumb-item active">axqua.workflow</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Hinweis schließen" title="Hinweis schließen">&times;</button>Diese Seite wurde maschinell aus dem Englischen übersetzt und kann Fehler enthalten. <a href="../../../_modules/axqua/workflow.html" hreflang="en" lang="en" data-axqua-lang="en">Englisches Original</a></div>
+             
+  <h1>Quellcode für axqua.workflow</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""Shared workflow helpers for the per-case scripts.</span>
+
+<span class="sd">The per-case ``preprocessing.py`` / ``initial_run.py`` / ``mesh_convergence_study.py``</span>
+<span class="sd">are deliberately thin: the logic they have in common lives here so it is written</span>
+<span class="sd">once and stays identical across every case (template, example-Inn, ering-revised, ...).</span>
+
+<span class="sd">The central rule is that the **steady discharge and the outflow stage prescription</span>
+<span class="sd">come from the case's own ``case-config.yml``**, never from a constant hard-coded in</span>
+<span class="sd">a script. :func:`prepare_steady_inputs` reads ``boundaries.prescribed_flowrate``</span>
+<span class="sd">(or the inflow series) so each case uses its own configured boundary conditions; an</span>
+<span class="sd">explicit ``discharge=`` only overrides it when a script genuinely needs to.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelemacRuntime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.progress</span><span class="w"> </span><span class="kn">import</span> <span class="n">SolverProgress</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.rating</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_outflow_rating</span>
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
+
+<span class="c1"># trapezoidal channel banks (H:V) used when a stage-discharge rating is synthesized</span>
+<span class="n">DEFAULT_BANK_SLOPE</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+<span class="n">_UNSET</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>   <span class="c1"># sentinel: "leave initialization.prewet_depth untouched"</span>
+
+
+<div class="viewcode-block" id="resolve_discharge">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.resolve_discharge">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_discharge</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Steady discharge [m3/s] the case is built for.</span>
+
+<span class="sd">    Resolution order: an explicit *discharge* argument, then the case config's</span>
+<span class="sd">    ``boundaries.prescribed_flowrate`` (the inflow Q set in ``case-config.yml``),</span>
+<span class="sd">    then the mean of the inflow series in ``boundaries.inflow``. Raises when none of</span>
+<span class="sd">    these is available - so a case never silently inherits another case's discharge.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">discharge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">discharge</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
+    <span class="n">inflow</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span>
+    <span class="k">if</span> <span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydraulics</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">hydraulics</span><span class="o">.</span><span class="n">read_inflow</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">inflow</span><span class="p">),</span> <span class="n">steady</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">steady_value</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="s2">"no steady discharge for the build: set boundaries.prescribed_flowrate "</span>
+        <span class="s2">"(m3/s) in case-config.yml, provide boundaries.inflow, or pass discharge=..."</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="synthesize_constant_inflow">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.synthesize_constant_inflow">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">synthesize_constant_inflow</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Write a tiny constant-Q inflow series when ``boundaries.inflow`` is missing,</span>
+<span class="sd">    point the config at it, and return its path (the existing inflow otherwise)."""</span>
+    <span class="n">inflow</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span>
+    <span class="k">if</span> <span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="s2">"inflow-constant.csv"</span><span class="p">)</span>
+    <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">"datetime,Q</span><span class="se">\n</span><span class="s2">2020-11-01 00:00,</span><span class="si">{</span><span class="n">discharge</span><span class="si">}</span><span class="se">\n</span><span class="s2">2020-11-01 01:00,</span><span class="si">{</span><span class="n">discharge</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"synthesized constant inflow Q=</span><span class="si">%g</span><span class="s2"> m3/s -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<div class="viewcode-block" id="synthesize_rating_if_missing">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.synthesize_rating_if_missing">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                 <span class="n">side_slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_BANK_SLOPE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Synthesize the outflow stage-discharge rating from the geodata when the</span>
+<span class="sd">    ``stage_discharge`` outflow condition is active and no rating CSV is given.</span>
+
+<span class="sd">    Width comes from the outflow boundary line, bed + reach slope from the DEM and</span>
+<span class="sd">    roughness from ``friction.boundary_*`` (see :func:`synthesize_outflow_rating`).</span>
+<span class="sd">    Returns the rating path (existing or generated), or None for the other outflow</span>
+<span class="sd">    conditions (``elevation`` / ``free``), which need no rating curve.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">!=</span> <span class="s2">"stage_discharge"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">sd</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="p">,</span> <span class="s2">"rating_method"</span><span class="p">,</span> <span class="s2">"trapezoid"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sd</span><span class="p">)</span> <span class="k">if</span> <span class="n">sd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cfg</span><span class="o">.</span><span class="n">preprocessing_path</span><span class="p">(</span><span class="s2">"rating-curve.csv"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">"section"</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.rating</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_outflow_rating_from_section</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">synthesize_outflow_rating_from_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">synthesize_outflow_rating</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="n">side_slope</span><span class="o">=</span><span class="n">side_slope</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">out</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"generated outflow rating curve (</span><span class="si">%s</span><span class="s2">) at Q=</span><span class="si">%g</span><span class="s2"> m3/s -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+             <span class="n">method</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+
+<div class="viewcode-block" id="prepare_steady_inputs">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.prepare_steady_inputs">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">prepare_steady_inputs</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">side_slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DEFAULT_BANK_SLOPE</span><span class="p">,</span>
+                          <span class="n">prewet_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">_UNSET</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>  <span class="c1"># type: ignore[assignment]</span>
+<span class="w">    </span><span class="sd">"""Configure the steady boundary conditions for a build and return the discharge.</span>
+
+<span class="sd">    Prescribes the steady discharge (from the config, see :func:`resolve_discharge`),</span>
+<span class="sd">    synthesizes a constant inflow series and the outflow stage-discharge rating when</span>
+<span class="sd">    those inputs are missing, so the build draws the inflow Q (m3/s) and the outflow</span>
+<span class="sd">    stage (H) straight from ``case-config.yml``. Used by ``preprocessing.py`` and the</span>
+<span class="sd">    mesh-convergence study so they share one source of truth for the steady setup.</span>
+
+<span class="sd">    *prewet_depth* defaults to the sentinel "leave it as the config has it"; pass a</span>
+<span class="sd">    float (or None) to set ``initialization.prewet_depth`` - the mesh-convergence study</span>
+<span class="sd">    hotstarts the channel this way, the dry-start initial run leaves it untouched.</span>
+<span class="sd">    """</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">resolve_discharge</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">q</span>
+    <span class="k">if</span> <span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_UNSET</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="o">=</span> <span class="n">prewet_depth</span>
+    <span class="n">synthesize_constant_inflow</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span>
+    <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">side_slope</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">q</span></div>
+
+
+
+<div class="viewcode-block" id="format_flux_convergence">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.format_flux_convergence">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_flux_convergence</span><span class="p">(</span><span class="n">fc</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Render a :class:`~axqua.flux_convergence.FluxConvergence` result as</span>
+<span class="sd">    user-facing report lines (whether the boundary fluxes reached mass balance, the</span>
+<span class="sd">    hotstart time-step recommendation, and the produced csv/png paths).</span>
+
+<span class="sd">    Kept here so every case's ``initial_run.py`` prints the convergence summary the</span>
+<span class="sd">    same way; the analysis itself lives in</span>
+<span class="sd">    :mod:`axqua.flux_convergence`.</span>
+<span class="sd">    """</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">fc</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"fluxes converged (&lt;</span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">tolerance</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2">) after </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">converged_time_steps</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"time steps (</span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">converged_seconds</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> s); "</span>
+            <span class="sa">f</span><span class="s2">"final imbalance </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">final_imbalance</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  -&gt; hotstart: set NUMBER OF TIME STEPS : </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">converged_time_steps</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"fluxes did NOT reach </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">tolerance</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2"> (final imbalance "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">final_imbalance</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">); extend the run (DURATION / NUMBER OF TIME STEPS)."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">fc</span><span class="o">.</span><span class="n">steady_seconds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">basis</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"per-printout"</span> <span class="k">if</span> <span class="n">fc</span><span class="o">.</span><span class="n">steady_strict</span>
+                 <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">steady_window</span><span class="si">}</span><span class="s2">-printout mean; instantaneous criterion "</span>
+                      <span class="s2">"not met (steady-state noise floor)"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"sustained flux balance (abs imbalance &lt; </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">steady_abs_tolerance</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2"> m3/s "</span>
+            <span class="sa">f</span><span class="s2">"over </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">steady_window</span><span class="si">}</span><span class="s2"> printouts, </span><span class="si">{</span><span class="n">basis</span><span class="si">}</span><span class="s2">) from "</span>
+            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">steady_seconds</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> s simulated"</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">fc</span><span class="o">.</span><span class="n">hotstart_cas</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  -&gt; hotstart case: </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">hotstart_cas</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"no sustained flux balance (abs imbalance &lt; </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">steady_abs_tolerance</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2"> "</span>
+            <span class="sa">f</span><span class="s2">"m3/s over </span><span class="si">{</span><span class="n">fc</span><span class="o">.</span><span class="n">steady_window</span><span class="si">}</span><span class="s2"> printouts) - no hotstart case written."</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"fluxes csv"</span><span class="p">,</span> <span class="n">fc</span><span class="o">.</span><span class="n">fluxes_csv</span><span class="p">),</span> <span class="p">(</span><span class="s2">"flux plot"</span><span class="p">,</span> <span class="n">fc</span><span class="o">.</span><span class="n">flux_plot</span><span class="p">),</span>
+                     <span class="p">(</span><span class="s2">"rate csv"</span><span class="p">,</span> <span class="n">fc</span><span class="o">.</span><span class="n">rate_csv</span><span class="p">),</span> <span class="p">(</span><span class="s2">"rate plot"</span><span class="p">,</span> <span class="n">fc</span><span class="o">.</span><span class="n">rate_plot</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">p</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+
+<div class="viewcode-block" id="format_3d_cases">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.format_3d_cases">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_3d_cases</span><span class="p">(</span><span class="n">setups</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Render :func:`axqua.threed.build_3d_cases` results as user-facing report</span>
+<span class="sd">    lines (one block per steering file; a ``None`` setup reports why it was skipped).</span>
+
+<span class="sd">    Kept here so every case's ``add3d.py`` prints the same summary; the builders</span>
+<span class="sd">    live in :mod:`axqua.threed` / :mod:`axqua.unsteady`.</span>
+<span class="sd">    """</span>
+    <span class="n">purposes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"hydrostatic"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"steady boundary-flux convergence check (constant Q/H; the "</span>
+                        <span class="s2">"sortie's FLUX BOUNDARY printouts show when in/outflow "</span>
+                        <span class="s2">"balance)"</span><span class="p">),</span>
+        <span class="s2">"hydrodyn"</span><span class="p">:</span> <span class="s2">"steady non-hydrostatic flow at the in-file prescribed Q and H"</span><span class="p">,</span>
+        <span class="s2">"unsteady"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"hydrograph-driven: Q(t) inflow + outflow SL(t) via the same "</span>
+                     <span class="s2">"liquid-boundaries file as unsteady2d.cas"</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">setups</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: skipped - needs a varying boundaries.inflow "</span>
+                         <span class="s2">"hydrograph (see the log message for details)"</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">nh</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">"non_hydrostatic"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wrote </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">cas</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">:"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  pressure    : </span><span class="si">{</span><span class="s1">'non-hydrostatic'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">nh</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'hydrostatic'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">"liquid_boundaries"</span><span class="p">):</span>        <span class="c1"># the unsteady setup</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  hydrograph  : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> "</span>
+                         <span class="sa">f</span><span class="s2">"over </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">duration</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">"dx"</span><span class="p">):</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  vertical    : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2"> sigma levels "</span>
+                         <span class="sa">f</span><span class="s2">"(dz~</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dz</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m, dx~</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dx</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m, depth~</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">depth</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m)"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  vertical    : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">n_levels</span><span class="si">}</span><span class="s2"> sigma levels (dz~</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">dz</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> m)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">"h_turbulence"</span><span class="p">):</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  turbulence  : H=</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">h_turbulence</span><span class="si">}</span><span class="s2"> V=</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">v_turbulence</span><span class="si">}</span><span class="s2"> "</span>
+                         <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">turbulence_reason</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  time step   : </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">time_step</span><span class="si">}</span><span class="s2"> s (</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">n_time_steps</span><span class="si">}</span><span class="s2"> steps ~ "</span>
+                     <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">time_step</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">s</span><span class="o">.</span><span class="n">n_time_steps</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2"> s simulated)"</span><span class="p">)</span>
+        <span class="n">gaia</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">"gaia_cas"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">gaia</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  GAIA        : </span><span class="si">{</span><span class="n">gaia</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">purposes</span><span class="p">:</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  purpose     : </span><span class="si">{</span><span class="n">purposes</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+
+<div class="viewcode-block" id="expected_duration">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.expected_duration">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">expected_duration</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Total simulated time [s] the run marches to when no stop criterion fires.</span>
+
+<span class="sd">    Mirrors :mod:`axqua.steering`'s ``DURATION`` logic: the explicit</span>
+<span class="sd">    ``hydrodynamics.duration`` when set, else the ``n_time_steps * time_step``</span>
+<span class="sd">    fallback. Used to scale the solver progress bar (the variable time step makes</span>
+<span class="sd">    the *number* of steps unknown a priori, so progress is measured against the</span>
+<span class="sd">    simulated-time cap instead).</span>
+<span class="sd">    """</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span>
+    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">n_time_steps</span> <span class="o">*</span> <span class="n">h</span><span class="o">.</span><span class="n">time_step</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="run_solver_streaming">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.run_solver_streaming">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">run_solver_streaming</span><span class="p">(</span><span class="n">runtime</span><span class="p">:</span> <span class="n">TelemacRuntime</span><span class="p">,</span> <span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">cas_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">solver</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">ncsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">cwd</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">show_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                         <span class="n">sink</span><span class="p">:</span> <span class="nb">object</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">should_stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Run the TELEMAC solver, echoing its listing live with a progress bar.</span>
+
+<span class="sd">    Unlike a plain :meth:`TelemacRuntime.run_solver`, this streams the solver's</span>
+<span class="sd">    stdout/stderr to the console as the run marches (so it is not silent) and, when</span>
+<span class="sd">    *show_progress*, overlays a simulated-time progress bar parsed from TELEMAC's</span>
+<span class="sd">    listing header. The bar's end time is *duration* when given (pass it whenever</span>
+<span class="sd">    the ``.cas`` does not march to the config's own time cap - e.g. a per-layer 3D</span>
+<span class="sd">    run or a hydrograph-spanning unsteady run), else :func:`expected_duration`.</span>
+<span class="sd">    *cwd* overrides the run folder (default ``cfg.model_dir`` - the convergence</span>
+<span class="sd">    studies run each level in its own subfolder). Returns the ``CompletedProcess``</span>
+<span class="sd">    (its ``returncode`` reports success/failure; a non-zero exit does not raise). A run</span>
+<span class="sd">    that TELEMAC-2D ended itself because a value left its limits comes back as a</span>
+<span class="sd">    failure too, although TELEMAC reports it as a correct end: see</span>
+<span class="sd">    :func:`_fail_on_limit_stop`.</span>
+
+<span class="sd">    *sink* is an event sink (:mod:`axqua.jobs.events`): the same parsed iteration</span>
+<span class="sd">    and simulated time that drive the terminal bar are also emitted as structured</span>
+<span class="sd">    progress, so a detached job never asks anyone to parse a console log. *should_stop*</span>
+<span class="sd">    is polled between lines and terminates the whole solver process group when it</span>
+<span class="sd">    returns true.</span>
+<span class="sd">    """</span>
+    <span class="n">cas_file</span> <span class="o">=</span> <span class="n">cas_file</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span>
+    <span class="k">if</span> <span class="n">ncsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ncsize</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">n_processors</span>
+    <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">expected_duration</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="c1"># A sink alone is enough reason to build the parser: a detached run wants the</span>
+    <span class="c1"># structured progress even though it has no terminal to draw a bar on.</span>
+    <span class="n">progress</span> <span class="o">=</span> <span class="p">(</span><span class="n">SolverProgress</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="n">sink</span><span class="o">=</span><span class="n">sink</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="n">show_progress</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">show_progress</span> <span class="ow">or</span> <span class="n">sink</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.sortie</span><span class="w"> </span><span class="kn">import</span> <span class="n">LIMIT_STOP</span>
+
+    <span class="n">feed</span> <span class="o">=</span> <span class="n">progress</span><span class="o">.</span><span class="n">feed</span> <span class="k">if</span> <span class="n">progress</span> <span class="k">else</span> <span class="nb">print</span>
+    <span class="n">stopped_on_limits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_line</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">LIMIT_STOP</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">stopped_on_limits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="n">feed</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="n">run_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cwd</span> <span class="ow">or</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">runtime</span><span class="o">.</span><span class="n">run_solver</span><span class="p">(</span><span class="n">cas_file</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">run_dir</span><span class="p">,</span> <span class="n">ncsize</span><span class="o">=</span><span class="n">ncsize</span><span class="p">,</span>
+                                  <span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">on_line</span><span class="o">=</span><span class="n">on_line</span><span class="p">,</span>
+                                  <span class="n">should_stop</span><span class="o">=</span><span class="n">should_stop</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">progress</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">progress</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">stopped_on_limits</span><span class="p">:</span>
+        <span class="n">_fail_on_limit_stop</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span> <span class="n">run_dir</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">cas_file</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                            <span class="n">progress</span><span class="o">.</span><span class="n">time</span> <span class="k">if</span> <span class="n">progress</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">proc</span></div>
+
+
+
+<span class="c1">#: The return code of a run that TELEMAC-2D stopped on its limits</span>
+<span class="c1">#: (:data:`axqua.solvers.telemac.sortie.LIMIT_STOP`). TELEMAC's own ``plante.F`` uses 2</span>
+<span class="c1">#: for a "controlled" stop on an error, which is what this is.</span>
+<span class="n">LIMIT_STOP_CODE</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1">#: What to do about it, in the words every caller can pass on.</span>
+<span class="n">LIMIT_STOP_REMEDY</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s2">"A value of that size is a numerical instability, not a flow. Look at the mesh, "</span>
+    <span class="s2">"the bed and the initial water depth at that position. Common causes are a sink "</span>
+    <span class="s2">"or a liquid boundary on nearly dry cells, an initial water surface far from the "</span>
+    <span class="s2">"steady one, and a time step that is too large (hydrodynamics.desired_courant)."</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fail_on_limit_stop</span><span class="p">(</span><span class="n">proc</span><span class="p">,</span> <span class="n">run_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Turn a run that TELEMAC-2D stopped on its limits into a failed run.</span>
+
+<span class="sd">    TELEMAC-2D treats this as a programmed stop: it prints ``CORRECT END OF RUN`` and</span>
+<span class="sd">    exits with code 0, although the velocities had just left the range of a river by</span>
+<span class="sd">    three orders of magnitude. Every caller judges a run by its return code, so the</span>
+<span class="sd">    code is corrected here, once, and the reason is attached as ``proc.stop_reason``</span>
+<span class="sd">    for a caller that can say more than a number.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.sortie</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_limit_stops</span>
+
+    <span class="n">stops</span> <span class="o">=</span> <span class="n">find_limit_stops</span><span class="p">(</span><span class="n">run_dir</span><span class="p">,</span> <span class="n">cas_name</span><span class="p">)</span>
+    <span class="n">where</span> <span class="o">=</span> <span class="n">stops</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span> <span class="k">if</span> <span class="n">stops</span> <span class="k">else</span> <span class="s2">"the listing does not name the node"</span>
+    <span class="n">more</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">", and at </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">stops</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> more node(s)"</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stops</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="n">when</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">" at t = </span><span class="si">{</span><span class="n">time</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> s"</span> <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span>
+    <span class="n">proc</span><span class="o">.</span><span class="n">stop_reason</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"TELEMAC-2D stopped the run"</span> <span class="o">+</span> <span class="n">when</span>
+                        <span class="o">+</span> <span class="sa">f</span><span class="s2">" because a value left its limits: </span><span class="si">{</span><span class="n">where</span><span class="si">}{</span><span class="n">more</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">=</span> <span class="n">LIMIT_STOP_CODE</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">. </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">stop_reason</span><span class="p">,</span> <span class="n">LIMIT_STOP_REMEDY</span><span class="p">)</span>
+
+
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<span class="c1"># post-run reporting (shared by every case's initial_run.py)</span>
+<span class="c1"># --------------------------------------------------------------------------- #</span>
+<div class="viewcode-block" id="mesh_from_geometry">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.mesh_from_geometry">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mesh_from_geometry</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Rebuild a :class:`~axqua.mesh.Mesh` from the built ``geometry.slf``.</span>
+
+<span class="sd">    Enough of one for the geometry-only helpers (water table, node masks, areas):</span>
+<span class="sd">    coordinates, element table, bed and the boundary numbering. Saves re-meshing</span>
+<span class="sd">    just to ask a question about a finished run.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.mesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mesh</span>
+
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">))</span>
+    <span class="n">ipobo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">geo</span><span class="p">[</span><span class="s2">"ipobo"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Mesh</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="n">geo</span><span class="p">[</span><span class="s2">"x"</span><span class="p">],</span> <span class="n">y</span><span class="o">=</span><span class="n">geo</span><span class="p">[</span><span class="s2">"y"</span><span class="p">],</span> <span class="n">triangles</span><span class="o">=</span><span class="n">geo</span><span class="p">[</span><span class="s2">"ikle"</span><span class="p">],</span>
+        <span class="n">bottom</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">geo</span><span class="p">[</span><span class="s2">"values"</span><span class="p">][</span><span class="s2">"BOTTOM"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
+        <span class="n">ipobo</span><span class="o">=</span><span class="n">ipobo</span><span class="p">,</span> <span class="n">boundary_nodes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">ipobo</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">element_matid</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geo</span><span class="p">[</span><span class="s2">"ikle"</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+        <span class="n">node_matid</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geo</span><span class="p">[</span><span class="s2">"x"</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">),</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="water_table_mask">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.water_table_mask">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">water_table_mask</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Depth the porous body's water table holds in place, per node (else ``None``).</span>
+
+<span class="sd">    Rebuilt from the same config and the same seeded surface the build used, so the</span>
+<span class="sd">    report and the model agree on which water is groundwater-fed rather than stray.</span>
+<span class="sd">    Returns ``None`` - never raises - when the case has no water table or it cannot</span>
+<span class="sd">    be reconstructed: this only decorates a report.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">water_table</span> <span class="o">!=</span> <span class="s2">"phreatic"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">watertable</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+
+        <span class="n">mesh</span> <span class="o">=</span> <span class="n">mesh_from_geometry</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">ic_slf</span><span class="p">))[</span><span class="s2">"values"</span><span class="p">][</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span>
+        <span class="n">plane</span> <span class="o">=</span> <span class="n">watertable</span><span class="o">.</span><span class="n">fit_phreatic_plane</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">surface</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="n">ic</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plane</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">watertable</span><span class="o">.</span><span class="n">water_table_depth</span><span class="p">(</span>
+            <span class="n">plane</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">watertable</span><span class="o">.</span><span class="n">patch_node_mask</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - a reporting aid, never fatal</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">"water-table mask unavailable (</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="report_wetting">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.report_wetting">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">report_wetting</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Wetted-extent + outlet-profile report for a finished run.</span>
+
+<span class="sd">    A balanced flux budget says nothing about **where** the water is, which is the</span>
+<span class="sd">    question this answers: how much of the wetted area actually carries flow, how</span>
+<span class="sd">    much is stagnant film, how much the initial condition put there, and whether the</span>
+<span class="sd">    film is still draining or has plateaued (a 2D model has neither infiltration nor</span>
+<span class="sd">    evaporation, so water perched above the converged surface never leaves). The</span>
+<span class="sd">    outlet profile then says whether the prescribed downstream stage is holding water</span>
+<span class="sd">    up over ground that should be dry.</span>
+
+<span class="sd">    Writes ``wetting-report.csv`` and ``outlet-profile.csv`` into ``model_dir`` and</span>
+<span class="sd">    returns report lines. Never raises: a diagnostic must not fail a successful run.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.wetting</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_profile</span><span class="p">,</span> <span class="n">wetting_report</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">)</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rep</span> <span class="o">=</span> <span class="n">wetting_report</span><span class="p">(</span>
+            <span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
+            <span class="n">initial_conditions</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">ic_slf</span><span class="p">),</span>
+            <span class="c1"># water an external source holds in place (a water-table pool) is</span>
+            <span class="c1"># legitimately wet; without this it counts as BOTH film and an isolated</span>
+            <span class="c1"># puddle, i.e. reads as a defect when it is what the model intends</span>
+            <span class="n">supported</span><span class="o">=</span><span class="n">water_table_mask</span><span class="p">(</span><span class="n">cfg</span><span class="p">),</span>
+            <span class="n">wet_depth</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">,</span>
+            <span class="n">out</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wetting report skipped: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"wetted-extent report -&gt; </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s1">'wetting-report.csv'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">ln</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">rep</span><span class="o">.</span><span class="n">summary</span><span class="p">()]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">prof</span> <span class="o">=</span> <span class="n">outlet_profile</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"outlet profile skipped: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"outlet profile -&gt; </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="s1">'outlet-profile.csv'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">ln</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">prof</span><span class="o">.</span><span class="n">summary</span><span class="p">()]</span>
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+
+
+<div class="viewcode-block" id="report_sections">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.workflow.report_sections">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">report_sections</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">out_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"baffle-XS-q.csv"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Discharge across the ``geodata.control_sections`` lines of a finished run.</span>
+
+<span class="sd">    Integrates ``Q = int (H*U) . n ds`` from the result, so the sections can be drawn</span>
+<span class="sd">    and changed in GIS without re-running the solver - which is how the split of the</span>
+<span class="sd">    total discharge between the threads of a braided reach gets read off and checked</span>
+<span class="sd">    against field transects. Empty list when the case defines no control sections.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">control_sections</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.sections</span><span class="w"> </span><span class="kn">import</span> <span class="n">write_line_discharges</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">write_line_discharges</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">),</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">control_sections</span><span class="p">,</span>
+            <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">out_name</span><span class="p">),</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">),</span>
+            <span class="n">name_field</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">control_section_name_field</span><span class="p">,</span>
+            <span class="n">crs_epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001 - the run already succeeded</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"cross-section discharges skipped: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"cross-section discharges -&gt; </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">out_name</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'name'</span><span class="p">]</span><span class="si">:</span><span class="s2">&lt;16</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'discharge'</span><span class="p">]</span><span class="si">:</span><span class="s2">8.4f</span><span class="si">}</span><span class="s2"> m3/s   "</span>
+            <span class="sa">f</span><span class="s2">"(wet </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'wetted_width'</span><span class="p">]</span><span class="si">:</span><span class="s2">5.1f</span><span class="si">}</span><span class="s2"> m, mean h </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'mean_depth'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m,"</span>
+            <span class="sa">f</span><span class="s2">" mean |U| </span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'mean_velocity'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> m/s)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Erstellt mit <a href="https://www.sphinx-doc.org/">Sphinx</a> mit einem
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    bereitgestellt von <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
