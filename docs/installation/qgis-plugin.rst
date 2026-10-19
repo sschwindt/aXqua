@@ -27,7 +27,7 @@ Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `r
 Install the aXqua program (backend)
 -----------------------------------
 
-The aXqua program is published on `PyPI <https://pypi.org/project/axqua/>`_, the package index of Python, and requires Python 3.10 or newer. The recommended route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which keeps QGIS and aXqua updatable independently of each other.
+The aXqua program is published on `PyPI <https://pypi.org/project/axqua/>`_, the package index of Python, and requires Python 3.10 or newer. ``pip`` installs it into a Python environment of its own, which keeps QGIS and aXqua updatable independently of each other. The recommended route is an environment from `Miniforge <https://github.com/conda-forge/miniforge>`_:
 
 * Install Miniforge following the instructions on its website.
 * Open **terminal** (on Windows, the *Miniforge Prompt*) and enter:
@@ -39,9 +39,20 @@ The aXqua program is published on `PyPI <https://pypi.org/project/axqua/>`_, the
    pip install axqua
    axqua --version
 
-``axqua --version`` printing a version confirms the installation. ``pip`` also installs the packages that aXqua requires (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``).
+``axqua --version`` printing a version (for example, ``axqua 1.0.1``) confirms the installation. ``pip`` also installs the packages that aXqua requires (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``), all of them from PyPI, which takes less than a minute on a fast internet connection.
 
 * **Bayesian calibration** requires the optional package HydroBayesCal: ``pip install "axqua[calibration]"``.
+
+**Without Miniforge.** On Linux and macOS, a Python 3.10 or newer that is already installed works as well (``python3 --version`` shows the version). The module ``venv`` of Python creates the environment:
+
+.. code-block:: bash
+
+   python3 -m venv ~/axqua-env
+   source ~/axqua-env/bin/activate
+   pip install axqua
+   axqua --version
+
+On Debian, Ubuntu and Linux Mint, ``venv`` requires the package ``python3-venv`` (``sudo apt install python3-venv``). The program is then ``~/axqua-env/bin/axqua``.
 
 .. note::
 
@@ -71,12 +82,12 @@ To **upgrade** aXqua, and HydroBayesCal where Bayesian calibration is used, to t
 
 .. code-block:: bash
 
-   mamba activate axqua-env
+   mamba activate axqua-env               # or: source ~/axqua-env/bin/activate
    pip install --upgrade axqua
    pip install --upgrade hydrobayescal
    axqua --version
 
-*Check* on the *Configuration* tab of the plugin then reports the new version. The plugin and the program are released together under the same version number, so upgrade the program also after an update of the plugin in QGIS.
+*Check* on the *Configuration* tab of the plugin then reports the new version. The plugin and the program are released together under the same version number, so upgrade the program also after an update of the plugin in QGIS. ``pip install axqua==<version>`` installs one particular version, for instance the version with which an earlier result was computed; the `release history on PyPI <https://pypi.org/project/axqua/#history>`_ lists all versions.
 
 .. _install-from-source:
 
@@ -195,6 +206,7 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 
    * If the above commands do not print anything, the environment is not active, or ``pip install axqua`` did not run in it.
    * To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\Scripts\axqua.exe`` (Windows).
+   * An environment created with ``venv`` is the folder named in ``python3 -m venv``; the program is ``<folder>/bin/axqua``, for instance ``/home/<user>/axqua-env/bin/axqua``.
 
 .. important::
 
@@ -203,7 +215,7 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 aXqua panel layout
 ------------------
 
-After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, and *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in the aXqua folder, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.
+After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, and *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in a copy of the repository installed as in :ref:`install-from-source`, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.
 
 .. figure:: ../img/gui-qgis-window.png
    :alt: The aXqua panel in the QGIS window
