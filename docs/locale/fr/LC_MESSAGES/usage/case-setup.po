@@ -75,9 +75,9 @@ msgstr "La fenêtre a trois boutons en bas à droite. *Save* écrit le fichier d
 msgid "Saving from the window rewrites the case file from its settings. Comments of a case file that was written by hand are not kept. The original is preserved as ``<name>.bak`` the first time the window saves."
 msgstr "L'enregistrement depuis la fenêtre réécrit le fichier de cas depuis ses paramètres. Les commentaires d'un fichier de cas qui a été écrit à la main ne sont pas conservés. L'original est conservé comme ``<name>.bak`` la première fois que la fenêtre économise."
 
-# machine translation: argos 5d6f11981ef8
-msgid "**In a text editor.** The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is provided in the folder ``cases/case-template/`` of the repository. Copy this folder to start a new case, and rename the case file. The command ``axqua check <case-file>`` reports everything that is not in order."
-msgstr "**Dans un éditeur de texte.** Le fichier de cas est un fichier texte au format YAML. Chaque bloc du fichier est expliqué dans une sous-section ci-dessous. Un modèle commenté est fourni dans le dossier ``cases/case-template/`` du dépôt. Copiez ce dossier pour lancer un nouveau cas, et renommez le fichier de cas. La commande ``axqua check <case-file>`` rapporte tout ce qui n'est pas en ordre."
+# machine translation: argos 2d2dc0d7fa01
+msgid "**In a text editor.** The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is the case file `case-template.axq-case <https://github.com/sschwindt/aXqua/blob/main/cases/case-template/case-template.axq-case>`_ of the repository; *Download raw file* on that page saves it. Save it in the folder of the new case and rename it. In a copy of the repository (:ref:`install-from-source`), copy the folder ``cases/case-template/`` instead. The command ``axqua check <case-file>`` reports everything that is not in order."
+msgstr "**Dans un éditeur de texte.** Le fichier de cas est un fichier texte au format YAML. Chaque bloc du fichier est expliqué dans une sous-section ci-dessous. Un modèle commenté est le fichier de cas `case-template.axq-case <https://github.com/sschwindt/aXqua/blob/main/cases/case-template/case-template.axq-case>`_ du dépôt ; *Download raw file* sur cette page l'enregistre. Sauvegardez-le dans le dossier du nouveau cas et renommez-le. Dans une copie du dépôt (:ref:`install-from-source`), copiez plutôt le dossier ``cases/case-template/``. La commande ``axqua check <case-file>`` rapporte tout ce qui n'est pas en ordre."
 
 # machine translation: argos 3c0423a6df92
 msgid "Case files of earlier aXqua versions are named ``case-config.yml`` and may contain the location of the simulation software. They are still read. The following command writes a case file of the current type next to such a file:"
@@ -131,9 +131,8 @@ msgstr "Géométrie"
 msgid "Attribute fields"
 msgstr "Champs d'attribut"
 
-# machine translation: argos cf95b75a55e8
 msgid "Purpose"
-msgstr "Objet"
+msgstr "Objectif"
 
 # machine translation: argos b3972fb93a62
 msgid "``dem_initial`` (required)"
@@ -295,9 +294,9 @@ msgstr "Aucun niveau d'eau n'est prescrit. Ce choix est adapté pour une sortie 
 msgid "For a simulation with a discharge that varies in time, ``inflow`` names a table with a time column and a discharge column, and ``hydrodynamics.regime`` is set to ``unsteady``; the case settings then mark the hydrograph as required. The exchange with a porous body, in which water leaves the surface through a gravel bar and returns further downstream (:ref:`preprocessing-telemac-choices`), is a frame of the page *Liquid boundaries* in the case settings."
 msgstr "Pour une simulation avec un débit qui varie dans le temps, ``inflow`` nomme une table avec une colonne de temps et une colonne débit, et ``hydrodynamics.regime`` est réglé à ``unsteady``; les paramètres cas marquent alors l'hydrographe au besoin. L'échange avec un corps poreux, dans lequel l'eau quitte la surface à travers une barre de gravier et retourne plus loin en aval (:ref:`preprocessing-telemac-choices`), est un cadre de la page *Liquid boundaries* dans les paramètres cas."
 
-# machine translation: argos cf03d5d261a6
-msgid "**Gauge data.** The script ``scripts/gauge_data.py`` retrieves discharge time series and rating curves of river gauges and saves them in the format that aXqua reads. It supports the gauges of the Bavarian flood information service (HND) and of the United States Geological Survey (USGS). It opens in a web browser and requires the package ``streamlit`` (``pip install \".[gui]\"``). Start it from the repository folder, paste the address or the number of a gauge, and save the two tables into ``user-sources/``:"
-msgstr "**Station hydrométrique données.** Le script ``scripts/gauge_data.py`` récupère les séries chronologiques débit et courbes de tarage de River stations hydrométriques et les sauve dans le format qu'aXqua lit. Il soutient les stations hydrométriques du Service bavarois d'information sur les inondations (HND) et de l'USGS. Il s'ouvre dans un navigateur Web et nécessite le paquet ``streamlit`` (``pip install \".[gui]\"``). Commencez à partir du dossier du dépôt, collez l'adresse ou le numéro d'une station hydrométrique, et enregistrez les deux tables dans ``user-sources/``:"
+# machine translation: argos cf5df913c909
+msgid "**Gauge data.** The script `gauge_data.py <https://github.com/sschwindt/aXqua/blob/main/scripts/gauge_data.py>`_ of the repository retrieves discharge time series and rating curves of river gauges and saves them in the format that aXqua reads. It supports the gauges of the Bavarian flood information service (HND) and of the United States Geological Survey (USGS). It opens in a web browser and requires the package ``streamlit`` (``pip install \"axqua[gui]\"``). Save it with *Download raw file* on that page, start it in the folder where it was saved (in a copy of the repository: ``python scripts/gauge_data.py``), paste the address or the number of a gauge, and save the two tables into ``user-sources/``:"
+msgstr "**Station hydrométrique données.** Le script `gauge_data.py <https://github.com/sschwindt/aXqua/blob/main/scripts/gauge_data.py>`_ du dépôt récupère les séries chronologiques débit et courbes de tarage de River stations hydrométriques et les enregistre dans le format qu'aXqua lit. Il soutient les stations hydrométriques du Service bavarois d'information sur les inondations (HND) et de l'USGS. Il s'ouvre dans un navigateur Web et nécessite le paquet ``streamlit`` (``pip install \"axqua[gui]\"``). Enregistrer avec *Download raw file* sur cette page, commencer dans le dossier où il a été enregistré (dans une copie du dépôt : ``python scripts/gauge_data.py``), coller l'adresse ou le numéro d'une station hydrométrique, et enregistrer les deux tables dans ``user-sources/``:"
 
 # machine translation: argos 365f971025e3
 msgid "The exported discharge series is the ``inflow`` table, and the exported rating curve is the ``stage_discharge`` table. Enter the elevation of the gauge zero to convert the gauge reading into an absolute water surface elevation, and verify that this elevation and the DEM refer to the same height system."
