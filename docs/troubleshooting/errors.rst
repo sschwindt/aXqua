@@ -220,7 +220,7 @@ Case file
 ---------
 
 ``... unknown config keys [...]``
-    A block of the case file contains an entry that aXqua does not know, usually because of a typing error. The message names the block and the entry. Compare the spelling with the template in ``cases/case-template/``.
+    A block of the case file contains an entry that aXqua does not know, usually because of a typing error. The message names the block and the entry. Compare the spelling with the `commented template <https://github.com/sschwindt/aXqua/blob/main/cases/case-template/case-template.axq-case>`_ of the repository.
 
 ``telemac.pysource is not set`` or ``TELEMAC pysource script not found``
     aXqua does not know where TELEMAC is installed, or the stated environment script does not exist. Create the profile of the computer with ``axqua profile init``, or correct its binding for TELEMAC (:ref:`solver-bindings`).

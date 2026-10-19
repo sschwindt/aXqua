@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=64", "wheel"]
+# 77: the license expression and license-files of PEP 639.
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,12 +8,35 @@ build-backend = "setuptools.build_meta"
 # module name resolves differently on case-insensitive filesystems. PyPI normalizes the
 # two to the same project, so `pip install aXqua` and `pip install axqua` both work.
 name = "aXqua"
-version = "1.0.0"
+version = "1.0.1"
 description = "Automated setup, persistent execution and calibration of river models - TELEMAC-2D/3D with GAIA, and OpenFOAM interFoam - with a QGIS frontend."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "BSD-3-Clause" }
+# aXqua is BSD-3-Clause. The wheel also carries the vendored OpenFOAM installer (MIT) and
+# Olsen's solver sources (GPL-3.0-or-later), which aXqua runs as separate programs and
+# never imports or links (NOTICE); PyPI shows this expression, so it names all three.
+license = "BSD-3-Clause AND MIT AND GPL-3.0-or-later"
+license-files = [
+    "LICENSE",
+    "NOTICE",
+    "src/axqua/install/vendor/OpenFOAM-installer/LICENSE",
+    "src/axqua/install/vendor/OpenFOAM-installer/LICENSES/*",
+]
 authors = [{ name = "Sebastian Schwindt" }]
+keywords = ["TELEMAC", "OpenFOAM", "river modeling", "hydraulics", "sediment transport",
+            "Bayesian calibration", "QGIS", "mesh generation"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 dependencies = [
     "numpy",
     "pandas",
@@ -29,6 +53,12 @@ dependencies = [
     # transitively by pythomac, which the flux analysis no longer uses.
     "matplotlib",
 ]
+
+[project.urls]
+Documentation = "https://axqua.eu"
+Source = "https://github.com/sschwindt/aXqua"
+Issues = "https://github.com/sschwindt/aXqua/issues"
+Releases = "https://github.com/sschwindt/aXqua/releases"
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff"]
@@ -79,7 +109,12 @@ openfoam = "axqua.solvers.openfoam.spec:SPEC"
 where = ["src"]
 
 [tool.setuptools.package-data]
-axqua = ["templates/*.cas", "templates/*.tbl", "install/vendor/**/*"]
+axqua = ["install/vendor/**/*"]
+
+# The vendor glob above takes everything, also the bytecode a run of the installer's own
+# tests leaves in a working tree. A wheel built from such a tree must not carry it.
+[tool.setuptools.exclude-package-data]
+axqua = ["**/__pycache__/*", "*.pyc"]
 
 [tool.ruff]
 line-length = 100

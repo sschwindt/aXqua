@@ -13,11 +13,16 @@ been migrated, and nothing here creates anything under the old name.
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import pytest
 
 from axqua.config import DEFAULT_SIM_DIR, LEGACY_SIM_DIR, load_config
 from axqua.jobs import paths
+
+#: The checkout these tests read, found from this file: the suite also runs against an
+#: installed wheel, whose package lies in site-packages and not in the checkout.
+REPO = Path(__file__).resolve().parents[1]
 
 MINIMAL = """
 project:
@@ -156,7 +161,6 @@ def test_a_fresh_machine_gets_the_new_directory(tmp_path, monkeypatch):
 #: made, whereas a pattern quietly starts matching things nobody intended.
 EXEMPT_FILES = {
     "tests/test_rename_compat.py",       # these tests
-    "README.md",                         # the migration section
     "CHANGELOG.md",
 }
 
@@ -172,14 +176,10 @@ def test_nothing_ships_the_old_name_any_more():
     docstring is harmless, but one in a path or an identifier is a bug that only shows up
     on someone else's machine, months later.
     """
-    import pathlib
     import re
     import subprocess
 
-    from axqua.jobs import paths as _paths
-
-    root = pathlib.Path(_paths.__file__).parents[3]
-    out = subprocess.run(["git", "grep", "-Ini", "hydromate"], cwd=root,
+    out = subprocess.run(["git", "grep", "-Ini", "hydromate"], cwd=REPO,
                          capture_output=True, text=True).stdout
     allowed = re.compile(SHIM_PATTERN, re.I)
 
@@ -203,13 +203,9 @@ def test_no_tracked_filename_carries_the_old_name():
     the plugin would have shipped without one. The zip validator caught it; this makes
     sure the test suite does too.
     """
-    import pathlib
     import subprocess
 
-    from axqua.jobs import paths as _paths
-
-    root = pathlib.Path(_paths.__file__).parents[3]
-    tracked = subprocess.run(["git", "ls-files"], cwd=root,
+    tracked = subprocess.run(["git", "ls-files"], cwd=REPO,
                              capture_output=True, text=True).stdout.splitlines()
     offenders = [name for name in tracked if "hydromate" in name.lower()]
     assert offenders == [], f"these filenames still carry the old name: {offenders}"
@@ -218,29 +214,12 @@ def test_no_tracked_filename_carries_the_old_name():
 def test_the_plugin_package_is_publishable():
     """Runs the same validation the release workflow does, so a packaging problem fails
     here rather than at a tag."""
-    import pathlib
     import subprocess
     import sys
 
-    from axqua.jobs import paths as _paths
-
-    root = pathlib.Path(_paths.__file__).parents[3]
     proc = subprocess.run([sys.executable, "scripts/build_plugin_zip.py", "--check"],
-                          cwd=root, capture_output=True, text=True)
+                          cwd=REPO, capture_output=True, text=True)
     assert proc.returncode == 0, proc.stdout + proc.stderr
-
-
-def test_the_readme_actually_documents_the_migration():
-    """README.md is exempted above, so this makes sure it earns the exemption."""
-    import pathlib
-
-    from axqua.jobs import paths as _paths
-
-    readme = (pathlib.Path(_paths.__file__).parents[3] / "README.md").read_text("utf-8")
-    assert "Migrating from hydromate" in readme
-    for expected in ("pip install aXqua", "import axqua", "axqua-case",
-                     "AXQUA_JOB_ROOT", ".axqua-prj"):
-        assert expected in readme, f"the migration table does not mention {expected}"
 
 
 def test_the_package_imports_under_the_new_name():
@@ -261,9 +240,5 @@ def test_the_distribution_is_branded_but_the_module_is_lowercase():
 
 @pytest.mark.parametrize("path", ["src/axqua", "qgis_plugin/axqua"])
 def test_the_directories_were_moved_not_copied(path):
-    import pathlib
-
-    from axqua.jobs import paths as _paths
-    root = pathlib.Path(_paths.__file__).parents[3]
-    assert (root / path).is_dir()
-    assert not (root / path.replace("axqua", "hydromate")).exists()
+    assert (REPO / path).is_dir()
+    assert not (REPO / path.replace("axqua", "hydromate")).exists()

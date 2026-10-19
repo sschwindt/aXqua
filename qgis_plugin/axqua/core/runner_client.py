@@ -156,7 +156,7 @@ def find_executable(configured: str | None = None) -> RunnerInfo:
     if problems:
         lines += ["", "What was tried:"] + problems
     lines += ["", "Install it with",
-              "    pip install git+https://github.com/sschwindt/aXqua.git",
+              "    pip install axqua",
               "in the Python environment of your choice, then set the path in "
               "aXqua > Settings."]
     raise RunnerNotFound("\n".join(lines))
@@ -221,8 +221,7 @@ def _require_minimum(version: str) -> None:
         raise RunnerError(
             f"this plugin needs axqua {MINIMUM_VERSION[0]}.{MINIMUM_VERSION[1]} or "
             f"newer, and this one is {version}",
-            remedy="Upgrade it with 'pip install --upgrade "
-                   "git+https://github.com/sschwindt/aXqua.git' in its Python environment.")
+            remedy="Upgrade it with 'pip install --upgrade axqua' in its Python environment.")
 
 
 def _no_window() -> dict:

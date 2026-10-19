@@ -69,6 +69,52 @@ jobs:
         shell: bash -el {0}
         run: python scripts/build_plugin_zip.py --check
 
+  wheel:
+    # The program as PyPI users get it: the built wheel, installed with pip alone into a
+    # plain Python (no conda), every dependency resolved from PyPI. The job above tests
+    # the conda stack against the source tree, which a wheel can drift away from (a file
+    # left out of the package data, a dependency only conda happened to provide).
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build the sdist and the wheel
+        run: |
+          python -m pip install -q build twine
+          python -m build
+          twine check --strict dist/*
+
+      - name: The wheel carries the licenses and no bytecode
+        run: python scripts/check_wheel.py dist/*.whl
+
+      - name: Libraries the gmsh wheel links against
+        # Present on a desktop, missing on a bare image; the installation page names them.
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q libglu1-mesa libgl1 libxrender1 libxcursor1 \
+            libxfixes3 libxext6 libxft2 libfontconfig1 libxinerama1 libgomp1
+
+      - name: Install the wheel with pip alone
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-env"
+          "$RUNNER_TEMP/wheel-env/bin/pip" install -q "$(ls dist/*.whl)[dev]"
+
+      - name: Test the installed wheel
+        # The tests read the checkout (case files, docs, the plugin), but `import axqua`
+        # must find the installed wheel and not src/; the first line makes sure of that.
+        run: |
+          "$RUNNER_TEMP/wheel-env/bin/python" -c "import axqua; assert 'site-packages' in axqua.__file__, axqua.__file__"
+          "$RUNNER_TEMP/wheel-env/bin/pytest" tests -q
+
   docs:
     runs-on: ubuntu-latest
     steps:

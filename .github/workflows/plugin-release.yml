@@ -1,7 +1,8 @@
-name: plugin release
+name: release
 
 # On a version tag: build the QGIS plugin zip, validate it against what
-# plugins.qgis.org requires, and attach it to the GitHub release.
+# plugins.qgis.org requires, and attach it to the GitHub release; then publish the aXqua
+# program of the same version on PyPI (job `pypi` below).
 #
 # The upload to plugins.qgis.org itself is **manual**, at least for the first version:
 # it needs an OSGeo ID (a GitHub-linked login on the QGIS hub is a different credential)
@@ -11,6 +12,12 @@ on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Also upload the program: none, or testpypi for a rehearsal"
+        type: choice
+        options: ["none", "testpypi"]
+        default: "none"
 
 permissions:
   contents: write        # to attach the asset to the release
@@ -30,7 +37,9 @@ jobs:
 
       - name: The tag and metadata.txt must agree
         # Otherwise the release asset says one version and the plugin manager another,
-        # and a user's "update available" never resolves.
+        # and a user's "update available" never resolves. Only for a tag: a run started
+        # by hand from a branch has the branch name where the tag would be.
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           tag="${GITHUB_REF_NAME#v}"
           meta=$(grep -m1 '^version=' qgis_plugin/axqua/metadata.txt | cut -d= -f2 | tr -d ' ')
@@ -64,6 +73,69 @@ jobs:
         with:
           files: dist/*.zip
           generate_release_notes: true
+
+  # The aXqua program on PyPI, from the same tag as the plugin zip: the plugin requires the
+  # program of its own version (MINIMUM_VERSION in qgis_plugin/axqua/core/runner_client.py),
+  # so the two are released together. PyPI never accepts a version twice, not even after a
+  # deletion, so the upload runs only after the checks of the plugin, and the environment
+  # `pypi` should require an approval (Settings > Environments > pypi > Required reviewers).
+  #
+  # Trusted publishing, no token is stored: on pypi.org, Your account > Publishing > Add a
+  # pending publisher (after the first upload: the project's Settings > Publishing), with
+  # owner sschwindt, repository aXqua, workflow plugin-release.yml, environment pypi. The
+  # same on test.pypi.org with the environment testpypi, for a rehearsal through
+  # Actions > release > Run workflow with the target testpypi.
+  pypi:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || inputs.target == 'testpypi'
+    environment:
+      name: ${{ startsWith(github.ref, 'refs/tags/') && 'pypi' || 'testpypi' }}
+    permissions:
+      contents: write    # to attach the wheel to the release
+      id-token: write    # trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: The tag and pyproject.toml must agree
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          declared=$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)
+          echo "tag=$tag pyproject=$declared"
+          if [ "$tag" != "$declared" ]; then
+            echo "::error::tag $tag does not match pyproject.toml version $declared"
+            exit 1
+          fi
+
+      - name: Build and check the sdist and the wheel
+        run: |
+          python -m pip install -q build twine
+          python -m build
+          twine check --strict dist/*
+          python scripts/check_wheel.py dist/*.whl
+
+      - name: Upload to TestPyPI
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          # A rehearsal may be repeated for the same version; TestPyPI keeps the first.
+          skip-existing: true
+
+      - name: Upload to PyPI
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Attach the wheel to the release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
 
   # Enable once the plugin exists on plugins.qgis.org and OSGEO_USERNAME / OSGEO_PASSWORD
   # are set as repository secrets. Until then the first upload is done by hand at

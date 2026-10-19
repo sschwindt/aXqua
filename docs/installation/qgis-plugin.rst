@@ -27,7 +27,64 @@ Until the plugin is in the QGIS plugin repository, take the ``.zip`` from the `r
 Install the aXqua program (backend)
 -----------------------------------
 
-Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The best route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which can be installed using git.
+The aXqua program is published on `PyPI <https://pypi.org/project/axqua/>`_, the package index of Python, and requires Python 3.10 or newer. The recommended route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which keeps QGIS and aXqua updatable independently of each other.
+
+* Install Miniforge following the instructions on its website.
+* Open **terminal** (on Windows, the *Miniforge Prompt*) and enter:
+
+.. code-block:: bash
+
+   mamba create -n axqua-env python=3.12
+   mamba activate axqua-env
+   pip install axqua
+   axqua --version
+
+``axqua --version`` printing a version confirms the installation. ``pip`` also installs the packages that aXqua requires (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``).
+
+* **Bayesian calibration** requires the optional package HydroBayesCal: ``pip install "axqua[calibration]"``.
+
+.. note::
+
+   **Linux computers without a desktop.** The mesh generator gmsh requires graphics libraries of the operating system, also when it meshes without a window. A computer with a desktop has them. On a server or in WSL, the error ``libGLU.so.1: cannot open shared object file`` at the first meshing means that they are missing. On Debian, Ubuntu and Linux Mint, install them with:
+
+   .. code-block:: bash
+
+      sudo apt install libglu1-mesa libgl1 libxrender1 libxcursor1 libxfixes3 libxext6 libxft2 libfontconfig1 libxinerama1 libgomp1
+
+.. tip::
+
+   HydroBayesCal installs PyTorch, which on Linux comes with the GPU libraries of NVIDIA (several gigabytes). The calibration does not require a GPU. Installing the CPU version of PyTorch first saves that space:
+
+   .. code-block:: bash
+
+      pip install torch --index-url https://download.pytorch.org/whl/cpu
+      pip install "axqua[calibration]"
+
+.. warning::
+
+   Installing aXqua into the Python that ships with QGIS is possible but not recommended. ``pip`` may replace packages such as ``numpy`` that QGIS itself uses, and QGIS may then fail to start. The plugin runs the aXqua program as a separate process, so the program does not have to be in the Python of QGIS.
+
+Upgrade the backend
+-------------------
+
+To **upgrade** aXqua, and HydroBayesCal where Bayesian calibration is used, to the newest versions:
+
+.. code-block:: bash
+
+   mamba activate axqua-env
+   pip install --upgrade axqua
+   pip install --upgrade hydrobayescal
+   axqua --version
+
+*Check* on the *Configuration* tab of the plugin then reports the new version. The plugin and the program are released together under the same version number, so upgrade the program also after an update of the plugin in QGIS.
+
+.. _install-from-source:
+
+Install from the source code (development)
+------------------------------------------
+
+Developers of aXqua, and users who need a change that is not released yet, install the program from a copy of the repository instead. This route requires Git.
+
 
 .. note::
 
@@ -82,9 +139,7 @@ Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``s
 
    A Git version number confirms that the installation is available. For detailed installation instructions and tutorials on cloning repositories, updating files, pushing changes, and collaborating with branches, see the `hydro-informatics.com Git tutorials <https://hydro-informatics.com/git/>`_.
 
-With Git available, **install the aXqua backend** as follows:
-
-* Open **terminal** and enter:
+With Git available, open **terminal** and enter:
 
 .. code-block:: bash
 
@@ -92,41 +147,10 @@ With Git available, **install the aXqua backend** as follows:
    cd aXqua
    mamba env create -f environment.yml
    mamba activate axqua-env
-   pip install .
+   pip install -e .
    axqua --version
 
-``axqua --version`` printing a version confirms the installation.
-
-* **Bayesian calibration** needs one more package: ``pip install ".[calibration]"``.
-
-.. note::
-
-   If pip finds no matching ``hydrobayescal``, it is not on PyPI yet. Install it from source, without a version tag, so that the newest is taken:
-
-  .. code-block:: bash
-
-     pip install "git+https://github.com/Ecohydraulics/hydrobayescal.git"
-
-
-Upgrade the backend
--------------------
-
-To **upgrade** ``axqua`` and ``hydrobayescal`` to the newest versions from the ``aXqua`` folder of the clone:
-
-  .. code-block:: bash
-
-     mamba activate axqua-env
-     git pull
-     pip install --upgrade .
-     pip install --upgrade --force-reinstall --no-deps "git+https://github.com/Ecohydraulics/hydrobayescal.git"
-     axqua --version
-
-  ``--force-reinstall`` is needed because a newer HydroBayesCal on GitHub may have the same version number as the installed one, which pip would otherwise keep. ``--no-deps`` leaves the packages of the conda environment untouched. *Check* on the *Configuration* tab of the plugin then reports the new version.
-
-.. tip::
-
-   aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently.
-
+``pip install -e .`` installs the program so that it runs from the copy, and ``git pull`` in the ``aXqua`` folder updates it. Repeat ``pip install -e .`` after an update, so that the version that the plugin reads is current. The copy also holds what the published package leaves out: the commented case template ``cases/case-template/``, the scripts in ``scripts/``, and the sources of this documentation.
 
 
 Connect the plugin to the aXqua program
@@ -169,7 +193,7 @@ Windows    ``C:\Users\<user>\miniforge3\envs\axqua-env\Scripts\axqua.exe``
 
 .. warning::
 
-   * If the above commands do not print anything, the environment is not active, or ``pip install .`` did not run in it.
+   * If the above commands do not print anything, the environment is not active, or ``pip install axqua`` did not run in it.
    * To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\Scripts\axqua.exe`` (Windows).
 
 .. important::

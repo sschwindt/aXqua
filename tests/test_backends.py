@@ -20,7 +20,10 @@ from axqua.core import registry
 from axqua.core.capabilities import Capability
 from axqua.core.registry import BaseBackend, SolverBackend
 
-SRC = Path(registry.__file__).parents[2]
+# The source tree of this checkout, found from this file rather than from the installed
+# package: CI also runs the suite against an installed wheel, whose package lies in
+# site-packages, away from pyproject.toml and the plugin.
+SRC = Path(__file__).resolve().parents[1] / "src"
 
 
 @pytest.mark.parametrize("name", ["telemac", "openfoam"])

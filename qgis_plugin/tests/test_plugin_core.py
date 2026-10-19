@@ -171,9 +171,9 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
     assert "plugin setting" in message
     assert runner_client.ENV_VAR in message
     assert "PATH" in message
-    # The instruction has to be one that actually works: aXqua is not on PyPI yet,
-    # and guidance that 404s is worse than none.
-    assert "github.com/sschwindt/aXqua" in message
+    # The instruction has to be one that actually works: since 1.0.1 the program is on
+    # PyPI, and the install command names it there rather than a checkout of main.
+    assert "pip install axqua" in message
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")

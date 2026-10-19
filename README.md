@@ -9,10 +9,16 @@ aXqua builds a **TELEMAC-2D/3D** case (optionally with **GAIA**) or an **OpenFOA
 ## Install
 
 ```bash
+pip install axqua                        # Python 3.10 or newer, best in an environment of its own
+axqua profile init                       # find TELEMAC, OpenFOAM, ParaView, VisIt on this computer
+```
+
+`pip install "axqua[calibration]"` adds HydroBayesCal for the Bayesian calibration. For development, install from a clone of this repository:
+
+```bash
 mamba env create -f environment.yml      # the environment axqua-env
 mamba activate axqua-env
 pip install -e .
-axqua profile init                       # find TELEMAC, OpenFOAM, ParaView, VisIt on this computer
 ```
 
 The QGIS plugin (QGIS 3.44 or newer) is `qgis_plugin/axqua/`; for development link it into a QGIS profile, or start `scripts/qgis_dev.sh`, which uses a QGIS of its own. The installation of the plugin and of the simulation software is described in the [documentation](https://axqua.eu/installation/index.html).
@@ -27,7 +33,7 @@ axqua list                                     # the jobs, with state and progre
 axqua cleanup <case-file>                      # what the case could do without (frees disk space)
 ```
 
-The example case and its guide are in [`cases/example-isar/`](cases/example-isar/README.md). Every command is listed in the [terminal syntax](https://axqua.eu/automation/terminal-syntax.html).
+The example case and its guide are in [`cases/example-isar/`](https://github.com/sschwindt/aXqua/blob/main/cases/example-isar/README.md). Every command is listed in the [terminal syntax](https://axqua.eu/automation/terminal-syntax.html).
 
 ## Repository
 
@@ -58,7 +64,7 @@ bash deploy.sh                                  # build into docs/_build/site an
 bash deploy.sh --push                           # ... then push main and gh-pages: the site is live within a minute
 ```
 
-`deploy.sh` translates only the paragraphs that are new or changed since the last deploy (seconds; `--retranslate` translates everything again, about 4 minutes), commits the updated catalogs `docs/locale/**.po` on `main`, pushes `main` and then the branch `gh-pages`, which GitHub Pages serves at `https://axqua.eu`. It refuses to run with uncommitted changes. Read the Docs builds the English pages from `main` by itself. The glossaries of technical terms, corrections of a translation by hand and the other settings are described in [`docs/i18n/README.md`](docs/i18n/README.md).
+`deploy.sh` translates only the paragraphs that are new or changed since the last deploy (seconds; `--retranslate` translates everything again, about 4 minutes), commits the updated catalogs `docs/locale/**.po` on `main`, pushes `main` and then the branch `gh-pages`, which GitHub Pages serves at `https://axqua.eu`. It refuses to run with uncommitted changes. Read the Docs builds the English pages from `main` by itself. The glossaries of technical terms, corrections of a translation by hand and the other settings are described in [`docs/i18n/README.md`](https://github.com/sschwindt/aXqua/blob/main/docs/i18n/README.md).
 
 ## License
 
