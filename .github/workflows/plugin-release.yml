@@ -80,15 +80,19 @@ jobs:
   # deletion, so the upload runs only after the checks of the plugin, and the environment
   # `pypi` should require an approval (Settings > Environments > pypi > Required reviewers).
   #
-  # Trusted publishing, no token is stored: on pypi.org, Your account > Publishing > Add a
-  # pending publisher (after the first upload: the project's Settings > Publishing), with
-  # owner sschwindt, repository aXqua, workflow plugin-release.yml, environment pypi. The
-  # same on test.pypi.org with the environment testpypi, for a rehearsal through
+  # OFF until the repository variable PYPI_UPLOAD is "true" (Settings > Secrets and
+  # variables > Actions > Variables): until then the program is uploaded by hand with twine
+  # (docs/code/plugin.rst names the commands), and a tag must not end in a red
+  # run because no publisher is registered. To switch it on, register trusted publishing
+  # first (no token is stored): on pypi.org, the project's Settings > Publishing (before
+  # the project exists: Your account > Publishing > Add a pending publisher), with owner
+  # sschwindt, repository aXqua, workflow plugin-release.yml, environment pypi. The same
+  # on test.pypi.org with the environment testpypi, for a rehearsal through
   # Actions > release > Run workflow with the target testpypi.
   pypi:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || inputs.target == 'testpypi'
+    if: (startsWith(github.ref, 'refs/tags/') && vars.PYPI_UPLOAD == 'true') || inputs.target == 'testpypi'
     environment:
       name: ${{ startsWith(github.ref, 'refs/tags/') && 'pypi' || 'testpypi' }}
     permissions:
@@ -130,6 +134,9 @@ jobs:
       - name: Upload to PyPI
         if: startsWith(github.ref, 'refs/tags/')
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # A version already uploaded by hand from the same tag is kept, not an error.
+          skip-existing: true
 
       - name: Attach the wheel to the release
         if: startsWith(github.ref, 'refs/tags/')
