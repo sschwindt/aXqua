@@ -66,3 +66,16 @@ QGIS lists a plugin only if it can read ``metadata.txt``. The command ``python s
 *Help* in the plugin opens the documentation at the section of the tab that is showing. The plugin archive carries no copy of the documentation: ``axqua docs`` names a copy built on this computer (``$AXQUA_DOCS``, else ``docs/_build/site`` or ``docs/_build/html`` of the source checkout) and whether the default browser can read it, and the plugin opens the published documentation otherwise. A local page is opened through a small forwarding page (``_help/open.html`` beside the copy), because ``xdg-open`` and Chromium drop the section part (``#...``) of a file address.
 
 The tests of the plugin are in ``qgis_plugin/tests/``. The tests that require QGIS are skipped when the Python module ``qgis`` is not available. The script ``scripts/build_plugin_zip.py`` builds the plugin archive and verifies the requirements of the QGIS plugin repository.
+
+**Releases.** The plugin and the program are released together under one version number, which ``pyproject.toml``, ``src/axqua/__init__.py`` (``_FALLBACK_VERSION``), ``qgis_plugin/axqua/metadata.txt`` and ``docs/conf.py`` carry. A tag ``v<version>`` pushed to GitHub builds the plugin archive and attaches it to the release. The program is uploaded to PyPI by hand, from a clean copy of the tagged commit. ``twine`` asks for an API token of pypi.org (*Account settings > API tokens*):
+
+.. code-block:: bash
+
+   rm -rf build dist/pypi
+   python -m pip install --upgrade build twine
+   python -m build --outdir dist/pypi
+   twine check --strict dist/pypi/*
+   python scripts/check_wheel.py dist/pypi/*.whl
+   twine upload dist/pypi/*
+
+``scripts/check_wheel.py`` confirms that the wheel holds exactly the tracked files of ``src/axqua`` and the license files that ``pyproject.toml`` names. PyPI accepts a version number only once, also after the files were deleted, so a mistake requires a new version. ``twine upload --repository testpypi dist/pypi/*`` uploads to `TestPyPI <https://test.pypi.org>`_ for a rehearsal. The job ``pypi`` of the release workflow can take over the upload with trusted publishing, which stores no token; the comment above the job in ``.github/workflows/plugin-release.yml`` explains how to switch it on.

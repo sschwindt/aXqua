@@ -200,7 +200,7 @@ With the option ``--json``, every command prints its result as one JSON document
 Scripts in the case folder
 --------------------------
 
-The template folder ``cases/case-template/`` contains one Python script per working step, for example ``preprocessing.py``, ``initial_run.py`` and ``mesh_convergence_study.py``. They perform the same steps as the commands above and run in the foreground, so that the output of the simulation code appears directly in the terminal. Settings that apply to one step only are listed at the top of each script.
+The template folder `cases/case-template/ <https://github.com/sschwindt/aXqua/tree/main/cases/case-template>`_ of the repository contains one Python script per working step, for example ``preprocessing.py``, ``initial_run.py`` and ``mesh_convergence_study.py``. They perform the same steps as the commands above and run in the foreground, so that the output of the simulation code appears directly in the terminal. Settings that apply to one step only are listed at the top of each script. The scripts are part of a copy of the repository (:ref:`install-from-source`), not of the installed program.
 
 .. code-block:: bash
 
