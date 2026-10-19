@@ -43,7 +43,7 @@ The window has three buttons at the bottom right. *Save* writes the case file an
 
 Saving from the window rewrites the case file from its settings. Comments of a case file that was written by hand are not kept. The original is preserved as ``<name>.bak`` the first time the window saves.
 
-**In a text editor.** The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is provided in the folder ``cases/case-template/`` of the repository. Copy this folder to start a new case, and rename the case file. The command ``axqua check <case-file>`` reports everything that is not in order.
+**In a text editor.** The case file is a text file in YAML format. Each block of the file is explained in one subsection below. A commented template is the case file `case-template.axq-case <https://github.com/sschwindt/aXqua/blob/main/cases/case-template/case-template.axq-case>`_ of the repository; *Download raw file* on that page saves it. Save it in the folder of the new case and rename it. In a copy of the repository (:ref:`install-from-source`), copy the folder ``cases/case-template/`` instead. The command ``axqua check <case-file>`` reports everything that is not in order.
 
 Case files of earlier aXqua versions are named ``case-config.yml`` and may contain the location of the simulation software. They are still read. The following command writes a case file of the current type next to such a file:
 
@@ -218,11 +218,11 @@ At the liquid boundaries of the model, the user states where water enters and le
 
 For a simulation with a discharge that varies in time, ``inflow`` names a table with a time column and a discharge column, and ``hydrodynamics.regime`` is set to ``unsteady``; the case settings then mark the hydrograph as required. The exchange with a porous body, in which water leaves the surface through a gravel bar and returns further downstream (:ref:`preprocessing-telemac-choices`), is a frame of the page *Liquid boundaries* in the case settings.
 
-**Gauge data.** The script ``scripts/gauge_data.py`` retrieves discharge time series and rating curves of river gauges and saves them in the format that aXqua reads. It supports the gauges of the Bavarian flood information service (HND) and of the United States Geological Survey (USGS). It opens in a web browser and requires the package ``streamlit`` (``pip install ".[gui]"``). Start it from the repository folder, paste the address or the number of a gauge, and save the two tables into ``user-sources/``:
+**Gauge data.** The script `gauge_data.py <https://github.com/sschwindt/aXqua/blob/main/scripts/gauge_data.py>`_ of the repository retrieves discharge time series and rating curves of river gauges and saves them in the format that aXqua reads. It supports the gauges of the Bavarian flood information service (HND) and of the United States Geological Survey (USGS). It opens in a web browser and requires the package ``streamlit`` (``pip install "axqua[gui]"``). Save it with *Download raw file* on that page, start it in the folder where it was saved (in a copy of the repository: ``python scripts/gauge_data.py``), paste the address or the number of a gauge, and save the two tables into ``user-sources/``:
 
 .. code-block:: bash
 
-   python scripts/gauge_data.py
+   python gauge_data.py
 
 The exported discharge series is the ``inflow`` table, and the exported rating curve is the ``stage_discharge`` table. Enter the elevation of the gauge zero to convert the gauge reading into an absolute water surface elevation, and verify that this elevation and the DEM refer to the same height system.
 

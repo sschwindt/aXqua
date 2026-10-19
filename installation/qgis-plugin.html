@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/installation/qgis-plugin.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/documentation_options.js?v=292eb321"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-from-the-source-code-development">Install from the source code (development)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#axqua-panel-layout">aXqua panel layout</a></li>
@@ -356,7 +357,63 @@
 </section>
 <section id="install-the-axqua-program-backend">
 <h2>Install the aXqua program (backend)<a class="headerlink" href="#install-the-axqua-program-backend" title="Link to this heading"></a></h2>
-<p>Requires Python 3.10 or newer and a geospatial stack (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code>, <code class="docutils literal notranslate"><span class="pre">pyproj</span></code>, <code class="docutils literal notranslate"><span class="pre">shapely</span></code>, <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>, <code class="docutils literal notranslate"><span class="pre">gmsh</span></code>, <code class="docutils literal notranslate"><span class="pre">openpyxl</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>). The best route is a separate environment from <a class="reference external" href="https://github.com/conda-forge/miniforge">Miniforge</a>, which can be installed using git.</p>
+<p>The aXqua program is published on <a class="reference external" href="https://pypi.org/project/axqua/">PyPI</a>, the package index of Python, and requires Python 3.10 or newer. <code class="docutils literal notranslate"><span class="pre">pip</span></code> installs it into a Python environment of its own, which keeps QGIS and aXqua updatable independently of each other. The recommended route is an environment from <a class="reference external" href="https://github.com/conda-forge/miniforge">Miniforge</a>:</p>
+<ul class="simple">
+<li><p>Install Miniforge following the instructions on its website.</p></li>
+<li><p>Open <strong>terminal</strong> (on Windows, the <em>Miniforge Prompt</em>) and enter:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>axqua-env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
+mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
+pip<span class="w"> </span>install<span class="w"> </span>axqua
+axqua<span class="w"> </span>--version
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">--version</span></code> printing a version (for example, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">1.0.1</span></code>) confirms the installation. <code class="docutils literal notranslate"><span class="pre">pip</span></code> also installs the packages that aXqua requires (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code>, <code class="docutils literal notranslate"><span class="pre">pyproj</span></code>, <code class="docutils literal notranslate"><span class="pre">shapely</span></code>, <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>, <code class="docutils literal notranslate"><span class="pre">gmsh</span></code>, <code class="docutils literal notranslate"><span class="pre">openpyxl</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>), all of them from PyPI, which takes less than a minute on a fast internet connection.</p>
+<ul class="simple">
+<li><p><strong>Bayesian calibration</strong> requires the optional package HydroBayesCal: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;axqua[calibration]&quot;</span></code>.</p></li>
+</ul>
+<p><strong>Without Miniforge.</strong> On Linux and macOS, a Python 3.10 or newer that is already installed works as well (<code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">--version</span></code> shows the version). The module <code class="docutils literal notranslate"><span class="pre">venv</span></code> of Python creates the environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/axqua-env
+<span class="nb">source</span><span class="w"> </span>~/axqua-env/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>axqua
+axqua<span class="w"> </span>--version
+</pre></div>
+</div>
+<p>On Debian, Ubuntu and Linux Mint, <code class="docutils literal notranslate"><span class="pre">venv</span></code> requires the package <code class="docutils literal notranslate"><span class="pre">python3-venv</span></code> (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">python3-venv</span></code>). The program is then <code class="docutils literal notranslate"><span class="pre">~/axqua-env/bin/axqua</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Linux computers without a desktop.</strong> The mesh generator gmsh requires graphics libraries of the operating system, also when it meshes without a window. A computer with a desktop has them. On a server or in WSL, the error <code class="docutils literal notranslate"><span class="pre">libGLU.so.1:</span> <span class="pre">cannot</span> <span class="pre">open</span> <span class="pre">shared</span> <span class="pre">object</span> <span class="pre">file</span></code> at the first meshing means that they are missing. On Debian, Ubuntu and Linux Mint, install them with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libglu1-mesa<span class="w"> </span>libgl1<span class="w"> </span>libxrender1<span class="w"> </span>libxcursor1<span class="w"> </span>libxfixes3<span class="w"> </span>libxext6<span class="w"> </span>libxft2<span class="w"> </span>libfontconfig1<span class="w"> </span>libxinerama1<span class="w"> </span>libgomp1
+</pre></div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>HydroBayesCal installs PyTorch, which on Linux comes with the GPU libraries of NVIDIA (several gigabytes). The calibration does not require a GPU. Installing the CPU version of PyTorch first saves that space:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cpu
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"axqua[calibration]"</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Installing aXqua into the Python that ships with QGIS is possible but not recommended. <code class="docutils literal notranslate"><span class="pre">pip</span></code> may replace packages such as <code class="docutils literal notranslate"><span class="pre">numpy</span></code> that QGIS itself uses, and QGIS may then fail to start. The plugin runs the aXqua program as a separate process, so the program does not have to be in the Python of QGIS.</p>
+</div>
+</section>
+<section id="upgrade-the-backend">
+<h2>Upgrade the backend<a class="headerlink" href="#upgrade-the-backend" title="Link to this heading"></a></h2>
+<p>To <strong>upgrade</strong> aXqua, and HydroBayesCal where Bayesian calibration is used, to the newest versions:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env<span class="w">               </span><span class="c1"># or: source ~/axqua-env/bin/activate</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>axqua
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>hydrobayescal
+axqua<span class="w"> </span>--version
+</pre></div>
+</div>
+<p><em>Check</em> on the <em>Configuration</em> tab of the plugin then reports the new version. The plugin and the program are released together under the same version number, so upgrade the program also after an update of the plugin in QGIS. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua==&lt;version&gt;</span></code> installs one particular version, for instance the version with which an earlier result was computed; the <a class="reference external" href="https://pypi.org/project/axqua/#history">release history on PyPI</a> lists all versions.</p>
+</section>
+<section id="install-from-the-source-code-development">
+<span id="install-from-source"></span><h2>Install from the source code (development)<a class="headerlink" href="#install-from-the-source-code-development" title="Link to this heading"></a></h2>
+<p>Developers of aXqua, and users who need a change that is not released yet, install the program from a copy of the repository instead. This route requires Git.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Installing Git</strong></p>
@@ -401,49 +458,16 @@ macOS</label><div class="sd-tab-content docutils">
 </div>
 <p>A Git version number confirms that the installation is available. For detailed installation instructions and tutorials on cloning repositories, updating files, pushing changes, and collaborating with branches, see the <a class="reference external" href="https://hydro-informatics.com/git/">hydro-informatics.com Git tutorials</a>.</p>
 </div>
-<p>With Git available, <strong>install the aXqua backend</strong> as follows:</p>
-<ul class="simple">
-<li><p>Open <strong>terminal</strong> and enter:</p></li>
-</ul>
+<p>With Git available, open <strong>terminal</strong> and enter:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/sschwindt/aXqua.git
 <span class="nb">cd</span><span class="w"> </span>aXqua
 mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
 mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
-pip<span class="w"> </span>install<span class="w"> </span>.
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 axqua<span class="w"> </span>--version
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">--version</span></code> printing a version confirms the installation.</p>
-<ul class="simple">
-<li><p><strong>Bayesian calibration</strong> needs one more package: <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;.[calibration]&quot;</span></code>.</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<blockquote>
-<div><p>If pip finds no matching <code class="docutils literal notranslate"><span class="pre">hydrobayescal</span></code>, it is not on PyPI yet. Install it from source, without a version tag, so that the newest is taken:</p>
-</div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"git+https://github.com/Ecohydraulics/hydrobayescal.git"</span>
-</pre></div>
-</div>
-</div>
-</section>
-<section id="upgrade-the-backend">
-<h2>Upgrade the backend<a class="headerlink" href="#upgrade-the-backend" title="Link to this heading"></a></h2>
-<p>To <strong>upgrade</strong> <code class="docutils literal notranslate"><span class="pre">axqua</span></code> and <code class="docutils literal notranslate"><span class="pre">hydrobayescal</span></code> to the newest versions from the <code class="docutils literal notranslate"><span class="pre">aXqua</span></code> folder of the clone:</p>
-<blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
-git<span class="w"> </span>pull
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>.
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>--force-reinstall<span class="w"> </span>--no-deps<span class="w"> </span><span class="s2">"git+https://github.com/Ecohydraulics/hydrobayescal.git"</span>
-axqua<span class="w"> </span>--version
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">--force-reinstall</span></code> is needed because a newer HydroBayesCal on GitHub may have the same version number as the installed one, which pip would otherwise keep. <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> leaves the packages of the conda environment untouched. <em>Check</em> on the <em>Configuration</em> tab of the plugin then reports the new version.</p>
-</div></blockquote>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently.</p>
-</div>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> installs the program so that it runs from the copy, and <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> in the <code class="docutils literal notranslate"><span class="pre">aXqua</span></code> folder updates it. Repeat <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> after an update, so that the version that the plugin reads is current. The copy also holds what the published package leaves out: the commented case template <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code>, the scripts in <code class="docutils literal notranslate"><span class="pre">scripts/</span></code>, and the sources of this documentation.</p>
 </section>
 <section id="connect-the-plugin-to-the-axqua-program">
 <h2>Connect the plugin to the aXqua program<a class="headerlink" href="#connect-the-plugin-to-the-axqua-program" title="Link to this heading"></a></h2>
@@ -487,8 +511,9 @@ where<span class="w"> </span>axqua<span class="w">          </span><span class="
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <ul class="simple">
-<li><p>If the above commands do not print anything, the environment is not active, or <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code> did not run in it.</p></li>
+<li><p>If the above commands do not print anything, the environment is not active, or <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua</span></code> did not run in it.</p></li>
 <li><p>To find an environment without activating it, <code class="docutils literal notranslate"><span class="pre">mamba</span> <span class="pre">env</span> <span class="pre">list</span></code> prints every environment with its folder. The program is then <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;/bin/axqua</span></code> (Linux, macOS) or <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;\Scripts\axqua.exe</span></code> (Windows).</p></li>
+<li><p>An environment created with <code class="docutils literal notranslate"><span class="pre">venv</span></code> is the folder named in <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span></code>; the program is <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;/bin/axqua</span></code>, for instance <code class="docutils literal notranslate"><span class="pre">/home/&lt;user&gt;/axqua-env/bin/axqua</span></code>.</p></li>
 </ul>
 </div>
 <div class="admonition important">
@@ -498,7 +523,7 @@ where<span class="w"> </span>axqua<span class="w">          </span><span class="
 </section>
 <section id="axqua-panel-layout">
 <h2>aXqua panel layout<a class="headerlink" href="#axqua-panel-layout" title="Link to this heading"></a></h2>
-<p>After successful configuration, the panel shows tabs that follow the workflow: <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (with the sub-tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, and <em>Morphodynamics</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> at the top right opens the documentation at the section of the tab that is showing, and <em>Clean Up</em> left of it frees disk space (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Freeing disk space</span></a>). Help opens a copy of the documentation built on this computer if there is one (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> in the aXqua folder, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Building the documentation</span></a>), because it describes the installed version, and otherwise the published documentation at <a class="reference external" href="https://axqua.eu">axqua.eu</a>. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.</p>
+<p>After successful configuration, the panel shows tabs that follow the workflow: <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (with the sub-tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, and <em>Morphodynamics</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> at the top right opens the documentation at the section of the tab that is showing, and <em>Clean Up</em> left of it frees disk space (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Freeing disk space</span></a>). Help opens a copy of the documentation built on this computer if there is one (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> in a copy of the repository installed as in <a class="reference internal" href="#install-from-source"><span class="std std-ref">Install from the source code (development)</span></a>, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Building the documentation</span></a>), because it describes the installed version, and otherwise the published documentation at <a class="reference external" href="https://axqua.eu">axqua.eu</a>. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab.</p>
 <figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="../_images/gui-qgis-window.png"><img alt="The aXqua panel in the QGIS window" src="../_images/gui-qgis-window.png" style="width: 100%;" />
 </a>

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/automation/terminal-syntax.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/documentation_options.js?v=292eb321"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Install from the source code (development)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
@@ -609,7 +610,7 @@ axqua<span class="w"> </span>--version
 </section>
 <section id="scripts-in-the-case-folder">
 <h2>Scripts in the case folder<a class="headerlink" href="#scripts-in-the-case-folder" title="Link to this heading"></a></h2>
-<p>The template folder <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code> contains one Python script per working step, for example <code class="docutils literal notranslate"><span class="pre">preprocessing.py</span></code>, <code class="docutils literal notranslate"><span class="pre">initial_run.py</span></code> and <code class="docutils literal notranslate"><span class="pre">mesh_convergence_study.py</span></code>. They perform the same steps as the commands above and run in the foreground, so that the output of the simulation code appears directly in the terminal. Settings that apply to one step only are listed at the top of each script.</p>
+<p>The template folder <a class="reference external" href="https://github.com/sschwindt/aXqua/tree/main/cases/case-template">cases/case-template/</a> of the repository contains one Python script per working step, for example <code class="docutils literal notranslate"><span class="pre">preprocessing.py</span></code>, <code class="docutils literal notranslate"><span class="pre">initial_run.py</span></code> and <code class="docutils literal notranslate"><span class="pre">mesh_convergence_study.py</span></code>. They perform the same steps as the commands above and run in the foreground, so that the output of the simulation code appears directly in the terminal. Settings that apply to one step only are listed at the top of each script. The scripts are part of a copy of the repository (<a class="reference internal" href="../installation/qgis-plugin.html#install-from-source"><span class="std std-ref">Install from the source code (development)</span></a>), not of the installed program.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>cases/my-reach
 python<span class="w"> </span>preprocessing.py
 python<span class="w"> </span>initial_run.py

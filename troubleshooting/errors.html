@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/troubleshooting/errors.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/documentation_options.js?v=292eb321"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -56,6 +56,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Install the aXqua plugin (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Install the aXqua program (backend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Upgrade the backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Install from the source code (development)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connect the plugin to the aXqua program</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Find the path of the installed program</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">aXqua panel layout</a></li>
@@ -379,7 +380,7 @@
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">ModuleNotFoundError:</span> <span class="pre">No</span> <span class="pre">module</span> <span class="pre">named</span> <span class="pre">'axqua'</span></code></dt><dd><p>The aXqua program is not installed in the active Python environment. Activate the environment and install aXqua (<a class="reference internal" href="../installation/qgis-plugin.html"><span class="doc">QGIS plugin</span></a>). A copy of the repository alone is not sufficient, because the source code lies in the subfolder <code class="docutils literal notranslate"><span class="pre">src/</span></code>.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">ImportError:</span> <span class="pre">libjxl.so...:</span> <span class="pre">cannot</span> <span class="pre">open</span> <span class="pre">shared</span> <span class="pre">object</span> <span class="pre">file</span></code></dt><dd><p>A system library that the geospatial packages require does not match their version. This occurs when packages of different origin are mixed in one environment. Create the environment again from <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code>, which installs all geospatial packages consistently from one source.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">ImportError:</span> <span class="pre">libjxl.so...:</span> <span class="pre">cannot</span> <span class="pre">open</span> <span class="pre">shared</span> <span class="pre">object</span> <span class="pre">file</span></code></dt><dd><p>A system library that the geospatial packages require does not match their version. This occurs when packages of different origin are mixed in one environment. Create a new environment that holds Python alone and install aXqua into it with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua</span></code> (<a class="reference internal" href="../installation/qgis-plugin.html"><span class="doc">QGIS plugin</span></a>), so that all geospatial packages come from PyPI. In a copy of the repository, <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> serves the same purpose with packages from conda-forge.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">could</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">found</span></code> (plugin)</dt><dd><p>The plugin did not find the program <code class="docutils literal notranslate"><span class="pre">axqua</span></code>. The message lists the three places that were searched. Enter the full path of the program in <em>aXqua &gt; Settings</em> and click <em>Test</em> (<a class="reference internal" href="../installation/qgis-plugin.html"><span class="doc">QGIS plugin</span></a>).</p>
 </dd>
@@ -523,7 +524,7 @@
 <section id="case-file">
 <h2>Case file<a class="headerlink" href="#case-file" title="Link to this heading"></a></h2>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">unknown</span> <span class="pre">config</span> <span class="pre">keys</span> <span class="pre">[...]</span></code></dt><dd><p>A block of the case file contains an entry that aXqua does not know, usually because of a typing error. The message names the block and the entry. Compare the spelling with the template in <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code>.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">unknown</span> <span class="pre">config</span> <span class="pre">keys</span> <span class="pre">[...]</span></code></dt><dd><p>A block of the case file contains an entry that aXqua does not know, usually because of a typing error. The message names the block and the entry. Compare the spelling with the <a class="reference external" href="https://github.com/sschwindt/aXqua/blob/main/cases/case-template/case-template.axq-case">commented template</a> of the repository.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">telemac.pysource</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">set</span></code> or <code class="docutils literal notranslate"><span class="pre">TELEMAC</span> <span class="pre">pysource</span> <span class="pre">script</span> <span class="pre">not</span> <span class="pre">found</span></code></dt><dd><p>aXqua does not know where TELEMAC is installed, or the stated environment script does not exist. Create the profile of the computer with <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">profile</span> <span class="pre">init</span></code>, or correct its binding for TELEMAC (<a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Define solver bindings</span></a>).</p>
 </dd>

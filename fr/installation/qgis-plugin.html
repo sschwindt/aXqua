@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/installation/qgis-plugin.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=05dadb3a"></script>
+      <script src="../_static/documentation_options.js?v=a1a25f23"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/translations.js?v=e6b791cb"></script>
@@ -50,13 +50,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Objectif</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Installation et configuration</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Extension de QGIS</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#install-qgis">Installer QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-from-the-source-code-development">Installer à partir du code source (développement)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#axqua-panel-layout">La disposition du panneau aXqua</a></li>
@@ -357,7 +358,63 @@
 </section>
 <section id="install-the-axqua-program-backend">
 <h2>Installer le programme aXqua (backend)<a class="headerlink" href="#install-the-axqua-program-backend" title="Lien vers cette rubrique"></a></h2>
-<p>Nécessite Python 3.10 ou plus récent et une pile géospatiale (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code>, <code class="docutils literal notranslate"><span class="pre">pyproj</span></code>, <code class="docutils literal notranslate"><span class="pre">shapely</span></code>, <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>, <code class="docutils literal notranslate"><span class="pre">gmsh</span></code>, <code class="docutils literal notranslate"><span class="pre">openpyxl</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>). La meilleure route est un environnement séparé de <a class="reference external" href="https://github.com/conda-forge/miniforge">Miniforge</a>, qui peut être installé en utilisant git.</p>
+<p>Le programme aXqua est publié sur <a class="reference external" href="https://pypi.org/project/axqua/">PyPI</a>, l’index des paquets de Python, et nécessite Python 3.10 ou plus récent. <code class="docutils literal notranslate"><span class="pre">pip</span></code> l’installe dans un environnement Python propre, qui maintient QGIS et aXqua updatable indépendamment les uns des autres. La route recommandée est un environnement de <a class="reference external" href="https://github.com/conda-forge/miniforge">Miniforge</a>:</p>
+<ul class="simple">
+<li><p>Installez Miniforge en suivant les instructions de son site web.</p></li>
+<li><p>Ouvrir <strong>terminal</strong> (sur Windows, le <em>Miniforge Prompt</em>) et entrer :</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>axqua-env<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.12
+mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
+pip<span class="w"> </span>install<span class="w"> </span>axqua
+axqua<span class="w"> </span>--version
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">--version</span></code> imprimer une version (par exemple, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">1.0.1</span></code>) confirme l’installation. <code class="docutils literal notranslate"><span class="pre">pip</span></code> installe également les paquets dont aXqua a besoin (<code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">pandas</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">pyyaml</span></code>, <code class="docutils literal notranslate"><span class="pre">pyproj</span></code>, <code class="docutils literal notranslate"><span class="pre">shapely</span></code>, <code class="docutils literal notranslate"><span class="pre">geopandas</span></code>, <code class="docutils literal notranslate"><span class="pre">rasterio</span></code>, <code class="docutils literal notranslate"><span class="pre">gmsh</span></code>, <code class="docutils literal notranslate"><span class="pre">openpyxl</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>), tous de PyPI, ce qui prend moins d’une minute sur une connexion Internet rapide.</p>
+<ul class="simple">
+<li><p><strong>Bayesian calage</strong> exige le paquet optionnel HydroBayesCal : <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;axqua[calibration]&quot;</span></code>.</p></li>
+</ul>
+<p><strong>Sans Miniforge.</strong> Sur Linux et macOS, un Python 3.10 ou plus récent déjà installé fonctionne également (<code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">--version</span></code> montre la version). Le module <code class="docutils literal notranslate"><span class="pre">venv</span></code> de Python crée l’environnement :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>~/axqua-env
+<span class="nb">source</span><span class="w"> </span>~/axqua-env/bin/activate
+pip<span class="w"> </span>install<span class="w"> </span>axqua
+axqua<span class="w"> </span>--version
+</pre></div>
+</div>
+<p>Sur Debian, Ubuntu et Linux Mint, <code class="docutils literal notranslate"><span class="pre">venv</span></code> nécessite le paquet <code class="docutils literal notranslate"><span class="pre">python3-venv</span></code> (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">python3-venv</span></code>). Le programme est alors <code class="docutils literal notranslate"><span class="pre">~/axqua-env/bin/axqua</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Les ordinateurs Linux sans bureau.</strong> Le générateur maillage gmsh nécessite des bibliothèques graphiques du système d’exploitation, aussi quand il maillages sans fenêtre. Un ordinateur avec un bureau les a. Sur un serveur ou en WSL, l’erreur <code class="docutils literal notranslate"><span class="pre">libGLU.so.1:</span> <span class="pre">cannot</span> <span class="pre">open</span> <span class="pre">shared</span> <span class="pre">object</span> <span class="pre">file</span></code> à la premier maillage signifie qu’ils manquent. Sur Debian, Ubuntu et Linux Mint, installez-les avec :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>libglu1-mesa<span class="w"> </span>libgl1<span class="w"> </span>libxrender1<span class="w"> </span>libxcursor1<span class="w"> </span>libxfixes3<span class="w"> </span>libxext6<span class="w"> </span>libxft2<span class="w"> </span>libfontconfig1<span class="w"> </span>libxinerama1<span class="w"> </span>libgomp1
+</pre></div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Astuce</p>
+<p>HydroBayesCal installe PyTorch, qui est livré sous Linux avec les bibliothèques GPU de NVIDIA (plusieurs gigaoctets). Le calage ne nécessite pas de GPU. Installer la version CPU de PyTorch sauve d’abord cet espace :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>torch<span class="w"> </span>--index-url<span class="w"> </span>https://download.pytorch.org/whl/cpu
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"axqua[calibration]"</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Avertissement</p>
+<p>Installer aXqua dans le Python qui est livré avec QGIS est possible mais pas recommandé. <code class="docutils literal notranslate"><span class="pre">pip</span></code> peut remplacer des paquets tels que <code class="docutils literal notranslate"><span class="pre">numpy</span></code> que QGIS utilise lui-même, et QGIS peut alors ne pas démarrer. L’extension exécute le programme aXqua comme un processus séparé, de sorte que le programme n’a pas à être dans le Python de QGIS.</p>
+</div>
+</section>
+<section id="upgrade-the-backend">
+<h2>Mettre à jour le moteur<a class="headerlink" href="#upgrade-the-backend" title="Lien vers cette rubrique"></a></h2>
+<p>Pour <strong>upgrade</strong> aXqua, et HydroBayesCal où le calage bayésien est utilisé, aux dernières versions :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env<span class="w">               </span><span class="c1"># or: source ~/axqua-env/bin/activate</span>
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>axqua
+pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>hydrobayescal
+axqua<span class="w"> </span>--version
+</pre></div>
+</div>
+<p><em>Check</em> sur l’onglet <em>Configuration</em> de l’extension puis rapporte la nouvelle version. L’extension et le programme sont publiés ensemble sous le même numéro de version, donc mettre à jour le programme aussi après une mise à jour de l’extension dans QGIS. <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua==&lt;version&gt;</span></code> installe une version particulière, par exemple la version avec laquelle un résultat antérieur a été calculé ; <a class="reference external" href="https://pypi.org/project/axqua/#history">historique de sortie sur PyPI</a> liste toutes les versions.</p>
+</section>
+<section id="install-from-the-source-code-development">
+<span id="install-from-source"></span><h2>Installer à partir du code source (développement)<a class="headerlink" href="#install-from-the-source-code-development" title="Lien vers cette rubrique"></a></h2>
+<p>Les développeurs d’aXqua, et les utilisateurs qui ont besoin d’un changement qui n’est pas encore publié, installer le programme à partir d’une copie du dépôt à la place. Cette route nécessite Git.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p><strong>Instant Git</strong></p>
@@ -402,49 +459,16 @@ macOS</label><div class="sd-tab-content docutils">
 </div>
 <p>Un numéro de version Git confirme que l’installation est disponible. Pour des instructions détaillées d’installation et des tutoriels sur le clonage des dépôts, la mise à jour des fichiers, la poussée des changements et la collaboration avec les succursales, voir le <a class="reference external" href="https://hydro-informatics.com/git/">hydro-informatique.com Didacticiels Git</a>.</p>
 </div>
-<p>Avec Git disponible, <strong>installer le moteur aXqua</strong> comme suit :</p>
-<ul class="simple">
-<li><p>Ouvrir <strong>terminal</strong> et entrer :</p></li>
-</ul>
+<p>Avec Git disponible, ouvrez <strong>terminal</strong> et entrez :</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/sschwindt/aXqua.git
 <span class="nb">cd</span><span class="w"> </span>aXqua
 mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>-f<span class="w"> </span>environment.yml
 mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
-pip<span class="w"> </span>install<span class="w"> </span>.
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 axqua<span class="w"> </span>--version
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">--version</span></code> imprimer une version confirme l’installation.</p>
-<ul class="simple">
-<li><p><strong>Bayesian calage</strong> a besoin d’un autre paquet : <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;.[calibration]&quot;</span></code>.</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<blockquote>
-<div><p>Si pip ne trouve pas de correspondance <code class="docutils literal notranslate"><span class="pre">hydrobayescal</span></code>, il n’est pas encore sur PyPI. Installez-le à partir de la source, sans balise de version, afin que le plus récent soit pris :</p>
-</div></blockquote>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"git+https://github.com/Ecohydraulics/hydrobayescal.git"</span>
-</pre></div>
-</div>
-</div>
-</section>
-<section id="upgrade-the-backend">
-<h2>Mettre à jour le moteur<a class="headerlink" href="#upgrade-the-backend" title="Lien vers cette rubrique"></a></h2>
-<p>À <strong>upgrade</strong> <code class="docutils literal notranslate"><span class="pre">axqua</span></code> et <code class="docutils literal notranslate"><span class="pre">hydrobayescal</span></code> vers les dernières versions du dossier <code class="docutils literal notranslate"><span class="pre">aXqua</span></code> du clone :</p>
-<blockquote>
-<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mamba<span class="w"> </span>activate<span class="w"> </span>axqua-env
-git<span class="w"> </span>pull
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>.
-pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>--force-reinstall<span class="w"> </span>--no-deps<span class="w"> </span><span class="s2">"git+https://github.com/Ecohydraulics/hydrobayescal.git"</span>
-axqua<span class="w"> </span>--version
-</pre></div>
-</div>
-<p><code class="docutils literal notranslate"><span class="pre">--force-reinstall</span></code> est nécessaire parce qu’un nouveau HydroBayeCal sur GitHub peut avoir le même numéro de version que celui installé, que pip conserverait autrement. <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> laisse intacts les paquets de l’environnement conda. <em>Check</em> sur l’onglet <em>Configuration</em> de l’extension, puis rapporte la nouvelle version.</p>
-</div></blockquote>
-<div class="admonition tip">
-<p class="admonition-title">Astuce</p>
-<p>aXqua peut également entrer dans le Python qui est livré avec QGIS, si les paquets ci-dessus s’y installent. L’environnement séparé est la voie testée et maintient QGIS et aXqua updatable indépendamment.</p>
-</div>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> installe le programme afin qu’il fonctionne à partir de la copie, et <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">pull</span></code> dans le dossier <code class="docutils literal notranslate"><span class="pre">aXqua</span></code> met à jour. Répétez <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> après une mise à jour, afin que la version que lit l’extension soit courante. La copie contient également ce que le paquet publié laisse de côté : le modèle cas commenté <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code>, les scripts <code class="docutils literal notranslate"><span class="pre">scripts/</span></code>, et les sources de cette documentation.</p>
 </section>
 <section id="connect-the-plugin-to-the-axqua-program">
 <h2>Connectez l’extension au programme aXqua<a class="headerlink" href="#connect-the-plugin-to-the-axqua-program" title="Lien vers cette rubrique"></a></h2>
@@ -488,8 +512,9 @@ where<span class="w"> </span>axqua<span class="w">          </span><span class="
 <div class="admonition warning">
 <p class="admonition-title">Avertissement</p>
 <ul class="simple">
-<li><p>Si les commandes ci-dessus n’impriment rien, l’environnement n’est pas actif, ou <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.</span></code> n’y est pas exécuté.</p></li>
+<li><p>Si les commandes ci-dessus n’impriment rien, l’environnement n’est pas actif, ou <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">axqua</span></code> n’y est pas exécuté.</p></li>
 <li><p>Pour trouver un environnement sans l’activer, <code class="docutils literal notranslate"><span class="pre">mamba</span> <span class="pre">env</span> <span class="pre">list</span></code> imprime chaque environnement avec son dossier. Le programme est alors <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;/bin/axqua</span></code> (Linux, macOS) ou <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;\Scripts\axqua.exe</span></code> (Windows).</p></li>
+<li><p>Un environnement créé avec <code class="docutils literal notranslate"><span class="pre">venv</span></code> est le dossier nommé à <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span></code>; le programme est <code class="docutils literal notranslate"><span class="pre">&lt;folder&gt;/bin/axqua</span></code>, par exemple <code class="docutils literal notranslate"><span class="pre">/home/&lt;user&gt;/axqua-env/bin/axqua</span></code>.</p></li>
 </ul>
 </div>
 <div class="admonition important">
@@ -499,7 +524,7 @@ where<span class="w"> </span>axqua<span class="w">          </span><span class="
 </section>
 <section id="axqua-panel-layout">
 <h2>La disposition du panneau aXqua<a class="headerlink" href="#axqua-panel-layout" title="Lien vers cette rubrique"></a></h2>
-<p>Après une configuration réussie, le panneau affiche des onglets qui suivent le flux de travail : <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (avec les sous-tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, et <em>Morphodynamics</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> en haut à droite ouvre la documentation à la section de l’onglet qui est affiché, et <em>Clean Up</em> à gauche de celui-ci libère l’espace disque (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Libérer l’espace disque</span></a>). Aide ouvre une copie de la documentation construite sur cet ordinateur s’il y en a une (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> dans le dossier aXqua, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Construction de la documentation</span></a>), parce qu’elle décrit la version installée, et sinon la documentation publiée à <a class="reference external" href="https://axqua.eu">axqua.eu</a>. Il ouvre les pages allemandes ou françaises lorsque QGIS est réglé en allemand ou en français. Un navigateur installé sous forme de paquet snap ou Flatpak (Firefox sur Ubuntu, par exemple) ne peut pas ouvrir de fichiers en dehors du dossier d’accueil ; pour une copie en dehors de celui-ci, Aide ouvre la documentation publiée. La liste tâche ci-dessous les onglets sont visibles de chaque onglet.</p>
+<p>Après avoir réussi la configuration, le panneau présente des onglets qui suivent le flux de travail : <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (avec les sous-tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, et <em>Morphodynamics</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> en haut à droite ouvre la documentation à la section de l’onglet qui est affiché, et <em>Clean Up</em> à gauche de celui-ci libère l’espace disque (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Libérer l’espace disque</span></a>). Aide ouvre une copie de la documentation construite sur cet ordinateur s’il y en a une (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> dans une copie du dépôt installé comme <a class="reference internal" href="#install-from-source"><span class="std std-ref">Installer à partir du code source (développement)</span></a>, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Construction de la documentation</span></a>), parce qu’elle décrit la version installée, et sinon la documentation publiée à <a class="reference external" href="https://axqua.eu">axqua.eu</a>. Il ouvre les pages allemandes ou françaises lorsque QGIS est réglé en allemand ou en français. Un navigateur installé sous forme de paquet snap ou Flatpak (Firefox sur Ubuntu, par exemple) ne peut pas ouvrir de fichiers en dehors du dossier d’accueil ; pour une copie en dehors de celui-ci, Aide ouvre la documentation publiée. La liste tâche ci-dessous les onglets sont visibles de chaque onglet.</p>
 <figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="../_images/gui-qgis-window.png"><img alt="Le panneau aXqua dans la fenêtre QGIS" src="../_images/gui-qgis-window.png" style="width: 100%;" />
 </a>

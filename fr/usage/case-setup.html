@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/usage/case-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=05dadb3a"></script>
+      <script src="../_static/documentation_options.js?v=a1a25f23"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/translations.js?v=e6b791cb"></script>
@@ -51,13 +51,14 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../index.html">Objet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Objectif</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation et configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">Extension de QGIS</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installer à partir du code source (développement)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
@@ -362,7 +363,7 @@
 </figure>
 <p>La fenêtre a trois boutons en bas à droite. <em>Save</em> écrit le fichier de cas et le vérifie, et la fenêtre reste ouverte. <em>Cancel</em> rejette les modifications depuis la dernière sauvegarde et ferme la fenêtre. <em>Exit</em> ferme la fenêtre et demande d’abord s’il y a des changements qui n’ont pas été enregistrés. La vérification n’empêche jamais l’enregistrement, car un cas est incomplet pendant sa configuration. Il marque chaque réglage qui n’est pas en ordre avec un triangle, orange pour un avertissement et rouge foncé pour une erreur, et marque la page dans la liste à gauche. Un clic sur un triangle ouvre le message avec son remède (<a class="reference internal" href="../troubleshooting/warnings.html"><span class="doc">Messages d’avertissement</span></a>, <a class="reference internal" href="../troubleshooting/errors.html"><span class="doc">Messages d’erreur</span></a>). Le bouton <em>Check</em> sur l’onglet <em>Case Setup</em> effectue la même vérification sans ouvrir la fenêtre. <em>Help</em> en bas à gauche ouvre la section de cette documentation qui appartient à la page qui apparaît.</p>
 <p>L’enregistrement depuis la fenêtre réécrit le fichier de cas depuis ses paramètres. Les commentaires d’un fichier de cas qui a été écrit à la main ne sont pas conservés. L’original est conservé comme <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;.bak</span></code> la première fois que la fenêtre économise.</p>
-<p><strong>Dans un éditeur de texte.</strong> Le fichier de cas est un fichier texte au format YAML. Chaque bloc du fichier est expliqué dans une sous-section ci-dessous. Un modèle commenté est fourni dans le dossier <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code> du dépôt. Copiez ce dossier pour lancer un nouveau cas, et renommez le fichier de cas. La commande <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code> rapporte tout ce qui n’est pas en ordre.</p>
+<p><strong>Dans un éditeur de texte.</strong> Le fichier de cas est un fichier texte au format YAML. Chaque bloc du fichier est expliqué dans une sous-section ci-dessous. Un modèle commenté est le fichier de cas <a class="reference external" href="https://github.com/sschwindt/aXqua/blob/main/cases/case-template/case-template.axq-case">case-template.axq-case</a> du dépôt ; <em>Download raw file</em> sur cette page l’enregistre. Sauvegardez-le dans le dossier du nouveau cas et renommez-le. Dans une copie du dépôt (<a class="reference internal" href="../installation/qgis-plugin.html#install-from-source"><span class="std std-ref">Installer à partir du code source (développement)</span></a>), copiez plutôt le dossier <code class="docutils literal notranslate"><span class="pre">cases/case-template/</span></code>. La commande <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code> rapporte tout ce qui n’est pas en ordre.</p>
 <p>Fichiers de cas des versions précédentes aXqua sont nommées <code class="docutils literal notranslate"><span class="pre">case-config.yml</span></code> et peuvent contenir l’emplacement du logiciel de simulation. Ils sont encore lus. La commande suivante écrit un fichier de cas du type actuel à côté d’un tel fichier :</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua migrate case-config.yml --to-case
 </pre></div>
@@ -424,7 +425,7 @@
 <tr class="row-odd"><th class="head"><p>Entrée</p></th>
 <th class="head"><p>Géométrie</p></th>
 <th class="head"><p>Champs d’attribut</p></th>
-<th class="head"><p>Objet</p></th>
+<th class="head"><p>Objectif</p></th>
 </tr>
 </thead>
 <tbody>
@@ -521,8 +522,8 @@
 </dd>
 </dl>
 <p>Pour une simulation avec un débit qui varie dans le temps, <code class="docutils literal notranslate"><span class="pre">inflow</span></code> nomme une table avec une colonne de temps et une colonne débit, et <code class="docutils literal notranslate"><span class="pre">hydrodynamics.regime</span></code> est réglé à <code class="docutils literal notranslate"><span class="pre">unsteady</span></code>; les paramètres cas marquent alors l’hydrographe au besoin. L’échange avec un corps poreux, dans lequel l’eau quitte la surface à travers une barre de gravier et retourne plus loin en aval (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC choix</span></a>), est un cadre de la page <em>Liquid boundaries</em> dans les paramètres cas.</p>
-<p><strong>Station hydrométrique données.</strong> Le script <code class="docutils literal notranslate"><span class="pre">scripts/gauge_data.py</span></code> récupère les séries chronologiques débit et courbes de tarage de River stations hydrométriques et les sauve dans le format qu’aXqua lit. Il soutient les stations hydrométriques du Service bavarois d’information sur les inondations (HND) et de l’USGS. Il s’ouvre dans un navigateur Web et nécessite le paquet <code class="docutils literal notranslate"><span class="pre">streamlit</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;.[gui]&quot;</span></code>). Commencez à partir du dossier du dépôt, collez l’adresse ou le numéro d’une station hydrométrique, et enregistrez les deux tables dans <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>scripts/gauge_data.py
+<p><strong>Station hydrométrique données.</strong> Le script <a class="reference external" href="https://github.com/sschwindt/aXqua/blob/main/scripts/gauge_data.py">gauge_data.py</a> du dépôt récupère les séries chronologiques débit et courbes de tarage de River stations hydrométriques et les enregistre dans le format qu’aXqua lit. Il soutient les stations hydrométriques du Service bavarois d’information sur les inondations (HND) et de l’USGS. Il s’ouvre dans un navigateur Web et nécessite le paquet <code class="docutils literal notranslate"><span class="pre">streamlit</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;axqua[gui]&quot;</span></code>). Enregistrer avec <em>Download raw file</em> sur cette page, commencer dans le dossier où il a été enregistré (dans une copie du dépôt : <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">scripts/gauge_data.py</span></code>), coller l’adresse ou le numéro d’une station hydrométrique, et enregistrer les deux tables dans <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>gauge_data.py
 </pre></div>
 </div>
 <p>La série débit exportée est la table <code class="docutils literal notranslate"><span class="pre">inflow</span></code>, et la courbe de tarage exportée est la table <code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code>. Entrez l’altitude de la station hydrométrique zéro pour convertir la station hydrométrique en une cote de la surface libre absolue, et vérifiez que cette altitude et le MNT se réfèrent au même système de hauteur.</p>
