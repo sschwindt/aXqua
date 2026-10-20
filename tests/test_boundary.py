@@ -147,11 +147,34 @@ def test_wraparound_not_split(tmp_path):
     kinds_seen = sorted(lb.kind for lb in liquids)
     assert kinds_seen == ["inflow", "outflow"], f"expected 2 boundaries, got {liquids}"
     assert sum(lb.n_nodes for lb in liquids if lb.kind == "inflow") == 8
-    # numbering is FRONT2 (SW-most start, domain-on-left): the SW corner sits on
-    # the inflow (left) edge, so the inflow boundary is encountered first
+    # numbering is FRONT2 (SW-most start, domain-on-left). The SW corner is the
+    # LAST node of the inflow (left) edge in counter-clockwise order, so the
+    # segment leaving it runs along the bottom wall: FRONT2 starts on a wall, meets
+    # the outflow first and the inflow last (what TELEMAC printed for the Inn KB15
+    # mesh of 2026-10-20, whose south-westernmost node closed the inflow line)
     by_index = {lb.index: lb.kind for lb in liquids}
-    assert by_index == {1: "inflow", 2: "outflow"}, by_index
+    assert by_index == {1: "outflow", 2: "inflow"}, by_index
     print("WRAP-AROUND TEST PASSED (single boundary, FRONT2 order)")
+
+
+def test_a_liquid_run_that_opens_at_the_south_west_corner_comes_first():
+    """The counterpart: the south-westernmost node is the FIRST node of the inflow.
+
+    The segment leaving it is liquid, so FRONT2 starts on the inflow and numbers it
+    1. Inflow along the bottom edge, outflow along the top, walls left and right."""
+    from axqua.solvers.telemac.boundary import _front2_runs
+
+    bottom = [(x, Y0) for x in np.linspace(X0, X0 + W, 9)]          # inflow, SW..SE
+    right = [(X0 + W, y) for y in np.linspace(Y0, Y0 + H, 5)[1:-1]]  # wall
+    top = [(x, Y0 + H) for x in np.linspace(X0 + W, X0, 9)]          # outflow
+    left = [(X0, y) for y in np.linspace(Y0 + H, Y0, 5)[1:-1]]       # wall
+    ring = bottom + right + top + left
+    kinds = (["inflow"] * len(bottom) + ["wall"] * len(right)
+             + ["outflow"] * len(top) + ["wall"] * len(left))
+    xy = np.array(ring)
+    runs = _front2_runs(np.arange(len(ring)), kinds, xy[:, 0], xy[:, 1])
+    liquid = [kind for kind, _nodes in runs if kind != "wall"]
+    assert liquid == ["inflow", "outflow"], runs
 
 
 def test_node_balance_warning(tmp_path, caplog):

@@ -496,6 +496,13 @@ def _front2_runs(loop_nodes, loop_kinds: list[str], x, y) -> list[tuple[str, lis
     PRESCRIBED FLOWRATES / ELEVATIONS land on the wrong boundary (inflow Q and
     outflow H swapped) or a single boundary that straddles the loop start is split
     into two.
+
+    FRONT2 types the *segment* that leaves the start node, not the node, and a
+    segment with one wall node is a wall ("solid over liquid"). So when the start
+    node is the **last** node of a liquid run, TELEMAC begins on a wall and meets
+    that run last, not first. Found on the Inn KB15 reach (2026-10-20): the south-
+    westernmost node closed the inflow line, TELEMAC made the outflow boundary 1,
+    and the discharge went to the outflow while the inflow received none.
     """
     import numpy as np
 
@@ -519,6 +526,11 @@ def _front2_runs(loop_nodes, loop_kinds: list[str], x, y) -> list[tuple[str, lis
     eps = (key.max() - key.min()) * 1e-4
     cand = np.flatnonzero(np.abs(key - key.min()) <= eps)
     start = int(cand[np.argmin(oys[cand])])
+    liquid = ("inflow", "outflow")
+    if n > 1 and okinds[start] in liquid and okinds[(start + 1) % n] not in liquid:
+        # the first segment is a wall: the start node closes the liquid run that
+        # FRONT2 meets last, so the walk effectively begins one node further on
+        start = (start + 1) % n
     rkinds = [okinds[(start + j) % n] for j in range(n)]
     rnodes = [int(onodes[(start + j) % n]) for j in range(n)]
 
