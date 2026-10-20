@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.0.1
+version=1.0.2
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,16 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.0.1
+changelog=1.0.2
+    - The inflow of a model received no discharge when the south-westernmost node
+      of its outline was the last node of a liquid boundary line: TELEMAC then
+      numbers that line last, and the discharge went to the outflow. The numbering
+      of aXqua now follows TELEMAC in this case too. Rebuild a model that was built
+      with an earlier version.
+    - The gauge tool (scripts/gauge_data.py) keeps the fetched gauge when a table
+      is downloaded, so the hydrograph and the rating curve can be saved one after
+      the other.
+    1.0.1
     - The aXqua program is published on PyPI. Install it with 'pip install axqua'
       and upgrade it with 'pip install --upgrade axqua'; Git and a copy of the
       repository are no longer needed.
