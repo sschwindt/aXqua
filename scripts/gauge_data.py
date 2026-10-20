@@ -400,10 +400,16 @@ def run_app() -> None:
         days, daily = PERIODS[period_label]
         go = st.button("Fetch", type="primary", use_container_width=True)
 
-    if not (go and ident):
+    # A download button reruns the whole script with the Fetch button released, so the
+    # gauge that was fetched is kept here; otherwise the first download reset the page
+    # and the other table could only be had by fetching again.
+    if go and ident:
+        st.session_state["fetched"] = (ident, days, daily)
+    if "fetched" not in st.session_state:
         st.info("Pick a preset or paste an HND gauge URL / USGS site number in the "
                 "sidebar, then **Fetch**.")
         st.stop()
+    ident, days, daily = st.session_state["fetched"]
 
     try:
         with st.spinner("fetching gauge data ..."):

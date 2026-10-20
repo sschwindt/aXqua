@@ -67,9 +67,65 @@ msgstr "Bis das Plugin im QGIS-Plugin-Repository ist, nehmen Sie ``.zip`` aus `R
 msgid "Install the aXqua program (backend)"
 msgstr "Installieren Sie das aXqua Programm (Backend)"
 
-# machine translation: argos ac2ccf2b2399
-msgid "Requires Python 3.10 or newer and a geospatial stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). The best route is a separate environment from `Miniforge <https://github.com/conda-forge/miniforge>`_, which can be installed using git."
-msgstr "Erfordert Python 3.10 oder neuer und einen Geospatial-Stack (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``). Die beste Route ist eine separate Umgebung von `Miniforge <https://github.com/conda-forge/miniforge>`_, die mit Git installiert werden kann."
+# machine translation: argos 01c77bfbe8e0
+msgid "The aXqua program is published on `PyPI <https://pypi.org/project/axqua/>`_, the package index of Python, and requires Python 3.10 or newer. ``pip`` installs it into a Python environment of its own, which keeps QGIS and aXqua updatable independently of each other. The recommended route is an environment from `Miniforge <https://github.com/conda-forge/miniforge>`_:"
+msgstr "Das aXqua-Programm wird unter `PyPI <https://pypi.org/project/axqua/>`_, dem Paketindex von Python, veröffentlicht und erfordert Python 3.10 oder neuer. ``pip`` installiert es in einer eigenen Python-Umgebung, die QGIS und aXqua unabhängig voneinander aktualisiert. Die empfohlene Route ist eine Umgebung von `Miniforge <https://github.com/conda-forge/miniforge>`_:"
+
+# machine translation: argos 17395479c1b0
+msgid "Install Miniforge following the instructions on its website."
+msgstr "Installieren Sie Miniforge nach den Anweisungen auf seiner Website."
+
+# machine translation: argos a7fb74184fb3
+msgid "Open **terminal** (on Windows, the *Miniforge Prompt*) and enter:"
+msgstr "Öffnen Sie **Terminal** (unter Windows, *Miniforge Prompt*) und geben Sie ein:"
+
+# machine translation: argos f22ae4efdf6a
+msgid "``axqua --version`` printing a version (for example, ``axqua 1.0.1``) confirms the installation. ``pip`` also installs the packages that aXqua requires (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``), all of them from PyPI, which takes less than a minute on a fast internet connection."
+msgstr "``axqua --version`` Drucken einer Version (zum Beispiel ``axqua 1.0.1``) bestätigt die Installation. ``pip`` installiert auch die Pakete, die aXqua benötigt (``numpy``, ``pandas``, ``scipy``, ``pyyaml``, ``pyproj``, ``shapely``, ``geopandas``, ``rasterio``, ``gmsh``, ``openpyxl``, ``matplotlib``), alle von PyPI, was bei einer schnellen Internetverbindung weniger als eine Minute dauert."
+
+# machine translation: argos e50a41089cb0
+msgid "**Bayesian calibration** requires the optional package HydroBayesCal: ``pip install \"axqua[calibration]\"``."
+msgstr "**Bayesianische Kalibrierung** erfordert das optionale Paket HydroBayesCal: ``pip install \"axqua[calibration]\"``."
+
+# machine translation: argos 1eeef6bd81ca
+msgid "**Without Miniforge.** On Linux and macOS, a Python 3.10 or newer that is already installed works as well (``python3 --version`` shows the version). The module ``venv`` of Python creates the environment:"
+msgstr "**Ohne Miniforge.** Unter Linux und macOS funktioniert auch ein Python 3.10 oder neuer, das bereits installiert ist (``python3 --version`` zeigt die Version an). Das Modul ``venv`` von Python schafft die Umgebung:"
+
+# machine translation: argos 47a6273160b8
+msgid "On Debian, Ubuntu and Linux Mint, ``venv`` requires the package ``python3-venv`` (``sudo apt install python3-venv``). The program is then ``~/axqua-env/bin/axqua``."
+msgstr "Auf Debian, Ubuntu und Linux Mint benötigt ``venv`` das Paket ``python3-venv`` (``sudo apt install python3-venv``). Das Programm ist dann ``~/axqua-env/bin/axqua``."
+
+# machine translation: argos 3425abfb3157
+msgid "**Linux computers without a desktop.** The mesh generator gmsh requires graphics libraries of the operating system, also when it meshes without a window. A computer with a desktop has them. On a server or in WSL, the error ``libGLU.so.1: cannot open shared object file`` at the first meshing means that they are missing. On Debian, Ubuntu and Linux Mint, install them with:"
+msgstr "**Linux-Computer ohne Desktop.** Der Rechennetzgenerator gmsh benötigt Grafikbibliotheken des Betriebssystems, auch wenn er Rechennetze ohne Fenster hat. Ein Computer mit einem Desktop hat sie. Auf einem Server oder in WSL bedeutet der Fehler ``libGLU.so.1: cannot open shared object file`` beim ersten Meshing, dass sie fehlen. Auf Debian, Ubuntu und Linux Mint installieren Sie sie mit:"
+
+# machine translation: argos 821448dd7e73
+msgid "HydroBayesCal installs PyTorch, which on Linux comes with the GPU libraries of NVIDIA (several gigabytes). The calibration does not require a GPU. Installing the CPU version of PyTorch first saves that space:"
+msgstr "HydroBayesCal installiert PyTorch, das unter Linux mit den GPU-Bibliotheken von NVIDIA (mehrere Gigabyte) geliefert wird. Die Kalibrierung erfordert keine GPU. Die Installation der CPU-Version von PyTorch spart zuerst diesen Speicherplatz:"
+
+# machine translation: argos d5addbddaae0
+msgid "Installing aXqua into the Python that ships with QGIS is possible but not recommended. ``pip`` may replace packages such as ``numpy`` that QGIS itself uses, and QGIS may then fail to start. The plugin runs the aXqua program as a separate process, so the program does not have to be in the Python of QGIS."
+msgstr "Die Installation von aXqua in das Python, das mit QGIS ausgeliefert wird, ist möglich, wird aber nicht empfohlen. ``pip`` kann Pakete wie ``numpy`` ersetzen, die QGIS selbst verwendet, und QGIS kann dann nicht starten. Das Plugin führt das aXqua-Programm als separaten Prozess aus, so dass das Programm nicht im Python von QGIS sein muss."
+
+# machine translation: argos 1a530c4bc485
+msgid "Upgrade the backend"
+msgstr "Upgrade des Backends"
+
+# machine translation: argos b076f6cead3d
+msgid "To **upgrade** aXqua, and HydroBayesCal where Bayesian calibration is used, to the newest versions:"
+msgstr "Zu **Upgrade** aXqua und HydroBayesCal, wo Bayesian-Kalibrierung verwendet wird, zu den neuesten Versionen:"
+
+# machine translation: argos 3af4fa6bfb57
+msgid "*Check* on the *Configuration* tab of the plugin then reports the new version. The plugin and the program are released together under the same version number, so upgrade the program also after an update of the plugin in QGIS. ``pip install axqua==<version>`` installs one particular version, for instance the version with which an earlier result was computed; the `release history on PyPI <https://pypi.org/project/axqua/#history>`_ lists all versions."
+msgstr "*Check* auf der Registerkarte *Configuration* des Plugins meldet dann die neue Version. Das Plugin und das Programm werden zusammen unter der gleichen Versionsnummer veröffentlicht, daher aktualisieren Sie das Programm auch nach einem Update des Plugins in QGIS. ``pip install axqua==<version>`` installiert eine bestimmte Version, zum Beispiel die Version, mit der ein früheres Ergebnis berechnet wurde; Die `Release History auf PyPI <https://pypi.org/project/axqua/#history>`_ listet alle Versionen auf."
+
+# machine translation: argos 83fb780330ea
+msgid "Install from the source code (development)"
+msgstr "Installieren aus dem Quellcode (Entwicklung)"
+
+# machine translation: argos 862c58ab2baa
+msgid "Developers of aXqua, and users who need a change that is not released yet, install the program from a copy of the repository instead. This route requires Git."
+msgstr "Entwickler von aXqua und Benutzer, die eine Änderung benötigen, die noch nicht veröffentlicht wurde, installieren das Programm stattdessen aus einer Kopie des Repositorys. Diese Route erfordert Git."
 
 # machine translation: argos 29f6d34c667c
 msgid "**Installing Git**"
@@ -127,41 +183,13 @@ msgstr "In Terminal, PowerShell oder Git Bash laufen:"
 msgid "A Git version number confirms that the installation is available. For detailed installation instructions and tutorials on cloning repositories, updating files, pushing changes, and collaborating with branches, see the `hydro-informatics.com Git tutorials <https://hydro-informatics.com/git/>`_."
 msgstr "Eine Git-Versionsnummer bestätigt, dass die Installation verfügbar ist. Detaillierte Installationsanweisungen und Tutorials zum Klonen von Repositories, Aktualisieren von Dateien, Drücken von Änderungen und Zusammenarbeit mit Zweigen finden Sie unter `hydro-informatics.com Git Tutorials <https://hydro-informatics.com/git/>`_."
 
-# machine translation: argos ee266172f1da
-msgid "With Git available, **install the aXqua backend** as follows:"
-msgstr "Mit Git verfügbar, **Installieren Sie das aXqua Backend** wie folgt:"
+# machine translation: argos e04246dc19e0
+msgid "With Git available, open **terminal** and enter:"
+msgstr "Mit Git verfügbar, öffnen Sie **Terminal** und geben Sie ein:"
 
-# machine translation: argos 20f45f781e98
-msgid "Open **terminal** and enter:"
-msgstr "Öffnen Sie **Terminal** und geben Sie ein:"
-
-# machine translation: argos 31950c54c3da
-msgid "``axqua --version`` printing a version confirms the installation."
-msgstr "``axqua --version`` Das Drucken einer Version bestätigt die Installation."
-
-# machine translation: argos 3ae86b137f69
-msgid "**Bayesian calibration** needs one more package: ``pip install \".[calibration]\"``."
-msgstr "**Bayesische Kalibrierung** benötigt ein weiteres Paket: ``pip install \".[calibration]\"``."
-
-# machine translation: argos ee0aa653b8bb
-msgid "If pip finds no matching ``hydrobayescal``, it is not on PyPI yet. Install it from source, without a version tag, so that the newest is taken:"
-msgstr "Wenn Pip kein passendes ``hydrobayescal`` findet, ist es noch nicht auf PyPI. Installieren Sie es von der Quelle, ohne Versions-Tag, so dass die neueste genommen wird:"
-
-# machine translation: argos 1a530c4bc485
-msgid "Upgrade the backend"
-msgstr "Upgrade des Backends"
-
-# machine translation: argos 45411b5bcf3c
-msgid "To **upgrade** ``axqua`` and ``hydrobayescal`` to the newest versions from the ``aXqua`` folder of the clone:"
-msgstr "Um **upgrade** ``axqua`` und ``hydrobayescal`` auf die neuesten Versionen aus dem ``aXqua``-Ordner des Klons:"
-
-# machine translation: argos 8c939c403ed7
-msgid "``--force-reinstall`` is needed because a newer HydroBayesCal on GitHub may have the same version number as the installed one, which pip would otherwise keep. ``--no-deps`` leaves the packages of the conda environment untouched. *Check* on the *Configuration* tab of the plugin then reports the new version."
-msgstr "``--force-reinstall`` Wird benötigt, weil ein neuerer HydroBayesCal auf GitHub möglicherweise die gleiche Versionsnummer wie der installierte hat, den Pip sonst behalten würde. ``--no-deps`` lässt die Pakete der Conda-Umgebung unberührt. *Check* auf der Registerkarte *Configuration* des Plugins meldet dann die neue Version."
-
-# machine translation: argos 408cbb01050e
-msgid "aXqua can also go into the Python that ships with QGIS, if the packages above install there. The separate environment is the tested route and keeps QGIS and aXqua updatable independently."
-msgstr "aXqua kann auch in das Python gehen, das mit QGIS ausgeliefert wird, wenn die oben genannten Pakete dort installiert sind. Die separate Umgebung ist die getestete Route und hält QGIS und aXqua unabhängig aktualisierbar."
+# machine translation: argos 2edf44a315cf
+msgid "``pip install -e .`` installs the program so that it runs from the copy, and ``git pull`` in the ``aXqua`` folder updates it. Repeat ``pip install -e .`` after an update, so that the version that the plugin reads is current. The copy also holds what the published package leaves out: the commented case template ``cases/case-template/``, the scripts in ``scripts/``, and the sources of this documentation."
+msgstr "``pip install -e .`` installiert das Programm so, dass es von der Kopie aus läuft, und ``git pull`` im Ordner ``aXqua`` aktualisiert es. Wiederholen Sie ``pip install -e .`` nach einem Update, so dass die Version, die das Plugin liest, aktuell ist. Die Kopie enthält auch das, was das veröffentlichte Paket auslässt: die kommentierte Fall Vorlage ``cases/case-template/``, die Skripte in ``scripts/`` und die Quellen dieser Dokumentation."
 
 # machine translation: argos 238cda70bd43
 msgid "Connect the plugin to the aXqua program"
@@ -212,12 +240,16 @@ msgid "What it prints is the path to enter in the plugin:"
 msgstr "Was es druckt, ist der Pfad, um in das Plugin einzutreten:"
 
 # machine translation: argos e9e643b2c12e
-msgid "If the above commands do not print anything, the environment is not active, or ``pip install .`` did not run in it."
-msgstr "Wenn die oben genannten Befehle nichts drucken, ist die Umgebung nicht aktiv oder ``pip install .`` wurde nicht darin ausgeführt."
+msgid "If the above commands do not print anything, the environment is not active, or ``pip install axqua`` did not run in it."
+msgstr "Wenn die oben genannten Befehle nichts drucken, ist die Umgebung nicht aktiv oder ``pip install axqua`` wurde nicht darin ausgeführt."
 
 # machine translation: argos 5d0eff3903c1
 msgid "To find an environment without activating it, ``mamba env list`` prints every environment with its folder. The program is then ``<folder>/bin/axqua`` (Linux, macOS) or ``<folder>\\Scripts\\axqua.exe`` (Windows)."
 msgstr "Um eine Umgebung zu finden, ohne sie zu aktivieren, druckt ``mamba env list`` jede Umgebung mit ihrem Ordner. Das Programm ist dann ``<folder>/bin/axqua`` (Linux, macOS) oder ``<folder>\\Scripts\\axqua.exe`` (Windows)."
+
+# machine translation: argos 36795067dce7
+msgid "An environment created with ``venv`` is the folder named in ``python3 -m venv``; the program is ``<folder>/bin/axqua``, for instance ``/home/<user>/axqua-env/bin/axqua``."
+msgstr "Eine Umgebung, die mit ``venv`` erstellt wurde, ist der Ordner mit dem Namen ``python3 -m venv``; das Programm ist ``<folder>/bin/axqua``, zum Beispiel ``/home/<user>/axqua-env/bin/axqua``."
 
 # machine translation: argos 71f13507ff2e
 msgid "This section only explains the very basic installation of the aXqua QGIS plugin (aka the **frontend**) and the required code behind the scenes (aka the **backend**). The next sections explain the installation of :doc:`simulation-software` (TELEMAC and OpenFOAM), :doc:`plugin-setup`, and the installation of :doc:`postprocessors` (ParaView and Visit DAV)."
@@ -227,9 +259,9 @@ msgstr "In diesem Abschnitt wird nur die sehr grundlegende Installation des aXqu
 msgid "aXqua panel layout"
 msgstr "aXqua Panel Layout"
 
-# machine translation: argos ba0b04bc5037
-msgid "After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, and *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in the aXqua folder, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab."
-msgstr "Nach erfolgreicher Konfiguration zeigt das Panel Registerkarten an, die dem Workflow folgen: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (mit den Unterregisterkarten *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence* und *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* oben rechts öffnet die Dokumentation im Abschnitt des Tabs, der angezeigt wird, und *Clean Up* links davon gibt Speicherplatz frei (:ref:`help-cleanup`). Help öffnet eine Kopie der auf diesem Computer erstellten Dokumentation, falls vorhanden (``bash docs/i18n/build_i18n.sh`` im Ordner aXqua, :doc:`../code/build-docs`), da sie die installierte Version und ansonsten die veröffentlichte Dokumentation unter `axqua.eu <https://axqua.eu>`_ beschreibt. Es öffnet die deutsche oder die französische Seite, wenn QGIS auf Deutsch oder Französisch eingestellt ist. Ein Browser, der als Snap- oder Flatpak-Paket installiert ist (z. B. Firefox auf Ubuntu), kann Dateien außerhalb des Home-Ordners nicht öffnen; für eine Kopie außerhalb öffnet Help die veröffentlichte Dokumentation. Die Jobliste unter den Tabs ist von jedem Tab aus sichtbar."
+# machine translation: argos 1320df19b741
+msgid "After successful configuration, the panel shows tabs that follow the workflow: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (with the sub-tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence*, and *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* at the top right opens the documentation at the section of the tab that is showing, and *Clean Up* left of it frees disk space (:ref:`help-cleanup`). Help opens a copy of the documentation built on this computer if there is one (``bash docs/i18n/build_i18n.sh`` in a copy of the repository installed as in :ref:`install-from-source`, :doc:`../code/build-docs`), because it describes the installed version, and otherwise the published documentation at `axqua.eu <https://axqua.eu>`_. It opens the German or the French pages when QGIS is set to German or French. A browser installed as a snap or Flatpak package (Firefox on Ubuntu, for example) cannot open files outside of the home folder; for a copy outside of it, Help opens the published documentation. The job list below the tabs is visible from every tab."
+msgstr "Nach erfolgreicher Konfiguration zeigt das Panel Tabs an, die dem Workflow folgen: *Configuration*, *Case Setup*, *Preprocessing*, *Simulations* (mit den Sub-Tabs *Baseline (Telemac)*, *OpenFOAM*, *Mesh convergence* und *Morphodynamics*), *Calibration & validation*, *Postprocessing*, *Batch-processing*. *Help* oben rechts öffnet die Dokumentation im Abschnitt des Tabs, der angezeigt wird, und *Clean Up* links davon gibt Speicherplatz frei (:ref:`help-cleanup`). Help öffnet eine Kopie der auf diesem Computer erstellten Dokumentation, wenn eine vorhanden ist (``bash docs/i18n/build_i18n.sh`` in einer Kopie des installierten Repositorys wie in :ref:`install-from-source`, :doc:`../code/build-docs`), da sie die installierte Version und ansonsten die veröffentlichte Dokumentation unter `axqua.eu <https://axqua.eu>`_ beschreibt. Es öffnet die deutsche oder die französische Seite, wenn QGIS auf Deutsch oder Französisch eingestellt ist. Ein Browser, der als Snap- oder Flatpak-Paket installiert ist (z. B. Firefox auf Ubuntu), kann Dateien außerhalb des Home-Ordners nicht öffnen; für eine Kopie außerhalb öffnet Help die veröffentlichte Dokumentation. Die Jobliste unter den Tabs ist von jedem Tab aus sichtbar."
 
 # machine translation: argos a12ccb0e91d9
 msgid "The aXqua panel in the QGIS window"

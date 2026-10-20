@@ -67,7 +67,7 @@ QGIS lists a plugin only if it can read ``metadata.txt``. The command ``python s
 
 The tests of the plugin are in ``qgis_plugin/tests/``. The tests that require QGIS are skipped when the Python module ``qgis`` is not available. The script ``scripts/build_plugin_zip.py`` builds the plugin archive and verifies the requirements of the QGIS plugin repository.
 
-**Releases.** The plugin and the program are released together under one version number, which ``pyproject.toml``, ``src/axqua/__init__.py`` (``_FALLBACK_VERSION``), ``qgis_plugin/axqua/metadata.txt`` and ``docs/conf.py`` carry. A tag ``v<version>`` pushed to GitHub builds the plugin archive and attaches it to the release. The program is uploaded to PyPI by hand, from a clean copy of the tagged commit. ``twine`` asks for an API token of pypi.org (*Account settings > API tokens*):
+**Releases.** The plugin and the program are released together under one version number, which ``pyproject.toml``, ``src/axqua/__init__.py`` (``_FALLBACK_VERSION``), ``qgis_plugin/axqua/metadata.txt`` and ``docs/conf.py`` carry. A tag ``v<version>`` pushed to GitHub builds the plugin archive and attaches it to the release. The program is uploaded to PyPI by hand, from a clean copy of the tagged commit. ``twine`` asks for an API token of pypi.org (*Account settings > API tokens*; a token limited to the project ``axqua`` suffices):
 
 .. code-block:: bash
 
