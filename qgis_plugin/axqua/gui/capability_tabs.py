@@ -39,6 +39,7 @@ TITLES = {
     "vertical_convergence": "Vertical convergence",
     "calibration": "Calibration (BAL)",
     "gain_lose": "Gain-lose reach",
+    "hydrology": "Hydrology (rainfall-runoff)",
 }
 
 ORDER = list(TITLES)
@@ -54,6 +55,7 @@ PRIMARY_KIND = {
     "mesh_convergence": "mesh-convergence",
     "vertical_convergence": "vertical-convergence",
     "calibration": "calibration",
+    "hydrology": "hydrology",
 }
 
 #: The kind that *builds* what the tab then runs, where the two differ.
@@ -63,6 +65,8 @@ BUILD_KIND = {
     "steady3d": "build-3d",
     "unsteady3d": "build-3d",
     "free_surface_3d": "openfoam-build",
+    # a hydrology case is built by the same build as any TELEMAC case
+    "hydrology": "preprocessing",
 }
 
 #: Where one solver does something else under the name of a capability than the others.
@@ -100,6 +104,16 @@ NOT_CONFIGURED_REASON = (
 #: capabilities is in that position any more (see :data:`PART_OF` and
 #: :data:`FIXED_OPTIONS`), and a future one still gets this text rather than dead buttons.
 NO_JOB_KIND_REASON = "{title} with {solver} cannot be started from the plugin yet."
+
+#: What a capability that is switched on in the case settings says while it is off,
+#: in place of :data:`NOT_CONFIGURED_REASON`.
+HOW_TO_CONFIGURE = {
+    "hydrology": ("This case is not in hydrology mode. Switch on Hydrology mode in Case "
+                  "settings, on the page Mesh configuration or Hydrology, and build the "
+                  "case on the tab Preprocessing."),
+    "steady2d": ("A case in hydrology mode is driven by its rain and has no steady "
+                 "simulation; its run is on the sub-tab Hydrology."),
+}
 
 
 #: Capabilities that are not simulations of their own. They are switched on in the case
@@ -189,7 +203,8 @@ class CapabilityView:
             # Before "not configured": configuring it would not help.
             return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
         if not self.configured:
-            return NOT_CONFIGURED_REASON.format(title=self.title)
+            return HOW_TO_CONFIGURE.get(self.name) or NOT_CONFIGURED_REASON.format(
+                title=self.title)
         return ""
 
     @property

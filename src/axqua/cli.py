@@ -621,6 +621,13 @@ def _run_example(argv: list[str]) -> int:
     return examplecli.run_example(argv)
 
 
+def _run_hydrology(argv: list[str]) -> int:
+    """``axqua hydrology`` - data and checkup of a hydrology case
+    (:mod:`axqua.hydrologycli`)."""
+    from axqua import hydrologycli
+    return hydrologycli.run_hydrology(argv)
+
+
 def _run_export(argv: list[str]) -> int:
     """``axqua export`` - results for ParaView and VisIt (:mod:`axqua.exportcli`)."""
     from axqua import exportcli
@@ -753,6 +760,7 @@ _DISPATCH = {
     "export": lambda argv: _run_export(argv),
     "validation": lambda argv: _run_validation(argv),
     "example": lambda argv: _run_example(argv),
+    "hydrology": lambda argv: _run_hydrology(argv),
     "schema": lambda argv: _case_cli("run_schema", argv),
     "case": lambda argv: _case_cli("run_case", argv),
     "check": lambda argv: _case_cli("run_check", argv),

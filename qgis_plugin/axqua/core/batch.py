@@ -19,15 +19,17 @@ from dataclasses import dataclass
 class Step:
     kind: str                  # the job kind of ``axqua submit --kind``
     title: str
-    needs: str = ""            # the capability that has to be asked for by the case
+    # the capability that has to be asked for by the case; "a|b" is either of them
+    needs: str = ""
     default: bool = False      # ticked when the list is first shown
     solver: str = ""           # where the capability is that of one solver only
 
 
 #: The steps a case can be taken through, in the order they depend on each other.
 STEPS: tuple[Step, ...] = (
-    Step("preprocessing", "Build the TELEMAC model", "steady2d", True),
+    Step("preprocessing", "Build the TELEMAC model", "steady2d|hydrology", True),
     Step("steady", "Steady 2D simulation", "steady2d", True),
+    Step("hydrology", "Hydrology simulation (rainfall-runoff)", "hydrology"),
     Step("mesh-convergence", "Mesh convergence study (TELEMAC)", "mesh_convergence",
          solver="telemac"),
     Step("openfoam-mesh-convergence", "Mesh convergence study (OpenFOAM)",

@@ -262,7 +262,11 @@ def _advice(raw: dict) -> list[Finding]:
             subject="telemac",
             remedy="Add the TELEMAC block (Solver: telemac2d), or the OpenFOAM block."))
     boundaries = raw.get("boundaries") if isinstance(raw.get("boundaries"), dict) else {}
-    if boundaries.get("prescribed_flowrate") in (None, "") and not boundaries.get("inflow"):
+    hydrology = raw.get("hydrology") if isinstance(raw.get("hydrology"), dict) else {}
+    # a catchment in hydrology mode is driven by its rain, not by a discharge
+    rain_driven = hydrology.get("enabled") is True
+    if (not rain_driven and boundaries.get("prescribed_flowrate") in (None, "")
+            and not boundaries.get("inflow")):
         out.append(Finding(
             WARNING, "axqua.config.incomplete",
             "no discharge is set, so the steady simulation has no inflow",

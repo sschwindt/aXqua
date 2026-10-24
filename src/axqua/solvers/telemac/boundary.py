@@ -27,7 +27,7 @@ mesh resolution near the boundaries or adjust the line lengths to rebalance).
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from axqua.config import Config
@@ -70,6 +70,9 @@ class LiquidBoundary:
     n_nodes: int
     discharge: float | None = None   # per-line prescribed Q [m3/s]; None -> split the
                                      # total reach discharge across inflows by node share
+    # the contour nodes of the boundary (0-based), known right after a build; not
+    # serialized (a hydrology outlet reads its own section through them)
+    nodes: tuple = field(default=(), compare=False, repr=False)
 
 
 @dataclass
@@ -130,7 +133,7 @@ def load_liquid_boundaries(path: str | Path) -> list["LiquidBoundary"]:
 
 def _outflow_code(cfg: Config) -> tuple[int, int, int]:
     """Free/Neumann outflow -> 4 4 4; stage_discharge / elevation -> 5 4 4."""
-    return OUTFLOW_FREE if cfg.boundaries.outflow_condition == "free" else OUTFLOW_ELEV
+    return OUTFLOW_FREE if cfg.outflow_condition == "free" else OUTFLOW_ELEV
 
 
 
@@ -426,7 +429,8 @@ def _contour_length(node_ids: list[int], mesh: Mesh) -> float:
 
 
 def _warn_node_balance(liquids: list[LiquidBoundary], mesh: Mesh,
-                       node_map: dict[int, list[int]]) -> None:
+                       node_map: dict[int, list[int]], *,
+                       hydrology: bool = False) -> None:
     """Stability check on liquid-boundary *resolution* (node spacing), not raw counts.
 
     Comparing total inflow vs total outflow node counts mislabels a legitimately
@@ -439,6 +443,12 @@ def _warn_node_balance(liquids: list[LiquidBoundary], mesh: Mesh,
     outflow = [lb for lb in liquids if lb.kind == "outflow"]
     n_in = sum(lb.n_nodes for lb in inflow)
     n_out = sum(lb.n_nodes for lb in outflow)
+    if hydrology and n_in == 0:
+        # a catchment is fed by its rain: an outlet alone is the normal case
+        if n_out == 0:
+            log.warning("a hydrology case needs at least one outflow line: without "
+                        "one, the rain has nowhere to go")
+        return
     if n_in == 0 or n_out == 0:
         log.warning(
             "STABILITY RISK: liquid boundaries have %d inflow and %d outflow "
@@ -572,7 +582,8 @@ def _number_liquid_boundaries(
         for kind, node_ids in _front2_runs(loop_nodes, loop_kinds, mesh.x, mesh.y):
             if kind in ("inflow", "outflow"):
                 idx = len(liquids) + 1
-                liquids.append(LiquidBoundary(idx, kind, len(node_ids)))
+                liquids.append(LiquidBoundary(idx, kind, len(node_ids),
+                                              nodes=tuple(int(n) for n in node_ids)))
                 node_map[idx] = node_ids
     return liquids, node_map
 
@@ -628,6 +639,11 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
     """
     from shapely.geometry import Point
 
+    hydrology = bool(getattr(cfg, "hydrology", None) and cfg.hydrology.enabled)
+    if hydrology and cfg.boundaries.liquid_boundaries is None:
+        log.warning("  no liquid boundaries: a closed catchment, all its rain stays in "
+                    "it (set boundaries.liquid_boundaries for an outlet)")
+        return ["wall"] * len(mesh.boundary_nodes), []
     lines = liquid_lines(cfg)
     tol = _match_tolerance(cfg, mesh)
     log.info("  liquid-boundary matching tolerance %.3f m (two median contour edges)",
@@ -657,6 +673,10 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
                  "on a solid structure", on_solid)
 
     liquids, node_map = _number_liquid_boundaries(mesh, kinds)
+    if not liquids and hydrology:
+        log.warning("  no contour node lies on a liquid-boundary line: the catchment "
+                    "is closed and all its rain stays in it")
+        return kinds, liquids
     if not liquids:
         raise ValueError(
             "No contour nodes matched the liquid-boundary lines. Check that the "
@@ -664,7 +684,7 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
             f"the matching tolerance (~{tol:.1f} m) suits the mesh resolution."
         )
     _assign_line_discharges(cfg, mesh, liquids, node_map)
-    _warn_node_balance(liquids, mesh, node_map)
+    _warn_node_balance(liquids, mesh, node_map, hydrology=hydrology)
     return kinds, liquids
 
 

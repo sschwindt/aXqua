@@ -77,8 +77,10 @@ _NUM = r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[dDeE][-+]?\d+)?"
 _RE_VOLUME = re.compile(rf"\s*VOLUME IN THE DOMAIN\s*:\s*(?P<value>{_NUM})", re.IGNORECASE)
 _RE_FLUX = re.compile(
     rf"\s*FLUX BOUNDARY\s+(?P<index>\d+)\s*:\s*(?P<value>{_NUM})", re.IGNORECASE)
+# TELEMAC-2D prints the error of a block relative to the volume in the domain, and
+# absolute while that volume is zero (a dry start before the rain has wetted anything)
 _RE_ERROR = re.compile(
-    rf"\s*RELATIVE ERROR IN VOLUME AT T\s*=\s*(?P<time>{_NUM})\s*S\s*:\s*"
+    rf"\s*(?:RELATIVE|ABSOLUTE) ERROR IN VOLUME AT T\s*=\s*(?P<time>{_NUM})\s*S\s*:\s*"
     rf"(?P<value>{_NUM})", re.IGNORECASE)
 _RE_ITERATION = re.compile(
     r"\s*ITERATION\s+(?P<iteration>\d+)\s+TIME\b(?P<rest>.*)", re.IGNORECASE)
@@ -330,8 +332,11 @@ def read_sortie(path: str | Path) -> Sortie:
     for i, row in enumerate(flux_rows):
         for index, value in row.items():
             fluxes[i, index - 1] = value
-    # drop any block whose fluxes were not all printed (a truncated tail)
-    complete = ~np.isnan(fluxes).any(axis=1) if n_bnd else np.zeros(len(flux_rows), bool)
+    # drop any block whose fluxes were not all printed (a truncated tail). A domain
+    # without liquid boundaries (a closed catchment of the hydrology mode) prints
+    # none at all, and every block of it is complete.
+    complete = (~np.isnan(fluxes).any(axis=1) if n_bnd
+                else np.ones(len(flux_rows), bool))
     if not complete.any():
         raise ValueError(f"{path.name}: balance blocks carry no boundary fluxes; "
                          "set 'PRINTING CUMULATED FLOWRATES : YES'.")

@@ -1,0 +1,332 @@
+"""Rain series: reading measured records and building design storms.
+
+A rain series is a sequence of intervals with a constant intensity, which is how rain
+gauges, radar products and design storms all report it, and how TELEMAC applies it
+(the generated routine holds each intensity over its interval). The one thing a series
+must say, and a plain table often does not, is whether the time stamp of a row is the
+**start** or the **end** of its interval: a gauge that reports the rain of the past hour
+at 13:00 means 12:00 to 13:00. Agencies (DWD station hours, RADOLAN, Open-Meteo) stamp
+the end, so ``end`` is the default; the files aXqua writes itself carry both ends
+(``start_s, end_s, rain_mm_h``), so nothing has to be assumed for them.
+
+Design storms are built from a depth-duration table of one return period, which is what
+KOSTRA-DWD (Germany), NOAA Atlas 14 (USA) and comparable national products publish:
+
+``block``
+    one intensity for the whole duration;
+``alternating``
+    the alternating block method of Chow, Maidment and Mays (1988): the increments of
+    the depth-duration curve, largest in the middle, the others alternately right and
+    left of it;
+``euler2``
+    Euler type II, the German standard (DWA-A 118): the largest increment at 30 % of the
+    duration, the following ones in decreasing order after it, and the smallest ones in
+    increasing order before it. Every window that starts at the peak holds the depth of
+    the table for its duration, which is the property the tests check.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass, field
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+#: Design-storm distributions.
+DISTRIBUTIONS = ("euler2", "alternating", "block")
+
+#: Column names of the series aXqua writes.
+CANONICAL = ("start_s", "end_s", "rain_mm_h")
+
+
+@dataclass
+class RainSeries:
+    """Rain as intervals of constant intensity, in seconds from the model's time zero."""
+
+    start_s: np.ndarray
+    end_s: np.ndarray
+    intensity_mm_h: np.ndarray
+    origin: pd.Timestamp | None = None        # calendar time of t = 0, when known
+    notes: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.start_s = np.asarray(self.start_s, dtype=float)
+        self.end_s = np.asarray(self.end_s, dtype=float)
+        self.intensity_mm_h = np.asarray(self.intensity_mm_h, dtype=float)
+
+    @property
+    def depth_mm(self) -> np.ndarray:
+        """Rain depth of each interval [mm]."""
+        return self.intensity_mm_h * (self.end_s - self.start_s) / 3600.0
+
+    @property
+    def total_mm(self) -> float:
+        return float(self.depth_mm.sum())
+
+    @property
+    def peak_mm_h(self) -> float:
+        return float(self.intensity_mm_h.max()) if self.intensity_mm_h.size else 0.0
+
+    @property
+    def end(self) -> float:
+        """End of the last interval [s]."""
+        return float(self.end_s[-1]) if self.end_s.size else 0.0
+
+    @property
+    def last_rain(self) -> float:
+        """End of the last interval with rain [s]; 0 for a dry series."""
+        wet = np.flatnonzero(self.intensity_mm_h > 0)
+        return float(self.end_s[wet[-1]]) if wet.size else 0.0
+
+    def rate_at(self, t: float) -> float:
+        """Intensity [mm/h] in force at time *t* (zero outside the series)."""
+        k = np.searchsorted(self.start_s, t, side="right") - 1
+        if k < 0 or t >= self.end_s[k]:
+            return 0.0
+        return float(self.intensity_mm_h[k])
+
+    def to_frame(self) -> pd.DataFrame:
+        return pd.DataFrame({"start_s": self.start_s, "end_s": self.end_s,
+                             "rain_mm_h": self.intensity_mm_h})
+
+    def write(self, path: str | Path) -> Path:
+        """Write the canonical CSV (both interval ends, intensity in mm/h)."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self.to_frame().to_csv(path, index=False, float_format="%.6g")
+        return path
+
+    def problems(self) -> list[str]:
+        """What is wrong with the series, in words; empty when it is usable."""
+        out = []
+        if self.start_s.size == 0:
+            return ["the series has no rows"]
+        if np.any(self.end_s <= self.start_s):
+            out.append("an interval ends before it starts")
+        if np.any(self.start_s[1:] < self.end_s[:-1] - 1e-6):
+            out.append("intervals overlap or the times do not increase")
+        if np.any(self.intensity_mm_h < 0):
+            out.append("negative rain")
+        if not np.all(np.isfinite(self.intensity_mm_h)):
+            out.append("rain values that are not numbers")
+        return out
+
+
+def _read_table(path: Path) -> pd.DataFrame:
+    """A CSV (any separator) or Excel table; decimal commas become numbers."""
+    if path.suffix.lower() in (".xlsx", ".xls"):
+        frame = pd.read_excel(path)
+    else:
+        frame = pd.read_csv(path, comment="#", sep=None, engine="python")
+        if frame.shape[1] < 2:
+            frame = pd.read_csv(path, comment="#", sep=";", decimal=",")
+    for col in frame.columns:
+        if frame[col].dtype == object or pd.api.types.is_string_dtype(frame[col]):
+            as_is = pd.to_numeric(frame[col], errors="coerce")
+            comma = pd.to_numeric(frame[col].astype(str).str.strip()
+                                  .str.replace(",", ".", regex=False), errors="coerce")
+            if comma.notna().sum() > as_is.notna().sum():
+                frame[col] = comma
+    return frame
+
+
+def _column(frame: pd.DataFrame, *words: str, exclude: tuple = ()) -> str | None:
+    for col in frame.columns:
+        low = str(col).lower().strip()
+        if col in exclude:
+            continue
+        if any(w in low for w in words):
+            return col
+    return None
+
+
+def _seconds(values: pd.Series) -> tuple[np.ndarray, pd.Timestamp | None]:
+    """Seconds of a time column, and the calendar time of its first row if dated."""
+    numeric = pd.to_numeric(values, errors="coerce")
+    if numeric.notna().all():
+        return numeric.to_numpy(dtype=float), None
+    stamps = pd.to_datetime(values, errors="coerce", utc=False)
+    if stamps.isna().any():
+        bad = values[stamps.isna()].iloc[0]
+        raise ValueError(f"time value {bad!r} is neither seconds nor a date")
+    first = stamps.iloc[0]
+    return (stamps - first).dt.total_seconds().to_numpy(dtype=float), first
+
+
+def read_series(path: str | Path, *, units: str = "mm/h", stamp: str = "end",
+                start: str | None = None) -> RainSeries:
+    """Read a rain series from a CSV or Excel table.
+
+    The canonical file (``start_s, end_s, rain_mm_h``) is read as it is. Otherwise the
+    first time-like column (``time``, ``date``, ``datum``, ``zeit``, ``t``) gives the
+    stamps, in seconds or as dates, and the first column that looks like rain
+    (``rain``, ``precip``, ``niederschlag``, ``rr``, ``mm``) or else the last column
+    gives the values. *units* is ``mm/h`` (intensity) or ``mm`` (depth per interval);
+    *stamp* says whether a time is the ``start`` or the ``end`` of its interval.
+
+    *start*, a date and time, sets the model's time zero for a dated series; without it
+    time zero is the start of the first interval.
+    """
+    if units not in ("mm/h", "mm"):
+        raise ValueError(f"rain units must be 'mm/h' or 'mm', got {units!r}")
+    if stamp not in ("start", "end"):
+        raise ValueError(f"the time stamp must be 'start' or 'end', got {stamp!r}")
+    path = Path(path)
+    frame = _read_table(path)
+    cols = {str(c).lower().strip(): c for c in frame.columns}
+    if all(name in cols for name in CANONICAL):
+        series = RainSeries(frame[cols["start_s"]], frame[cols["end_s"]],
+                            frame[cols["rain_mm_h"]])
+        if start:
+            series.origin = pd.Timestamp(start)
+        return series
+    tcol = _column(frame, "time", "date", "datum", "zeit") or next(
+        (c for c in frame.columns if str(c).lower().strip() == "t"), None)
+    if tcol is None:
+        raise ValueError(f"{path.name}: no time column (time, date, datum, zeit or t)")
+    vcol = (_column(frame, "rain", "precip", "niederschlag", "rr", "mm", "intens",
+                    exclude=(tcol,))
+            or next(c for c in reversed(frame.columns) if c != tcol))
+    values = pd.to_numeric(frame[vcol], errors="coerce")
+    keep = values.notna()
+    frame, values = frame[keep], values[keep]
+    seconds, first = _seconds(frame[tcol].reset_index(drop=True))
+    values = values.to_numpy(dtype=float)
+    if seconds.size < 1:
+        raise ValueError(f"{path.name}: no rows with a rain value")
+    if seconds.size == 1:
+        raise ValueError(f"{path.name}: one row cannot say how long its interval is")
+    steps = np.diff(seconds)
+    if np.any(steps <= 0):
+        raise ValueError(f"{path.name}: the times do not increase")
+    if stamp == "end":
+        # the first row's interval is as long as the step that follows it
+        ends = seconds
+        starts = np.concatenate([[seconds[0] - steps[0]], seconds[:-1]])
+    else:
+        starts = seconds
+        ends = np.concatenate([seconds[1:], [seconds[-1] + steps[-1]]])
+    hours = (ends - starts) / 3600.0
+    intensity = values / hours if units == "mm" else values
+    origin = None
+    if first is not None:
+        origin = first + pd.Timedelta(seconds=float(starts[0] - seconds[0]))
+    zero = starts[0]
+    if start:
+        anchor = pd.Timestamp(start)
+        if origin is None:
+            raise ValueError("a start date needs a series with dates")
+        zero = starts[0] + (anchor - origin).total_seconds()
+        origin = anchor
+    series = RainSeries(starts - zero, ends - zero, intensity, origin=origin)
+    series.notes.append(f"read {path.name}: column {vcol!r} in {units}, time stamps at "
+                        f"the {stamp} of each interval")
+    return series
+
+
+# --------------------------------------------------------------------------- #
+# design storms
+# --------------------------------------------------------------------------- #
+
+
+def depth_at(durations_min, depths_mm, duration_min: float) -> float:
+    """Depth [mm] of a depth-duration table at *duration_min*, log-log interpolated.
+
+    Below the shortest tabulated duration the intensity of that duration is kept; above
+    the longest the depth is extrapolated along the last segment.
+    """
+    d = np.asarray(durations_min, dtype=float)
+    p = np.asarray(depths_mm, dtype=float)
+    order = np.argsort(d)
+    d, p = d[order], p[order]
+    if np.any(d <= 0) or np.any(p <= 0):
+        raise ValueError("durations and depths of the table must be positive")
+    if duration_min <= d[0]:
+        return float(p[0] * duration_min / d[0])
+    if d.size == 1:
+        return float(p[0] * duration_min / d[0])
+    ld, lp = np.log(d), np.log(p)
+    if duration_min >= d[-1]:
+        slope = (lp[-1] - lp[-2]) / (ld[-1] - ld[-2])
+        return float(math.exp(lp[-1] + slope * (math.log(duration_min) - ld[-1])))
+    return float(math.exp(np.interp(math.log(duration_min), ld, lp)))
+
+
+def design_storm(durations_min, depths_mm, *, duration_min: float, step_min: float = 5.0,
+                 distribution: str = "euler2", peak: float | None = None) -> RainSeries:
+    """A design hyetograph from a depth-duration table of one return period.
+
+    *duration_min* is the storm duration and *step_min* the block length; the table may
+    be KOSTRA-DWD, NOAA Atlas 14 or any other depth-duration-frequency product.
+    *peak* moves the largest block (0 to 1 of the duration) for ``alternating``; the
+    default is the middle, and ``euler2`` always has it at 30 %.
+    """
+    if distribution not in DISTRIBUTIONS:
+        raise ValueError(f"distribution must be one of {DISTRIBUTIONS}, got "
+                         f"{distribution!r}")
+    if step_min <= 0 or duration_min <= 0:
+        raise ValueError("the duration and the block length must be positive")
+    n = int(round(duration_min / step_min))
+    if n < 1 or abs(n * step_min - duration_min) > 1e-6 * duration_min:
+        raise ValueError(f"the duration {duration_min:g} min is not a whole number of "
+                         f"blocks of {step_min:g} min")
+    total = depth_at(durations_min, depths_mm, duration_min)
+    if distribution == "block":
+        blocks = np.full(n, total / n)
+    else:
+        cumulative = np.array([depth_at(durations_min, depths_mm, (k + 1) * step_min)
+                               for k in range(n)])
+        increments = np.diff(np.concatenate([[0.0], cumulative]))
+        # a depth-duration curve whose increments grow (a table typo) would put the
+        # largest block last; sorting keeps the shape the method describes
+        ranked = np.sort(increments)[::-1]
+        blocks = np.zeros(n)
+        if distribution == "alternating":
+            centre = int(round((0.5 if peak is None else float(peak)) * (n - 1)))
+            centre = min(max(centre, 0), n - 1)
+            positions = [centre]
+            left, right = centre - 1, centre + 1
+            toggle = True
+            while len(positions) < n:
+                if (toggle and right < n) or left < 0:
+                    positions.append(right)
+                    right += 1
+                else:
+                    positions.append(left)
+                    left -= 1
+                toggle = not toggle
+            blocks[positions] = ranked
+        else:                                   # euler2
+            m = max(1, math.ceil(0.3 * n))      # 1-based position of the peak
+            after = n - m + 1                   # peak and the blocks after it
+            blocks[m - 1:] = ranked[:after]
+            blocks[:m - 1] = np.sort(ranked[after:])
+    starts = np.arange(n) * step_min * 60.0
+    ends = starts + step_min * 60.0
+    series = RainSeries(starts, ends, blocks / (step_min / 60.0))
+    series.notes.append(f"design storm ({distribution}) of {duration_min:g} min in blocks "
+                        f"of {step_min:g} min, {total:.1f} mm")
+    return series
+
+
+def read_depth_duration(path: str | Path) -> tuple[np.ndarray, np.ndarray]:
+    """A depth-duration table: a duration column in minutes and a depth column in mm.
+
+    Columns are found by name (``dur``/``dauer``/``min`` and ``depth``/``mm``/``hn``),
+    else the first two numeric columns are taken in that order.
+    """
+    frame = _read_table(Path(path))
+    dcol = _column(frame, "dur", "dauer", "min")
+    pcol = _column(frame, "depth", "hoehe", "höhe", "hn", "mm", exclude=(dcol,))
+    if dcol is None or pcol is None:
+        numeric = frame.apply(pd.to_numeric, errors="coerce").dropna(axis=1, how="all")
+        if numeric.shape[1] < 2:
+            raise ValueError(f"{Path(path).name}: a duration and a depth column are "
+                             "needed")
+        dcol, pcol = numeric.columns[:2]
+    d = pd.to_numeric(frame[dcol], errors="coerce")
+    p = pd.to_numeric(frame[pcol], errors="coerce")
+    keep = d.notna() & p.notna()
+    return d[keep].to_numpy(dtype=float), p[keep].to_numpy(dtype=float)

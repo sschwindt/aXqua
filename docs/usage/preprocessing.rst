@@ -94,6 +94,14 @@ The plugin uses the same information to enable and disable its tabs and buttons.
 
 The final check is the first simulation itself, which shows whether inflow and outflow reach a balance (:ref:`hydraulics-dry-runs`).
 
+**The hydrology checkup.** A case in hydrology mode (:doc:`hydrology-simulations`) gets a further check, shown in the box *Hydrology checkup* of the tab *Preprocessing* and run at the start of every build, where an error stops the build:
+
+.. code-block:: text
+
+   axqua hydrology check <case-file>
+
+It reads the rain series and the weather series, checks the soil zones and their values against the texture classes of Rawls et al. (1983), and names a missing initial water content, a free outlet and the finite-element kernel. It then analyzes the terrain model. Every cell of the outline is opened as an exit and the terrain is flooded inwards from them (priority flood, Barnes et al. 2014), so that each cell drains along a path to the outline. Where a large area drains to a stretch of the outline that is a wall and not an outflow line, the outline does not follow the divide, and the water collected there would pond against the wall. The same flood fills the closed depressions of the terrain model to their spill level; the largest ones are named with their volume, because a depression keeps the rain until it is full. That is right for a pond and wrong where the terrain model blocks a culvert or the opening of a bridge.
+
 .. _preprocessing-telemac-choices:
 
 TELEMAC choices

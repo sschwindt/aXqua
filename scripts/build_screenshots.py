@@ -11,7 +11,8 @@ command when the plugin changes::
 
 The case has to be built and to have a completed steady job, so that the tabs show
 what a user sees while working: the job list with its jobs, the checkup table, the
-results. A case with the blocks ``calibration``, ``openfoam`` and ``fine_sediment``
+results. The figures of the hydrology mode need a case in that mode and are taken on
+their own: ``--only "hydrology editor,hydrology,hydrology wizard"``. A case with the blocks ``calibration``, ``openfoam`` and ``fine_sediment``
 shows those boxes filled, and the figure of the fine sediment simulation needs that
 block. The script fails, and says which figure, when a widget that a caption explains
 is not on the screen: a figure whose numbers no longer match its caption is worse than
@@ -91,6 +92,9 @@ def take_screenshots() -> None:
 
     out = Path(os.environ["AXQUA_SHOTS_OUT"])
     case = Path(os.environ["AXQUA_SHOTS_CASE"])
+    #: the figures to take, by the names of the loop at the end; empty: all of a river
+    only = {n.strip() for n in os.environ.get("AXQUA_SHOTS_ONLY", "").split(",")
+            if n.strip()}
     out.mkdir(parents=True, exist_ok=True)
     report: dict = {"figures": {}, "failed": {}}
 
@@ -214,7 +218,7 @@ def take_screenshots() -> None:
     until(lambda: dock.ctx.case_view is not None, 90)
     until(lambda: "checking" not in dock.case_tab.capability_label.text(), 120)
     dock.jobs_tab.refresh()
-    until(lambda: dock.jobs_tab.table.rowCount() > 0, 30)
+    until(lambda: dock.jobs_tab.table.rowCount() > 0, 10 if only else 30)
     wait(1500)
 
     # ---- Configuration -----------------------------------------------------------
@@ -408,6 +412,61 @@ def take_screenshots() -> None:
             sub_tab_bar("postprocessing"), page.table, page.export_button,
             page.open_button])
 
+    # ---- the hydrology mode (a case in hydrology mode: --only hydrology...) -------
+    def hydrology_editor() -> None:
+        from axqua.gui.case_editor import CaseEditor
+        read = client.case_read(case)
+        editor = CaseEditor(client, case, read.get("data") or {}, client.schema())
+        editor.resize(1180, 760)                   # the label of the switch in one piece
+        editor.show()
+        wait(300)
+        names = [editor.section_list.item(i).text()
+                 for i in range(editor.section_list.count())]
+        editor.section_list.setCurrentRow(names.index("Mesh configuration"))
+        wait(300)
+        try:
+            # the texts first: a long path in the header wraps, and its neutral
+            # replacement does not, which moves the list after it was measured
+            neutralize(editor)
+            wait(300)
+            switch = editor._switch_boxes["hydrology"][0]     # the one on the mesh page
+            page = editor.section_list.visualItemRect(
+                editor.section_list.item(names.index("Hydrology"))).translated(
+                editor.section_list.viewport().mapTo(editor, QPoint(0, 0)))
+            shot(editor, "gui-case-editor-hydrology", [
+                switch, first(editor.stack.currentWidget(), QGroupBox, "TELEMAC mesh"),
+                page])
+        finally:
+            editor.reject()
+
+    def hydrology() -> None:
+        dock.show_section("hydraulics", "hydrology")
+        page = dock.page("hydraulics", "hydrology")
+        until(lambda: page.data.summary.text().startswith("Catchment"), 60)
+        until(lambda: page.data.check_button.isEnabled(), 120)
+        wait(500)
+        inner, box = capability_box(page, "telemac", "hydrology")
+        shot(dock, "gui-hydrology", [
+            sub_tab_bar("hydraulics"), [inner.build_button, inner.submit_button],
+            page.data.summary, page.data.finding_list,
+            [page.data.wizard_button, page.data.check_button]])
+
+    def hydrology_wizard() -> None:
+        from axqua.gui.hydrology_wizard import HydrologyWizard
+        page = dock.page("hydraulics", "hydrology")
+        window = HydrologyWizard(dock.ctx, case, page.data.info)
+        window.resize(860, 1500)
+        window.show()
+        until(lambda: "<a href" in window._portal_labels[0][0].text(), 60)
+        wait(500)
+        rain = window.tabs.widget(0).widget()
+        shot(window, "gui-hydrology-wizard", [
+            window.tabs.tabBar(), window._portal_labels[0][0],
+            first(rain, QGroupBox, "A rain record"),
+            first(rain, QGroupBox, "A design storm"),
+            first(rain, QGroupBox, "A past event"), window.next_button])
+        window.close()
+
     def batch() -> None:
         dock.show_section("batch")
         page = dock.page("batch")
@@ -460,7 +519,14 @@ def take_screenshots() -> None:
                          ("mesh convergence", mesh_convergence),
                          ("fine sediment", fine_sediment),
                          ("calibration", calibration), ("postprocessing", postprocessing),
-                         ("batch", batch), ("window", window)):
+                         ("batch", batch), ("window", window),
+                         ("hydrology editor", hydrology_editor),
+                         ("hydrology", hydrology),
+                         ("hydrology wizard", hydrology_wizard)):
+        if only and name not in only:
+            continue
+        if not only and name.startswith("hydrology"):
+            continue                      # they need a case in hydrology mode
         attempt(name, action)
     report["done"] = True
     save_report()
@@ -499,6 +565,10 @@ def main(argv: list[str] | None = None) -> int:
                         help="a case file whose model is built and has a steady result")
     parser.add_argument("--out", type=Path, default=repo / "docs" / "img")
     parser.add_argument("--timeout", type=float, default=900.0)
+    parser.add_argument("--only", default="",
+                        help="the figures to take, comma-separated names of the loop of "
+                             "take_screenshots; 'hydrology editor,hydrology,hydrology "
+                             "wizard' needs a case in hydrology mode")
     args = parser.parse_args(argv)
     if not args.case.is_file():
         print(f"no such case file: {args.case}", file=sys.stderr)
@@ -507,7 +577,7 @@ def main(argv: list[str] | None = None) -> int:
     with tempfile.TemporaryDirectory(prefix="axqua-shots-") as scratch:
         env = dict(os.environ, QGIS_CUSTOM_CONFIG_PATH=scratch, QGIS_PROFILE="shots",
                    QT_QPA_PLATFORM="offscreen", AXQUA_SHOTS_CASE=str(args.case.resolve()),
-                   AXQUA_SHOTS_OUT=str(args.out.resolve()))
+                   AXQUA_SHOTS_OUT=str(args.out.resolve()), AXQUA_SHOTS_ONLY=args.only)
         report = args.out / ".gui-screenshots-run.json"
         report.unlink(missing_ok=True)
         try:

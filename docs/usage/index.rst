@@ -8,6 +8,7 @@ This section follows the order in which a model is built and used. Each subsecti
 #. :doc:`hydraulic-simulations` computes water depths and flow velocities, first with TELEMAC and optionally with OpenFOAM.
 #. :doc:`mesh-convergence` determines the mesh resolution that the results require.
 #. :doc:`morphodynamic-simulations` adds sediment transport and riverbed change.
+#. :doc:`hydrology-simulations` computes the runoff of rain over a catchment, with infiltration, wind and evaporation.
 #. :doc:`calibration-validation` adjusts uncertain parameters to field measurements and quantifies the remaining uncertainty.
 #. :doc:`postprocessing` turns the results into maps and figures.
 #. :doc:`batch-processing` runs several of these steps in sequence without supervision.
@@ -20,6 +21,7 @@ This section follows the order in which a model is built and used. Each subsecti
    hydraulic-simulations
    mesh-convergence
    morphodynamic-simulations
+   hydrology-simulations
    calibration-validation
    postprocessing
    batch-processing

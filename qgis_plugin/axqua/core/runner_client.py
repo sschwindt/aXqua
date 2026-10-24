@@ -477,6 +477,53 @@ class RunnerClient:
         the validation form of a case shows."""
         return self.call(["validation", str(case)], timeout=120).data or {}
 
+    # -- the hydrology mode ---------------------------------------------------------
+    def hydrology_info(self, case: str | os.PathLike) -> dict:
+        """``{latitude, longitude, area_m2, countries, files, ...}`` of a case."""
+        return self.call(["hydrology", "info", str(case)], timeout=120).data or {}
+
+    def hydrology_check(self, case: str | os.PathLike, *, terrain: bool = True) -> dict:
+        """``{enabled, findings}``: the hydrology checkup of a case."""
+        args = ["hydrology", "check", str(case)] + ([] if terrain else ["--no-terrain"])
+        return self.call(args, timeout=600).data or {}
+
+    def hydrology_portals(self, case: str | os.PathLike | None = None,
+                          countries: Sequence[str] = ()) -> dict:
+        """``{advice, countries, national, global}``: where the data come from."""
+        args = ["hydrology", "portals"] + ([str(case)] if case else [])
+        for code in countries:
+            args += ["--country", code]
+        return self.call(args, timeout=120).data or {}
+
+    def hydrology_textures(self) -> dict:
+        """The Green-Ampt parameters of the texture classes (Rawls et al., 1983)."""
+        return self.call(["hydrology", "textures"], timeout=60).data or {}
+
+    def hydrology_rainfall(self, case: str | os.PathLike, file: str | os.PathLike, *,
+                           units: str = "mm/h", stamp: str = "end",
+                           start: str = "") -> dict:
+        """Turn a rain record into the series of the case; ``{settings, ...}``."""
+        args = ["hydrology", "rainfall", str(case), "--file", str(file),
+                "--units", units, "--stamp", stamp] + (["--start", start] if start else [])
+        return self.call(args, timeout=120).data or {}
+
+    def hydrology_design(self, case: str | os.PathLike, *, pairs: str = "",
+                         file: str | os.PathLike | None = None, duration: float = 60.0,
+                         step: float = 5.0, distribution: str = "euler2") -> dict:
+        """A design storm from a depth-duration table; ``{settings, blocks, ...}``."""
+        args = ["hydrology", "design", str(case), "--duration", f"{duration:g}",
+                "--step", f"{step:g}", "--distribution", distribution]
+        args += ["--file", str(file)] if file else ["--pairs", pairs]
+        return self.call(args, timeout=120).data or {}
+
+    def hydrology_fetch(self, case: str | os.PathLike, what: str, **options) -> dict:
+        """Download ``event``, ``moisture``, ``soil`` or ``sealed`` for the case."""
+        args = ["hydrology", "fetch", str(case), what]
+        for name in ("start", "end", "at"):
+            if options.get(name):
+                args += [f"--{name}", str(options[name])]
+        return self.call(args, timeout=900).data or {}
+
     # -- results for ParaView and VisIt -------------------------------------------
     def export_list(self, case: str | os.PathLike) -> dict:
         """``{folder, results: [...]}``: the TELEMAC results of a case, and which of

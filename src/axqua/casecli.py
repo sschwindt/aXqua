@@ -67,16 +67,30 @@ def run_check(argv: list[str]) -> int:
         return fail("check", exc, as_json=args.as_json, verbose=args.verbose)
 
 
-def _checked(path: Path) -> dict:
+def _all_findings(path: Path) -> list:
+    """The case check, and for a case in hydrology mode the quick part of the
+    hydrology checkup (the terrain analysis is ``axqua hydrology check``'s)."""
     from axqua.core.casecheck import check_case
+    from axqua.core.diagnostics import has_errors
 
-    return {"path": str(path), "findings": [f.as_dict() for f in check_case(path)]}
+    findings = check_case(path)
+    if not has_errors(findings):
+        try:
+            from axqua.config import load_config
+            from axqua.hydrology.checks import run_checks
+
+            findings += run_checks(load_config(path), terrain=False)
+        except Exception:  # noqa: BLE001 - the case check has named what is wrong
+            pass
+    return findings
+
+
+def _checked(path: Path) -> dict:
+    return {"path": str(path), "findings": [f.as_dict() for f in _all_findings(path)]}
 
 
 def _lines(path: Path) -> list[str]:
-    from axqua.core.casecheck import check_case
-
-    return [f.line() for f in check_case(path)] or [f"{path}: no findings"]
+    return [f.line() for f in _all_findings(path)] or [f"{path}: no findings"]
 
 
 def run_case(argv: list[str]) -> int:

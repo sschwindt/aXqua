@@ -591,6 +591,10 @@ class CaseEditor(EditorDialog):
         self._adders: dict[str, QComboBox] = {}
         self._problems: dict[str, fnd.TriangleButton] = {}
         self.switches: dict[str, QCheckBox] = {}         # block -> switch
+        # every check box of a switch: the one at the top of its page and the ones a
+        # frame of another page shows (the hydrology mode on the mesh page)
+        self._switch_boxes: dict[str, list[QCheckBox]] = {}
+        self._switch_seed: dict[str, dict] = {}
         self.measurements: MeasurementTable | None = None
         self.findings: list[fnd.Finding] = []
         self._building = True
@@ -639,12 +643,7 @@ class CaseEditor(EditorDialog):
         top = QHBoxLayout()
         switch = page.get("switch") or {}
         if switch:
-            box = QCheckBox(switch.get("label") or "Use")
-            box.setChecked(page["key"] in self._base)
-            box.setStyleSheet("QCheckBox { font-weight: bold; }")
-            box.toggled.connect(lambda on, p=page: self._switched(p, on))
-            self.switches[page["key"]] = box
-            top.addWidget(box)
+            top.addWidget(self._switch_box(page["key"], switch))
         problem = fnd.TriangleButton()
         self._problems[page["key"]] = problem
         top.addWidget(problem)
@@ -658,6 +657,36 @@ class CaseEditor(EditorDialog):
         scroll.setWidget(body)
         self.stack.addWidget(scroll)
 
+    def _block_declared(self, block: str, seed: dict) -> bool:
+        """Whether the case has the block, switched on where the switch stands for
+        its ``enabled`` (the loader reads a block without it as off)."""
+        section = self._base.get(block)
+        if block not in self._base:
+            return False
+        if "enabled" in seed:
+            return isinstance(section, dict) and section.get("enabled") is True
+        return True
+
+    def _switch_box(self, block: str, switch: dict) -> QCheckBox:
+        """A check box of the switch of *block*; all of them stay in step."""
+        box = QCheckBox(switch.get("label") or "Use")
+        box.setChecked(self._block_declared(block, dict(switch.get("seed") or {})))
+        box.setStyleSheet("QCheckBox { font-weight: bold; }")
+        self._switch_seed[block] = dict(switch.get("seed") or {})
+        box.toggled.connect(lambda on, b=block: self._toggle(b, on))
+        self._switch_boxes.setdefault(block, []).append(box)
+        self.switches.setdefault(block, box)
+        return box
+
+    def _toggle(self, block: str, on: bool) -> None:
+        for other in self._switch_boxes.get(block, []):
+            if other.isChecked() != on:
+                other.blockSignals(True)
+                other.setChecked(on)
+                other.blockSignals(False)
+        self._switched({"key": block, "switch": {"seed": self._switch_seed.get(block)}},
+                       on)
+
     def _frame_id(self, page: dict, frame: dict) -> str:
         return page["key"] if not frame.get("title") else f"{page['key']}:{frame['title']}"
 
@@ -667,6 +696,9 @@ class CaseEditor(EditorDialog):
         inner = QVBoxLayout(holder)
         if not frame.get("title"):
             inner.setContentsMargins(0, 0, 0, 0)
+        if frame.get("switch"):
+            switch = dict(frame["switch"])
+            inner.addWidget(self._switch_box(switch.pop("block"), switch))
         if frame.get("info"):
             info = QHBoxLayout()
             button = QToolButton()
@@ -785,6 +817,8 @@ class CaseEditor(EditorDialog):
         block = page["key"]
         if on:
             for name, value in ((page.get("switch") or {}).get("seed") or {}).items():
+                if (self._meta(f"{block}.{name}") or {}).get("hidden"):
+                    continue                      # the switch is that setting
                 row = self.ensure_row(f"{block}.{name}")
                 if row is not None and is_unset(row.peek()):
                     if row.kind == "yaml":
@@ -808,11 +842,14 @@ class CaseEditor(EditorDialog):
         shown, the OpenFOAM lattice on the mesh page included."""
         for key, row in self.rows.items():
             block = key.split(".", 1)[0]
-            if block in self.switches:
-                on = self.switches[block].isChecked()
-                row.container.setEnabled(on)
-                if row.label_widget is not None:
-                    row.label_widget.setEnabled(on)
+            on = self.switches[block].isChecked() if block in self.switches else True
+            # a setting another switch makes pointless (the centerline of a catchment)
+            if on and any(condition_met(c, self.value_of, self.block_on)
+                          for c in row.meta.get("disabled_when") or []):
+                on = False
+            row.container.setEnabled(on)
+            if row.label_widget is not None:
+                row.label_widget.setEnabled(on)
 
     # -- what is required -----------------------------------------------------------
     def value_of(self, key: str):
@@ -833,6 +870,10 @@ class CaseEditor(EditorDialog):
         meta = self._meta(key) or {}
         block = key.split(".", 1)[0]
         if block in self.switches and not self.switches[block].isChecked():
+            return False
+        # a hydrology case needs no discharge: what an option makes unnecessary
+        if any(condition_met(c, self.value_of, self.block_on)
+               for c in meta.get("required_unless") or []):
             return False
         if meta.get("required"):
             return True
@@ -911,7 +952,22 @@ class CaseEditor(EditorDialog):
                         data.pop(block, None)
         for block, switch in self.switches.items():
             if not switch.isChecked():
-                data.pop(block, None)
+                seed = self._switch_seed.get(block, {})
+                section = data.get(block)
+                if "enabled" in seed and isinstance(section, dict) and set(section) - {
+                        "enabled"}:
+                    # switched off, not deleted: the rain and soil stay for later
+                    section["enabled"] = False
+                else:
+                    data.pop(block, None)
+                continue
+            # what the switch stands for and no row shows (hydrology.enabled)
+            for name, value in self._switch_seed.get(block, {}).items():
+                if (self._meta(f"{block}.{name}") or {}).get("hidden"):
+                    section = data.get(block)
+                    if not isinstance(section, dict):
+                        section = data[block] = {}
+                    section[name] = value
         return data
 
     @property

@@ -883,13 +883,14 @@ def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
 
 #: The tabs the user's instructions prescribe, in their order, with their sub-tabs.
 #: The user's corrections of 2026-10-16: Mesh convergence and Morphodynamic simulation
-#: moved into Simulations, whose TELEMAC sub-tab is the baseline.
+#: moved into Simulations, whose TELEMAC sub-tab is the baseline. The user's order of
+#: 2026-10-24: a sub-tab Hydrology, TELEMAC only.
 PRESCRIBED = [
     ("Configuration", []),
     ("Case Setup", []),
     ("Preprocessing", []),
     ("Simulations", ["Baseline (Telemac)", "OpenFOAM", "Mesh convergence",
-                     "Morphodynamics"]),
+                     "Morphodynamics", "Hydrology"]),
     ("Calibration & validation", []),
     ("Postprocessing", ["QGIS", "ParaView", "VisIt"]),
     ("Batch-processing", []),
@@ -911,8 +912,9 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 7 tabs, 7 sub-tabs, 3 installation wizards and the windows of the example case and of Clean Up
-    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 2
+    # 7 tabs, 8 sub-tabs, 3 installation wizards and the windows of the example case,
+    # of Clean Up and of the hydrology data wizard
+    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 8 + 3 + 3
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
@@ -924,6 +926,8 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
                                                           "help-mesh-convergence")
     assert sections.help_target("hydraulics", "morphodynamics")[0] == \
         "usage/morphodynamic-simulations"
+    assert sections.help_target("hydraulics", "hydrology") == (
+        "usage/hydrology-simulations", "help-hydrology")
 
 
 def test_a_capability_is_shown_on_the_tab_of_its_section():

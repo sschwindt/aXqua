@@ -32,6 +32,7 @@ OPTION_FIELDS = {
                          ("auto_extend", "Refine automatically until converged", "bool",
                           False)],
     "vertical-convergence": [("ncsize", "MPI processes", "int", 0)],
+    "hydrology": [("ncsize", "MPI processes", "int", 0)],
     "calibration": [("prepare_only", "Prepare only (write inputs, do not launch)",
                      "bool", False)],
     "openfoam-run": [("n_processors", "MPI ranks", "int", 0),

@@ -913,7 +913,7 @@ def test_the_panel_has_the_prescribed_tabs_and_sub_tabs(dock):
     inner = {key: [tabs.tabText(i) for i in range(tabs.count())]
              for key, tabs in dock.subtabs.items()}
     assert inner == {"hydraulics": ["Baseline (Telemac)", "OpenFOAM",
-                                    "Mesh convergence", "Morphodynamics"],
+                                    "Mesh convergence", "Morphodynamics", "Hydrology"],
                      "postprocessing": ["QGIS", "ParaView", "VisIt"]}
     # the job list is below the tabs and not one of them
     assert dock.jobs_tab.parent() is not None and dock.tabs.indexOf(dock.jobs_tab) == -1
@@ -3086,3 +3086,170 @@ def test_every_processing_algorithm_loads(qgis_app):
         assert algorithm.shortHelpString()
     names = {algorithm.name() for algorithm in provider.algorithms()}
     assert {"importresults"} <= names and len(names) == 3
+
+
+# --------------------------------------------------------------- hydrology mode
+
+
+def _hydro_field(key, kind, label, **extra):
+    field = _field(key, kind, label, True)
+    field.update({"required": extra.get("required", False),
+                  "required_when": extra.get("required_when", []),
+                  "required_unless": extra.get("required_unless", []),
+                  "disabled_when": extra.get("disabled_when", []),
+                  "hidden": extra.get("hidden", False)})
+    return field
+
+
+HYDRO_SWITCH = {"label": "Hydrology mode", "seed": {"enabled": True}}
+
+HYDRO_SCHEMA = {
+    "sections": [
+        {"block": "geodata", "title": "Geodata", "label": "case-geodata", "fields": [
+            _hydro_field("geodata.channel_centerline", "vector", "Centerline",
+                         disabled_when=[{"block": "hydrology"}])]},
+        {"block": "boundaries", "title": "Liquid boundaries", "label": "",
+         "fields": [_hydro_field("boundaries.prescribed_flowrate", "number",
+                                 "Discharge", required=True,
+                                 required_unless=[{"block": "hydrology"}])]},
+        {"block": "mesh", "title": "Mesh", "label": "", "fields": [
+            _hydro_field("mesh.default_size", "number", "Edge length")]},
+        {"block": "hydrology", "title": "Hydrology", "label": "", "fields": [
+            _hydro_field("hydrology.enabled", "bool", "Enabled", hidden=True),
+            _hydro_field("hydrology.rainfall", "table", "Rain series",
+                         required_when=[{"block": "hydrology"}])]},
+    ],
+    "pages": [
+        {"key": "geodata", "title": "Geodata", "label": "", "switch": {},
+         "frames": [{"title": "", "info": "", "keys": ["geodata.channel_centerline"]}]},
+        {"key": "boundaries", "title": "Liquid boundaries", "label": "", "switch": {},
+         "frames": [{"title": "", "info": "",
+                     "keys": ["boundaries.prescribed_flowrate"]}]},
+        {"key": "mesh", "title": "Mesh configuration", "label": "", "switch": {},
+         "frames": [{"title": "TELEMAC mesh", "info": "", "keys": ["mesh.default_size"],
+                     "switch": {"block": "hydrology", **HYDRO_SWITCH}}]},
+        {"key": "hydrology", "title": "Hydrology", "label": "", "switch": HYDRO_SWITCH,
+         "frames": [{"title": "Rain", "info": "", "keys": ["hydrology.rainfall"]}]},
+    ],
+}
+
+
+def test_hydrology_mode_is_one_switch_on_the_mesh_page_and_on_its_own(
+        qgis_app, tmp_path, monkeypatch):
+    """The user's words: "a check-button for Hydrology-mode must also be integrated in
+    mesh generation"; the mode needs no discharge and no centerline."""
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    case = {"geodata": {"channel_centerline": "cl.gpkg"},
+            "boundaries": {"prescribed_flowrate": None}, "mesh": {"default_size": 5.0}}
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "c.axq-case", case,
+                                    HYDRO_SCHEMA)
+    boxes = editor._switch_boxes["hydrology"]
+    assert len(boxes) == 2 and not any(box.isChecked() for box in boxes)
+    rows = editor.rows
+    assert "hydrology.enabled" not in rows                    # the switch stands for it
+    assert _purple(rows["boundaries.prescribed_flowrate"].label_widget)
+    assert rows["geodata.channel_centerline"].container.isEnabled()
+
+    boxes[0].setChecked(True)                                 # on the mesh page
+    assert boxes[1].isChecked()                               # the page switch follows
+    assert not _purple(rows["boundaries.prescribed_flowrate"].label_widget)
+    assert not rows["geodata.channel_centerline"].container.isEnabled()
+    assert _purple(rows["hydrology.rainfall"].label_widget)
+    assert editor.values()["hydrology"] == {"enabled": True}
+
+    rows["hydrology.rainfall"].widget.setText("user-sources/hydrology/rain.csv")
+    boxes[1].setChecked(False)                                # off on its own page
+    assert not boxes[0].isChecked()
+    # switched off, not deleted: the rain stays for later
+    assert editor.values()["hydrology"] == {
+        "enabled": False, "rainfall": "user-sources/hydrology/rain.csv"}
+    editor.deleteLater()
+
+
+def test_a_block_without_enabled_true_opens_switched_off(qgis_app, tmp_path,
+                                                        monkeypatch):
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    case = {"hydrology": {"rainfall": "rain.csv"}}           # the loader reads it as off
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "c.axq-case", case,
+                                    HYDRO_SCHEMA)
+    assert not editor.switches["hydrology"].isChecked()
+    editor.deleteLater()
+
+
+class _HydroClient:
+    def __init__(self):
+        self.written = []
+
+    def hydrology_portals(self, case=None, countries=()):
+        return {"advice": "ask the agency",
+                "national": [{"name": "DWD RADOLAN", "url": "https://dwd.example",
+                              "offers": ["rain"], "note": "", "country_name": "Germany",
+                              "country": "DE"}],
+                "global": [{"name": "SoilGrids", "url": "https://soilgrids.example",
+                            "offers": ["soil"], "note": "250 m"},
+                           {"name": "Open-Meteo", "url": "https://om.example",
+                            "offers": ["rain", "weather"], "note": "ERA5"}]}
+
+    def hydrology_textures(self):
+        return {"textures": [{"texture": "loam", "ks_mm_h": 3.4, "suction_m": 0.0889,
+                              "theta_s": 0.463}]}
+
+    def hydrology_info(self, case):
+        return {"latitude": 47.8, "longitude": 11.7, "area_m2": 3.0e6,
+                "countries": ["DE"], "files": {}, "outlet_condition": "normal_depth"}
+
+    def hydrology_fetch(self, case, what, **options):
+        return {"settings": {"hydrology.rainfall": "user-sources/hydrology/rainfall.csv",
+                             "hydrology.weather": "user-sources/hydrology/weather.csv"},
+                "weather": "user-sources/hydrology/weather.csv",
+                "caution": "Reanalysis underestimates short rain intensities."}
+
+    def case_read(self, case):
+        return {"data": {"project": {"name": "c"}, "hydrology": {"enabled": False}}}
+
+    def case_write(self, case, data):
+        self.written.append(data)
+        return {"findings": []}
+
+
+def test_the_data_wizard_lists_the_agency_first_and_saves_what_was_chosen(
+        qgis_app, tmp_path, monkeypatch):
+    from axqua_plugin.gui import hydrology_wizard
+
+    monkeypatch.setattr(hydrology_wizard, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _HydroClient()
+
+    class _Ctx:
+        pass
+
+    ctx = _Ctx()
+    ctx.client = client
+    wizard = hydrology_wizard.HydrologyWizard(ctx, tmp_path / "c.axq-case")
+    assert [wizard.tabs.tabText(i) for i in range(wizard.tabs.count())] == [
+        "Rain", "Soil", "Initial moisture", "Wind and sun", "Outlet", "Save"]
+    rain_links = next(label.text() for label, offers in wizard._portal_labels
+                      if offers == "rain")
+    assert rain_links.index("DWD RADOLAN") < rain_links.index("Open-Meteo")
+    assert "SoilGrids" not in rain_links
+    assert "countries DE" in wizard.where.text()
+    wizard.fetch_event()
+    assert "Reanalysis" in wizard.status.text()
+    wizard.texture.setCurrentIndex(wizard.texture.findData("loam"))
+    assert "3.4 mm/h" in wizard.texture_values.text()
+    wizard.save()
+    written = client.written[-1]
+    assert written["hydrology"]["enabled"] is True
+    assert written["hydrology"]["rainfall"] == "user-sources/hydrology/rainfall.csv"
+    assert written["project"] == {"name": "c"}               # the rest is kept
+    assert wizard.saved
+    wizard.deleteLater()

@@ -271,6 +271,8 @@ The default values produce a fine mesh. A reach of 0.3 km² then has several hun
 
 Without mesh zones and a centerline, aXqua creates a mesh of uniform resolution (``default_size``).
 
+**Hydrology mode.** The check box *Hydrology mode* at the top of the frame *TELEMAC mesh* switches the case to rainfall-runoff over a catchment (:ref:`case-hydrology`). A catchment has no channel to align cells with, so the mesh then consists of near-equal triangles everywhere: the edge length of each mesh zone applies isotropically, ``default_size`` applies outside the zones, and streams drawn as ``geodata.breaklines`` are refined to ``breakline_size``. Between zones the edge length grows by at most ``growth_ratio`` per triangle. The channel centerline is not used and is grayed out.
+
 **OpenFOAM lattice.** The OpenFOAM model is built on a lattice of columns in plan with layers in the vertical (:ref:`preprocessing-openfoam-choices`). Its resolution is set on the same page of the case settings, in the frame *OpenFOAM lattice*. With ``openfoam.cell_size_factor``, the cell size of the lattice follows the edge length in the channel: 3 makes the lattice three times coarser than the TELEMAC mesh, so that a change of the TELEMAC mesh carries over. Without the factor, ``openfoam.cell_size`` is used as it is. ``openfoam.n_layers`` is the number of layers in the vertical.
 
 .. _case-roughness:
@@ -318,6 +320,33 @@ The ``hydrodynamics`` block controls the hydraulic simulation with TELEMAC. Most
 With ``turbulence_model: auto``, aXqua selects the turbulence model from the mesh resolution relative to the water depth. The time step is adapted automatically during the run, so that the simulation remains stable (``desired_courant``).
 
 The number of processor cores is a property of the computer and is set in its profile (``mpi_processes``, :ref:`solver-bindings`). Where the profile names no number, ``telemac.n_processors`` of the case file applies. The settings of the 3D simulation with OpenFOAM are described in :ref:`preprocessing-openfoam-choices`.
+
+.. _case-hydrology:
+
+Hydrology
+---------
+
+The page *Hydrology* of the case settings describes a rainfall-runoff simulation over a catchment with TELEMAC (:doc:`hydrology-simulations`). Its switch at the top, which is the same as the check box *Hydrology mode* on the page *Mesh configuration*, writes the block ``hydrology``:
+
+.. code-block:: yaml
+
+   hydrology:
+     enabled: true
+     rainfall: user-sources/hydrology/rainfall.csv   # time and rain
+     rainfall_units: mm/h                             # or mm per interval
+     rainfall_stamp: end                              # a time stamp ends its interval
+     infiltration: green-ampt
+     green_ampt: sadeghi                              # de Vos et al. (2024)
+     soil_zones: user-sources/hydrology/soil-zones.gpkg
+     soil_table: user-sources/hydrology/soil-table.csv
+     initial_water_content: 0.25                      # [m3/m3] at the start
+     weather: user-sources/hydrology/weather.csv
+     wind: true
+     evaporation: et0                                 # FAO-56 reference times 1.05
+     outlet_condition: normal_depth
+     drain_time: 3600                                 # [s] after the last rain
+
+In hydrology mode, the case needs no discharge and no inflow line: the rain drives it, and the outflow lines of the page *Liquid boundaries* are where the water leaves. Without any outflow line the catchment is closed and keeps its rain. The page has four frames: *Rain*, *Infiltration (Green-Ampt)*, *Wind and sun*, and *Outlet and run*, each with a button that explains it. The data wizard on the sub-tab *Simulations > Hydrology* writes the files and these entries (:ref:`the data wizard <help-hydrology-wizard>`).
 
 .. _case-morphodynamics:
 

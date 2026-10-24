@@ -106,8 +106,8 @@ def load_hydrograph(cfg: Config) -> hydraulics.Inflow:
 
 def _outflow_wse_fn(cfg: Config):
     """Callable Q -> downstream WSE matching the outflow condition (None if free)."""
-    cond = cfg.boundaries.outflow_condition
-    if cond == "free":
+    cond = cfg.outflow_condition
+    if cond in ("free", "normal_depth"):
         return None
     if cond == "elevation":
         wse = float(cfg.boundaries.prescribed_elevation)

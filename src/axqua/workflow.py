@@ -108,7 +108,15 @@ def prepare_steady_inputs(cfg: Config, discharge: float | None = None, *,
     *prewet_depth* defaults to the sentinel "leave it as the config has it"; pass a
     float (or None) to set ``initialization.prewet_depth`` - the mesh-convergence study
     hotstarts the channel this way, the dry-start initial run leaves it untouched.
+
+    A hydrology case (``hydrology.enabled``) is driven by its rain and has no steady
+    discharge: nothing is prescribed or synthesized, and the discharge of an inflow
+    line, if the case gives one, is returned (else 0).
     """
+    hydrology = getattr(cfg, "hydrology", None)
+    if hydrology is not None and hydrology.enabled:
+        q = discharge if discharge is not None else cfg.boundaries.prescribed_flowrate
+        return float(q) if q is not None else 0.0
     q = resolve_discharge(cfg, discharge)
     cfg.boundaries.prescribed_flowrate = q
     if prewet_depth is not _UNSET:

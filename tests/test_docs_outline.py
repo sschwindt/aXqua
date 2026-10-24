@@ -38,7 +38,7 @@ OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
         ("aXqua case setup", "case-setup",
          ["Project settings", "Geodata", "Liquid boundaries", "Initial conditions",
           "Mesh configuration", "Wall roughness", "Hydraulic simulation",
-          "Morphodynamic simulation"]),
+          "Hydrology", "Morphodynamic simulation"]),
         ("Preprocessing", "preprocessing",
          ["aXqua workflow", "Meshing", "Pre-processing checkup", "TELEMAC choices",
           "OpenFOAM choices"]),
@@ -49,6 +49,10 @@ OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
          ["Mesh study setup", "Run mesh convergence study", "Study report"]),
         ("Morphodynamic simulations", "morphodynamic-simulations",
          ["Concept", "TELEMAC-GAIA Setup", "OpenFOAM Setup"]),
+        # the hydrology mode, the user's order of 2026-10-24
+        ("Hydrology simulations", "hydrology-simulations",
+         ["Concept", "Data setup", "Wind and evaporation", "Boundaries and outlet",
+          "Run and results"]),
         ("Calibration & validation", "calibration-validation",
          ["Introduction to Bayesian calibration", "Ground truth data setup",
           "Bayesian calibration & validation setup", "Run HydroBayesCal",
@@ -77,7 +81,8 @@ HELP_LABELS = [
     "help-mesh-convergence", "help-morphodynamics", "help-morphodynamics-telemac",
     "help-morphodynamics-openfoam", "help-calibration", "help-postprocessing",
     "help-postprocessing-qgis", "help-postprocessing-paraview",
-    "help-postprocessing-visit", "help-batch",
+    "help-postprocessing-visit", "help-batch", "help-hydrology",
+    "help-hydrology-wizard",
 ]
 
 
@@ -191,6 +196,8 @@ SCREENSHOTS = {
     "usage/postprocessing": ["gui-postprocessing-qgis", "gui-map-streamlines",
                              "gui-postprocessing-paraview"],
     "usage/batch-processing": ["gui-batch"],
+    "usage/hydrology-simulations": ["gui-case-editor-hydrology", "gui-hydrology-wizard",
+                                    "gui-hydrology"],
 }
 
 

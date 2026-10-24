@@ -196,6 +196,7 @@ def write_geometry(
     *,
     friction_id: np.ndarray | None = None,
     roughness: np.ndarray | None = None,
+    extra: Sequence[tuple[str, str, np.ndarray]] = (),
     title: str = "axqua geometry",
     date: Sequence[int] = (2026, 1, 1, 0, 0, 0),
     double_precision: bool = True,
@@ -226,6 +227,9 @@ def write_geometry(
     bottom : (NPOIN,) float array of bed elevations (m).
     friction_id : optional (NPOIN,) int array of friction-zone ids per node.
     roughness : optional (NPOIN,) float array of per-node roughness values.
+    extra : further ``(name, unit, values)`` node variables, written after the others;
+        TELEMAC reads them as private variables by their names (the soil fields of a
+        hydrology case).
     """
     bottom = np.asarray(bottom, dtype=float)
     variables = [("BOTTOM", "M", bottom)]
@@ -233,6 +237,8 @@ def write_geometry(
         variables.append(("FRIC_ID", "", np.asarray(friction_id, dtype=float)))
     if roughness is not None:
         variables.append(("BOTTOM FRICTION", "M", np.asarray(roughness, dtype=float)))
+    for name, unit, values in extra:
+        variables.append((name, unit, np.asarray(values, dtype=float)))
     return _write_selafin(Path(path), x, y, ikle, ipobo, variables,
                           title=title, date=date, double_precision=double_precision)
 

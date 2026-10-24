@@ -145,6 +145,7 @@ class JobKind(str, Enum):
     STEADY_RUN_3D = "steady-3d"
     VERTICAL_CONVERGENCE = "vertical-convergence"
     UNSTEADY_RUN = "unsteady"
+    HYDROLOGY_RUN = "hydrology"
     OPENFOAM_BUILD = "openfoam-build"
     OPENFOAM_RUN = "openfoam-run"
     OPENFOAM_SEDIMENT_BUILD = "openfoam-sediment-build"
@@ -170,6 +171,7 @@ def parse_kind(value: str) -> JobKind:
                "steady3d": JobKind.STEADY_RUN_3D, "vertconv": JobKind.VERTICAL_CONVERGENCE,
                "bal": JobKind.CALIBRATION, "balmf": JobKind.CALIBRATION_MULTIFLOW,
                "val": JobKind.VALIDATION,
+               "rainfall-runoff": JobKind.HYDROLOGY_RUN, "hydro": JobKind.HYDROLOGY_RUN,
                "of-build": JobKind.OPENFOAM_BUILD, "of-run": JobKind.OPENFOAM_RUN,
                "fine-sediment-build": JobKind.OPENFOAM_SEDIMENT_BUILD,
                "fine-sediment": JobKind.OPENFOAM_SEDIMENT_RUN,
@@ -323,6 +325,13 @@ class UnsteadyOptions(Options):
     gaia_bedload: bool = True
     gaia_suspended: bool = False
     run: bool = True
+    ncsize: int | None = None
+
+
+@dataclass
+class HydrologyOptions(Options):
+    """The hydrology run (rainfall-runoff) of a case in hydrology mode."""
+
     ncsize: int | None = None
 
 
@@ -576,6 +585,9 @@ KIND_META: dict[JobKind, KindMeta] = {
     JobKind.UNSTEADY_RUN: KindMeta(
         JobKind.UNSTEADY_RUN, "unsteady", "telemac", "Unsteady (hydrograph) run",
         Capability.UNSTEADY2D, "run", UnsteadyOptions, SolverRunProgress, "case", True),
+    JobKind.HYDROLOGY_RUN: KindMeta(
+        JobKind.HYDROLOGY_RUN, "hydro", "telemac", "Hydrology (rainfall-runoff) run",
+        Capability.HYDROLOGY, "run", HydrologyOptions, SolverRunProgress, "case", True),
     JobKind.OPENFOAM_BUILD: KindMeta(
         JobKind.OPENFOAM_BUILD, "ofbuild", "openfoam", "Build the OpenFOAM case",
         Capability.FREE_SURFACE_3D, "build", OpenFoamBuildOptions, OpenFoamBuildProgress,

@@ -67,6 +67,7 @@ class TelemacBackend(BaseBackend):
             return self._build_unsteady(cfg, ctx=ctx, **kwargs)
         if capability in (Capability.STEADY3D,):
             return self._build_3d(cfg, ctx=ctx, **kwargs)
+        # a hydrology case is built by the same pipeline (it knows the mode)
         return self._build_case(cfg, ctx=ctx, **kwargs)
 
     def _build_case(self, cfg, *, ctx: Any = None, discharge: float | None = None,
@@ -82,7 +83,8 @@ class TelemacBackend(BaseBackend):
         artifacts = pipeline.run(cfg, validate_env=validate_env, dry_run=dry_run,
                                  log_to_file=False)
         if ctx is not None:
-            for name in ("geometry_slf", "boundary_cli", "cas_file", "friction_tbl"):
+            for name in ("geometry_slf", "boundary_cli", "cas_file", "friction_tbl",
+                         "hydrology_cas"):
                 path = getattr(artifacts, name, None)
                 if path:
                     ctx.record(Path(path).name, path, kind="file")
@@ -114,7 +116,20 @@ class TelemacBackend(BaseBackend):
             return self._run_3d(cfg, ctx=ctx, **kwargs)
         if capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D):
             return self._run_unsteady(cfg, ctx=ctx, **kwargs)
+        if capability is Capability.HYDROLOGY:
+            return self._run_hydrology(cfg, ctx=ctx, **kwargs)
         return self._run_steady(cfg, ctx=ctx, **kwargs)
+
+    def _run_hydrology(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
+                       **_ignored):
+        if not cfg.hydrology.enabled:
+            raise errors.ConfigError(
+                "the case is not in hydrology mode", subject="hydrology.enabled",
+                remedy="Switch the hydrology mode on in the case settings and build "
+                       "the case again.")
+        return self._launch(cfg, ctx=ctx, cas_file=cfg.hydrology_cas_file,
+                            ncsize=ncsize, solver=None, name="telemac-hydrology",
+                            duration=_cas_duration(cfg, cfg.hydrology_cas_file))
 
     def _run_steady(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
                     cas_file: str | None = None, **_ignored):
@@ -395,6 +410,10 @@ class TelemacBackend(BaseBackend):
         """
         from axqua.jobs.model import JobKind
         kind = getattr(getattr(ctx, "spec", None), "kind", None)
+        if kind is JobKind.HYDROLOGY_RUN:
+            return self._hydrology_report(cfg, ctx)
+        if getattr(cfg, "hydrology", None) is not None and cfg.hydrology.enabled:
+            return None             # a catchment has no steady flux balance to judge
         if kind not in (JobKind.STEADY_RUN, JobKind.UNSTEADY_RUN, JobKind.PREPROCESSING):
             return None
         if not any(Path(cfg.model_dir).glob("*.sortie")):
@@ -410,6 +429,21 @@ class TelemacBackend(BaseBackend):
                            if name.endswith(".png") else "table")
         self._wetting_reports(cfg, ctx)
         return fc
+
+    @staticmethod
+    def _hydrology_report(cfg, ctx: Any):
+        """Outlet hydrograph and water balance of a hydrology run."""
+        from axqua.hydrology import report
+
+        result = report.analyze(cfg)
+        if ctx is not None:
+            folder = Path(cfg.postprocessing_dir) / "hydrology"
+            ctx.record("Outlet hydrograph", folder / "hydrograph.png", kind="figure")
+            ctx.record("Outlet hydrograph (table)", folder / "hydrograph.csv",
+                       kind="table")
+            ctx.record("Water balance", folder / "water-balance.csv", kind="table")
+            ctx.progress(flux_imbalance=result.relative_error)
+        return result
 
     @staticmethod
     def _wetting_reports(cfg, ctx: Any) -> None:
@@ -471,6 +505,8 @@ class TelemacBackend(BaseBackend):
              "SCALAR VELOCITY"),
             (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
              "SCALAR VELOCITY"),
+            (getattr(cfg, "results_hydrology_slf", None), "TELEMAC result (hydrology)",
+             "SCALAR VELOCITY"),
             (getattr(cfg, "results2d_from_3d_slf", None),
              "TELEMAC-3D result (depth-averaged)", "VELOCITY"),
             (threed.HYDROSTATIC_RESULT_2D,
@@ -510,6 +546,15 @@ class TelemacBackend(BaseBackend):
                 ctx.record(f"{label} (3D file, not a map layer)", cfg.model_path(name),
                            kind="file")
 
+        hydrology = cfg.model_path(getattr(cfg, "results_hydrology_slf", "r2d-hydrology.slf"))
+        if hydrology.exists():
+            ctx.record("TELEMAC result (hydrology) - infiltrated depth", hydrology,
+                       kind="mesh", variable="INFILTRATED")
+            # TELEMAC's maxima over the run (MAXZ, MAXV in the printouts)
+            ctx.record("TELEMAC result (hydrology) - high water mark", hydrology,
+                       kind="mesh", variable="HIGH WATER MARK")
+            ctx.record("TELEMAC result (hydrology) - highest velocity", hydrology,
+                       kind="mesh", style=STYLE_VELOCITY, variable="HIGHEST VELOCITY")
         ctx.record("Mesh geometry", cfg.model_path(cfg.geometry_slf), kind="mesh")
         for name, kind in (("mesh-convergence.xlsx", "table"),
                            ("vertical-convergence.xlsx", "table")):
@@ -521,6 +566,22 @@ class TelemacBackend(BaseBackend):
 
 
 BACKEND = TelemacBackend()
+
+
+def _cas_duration(cfg, cas_name: str) -> float | None:
+    """The ``DURATION`` of a 2D steering file, for the progress bar."""
+    try:
+        text = cfg.model_path(cas_name).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    for line in text.splitlines():
+        key, sep, value = line.partition(":")
+        if sep and key.strip().upper() == "DURATION":
+            try:
+                return float(value.strip())
+            except ValueError:
+                return None
+    return None
 
 
 def _level_progress(ctx: Any):

@@ -16,7 +16,7 @@ major version and is the most common reason a plugin loads on one QGIS and not t
 
 **The tabs are fixed** (`gui/sections.py`, pure data): Configuration, Case Setup,
 Preprocessing, Simulations [Baseline (Telemac) | OpenFOAM | Mesh convergence |
-Morphodynamics], Calibration & validation, Postprocessing [QGIS | ParaView | VisIt],
+Morphodynamics | Hydrology], Calibration & validation, Postprocessing [QGIS | ParaView | VisIt],
 Batch-processing - the user's corrections of 2026-10-16 merged the former tabs Hydraulic
 simulation, Mesh convergence and Morphodynamic simulation into *Simulations* (key
 `hydraulics`, kept so that labels and placements did not move) and renamed its TELEMAC
@@ -255,3 +255,5 @@ The plugin folder and the library are both called `axqua`, which is right in bot
 places but means they cannot share a pytest process - `qgis_plugin/tests/conftest.py` loads
 the plugin under the alias `axqua_plugin` so one `pytest` at the repo root runs both
 suites.
+
+**Hydrology** (the user's order of 2026-10-24; library side in the root notes). The sub-tab *Simulations > Hydrology* is a `gui/hydrology_box.HydrologyPage`: the capability box (kind `hydrology`, build `preprocessing`) and below it *Hydrology data* (summary of `axqua hydrology info`, the findings of `axqua hydrology check`, *Data wizard...*, *Check*). The same `HydrologyDataBox` titled *Hydrology checkup* sits on the Preprocessing tab in hydrology mode, whose Build is enabled by STEADY2D **or** HYDROLOGY being configured. `gui/hydrology_wizard.py` is one window with tabs Rain, Soil, Initial moisture, Wind and sun, Outlet, Save: each tab lists the national portals first, every route is an `axqua hydrology` call whose answer carries `settings` (dotted keys), and *Save* merges them through `case read`/`case write` with `hydrology.enabled: true`. **The case editor**: `SWITCHES["hydrology"]` (seed `enabled: true`) is the page switch of *Hydrology* and, mirrored through `schema_meta.FRAME_SWITCHES`, a check box at the top of the frame *TELEMAC mesh* (`_switch_box`/`_toggle` keep all boxes of a block in step); `hydrology.enabled` itself is `HIDDEN` (no row; `values()` writes it), and switching the mode off keeps the block with `enabled: false` instead of deleting the rain and soil. `required_unless` (schema) drops the requirement of the discharge, the outflow lines and the outflow level in the mode; `disabled_when` grays out the centerline, the channel anisotropy and the pre-wet depth.

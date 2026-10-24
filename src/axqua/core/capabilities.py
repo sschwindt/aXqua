@@ -75,6 +75,7 @@ class Capability(str, Enum):
     MESH_CONVERGENCE = "mesh_convergence"    # horizontal grid independence
     VERTICAL_CONVERGENCE = "vertical_convergence"
     GAIN_LOSE = "gain_lose"                  # losing/gaining reach exchange
+    HYDROLOGY = "hydrology"                  # rainfall-runoff over a catchment
 
     def __str__(self) -> str:                # so f-strings render the value
         return self.value
@@ -100,6 +101,7 @@ CAPABILITY_ORDER: tuple[Capability, ...] = (
     Capability.FREE_SURFACE_3D,
     Capability.MORPHODYNAMICS,
     Capability.GAIN_LOSE,
+    Capability.HYDROLOGY,
     Capability.MESH_CONVERGENCE,
     Capability.VERTICAL_CONVERGENCE,
     Capability.CALIBRATION,

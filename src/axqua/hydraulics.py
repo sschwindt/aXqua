@@ -191,13 +191,19 @@ def resolve_outflow_wse(cfg, inflow_q: float) -> float:
     ``stage_discharge`` (default) reads the rating curve and interpolates the WSE
     at the simulated discharge; ``elevation`` uses the fixed prescribed value.
     """
-    cond = cfg.boundaries.outflow_condition
+    cond = cfg.outflow_condition
     if cond == "elevation":
         if cfg.boundaries.prescribed_elevation is None:
             raise ValueError(
                 "outflow_condition: elevation needs boundaries.prescribed_elevation"
             )
         return float(cfg.boundaries.prescribed_elevation)
+    if cond == "normal_depth":
+        # the outlet of a hydrology case on TELEMAC's stage-discharge curve: the level
+        # of the curve at the discharge, the starting value TELEMAC then updates
+        from axqua.solvers.telemac.hydrology import outlet_rating_csv
+
+        return read_stage_discharge(outlet_rating_csv(cfg))(inflow_q)
     # stage_discharge: look up the rating curve at the simulated Q
     if cfg.boundaries.stage_discharge is None:
         raise ValueError(

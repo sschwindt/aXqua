@@ -39,6 +39,7 @@ calibration capability and its `study` verb, told apart by its option record.
 `OPENFOAM_SEDIMENT_BUILD` and `OPENFOAM_SEDIMENT_RUN` have no script either: they are
 the `build` and `run` verbs of the OpenFOAM backend for `Capability.MORPHODYNAMICS`,
 which there is fine sediment over a fixed bed (`solvers/openfoam/sediment.py`).
+`HYDROLOGY_RUN` (`hydrology`) runs the rainfall-runoff case of a case in hydrology mode (`hydrology2d.cas`, the ordinary build writes it; options `ncsize`), postprocessed into the outlet hydrograph and the water balance (`axqua/hydrology/report.py`).
 `gain_lose` and TELEMAC's `morphodynamics` are **not**
 kinds - they are config switches folded into the steady/unsteady kinds. Options refuse an
 unknown key (plan §5: never silently ignore a field, or a job that *looks* submitted

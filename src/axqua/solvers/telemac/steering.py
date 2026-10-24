@@ -64,13 +64,21 @@ def _coerce_turbulence_model(value) -> int | None:
 
 def _turbulence_length_scale(cfg: Config) -> float:
     """Turbulence integral length scale [m] - the flow depth proxy: the explicit
-    override, else the pre-wet depth, else 1 m."""
+    override, else the pre-wet depth, else 0.1 m for the overland flow of a hydrology
+    case, else 1 m."""
     h = cfg.hydrodynamics
     if h.turbulence_length_scale is not None:
         return float(h.turbulence_length_scale)
     if cfg.initialization.prewet_depth is not None:
         return float(cfg.initialization.prewet_depth)
+    if _hydrology(cfg):
+        return 0.1
     return 1.0
+
+
+def _hydrology(cfg: Config) -> bool:
+    hydrology = getattr(cfg, "hydrology", None)
+    return bool(hydrology is not None and hydrology.enabled)
 
 
 def eddy_viscosity_estimate(cfg: Config) -> float:
@@ -136,6 +144,11 @@ def select_turbulence_model(cfg: Config, mesh=None) -> tuple[int, str]:
     explicit = _coerce_turbulence_model(cfg.hydrodynamics.turbulence_model)
     if explicit is not None:
         return explicit, f"configured explicitly: {TURB_NAMES.get(explicit, explicit)}"
+    if _hydrology(cfg):
+        # overland flow a few centimeters deep on cells of meters resolves no
+        # turbulence length scale; a transport model would only add a stiff solve
+        return 1, ("hydrology mode: constant eddy viscosity for overland flow, whose "
+                   "depth is far below the cell size")
     return turbulence_pick_for_dx(cfg, _channel_cell_size(cfg, mesh))
 
 
@@ -804,7 +817,7 @@ def _prescribed_arrays(cfg: Config, liquids: list[LiquidBoundary],
     inflow stays *inflow_q* - prescribing the full Q on each would multiply the
     supplied discharge and flood the domain.
     """
-    free_outflow = cfg.boundaries.outflow_condition == "free"
+    free_outflow = cfg.outflow_condition == "free"
     inflows = [b for b in liquids if b.kind == "inflow"]
     per_line = bool(inflows) and all(b.discharge is not None for b in inflows)
     inflow_nodes = sum(b.n_nodes for b in inflows) or 1
@@ -835,7 +848,10 @@ def write_liquid_boundaries(cfg: Config, liquids: list[LiquidBoundary],
     """
     import numpy as np
 
-    free_outflow = cfg.boundaries.outflow_condition == "free"
+    # a level comes from the file only where the outflow prescribes one that the file
+    # can give: not for a free outflow, and not for a hydrology outlet on TELEMAC's
+    # stage-discharge curve, whose level TELEMAC takes from the curve itself
+    free_outflow = cfg.outflow_condition in ("free", "normal_depth")
     ordered = sorted(liquids, key=lambda b: b.index)
     inflows = [b for b in ordered if b.kind == "inflow"]
     per_line = bool(inflows) and all(b.discharge is not None for b in inflows)
@@ -919,7 +935,12 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
               n_distributive_corrections: int | None = None,
               sections_input: str | None = None, sections_output: str | None = None,
               hotstart_note: str | None = None,
-              source_regions: "list | None" = None) -> Path:
+              source_regions: "list | None" = None,
+              extra_block: list[str] | None = None,
+              printouts: str | None = None,
+              printout_periods: tuple[int, int] | None = None,
+              regime_label: str | None = None,
+              finite_volumes: bool | None = None) -> Path:
     """Write a TELEMAC-2D steering (.cas) file.
 
     The default (``unsteady=False``, ``out_name=None``) writes the **steady** initial
@@ -950,17 +971,24 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
     the file written by :func:`write_source_regions`, or, in ``percolation.mode:
     fortran``, as the FORTRAN FILE + RAIN keywords for the generated USER_RAIN
     routine (see :mod:`axqua.solvers.telemac.fortran`).
+
+    *extra_block* lines are added before the user overrides (the keywords of a
+    hydrology run, :mod:`axqua.solvers.telemac.hydrology`); *printouts* replaces the
+    graphic printout variables, *printout_periods* the graphic and listing periods in
+    steps, and *regime_label* the regime named in the title. *finite_volumes*
+    overrides ``hydrodynamics.finite_volumes`` (a hydrology run chooses its kernel).
     """
     h = cfg.hydrodynamics
+    fv = h.finite_volumes if finite_volumes is None else bool(finite_volumes)
     flow, elev, prof = _prescribed_arrays(cfg, liquids, inflow_q, outflow_wse)
     n_liquid = len(liquids)
-    regime = "unsteady" if unsteady else "steady"
+    regime = regime_label or ("unsteady" if unsteady else "steady")
     if turbulence_model is None:
         turbulence_model = select_turbulence_model(cfg, None)[0]
     # finalize the turbulence model up front (finite volumes accept only model 1) so
     # the graphic-printout list and every block below agree on the same model.
     turb_model = turbulence_model
-    if h.finite_volumes and turb_model != 1:
+    if fv and turb_model != 1:
         # FV's init_fv.f rejects ITURB>=2 ('TURBULENCE MODEL NOT TAKEN INTO ACCOUNT');
         # k-epsilon (3) / Smagorinski (4) / Spalart-Allmaras (6) need finite elements.
         log.warning("finite volumes accept only TURBULENCE MODEL 1 (constant "
@@ -969,7 +997,9 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         turb_model = 1
     # K (TKE) and E (its dissipation) only exist for the k-epsilon model (3); request
     # them as graphic outputs there so the results carry the turbulence fields too.
-    printvars = "U,V,S,B,H,M,Q,F" + (",K,E" if turb_model == 3 else "")
+    printvars = (printouts or "U,V,S,B,H,M,Q,F") + (",K,E" if turb_model == 3 else "")
+    graphic_period, listing_period = printout_periods or (h.graphic_printout_period,
+                                                          h.listing_printout_period)
 
     if previous_computation:
         # since TELEMAC release 9.0 the boolean COMPUTATION CONTINUED keyword is
@@ -1020,7 +1050,10 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         # M = scalar velocity (sqrt(u^2+v^2)); written so the results carry
         # SCALAR VELOCITY directly, which HydroBayesCal reads as a calibration QoI.
         # K,E (TKE + dissipation) are appended for the k-epsilon model (see above).
-        f"VARIABLES FOR GRAPHIC PRINTOUTS : '{printvars}'",
+        # A list too long for DAMOCLES' 72 columns goes on a line of its own.
+        *([f"VARIABLES FOR GRAPHIC PRINTOUTS : '{printvars}'"]
+          if len(printvars) <= 34 else
+          ["VARIABLES FOR GRAPHIC PRINTOUTS :", f"'{printvars}'"]),
         "PRINTING CUMULATED FLOWRATES : YES",
         "/",
         "/ TIME",
@@ -1032,8 +1065,8 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
            f"DESIRED COURANT NUMBER : {h.desired_courant}"]
           if h.variable_timestep else []),
         duration_line,
-        f"GRAPHIC PRINTOUT PERIOD : {h.graphic_printout_period}",
-        f"LISTING PRINTOUT PERIOD : {h.listing_printout_period}",
+        f"GRAPHIC PRINTOUT PERIOD : {graphic_period}",
+        f"LISTING PRINTOUT PERIOD : {listing_period}",
         # OPT-IN steady-state auto-stop (off by default, steady run only). TELEMAC's
         # steady.f stops when |X - X_prev| over two CONSECUTIVE TIME STEPS falls below
         # STOP CRITERIA - an ABSOLUTE per-step change. With VARIABLE TIME-STEP the dt is
@@ -1047,7 +1080,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
     ]
 
     # numerics: finite elements (default) vs finite volumes ------------------
-    if h.finite_volumes:
+    if fv:
         lines += [
             "/ NUMERICS (finite volumes: robust for transcritical wetting/drying;",
             "/ explicit scheme -> time step is CFL-bound via VARIABLE TIME-STEP above)",
@@ -1105,7 +1138,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
     ]
     # tidal flats: FE needs the explicit wetting/drying treatment; FV handles dry
     # fronts intrinsically (the HLLC Riemann solver), so this block is FE-only.
-    if not h.finite_volumes:
+    if not fv:
         lines += [
             "/",
             "/ TIDAL FLATS",
@@ -1118,14 +1151,17 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
             f"H CLIPPING : {'YES' if h.h_clipping else 'NO'}",
         ]
 
-    lines += [
-        "/",
-        "/ BOUNDARY CONDITIONS",
-        f"PRESCRIBED FLOWRATES : {flow}",
-        f"PRESCRIBED ELEVATIONS : {elev}",
-        f"VELOCITY PROFILES : {prof}",
-        f"OPTION FOR LIQUID BOUNDARIES : {';'.join(['1'] * n_liquid)}",
-    ]
+    if n_liquid:
+        lines += [
+            "/",
+            "/ BOUNDARY CONDITIONS",
+            f"PRESCRIBED FLOWRATES : {flow}",
+            f"PRESCRIBED ELEVATIONS : {elev}",
+            f"VELOCITY PROFILES : {prof}",
+            f"OPTION FOR LIQUID BOUNDARIES : {';'.join(['1'] * n_liquid)}",
+        ]
+    else:
+        lines += ["/", "/ BOUNDARY CONDITIONS: none, a closed domain"]
 
     if (cfg.gain_lose.active and cfg.gain_lose.implementation == "fortran"
             and source_regions):
@@ -1189,7 +1225,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         ]
         # finite_volumes lives on cfg.hydrodynamics, not on cfg - reading it off cfg
         # made this guard dead code (getattr always fell back to False).
-        if h.finite_volumes:
+        if fv:
             log.warning(
                 "internal source REGIONS need TYPE OF SOURCES 1, which the "
                 "finite-volume kernel rejects (prosou: 'ONLY SOURCES WITH DIRAC "
@@ -1208,7 +1244,7 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
         # emit it only for finite elements.
         *([f"LAW OF FRICTION ON LATERAL BOUNDARIES : {cfg.friction.boundary_law}",
            f"ROUGHNESS COEFFICIENT OF BOUNDARIES : {cfg.friction.boundary_coefficient}"]
-          if not h.finite_volumes else []),
+          if not fv else []),
         "/",
         "/ INITIAL CONDITIONS",
         *initial_conditions,
@@ -1247,6 +1283,9 @@ def write_cas(cfg: Config, liquids: list[LiquidBoundary],
                   "COUPLING WITH : 'GAIA'",
                   f"GAIA STEERING FILE : {gaia_cas}",
                   f"COUPLING PERIOD FOR GAIA : {cfg.morphodynamics.coupling_period}"]
+
+    if extra_block:
+        lines += extra_block
 
     if h.extra_keywords:
         lines += ["/", "/ USER OVERRIDES"]

@@ -54,6 +54,7 @@ BLOCKS: tuple[tuple[str, str, str], ...] = (
     ("mesh", "Mesh configuration", "case-mesh"),
     ("friction", "Wall roughness", "case-roughness"),
     ("hydrodynamics", "Hydraulic simulation", "case-hydraulics"),
+    ("hydrology", "Hydrology (rainfall-runoff)", "case-hydrology"),
     ("morphodynamics", "Morphodynamic simulation", "case-morphodynamics"),
     ("fine_sediment", "Fine sediment over a fixed bed", "case-morphodynamics"),
     ("dem_of_difference", "DEM of difference", "case-morphodynamics"),
@@ -85,6 +86,36 @@ OPENFOAM_MESH_INFO = (
     "coarser than the TELEMAC mesh, so a change of the TELEMAC mesh carries over. "
     "Without a factor, the cell size is used as it is.")
 
+#: What the frames of the Hydrology page explain.
+RAIN_INFO = (
+    "Rain falls on every node of the catchment, one series for all of it. Ask the "
+    "national meteorological agency first: its gauges and radar resolve the minutes and "
+    "kilometers of a storm, and its design rainfall is what practice expects. The data "
+    "wizard on the tab Simulations > Hydrology imports a record, builds a design storm "
+    "or downloads a past event from a reanalysis, which underestimates short "
+    "intensities.")
+INFILTRATION_INFO = (
+    "Green-Ampt as revised by de Vos et al. (2024): before ponding all rain "
+    "infiltrates; once the soil cannot take it, the capacity follows the explicit "
+    "solution of Sadeghi et al. (2024), and ponded water keeps infiltrating after the "
+    "rain. A soil is its conductivity Ks, its suction head and its water contents at "
+    "saturation and at the start; a texture class gives all but the last from Rawls et "
+    "al. (1983). The water content at the start decides most of the runoff of a storm.")
+WEATHER_INFO = (
+    "Wind acts on water deeper than its threshold depth, so on ponds and lakes, not on "
+    "the sheet flow of a hillslope. Evaporation is taken from the surface water, at the "
+    "FAO-56 reference evapotranspiration times the factor of open water; the soil gives "
+    "no water back in this model. Both matter little during a storm and more in the "
+    "hours after it.")
+OUTLET_INFO = (
+    "The outline is the drainage divide and so a wall; water leaves through the outflow "
+    "lines of the page Liquid boundaries. normal_depth holds the level at each outflow "
+    "line that its section needs for the discharge (Manning's normal flow, or a "
+    "measured rating curve). free prescribes nothing and holds only where the flow "
+    "leaves supercritical. The level of normal_depth depends on the roughness of the "
+    "outlet: 20 % on Manning's n is about 12 % on the depth, fading upstream over about "
+    "depth / slope, so put the outlet a little downstream of where results are read.")
+
 #: The pages of the editor, in the order of the workflow:
 #: ``(key, title, docs label, ((block or block/group, frame title, information), ...))``.
 #: ``openfoam/mesh`` is the group *mesh* of the block ``openfoam``, which belongs on
@@ -102,6 +133,11 @@ PAGES: tuple[tuple[str, str, str, tuple[tuple[str, str, str], ...]], ...] = (
     ("friction", "Wall roughness", "case-roughness", (("friction", "", ""),)),
     ("hydrodynamics", "Hydraulic simulation", "case-hydraulics", (
         ("hydrodynamics", "", ""),)),
+    ("hydrology", "Hydrology", "case-hydrology", (
+        ("hydrology/rain", "Rain", RAIN_INFO),
+        ("hydrology/infiltration", "Infiltration (Green-Ampt)", INFILTRATION_INFO),
+        ("hydrology/wind and sun", "Wind and sun", WEATHER_INFO),
+        ("hydrology/outlet and run", "Outlet and run", OUTLET_INFO))),
     ("morphodynamics", "Morphodynamic simulation", "case-morphodynamics", (
         ("morphodynamics", "Sediment transport with TELEMAC and GAIA", ""),
         ("fine_sediment", "Fine sediment over a fixed bed with OpenFOAM", ""),
@@ -124,13 +160,43 @@ SWITCHES: dict[str, dict[str, Any]] = {
     "calibration": {"label": "Calibrate and validate this case",
                     "seed": {"calibration_quantities": ["WATER DEPTH",
                                                         "SCALAR VELOCITY"]}},
+    "hydrology": {"label": "Hydrology mode: rainfall-runoff over a catchment "
+                           "(TELEMAC only; no channel mesh, no centerline)",
+                  "seed": {"enabled": True}},
 }
+
+#: Frames that show the switch of a page of another block at their top, as one more
+#: check box for the same switch: ``(page key, frame title) -> block``. The hydrology
+#: mode changes how the mesh is built, so it is switched where the mesh is set up too.
+FRAME_SWITCHES: dict[tuple[str, str], str] = {
+    ("mesh", "TELEMAC mesh"): "hydrology",
+}
+
+#: Settings a switch stands for, which get no row of their own.
+HIDDEN = frozenset({"hydrology.enabled"})
 
 #: The entries a minimal case cannot do without.
 REQUIRED = frozenset({
     "project.name", "project.crs_epsg", "geodata.dem_initial", "geodata.boundary",
     "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate",
 })
+
+#: Entries that are not needed while a condition holds: ``key -> conditions`` (of which
+#: one suffices), in the form of :data:`REQUIRED_WHEN`. A hydrology case is driven by
+#: its rain, so it needs no discharge, and a closed catchment no outflow line.
+REQUIRED_UNLESS: dict[str, list[dict[str, Any]]] = {
+    "boundaries.prescribed_flowrate": [{"block": "hydrology"}],
+    "boundaries.liquid_boundaries": [{"block": "hydrology"}],
+    "boundaries.prescribed_elevation": [{"block": "hydrology"}],
+}
+
+#: Entries that have no effect while a condition holds, which a form grays out:
+#: ``key -> conditions`` as in :data:`REQUIRED_WHEN`. A catchment mesh has no channel.
+DISABLED_WHEN: dict[str, list[dict[str, Any]]] = {
+    key: [{"block": "hydrology"}] for key in (
+        "geodata.channel_centerline", "mesh.channel_anisotropy",
+        "initialization.prewet_depth")
+}
 
 #: Entries an option makes necessary: ``key -> conditions``, of which one suffices. A
 #: condition is ``{"key": ..., "in": [values]}`` (an unset entry counts with its
@@ -147,6 +213,10 @@ REQUIRED_WHEN: dict[str, list[dict[str, Any]]] = {
                                             "in": [True]}],
     "openfoam.mode": [{"block": "openfoam"}],
     "openfoam.end_time": [{"block": "openfoam"}],
+    "hydrology.rainfall": [{"block": "hydrology"}],
+    "hydrology.weather": [{"key": "hydrology.wind", "in": [True]},
+                          {"key": "hydrology.evaporation",
+                           "in": ["et0", "penman", "series"]}],
     "ground_truth.sources": [{"block": "calibration"}],
     "calibration.parameters": [{"block": "calibration"}],
     "calibration.calibration_quantities": [{"block": "calibration"}],
@@ -304,6 +374,69 @@ CURATED: dict[str, dict[str, Any]] = {
         "Steady or unsteady", "choice", choices=("steady", "unsteady"),
         help="unsteady runs the hydrograph given on the page Liquid boundaries."),
     "drying.film_infiltration": _c("Remove thin films", "bool"),
+    "hydrology.rainfall": _c(
+        "Rain series", "table",
+        help="A table of time and rain (CSV or Excel), or the file the data wizard "
+             "writes. The model's time zero is the start of the series."),
+    "hydrology.rainfall_units": _c(
+        "Rain values are", "choice", choices=("mm/h", "mm"),
+        help="mm/h: intensities. mm: depths per interval."),
+    "hydrology.rainfall_stamp": _c(
+        "A time stamp is the", "choice", choices=("end", "start"),
+        help="Weather services stamp the end of the interval: the rain of 12:00 to "
+             "13:00 is reported at 13:00."),
+    "hydrology.rainfall_start": _c(
+        "Time zero", "text",
+        help="Date and time of the start of the simulation for a series with dates, "
+             "e.g. 2024-06-02T14:00. Empty: the first interval."),
+    "hydrology.infiltration": _c("Infiltration", "choice", choices=("green-ampt", "none"),
+                                 help="none: all rain runs off."),
+    "hydrology.green_ampt": _c(
+        "Green-Ampt solution", "choice", choices=("sadeghi", "exact", "travert"),
+        help="sadeghi: de Vos et al. (2024), the explicit solution of Sadeghi et al. "
+             "with Chu's ponding time. exact: Ks (1 + a/F) on the infiltrated depth. "
+             "travert: TELEMAC's own equations, for comparison."),
+    "hydrology.soil_zones": _c("Soil zones", "vector",
+                               help="Polygons with a whole-number Zone ID. Empty: one "
+                                    "soil for the whole catchment."),
+    "hydrology.soil_table": _c(
+        "Soil table", "table",
+        help="Columns zone_id, texture, ks_mm_h, suction_m, theta_s, theta_i; what a "
+             "row leaves empty comes from its texture (Rawls et al., 1983)."),
+    "hydrology.soil_texture": _c(
+        "Soil texture (whole catchment)", "choice",
+        choices=("sand", "loamy sand", "sandy loam", "loam", "silt loam",
+                 "sandy clay loam", "clay loam", "silty clay loam", "sandy clay",
+                 "silty clay", "clay"),
+        help="Used where there is no soil table."),
+    "hydrology.initial_water_content": _c(
+        "Water content at the start", "number", "m3/m3",
+        help="Volumetric soil moisture before the storm, for zones without their own "
+             "value. The data wizard fetches the ERA5-Land value of the event."),
+    "hydrology.sealed_surfaces": _c("Sealed surfaces", "vector",
+                                    help="Roofs and roads: no infiltration there."),
+    "hydrology.weather": _c(
+        "Weather series", "table",
+        help="Time and any of wind_speed_10m, wind_direction_10m, shortwave_radiation, "
+             "temperature, relative_humidity, et0, evaporation."),
+    "hydrology.wind": _c("Wind", "bool", help="Apply the wind of the weather series."),
+    "hydrology.evaporation": _c(
+        "Evaporation", "choice", choices=("none", "et0", "penman", "series"),
+        help="et0: the et0 column times the factor of open water. penman: FAO-56 from "
+             "radiation, temperature, humidity and wind. series: the evaporation "
+             "column."),
+    "hydrology.outlet_condition": _c(
+        "Outlet", "choice", choices=("normal_depth", "free", "elevation"),
+        help="normal_depth: the level of normal flow through each outflow section. "
+             "free: nothing prescribed; only for a supercritical outlet. elevation: "
+             "the fixed level of the page Liquid boundaries."),
+    "hydrology.drain_time": _c("Simulated time after the rain", "number", "s"),
+    "hydrology.printout_period": _c("Interval of the result maps", "number", "s"),
+    "hydrology.kernel": _c(
+        "Numerical kernel", "choice", choices=("finite-volumes", "finite-elements"),
+        help="finite-volumes: TELEMAC's HLLC scheme with the hydrostatic "
+             "reconstruction of Chen and Noelle, made for water shallower than the "
+             "steps of the bed. finite-elements: thin films drain slower."),
     "morphodynamics.sediment_classes": _c(
         "Sediment classes", "yaml",
         help="One entry per grain size class, for example name, diameter (m) and "
@@ -341,6 +474,7 @@ CHOICES: dict[str, tuple[str, ...]] = {
     "gain_lose.mode": ("off", "region", "fortran"),
     "gain_lose.losing_region": ("patch", "line"),
     "gain_lose.water_table": ("off", "phreatic"),
+    "hydrology.wind_formula": ("flather", "wu", "constant"),
 }
 
 #: Keys of the ``project`` block, which are fields of :class:`~axqua.config.Config`
@@ -513,6 +647,7 @@ def build() -> list[dict[str, Any]]:
                                      frames.get(block, (block, "")))
             required = key in REQUIRED
             when = [dict(condition) for condition in REQUIRED_WHEN.get(key, ())]
+            unless = [dict(condition) for condition in REQUIRED_UNLESS.get(key, ())]
             fields.append({
                 "key": key, "block": block, "name": name,
                 "label": curated.get("label") or _label(name),
@@ -528,6 +663,9 @@ def build() -> list[dict[str, Any]]:
                 "default": _json(default),
                 "required": required,
                 "required_when": when,
+                "required_unless": unless,
+                "disabled_when": [dict(c) for c in DISABLED_WHEN.get(key, ())],
+                "hidden": key in HIDDEN,
                 "page": page,
                 "frame": frame,
             })
@@ -552,11 +690,17 @@ def pages(sections: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
                 "switch": dict(SWITCHES.get(key, {})), "frames": []}
         for _block, frame_title, info in frames:
             keys = [item["key"] for item in fields
-                    if item["page"] == key and item["frame"] == frame_title]
+                    if item["page"] == key and item["frame"] == frame_title
+                    and not item.get("hidden")]
             if keys:
-                page["frames"].append({"title": frame_title, "info": info, "keys": keys})
+                frame = {"title": frame_title, "info": info, "keys": keys}
+                block = FRAME_SWITCHES.get((key, frame_title))
+                if block:
+                    frame["switch"] = {"block": block, **SWITCHES[block]}
+                page["frames"].append(frame)
                 known.update(keys)
         out.append(page)
+    known.update(item["key"] for item in fields if item.get("hidden"))
     for section in sections:
         rest = [item["key"] for item in section["fields"] if item["key"] not in known]
         if rest:

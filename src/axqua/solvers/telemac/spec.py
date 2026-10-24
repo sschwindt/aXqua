@@ -67,6 +67,8 @@ def result_files(cfg) -> list[tuple[str, str, Path]]:
         (f"{steady.stem}-hotstart{steady.suffix}", "continued steady simulation, 2D"),
         (getattr(cfg, "results_unsteady_slf", "r2d-unsteady.slf"),
          "unsteady simulation, 2D"),
+        (getattr(cfg, "results_hydrology_slf", "r2d-hydrology.slf"),
+         "hydrology simulation (rainfall-runoff), 2D"),
         (getattr(cfg, "results3d_slf", "r3d.slf"), "3D simulation"),
         (getattr(cfg, "results2d_from_3d_slf", "r3d-2d.slf"),
          "3D simulation, depth-averaged"),
@@ -99,6 +101,12 @@ def _has_varying_inflow(cfg) -> bool:
     return cfg.boundaries.inflow is not None
 
 
+def _hydrology(cfg) -> bool:
+    """A hydrology case: rainfall-runoff over a catchment (``hydrology.enabled``)."""
+    hydrology = getattr(cfg, "hydrology", None)
+    return bool(hydrology is not None and hydrology.enabled)
+
+
 def _calibration_configured(cfg) -> bool:
     """Calibration needs parameters to perturb and ground truth to fit against."""
     has_params = bool(cfg.calibration.parameters)
@@ -125,7 +133,8 @@ SPEC = BackendSpec(
     capabilities={
         Capability.STEADY2D: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=lambda cfg: True,           # every TELEMAC case builds one
+            # every river case builds one; a catchment has no steady state
+            configured=lambda cfg: not _hydrology(cfg),
             built=lambda cfg: _exists(cfg, cfg.cas_file),
             run=lambda cfg: _exists(cfg, cfg.results_slf),
         ),
@@ -167,9 +176,16 @@ SPEC = BackendSpec(
                                or _model(cfg, cfg.user_fortran_dir).is_dir()),
             run=lambda cfg: _exists(cfg, cfg.results_slf),
         ),
+        Capability.HYDROLOGY: CapabilitySpec(
+            support=Support.SUPPORTED,
+            configured=_hydrology,
+            built=lambda cfg: _exists(cfg, cfg.hydrology_cas_file),
+            run=lambda cfg: _exists(cfg, cfg.results_hydrology_slf),
+        ),
         Capability.MESH_CONVERGENCE: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=lambda cfg: True,
+            # the study compares steady flux-balanced runs; a catchment has none
+            configured=lambda cfg: not _hydrology(cfg),
             built=lambda cfg: (Path(cfg.postprocessing_dir) / "mesh-convergence").is_dir(),
             run=lambda cfg: any((Path(cfg.postprocessing_dir) / "mesh-convergence")
                                 .glob("mesh-convergence.*")),

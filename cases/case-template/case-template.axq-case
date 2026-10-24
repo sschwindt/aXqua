@@ -635,6 +635,37 @@ dem_of_difference:
 #   # porosity: 0.3            # [-] pores between its coarse grains
 #   # initial_fraction: 0.15   # [-] share of fines in its dry mass at the start
 
+# hydrology:                   # optional: rainfall-runoff over a catchment (TELEMAC only)
+#   # Rain falls on every node, infiltrates after Green-Ampt (de Vos et al. 2024),
+#   # evaporates from surface water, and runs off to the outflow lines. The outline is
+#   # the drainage divide (a wall); no discharge and no inflow line are needed. The mesh
+#   # becomes isotropic (no channel centerline). Build with the preprocessing, run:
+#   #   axqua submit <case> --kind hydrology
+#   # The data: axqua hydrology portals|rainfall|design|fetch|check <case>, or the data
+#   # wizard on the sub-tab Simulations > Hydrology of the plugin.
+#   enabled: true
+#   rainfall: user-sources/hydrology/rainfall.csv   # time and rain
+#   rainfall_units: mm/h       # mm/h (intensity) | mm (depth per interval)
+#   rainfall_stamp: end        # a time stamp ends its interval (agencies) | start
+#   # rainfall_start: 2024-06-02T14:00   # time zero of a series with dates
+#   infiltration: green-ampt   # | none
+#   green_ampt: sadeghi        # de Vos et al. (2024) | exact | travert (TELEMAC's own)
+#   # soil_zones: user-sources/hydrology/soil-zones.gpkg   # polygons with a Zone ID
+#   soil_table: user-sources/hydrology/soil-table.csv
+#   #   zone_id,texture,ks_mm_h,suction_m,theta_s,theta_i; what a row leaves empty
+#   #   comes from its texture (Rawls et al. 1983)
+#   # soil_texture: loam       # one texture for the whole catchment, without a table
+#   initial_water_content: 0.25   # [m3/m3] soil moisture at the start of the event
+#   # sealed_surfaces: user-sources/hydrology/sealed-surfaces.gpkg   # Ks = 0
+#   # weather: user-sources/hydrology/weather.csv   # wind_speed_10m,
+#   #   wind_direction_10m, shortwave_radiation, temperature, relative_humidity, et0
+#   # wind: true               # TELEMAC's wind stress, on water deeper than 1 m
+#   # evaporation: et0         # none | et0 | penman (FAO-56) | series
+#   outlet_condition: normal_depth   # Z(Q) of normal flow | free | elevation
+#   kernel: finite-volumes     # HLLC with the reconstruction of Chen and Noelle
+#   drain_time: 3600           # [s] simulated after the last rain
+#   printout_period: 300       # [s] between result maps
+
 ground_truth:
   # How well the survey's HORIZONTAL coordinates are known. A calibration reads the
   # model AT the measurement's coordinates, so a position error is charged to the

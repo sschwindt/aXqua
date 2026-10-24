@@ -46,6 +46,9 @@ class Mesh:
     boundary_loops: np.ndarray | None = None  # per-loop node counts in boundary_nodes
     roughness: np.ndarray | None = None  # (NPOIN,) per-node roughness value (e.g. ks)
     quality: object | None = None        # mesh_quality.QualityReport (set by build_mesh)
+    # further node variables of the geometry, as (name, unit, values): the soil
+    # fields a hydrology case hands TELEMAC as private variables
+    extra: list | None = None
 
     @property
     def npoin(self) -> int:
@@ -172,7 +175,9 @@ def _build_gmsh(cfg: Config, *, bg_budget: int = 40000, aniso_relax: float = 1.0
     if embedded_lines:
         gmsh.model.mesh.embed(1, embedded_lines, 2, surface)
 
-    if _anisotropic_enabled(cfg):
+    if _hydrology_enabled(cfg):
+        _hydrology_size_field(cfg, poly, embedded_lines)
+    elif _anisotropic_enabled(cfg):
         _anisotropic_size_field(cfg, poly, bg_budget=bg_budget, aniso_relax=aniso_relax)
     else:
         _size_fields(cfg, embedded_lines)
@@ -185,8 +190,15 @@ def _build_gmsh(cfg: Config, *, bg_budget: int = 40000, aniso_relax: float = 1.0
 
 
 def _anisotropic_enabled(cfg: Config) -> bool:
-    return (cfg.geodata.mesh_zones is not None
+    return (not _hydrology_enabled(cfg)
+            and cfg.geodata.mesh_zones is not None
             and cfg.geodata.channel_centerline is not None)
+
+
+def _hydrology_enabled(cfg: Config) -> bool:
+    """The hydrology mode meshes a catchment: no channel mesh, no centerline."""
+    hydrology = getattr(cfg, "hydrology", None)
+    return bool(hydrology is not None and hydrology.enabled)
 
 
 _DEFAULT_BG_BUDGET = 40000
@@ -346,6 +358,143 @@ def _anisotropic_size_field(cfg: Config, poly, *, bg_budget: int = 40000,
     gmsh.option.setNumber("Mesh.AnisoMax", max(1.5, m.max_aspect_ratio / 1.6 * aniso_relax))
     gmsh.option.setNumber("Mesh.Algorithm", 7)   # BAMG (anisotropic 2D)
     _ = view
+
+
+# --------------------------------------------------------------------------- #
+# hydrology mode: isotropic triangles sized by the mesh zones
+# --------------------------------------------------------------------------- #
+
+#: Background grid budget of the hydrology size field. Finer than the anisotropic
+#: budget, because the zones of a catchment (settlements, stream corridors) are small
+#: against its extent and a grid that steps over a zone does not see it.
+_HYDROLOGY_BG_BUDGET = 250_000
+
+
+def hydrology_size_grid(cfg: Config, poly, *, bg_budget: int = _HYDROLOGY_BG_BUDGET):
+    """Target edge length on a regular grid over the catchment, growth-limited.
+
+    Each grid point takes the finest ``Max Edge Length (m)`` of the mesh zones within
+    half a grid step of it (so a zone narrower than the step still marks the row of
+    points beside it), and ``mesh.default_size`` outside every zone; all sizes are
+    multiplied by ``mesh.size_scale``. The sizes are then limited so that they grow by
+    at most ``mesh.growth_ratio`` per element away from a fine zone, which keeps the
+    transition from a stream corridor to the hillslope smooth.
+
+    Returns ``(x, y, size)`` of the grid (2D arrays).
+    """
+    import geopandas as gpd
+
+    m = cfg.mesh
+    scale = float(m.size_scale or 1.0)
+    default = float(m.default_size) * scale
+    minx, miny, maxx, maxy = poly.bounds
+    area = max((maxx - minx) * (maxy - miny), 1.0)
+    zones = _read_mesh_zones(cfg) if cfg.geodata.mesh_zones is not None else None
+    finest = float(zones["_edge_length"].min()) if zones is not None and len(zones) \
+        else default
+    step = max(finest, math.sqrt(area / float(bg_budget)))
+    gx, gy = np.meshgrid(np.arange(minx - step, maxx + 2 * step, step),
+                         np.arange(miny - step, maxy + 2 * step, step))
+    size = np.full(gx.shape, default)
+    if zones is not None and len(zones):
+        pts = gpd.GeoDataFrame(geometry=gpd.points_from_xy(gx.ravel(), gy.ravel()),
+                               crs=f"EPSG:{cfg.crs_epsg}")
+        grown = zones[["_edge_length", "geometry"]].copy()
+        grown["geometry"] = grown.geometry.buffer(0.5 * step)
+        hit = gpd.sjoin(pts, grown, how="inner", predicate="within")
+        finest_at = hit.groupby(level=0)["_edge_length"].min()
+        flat = size.ravel()
+        flat[finest_at.index.to_numpy()] = finest_at.to_numpy(dtype=float)
+        size = flat.reshape(gx.shape)
+    # growth limit: a size may exceed its neighbor's by (growth - 1) x distance, the
+    # largest change that keeps the ratio of neighboring edges at growth_ratio
+    rate = max(float(m.growth_ratio) - 1.0, 0.01)
+    for _ in range(int(max(gx.shape)) + 1):
+        before = size.copy()
+        for axis, dist in ((0, step), (1, step)):
+            for shift in (1, -1):
+                neighbor = np.roll(size, shift, axis=axis)
+                if shift == 1:
+                    edge = (slice(0, 1), slice(None)) if axis == 0 else (slice(None),
+                                                                         slice(0, 1))
+                else:
+                    edge = (slice(-1, None), slice(None)) if axis == 0 else (
+                        slice(None), slice(-1, None))
+                neighbor[edge] = np.inf
+                size = np.minimum(size, neighbor + rate * dist)
+        if np.allclose(size, before):
+            break
+    return gx, gy, size
+
+
+def _hydrology_size_field(cfg: Config, poly, breakline_curves: list[int]) -> None:
+    """Isotropic size field of the hydrology mode (no channel anisotropy)."""
+    import gmsh
+    from scipy.spatial import Delaunay
+
+    m = cfg.mesh
+    scale = float(m.size_scale or 1.0)
+    default = float(m.default_size) * scale
+    field = gmsh.model.mesh.field
+    parts: list[int] = []
+    largest = default
+    if cfg.geodata.mesh_zones is not None:
+        gx, gy, size = hydrology_size_grid(cfg, poly)
+        largest = max(largest, float(size.max()))
+        pts = np.column_stack([gx.ravel(), gy.ravel()])
+        simplices = Delaunay(pts).simplices
+        values = size.ravel()
+        P = pts[simplices]
+        data = np.concatenate([P[:, :, 0], P[:, :, 1], np.zeros((len(simplices), 3)),
+                               values[simplices]], axis=1).ravel()
+        view = gmsh.view.add("hydrology-size")
+        gmsh.view.addListData(view, "ST", len(simplices), data.tolist())
+        background = field.add("PostView")
+        field.setNumber(background, "ViewTag", view)
+        parts.append(background)
+    if breakline_curves:
+        dist = field.add("Distance")
+        field.setNumbers(dist, "CurvesList", breakline_curves)
+        field.setNumber(dist, "Sampling", 100)
+        thr = field.add("Threshold")
+        field.setNumber(thr, "InField", dist)
+        field.setNumber(thr, "SizeMin", m.breakline_size * scale)
+        field.setNumber(thr, "SizeMax", largest)
+        field.setNumber(thr, "DistMin", m.breakline_size * scale)
+        # grow away from the stream at growth_ratio per element
+        field.setNumber(thr, "DistMax", max(largest - m.breakline_size * scale, 0.0)
+                        / max(m.growth_ratio - 1.0, 0.01))
+        parts.append(thr)
+    if parts:
+        lowest = field.add("Min")
+        field.setNumbers(lowest, "FieldsList", parts)
+        field.setAsBackgroundMesh(lowest)
+    gmsh.option.setNumber("Mesh.MeshSizeMax", largest)
+    if m.min_size:
+        gmsh.option.setNumber("Mesh.MeshSizeMin", m.min_size * scale)
+    gmsh.option.setNumber("Mesh.MeshSizeExtendFromBoundary", 0)
+    # the outline's points carry default_size; the field decides near the outline too
+    gmsh.option.setNumber("Mesh.MeshSizeFromPoints", 0 if parts else 1)
+    gmsh.option.setNumber("Mesh.MeshSizeFromCurvature", 0)
+    gmsh.option.setNumber("Mesh.Algorithm", 6)      # Frontal-Delaunay: near-equal sides
+
+
+def estimate_hydrology_elements(cfg: Config) -> int:
+    """Number of triangles the hydrology mesh will have, from its size grid.
+
+    An equilateral triangle of side h covers sqrt(3)/4 h^2, so the count is the
+    integral of 4 / (sqrt(3) h^2) over the catchment.
+    """
+    from shapely import contains_xy
+
+    poly = roi_polygon(cfg)
+    if cfg.geodata.mesh_zones is None:
+        h = float(cfg.mesh.default_size) * float(cfg.mesh.size_scale or 1.0)
+        return int(poly.area * 4.0 / (math.sqrt(3.0) * h * h))
+    gx, gy, size = hydrology_size_grid(cfg, poly)
+    inside = contains_xy(poly, gx, gy)
+    cell = float(gx[0, 1] - gx[0, 0]) * float(gy[1, 0] - gy[0, 0])
+    return int(np.sum(4.0 / (math.sqrt(3.0) * size[inside] ** 2)) * cell)
 
 
 def _size_fields(cfg: Config, breakline_curves: list[int]):
@@ -636,7 +785,22 @@ def build_mesh(cfg: Config, dem_initial_roi: Path | None = None) -> Mesh:
     its elevations are interpolated onto the nodes; otherwise the bottom is left
     at zero and can be filled later with :func:`interpolate_elevations`.
     """
-    if _anisotropic_enabled(cfg):
+    if _hydrology_enabled(cfg):
+        estimate = estimate_hydrology_elements(cfg)
+        log.info("  mesh strategy: hydrology (isotropic, default %.2f m, zones %s, "
+                 "streams %s, growth %.2f; no channel mesh); about %d elements",
+                 cfg.mesh.default_size * cfg.mesh.size_scale,
+                 Path(cfg.geodata.mesh_zones).name if cfg.geodata.mesh_zones else "none",
+                 Path(cfg.geodata.breaklines).name if cfg.geodata.breaklines else "none",
+                 cfg.mesh.growth_ratio, estimate)
+        if cfg.geodata.channel_centerline is not None:
+            log.warning("  geodata.channel_centerline is not used in the hydrology "
+                        "mode: a catchment mesh has no channel anisotropy")
+        if estimate > 2_000_000:
+            log.warning("  the hydrology mesh will have about %d elements; raise "
+                        "mesh.default_size or the zone edge lengths if that is not "
+                        "intended", estimate)
+    elif _anisotropic_enabled(cfg):
         zones = _read_mesh_zones(cfg)
         summary = ", ".join(
             f"{zt} {grp['_edge_length'].min():.2f}-{grp['_edge_length'].max():.2f} m"
@@ -917,6 +1081,7 @@ def write_mesh(mesh: Mesh, path: Path, *, title: str = "mesh") -> Path:
         ipobo=mesh.ipobo, bottom=mesh.bottom,
         friction_id=mesh.node_matid,
         roughness=mesh.roughness,
+        extra=mesh.extra or (),
         title=title,
     )
     return path
@@ -933,6 +1098,11 @@ def run(cfg: Config, dem_initial_roi: Path) -> tuple[Mesh, Path]:
     if cfg.geodata.roughness_zones is not None and cfg.geodata.roughness_table is not None:
         with log_step("  interpolate roughness zones onto the mesh"):
             mesh = interpolate_roughness(cfg, mesh)
+    if _hydrology_enabled(cfg):
+        from axqua.solvers.telemac.hydrology import soil_variables
+
+        with log_step("  interpolate soil zones onto the mesh"):
+            mesh.extra = soil_variables(cfg, mesh)
     slf_path = write_mesh(mesh, cfg.model_path(cfg.geometry_slf),
                           title=f"{cfg.name} geometry")
     return mesh, slf_path
