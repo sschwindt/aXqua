@@ -128,7 +128,7 @@ def test_the_plugin_never_imports_axqua():
 # ----------------------------------------------------------- executable discovery
 
 
-def _fake_axqua(tmp_path: Path, *, version: str = "axqua 1.0.2",
+def _fake_axqua(tmp_path: Path, *, version: str = "axqua 1.1.0",
                     exit_code: int = 0) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "axqua"
@@ -178,23 +178,23 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_axqua_too_old_for_this_plugin_is_refused_by_name(tmp_path, monkeypatch):
-    """An older aXqua presented as a series of unexplained parse failures at every verb rather than as one sentence here. Since 1.0 the plugin also calls commands 0.5 does not have."""
-    old = _fake_axqua(tmp_path, version="axqua 0.5.0")
+    """An older aXqua presented as a series of unexplained parse failures at every verb rather than as one sentence here. Since 1.1 the plugin also calls commands 1.0 does not have (``hydrology``)."""
+    old = _fake_axqua(tmp_path, version="axqua 1.0.2")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
     with pytest.raises(runner_client.RunnerNotFound) as excinfo:
         runner_client.find_executable(str(old))
-    assert "1.0 or newer" in str(excinfo.value)
+    assert "1.1 or newer" in str(excinfo.value)
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_unusual_version_string_is_accepted(tmp_path, monkeypatch):
     """Refusing to run something because its version is a git describe string would be
     worse than the problem the check exists for."""
-    dev = _fake_axqua(tmp_path, version="axqua 1.0.1.dev3+g1a2b3c4")
+    dev = _fake_axqua(tmp_path, version="axqua 1.1.0.dev3+g1a2b3c4")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
-    assert runner_client.find_executable(str(dev)).version.startswith("1.0.1")
+    assert runner_client.find_executable(str(dev)).version.startswith("1.1.0")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
@@ -252,7 +252,7 @@ def test_a_structured_failure_reaches_the_user_with_its_remedy():
 def test_output_that_is_not_json_is_reported_as_such(tmp_path, monkeypatch):
     script = tmp_path / "axqua"
     script.write_text("#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo "
-                      "'axqua 1.0.0'; else echo 'Segmentation fault'; fi\n",
+                      "'axqua 1.1.0'; else echo 'Segmentation fault'; fi\n",
                       encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     client = runner_client.RunnerClient(str(script))
@@ -791,6 +791,9 @@ UNSCOPED_ENUMS = [
     (r"QgsColorRampShader\.Interpolated", "QgsColorRampShader.Type.Interpolated"),
     (r"QgsLegendStyle\.(Title|Group|Subgroup|SymbolLabel)", "QgsLegendStyle.Style.*"),
     (r"Qt\.(UserRole|AlignRight|AlignCenter|MatchExactly)\b", "Qt.<Scope>.*"),
+    # QGIS's Qt6 check flagged QgsWkbTypes.PointGeometry on 2026-10-25; the member lives in Qgis.GeometryType since QGIS 3.30, and the QgsWkbTypes spellings are aliases.
+    (r"QgsWkbTypes\.(GeometryType\.)?(Point|Line|Polygon|Unknown|Null)Geometry\b",
+     "Qgis.GeometryType.*"),
 ]
 
 #: Every scope ``Qt`` member the plugin uses lives under. Anything else spelled
@@ -836,14 +839,14 @@ def test_no_unscoped_qt_enum_outside_compat(pattern, scoped):
                             f"compat: {offenders}")
 
 
-def test_no_exec_underscore_outside_compat():
-    """``exec_`` was removed in Qt6. compat routes it through getattr, so the literal
-    member call should exist nowhere else."""
+def test_no_exec_underscore_anywhere():
+    """``exec_`` was removed in Qt6. compat routes it through getattr, so neither a member call nor a function of that name exists anywhere, compat included: QGIS's Qt6 check reads compat too and asked on 2026-10-25 for its ``def exec_`` to be renamed."""
     import re
 
+    bad = re.compile(r"\.exec_\(|\bdef exec_\b")
     offenders = [str(p.relative_to(PLUGIN_ROOT))
                  for p in (PLUGIN_ROOT / "axqua").rglob("*.py")
-                 if p.name != "compat.py" and re.search(r"\.exec_\(", p.read_text("utf-8"))]
+                 if bad.search(p.read_text("utf-8"))]
     assert offenders == []
 
 

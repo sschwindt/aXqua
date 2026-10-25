@@ -120,14 +120,14 @@ def reach_bearing(project=None) -> float | None:
     a *measurement*. Without one there is nothing here worth guessing from, and the
     caller falls back to the extent's aspect.
     """
-    from qgis.core import QgsProject, QgsWkbTypes
+    from qgis.core import Qgis, QgsProject
     project = project or QgsProject.instance()
     names = ("centerline", "centreline", "center line", "thalweg", "reach", "axis")
     for layer in project.mapLayers().values():
         if not hasattr(layer, "geometryType") or not hasattr(layer, "getFeatures"):
             continue
         try:
-            if layer.geometryType() != QgsWkbTypes.GeometryType.LineGeometry:
+            if layer.geometryType() != Qgis.GeometryType.Line:
                 continue
         except (AttributeError, TypeError):
             continue

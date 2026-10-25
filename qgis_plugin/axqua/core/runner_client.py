@@ -201,8 +201,8 @@ def _probe(path: str) -> str:
     return version
 
 
-#: The oldest axqua this plugin works with. An older one presented as a series of unexplained parse failures; since 1.0 the plugin also calls commands that 0.5 does not have (``docs``, ``cleanup``), so plugin and program are released together.
-MINIMUM_VERSION = (1, 0)
+#: The oldest axqua this plugin works with. An older one presented as a series of unexplained parse failures; since 1.0 the plugin also calls commands that 0.5 does not have (``docs``, ``cleanup``), and since 1.1 commands that 1.0 does not have (``hydrology``), so plugin and program are released together.
+MINIMUM_VERSION = (1, 1)
 
 
 def _require_minimum(version: str) -> None:

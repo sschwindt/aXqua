@@ -131,17 +131,6 @@ VECTOR_STREAMLINES = enum_value(
     QgsMeshRendererVectorSettings, "Symbology.Streamlines", "Streamlines", default=None)
 
 
-def exec_(obj):
-    """Run a modal object's event loop on either Qt.
-
-    The same shim as :func:`exec_dialog`, for a ``QEventLoop`` rather than a dialog.
-    Reached through ``getattr`` so the trailing-underscore spelling appears nowhere as a
-    literal member call - which is what the Qt6 checker looks for.
-    """
-    runner = getattr(obj, "exec", None) or getattr(obj, "exec_")
-    return runner()
-
-
 def icon(name: str) -> QIcon:
     """An icon from a plain file.
 

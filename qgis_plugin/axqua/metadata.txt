@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.0.2
+version=1.1.0
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,18 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.0.2
+changelog=1.1.0
+    - Hydrology mode: rainfall-runoff over a catchment or a field with TELEMAC-2D
+      and Green-Ampt infiltration, rain uniform in space, wind and evaporation.
+      The sub-tab Simulations > Hydrology runs it, a data wizard fetches or reads
+      rain, soil, initial moisture, wind and sun, and a checkup of the data and of
+      the terrain runs before the build.
+    - A second example case, example-agrohydrology: an arable field in Lower
+      Bavaria under a storm of 42 mm in 7 hours.
+    - The plugin passes the Qt6 check of the QGIS plugin repository.
+    - The plugin needs the aXqua program 1.1 or newer. Upgrade it with
+      'pip install --upgrade axqua'.
+    1.0.2
     - The inflow of a model received no discharge when the south-westernmost node
       of its outline was the last node of a liquid boundary line: TELEMAC then
       numbers that line last, and the discharge went to the outflow. The numbering
