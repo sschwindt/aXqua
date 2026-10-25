@@ -281,7 +281,7 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     liquids, total = _liquids_for(cfg, situation)
     there = copy.deepcopy(cfg)
     there.boundaries.prescribed_flowrate = total
-    condition = cfg.boundaries.outflow_condition
+    condition = cfg.outflow_condition
     level = outlet_level(condition)
     if situation.prescribed_elevation is not None:
         there.boundaries.prescribed_elevation = float(situation.prescribed_elevation)

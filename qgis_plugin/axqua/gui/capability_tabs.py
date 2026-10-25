@@ -222,7 +222,9 @@ class CapabilityView:
             # Before "not configured": configuring it would not help.
             return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
         if not self.configured:
-            if self.hydrology_mode and self.name in NOT_IN_HYDROLOGY_MODE:
+            # the mode is TELEMAC's; another solver's box keeps its own advice
+            if (self.hydrology_mode and self.solver == "telemac"
+                    and self.name in NOT_IN_HYDROLOGY_MODE):
                 return NOT_IN_HYDROLOGY_MODE[self.name]
             return HOW_TO_CONFIGURE.get(self.name) or NOT_CONFIGURED_REASON.format(
                 title=self.title)

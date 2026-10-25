@@ -503,6 +503,12 @@ def test_a_hydrology_case_says_why_it_offers_no_steady_run_and_no_calibration():
         assert "relevant block" not in telemac.capability(name).reason
     river = CaseView.from_payload(payload(False)).solver("telemac")
     assert "relevant block" in river.capability("calibration").reason
+    # the mode is TELEMAC's: an OpenFOAM box of the same case keeps its own advice
+    mixed = payload(True)
+    mixed["solvers"].append({"solver": "openfoam", "enabled": False, "capabilities": [
+        {"capability": "mesh_convergence", "implemented": "yes", "configured": False}]})
+    openfoam = CaseView.from_payload(mixed).solver("openfoam")
+    assert "relevant block" in openfoam.capability("mesh_convergence").reason
 
 
 def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():

@@ -277,6 +277,17 @@ def read_marker(path: str | Path) -> SolverStatus:
     )
 
 
+#: ``hydrodynamics.wet_depth`` of a river case that sets none [m].
+RIVER_WET_DEPTH = 0.01
+#: ``hydrodynamics.wet_depth`` of a hydrology case that sets none [m]: the sheet flow of a hillslope is millimeters deep, and the 1 cm of a river would hide it from the map.
+HYDROLOGY_WET_DEPTH = 0.001
+
+
+def default_wet_depth(hydrology_mode: bool) -> float:
+    """The depth [m] at or below which water counts as dry when a case sets none: 1 mm in hydrology mode, 1 cm in a river case. The one place that says so, for :attr:`axqua.config.Config.wet_depth` and the display settings."""
+    return HYDROLOGY_WET_DEPTH if hydrology_mode else RIVER_WET_DEPTH
+
+
 def _display_settings(cfg) -> dict:
     """How this case's results should be drawn, read off the case.
 
@@ -289,11 +300,8 @@ def _display_settings(cfg) -> dict:
     wet = getattr(cfg, "wet_depth", None)
     if wet is None:
         wet = getattr(getattr(cfg, "hydrodynamics", None), "wet_depth", None)
-    if not wet:
-        from axqua.config import HYDROLOGY_WET_DEPTH, RIVER_WET_DEPTH
-
-        wet = (HYDROLOGY_WET_DEPTH if getattr(cfg, "hydrology_mode", False)
-               else RIVER_WET_DEPTH)
+    if wet is None:
+        wet = default_wet_depth(getattr(cfg, "hydrology_mode", False))
     return {
         "wet_depth": float(wet),
         "velocity_scale_max": float(

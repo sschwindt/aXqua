@@ -189,12 +189,15 @@ def test_a_rain_table_that_only_names_a_hyetograph_is_read_as_a_table(tmp_path):
     table = "time,rain\n0,0\n600,2\n1200,3\n"
     plain, named = tmp_path / "plain.csv", tmp_path / "named.csv"
     plain.write_text(table)
-    named.write_text("# Hyetograph, DWD station 3668\n" + table)
     expected = rainfall.read_series(plain, units="mm", stamp="end")
-    series = rainfall.read_series(named, units="mm", stamp="end")
-    assert list(series.end_s) == list(expected.end_s) == [600.0, 1200.0, 1800.0]
-    assert list(series.intensity_mm_h) == list(expected.intensity_mm_h) == [0.0, 12.0, 18.0]
-    assert not any("TELEMAC" in note for note in series.notes)
+    for comments in ("# Hyetograph, DWD station 3668\n",
+                     "# Hyetograph, station 3668\n# exported 2024-06-02\n"):
+        named.write_text(comments + table)
+        series = rainfall.read_series(named, units="mm", stamp="end")
+        assert list(series.end_s) == list(expected.end_s) == [600.0, 1200.0, 1800.0]
+        assert list(series.intensity_mm_h) == list(expected.intensity_mm_h) == [
+            0.0, 12.0, 18.0]
+        assert not any("TELEMAC" in note for note in series.notes)
 
 
 def test_the_canonical_file_round_trips(tmp_path):
@@ -464,6 +467,18 @@ def test_a_hydrology_case_builds_without_a_discharge_or_a_centerline(tmp_path):
     for capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D, Capability.STEADY3D,
                        Capability.VERTICAL_CONVERGENCE, Capability.CALIBRATION):
         assert not status.capability(capability).configured, capability
+    # and the backend refuses them, whatever files a river past left in the model folder
+    from axqua.core.errors import ConfigError
+    from axqua.solvers.telemac.backend import BACKEND
+
+    for call, capability in ((BACKEND.build, Capability.STEADY3D),
+                             (BACKEND.run, Capability.STEADY3D),
+                             (BACKEND.run, Capability.STEADY2D),
+                             (BACKEND.run, Capability.UNSTEADY2D),
+                             (BACKEND.study, Capability.VERTICAL_CONVERGENCE),
+                             (BACKEND.study, Capability.CALIBRATION)):
+        with pytest.raises(ConfigError, match="hydrology mode"):
+            call(cfg, capability)
     cfg.hydrology.enabled = False
     assert spec._calibration_configured(cfg) and spec._has_varying_inflow(cfg)
     assert spec._three_d_configured(cfg)
@@ -511,6 +526,15 @@ def test_an_overfall_outlet_holds_no_water_at_its_lines(tmp_path):
              .splitlines()]
     assert ["5", "4", "4"] in codes and ["2", "2", "2"] in codes
     assert ["4", "4", "4"] not in codes
+
+
+def test_a_missing_outlet_level_names_the_setting_of_the_mode(tmp_path):
+    """In hydrology mode the outlet is hydrology.outlet_condition; boundaries.outflow_condition has no effect there, so the message must not send the user to it."""
+    from axqua.config import load_config
+
+    cfg = load_config(_catchment(tmp_path, extra="  outlet_condition: elevation\n"))
+    with pytest.raises(ValueError, match=r"required by hydrology\.outlet_condition: elevation$"):
+        cfg.validate()
 
 
 @pytest.mark.parametrize("outlet", ["overfall", "normal_depth"])

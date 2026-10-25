@@ -24,6 +24,8 @@ import yaml
 from axqua.core import schema
 from axqua.core.boundaries import (  # noqa: F401  (part of this module's surface)
     HYDROLOGY_OUTLETS, OUTLET_LEVELS, RIVER_OUTLETS, outlet_level)
+from axqua.core.capabilities import (  # noqa: F401  (part of this module's surface)
+    HYDROLOGY_WET_DEPTH, RIVER_WET_DEPTH, default_wet_depth)
 
 log = logging.getLogger("axqua")
 
@@ -1388,10 +1390,6 @@ class FineSediment:
                     "more than a river carries. The unit is kg/m3: 20 mg/l are 0.02")
 
 
-#: ``hydrodynamics.wet_depth`` of a hydrology case that sets none [m]: the sheet flow of a hillslope is millimeters deep, and the 1 cm of a river would hide it from the map.
-HYDROLOGY_WET_DEPTH = 0.001
-#: ``hydrodynamics.wet_depth`` of a river case that sets none [m].
-RIVER_WET_DEPTH = 0.01
 
 
 @dataclass
@@ -2331,7 +2329,7 @@ class Config:
         """The depth [m] at or below which water counts as dry in the reports and the maps: ``hydrodynamics.wet_depth``, else 1 mm in a hydrology case and 1 cm in a river case."""
         if self.hydrodynamics.wet_depth is not None:
             return float(self.hydrodynamics.wet_depth)
-        return HYDROLOGY_WET_DEPTH if self.hydrology_mode else RIVER_WET_DEPTH
+        return default_wet_depth(self.hydrology_mode)
 
     @property
     def rigid_lid(self) -> bool:
@@ -2440,9 +2438,10 @@ class Config:
                      "be synthesized (rating_method: %s) from the outflow line and "
                      "the DEM", self.boundaries.rating_method)
         if level == "fixed" and self.boundaries.prescribed_elevation is None:
-            raise ValueError(
-                f"outflow_condition: {cond} requires boundaries.prescribed_elevation"
-            )
+            key = ("hydrology.outlet_condition" if self.hydrology_mode
+                   else "boundaries.outflow_condition")
+            # the setting to fill in comes first: the case check takes the first key of a message for its subject
+            raise ValueError(f"boundaries.prescribed_elevation is required by {key}: {cond}")
 
     def _closed_catchment(self) -> frozenset[str]:
         """A hydrology case may have no liquid boundary at all: a closed depression whose rain stays in it. Its missing lines are then not an error."""

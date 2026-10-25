@@ -45,7 +45,7 @@ MISSING_AT_OR_BELOW = -999.0
 #: Dates written as one integer, by number of digits (DWD ``MESS_DATUM``).
 _INTEGER_DATES = {8: "%Y%m%d", 10: "%Y%m%d%H", 12: "%Y%m%d%H%M"}
 
-#: The header of TELEMAC's hyetograph file: ``#HYETOGRAPH FILE`` (any case and spacing), or a comment ``#HYETOGRAPH ...`` with a second comment line under it, as TELEMAC's files have it. A comment that only names a hyetograph above the header of a table (``# Hyetograph, station 3668`` and then ``time,rain``) is no such file.
+#: The header of TELEMAC's hyetograph file: ``#HYETOGRAPH FILE`` (any case and spacing), or a comment ``#HYETOGRAPH ...`` with a second comment line under it and a time in seconds on the first line after them, as TELEMAC's files have it. Comments that only name a hyetograph above the header of a table (``# Hyetograph, station 3668``, ``# exported 2024-06-02`` and then ``time,rain``) are no such file.
 TELEMAC_HYETOGRAPH = re.compile(r"#\s*HYETOGRAPH\b", re.IGNORECASE)
 TELEMAC_HYETOGRAPH_FILE = re.compile(r"#\s*HYETOGRAPH\s+FILE\b", re.IGNORECASE)
 
@@ -344,6 +344,16 @@ def _with_holes(starts, ends, values, missing):
             np.insert(values, at, 0.0), np.insert(missing, at, True))
 
 
+def _starts_with_number(line: str) -> bool:
+    """Whether the first field of *line* (spaces or commas) is a number, as a time in seconds is."""
+    fields = line.replace(",", " ").split()
+    try:
+        float(fields[0])
+    except (IndexError, ValueError):
+        return False
+    return True
+
+
 def telemac_hyetograph(path: str | Path) -> RainSeries | None:
     """TELEMAC's own hyetograph file, read as TELEMAC reads it; ``None`` for any other file.
 
@@ -359,11 +369,14 @@ def telemac_hyetograph(path: str | Path) -> RainSeries | None:
             if not TELEMAC_HYETOGRAPH.match(first):
                 return None
             second = stream.readline()
-            if not (TELEMAC_HYETOGRAPH_FILE.match(first) or second.lstrip().startswith("#")):
-                return None
-            lines = [first, second, *stream.read().splitlines()]
+            rest = stream.read().splitlines()
     except OSError:
         return None
+    if not TELEMAC_HYETOGRAPH_FILE.match(first):
+        data = next((line for line in rest if line.strip()), "")
+        if not (second.lstrip().startswith("#") and _starts_with_number(data)):
+            return None
+    lines = [first, second, *rest]
     rows = []
     for number, line in enumerate(lines[2:], start=3):
         if not line.strip():

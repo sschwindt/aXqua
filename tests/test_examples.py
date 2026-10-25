@@ -179,6 +179,17 @@ def test_an_example_newer_than_the_installed_release_is_named_but_not_placed(
     # named as the source, it is placed
     done = examples.fetch("demo", tmp_path / "work", source=str(source), say=lambda text: None)
     assert done["source"] == str(source)
+    # a checkout of this version that lists it without its data belongs to this version: the data come from a later source
+    bare = tmp_path / "bare"
+    (bare / "demo").mkdir(parents=True)
+    (bare / "demo" / "demo.axq-case").write_bytes(FILES["demo.axq-case"])
+    _index(bare)
+    monkeypatch.setattr(examples, "sources", lambda explicit="": (
+        [explicit] if explicit else [str(bare), str(older), str(source)]))
+    done = examples.fetch("demo", tmp_path / "again", say=lambda text: None)
+    assert done["source"] == str(source)
+    monkeypatch.setattr(examples, "sources", lambda explicit="": (
+        [explicit] if explicit else [str(older), str(source)]))
     # where no source has it, the answer names the examples there are
     with pytest.raises(ConfigError, match="no example case 'inn'") as caught:
         examples.fetch("inn", tmp_path / "work", say=lambda text: None)

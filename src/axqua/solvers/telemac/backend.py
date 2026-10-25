@@ -31,6 +31,22 @@ log = logging.getLogger("axqua.solvers.telemac.backend")
 #: Which ``.cas`` each 3D variant runs, and what its result is called. Kept here rather
 #: than re-derived, because ``spec.py`` already names the same three files and the two
 #: must not drift.
+#: What a case in hydrology mode does not run: a steady state, the unsteady and 3D runs that start from one, the studies that compare steady runs and the calibration that perturbs one. A file left from when the case was a river case (``steady2d.cas``, ``r2d.slf``, ``unsteady2d.cas``) would otherwise run a model that is no longer the case.
+_NOT_IN_HYDROLOGY_MODE = frozenset({
+    Capability.STEADY2D, Capability.UNSTEADY2D, Capability.UNSTEADY3D, Capability.STEADY3D,
+    Capability.MESH_CONVERGENCE, Capability.VERTICAL_CONVERGENCE, Capability.CALIBRATION})
+
+
+def _refuse_in_hydrology_mode(cfg, capability) -> None:
+    """A :class:`~axqua.core.errors.ConfigError` for a capability of :data:`_NOT_IN_HYDROLOGY_MODE` in a case in hydrology mode."""
+    if getattr(cfg, "hydrology_mode", False) and capability in _NOT_IN_HYDROLOGY_MODE:
+        raise errors.ConfigError(
+            f"a case in hydrology mode has no {capability.value} simulation",
+            subject="hydrology.enabled",
+            remedy="Run the storm with the hydrology run (axqua submit <case> --kind "
+                   "hydrology), or switch the hydrology mode off and build the case again.")
+
+
 _3D_VARIANTS = {
     "hydrostatic": ("hotstart3d_hydrostatic.cas", "r3d-hydrostatic.slf"),
     "hydrodyn": ("hotstart3d_hydrodyn.cas", None),
@@ -63,6 +79,9 @@ class TelemacBackend(BaseBackend):
     def build(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
               **kwargs):
         capability = capability or Capability.STEADY2D
+        if capability is not Capability.STEADY2D:
+            # the build of the case itself is the build of STEADY2D, in either mode
+            _refuse_in_hydrology_mode(cfg, capability)
         if capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D):
             return self._build_unsteady(cfg, ctx=ctx, **kwargs)
         if capability in (Capability.STEADY3D,):
@@ -112,6 +131,7 @@ class TelemacBackend(BaseBackend):
     def run(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
             **kwargs):
         capability = capability or Capability.STEADY2D
+        _refuse_in_hydrology_mode(cfg, capability)
         if capability is Capability.STEADY3D:
             return self._run_3d(cfg, ctx=ctx, **kwargs)
         if capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D):
@@ -250,6 +270,7 @@ class TelemacBackend(BaseBackend):
     # -- study --------------------------------------------------------------------
     def study(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
               **kwargs):
+        _refuse_in_hydrology_mode(cfg, capability)
         if capability is Capability.MESH_CONVERGENCE:
             return self._mesh_convergence(cfg, ctx=ctx, **kwargs)
         if capability is Capability.VERTICAL_CONVERGENCE:

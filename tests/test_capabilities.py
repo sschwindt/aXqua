@@ -451,6 +451,13 @@ def test_the_case_carries_how_its_results_are_drawn(tmp_path):
 
     assert _display_settings(_Hydrology())["wet_depth"] == 0.001
 
+    # a case that sets 0 shows all water, in the map as in the report
+    class _Everything(_Cfg):
+        class hydrodynamics:
+            wet_depth = 0.0
+
+    assert _display_settings(_Everything())["wet_depth"] == 0.0
+
 
 def test_a_config_without_those_fields_still_answers():
     """`capabilities` is imported to say what a case can do and must not fail on an

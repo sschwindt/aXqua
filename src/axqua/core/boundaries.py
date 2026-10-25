@@ -33,8 +33,9 @@ def outlet_level(condition: str) -> str | None:
     try:
         return OUTLET_LEVELS[condition]
     except KeyError:
-        raise ValueError(f"{condition!r} is no outflow condition; the conditions are "
-                         f"{', '.join(OUTLET_LEVELS)}") from None
+        raise ValueError(f"{condition!r} is no outflow condition: a river case takes "
+                         f"{', '.join(RIVER_OUTLETS)}, a hydrology case "
+                         f"{', '.join(HYDROLOGY_OUTLETS)}") from None
 
 
 log = logging.getLogger("axqua")

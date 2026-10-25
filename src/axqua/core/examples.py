@@ -278,7 +278,7 @@ def fetch(name: str, folder: str | os.PathLike, *, source: str = "",
     ``{"name", "title", "folder", "case", "guide", "files", "megabytes", "source"}``.
     A folder that is there already is not touched: results of the user may be in it.
     """
-    tried, unknown = [], None
+    tried, unknown, listed_here = [], None, False
     for candidate in sources(source):
         try:
             listed = read_index(candidate)
@@ -297,8 +297,8 @@ def fetch(name: str, folder: str | os.PathLike, *, source: str = "",
             unknown = unknown or exc
             tried.append(f"{candidate} (no example {name!r})")
             continue
-        if unknown is not None:
-            # An example the checkout or the release tag of this aXqua does not have is newer than this aXqua, and its case file may use settings this version cannot read.
+        if unknown is not None and not listed_here:
+            # An example the checkout or the release tag of this aXqua does not have is newer than this aXqua, and its case file may use settings this version cannot read. One that an earlier source lists without its data belongs to this version.
             from axqua import __version__
 
             raise ConfigError(
@@ -309,6 +309,7 @@ def fetch(name: str, folder: str | os.PathLike, *, source: str = "",
         if not is_remote(candidate) and not _complete(candidate, example):
             # a checkout carries the case file and the guide, not always the data
             tried.append(f"{candidate} (without the data of {example.name})")
+            listed_here = True
             continue
         return _place(candidate, example, Path(folder), say)
     if unknown is not None and all("(no example " in t for t in tried):
