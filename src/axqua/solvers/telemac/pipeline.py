@@ -10,6 +10,7 @@ from pathlib import Path
 from axqua import calibration, dem, hydraulics
 from axqua.solvers.telemac import boundary, fortran, mesh, steering
 from axqua.config import Config
+from axqua.core.boundaries import outlet_level
 from axqua.core.capabilities import refresh_markers
 from axqua.env import TelemacRuntime
 from axqua.logsetup import log_step, setup_logging
@@ -72,7 +73,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
     # boundaries.rating_method set, leaving stage_discharge unset is a legitimate
     # "derive it from the geodata at the simulated Q" (see workflow.
     # synthesize_rating_if_missing), and it must land before validate() checks it.
-    if (cfg.outflow_condition == "stage_discharge"
+    if (outlet_level(cfg.outflow_condition) == "rating"
             and cfg.boundaries.stage_discharge is None
             and cfg.boundaries.prescribed_flowrate is not None):
         from axqua.workflow import synthesize_rating_if_missing
@@ -221,7 +222,7 @@ def _river_boundary_values(cfg: Config, inflow) -> tuple[float, float | None]:
             "no steady discharge for the build: set boundaries.prescribed_flowrate "
             "(m3/s) in case-config.yml, or provide boundaries.inflow."
         )
-    if cfg.boundaries.outflow_condition == "free":
+    if outlet_level(cfg.outflow_condition) is None:
         outflow_wse = None
         log.info("  prescribed inflow Q=%.3f m3/s, free (Neumann) outflow", inflow_q)
     else:

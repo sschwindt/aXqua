@@ -190,7 +190,7 @@ def resolve_outflow_wse(cfg, inflow_q: float) -> float:
 
     Where the level comes from is :data:`axqua.core.boundaries.OUTLET_LEVELS`: ``stage_discharge`` reads the rating curve and interpolates the WSE at the simulated discharge, ``elevation`` uses the fixed prescribed value, ``normal_depth`` the level of TELEMAC's Z(Q) curve at the discharge (the starting value TELEMAC then updates), and ``overfall`` the level below the lowest node of the built mesh. A free outflow has no level and raises.
     """
-    from axqua.config import outlet_level
+    from axqua.core.boundaries import outlet_level
 
     level = outlet_level(cfg.outflow_condition)
     if level == "fixed":
@@ -213,16 +213,16 @@ def resolve_outflow_wse(cfg, inflow_q: float) -> float:
     return _rating(cfg)(inflow_q)
 
 
-def outflow_wse_fn(cfg):
-    """Callable Q -> level of the outflow lines for a liquid-boundaries file, or None where the file gives no level: a free outflow prescribes none, and a ``normal_depth`` outlet takes its level from TELEMAC's own Z(Q) curve as the discharge changes. A rating curve gives the level of each discharge, every other outlet one level."""
-    from axqua.config import outlet_level
+def outflow_wse_fn(cfg, level: float | None = None):
+    """Callable Q -> level of the outflow lines for a liquid-boundaries file, or None where the file gives no level: a free outflow prescribes none, and a ``normal_depth`` outlet takes its level from TELEMAC's own Z(Q) curve as the discharge changes. A rating curve gives the level of each discharge, every other outlet one level: *level* where the caller has it already (the hydrology build, from its mesh), else :func:`resolve_outflow_wse`."""
+    from axqua.core.boundaries import outlet_level
 
-    level = outlet_level(cfg.outflow_condition)
-    if level in (None, "curve"):
+    kind = outlet_level(cfg.outflow_condition)
+    if kind in (None, "curve"):
         return None
-    if level == "rating":
+    if kind == "rating":
         return _rating(cfg)
-    wse = resolve_outflow_wse(cfg, 0.0)
+    wse = float(level) if level is not None else resolve_outflow_wse(cfg, 0.0)
     return lambda _q: wse
 
 

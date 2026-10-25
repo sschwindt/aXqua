@@ -177,6 +177,11 @@ def test_telemacs_own_hyetograph_file_is_read_as_telemac_reads_it(tmp_path):
     # TELEMAC reads only the time of the first line (READ(UL,*) AT1)
     path.write_text("#HYETOGRAPH FILE\n#T (s) RAINFALL (mm)\n0.\n3600 6.72\n")
     assert list(rainfall.read_series(path).intensity_mm_h) == [6.72]
+    # a byte order mark, a space after '#' and lower case are TELEMAC's file all the same
+    for header in ("\ufeff#HYETOGRAPH FILE\n", "# hyetograph file\n", "# HYETOGRAPH\n"):
+        path.write_text(header + "#T (s) RAINFALL (mm)\n0. 0\n3600 6.72\n", encoding="utf-8")
+        series = rainfall.read_series(path, units="mm", stamp="start")
+        assert list(series.intensity_mm_h) == [6.72], header
 
 
 def test_a_rain_table_that_only_names_a_hyetograph_is_read_as_a_table(tmp_path):
@@ -454,11 +459,14 @@ def test_a_hydrology_case_builds_without_a_discharge_or_a_centerline(tmp_path):
     cfg.boundaries.inflow = model / "hydrograph.csv"
     cfg.calibration = SimpleNamespace(parameters={"zone1": [0.1, 0.3]})
     cfg.ground_truth = SimpleNamespace(measurements="points.csv", sources=[], targets=None)
+    (model / cfg.results_slf).write_bytes(b"")      # a steady result left from a river case
     status = spec.SPEC.status(cfg)
-    for capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D, Capability.CALIBRATION):
+    for capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D, Capability.STEADY3D,
+                       Capability.VERTICAL_CONVERGENCE, Capability.CALIBRATION):
         assert not status.capability(capability).configured, capability
     cfg.hydrology.enabled = False
     assert spec._calibration_configured(cfg) and spec._has_varying_inflow(cfg)
+    assert spec._three_d_configured(cfg)
 
 
 def test_a_hydrology_case_shows_water_from_one_millimeter(tmp_path):
@@ -503,6 +511,45 @@ def test_an_overfall_outlet_holds_no_water_at_its_lines(tmp_path):
              .splitlines()]
     assert ["5", "4", "4"] in codes and ["2", "2", "2"] in codes
     assert ["4", "4", "4"] not in codes
+
+
+@pytest.mark.parametrize("outlet", ["overfall", "normal_depth"])
+def test_an_inflow_hydrograph_runs_in_the_hydrology_run(tmp_path, outlet):
+    """A catchment upstream enters through an inflow line with its hydrograph. The liquid-boundaries file gives the inflow Q(t) and, for an outlet that holds one level, that level (overfall: below the mesh); a normal_depth outlet takes its level from TELEMAC's Z(Q) curve and gets no column."""
+    import geopandas as gpd
+    from shapely.geometry import LineString
+
+    from axqua.config import load_config
+    from axqua.core.selafin import SelafinFile
+    from axqua.solvers.telemac import pipeline
+
+    case = _catchment(tmp_path, outlet="channel", extra=f"  outlet_condition: {outlet}\n")
+    src = tmp_path / "user-sources"
+    lines = [LineString([(X0 + 24, Y0), (X0 + 36, Y0)]),
+             LineString([(X0 + 24, Y0 + 50), (X0 + 36, Y0 + 50)])]
+    gpd.GeoDataFrame({"Type (inflow/outflow)": ["outflow", "inflow"]}, geometry=lines,
+                     crs="EPSG:25832").to_file(src / "liquid-boundaries.gpkg")
+    (src / "inflow.csv").write_text("time,Q\n0,0.05\n300,0.2\n600,0.05\n")
+    case.write_text(case.read_text().replace(
+        "  liquid_boundaries: user-sources/liquid-boundaries.gpkg\n",
+        "  liquid_boundaries: user-sources/liquid-boundaries.gpkg\n"
+        "  inflow: user-sources/inflow.csv\n"))
+    cfg = load_config(case)
+    pipeline.run(cfg, validate_env=False, log_to_file=False)
+    model = Path(cfg.model_dir)
+    rows = (model / cfg.liquid_boundaries_file).read_text().splitlines()
+    header = next(line.split() for line in rows if line.startswith("T"))
+    assert any(name.startswith("Q(") for name in header)
+    levels = [name for name in header if name.startswith("SL(")]
+    if outlet == "normal_depth":
+        assert not levels
+        return
+    assert len(levels) == 1
+    column = header.index(levels[0])
+    bed = SelafinFile(model / "geometry.slf").frame(0)["BOTTOM"]
+    values = [float(line.split()[column]) for line in rows[3:] if line.strip()]
+    assert values and values == pytest.approx([float(bed.min()) - 1.0] * len(values),
+                                              abs=1e-3)
 
 
 def test_the_hydrology_mesh_is_isotropic_and_honors_its_zones(tmp_path):

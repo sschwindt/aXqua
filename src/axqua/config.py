@@ -2327,11 +2327,6 @@ class Config:
         return self.boundaries.outflow_condition
 
     @property
-    def outlet_level(self) -> str | None:
-        """Where the level of the outflow lines comes from (:data:`OUTLET_LEVELS`)."""
-        return outlet_level(self.outflow_condition)
-
-    @property
     def wet_depth(self) -> float:
         """The depth [m] at or below which water counts as dry in the reports and the maps: ``hydrodynamics.wet_depth``, else 1 mm in a hydrology case and 1 cm in a river case."""
         if self.hydrodynamics.wet_depth is not None:
@@ -2429,7 +2424,9 @@ class Config:
 
     def _check_outflow(self) -> None:
         cond = self.outflow_condition
-        if cond == "stage_discharge" and self.boundaries.stage_discharge is None:
+        # a name that is no outflow condition is the finding of the block it is in
+        level = OUTLET_LEVELS.get(cond, "unknown")
+        if level == "rating" and self.boundaries.stage_discharge is None:
             # A MISSING rating is a supported state, not an error: `rating_method`
             # exists to say how one is synthesized, and `workflow.prepare_steady_inputs`
             # does it from the outflow liquid line and the DEM before the build. So
@@ -2442,9 +2439,9 @@ class Config:
             log.info("boundaries.stage_discharge is not set; the outflow rating will "
                      "be synthesized (rating_method: %s) from the outflow line and "
                      "the DEM", self.boundaries.rating_method)
-        if cond == "elevation" and self.boundaries.prescribed_elevation is None:
+        if level == "fixed" and self.boundaries.prescribed_elevation is None:
             raise ValueError(
-                "outflow_condition: elevation requires boundaries.prescribed_elevation"
+                f"outflow_condition: {cond} requires boundaries.prescribed_elevation"
             )
 
     def _closed_catchment(self) -> frozenset[str]:

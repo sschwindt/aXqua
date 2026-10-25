@@ -17,6 +17,7 @@ import logging
 from pathlib import Path
 
 from axqua.config import Config
+from axqua.core.boundaries import outlet_level
 from axqua.env import TelemacRuntime
 from axqua.progress import SolverProgress
 from axqua.rating import synthesize_outflow_rating
@@ -76,7 +77,7 @@ def synthesize_rating_if_missing(cfg: Config, discharge: float,
     Returns the rating path (existing or generated), or None for the other outflow
     conditions (``elevation`` / ``free``), which need no rating curve.
     """
-    if cfg.boundaries.outflow_condition != "stage_discharge":
+    if outlet_level(cfg.boundaries.outflow_condition) != "rating":
         return None
     sd = cfg.boundaries.stage_discharge
     method = getattr(cfg.boundaries, "rating_method", "trapezoid")

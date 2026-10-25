@@ -442,6 +442,15 @@ def test_the_case_carries_how_its_results_are_drawn(tmp_path):
     assert _display_settings(_Cfg()) == {"wet_depth": 0.005,
                                          "velocity_scale_max": 12.0}
 
+    # a stand-in without a setting of its own gets the default of its mode
+    class _Hydrology(_Cfg):
+        hydrology_mode = True
+
+        class hydrodynamics:
+            wet_depth = None
+
+    assert _display_settings(_Hydrology())["wet_depth"] == 0.001
+
 
 def test_a_config_without_those_fields_still_answers():
     """`capabilities` is imported to say what a case can do and must not fail on an

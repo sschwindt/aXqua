@@ -118,8 +118,8 @@ def _calibration_configured(cfg) -> bool:
 
 def _three_d_configured(cfg) -> bool:
     """The 3D path is available once the 2D result it hotstarts from exists; there is
-    no separate config switch for it (``add3d.py`` is an opt-in script)."""
-    return _exists(cfg, cfg.results_slf)
+    no separate config switch for it (``add3d.py`` is an opt-in script). A hydrology case has no steady 2D result of its own: an ``r2d.slf`` left from when the case was a river case would start 3D from a model that is no longer the case."""
+    return not _hydrology(cfg) and _exists(cfg, cfg.results_slf)
 
 
 SPEC = BackendSpec(
@@ -157,8 +157,7 @@ SPEC = BackendSpec(
         ),
         Capability.UNSTEADY3D: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=lambda cfg: (_has_varying_inflow(cfg) and not _hydrology(cfg)
-                                    and _three_d_configured(cfg)),
+            configured=lambda cfg: _has_varying_inflow(cfg) and _three_d_configured(cfg),
             built=lambda cfg: _exists(cfg, UNSTEADY3D_CAS),
             run=lambda cfg: _exists(cfg, cfg.results3d_unsteady_slf),
         ),

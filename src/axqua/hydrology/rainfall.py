@@ -15,6 +15,7 @@ Design storms are built from a depth-duration table of one return period, which 
 from __future__ import annotations
 
 import math
+import re
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -44,8 +45,9 @@ MISSING_AT_OR_BELOW = -999.0
 #: Dates written as one integer, by number of digits (DWD ``MESS_DATUM``).
 _INTEGER_DATES = {8: "%Y%m%d", 10: "%Y%m%d%H", 12: "%Y%m%d%H%M"}
 
-#: How the first line of TELEMAC's hyetograph file begins (``#HYETOGRAPH FILE``); a comment that only names a hyetograph (``# Hyetograph, station 3668``) is no such file.
-TELEMAC_HYETOGRAPH = "#HYETOGRAPH"
+#: The header of TELEMAC's hyetograph file: ``#HYETOGRAPH FILE`` (any case and spacing), or a comment ``#HYETOGRAPH ...`` with a second comment line under it, as TELEMAC's files have it. A comment that only names a hyetograph above the header of a table (``# Hyetograph, station 3668`` and then ``time,rain``) is no such file.
+TELEMAC_HYETOGRAPH = re.compile(r"#\s*HYETOGRAPH\b", re.IGNORECASE)
+TELEMAC_HYETOGRAPH_FILE = re.compile(r"#\s*HYETOGRAPH\s+FILE\b", re.IGNORECASE)
 
 
 @dataclass
@@ -351,11 +353,15 @@ def telemac_hyetograph(path: str | Path) -> RainSeries | None:
     if path.suffix.lower() in (".xlsx", ".xls"):
         return None
     try:
-        with path.open(encoding="utf-8", errors="replace") as stream:
-            first = stream.readline()
-            if not first.strip().upper().startswith(TELEMAC_HYETOGRAPH):
+        # utf-8-sig: a file saved with a byte order mark (Windows Notepad) still begins with '#'
+        with path.open(encoding="utf-8-sig", errors="replace") as stream:
+            first = stream.readline().strip()
+            if not TELEMAC_HYETOGRAPH.match(first):
                 return None
-            lines = [first, *stream.read().splitlines()]
+            second = stream.readline()
+            if not (TELEMAC_HYETOGRAPH_FILE.match(first) or second.lstrip().startswith("#")):
+                return None
+            lines = [first, second, *stream.read().splitlines()]
     except OSError:
         return None
     rows = []

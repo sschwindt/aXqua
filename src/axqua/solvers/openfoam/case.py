@@ -27,7 +27,8 @@ from pathlib import Path
 
 import numpy as np
 
-from axqua.config import Config
+from axqua.config import RIVER_WET_DEPTH, Config
+from axqua.core.boundaries import outlet_level
 from axqua.core.capabilities import refresh_markers
 from axqua.solvers.openfoam import (dicts, fields, mesh as ofmesh,
                                     planview, potential, quality)
@@ -211,7 +212,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
         # at the discharge of the case, and the mesher walls the outlet above that
         rating = rating_table(cfg, q, case_dir)
         tailwater = float(np.interp(q, [r[0] for r in rating], [r[1] for r in rating]))
-    elif of.outlet_stage is None and cfg.boundaries.outflow_condition != "free":
+    elif of.outlet_stage is None and outlet_level(cfg.outflow_condition) is not None:
         from axqua.hydraulics import resolve_outflow_wse
 
         tailwater = float(resolve_outflow_wse(cfg, q))
@@ -256,7 +257,7 @@ def build_case(cfg: Config, *, state: State2D | None = None,
                 f"{len(of_mesh.outlet_patches)} outlets each follow the same relation "
                 "with the discharge through their own patch, which is right only where "
                 "each outlet has a rating curve of that shape")
-    elif cfg.boundaries.outflow_condition == "free":
+    elif outlet_level(cfg.outflow_condition) is None:
         stage = None
         notes.append("free (Neumann) outfall: the model chooses its own tailwater")
     else:
@@ -526,7 +527,7 @@ def summarise(art: OpenFoamArtifacts) -> list[str]:
         # re-deriving it from the seed here would report a water fraction the case
         # does not have - and reporting 96.8% for a domain that is water by
         # construction is exactly the kind of contradiction this line exists to catch.
-        wet_depth = art.cfg.wet_depth if art.cfg is not None else 0.01
+        wet_depth = art.cfg.wet_depth if art.cfg is not None else RIVER_WET_DEPTH
         water = (1.0 if getattr(art.mesh, "rigid_lid", False)
                  else float(np.mean(fields.initial_alpha(
                      art.mesh, wet_depth=wet_depth) > 0.5)))

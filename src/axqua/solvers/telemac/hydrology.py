@@ -21,7 +21,9 @@ from pathlib import Path
 
 import numpy as np
 
+from axqua import hydraulics
 from axqua.config import Config
+from axqua.core.boundaries import outlet_level
 from axqua.hydrology import rainfall, soil, weather
 from axqua.solvers.telemac import greenampt
 
@@ -346,7 +348,8 @@ def steering_block(cfg: Config, liquids, forcing: Forcing) -> list[str]:
             f"COEFFICIENT OF WIND INFLUENCE FORMULA : {WIND_FORMULAS[h.wind_formula]}",
             f"THRESHOLD DEPTH FOR WIND : {h.wind_threshold_depth:g}",
         ]
-    if cfg.outlet_level == "curve" and any(lb.kind == "outflow" for lb in liquids):
+    if outlet_level(cfg.outflow_condition) == "curve" and any(lb.kind == "outflow"
+                                                             for lb in liquids):
         curves = ["1" if lb.kind == "outflow" else "0"
                   for lb in sorted(liquids, key=lambda b: b.index)]
         lines += [
@@ -392,13 +395,14 @@ def write_case(cfg: Config, mesh, liquids, inflow, *, turbulence_model: int,
     q_max = design_discharge(cfg, forcing.rain, inflow)
     level = None
     has_outlet = any(lb.kind == "outflow" for lb in liquids)
-    if cfg.outlet_level == "curve" and has_outlet:
+    outlet = outlet_level(cfg.outflow_condition)
+    if outlet == "curve" and has_outlet:
         out["outlet_curves"] = write_outlet_curves(cfg, mesh, liquids, q_max)
         levels = outlet_levels(cfg, liquids)
         level = min(levels.values()) if levels else None
-    elif cfg.outlet_level == "fixed":
+    elif outlet == "fixed":
         level = float(cfg.boundaries.prescribed_elevation)
-    elif cfg.outlet_level == "mesh":
+    elif outlet == "mesh":
         level = overfall_level(mesh)
         log.info("  outlet overfall: the level of the outflow lines is %.2f m, 1 m below "
                  "the lowest node, so TELEMAC holds no water there", level)
@@ -412,8 +416,7 @@ def write_case(cfg: Config, mesh, liquids, inflow, *, turbulence_model: int,
     liquid_file = None
     if _has_hydrograph(inflow):
         out["liquid_boundaries"] = steering.write_liquid_boundaries(
-            cfg, liquids, inflow,
-            (lambda _q, z=level: z) if cfg.outlet_level in ("fixed", "mesh") else None)
+            cfg, liquids, inflow, hydraulics.outflow_wse_fn(cfg, level=level))
         liquid_file = out["liquid_boundaries"].name
     graphic, listing = printout_steps(cfg)
     out["cas"] = steering.write_cas(

@@ -485,6 +485,26 @@ def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
     assert "cannot be started from the plugin yet" in capability.reason
 
 
+def test_a_hydrology_case_says_why_it_offers_no_steady_run_and_no_calibration():
+    """In hydrology mode the steady run, the unsteady runs, the 3D runs, both studies and the calibration are not configured, whatever the case file holds. "Add the relevant block" was the wrong advice: the block may well be there."""
+    def payload(hydrology):
+        return {"solvers": [{"solver": "telemac", "enabled": True, "capabilities": [
+            {"capability": "hydrology", "implemented": "yes", "configured": hydrology},
+            {"capability": "calibration", "implemented": "yes", "configured": False},
+            {"capability": "unsteady2d", "implemented": "yes", "configured": False},
+            {"capability": "mesh_convergence", "implemented": "yes",
+             "configured": False}]}]}
+
+    telemac = CaseView.from_payload(payload(True)).solver("telemac")
+    assert "not yet available" in telemac.capability("calibration").reason
+    assert "hydrology run" in telemac.capability("unsteady2d").reason
+    assert "steady simulations" in telemac.capability("mesh_convergence").reason
+    for name in ("calibration", "unsteady2d", "mesh_convergence"):
+        assert "relevant block" not in telemac.capability(name).reason
+    river = CaseView.from_payload(payload(False)).solver("telemac")
+    assert "relevant block" in river.capability("calibration").reason
+
+
 def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
     """GAIA is coupled to the steady and unsteady runs by a block of the case file.
     The tab said "no job kind - run it from a Python driver", which was wrong twice."""

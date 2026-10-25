@@ -221,8 +221,10 @@ DISABLED_WHEN: dict[str, list[dict[str, Any]]] = {
 #: one. No released plugin is affected: 1.0.2 and earlier read no ``required_unless``
 #: at all, and the plugin that brought it brought ``all`` as well.
 REQUIRED_WHEN: dict[str, list[dict[str, Any]]] = {
-    "boundaries.prescribed_elevation": [{"key": "boundaries.outflow_condition",
-                                         "in": ["elevation"]}, _HYDROLOGY_LEVEL],
+    "boundaries.prescribed_elevation": [
+        {"key": "boundaries.outflow_condition",
+         "in": [c for c in RIVER_OUTLETS if outlet_level(c) == "fixed"]},
+        _HYDROLOGY_LEVEL],
     "boundaries.inflow": [{"key": "hydrodynamics.regime", "in": ["unsteady"]}],
     "gain_lose.zone": [{"key": "gain_lose.enabled", "in": [True]}],
     "geodata.dem_target": [{"key": "dem_of_difference.enabled", "in": [True]}],

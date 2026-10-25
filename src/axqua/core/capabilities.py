@@ -285,12 +285,17 @@ def _display_settings(cfg) -> dict:
     predates a field.
     """
     post = getattr(cfg, "postproc", None)
-    # Config.wet_depth resolves the default of the mode; a stand-in may carry only the setting of the case
+    # Config.wet_depth resolves the default of the mode; a stand-in may carry only the setting of the case, and then gets the default of its mode here
     wet = getattr(cfg, "wet_depth", None)
     if wet is None:
         wet = getattr(getattr(cfg, "hydrodynamics", None), "wet_depth", None)
+    if not wet:
+        from axqua.config import HYDROLOGY_WET_DEPTH, RIVER_WET_DEPTH
+
+        wet = (HYDROLOGY_WET_DEPTH if getattr(cfg, "hydrology_mode", False)
+               else RIVER_WET_DEPTH)
     return {
-        "wet_depth": float(wet or 0.01),
+        "wet_depth": float(wet),
         "velocity_scale_max": float(
             getattr(post, "velocity_scale_max", 5.0) or 5.0),
     }

@@ -261,6 +261,7 @@ class ValidationSetup:
 def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     """Write the steering file of the validation run into the model folder."""
     from axqua import bayescal
+    from axqua.core.boundaries import outlet_level
     from axqua.core.errors import ConfigError
     from axqua.hydraulics import resolve_outflow_wse
     from axqua.solvers.telemac import steering
@@ -281,12 +282,13 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
     there = copy.deepcopy(cfg)
     there.boundaries.prescribed_flowrate = total
     condition = cfg.boundaries.outflow_condition
+    level = outlet_level(condition)
     if situation.prescribed_elevation is not None:
         there.boundaries.prescribed_elevation = float(situation.prescribed_elevation)
-        if condition != "elevation":
+        if level != "fixed":
             notes.append("The outflow water level of the validation situation is not "
                          f"used: the case computes it ({condition}).")
-    elif condition == "elevation":
+    elif level == "fixed":
         raise ConfigError(
             "the case prescribes the water level at the outflow, and the validation "
             f"situation {situation.name!r} names none",
@@ -294,7 +296,7 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
             remedy="Enter the outflow water level at which the validation data were "
                    "measured. The level of the calibration belongs to its discharge.")
     given = cfg.boundaries.stage_discharge
-    if condition == "stage_discharge" and (given is None or not Path(given).exists()):
+    if level == "rating" and (given is None or not Path(given).exists()):
         # The case has no measured rating curve: its outflow level was derived from
         # the channel geometry for the calibrated discharge. The level of this
         # situation is derived the same way, for its own discharge.
@@ -305,7 +307,7 @@ def build(cfg, situation, parameters: dict[str, float]) -> ValidationSetup:
         own.unlink(missing_ok=True)
         there.boundaries.stage_discharge = own
         synthesize_rating_if_missing(there, total)
-    stage = None if condition == "free" else float(resolve_outflow_wse(there, total))
+    stage = None if level is None else float(resolve_outflow_wse(there, total))
     flow, elev, _profiles = steering._prescribed_arrays(there, liquids, total, stage)
     text = bayescal._patch_cas(text, "PRESCRIBED FLOWRATES", flow)
     text = bayescal._patch_cas(text, "PRESCRIBED ELEVATIONS", elev)
