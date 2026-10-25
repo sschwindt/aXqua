@@ -78,8 +78,7 @@ def _turbulence_length_scale(cfg: Config) -> float:
 
 
 def read_cas_values(path: str | Path, *keywords: str) -> dict[str, str | None]:
-    """Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``),
-    ignoring comment lines - one file read/pass for all keywords."""
+    """Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``), ignoring comment lines - one file read/pass for all keywords."""
     pats = {kw: re.compile(rf"^\s*{re.escape(kw)}\s*[:=]\s*(.+?)\s*$", re.IGNORECASE)
             for kw in keywords}
     found: dict[str, str | None] = dict.fromkeys(keywords)

@@ -2,16 +2,10 @@
 
 Two sources in the listing of the run (``hydrology2d.cas_<date>.sortie``):
 
-* TELEMAC's water balance at every listing printout (:mod:`axqua.solvers.telemac.
-  sortie`): the volume in the domain and the flux through every liquid boundary,
-  positive entering. The outlet hydrograph is the sum of the exiting fluxes;
-* the line ``AXQUA HYDROLOGY t rain infiltrated evaporated`` that aXqua's runoff
-  routine writes at the same printouts: the volumes of rain, infiltration and
-  evaporation since the start [m3].
+* TELEMAC's water balance at every listing printout (:mod:`axqua.solvers.telemac. sortie`): the volume in the domain and the flux through every liquid boundary, positive entering. The outlet hydrograph is the sum of the exiting fluxes;
+* the line ``AXQUA HYDROLOGY t rain infiltrated evaporated`` that aXqua's runoff routine writes at the same printouts: the volumes of rain, infiltration and evaporation since the start [m3].
 
-The balance closes as ``rain + inflow = outflow + infiltrated + evaporated +
-storage + error``; ``error`` is what TELEMAC's mass conservation leaves, and is
-reported relative to the rain. The runoff coefficient is outflow over rain.
+The balance closes as ``rain + inflow = outflow + infiltrated + evaporated + storage + error``; ``error`` is what TELEMAC's mass conservation leaves, and is reported relative to the rain. The runoff coefficient is outflow over rain.
 """
 
 from __future__ import annotations
@@ -101,10 +95,7 @@ FINAL_KEYS = {
 def read_final_balance(path: str | Path) -> dict[str, float] | None:
     """TELEMAC-2D's ``FINAL BALANCE OF WATER VOLUME``, or None for an unfinished run.
 
-    ``entered`` is the net volume through the liquid boundaries (negative leaving),
-    ``source`` the net volume of the source terms, here rain less infiltration and
-    evaporation, and ``lost`` TELEMAC's own mass error. A closed domain prints the
-    volumes only; the others are then 0.
+    ``entered`` is the net volume through the liquid boundaries (negative leaving), ``source`` the net volume of the source terms, here rain less infiltration and evaporation, and ``lost`` TELEMAC's own mass error. A closed domain prints the volumes only; the others are then 0.
     """
     out: dict[str, float] = {}
     seen = False
@@ -135,10 +126,7 @@ def balance(sortie, budget: dict[str, np.ndarray],
             final: dict[str, float] | None = None) -> WaterBalance:
     """The water balance from TELEMAC's fluxes and the routine's volumes.
 
-    With TELEMAC's final balance the storage and the net boundary volume are exact;
-    the split of the boundary volume into inflow and outflow comes from the printed
-    fluxes (integrated from t = 0, where nothing flows yet). Without it, as for a run
-    that was stopped, the volume at t = 0 is taken back from the first printout.
+    With TELEMAC's final balance the storage and the net boundary volume are exact; the split of the boundary volume into inflow and outflow comes from the printed fluxes (integrated from t = 0, where nothing flows yet). Without it, as for a run that was stopped, the volume at t = 0 is taken back from the first printout.
     """
     t = np.concatenate([[0.0], np.asarray(sortie.time, dtype=float)])
     outflow = np.concatenate([[0.0], np.asarray(sortie.gross_out, dtype=float)])
@@ -222,9 +210,7 @@ def plot(path: Path, sortie, forcing_table, title: str) -> Path:
 def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     """Write the hydrograph and the water balance of the last hydrology run.
 
-    Files, in ``<postprocessing>/hydrology/`` unless *out_dir* says otherwise:
-    ``hydrograph.csv`` (time, every boundary flux, outflow), ``hydrograph.png``,
-    ``water-balance.csv`` and ``water-balance.json``.
+    Files, in ``<postprocessing>/hydrology/`` unless *out_dir* says otherwise: ``hydrograph.csv`` (time, every boundary flux, outflow), ``hydrograph.png``, ``water-balance.csv`` and ``water-balance.json``.
     """
     import pandas as pd
 

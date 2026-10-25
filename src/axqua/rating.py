@@ -47,9 +47,7 @@ def _resolve_n(manning: float | None, strickler: float | None) -> float:
 def ks_from_friction(law: int, coefficient: float) -> float | None:
     """Nikuradse ks [m] equivalent to a TELEMAC friction law and its coefficient.
 
-    Strickler (law 3, K = 1/n) and Manning (law 4, n) through the Strickler relation
-    n = ks^(1/6) / 21.1, i.e. ks = (n / 0.0474)^6; Nikuradse (law 5) is ks itself.
-    ``None`` for a law without such an equivalent (Chezy, Haaland, ...).
+    Strickler (law 3, K = 1/n) and Manning (law 4, n) through the Strickler relation n = ks^(1/6) / 21.1, i.e. ks = (n / 0.0474)^6; Nikuradse (law 5) is ks itself. ``None`` for a law without such an equivalent (Chezy, Haaland, ...).
     """
     law, coefficient = int(law), float(coefficient)
     if law not in (3, 4, 5):
@@ -378,11 +376,7 @@ def _valid(z, dem):
 def _dem_points(cfg, dem, points):
     """Coordinates of *points* in the DEM's own frame.
 
-    A case built from a CAD assembly runs in local coordinates: the DEM has no CRS
-    even where ``crs_epsg`` names the grid the drawing is set out in, because the two
-    have never been tied together (see `axqua georef`). Reprojecting into ``None``
-    raises, so when the DEM carries no CRS the points are already in its frame and are
-    sampled as they stand.
+    A case built from a CAD assembly runs in local coordinates: the DEM has no CRS even where ``crs_epsg`` names the grid the drawing is set out in, because the two have never been tied together (see `axqua georef`). Reprojecting into ``None`` raises, so when the DEM carries no CRS the points are already in its frame and are sampled as they stand.
     """
     from rasterio.warp import transform as warp_transform
 
@@ -419,11 +413,7 @@ def outflow_lines(cfg):
 def line_section(cfg, line, *, n_samples: int = 300, ks_fallback: float | None = None):
     """The cross-section along *line*: ``(station, bed, ks, points)``.
 
-    Samples the bed straight out of ``geodata.dem_initial`` and picks up the Nikuradse
-    ``ks`` of the roughness zone each sample falls in (``geodata.roughness_zones`` +
-    ``roughness_table``); without roughness zones every sample gets *ks_fallback*, or
-    the ks of the lateral ``friction.boundary_*`` roughness when that is None too.
-    Samples the DEM has no value for are left out.
+    Samples the bed straight out of ``geodata.dem_initial`` and picks up the Nikuradse ``ks`` of the roughness zone each sample falls in (``geodata.roughness_zones`` + ``roughness_table``); without roughness zones every sample gets *ks_fallback*, or the ks of the lateral ``friction.boundary_*`` roughness when that is None too. Samples the DEM has no value for are left out.
     """
     import geopandas as gpd
     import numpy as np
@@ -476,12 +466,7 @@ def synthesize_outflow_rating_from_section(cfg, discharge, *, slope=None, out=No
                                            n_samples: int = 300):
     """Outflow rating from the DEM cross-section along the outflow boundary line.
 
-    Samples the bed along the ``outflow`` liquid-boundary line straight out of
-    ``geodata.dem_initial``, picks up the Nikuradse ``ks`` of the roughness zone each
-    sample falls in (``geodata.roughness_zones`` + ``roughness_table``; the lateral
-    ``friction.boundary_*`` roughness otherwise), takes the reach slope from a linear
-    fit of the DEM along ``geodata.channel_centerline``, and inverts the section
-    conveyance with :func:`section_rating`.
+    Samples the bed along the ``outflow`` liquid-boundary line straight out of ``geodata.dem_initial``, picks up the Nikuradse ``ks`` of the roughness zone each sample falls in (``geodata.roughness_zones`` + ``roughness_table``; the lateral ``friction.boundary_*`` roughness otherwise), takes the reach slope from a linear fit of the DEM along ``geodata.channel_centerline``, and inverts the section conveyance with :func:`section_rating`.
     """
     import geopandas as gpd
     import numpy as np

@@ -1,31 +1,20 @@
 """The *Simulations > Hydrology* sub-tab: rainfall-runoff over a catchment.
 
-Above, the box of the capability (Build, Submit, Load results), like every simulation.
-Below it, the data of the case: where the catchment is, which rain, soil and weather
-files it has, and the findings of the hydrology checkup. *Data wizard...* opens the
-window that guides through the data (:mod:`.hydrology_wizard`); *Check* runs the
-checkup with the analysis of the terrain model, which takes a few seconds.
+Above, the box of the capability (Build, Submit, Load results), like every simulation. Below it, the data of the case: where the catchment is, which rain, soil and weather files it has, and the findings of the hydrology checkup. *Data wizard...* opens the window that guides through the data (:mod:`.hydrology_wizard`); *Check* runs the checkup with the analysis of the terrain model, which takes a few seconds.
 
-The plugin decides nothing here: the answers are those of ``axqua hydrology info``
-and ``axqua hydrology check``. Three rules keep them right and cheap. An answer is
-shown only when it is the newest one asked for the case that is still chosen (a
-checkup of the terrain takes seconds, and the user may have moved on to another case).
-A box that is not on the screen asks nothing until its tab is shown, so that one
-refresh of the case starts one checkup, not one per tab that carries the box. And a
-question that is still on its way is not asked again while the case file is the one it
-was asked about: a refresh then waits for its answer, which also keeps a checkup of the
-terrain the user started; data that have changed since are asked about again, with the
-terrain if that was the question.
+The plugin decides nothing here: the answers are those of ``axqua hydrology info`` and ``axqua hydrology check``. Three rules keep them right and cheap. An answer is shown only when it is the newest one asked for the case that is still chosen (a checkup of the terrain takes seconds, and the user may have moved on to another case). A box that is not on the screen asks nothing until its tab is shown, so that one refresh of the case starts one checkup, not one per tab that carries the box. And a question that is still on its way is not asked again while the case file is the one it was asked about: a refresh then waits for its answer, which also keeps a checkup of the terrain the user started; data that have changed since are asked about again, with the terrain if that was the question.
 """
 
 from __future__ import annotations
 
+import weakref
 from pathlib import Path
 from typing import NamedTuple
 
 from qgis.PyQt.QtWidgets import (QGroupBox, QHBoxLayout, QLabel, QPushButton,
                                  QVBoxLayout)
 
+from ..compat import is_deleted
 from ..core.runner_client import user_text
 from ..core.tasks import run_async
 from . import findings as fnd
@@ -72,11 +61,23 @@ def case_stamp(case: Path | None) -> tuple:
     return state.st_mtime_ns, state.st_size
 
 
+#: Every box of the hydrology data (the Hydrology sub-tab and the Preprocessing tab).
+_BOXES: "weakref.WeakSet[HydrologyDataBox]" = weakref.WeakSet()
+
+
+def data_changed(context) -> None:
+    """Tell every box of the dock of *context* that the data files of its case were written."""
+    for box in list(_BOXES):
+        if not is_deleted(box) and box.ctx is context:
+            box.refresh(changed=True)
+
+
 class HydrologyDataBox(QGroupBox):
     """The data of a hydrology case and its checkup."""
 
     def __init__(self, context, parent=None) -> None:
         super().__init__("Hydrology data", parent)
+        _BOXES.add(self)
         self.ctx = context
         self.case: Path | None = None
         self.info: dict = {}
@@ -111,8 +112,7 @@ class HydrologyDataBox(QGroupBox):
         layout.addLayout(row)
 
     def refresh(self, *, changed: bool = False) -> None:
-        """Show the case now chosen; *changed* says that its data files were written,
-        which the case file does not show (the data wizard downloads into them)."""
+        """Show the case now chosen; *changed* says that its data files were written, which the case file does not show (the data wizard downloads into them)."""
         case = self.ctx.project.active_case_path()
         self.case = Path(case) if case is not None else None
         self._stale = True
@@ -227,10 +227,10 @@ class HydrologyDataBox(QGroupBox):
         wizard = HydrologyWizard(self.ctx, self.case, self.info, parent=self)
         exec_dialog(wizard)
         if wizard.saved or wizard.wrote:
-            # the box asks again itself: the refresh of the page reaches it only when
-            # the status of the case can be read, and is then answered by these
-            # questions, which are on their way
-            self.refresh(changed=True)
+            # every box asks again itself (this one, and the one of the other tab): the
+            # refresh of the page reaches a box only when the status of the case can be
+            # read, and then finds these questions on their way
+            data_changed(self.ctx)
         if wizard.saved:
             self.ctx.refresh_case()
 

@@ -1,23 +1,10 @@
 """Green-Ampt soil parameters: by texture class, per soil zone, and per mesh node.
 
-Green-Ampt needs four soil numbers: the saturated hydraulic conductivity ``Ks``, the
-suction head at the wetting front ``psi``, the water content at saturation
-``theta_s`` and the water content at the start ``theta_i``. The runoff routine uses
-them as ``Ks`` and ``a = psi (theta_s - theta_i)`` per node.
+Green-Ampt needs four soil numbers: the saturated hydraulic conductivity ``Ks``, the suction head at the wetting front ``psi``, the water content at saturation ``theta_s`` and the water content at the start ``theta_i``. The runoff routine uses them as ``Ks`` and ``a = psi (theta_s - theta_i)`` per node.
 
-Where no measurements exist, Rawls, Brakensiek and Miller (1983, Journal of Hydraulic
-Engineering 109(1), Table 2) give mean values for the eleven USDA texture classes,
-which is what :data:`RAWLS_1983` holds, checked against the scan of the paper: total
-porosity (used as ``theta_s``), effective porosity (``theta_s`` minus the residual
-water content), suction and conductivity. Their conductivity is the Green-Ampt value,
-about half the saturated conductivity of a sample, as the paper derives it. Pure silt
-has no row (too few samples); it takes the silt loam values.
+Where no measurements exist, Rawls, Brakensiek and Miller (1983, Journal of Hydraulic Engineering 109(1), Table 2) give mean values for the eleven USDA texture classes, which is what :data:`RAWLS_1983` holds, checked against the scan of the paper: total porosity (used as ``theta_s``), effective porosity (``theta_s`` minus the residual water content), suction and conductivity. Their conductivity is the Green-Ampt value, about half the saturated conductivity of a sample, as the paper derives it. Pure silt has no row (too few samples); it takes the silt loam values.
 
-``theta_i`` is the one number that belongs to the event and not to the soil. It comes
-from the soil table, from ``hydrology.initial_water_content`` (for example the
-ERA5-Land soil moisture at the start of the event, which the data wizard fetches), or
-else from ``hydrology.initial_saturation``: the effective saturation, 0 for a soil at
-its residual water content and 1 for a saturated one.
+``theta_i`` is the one number that belongs to the event and not to the soil. It comes from the soil table, from ``hydrology.initial_water_content`` (for example the ERA5-Land soil moisture at the start of the event, which the data wizard fetches), or else from ``hydrology.initial_saturation``: the effective saturation, 0 for a soil at its residual water content and 1 for a saturated one.
 """
 
 from __future__ import annotations
@@ -83,8 +70,7 @@ def texture(name: str) -> Texture | None:
 def classify_texture(sand, silt, clay) -> np.ndarray:
     """USDA texture class of sand, silt and clay contents in percent (any scale).
 
-    The rules of the USDA soil texture triangle, as the NRCS texture calculator states
-    them. The contents are normalized to 100 % first, so SoilGrids' g/kg work as well.
+    The rules of the USDA soil texture triangle, as the NRCS texture calculator states them. The contents are normalized to 100 % first, so SoilGrids' g/kg work as well.
     """
     sand = np.asarray(sand, dtype=float)
     silt = np.asarray(silt, dtype=float)
@@ -168,8 +154,7 @@ def zone_soil(zone_id: int, *, texture_name: str | None = None, ks_mm_h=None,
               initial_saturation: float = 0.3) -> ZoneSoil:
     """Fill what a row does not give from its texture class, then ``theta_i``.
 
-    A sealed zone (``texture: sealed``) has ``Ks = 0`` and takes the rest from loam,
-    since without conductivity the other values do nothing.
+    A sealed zone (``texture: sealed``) has ``Ks = 0`` and takes the rest from loam, since without conductivity the other values do nothing.
     """
     name = (texture_name or "").strip()
     sealed = name.lower() in ("sealed", "impervious")
@@ -203,8 +188,7 @@ def read_soil_table(path: str | Path, *, initial_water_content: float | None = N
                     initial_saturation: float = 0.3) -> dict[int, ZoneSoil]:
     """Read ``zone_id, texture, ks_mm_h, suction_m, theta_s, theta_i`` (CSV or Excel).
 
-    Any column but ``zone_id`` may be missing or empty; what a row does not give comes
-    from its texture class.
+    Any column but ``zone_id`` may be missing or empty; what a row does not give comes from its texture class.
     """
     path = Path(path)
     frame = (pd.read_excel(path) if path.suffix.lower() in (".xlsx", ".xls")
@@ -276,9 +260,7 @@ def case_zones(cfg) -> dict[int, ZoneSoil]:
 def node_soil(cfg, x: np.ndarray, y: np.ndarray) -> NodeSoil:
     """Green-Ampt fields per node from the soil zones and the sealed surfaces.
 
-    Without ``soil_zones`` every node takes the one zone of the table (or the uniform
-    texture). With them, each node takes the zone of the polygon it lies in, or of the
-    nearest polygon just outside; a node under a sealed surface gets ``Ks = 0``.
+    Without ``soil_zones`` every node takes the one zone of the table (or the uniform texture). With them, each node takes the zone of the polygon it lies in, or of the nearest polygon just outside; a node under a sealed surface gets ``Ks = 0``.
     """
     import geopandas as gpd
 

@@ -23,17 +23,11 @@ from .runner_client import RunnerError
 class RunnerTask(QgsTask):
     """Call axqua in the background and hand the result back on the main thread.
 
-    Both callbacks run on the main thread (Qt delivers ``finished`` there), so they may
-    touch widgets and the layer tree freely - which is precisely why the subprocess call
-    has to happen in ``run`` and nothing else does.
+    Both callbacks run on the main thread (Qt delivers ``finished`` there), so they may touch widgets and the layer tree freely - which is precisely why the subprocess call has to happen in ``run`` and nothing else does.
 
-    *owner* is the widget the callbacks will touch. A task started from a dock that the
-    user then closes, or from a plugin that is reloaded, would otherwise call into a
-    deleted C++ object; naming the owner lets the callback be dropped instead.
+    *owner* is the widget the callbacks will touch. A task started from a dock that the user then closes, or from a plugin that is reloaded, would otherwise call into a deleted C++ object; naming the owner lets the callback be dropped instead.
 
-    *on_cancel* runs instead of both when the user cancels the task in the task bar, so
-    that a widget waiting for the answer can stop waiting; :func:`cancel_all` drops it,
-    because the widgets go away with the plugin.
+    *on_cancel* runs instead of both when the user cancels the task in the task bar, so that a widget waiting for the answer can stop waiting; :func:`cancel_all` drops it, because the widgets go away with the plugin.
     """
 
     def __init__(self, description: str, work: Callable[[], Any], *,

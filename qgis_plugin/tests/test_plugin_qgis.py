@@ -3417,15 +3417,17 @@ def test_a_checkup_of_the_terrain_is_asked_again_when_the_data_change(
 
 def test_the_data_wizard_refreshes_the_box_once_when_the_case_status_fails(
         qgis_app, tmp_path, monkeypatch):
-    """The page refreshes the box only when it can read the status of the case."""
+    """The page refreshes the box only when it can read the status of the case; the box of the other tab is told as well."""
     from axqua_plugin import compat
-    from axqua_plugin.gui import hydrology_wizard
+    from axqua_plugin.gui import hydrology_box, hydrology_wizard
 
     box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
     box.refresh()
     box.show()
     calls[0][1]["on_success"]({})
     calls[1][1]["on_success"]({"findings": []})
+    other = hydrology_box.HydrologyDataBox(box.ctx)     # the Preprocessing tab's box
+    other.refresh()                                     # not on the screen yet
 
     class _Wizard:
         def __init__(self, *args, **kwargs):
@@ -3437,7 +3439,10 @@ def test_the_data_wizard_refreshes_the_box_once_when_the_case_status_fails(
     assert _asked(calls, 2) == ["info", "checkup"]
     box.refresh()                                    # the page, when it does arrive
     assert _asked(calls, 2) == ["info", "checkup"]
+    other.show()                                     # its tab is opened: it asks
+    assert _asked(calls, 4) == ["info", "checkup"]
     box.deleteLater()
+    other.deleteLater()
 
 
 def test_a_cancelled_checkup_lets_the_user_check_again(qgis_app, tmp_path, monkeypatch):

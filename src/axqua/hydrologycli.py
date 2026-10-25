@@ -1,17 +1,8 @@
 """``axqua hydrology``: the data of a hydrology case, and its checkup.
 
-``info``      where the catchment is, its countries and what the case has so far
-``portals``   where rain, soil and weather data come from: national agencies, then global
-``textures``  the Green-Ampt parameters of the USDA texture classes (Rawls et al., 1983)
-``rainfall``  turn a rain record into the series the case reads
-``design``    a design storm from a depth-duration table (Euler II, alternating, block)
-``fetch``     download ``event`` (rain and weather), ``moisture``, ``soil`` or ``sealed``
-``check``     the hydrology checkup, the terrain analysis included
+``info``      where the catchment is, its countries and what the case has so far ``portals``   where rain, soil and weather data come from: national agencies, then global ``textures``  the Green-Ampt parameters of the USDA texture classes (Rawls et al., 1983) ``rainfall``  turn a rain record into the series the case reads ``design``    a design storm from a depth-duration table (Euler II, alternating, block) ``fetch``     download ``event`` (rain and weather), ``moisture``, ``soil`` or ``sealed`` ``check``     the hydrology checkup, the terrain analysis included
 
-The data wizard of the plugin is a form over these commands. Each command that writes
-a file answers with ``settings``: the case keys that point at it, which the wizard puts
-into the case file through ``axqua case write``. Files go into
-``<case folder>/user-sources/hydrology`` unless ``--out`` says otherwise.
+The data wizard of the plugin is a form over these commands. Each command that writes a file answers with ``settings``: the case keys that point at it, which the wizard puts into the case file through ``axqua case write``. Files go into ``<case folder>/user-sources/hydrology`` unless ``--out`` says otherwise.
 """
 
 from __future__ import annotations

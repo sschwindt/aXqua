@@ -1,13 +1,8 @@
 """The hydrology checkup: what a hydrology case needs before it is built.
 
-Returns :class:`~axqua.core.diagnostics.Finding` objects and never raises, so the case
-settings and the plugin can show every problem at once; the build runs the same checks
-and stops on an error. Each code has an anchor in ``docs/troubleshooting/``.
+Returns :class:`~axqua.core.diagnostics.Finding` objects and never raises, so the case settings and the plugin can show every problem at once; the build runs the same checks and stops on an error. Each code has an anchor in ``docs/troubleshooting/``.
 
-*terrain* switches on the part that takes seconds: the analysis of the DEM
-(:mod:`axqua.hydrology.terrain`) and the estimate of the mesh size from the size grid.
-The case settings and the refresh of the plugin leave it out, ``axqua hydrology check``,
-the *Check* button and the build run it.
+*terrain* switches on the part that takes seconds: the analysis of the DEM (:mod:`axqua.hydrology.terrain`) and the estimate of the mesh size from the size grid. The case settings and the refresh of the plugin leave it out, ``axqua hydrology check``, the *Check* button and the build run it.
 """
 
 from __future__ import annotations

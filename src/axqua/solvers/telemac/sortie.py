@@ -211,15 +211,9 @@ class Sortie:
 def read_sortie(path: str | Path) -> Sortie:
     """Parse the water-volume balance history out of a ``.sortie`` listing.
 
-    Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module
-    docstring); which one a listing carried is reported as :attr:`Sortie.dimension`.
+    Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module docstring); which one a listing carried is reported as :attr:`Sortie.dimension`.
 
-    Raises :class:`ValueError` when the listing holds no complete balance block -
-    normally because the run was launched without ``-s`` or without
-    ``PRINTING CUMULATED FLOWRATES : YES``. Blocks without any boundary flux are
-    complete only when the listing itself says the run had no liquid boundary (a
-    closed catchment of the hydrology mode): the domain of that run decides, not the
-    case as it is built now.
+    Raises :class:`ValueError` when the listing holds no complete balance block - normally because the run was launched without ``-s`` or without ``PRINTING CUMULATED FLOWRATES : YES``. Blocks without any boundary flux are complete only when the listing itself says the run had no liquid boundary (a closed catchment of the hydrology mode): the domain of that run decides, not the case as it is built now.
     """
     path = Path(path)
     study = "UNKNOWN"

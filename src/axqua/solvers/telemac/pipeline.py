@@ -233,8 +233,7 @@ def _river_boundary_values(cfg: Config, inflow) -> tuple[float, float | None]:
 
 def _write_river_steering(cfg: Config, the_mesh, liquids, inflow, inflow_q,
                           outflow_wse, art: Artifacts) -> None:
-    """Stage 4 of a river reach: GAIA, initial state, sources, steady and
-    unsteady steering."""
+    """Stage 4 of a river reach: GAIA, initial state, sources, steady and unsteady steering."""
     art.gaia_cas = steering.write_gaia_cas(cfg)
     gaia_name = art.gaia_cas.name if art.gaia_cas else None
     # turbulence model selected from the actual mesh resolution + velocity guess
@@ -311,9 +310,7 @@ def _write_river_steering(cfg: Config, the_mesh, liquids, inflow, inflow_q,
 def _write_hydrology(cfg: Config, the_mesh, liquids, inflow, art: Artifacts) -> None:
     """Stage 4 of a hydrology case: forcing, runoff routine, outlet and the .cas.
 
-    The run starts dry; only an inflow line gets the plug of the dry start, since
-    TELEMAC cannot prescribe a discharge through a dry section. No steady case is
-    written: a catchment has no steady state to start from.
+    The run starts dry; only an inflow line gets the plug of the dry start, since TELEMAC cannot prescribe a discharge through a dry section. No steady case is written: a catchment has no steady state to start from.
     """
     from axqua.solvers.telemac import hydrology
 

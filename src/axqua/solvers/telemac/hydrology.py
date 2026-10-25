@@ -1,37 +1,15 @@
 """The TELEMAC build of a hydrology case: rain, soil, weather and the outlet.
 
-A hydrology case (``hydrology.enabled``) is built by the same pipeline as a river
-reach (:mod:`axqua.solvers.telemac.pipeline`): terrain, mesh, boundary conditions,
-steering. This module supplies what differs:
+A hydrology case (``hydrology.enabled``) is built by the same pipeline as a river reach (:mod:`axqua.solvers.telemac.pipeline`): terrain, mesh, boundary conditions, steering. This module supplies what differs:
 
-* the soil fields of the geometry, read by TELEMAC as private variables
-  (:func:`soil_variables`);
-* the forcing files: rain and evaporation for the generated runoff routine
-  (``forcing.txt``), wind for TELEMAC's meteo module (``atmosphere.txt``)
-  (:func:`write_forcing`);
-* the outlet on TELEMAC's stage-discharge curve, one Z(Q) curve per outflow line from
-  Manning's normal flow through the section of that line, or the measured rating of
-  ``boundaries.stage_discharge`` (:func:`write_outlet_curves`);
-* the keywords of ``hydrology2d.cas`` (:func:`steering_block`) and the case itself
-  (:func:`write_case`).
+* the soil fields of the geometry, read by TELEMAC as private variables (:func:`soil_variables`);
+* the forcing files: rain and evaporation for the generated runoff routine (``forcing.txt``), wind for TELEMAC's meteo module (``atmosphere.txt``) (:func:`write_forcing`);
+* the outlet on TELEMAC's stage-discharge curve, one Z(Q) curve per outflow line from Manning's normal flow through the section of that line, or the measured rating of ``boundaries.stage_discharge`` (:func:`write_outlet_curves`);
+* the keywords of ``hydrology2d.cas`` (:func:`steering_block`) and the case itself (:func:`write_case`).
 
-The outline is a drainage divide and so a solid wall; water leaves through the outflow
-lines. The default outlet is ``normal_depth``: the level of the outflow line follows
-TELEMAC's Z(Q) curve of normal flow through its section, so the outlet holds the level
-the discharge needs and no more. Its level depends on the roughness of the outlet
-section (a 20 % error in Manning's n moves the depth by about 12 %), and that influence
-fades upstream over about ``h / S``, so the outlet goes a few such lengths downstream of
-where results are read. ``free`` (zero gradient of depth and velocity) holds only where
-the flow leaves supercritical: on the synthetic V-catchment of the tests, a channel at
-2 % with Manning's n of 0.03 runs near critical, and its free outlet filled up into a
-pond with the finite-volume kernel and blew up with the finite-element one, while
-``normal_depth`` drained the equilibrium discharge i A to 0.01 %. ``LAW OF FRICTION ON
-LATERAL BOUNDARIES`` plays no part: TELEMAC applies it to solid walls only.
+The outline is a drainage divide and so a solid wall; water leaves through the outflow lines. The default outlet is ``normal_depth``: the level of the outflow line follows TELEMAC's Z(Q) curve of normal flow through its section, so the outlet holds the level the discharge needs and no more. Its level depends on the roughness of the outlet section (a 20 % error in Manning's n moves the depth by about 12 %), and that influence fades upstream over about ``h / S``, so the outlet goes a few such lengths downstream of where results are read. ``free`` (zero gradient of depth and velocity) holds only where the flow leaves supercritical: on the synthetic V-catchment of the tests, a channel at 2 % with Manning's n of 0.03 runs near critical, and its free outlet filled up into a pond with the finite-volume kernel and blew up with the finite-element one, while ``normal_depth`` drained the equilibrium discharge i A to 0.01 %. ``LAW OF FRICTION ON LATERAL BOUNDARIES`` plays no part: TELEMAC applies it to solid walls only.
 
-The kernel is TELEMAC's finite-volume scheme (HLLC) with the hydrostatic reconstruction
-of Chen and Noelle (2017), the combination of TELEMAC's own rain-runoff validation case:
-the classical reconstruction fails where the water is shallower than the step of the
-bed between two nodes, which is what sheet flow on a hillslope is.
+The kernel is TELEMAC's finite-volume scheme (HLLC) with the hydrostatic reconstruction of Chen and Noelle (2017), the combination of TELEMAC's own rain-runoff validation case: the classical reconstruction fails where the water is shallower than the step of the bed between two nodes, which is what sheet flow on a hillslope is.
 """
 
 from __future__ import annotations
@@ -52,8 +30,7 @@ log = logging.getLogger("axqua")
 #: Wind formulas of TELEMAC's ``COEFFICIENT OF WIND INFLUENCE FORMULA``.
 WIND_FORMULAS = {"constant": 0, "flather": 1, "wu": 2}
 
-#: Graphic printouts of a hydrology run: the flow, the four private arrays (soil and
-#: infiltrated depth) and TELEMAC's maxima of the free surface and of the velocity.
+#: Graphic printouts of a hydrology run: the flow, the four private arrays (soil and infiltrated depth) and TELEMAC's maxima of the free surface and of the velocity.
 PRINTOUTS = "U,V,S,B,H,M,N,O,R,Z,MAXZ,TMXZ,MAXV,TMXV"
 
 
@@ -122,8 +99,7 @@ class Forcing:
 def write_forcing(cfg: Config, *, until: float | None = None) -> Forcing:
     """Write ``forcing.txt`` (and ``atmosphere.txt`` with wind); the run's duration.
 
-    The duration is the end of the last rain plus ``hydrology.drain_time``, or *until*
-    when that is later (the end of an inflow hydrograph).
+    The duration is the end of the last rain plus ``hydrology.drain_time``, or *until* when that is later (the end of an inflow hydrograph).
     """
     h = cfg.hydrology
     rain = rain_series(cfg)
@@ -176,9 +152,7 @@ def boundary_line(mesh, lb):
 def outlet_slope(cfg: Config, line, *, length: float | None = None) -> float:
     """Bed slope upstream of an outflow line, from the terrain model.
 
-    From the lowest point of the line, the DEM is sampled along the normal of the line
-    into the catchment, up to *length* (five default edge lengths, at least 20 m), and
-    the slope is the fit of elevation over distance. Never below 1e-4.
+    From the lowest point of the line, the DEM is sampled along the normal of the line into the catchment, up to *length* (five default edge lengths, at least 20 m), and the slope is the fit of elevation over distance. Never below 1e-4.
     """
     import rasterio
 
@@ -226,9 +200,7 @@ def outlet_slope(cfg: Config, line, *, length: float | None = None) -> float:
 
 
 def design_discharge(cfg: Config, rain: rainfall.RainSeries, inflow=None) -> float:
-    """Upper end of the outlet curves [m3/s]: three times the peak rain on the whole
-    catchment, plus the largest inflow. TELEMAC holds the last level of a curve above
-    its range, so the range is generous on purpose."""
+    """Upper end of the outlet curves [m3/s]: three times the peak rain on the whole catchment, plus the largest inflow. TELEMAC holds the last level of a curve above its range, so the range is generous on purpose."""
     from axqua.solvers.telemac.mesh import roi_polygon
 
     area = roi_polygon(cfg).area
@@ -241,9 +213,7 @@ def design_discharge(cfg: Config, rain: rainfall.RainSeries, inflow=None) -> flo
 def bed_roughness_ks(cfg: Config) -> float:
     """Nikuradse ks [m] of the bed where no roughness zones say otherwise.
 
-    From ``friction.default_law`` / ``default_coefficient`` through
-    :func:`axqua.rating.ks_from_friction`. Not the lateral wall roughness: TELEMAC
-    applies that to solid walls only, and an outlet is the bed of its section.
+    From ``friction.default_law`` / ``default_coefficient`` through :func:`axqua.rating.ks_from_friction`. Not the lateral wall roughness: TELEMAC applies that to solid walls only, and an outlet is the bed of its section.
     """
     from axqua.rating import ks_from_friction
 
@@ -280,8 +250,7 @@ def outlet_curve(cfg: Config, line, q_max: float):
 def write_outlet_curves(cfg: Config, mesh, liquids, q_max: float) -> Path:
     """TELEMAC's ``STAGE-DISCHARGE CURVES FILE``: one Z(Q) block per outflow line.
 
-    Also writes each curve as ``outlet-rating-<n>.csv`` (Q, WSE) into the
-    preprocessing folder, for the checkup and the report.
+    Also writes each curve as ``outlet-rating-<n>.csv`` (Q, WSE) into the preprocessing folder, for the checkup and the report.
     """
     blocks = ["# stage-discharge curves of the outlet, generated by axqua",
               "# (Manning's normal flow through the section of each outflow line,",
@@ -333,8 +302,7 @@ def outlet_levels(cfg: Config, liquids) -> dict[int, float]:
 def steering_block(cfg: Config, liquids, forcing: Forcing) -> list[str]:
     """The keywords a hydrology run adds to the steering file.
 
-    Values that do not fit DAMOCLES' 72 columns go on lines of their own: it reads a
-    keyword's values on as many lines as they take.
+    Values that do not fit DAMOCLES' 72 columns go on lines of their own: it reads a keyword's values on as many lines as they take.
     """
     h = cfg.hydrology
     lines = [
@@ -390,9 +358,7 @@ def finite_volumes(cfg: Config) -> bool:
 def printout_steps(cfg: Config) -> tuple[int, int]:
     """Graphic and listing printout periods in time steps.
 
-    TELEMAC counts them in steps of ``TIME STEP``, and with ``VARIABLE TIME-STEP``
-    both kernels adapt the step so that the printouts land on multiples of that time
-    (``ADAPTATION OF TIME STEP TO GRAPHIC PRINTOUTS``), so the period is exact.
+    TELEMAC counts them in steps of ``TIME STEP``, and with ``VARIABLE TIME-STEP`` both kernels adapt the step so that the printouts land on multiples of that time (``ADAPTATION OF TIME STEP TO GRAPHIC PRINTOUTS``), so the period is exact.
     """
     dt = float(cfg.hydrodynamics.time_step)
     graphic = max(1, int(round(float(cfg.hydrology.printout_period) / dt)))
@@ -404,8 +370,7 @@ def write_case(cfg: Config, mesh, liquids, inflow, *, turbulence_model: int,
                previous_computation: str | None = None) -> dict[str, Path]:
     """Write everything of the hydrology run: forcing, routine, curves and the .cas.
 
-    *inflow* is the inflow series of the case, or None; with a varying one the
-    inflow lines follow it through the liquid-boundaries file.
+    *inflow* is the inflow series of the case, or None; with a varying one the inflow lines follow it through the liquid-boundaries file.
     """
     from axqua.solvers.telemac import steering
     from axqua.solvers.telemac.pipeline import _has_hydrograph, _hydrograph_duration

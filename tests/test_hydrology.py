@@ -810,15 +810,58 @@ def test_integer_dates_are_read_as_dates_whatever_the_column_is_called(
 
 @pytest.mark.parametrize("values, step", [
     ((1900010100, 1900013700, 1900017300), 3600.0),
-    ((2030010100, 2030010700, 2030011300), 600.0)])     # these parse as dates as well
+    ((2030010100, 2030010700, 2030011300), 600.0),       # these parse as dates as well
+    ((1901010107, 1901010703), 596.0)])                  # and a logger's jitter
 def test_unix_seconds_are_never_read_as_dates(tmp_path, values, step):
-    """From 2030 on, Unix seconds also parse as YYYYMMDDHH; their steps are whole
-    minutes, which YYYYMMDDHH read as a number never are."""
+    """From 2030 on, Unix seconds also parse as YYYYMMDDHH; their steps are whole minutes, or days when read as dates, which YYYYMMDDHH never are."""
     path = tmp_path / "logger.csv"
     path.write_text("timestamp,rain\n" + "".join(f"{v},5\n" for v in values))
     series = rainfall.read_series(path)
     assert series.origin is None
-    assert list(series.end_s) == [step, 2 * step, 3 * step]
+    assert list(series.end_s) == [step * (k + 1) for k in range(len(values))]
+
+
+def test_the_date_cells_of_an_excel_table_are_dates(tmp_path):
+    """pandas holds them as dates; read as numbers they were nanoseconds since 1970."""
+    from axqua.hydrology import weather
+
+    stamps = pd.to_datetime(["2024-06-01 01:00", "2024-06-01 02:00", "2024-06-01 03:00"])
+    pd.DataFrame({"time": stamps, "rain": [1.0, 2.0, 3.0]}).to_excel(
+        tmp_path / "rain.xlsx", index=False)
+    series = rainfall.read_series(tmp_path / "rain.xlsx", units="mm")
+    assert series.origin == pd.Timestamp("2024-06-01 00:00")
+    assert list(series.end_s) == [3600.0, 7200.0, 10800.0]
+    assert series.total_mm == pytest.approx(6.0)
+    pd.DataFrame({"time": stamps, "temperature": [10.0, 11.0, 12.0]}).to_excel(
+        tmp_path / "weather.xlsx", index=False)
+    meteo = weather.read_weather(tmp_path / "weather.xlsx")
+    assert meteo.origin == pd.Timestamp("2024-06-01 00:00")
+    assert list(meteo.end_s) == [3600.0, 7200.0, 10800.0]
+
+
+def test_a_header_repeated_inside_the_data_is_left_out_whatever_its_name(tmp_path):
+    path = tmp_path / "joined.csv"
+    path.write_text("Zeit (UTC+1),rain\n2024-06-02 12:00,1\nZeit (UTC+1),rain\n"
+                    "2024-06-02 13:00,2\n")
+    assert list(rainfall.read_series(path).intensity_mm_h) == [1.0, 2.0]
+
+
+def test_a_value_of_the_dwd_covers_its_own_period_and_a_missing_row_is_a_gap(tmp_path):
+    """An hour the file does not have is not spread over the next one; the day before the DWD changed its day in April 2001 ends at 05:30 UTC, the next begins at 05:50."""
+    hourly = tmp_path / "produkt_rr_stunde_03379.txt"
+    hourly.write_text("STATIONS_ID;MESS_DATUM;QN_8;  R1;RS_IND;WRTR;eor\n"
+                      "3379;2024060211;3;1.0;1;6;eor\n3379;2024060213;3;2.0;1;6;eor\n")
+    series = rainfall.read_series(hourly)
+    assert list(series.intensity_mm_h) == [1.0, 0.0, 2.0]
+    assert series.gaps == 1 and series.total_mm == pytest.approx(3.0)
+    daily = tmp_path / "produkt_nieder_tag_03379.txt"
+    daily.write_text("STATIONS_ID;MESS_DATUM;QN_6;  RS;RSF;SH_TAG;NSH_TAG;eor\n"
+                     "3379;20010331;3;24.0;6;0;0;eor\n3379;20010401;3;24.0;6;0;0;eor\n")
+    series = rainfall.read_series(daily)
+    assert series.origin == pd.Timestamp("2001-03-31 05:30")    # 07:30 summer time
+    assert list((series.end_s - series.start_s) / 3600.0) == pytest.approx(
+        [24.0, 1 / 3, 24.0])
+    assert list(series.intensity_mm_h) == [1.0, 0.0, 1.0] and series.gaps == 1
 
 
 def test_a_missing_reading_of_the_weather_is_interpolated_and_named(tmp_path):

@@ -2,23 +2,11 @@
 
 Two questions the hydrology checkup asks before anything is meshed:
 
-**Does water leave through a wall?** The outline of a hydrology case is meant to be
-the drainage divide, which is a solid wall by definition: no surface water crosses it.
-Where the outline is not the divide, the terrain slopes out of the domain under the
-wall, and in the model the water collected upslope ponds against it. To find those
-places, every cell of the outline is opened as an exit and the terrain is flooded
-inwards from them (priority-flood, Barnes et al., 2014): each cell drains to the cell
-that flooded it, over its spill point where it lies in a depression. An exit cell whose
-contributing area is large and which lies on no outflow line is a wall the flow
-crosses.
+**Does water leave through a wall?** The outline of a hydrology case is meant to be the drainage divide, which is a solid wall by definition: no surface water crosses it. Where the outline is not the divide, the terrain slopes out of the domain under the wall, and in the model the water collected upslope ponds against it. To find those places, every cell of the outline is opened as an exit and the terrain is flooded inwards from them (priority-flood, Barnes et al., 2014): each cell drains to the cell that flooded it, over its spill point where it lies in a depression. An exit cell whose contributing area is large and which lies on no outflow line is a wall the flow crosses.
 
-**Which closed depressions are there?** The same flood fills every depression to its
-spill level. A depression keeps the rain that falls into it until it is full, which is
-right for a pond, and wrong where the terrain model blocks a culvert or a bridge
-opening. The checkup names the largest ones so they can be told apart.
+**Which closed depressions are there?** The same flood fills every depression to its spill level. A depression keeps the rain that falls into it until it is full, which is right for a pond, and wrong where the terrain model blocks a culvert or a bridge opening. The checkup names the largest ones so they can be told apart.
 
-The DEM is read over the outline at a cell size that keeps the grid at
-``max_cells`` cells, so the check takes seconds on a catchment of any size.
+The DEM is read over the outline at a cell size that keeps the grid at ``max_cells`` cells, so the check takes seconds on a catchment of any size.
 """
 
 from __future__ import annotations
@@ -46,8 +34,7 @@ class TerrainGrid:
 
 
 def load_grid(cfg, *, max_cells: int = 250_000) -> TerrainGrid:
-    """Read ``geodata.dem_initial`` over ``geodata.boundary``, averaged to at most
-    *max_cells* cells (never finer than the DEM itself)."""
+    """Read ``geodata.dem_initial`` over ``geodata.boundary``, averaged to at most *max_cells* cells (never finer than the DEM itself)."""
     import rasterio
     from rasterio.enums import Resampling
     from rasterio.features import geometry_mask

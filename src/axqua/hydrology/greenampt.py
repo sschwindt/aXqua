@@ -1,43 +1,19 @@
 """Green-Ampt infiltration: the per-node algorithm of aXqua's runoff routine, in Python.
 
-TELEMAC-2D v9.1.1 ships one Green-Ampt routine (``RAINFALL-RUNOFF MODEL : 3``), the
-integral form of Travert et al. (2022). De Vos et al. (2024, Proceedings of the XXXth
-TELEMAC User Conference, hdl 20.500.11970/114347) showed that it does not let ponded
-water infiltrate once the rain stops, and that its capacity rises when the rain
-intensifies after ponding, through the term ``c = P - F``. They recommend the explicit
-solution of Sadeghi et al. (2024, Vadose Zone Journal 23(4)) with the ponding time of
-Chu (1978) for unsteady rain. The first implementation in TELEMAC is Broich et al.
-(2022, Proceedings of the XXVIIIth TELEMAC User Conference, pp. 143-145).
+TELEMAC-2D v9.1.1 ships one Green-Ampt routine (``RAINFALL-RUNOFF MODEL : 3``), the integral form of Travert et al. (2022). De Vos et al. (2024, Proceedings of the XXXth TELEMAC User Conference, hdl 20.500.11970/114347) showed that it does not let ponded water infiltrate once the rain stops, and that its capacity rises when the rain intensifies after ponding, through the term ``c = P - F``. They recommend the explicit solution of Sadeghi et al. (2024, Vadose Zone Journal 23(4)) with the ponding time of Chu (1978) for unsteady rain. The first implementation in TELEMAC is Broich et al. (2022, Proceedings of the XXVIIIth TELEMAC User Conference, pp. 143-145).
 
-aXqua generates its own ``runoff_greenampt.f`` (:mod:`axqua.solvers.telemac.greenampt`)
-with three kernels, and this module is the same algorithm in Python. It serves as the
-reference the tests check against the exact Green-Ampt solution, and as a quick
-estimate of how much of a storm a soil takes up:
+aXqua generates its own ``runoff_greenampt.f`` (:mod:`axqua.solvers.telemac.greenampt`) with three kernels, and this module is the same algorithm in Python. It serves as the reference the tests check against the exact Green-Ampt solution, and as a quick estimate of how much of a storm a soil takes up:
 
 ``sadeghi`` (the default)
-    Before ponding the capacity is the exact ``Ks (1 + a/F)``, so all rain infiltrates.
-    A node ponds when that capacity falls below the rain intensity (Chu's criterion for
-    a hyetograph of blocks), or, as aXqua's extension, when water from upslope stands
-    on it deeper than ``runon_depth`` (the gap de Vos et al. name). After ponding the
-    capacity follows Sadeghi's explicit solution in the time since ponding, shifted by
-    the time the ponded curve needs to reach the depth already infiltrated (their
-    eq. 4 to 9). Ponded water keeps infiltrating after the rain.
+    Before ponding the capacity is the exact ``Ks (1 + a/F)``, so all rain infiltrates. A node ponds when that capacity falls below the rain intensity (Chu's criterion for a hyetograph of blocks), or, as aXqua's extension, when water from upslope stands on it deeper than ``runon_depth`` (the gap de Vos et al. name). After ponding the capacity follows Sadeghi's explicit solution in the time since ponding, shifted by the time the ponded curve needs to reach the depth already infiltrated (their eq. 4 to 9). Ponded water keeps infiltrating after the rain.
 ``exact``
-    The capacity ``Ks (1 + a/F)`` on the infiltrated depth the routine tracks per node,
-    limited by the water available. This is Travert's form with ``c = 0``, which de Vos
-    et al. name as the repair of its anomaly, plus the infiltration of ponded water.
+    The capacity ``Ks (1 + a/F)`` on the infiltrated depth the routine tracks per node, limited by the water available. This is Travert's form with ``c = 0``, which de Vos et al. name as the repair of its anomaly, plus the infiltration of ponded water.
 ``travert``
-    The equations TELEMAC ships, for comparison: capacity ``Ks (1 + (a + c dtheta)/F)``
-    with ``c = P - F``, and only rain infiltrates.
+    The equations TELEMAC ships, for comparison: capacity ``Ks (1 + (a + c dtheta)/F)`` with ``c = P - F``, and only rain infiltrates.
 
-In all three, ``a = psi (theta_s - theta_i)`` is the product of the suction head at the
-wetting front and the moisture deficit, so a soil is two numbers per node, ``Ks`` and
-``a`` (``dtheta`` is needed by ``travert`` alone). Evaporation is taken from the surface
-water left after infiltration and never below the water there is.
+In all three, ``a = psi (theta_s - theta_i)`` is the product of the suction head at the wetting front and the moisture deficit, so a soil is two numbers per node, ``Ks`` and ``a`` (``dtheta`` is needed by ``travert`` alone). Evaporation is taken from the surface water left after infiltration and never below the water there is.
 
-The per-step update is written so that the Fortran routine can repeat it: TELEMAC calls
-the source terms once per sub-iteration of a time step, so the routine computes the step
-from the state at its start and commits it only when the next step begins.
+The per-step update is written so that the Fortran routine can repeat it: TELEMAC calls the source terms once per sub-iteration of a time step, so the routine computes the step from the state at its start and commits it only when the next step begins.
 """
 
 from __future__ import annotations
@@ -64,9 +40,7 @@ MM_PER_H = 1.0 / 3.6e6       # 1 mm/h in m/s
 def sadeghi_capacity(ks: float, a: float, t_ga: float) -> float:
     """Infiltration capacity [m/s] of a ponded soil after Sadeghi et al. (2024).
 
-    *t_ga* is the time on the ponded Green-Ampt curve [s] (de Vos et al., eq. 6). Within
-    about 5 % of the exact capacity at the start of ponding and within 1 % once
-    ``Ks t / a`` exceeds 1 (checked in the tests).
+    *t_ga* is the time on the ponded Green-Ampt curve [s] (de Vos et al., eq. 6). Within about 5 % of the exact capacity at the start of ponding and within 1 % once ``Ks t / a`` exceeds 1 (checked in the tests).
     """
     if ks <= 0.0:
         return 0.0
@@ -80,9 +54,7 @@ def sadeghi_capacity(ks: float, a: float, t_ga: float) -> float:
 def ponded_time(ks: float, a: float, depth: float) -> float:
     """Time [s] the ponded Green-Ampt curve needs to infiltrate *depth* [m].
 
-    The exact inverse of Green-Ampt under ponding from a dry start,
-    ``t = (F - a ln(1 + F/a)) / Ks``; with ``F`` the depth at ponding it is the time
-    shift ``t_s`` of de Vos et al. (eq. 5).
+    The exact inverse of Green-Ampt under ponding from a dry start, ``t = (F - a ln(1 + F/a)) / Ks``; with ``F`` the depth at ponding it is the time shift ``t_s`` of de Vos et al. (eq. 5).
     """
     if ks <= 0.0 or depth <= 0.0:
         return 0.0
@@ -146,9 +118,7 @@ def step(state: NodeState, soil: Soil, *, t_end: float, dt: float, rain: float,
          ponding_by_runon: bool = True, runon_depth: float = 0.001) -> Step:
     """Advance one node over the step ``[t_end - dt, t_end]``.
 
-    *rain* and *evaporation* are rates [m/s] over the step, *depth* the water depth at
-    its start [m], *rain_total* the rain fallen before the step [m] (``travert`` only).
-    Returns the new state without changing *state*, so a step can be computed again.
+    *rain* and *evaporation* are rates [m/s] over the step, *depth* the water depth at its start [m], *rain_total* the rain fallen before the step [m] (``travert`` only). Returns the new state without changing *state*, so a step can be computed again.
     """
     if kernel not in KERNELS:
         raise ValueError(f"unknown Green-Ampt kernel {kernel!r}; one of {KERNELS}")
@@ -212,10 +182,7 @@ def simulate_column(soil: Soil, rain_rate, evaporation_rate=None, *, duration: f
                     runon_depth: float = 0.001) -> ColumnResult:
     """Run the algorithm on one node whose surface water stays where it falls.
 
-    *rain_rate* and *evaporation_rate* are callables of time [s] returning rates
-    [m/s], or numbers. This is a closed, flat cell: what TELEMAC computes on a flat
-    closed basin of one soil, which is how the generated routine is checked against
-    this reference.
+    *rain_rate* and *evaporation_rate* are callables of time [s] returning rates [m/s], or numbers. This is a closed, flat cell: what TELEMAC computes on a flat closed basin of one soil, which is how the generated routine is checked against this reference.
     """
     def _as_fn(value):
         if value is None:
@@ -253,9 +220,7 @@ def simulate_column(soil: Soil, rain_rate, evaporation_rate=None, *, duration: f
 def exact_ponded_infiltration(ks: float, a: float, rain: float, t: float) -> float:
     """Cumulative infiltration [m] under constant rain, exact (Mein and Larson, 1973).
 
-    All rain infiltrates until ponding at ``F_p = a Ks / (i - Ks)``; afterwards ``F``
-    solves ``F - a ln(1 + F/a) = Ks (t - t_p) + F_p - a ln(1 + F_p/a)``. *ks* and
-    *rain* in m/s, *a* in m, *t* in s.
+    All rain infiltrates until ponding at ``F_p = a Ks / (i - Ks)``; afterwards ``F`` solves ``F - a ln(1 + F/a) = Ks (t - t_p) + F_p - a ln(1 + F_p/a)``. *ks* and *rain* in m/s, *a* in m, *t* in s.
     """
     from scipy.optimize import brentq
 

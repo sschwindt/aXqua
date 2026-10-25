@@ -1,15 +1,8 @@
 """Where the data of a hydrology case come from: national agencies first, then global.
 
-The rain of a catchment is best measured close by: rain gauges and weather radar of the
-national meteorological agency resolve the minutes and kilometers a storm has, and the
-design storms engineers work with are national products (KOSTRA-DWD in Germany, NOAA
-Atlas 14 in the USA). Global data sets fill in where nothing else is at hand, with a
-caution: reanalysis spreads a storm over cells of 10 to 30 km and an hour, and
-underestimates short intensities.
+The rain of a catchment is best measured close by: rain gauges and weather radar of the national meteorological agency resolve the minutes and kilometers a storm has, and the design storms engineers work with are national products (KOSTRA-DWD in Germany, NOAA Atlas 14 in the USA). Global data sets fill in where nothing else is at hand, with a caution: reanalysis spreads a storm over cells of 10 to 30 km and an hour, and underestimates short intensities.
 
-The list is data. Every link was opened when it was written (2026-10-24); a country is
-told from the location of the catchment by coarse bounding boxes, so a catchment near
-a border gets the agencies of both countries.
+The list is data. Every link was opened when it was written (2026-10-24); a country is told from the location of the catchment by coarse bounding boxes, so a catchment near a border gets the agencies of both countries.
 """
 
 from __future__ import annotations

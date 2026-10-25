@@ -1,32 +1,15 @@
 """Generate ``runoff_greenampt.f``: Green-Ampt infiltration, rain and evaporation.
 
-TELEMAC-2D v9.1.1 calls ``RUNOFF_GREENAMPT`` from ``prosou.f`` when
-``RAINFALL-RUNOFF MODEL : 3`` and ``RAIN OR EVAPORATION : YES``. A routine of that
-name in the ``FORTRAN FILE`` folder replaces the shipped one, which is how this module
-brings in what TELEMAC lacks (see :mod:`axqua.hydrology.greenampt` for the physics and
-the papers):
+TELEMAC-2D v9.1.1 calls ``RUNOFF_GREENAMPT`` from ``prosou.f`` when ``RAINFALL-RUNOFF MODEL : 3`` and ``RAIN OR EVAPORATION : YES``. A routine of that name in the ``FORTRAN FILE`` folder replaces the shipped one, which is how this module brings in what TELEMAC lacks (see :mod:`axqua.hydrology.greenampt` for the physics and the papers):
 
-* the infiltration kernel of de Vos et al. (2024): Sadeghi's explicit solution with
-  Chu's ponding for unsteady rain, ponded water infiltrating after the rain, and
-  ponding by run-on as aXqua's extension; or the exact capacity on the infiltrated
-  depth, or TELEMAC's own equations for comparison;
-* ``Ks`` and ``a = psi (theta_s - theta_i)`` per node, read by TELEMAC from the
-  geometry as private variables (only ``Ks`` is spatial in the shipped routine);
-* a hyetograph and an evaporation series from ``FORMATTED DATA FILE 1``
-  (``forcing.txt``), where the shipped routine knows one constant rate;
-* evaporation of the surface water left after infiltration (the shipped routine stops
-  on negative rain).
+* the infiltration kernel of de Vos et al. (2024): Sadeghi's explicit solution with Chu's ponding for unsteady rain, ponded water infiltrating after the rain, and ponding by run-on as aXqua's extension; or the exact capacity on the infiltrated depth, or TELEMAC's own equations for comparison;
+* ``Ks`` and ``a = psi (theta_s - theta_i)`` per node, read by TELEMAC from the geometry as private variables (only ``Ks`` is spatial in the shipped routine);
+* a hyetograph and an evaporation series from ``FORMATTED DATA FILE 1`` (``forcing.txt``), where the shipped routine knows one constant rate;
+* evaporation of the surface water left after infiltration (the shipped routine stops on negative rain).
 
-The routine computes each step from the state at the start of the step and commits it
-when the next step begins, because ``PROSOU`` runs once per sub-iteration of a step
-(``NUMBER OF SUB-ITERATIONS FOR NON-LINEARITIES``): updating the state on every call
-would count the infiltration of a step several times. At every listing printout it
-writes the volumes of rain, infiltration and evaporation so far as one line
-``AXQUA HYDROLOGY t rain infiltrated evaporated`` [s, m3], which the report of the run
-reads (:mod:`axqua.hydrology.report`).
+The routine computes each step from the state at the start of the step and commits it when the next step begins, because ``PROSOU`` runs once per sub-iteration of a step (``NUMBER OF SUB-ITERATIONS FOR NON-LINEARITIES``): updating the state on every call would count the infiltration of a step several times. At every listing printout it writes the volumes of rain, infiltration and evaporation so far as one line ``AXQUA HYDROLOGY t rain infiltrated evaporated`` [s, m3], which the report of the run reads (:mod:`axqua.hydrology.report`).
 
-The per-node update is line for line the one of :func:`axqua.hydrology.greenampt.step`;
-the tests compare a TELEMAC run on a closed flat basin with that reference.
+The per-node update is line for line the one of :func:`axqua.hydrology.greenampt.step`; the tests compare a TELEMAC run on a closed flat basin with that reference.
 """
 
 from __future__ import annotations
@@ -40,9 +23,7 @@ from axqua.solvers.telemac.fortran import FIXED_FORM_LIMIT, _dbl
 
 log = logging.getLogger("axqua")
 
-#: The private variables, in the order of TELEMAC's private arrays: name and unit,
-#: 16 characters each. The first three are read from the geometry, the fourth is
-#: written by the routine. TELEMAC matches the first 16 characters (fonstr.f).
+#: The private variables, in the order of TELEMAC's private arrays: name and unit, 16 characters each. The first three are read from the geometry, the fourth is written by the routine. TELEMAC matches the first 16 characters (fonstr.f).
 PRIVATE_VARIABLES = (
     ("KS", "MM/H"),
     ("GA SUCTION A", "M"),
@@ -64,8 +45,7 @@ def private_name(index: int) -> str:
 
 
 def write_runoff_routine(cfg: Config) -> Path:
-    """Write ``<model>/<user_fortran>/runoff_greenampt.f`` for the case; returns the
-    folder (the ``FORTRAN FILE``)."""
+    """Write ``<model>/<user_fortran>/runoff_greenampt.f`` for the case; returns the folder (the ``FORTRAN FILE``)."""
     h = cfg.hydrology
     kernel = h.green_ampt if h.infiltration == "green-ampt" else "exact"
     if kernel not in KERNELS:

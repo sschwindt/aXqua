@@ -375,8 +375,7 @@ _SIZE_GRIDS: dict[tuple, tuple] = {}
 
 
 def _size_grid_key(cfg: Config, poly, bg_budget: int) -> tuple:
-    """Everything :func:`hydrology_size_grid` reads; the zone layer by name, size and
-    modification time, so that a changed file is read again."""
+    """Everything :func:`hydrology_size_grid` reads; the zone layer by name, size and modification time, so that a changed file is read again."""
     import hashlib
 
     m = cfg.mesh
@@ -395,8 +394,7 @@ def _size_grid_key(cfg: Config, poly, bg_budget: int) -> tuple:
 
 
 def hydrology_size_grid(cfg: Config, poly, *, bg_budget: int = _HYDROLOGY_BG_BUDGET):
-    """Target edge length on a regular grid over the catchment, growth-limited; once
-    per set of inputs in a process (the arrays returned are read-only)."""
+    """Target edge length on a regular grid over the catchment, growth-limited; once per set of inputs in a process (the arrays returned are read-only)."""
     key = _size_grid_key(cfg, poly, bg_budget)
     if key not in _SIZE_GRIDS:
         grid = _hydrology_size_grid(cfg, poly, bg_budget=bg_budget)
@@ -411,12 +409,7 @@ def hydrology_size_grid(cfg: Config, poly, *, bg_budget: int = _HYDROLOGY_BG_BUD
 def _hydrology_size_grid(cfg: Config, poly, *, bg_budget: int):
     """Target edge length on a regular grid over the catchment, growth-limited.
 
-    Each grid point takes the finest ``Max Edge Length (m)`` of the mesh zones within
-    half a grid step of it (so a zone narrower than the step still marks the row of
-    points beside it), and ``mesh.default_size`` outside every zone; all sizes are
-    multiplied by ``mesh.size_scale``. The sizes are then limited so that they grow by
-    at most ``mesh.growth_ratio`` per element away from a fine zone, which keeps the
-    transition from a stream corridor to the hillslope smooth.
+    Each grid point takes the finest ``Max Edge Length (m)`` of the mesh zones within half a grid step of it (so a zone narrower than the step still marks the row of points beside it), and ``mesh.default_size`` outside every zone; all sizes are multiplied by ``mesh.size_scale``. The sizes are then limited so that they grow by at most ``mesh.growth_ratio`` per element away from a fine zone, which keeps the transition from a stream corridor to the hillslope smooth.
 
     Returns ``(x, y, size)`` of the grid (2D arrays).
     """
@@ -520,8 +513,7 @@ def _hydrology_size_field(cfg: Config, poly, breakline_curves: list[int]) -> Non
 def estimate_hydrology_elements(cfg: Config) -> int:
     """Number of triangles the hydrology mesh will have, from its size grid.
 
-    An equilateral triangle of side h covers sqrt(3)/4 h^2, so the count is the
-    integral of 4 / (sqrt(3) h^2) over the catchment.
+    An equilateral triangle of side h covers sqrt(3)/4 h^2, so the count is the integral of 4 / (sqrt(3) h^2) over the catchment.
     """
     from shapely import contains_xy
 

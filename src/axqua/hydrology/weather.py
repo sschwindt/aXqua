@@ -1,26 +1,10 @@
 """Wind and sun: the weather a hydrology case is driven with besides rain.
 
-**Wind** goes to TELEMAC as it is (``WIND : YES``, ``OPTION FOR WIND : 2``): a time
-series of the two components at 10 m in the ``ASCII ATMOSPHERIC DATA FILE``. Weather
-services give speed and the direction the wind comes *from*, clockwise from north; the
-components are ``u = -s sin(d)`` (east) and ``v = -s cos(d)`` (north), computed here so
-that no convention of the solver has to be trusted. TELEMAC applies wind stress only
-where the water is deeper than ``THRESHOLD DEPTH FOR WIND`` (1 m by default), which is
-right for sheet flow on hillslopes: wind matters on ponds and lakes in the catchment.
+**Wind** goes to TELEMAC as it is (``WIND : YES``, ``OPTION FOR WIND : 2``): a time series of the two components at 10 m in the ``ASCII ATMOSPHERIC DATA FILE``. Weather services give speed and the direction the wind comes *from*, clockwise from north; the components are ``u = -s sin(d)`` (east) and ``v = -s cos(d)`` (north), computed here so that no convention of the solver has to be trusted. TELEMAC applies wind stress only where the water is deeper than ``THRESHOLD DEPTH FOR WIND`` (1 m by default), which is right for sheet flow on hillslopes: wind matters on ponds and lakes in the catchment.
 
-**Sun** enters as evaporation. TELEMAC-2D removes no water for radiation (its heat
-exchange in WAQTEL changes the temperature only), so aXqua computes an evaporation rate
-and its runoff routine takes it from the surface water left after infiltration. The
-rate is the FAO-56 reference evapotranspiration ``ET0`` (Allen et al., 1998) times
-``open_water_factor`` (1.05, the crop coefficient FAO-56 gives for open water less than
-2 m deep). ``ET0`` comes from the weather table (``et0``, as Open-Meteo provides it) or
-is computed hourly from shortwave radiation, air temperature, relative humidity and
-wind with the Penman-Monteith equation (FAO-56 eq. 53). Water in the soil does not
-evaporate in this model: Green-Ampt keeps no soil water budget that could give it up.
+**Sun** enters as evaporation. TELEMAC-2D removes no water for radiation (its heat exchange in WAQTEL changes the temperature only), so aXqua computes an evaporation rate and its runoff routine takes it from the surface water left after infiltration. The rate is the FAO-56 reference evapotranspiration ``ET0`` (Allen et al., 1998) times ``open_water_factor`` (1.05, the crop coefficient FAO-56 gives for open water less than 2 m deep). ``ET0`` comes from the weather table (``et0``, as Open-Meteo provides it) or is computed hourly from shortwave radiation, air temperature, relative humidity and wind with the Penman-Monteith equation (FAO-56 eq. 53). Water in the soil does not evaporate in this model: Green-Ampt keeps no soil water budget that could give it up.
 
-The forcing tables written here are what the generated routine and TELEMAC read:
-``forcing.txt`` (rain and evaporation in mm/h, piecewise constant) and
-``atmosphere.txt`` (wind components, interpolated by TELEMAC between rows).
+The forcing tables written here are what the generated routine and TELEMAC read: ``forcing.txt`` (rain and evaporation in mm/h, piecewise constant) and ``atmosphere.txt`` (wind components, interpolated by TELEMAC between rows).
 """
 
 from __future__ import annotations
@@ -55,9 +39,7 @@ VARIABLES = {
 class WeatherSeries:
     """Weather as intervals, in seconds from the model's time zero.
 
-    Every variable is held constant over its interval, like rain. Units: wind m/s and
-    degrees, radiation W/m2 (mean over the interval), temperature deg C, humidity %,
-    ``et0`` and ``evaporation`` mm/h.
+    Every variable is held constant over its interval, like rain. Units: wind m/s and degrees, radiation W/m2 (mean over the interval), temperature deg C, humidity %, ``et0`` and ``evaporation`` mm/h.
     """
 
     start_s: np.ndarray
@@ -87,10 +69,7 @@ class WeatherSeries:
 def fill_gaps(times, values, *, circular: bool = False) -> tuple[np.ndarray, int]:
     """*values* with each missing one (``NaN``) interpolated in time, and their number.
 
-    Between two readings the value is interpolated linearly, before the first and after
-    the last the nearest reading holds. A direction in degrees (*circular*) is
-    interpolated as a unit vector, so that 350 and 10 give 0 and not 180. A variable
-    without any reading stays empty and counts no gap: the series does not have it.
+    Between two readings the value is interpolated linearly, before the first and after the last the nearest reading holds. A direction in degrees (*circular*) is interpolated as a unit vector, so that 350 and 10 give 0 and not 180. A variable without any reading stays empty and counts no gap: the series does not have it.
     """
     times = np.asarray(times, dtype=float)
     values = np.asarray(values, dtype=float)
@@ -111,13 +90,7 @@ def read_weather(path: str | Path, *, stamp: str = "end",
                  origin: pd.Timestamp | None = None) -> WeatherSeries:
     """Read a weather table: ``start_s, end_s`` and named columns, or a time column.
 
-    Columns are found by the words in :data:`VARIABLES`. Rows that are no data, a
-    units row or a sum, are left out as for rain, and a row with a value but no
-    readable time stops the import. A reading without a value (empty, or -999 as the
-    DWD writes it) is interpolated between the readings around it (:func:`fill_gaps`):
-    wind, sun and air change gradually, and -999 would otherwise reach the solver as a
-    temperature or a wind speed. With dates in the table and an *origin* (the time zero
-    of the rain), the weather is put on the rain's clock.
+    Columns are found by the words in :data:`VARIABLES`. Rows that are no data, a units row or a sum, are left out as for rain, and a row with a value but no readable time stops the import. A reading without a value (empty, or -999 as the DWD writes it) is interpolated between the readings around it (:func:`fill_gaps`): wind, sun and air change gradually, and -999 would otherwise reach the solver as a temperature or a wind speed. With dates in the table and an *origin* (the time zero of the rain), the weather is put on the rain's clock.
     """
     path = Path(path)
     frame = _read_table(path)
@@ -143,8 +116,8 @@ def read_weather(path: str | Path, *, stamp: str = "end",
         starts = pd.to_numeric(frame[cols["start_s"]]).to_numpy(dtype=float)
         ends = pd.to_numeric(frame[cols["end_s"]]).to_numpy(dtype=float)
     else:
-        frame, notes = _data_rows(frame, tcol, list(found.values()), path.name)
-        seconds, first = _seconds(frame[tcol])
+        frame, parsed, notes = _data_rows(frame, tcol, list(found.values()), path.name)
+        seconds, first = _seconds(frame[tcol], parsed)
         if seconds.size < 2:
             raise ValueError(f"{path.name}: at least two rows are needed")
         steps = np.diff(seconds)
@@ -215,8 +188,7 @@ def extraterrestrial_radiation_hourly(when: pd.DatetimeIndex, latitude: float,
                                       longitude: float, hours: float = 1.0):
     """Ra [MJ m-2 per period] for periods that END at *when* (UTC), FAO-56 eq. 28.
 
-    *longitude* in degrees east; the solar time follows from it directly, since the
-    times are UTC (FAO-56 eq. 31 with Lz = 0).
+    *longitude* in degrees east; the solar time follows from it directly, since the times are UTC (FAO-56 eq. 31 with Lz = 0).
     """
     when = pd.DatetimeIndex(when)
     doy = when.dayofyear.to_numpy(dtype=float)
@@ -245,9 +217,7 @@ def penman_monteith_hourly(*, radiation_w_m2, temperature_c, humidity_pct,
                            hours: float = 1.0) -> np.ndarray:
     """FAO-56 hourly reference evapotranspiration ET0 [mm per period], eq. 53.
 
-    *radiation_w_m2* is the mean shortwave radiation over the period, *ra_mj* the
-    extraterrestrial radiation of the period [MJ m-2]. Night-time net longwave uses
-    the cloudiness of the last daylight period, as FAO-56 recommends.
+    *radiation_w_m2* is the mean shortwave radiation over the period, *ra_mj* the extraterrestrial radiation of the period [MJ m-2]. Night-time net longwave uses the cloudiness of the last daylight period, as FAO-56 recommends.
     """
     rs = np.asarray(radiation_w_m2, dtype=float) * 3600.0 * hours / 1.0e6  # MJ m-2
     t = np.asarray(temperature_c, dtype=float)
@@ -331,9 +301,7 @@ def forcing_table(rain: RainSeries, weather: WeatherSeries | None = None,
                   *, until: float | None = None) -> pd.DataFrame:
     """Rain and evaporation as one table of piecewise constant intervals.
 
-    The rows start at every time either series changes; the last row ends the table
-    with zeros at *until* (the end of the run; else the end of the longer series), so
-    the routine holds no rain and no evaporation after it.
+    The rows start at every time either series changes; the last row ends the table with zeros at *until* (the end of the run; else the end of the longer series), so the routine holds no rain and no evaporation after it.
     """
     edges = set(rain.start_s.tolist()) | set(rain.end_s.tolist())
     if weather is not None and evaporation_mm_h is not None:
@@ -364,8 +332,7 @@ def forcing_table(rain: RainSeries, weather: WeatherSeries | None = None,
 def write_forcing(path: str | Path, table: pd.DataFrame) -> Path:
     """``forcing.txt`` for the generated runoff routine (FORMATTED DATA FILE 1).
 
-    Two comment lines, the number of rows, then ``time rain evaporation`` per row:
-    the routine reads exactly that, so the layout is fixed.
+    Two comment lines, the number of rows, then ``time rain evaporation`` per row: the routine reads exactly that, so the layout is fixed.
     """
     path = Path(path)
     lines = ["# axqua forcing of runoff_greenampt.f (piecewise constant from each row)",
@@ -381,8 +348,7 @@ def write_forcing(path: str | Path, table: pd.DataFrame) -> Path:
 def write_atmosphere(path: str | Path, weather: WeatherSeries) -> Path:
     """``atmosphere.txt``: wind components at 10 m for TELEMAC's meteo module.
 
-    Written at the middle of each interval, since TELEMAC interpolates linearly between
-    rows; the first and the last rows hold the values out to the ends of the series.
+    Written at the middle of each interval, since TELEMAC interpolates linearly between rows; the first and the last rows hold the values out to the ends of the series.
     """
     if not (weather.has("wind_speed_10m") and weather.has("wind_direction_10m")):
         raise ValueError("wind needs the columns wind_speed_10m and wind_direction_10m")

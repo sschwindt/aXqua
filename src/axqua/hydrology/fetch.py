@@ -1,17 +1,10 @@
 """The downloads of the data wizard: rain and weather, soil moisture, soil, sealing.
 
-All four take what the case already knows - its outline and its CRS - and write files
-the case can use as they are, each with a provenance file beside it (source, address,
-license, the text an attribution needs). The national agency comes first; these are
-the global data sets that cover any catchment, roughly:
+All four take what the case already knows - its outline and its CRS - and write files the case can use as they are, each with a provenance file beside it (source, address, license, the text an attribution needs). The national agency comes first; these are the global data sets that cover any catchment, roughly:
 
-* **rain and weather** of an event, hourly, from Open-Meteo's archive of ERA5 and
-  ERA5-Land at the centroid of the catchment (no key; data CC BY 4.0; the free service
-  is for non-commercial use);
-* **soil moisture** at the start of the event, ERA5-Land's layer 0 to 7 cm, as the
-  initial water content of Green-Ampt;
-* **soil texture** from ISRIC SoilGrids (250 m, CC BY 4.0), sand, silt and clay of
-  the top 15 cm, classified to the USDA texture classes and so to Rawls et al. (1983);
+* **rain and weather** of an event, hourly, from Open-Meteo's archive of ERA5 and ERA5-Land at the centroid of the catchment (no key; data CC BY 4.0; the free service is for non-commercial use);
+* **soil moisture** at the start of the event, ERA5-Land's layer 0 to 7 cm, as the initial water content of Green-Ampt;
+* **soil texture** from ISRIC SoilGrids (250 m, CC BY 4.0), sand, silt and clay of the top 15 cm, classified to the USDA texture classes and so to Rawls et al. (1983);
 * **sealed surfaces** from ESA WorldCover (10 m, CC BY 4.0), its class 50 "built-up".
 
 Network access uses the standard library with timeouts; rasters are read by GDAL.
@@ -117,10 +110,7 @@ def _open_meteo(lon: float, lat: float, start: pd.Timestamp, end: pd.Timestamp,
 def fetch_event(cfg, start: str, end: str, out_dir: str | Path) -> Event:
     """Hourly rain and weather of an event at the catchment, from Open-Meteo.
 
-    *start* and *end* are dates and times (UTC). Open-Meteo's hourly values are those
-    of the hour that ends at their time stamp, so the first hour written is the one
-    starting at *start*. Writes ``rainfall.csv`` and ``weather.csv`` (intervals in
-    seconds from *start*) with provenance files.
+    *start* and *end* are dates and times (UTC). Open-Meteo's hourly values are those of the hour that ends at their time stamp, so the first hour written is the one starting at *start*. Writes ``rainfall.csv`` and ``weather.csv`` (intervals in seconds from *start*) with provenance files.
     """
     t0 = pd.Timestamp(start).floor("h")
     t1 = pd.Timestamp(end).ceil("h")
@@ -200,10 +190,7 @@ def _soilgrids_layer(name: str, depth: str, bounds, out: Path) -> Path:
 def fetch_soil(cfg, out_dir: str | Path) -> dict:
     """Soil zones by USDA texture class from SoilGrids, with their Rawls parameters.
 
-    Sand, silt and clay of the top 15 cm (0-5 and 5-15 cm averaged) are classified per
-    250 m cell, the classes turned into polygons over the catchment
-    (``soil-zones.gpkg``, field ``Zone ID``) and ``soil-table.csv`` names the texture
-    of each zone, whose values come from Rawls et al. (1983) when the case is built.
+    Sand, silt and clay of the top 15 cm (0-5 and 5-15 cm averaged) are classified per 250 m cell, the classes turned into polygons over the catchment (``soil-zones.gpkg``, field ``Zone ID``) and ``soil-table.csv`` names the texture of each zone, whose values come from Rawls et al. (1983) when the case is built.
     """
     import geopandas as gpd
     import rasterio

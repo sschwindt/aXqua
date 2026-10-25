@@ -1,22 +1,14 @@
 """The data wizard of a hydrology case: rain, soil, moisture, wind and sun, outlet.
 
-One window with a tab per kind of data, visited in any order, with *Back* and *Next*
-walking through them like the installation wizards. Every tab says first where good
-data come from (the national meteorological agency, listed for the country of the
-catchment) and then offers the routes aXqua has:
+One window with a tab per kind of data, visited in any order, with *Back* and *Next* walking through them like the installation wizards. Every tab says first where good data come from (the national meteorological agency, listed for the country of the catchment) and then offers the routes aXqua has:
 
-* **Rain**: import a record (gauge, radar, agency table), build a design storm from a
-  depth-duration table (KOSTRA-DWD, NOAA Atlas 14, ...), or download a past event from
-  Open-Meteo (ERA5), which underestimates short intensities;
-* **Soil**: one's own soil map and table, one texture class for the whole catchment,
-  or SoilGrids textures; sealed surfaces from one's own layer or ESA WorldCover;
+* **Rain**: import a record (gauge, radar, agency table), build a design storm from a depth-duration table (KOSTRA-DWD, NOAA Atlas 14, ...), or download a past event from Open-Meteo (ERA5), which underestimates short intensities;
+* **Soil**: one's own soil map and table, one texture class for the whole catchment, or SoilGrids textures; sealed surfaces from one's own layer or ESA WorldCover;
 * **Initial moisture**: a number, or ERA5-Land at the start of the event;
 * **Wind and sun**: the weather series and what of it the run uses;
 * **Outlet**: the condition of the outflow lines and the numerical kernel.
 
-Nothing is written into the case file before *Save*; the files a route writes go into
-``user-sources/hydrology`` at once. The window decides nothing: every route is a call
-of ``axqua hydrology`` and its answer says which case settings point at the file.
+Nothing is written into the case file before *Save*; the files a route writes go into ``user-sources/hydrology`` at once. The window decides nothing: every route is a call of ``axqua hydrology`` and its answer says which case settings point at the file.
 """
 
 from __future__ import annotations
@@ -90,8 +82,7 @@ def portal_html(portals: dict, offers: str) -> str:
 
 
 class HydrologyWizard(QDialog):
-    """Set up the data of the hydrology case at *case*. *info* is the answer of
-    ``axqua hydrology info``; the window asks for it again when it is empty."""
+    """Set up the data of the hydrology case at *case*. *info* is the answer of ``axqua hydrology info``; the window asks for it again when it is empty."""
 
     def __init__(self, context, case: Path, info: dict | None = None,
                  parent=None) -> None:
