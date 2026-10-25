@@ -44,6 +44,9 @@ MISSING_AT_OR_BELOW = -999.0
 #: Dates written as one integer, by number of digits (DWD ``MESS_DATUM``).
 _INTEGER_DATES = {8: "%Y%m%d", 10: "%Y%m%d%H", 12: "%Y%m%d%H%M"}
 
+#: The word the first line of TELEMAC's hyetograph file carries (``#HYETOGRAPH FILE``).
+TELEMAC_HYETOGRAPH = "HYETOGRAPH"
+
 
 @dataclass
 class RainSeries:
@@ -339,6 +342,47 @@ def _with_holes(starts, ends, values, missing):
             np.insert(values, at, 0.0), np.insert(missing, at, True))
 
 
+def telemac_hyetograph(path: str | Path) -> RainSeries | None:
+    """TELEMAC's own hyetograph file, read as TELEMAC reads it; ``None`` for any other file.
+
+    The file is ``FORMATTED DATA FILE 1`` of TELEMAC's ``RUNOFF_GREENAMPT`` with ``RAINDEF = 3`` (release 8.4 and later, example ``pluie``). TELEMAC skips its first two lines, ``#HYETOGRAPH FILE`` and ``#T (s) RAINFALL (mm)``, and reads a time in seconds and a depth in mm from each line after them. A depth falls in the interval that ends at its time, and the depth of the first line belongs to no interval: its time is where the series begins. The units and stamp settings therefore do not apply. Time zero is the time of the first line, which TELEMAC requires to be 0.
+    """
+    path = Path(path)
+    if path.suffix.lower() in (".xlsx", ".xls"):
+        return None
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    if not lines or TELEMAC_HYETOGRAPH not in lines[0].upper():
+        return None
+    rows = []
+    for number, line in enumerate(lines[2:], start=3):
+        if not line.strip():
+            continue
+        fields = line.replace(",", " ").split()
+        try:
+            rows.append((float(fields[0]), float(fields[1])))
+        except (IndexError, ValueError):
+            raise ValueError(f"{path.name}, line {number}: {line.strip()!r} is not a time "
+                             "in s and a depth in mm, as TELEMAC's hyetograph file "
+                             "has them") from None
+    if len(rows) < 2:
+        raise ValueError(f"{path.name}: TELEMAC's hyetograph file needs a line where the "
+                         "series begins and at least one with a depth")
+    times, depths = (np.array(column) for column in zip(*rows))
+    if np.any(np.diff(times) <= 0):
+        raise ValueError(f"{path.name}: the times do not increase")
+    starts, ends = times[:-1] - times[0], times[1:] - times[0]
+    series = RainSeries(starts, ends, depths[1:] * 3600.0 / (ends - starts))
+    series.notes.append(f"read {path.name} as TELEMAC's hyetograph file: the depth in mm "
+                        "of the interval that ends at each time; the units and stamp "
+                        "settings do not apply to it")
+    if times[0] != 0:
+        series.notes.append(f"its first time is {times[0]:g} s; time zero is that time")
+    return series
+
+
 def read_series(path: str | Path, *, units: str = "mm/h", stamp: str = "end",
                 start: str | None = None) -> RainSeries:
     """Read a rain series from a CSV or Excel table.
@@ -348,12 +392,20 @@ def read_series(path: str | Path, *, units: str = "mm/h", stamp: str = "end",
     A row without a value (empty, or -999 as the DWD writes it) keeps its interval and counts as dry; :attr:`RainSeries.gaps` says how many there were, so that the checkup can report them rather than the next row's interval being stretched over the gap. A value of the DWD covers its own period, so a row such a file does not have is a gap as well. Rows that are no data, a units row under the header or a sum at the end, are left out, and a row with a value but no readable time stops the import (:func:`_data_rows`).
 
     *start*, a date and time, sets the model's time zero for a dated series; without it time zero is the start of the first interval.
+
+    TELEMAC's own hyetograph file is read as TELEMAC reads it (:func:`telemac_hyetograph`).
     """
     if units not in ("mm/h", "mm"):
         raise ValueError(f"rain units must be 'mm/h' or 'mm', got {units!r}")
     if stamp not in ("start", "end"):
         raise ValueError(f"the time stamp must be 'start' or 'end', got {stamp!r}")
     path = Path(path)
+    telemac = telemac_hyetograph(path)
+    if telemac is not None:
+        if start:
+            raise ValueError(f"{path.name}: TELEMAC's hyetograph file has no dates, so "
+                             "hydrology.rainfall_start cannot apply to it")
+        return telemac
     frame = _read_table(path)
     cols = {str(c).lower().strip(): c for c in frame.columns}
     if all(name in cols for name in CANONICAL):

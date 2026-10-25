@@ -114,7 +114,9 @@ OUTLET_INFO = (
     "measured rating curve). free prescribes nothing and holds only where the flow "
     "leaves supercritical. The level of normal_depth depends on the roughness of the "
     "outlet: 20 % on Manning's n is about 12 % on the depth, fading upstream over about "
-    "depth / slope, so put the outlet a little downstream of where results are read.")
+    "depth / slope, so put the outlet a little downstream of where results are read. "
+    "A field, a plot or a terrace is no catchment: where the terrain falls away beyond "
+    "its edge, overfall lets the water leave as over a brink, and none comes back.")
 
 #: The pages of the editor, in the order of the workflow:
 #: ``(key, title, docs label, ((block or block/group, frame title, information), ...))``.
@@ -194,7 +196,8 @@ REQUIRED_UNLESS: dict[str, list[dict[str, Any]]] = {
     "boundaries.liquid_boundaries": [{"block": "hydrology"}],
     "boundaries.prescribed_elevation": [
         {"all": [{"block": "hydrology"},
-                 {"key": "hydrology.outlet_condition", "in": ["normal_depth", "free"]}]}],
+                 {"key": "hydrology.outlet_condition",
+                  "in": ["normal_depth", "free", "overfall"]}]}],
 }
 
 #: Entries that have no effect while a condition holds, which a form grays out:
@@ -437,10 +440,12 @@ CURATED: dict[str, dict[str, Any]] = {
              "radiation, temperature, humidity and wind. series: the evaporation "
              "column."),
     "hydrology.outlet_condition": _c(
-        "Outlet", "choice", choices=("normal_depth", "free", "elevation"),
+        "Outlet", "choice", choices=("normal_depth", "free", "elevation", "overfall"),
         help="normal_depth: the level of normal flow through each outflow section. "
              "free: nothing prescribed; only for a supercritical outlet. elevation: "
-             "the fixed level of the page Liquid boundaries."),
+             "the fixed level of the page Liquid boundaries. overfall: no water is "
+             "held at the outflow lines, for the lower edge of a field over which the "
+             "terrain falls away."),
     "hydrology.drain_time": _c("Simulated time after the rain", "number", "s"),
     "hydrology.printout_period": _c("Interval of the result maps", "number", "s"),
     "hydrology.kernel": _c(

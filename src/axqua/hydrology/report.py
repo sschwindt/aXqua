@@ -210,11 +210,11 @@ def plot(path: Path, sortie, forcing_table, title: str) -> Path:
 def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     """Write the hydrograph and the water balance of the last hydrology run.
 
-    Files, in ``<postprocessing>/hydrology/`` unless *out_dir* says otherwise: ``hydrograph.csv`` (time, every boundary flux, outflow), ``hydrograph.png``, ``water-balance.csv`` and ``water-balance.json``.
+    Files, in ``<postprocessing>/hydrology/`` unless *out_dir* says otherwise: ``hydrograph.csv`` (time, every boundary flux, outflow), ``hydrograph.png``, ``water-balance.csv`` and ``water-balance.json``. The listing copies of each processor of a parallel run are deleted, as after a steady run: the balance is in the main listing.
     """
     import pandas as pd
 
-    from axqua.solvers.telemac.sortie import latest_sortie, read_sortie
+    from axqua.solvers.telemac.sortie import latest_sortie, processor_sorties, read_sortie
 
     listing = latest_sortie(cfg.model_dir, cfg.hydrology_cas_file)
     if listing is None:
@@ -242,6 +242,12 @@ def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     (out / "water-balance.json").write_text(json.dumps(asdict(result), indent=2) + "\n")
     for line in result.lines():
         log.info("  water balance: %s", line)
+    copies = processor_sorties(cfg.model_dir, cfg.hydrology_cas_file)
+    for copy in copies:
+        copy.unlink()
+    if copies:
+        log.info("  removed %d per-processor .sortie file(s); kept the main listing",
+                 len(copies))
     if np.isfinite(result.relative_error) and abs(result.relative_error) > 0.01:
         log.warning("  the water balance closes only to %.2f %% of the rain; the "
                     "listing printouts may be too far apart for the integral of the "

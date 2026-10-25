@@ -37,7 +37,7 @@ Measured run times with 8 processor cores on a workstation with 16 cores:
 
 ## Requirements
 
-1. **The folder of the example.** It contains the case file, this guide, and the input data in `user-sources/` (about 6 MB): the terrain model, cut to the outline of the model, the layers and tables that describe the reach, and the velocity measurements. To get the folder, click *Example case...* on the *Case Setup* tab of the plugin, or run `axqua example get --folder <folder>` in a terminal. Everything the example produces is written to `axqua-case/` in the same folder.
+1. **The folder of the example.** It contains the case file, this guide, and the input data in `user-sources/` (about 6 MB): the terrain model, cut to the outline of the model, the layers and tables that describe the reach, and the velocity measurements. To get the folder, click *Example case...* on the *Case Setup* tab of the plugin, or run `axqua example get example-isar --folder <folder>` in a terminal. Everything the example produces is written to `axqua-case/` in the same folder.
 2. **aXqua with a TELEMAC installation.** aXqua has to know where TELEMAC is installed. Step 1 below sets this up in the plugin. In a terminal, `axqua profile init` writes the profile of this computer with the TELEMAC installation it finds, and `axqua profile check` starts TELEMAC once and reports every problem with its remedy.
 3. **HydroBayesCal 1.8.1 or newer** in the Python environment of aXqua. The Python Package Index currently provides version 1.7.0 only, so install it from the tagged source:
 

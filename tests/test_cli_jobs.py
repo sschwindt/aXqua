@@ -158,6 +158,20 @@ def test_list_shows_a_created_job(fake_case, capsys):
     assert jd.job_id in out and "telemac" in out
 
 
+def test_a_long_job_id_keeps_its_distance_from_the_solver():
+    """A job id carries the case name: example-agrohydrology made it 45 characters, and the list printed '...609f7dtelemac'."""
+    from types import SimpleNamespace
+
+    from axqua.jobcli import _list_lines
+
+    row = SimpleNamespace(job_id="2026-10-25-example-agrohydrology-hydro-609f7d",
+                          solver="telemac", kind="hydrology", state="RUNNING",
+                          created="2026-10-25T14:29:07+01:00")
+    header, _rule, line = _list_lines([row])
+    assert line.split()[:4] == [row.job_id, "telemac", "hydrology", "RUNNING"]
+    assert header.index("SOLVER") == line.index("telemac")
+
+
 def test_list_filters(fake_case, capsys):
     _make_job(fake_case)
     main(["list", "--state", "COMPLETED", "--json"])

@@ -49,6 +49,8 @@ OUTLETS = (
     ("free", "free: nothing prescribed; only for a steep, supercritical outlet"),
     ("elevation", "elevation: the fixed level of a lake or river the catchment "
                   "drains into"),
+    ("overfall", "overfall: the terrain falls away beyond the outflow lines, as at the "
+                 "lower edge of a field; the water leaves as over a brink"),
 )
 
 

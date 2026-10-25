@@ -1,0 +1,43 @@
+# =============================================================================
+# aXqua example case: arable field, rainfall-runoff with Green-Ampt infiltration
+# =============================================================================
+# The hydrology mode of aXqua on an arable field of 5.6 ha on a hillslope in Lower Bavaria: rain on every node of the mesh, infiltration after Green-Ampt, sheet flow over the field, and the runoff that leaves it over three of its edges. README.md in this folder walks through every step.
+#
+# The folder works on its own: the input data are in user-sources/ next to this file, and all results go to the folder axqua-case/ next to this file. The data may be reused under the terms of LICENSE.md.
+#
+# The case was reconstructed from two TELEMAC models of the field that differ in their soil only. Both soils are in user-sources/hydrology/; this file uses the less permeable one, and README.md shows how to run the other.
+# -----------------------------------------------------------------------------
+
+project:
+  name: example-agrohydrology
+  crs_epsg: 25832              # ETRS89 / UTM zone 32N, coordinates in meters
+  sim_dir: axqua-case          # folder for everything aXqua produces
+
+telemac:
+  solver: telemac2d            # depth-averaged (2D) simulation
+  n_processors: 4              # processor cores per simulation
+
+geodata:
+  dem_initial: user-sources/geodata/dgm1.tif            # terrain model DGM1 of the Bavarian surveying administration, 1 m cells
+  boundary: user-sources/geodata/field-outline.gpkg     # outline of the field
+
+# The field is no catchment: its water leaves it over the lower edges, where the terrain falls away beyond the outline. These edges are the three outflow lines of the layer, and every other part of the outline is a wall.
+boundaries:
+  liquid_boundaries: user-sources/geodata/liquid-boundaries.gpkg   # outflow lines on the north, west and southeast edges
+
+mesh:
+  default_size: 2.0            # [m] edge length of the triangles
+
+friction:
+  default_law: 3               # Strickler
+  default_coefficient: 30      # [m^(1/3)/s] as in the original models (Manning n = 0.033)
+
+hydrology:
+  enabled: true                # hydrology mode: rainfall-runoff (TELEMAC only)
+  rainfall: user-sources/hydrology/hyetograph.txt   # 42.1 mm in 7 hours, TELEMAC's own hyetograph file
+  infiltration: green-ampt
+  green_ampt: sadeghi          # de Vos et al. (2024); travert gives the equations of the original models
+  soil_table: user-sources/hydrology/soil-ks-0.61.csv   # Ks 0.61 mm/h; the other soil is soil-ks-2.csv
+  outlet_condition: overfall   # the water leaves over the edges as over a brink
+  drain_time: 3600             # [s] simulated time after the last rain
+  printout_period: 600         # [s] interval of the result maps

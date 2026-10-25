@@ -295,7 +295,8 @@ def _check_outlet_and_run(cfg, rain, found: list[Finding], *, terrain: bool) -> 
             "A free outlet holds only where the flow leaves supercritical; a slower "
             "outlet fills up into a pond, or blows up with finite elements.",
             "hydrology.outlet_condition",
-            "Use normal_depth unless the outlet is steep and smooth."))
+            "Use normal_depth unless the outlet is steep and smooth, and overfall at "
+            "the lower edge of a field over which the terrain falls away."))
     if h.kernel == "finite-elements":
         found.append(_finding(
             "axqua.hydrology.finite_elements",

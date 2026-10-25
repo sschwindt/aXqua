@@ -7,7 +7,7 @@ A hydrology case (``hydrology.enabled``) is built by the same pipeline as a rive
 * the outlet on TELEMAC's stage-discharge curve, one Z(Q) curve per outflow line from Manning's normal flow through the section of that line, or the measured rating of ``boundaries.stage_discharge`` (:func:`write_outlet_curves`);
 * the keywords of ``hydrology2d.cas`` (:func:`steering_block`) and the case itself (:func:`write_case`).
 
-The outline is a drainage divide and so a solid wall; water leaves through the outflow lines. The default outlet is ``normal_depth``: the level of the outflow line follows TELEMAC's Z(Q) curve of normal flow through its section, so the outlet holds the level the discharge needs and no more. Its level depends on the roughness of the outlet section (a 20 % error in Manning's n moves the depth by about 12 %), and that influence fades upstream over about ``h / S``, so the outlet goes a few such lengths downstream of where results are read. ``free`` (zero gradient of depth and velocity) holds only where the flow leaves supercritical: on the synthetic V-catchment of the tests, a channel at 2 % with Manning's n of 0.03 runs near critical, and its free outlet filled up into a pond with the finite-volume kernel and blew up with the finite-element one, while ``normal_depth`` drained the equilibrium discharge i A to 0.01 %. ``LAW OF FRICTION ON LATERAL BOUNDARIES`` plays no part: TELEMAC applies it to solid walls only.
+The outline is a drainage divide and so a solid wall; water leaves through the outflow lines. The default outlet is ``normal_depth``: the level of the outflow line follows TELEMAC's Z(Q) curve of normal flow through its section, so the outlet holds the level the discharge needs and no more. Its level depends on the roughness of the outlet section (a 20 % error in Manning's n moves the depth by about 12 %), and that influence fades upstream over about ``h / S``, so the outlet goes a few such lengths downstream of where results are read. ``free`` (zero gradient of depth and velocity) holds only where the flow leaves supercritical: on the synthetic V-catchment of the tests, a channel at 2 % with Manning's n of 0.03 runs near critical, and its free outlet filled up into a pond with the finite-volume kernel and blew up with the finite-element one, while ``normal_depth`` drained the equilibrium discharge i A to 0.01 %. ``overfall`` is for an outline that is no divide but the lower edge of a field, a terrace or a bank, over which the terrain falls away: the outflow lines hold a depth of zero (:func:`overfall_level`), so the water leaves as over a brink and none comes back. A Z(Q) curve does not fit there, because one level for a whole edge that runs across the slope is the level of its lowest point only, and the free outlet of the finite-volume kernel copies the state inside, which lets water in wherever the velocity at the edge points inward; on the arable field of the example ``example-agrohydrology`` it took in 2.7 m3/s through the lower edge of the field 16 minutes after the runoff began. ``LAW OF FRICTION ON LATERAL BOUNDARIES`` plays no part: TELEMAC applies it to solid walls only.
 
 The kernel is TELEMAC's finite-volume scheme (HLLC) with the hydrostatic reconstruction of Chen and Noelle (2017), the combination of TELEMAC's own rain-runoff validation case: the classical reconstruction fails where the water is shallower than the step of the bed between two nodes, which is what sheet flow on a hillslope is.
 """
@@ -269,6 +269,14 @@ def write_outlet_curves(cfg: Config, mesh, liquids, q_max: float) -> Path:
     return path
 
 
+def overfall_level(mesh) -> float:
+    """The level of an ``overfall`` outlet: 1 m below the lowest node of the mesh.
+
+    TELEMAC sets the depth of a prescribed level to ``max(0, level - bed)`` at each node of the line (``bord.f``), so a level below every node gives a depth of zero along the whole line. The finite-volume kernel takes that as a dry state outside the cell (``cdl_fv.f``): water leaves as it would over a brink, at critical flow at most, and none can come in, since there is none outside. The finite-element kernel holds the nodes of the line at a depth of zero; on the field of ``example-agrohydrology`` it, too, took no water in and closed the volume to 1e-15.
+    """
+    return float(np.min(np.asarray(mesh.bottom, dtype=float))) - 1.0
+
+
 def outlet_rating_csv(cfg: Config) -> Path:
     """The rating of the first outflow line (for the starting level of the outlet)."""
     if cfg.boundaries.stage_discharge is not None:
@@ -391,6 +399,10 @@ def write_case(cfg: Config, mesh, liquids, inflow, *, turbulence_model: int,
         level = min(levels.values()) if levels else None
     elif cfg.outflow_condition == "elevation":
         level = float(cfg.boundaries.prescribed_elevation)
+    elif cfg.outflow_condition == "overfall":
+        level = overfall_level(mesh)
+        log.info("  outlet overfall: the level of the outflow lines is %.2f m, 1 m below "
+                 "the lowest node, so TELEMAC holds no water there", level)
     has_inflow = any(lb.kind == "inflow" for lb in liquids)
     inflow_q = 0.0
     if has_inflow:
@@ -402,7 +414,8 @@ def write_case(cfg: Config, mesh, liquids, inflow, *, turbulence_model: int,
     if _has_hydrograph(inflow):
         out["liquid_boundaries"] = steering.write_liquid_boundaries(
             cfg, liquids, inflow,
-            (lambda _q, z=level: z) if cfg.outflow_condition == "elevation" else None)
+            (lambda _q, z=level: z) if cfg.outflow_condition in ("elevation", "overfall")
+            else None)
         liquid_file = out["liquid_boundaries"].name
     graphic, listing = printout_steps(cfg)
     out["cas"] = steering.write_cas(

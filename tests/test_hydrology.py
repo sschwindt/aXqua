@@ -157,6 +157,25 @@ def test_a_series_stamped_at_the_start_and_given_as_intensity(tmp_path):
     assert series.rate_at(900.0) == 60.0 and series.rate_at(2000.0) == 0.0
 
 
+def test_telemacs_own_hyetograph_file_is_read_as_telemac_reads_it(tmp_path):
+    """RUNOFF_GREENAMPT with RAINDEF = 3: two lines skipped, then time [s] and the depth [mm] of the interval that ends there; the first depth belongs to no interval. Space separated, with a blank at the end of a line, as in the file of the example example-agrohydrology."""
+    path = tmp_path / "hyetograph.txt"
+    path.write_text("#HYETOGRAPH FILE\n#T (s) RAINFALL (mm)\n0. 0\n3600 6.72\n"
+                    "7200 4.11 \n10800 0\n\n\n")
+    series = rainfall.read_series(path, units="mm/h", stamp="start")
+    assert list(series.start_s) == [0.0, 3600.0, 7200.0]
+    assert list(series.end_s) == [3600.0, 7200.0, 10800.0]
+    assert np.allclose(series.intensity_mm_h, [6.72, 4.11, 0.0])
+    assert series.total_mm == pytest.approx(10.83)
+    assert series.last_rain == 7200.0 and series.origin is None
+    assert "TELEMAC's hyetograph" in series.notes[0]
+    with pytest.raises(ValueError, match="no dates"):
+        rainfall.read_series(path, start="2024-06-02T14:00")
+    path.write_text("#HYETOGRAPH FILE\n#T (s) RAINFALL (mm)\n0 0\n3600 6.72\nend\n")
+    with pytest.raises(ValueError, match="line 5"):
+        rainfall.read_series(path)
+
+
 def test_the_canonical_file_round_trips(tmp_path):
     series = rainfall.RainSeries([0, 600], [600, 1200], [5.0, 12.0])
     back = rainfall.read_series(series.write(tmp_path / "r.csv"))
@@ -415,6 +434,44 @@ def test_a_hydrology_case_builds_without_a_discharge_or_a_centerline(tmp_path):
     assert not status.capability(Capability.MESH_CONVERGENCE).configured
 
 
+def test_a_hydrology_case_shows_water_from_one_millimeter(tmp_path):
+    """Sheet flow is millimeters deep: the river's 1 cm would leave the map of a catchment nearly empty. A case that sets its own threshold keeps it."""
+    from axqua.config import HYDROLOGY_WET_DEPTH, load_config
+    from axqua.core.capabilities import _display_settings
+
+    case = _catchment(tmp_path)
+    cfg = load_config(case)
+    assert cfg.hydrodynamics.wet_depth == HYDROLOGY_WET_DEPTH == 0.001
+    assert _display_settings(cfg)["wet_depth"] == 0.001
+    case.write_text(case.read_text() + "hydrodynamics:\n  wet_depth: 0.005\n")
+    assert load_config(case).hydrodynamics.wet_depth == 0.005
+    river = case.read_text().replace("  enabled: true\n", "  enabled: false\n")
+    case.write_text(river.replace("hydrodynamics:\n  wet_depth: 0.005\n", ""))
+    assert load_config(case).hydrodynamics.wet_depth == 0.01
+
+
+def test_an_overfall_outlet_holds_no_water_at_its_lines(tmp_path):
+    """The lower edge of a field: a level below every node, so TELEMAC prescribes a depth of zero along the line and its finite-volume kernel lets water out only."""
+    from axqua.config import load_config
+    from axqua.core.selafin import SelafinFile
+    from axqua.solvers.telemac import pipeline
+
+    cfg = load_config(_catchment(tmp_path, extra="  outlet_condition: overfall\n"))
+    assert cfg.outflow_condition == "overfall"
+    pipeline.run(cfg, validate_env=False, log_to_file=False)
+    model = Path(cfg.model_dir)
+    cas = (model / "hydrology2d.cas").read_text()
+    bed = SelafinFile(model / "geometry.slf").frame(0)["BOTTOM"]
+    level = next(float(line.split(":")[1]) for line in cas.splitlines()
+                 if line.startswith("PRESCRIBED ELEVATIONS"))
+    assert level == pytest.approx(float(bed.min()) - 1.0, abs=1e-3)
+    assert "STAGE-DISCHARGE CURVES" not in cas
+    codes = [line.split()[:3] for line in (model / "boundaries.cli").read_text()
+             .splitlines()]
+    assert ["5", "4", "4"] in codes and ["2", "2", "2"] in codes
+    assert ["4", "4", "4"] not in codes
+
+
 def test_the_hydrology_mesh_is_isotropic_and_honors_its_zones(tmp_path):
     import geopandas as gpd
     from shapely.geometry import Polygon
@@ -521,6 +578,33 @@ AXQUA HYDROLOGY   1.20000000E+02   8.40000000E+01   2.00000000E+01   1.00000000E
     assert result.storage_m3 == pytest.approx(13.0)
     assert result.error_m3 == pytest.approx(84.0 - 50.0 - 20.0 - 1.0 - 13.0)
     assert result.runoff_coefficient == pytest.approx(50.0 / 84.0)
+
+
+def test_the_report_keeps_the_main_listing_and_deletes_the_processor_copies(tmp_path):
+    """As after a steady run: the balance is in the main listing, the copy of each processor is clutter."""
+    from axqua.config import load_config
+    from axqua.hydrology import report
+
+    cfg = load_config(_catchment(tmp_path))
+    model = Path(cfg.model_dir)
+    model.mkdir(parents=True, exist_ok=True)
+    blocks = "".join(f"""
+AXQUA HYDROLOGY   {t:.8E}   {0.1 * t:.8E}   {0.05 * t:.8E}   0.00000000E+00
+                       BALANCE OF WATER VOLUME
+     VOLUME IN THE DOMAIN :    {0.01 * t:.6f}     M3
+     FLUX BOUNDARY    1:   {-0.0001 * t:.7E} M3/S  ( >0 : ENTERING  <0 : EXITING )
+     RELATIVE ERROR IN VOLUME AT T =        {t:.1f}     S :    0.000000
+""" for t in (60.0, 120.0, 180.0))
+    main = model / "hydrology2d.cas_2026-10-25-14h07min42s.sortie"
+    main.write_text(" NUMBER OF LIQUID BOUNDARIES:           1\n" + blocks)
+    copies = [model / f"hydrology2d.cas_2026-10-25-14h07min42s_p0000{k}.sortie"
+              for k in (1, 2)]
+    for copy in copies:
+        copy.write_text(main.read_text())
+    result = report.analyze(cfg)
+    assert result.rain_m3 == pytest.approx(18.0)
+    assert main.exists() and not any(copy.exists() for copy in copies)
+    assert (Path(cfg.postprocessing_dir) / "hydrology" / "water-balance.json").exists()
 
 
 def test_the_cli_builds_a_design_storm_and_lists_portals(tmp_path, capsys):

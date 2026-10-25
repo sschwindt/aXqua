@@ -26,14 +26,14 @@ The QGIS plugin (QGIS 3.44 or newer) is `qgis_plugin/axqua/`; for development li
 ## Quick start
 
 ```bash
-axqua example get --folder ~/aXqua-examples    # a small Isar case with its data (6 MB)
+axqua example get example-isar --folder ~/aXqua-examples    # a small Isar case with its data (6 MB)
 axqua submit <case-file> --kind preprocessing  # build the TELEMAC model, as a job
 axqua submit <case-file> --kind steady         # the steady 2D run (waits for the build)
 axqua list                                     # the jobs, with state and progress
 axqua cleanup <case-file>                      # what the case could do without (frees disk space)
 ```
 
-The example case and its guide are in [`cases/example-isar/`](https://github.com/sschwindt/aXqua/blob/main/cases/example-isar/README.md). Every command is listed in the [terminal syntax](https://axqua.eu/automation/terminal-syntax.html).
+The example cases and their guides are in [`cases/example-isar/`](https://github.com/sschwindt/aXqua/blob/main/cases/example-isar/README.md) (river reach, calibration and validation) and [`cases/example-agrohydrology/`](https://github.com/sschwindt/aXqua/blob/main/cases/example-agrohydrology/README.md) (hydrology mode: rainfall-runoff on an arable field). Every command is listed in the [terminal syntax](https://axqua.eu/automation/terminal-syntax.html).
 
 ## Repository
 
@@ -68,4 +68,4 @@ bash deploy.sh --push                           # ... then push main and gh-page
 
 ## License
 
-aXqua is BSD-3-Clause; the QGIS plugin is GPL-2.0-or-later. The data of the example case are CC BY 4.0 (`cases/example-isar/LICENSE.md`). Coordinates are EPSG:25832 throughout; see `CLAUDE.md` for the notes of the developers.
+aXqua is BSD-3-Clause; the QGIS plugin is GPL-2.0-or-later. The data of the example cases are CC BY 4.0 (`cases/example-*/LICENSE.md`). Coordinates are EPSG:25832 throughout; see `CLAUDE.md` for the notes of the developers.

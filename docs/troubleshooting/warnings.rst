@@ -141,7 +141,7 @@ The hydrology checkup of a case in hydrology mode reports the following warnings
 .. _axqua-hydrology-free-outlet:
 
 ``A free outlet holds only where the flow leaves supercritical``
-    A free outlet prescribes nothing. At a slower outlet the water fills up into a pond, or the finite-element kernel becomes unstable. Use ``normal_depth`` unless the outlet is steep and smooth (:ref:`hydrology-outlet`).
+    A free outlet prescribes nothing. At a slower outlet the water fills up into a pond, or the finite-element kernel becomes unstable, and the finite-volume kernel lets water in wherever the velocity at the outflow line points into the domain. Use ``normal_depth`` unless the outlet is steep and smooth, and ``overfall`` at the lower edge of a field over which the terrain falls away (:ref:`hydrology-outlet`).
 
 .. _axqua-hydrology-finite-elements:
 

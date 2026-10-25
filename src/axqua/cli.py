@@ -460,13 +460,16 @@ def _run_build(argv: list[str] | None) -> int:
 
     log.info("done. Produced case in %s", cfg.model_dir)
     for name in ("geometry_slf", "boundary_cli", "friction_tbl", "initial_conditions",
-                 "cas_file", "unsteady_cas", "liquid_boundaries", "gaia_cas",
-                 "ground_truth", "calibration_csv", "hbc_config"):
-        value = getattr(art, name)
+                 "cas_file", "hydrology_cas", "unsteady_cas", "liquid_boundaries",
+                 "gaia_cas", "ground_truth", "calibration_csv", "hbc_config"):
+        value = getattr(art, name, None)
         if value:
             log.info("  %-16s %s", name, value)
-    log.info("next: cd %s && python bal_telemac.py --config %s",
-             cfg.model_dir, cfg.hbc_config)
+    if cfg.hydrology_mode:
+        log.info("next: axqua submit %s --kind hydrology", args.config)
+    else:
+        log.info("next: cd %s && python bal_telemac.py --config %s",
+                 cfg.model_dir, cfg.hbc_config)
     return 0
 
 
