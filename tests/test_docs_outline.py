@@ -49,10 +49,12 @@ OUTLINE: list[tuple[str, str, list[tuple[str, str, list[str] | None]]]] = [
          ["Mesh study setup", "Run mesh convergence study", "Study report"]),
         ("Morphodynamic simulations", "morphodynamic-simulations",
          ["Concept", "TELEMAC-GAIA Setup", "OpenFOAM Setup"]),
-        # the hydrology mode, the user's order of 2026-10-24
-        ("Hydrology simulations", "hydrology-simulations",
-         ["Concept", "Data setup", "Wind and evaporation", "Boundaries and outlet",
-          "Run and results"]),
+        # the hydrology mode, the user's order of 2026-10-24; a section that can be read
+        # on its own, the user's order of 2026-10-25
+        ("Hydrology", "hydrology-simulations",
+         ["Concept", "Case setup", "Data setup", "Wind and evaporation",
+          "Boundaries and outlet", "Preprocessing", "Run and results",
+          "Mesh resolution, calibration and limits"]),
         ("Calibration & validation", "calibration-validation",
          ["Introduction to Bayesian calibration", "Ground truth data setup",
           "Bayesian calibration & validation setup", "Run HydroBayesCal",

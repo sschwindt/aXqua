@@ -107,7 +107,9 @@ def _hydrology(cfg) -> bool:
 
 
 def _calibration_configured(cfg) -> bool:
-    """Calibration needs parameters to perturb and ground truth to fit against."""
+    """Calibration needs parameters to perturb and ground truth to fit against, and a steady run to perturb: a hydrology case has none, so HydroBayesCal is not available in the mode yet."""
+    if _hydrology(cfg):
+        return False
     has_params = bool(cfg.calibration.parameters)
     gt = cfg.ground_truth
     has_truth = bool(gt.measurements or gt.sources or gt.targets)

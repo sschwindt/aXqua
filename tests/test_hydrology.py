@@ -448,6 +448,17 @@ def test_a_hydrology_case_builds_without_a_discharge_or_a_centerline(tmp_path):
     # a catchment has no steady simulation and no steady mesh study
     assert not status.capability(Capability.STEADY2D).configured
     assert not status.capability(Capability.MESH_CONVERGENCE).configured
+    # its inflow lines follow their hydrograph in the hydrology run, and HydroBayesCal has no steady run to perturb
+    from types import SimpleNamespace
+
+    cfg.boundaries.inflow = model / "hydrograph.csv"
+    cfg.calibration = SimpleNamespace(parameters={"zone1": [0.1, 0.3]})
+    cfg.ground_truth = SimpleNamespace(measurements="points.csv", sources=[], targets=None)
+    status = spec.SPEC.status(cfg)
+    for capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D, Capability.CALIBRATION):
+        assert not status.capability(capability).configured, capability
+    cfg.hydrology.enabled = False
+    assert spec._calibration_configured(cfg) and spec._has_varying_inflow(cfg)
 
 
 def test_a_hydrology_case_shows_water_from_one_millimeter(tmp_path):

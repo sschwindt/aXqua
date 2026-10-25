@@ -94,7 +94,7 @@ The plugin uses the same information to enable and disable its tabs and buttons.
 
 The final check is the first simulation itself, which shows whether inflow and outflow reach a balance (:ref:`hydraulics-dry-runs`).
 
-**The hydrology checkup.** A case in hydrology mode (:doc:`hydrology-simulations`) gets a further check, shown in the box *Hydrology checkup* of the tab *Preprocessing* and run at the start of every build, where an error stops the build:
+**The hydrology checkup.** A case in hydrology mode (:ref:`hydrology-preprocessing`) gets a further check, shown in the box *Hydrology checkup* of the tab *Preprocessing* and run at the start of every build, where an error stops the build:
 
 .. code-block:: text
 
@@ -177,6 +177,10 @@ The simulated time a model needs to reach a steady state depends on how much wat
 
 .. rubric:: References
 
+Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127.
+
 Geuzaine, C., Remacle, J.-F., 2009. Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering 79, 1309–1331. https://doi.org/10.1002/nme.2579
+
+Rawls, W. J., Brakensiek, D. L., Miller, N., 1983. Green-Ampt infiltration parameters from soils data. Journal of Hydraulic Engineering 109(1), 62–70.
 
 Thorenz, C., 2024. Boundary conditions for hydraulic structures modelling with OpenFOAM. 10th International Symposium on Hydraulic Structures, Zurich. https://doi.org/10.3929/ethz-b-000675949
