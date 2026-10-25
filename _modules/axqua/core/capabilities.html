@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/core/capabilities.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -116,6 +117,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -277,6 +289,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -286,6 +299,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -407,6 +421,7 @@
     <span class="n">MESH_CONVERGENCE</span> <span class="o">=</span> <span class="s2">"mesh_convergence"</span>    <span class="c1"># horizontal grid independence</span>
     <span class="n">VERTICAL_CONVERGENCE</span> <span class="o">=</span> <span class="s2">"vertical_convergence"</span>
     <span class="n">GAIN_LOSE</span> <span class="o">=</span> <span class="s2">"gain_lose"</span>                  <span class="c1"># losing/gaining reach exchange</span>
+    <span class="n">HYDROLOGY</span> <span class="o">=</span> <span class="s2">"hydrology"</span>                  <span class="c1"># rainfall-runoff over a catchment</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>                <span class="c1"># so f-strings render the value</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span></div>
@@ -436,6 +451,7 @@
     <span class="n">Capability</span><span class="o">.</span><span class="n">FREE_SURFACE_3D</span><span class="p">,</span>
     <span class="n">Capability</span><span class="o">.</span><span class="n">MORPHODYNAMICS</span><span class="p">,</span>
     <span class="n">Capability</span><span class="o">.</span><span class="n">GAIN_LOSE</span><span class="p">,</span>
+    <span class="n">Capability</span><span class="o">.</span><span class="n">HYDROLOGY</span><span class="p">,</span>
     <span class="n">Capability</span><span class="o">.</span><span class="n">MESH_CONVERGENCE</span><span class="p">,</span>
     <span class="n">Capability</span><span class="o">.</span><span class="n">VERTICAL_CONVERGENCE</span><span class="p">,</span>
     <span class="n">Capability</span><span class="o">.</span><span class="n">CALIBRATION</span><span class="p">,</span>
@@ -638,6 +654,20 @@
 
 
 
+<span class="c1">#: ``hydrodynamics.wet_depth`` of a river case that sets none [m].</span>
+<span class="n">RIVER_WET_DEPTH</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="c1">#: ``hydrodynamics.wet_depth`` of a hydrology case that sets none [m]: the sheet flow of a hillslope is millimeters deep, and the 1 cm of a river would hide it from the map.</span>
+<span class="n">HYDROLOGY_WET_DEPTH</span> <span class="o">=</span> <span class="mf">0.001</span>
+
+
+<div class="viewcode-block" id="default_wet_depth">
+<a class="viewcode-back" href="../../../code/core.html#axqua.core.capabilities.default_wet_depth">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">default_wet_depth</span><span class="p">(</span><span class="n">hydrology_mode</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The depth [m] at or below which water counts as dry when a case sets none: 1 mm in hydrology mode, 1 cm in a river case. The one place that says so, for :attr:`axqua.config.Config.wet_depth` and the display settings."""</span>
+    <span class="k">return</span> <span class="n">HYDROLOGY_WET_DEPTH</span> <span class="k">if</span> <span class="n">hydrology_mode</span> <span class="k">else</span> <span class="n">RIVER_WET_DEPTH</span></div>
+
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_display_settings</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""How this case's results should be drawn, read off the case.</span>
 
@@ -645,10 +675,15 @@
 <span class="sd">    imported to answer "what can this case do?" and must not fail because a config</span>
 <span class="sd">    predates a field.</span>
 <span class="sd">    """</span>
-    <span class="n">hydro</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"hydrodynamics"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">post</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"postproc"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="c1"># Config.wet_depth resolves the default of the mode; a stand-in may carry only the setting of the case, and then gets the default of its mode here</span>
+    <span class="n">wet</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"wet_depth"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">wet</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"hydrodynamics"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="s2">"wet_depth"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">wet</span> <span class="o">=</span> <span class="n">default_wet_depth</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"hydrology_mode"</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">"wet_depth"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">hydro</span><span class="p">,</span> <span class="s2">"wet_depth"</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">0.01</span><span class="p">),</span>
+        <span class="s2">"wet_depth"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">wet</span><span class="p">),</span>
         <span class="s2">"velocity_scale_max"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span>
             <span class="nb">getattr</span><span class="p">(</span><span class="n">post</span><span class="p">,</span> <span class="s2">"velocity_scale_max"</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">5.0</span><span class="p">),</span>
     <span class="p">}</span>

@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/troubleshooting/errors.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -119,6 +120,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -280,6 +292,7 @@
 <li class="toctree-l3"><a class="reference internal" href="warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html#simulation-software">Simulation software</a></li>
@@ -289,6 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -494,6 +508,22 @@
 </dl>
 <dl class="simple" id="axqua-config-unreadable">
 <dt><code class="docutils literal notranslate"><span class="pre">the</span> <span class="pre">case</span> <span class="pre">file</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">read</span></code></dt><dd><p>The file does not exist or may not be read. Verify the path and the access rights.</p>
+</dd>
+</dl>
+</section>
+<section id="hydrology-checkup">
+<h2>Hydrology checkup<a class="headerlink" href="#hydrology-checkup" title="Link to this heading"></a></h2>
+<p>The hydrology checkup of a case in hydrology mode (<em>Check</em> on the sub-tab <em>Simulations &gt; Hydrology</em> and on the tab <em>Preprocessing</em>, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">hydrology</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code>, and the start of every build) reports the following errors. An error stops the build (<a class="reference internal" href="../usage/hydrology-simulations.html"><span class="doc">Hydrology</span></a>).</p>
+<dl class="simple" id="axqua-hydrology-rainfall-unreadable">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">rain</span> <span class="pre">series</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">read</span></code> or <code class="docutils literal notranslate"><span class="pre">is</span> <span class="pre">not</span> <span class="pre">usable</span></code></dt><dd><p>The file of <code class="docutils literal notranslate"><span class="pre">hydrology.rainfall</span></code> is missing, has no time column, or has times that do not increase, intervals that overlap, or negative rain. A table of time and rain, in mm/h or in mm per interval, is expected; the data wizard writes one from a record.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-weather-unreadable">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">weather</span> <span class="pre">series</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">used</span></code></dt><dd><p>Wind or evaporation is switched on, but <code class="docutils literal notranslate"><span class="pre">hydrology.weather</span></code> is missing or lacks the columns the choice needs: wind needs <code class="docutils literal notranslate"><span class="pre">wind_speed_10m</span></code> and <code class="docutils literal notranslate"><span class="pre">wind_direction_10m</span></code>, evaporation <code class="docutils literal notranslate"><span class="pre">et0</span></code> needs <code class="docutils literal notranslate"><span class="pre">et0</span></code>, <code class="docutils literal notranslate"><span class="pre">penman</span></code> needs radiation, temperature, humidity and wind with dates, and <code class="docutils literal notranslate"><span class="pre">series</span></code> needs <code class="docutils literal notranslate"><span class="pre">evaporation</span></code>.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-soil-invalid">
+<dt><code class="docutils literal notranslate"><span class="pre">Soil</span> <span class="pre">zone</span> <span class="pre">...</span></code> or <code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">soil</span> <span class="pre">cannot</span> <span class="pre">be</span> <span class="pre">read</span></code></dt><dd><p>A value of the soil table is impossible (a negative Ks, a suction head above 1 m, which is usually a value in centimeters, or a water content at the start above saturation), a texture class is unknown, or a zone number of the soil layer is missing from the table.</p>
 </dd>
 </dl>
 </section>

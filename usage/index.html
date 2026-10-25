@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/usage/index.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -119,6 +120,17 @@
 <li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -280,6 +292,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -289,6 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -339,6 +353,7 @@
 <li><p><a class="reference internal" href="hydraulic-simulations.html"><span class="doc">Hydraulic simulations</span></a> computes water depths and flow velocities, first with TELEMAC and optionally with OpenFOAM.</p></li>
 <li><p><a class="reference internal" href="mesh-convergence.html"><span class="doc">Mesh convergence</span></a> determines the mesh resolution that the results require.</p></li>
 <li><p><a class="reference internal" href="morphodynamic-simulations.html"><span class="doc">Morphodynamic simulations</span></a> adds sediment transport and riverbed change.</p></li>
+<li><p><a class="reference internal" href="hydrology-simulations.html"><span class="doc">Hydrology</span></a> computes the runoff of rain over a catchment or a field, with infiltration, wind and evaporation. It can be read on its own and takes up what a hydrology case needs from the preceding subsections.</p></li>
 <li><p><a class="reference internal" href="calibration-validation.html"><span class="doc">Calibration &amp; validation</span></a> adjusts uncertain parameters to field measurements and quantifies the remaining uncertainty.</p></li>
 <li><p><a class="reference internal" href="postprocessing.html"><span class="doc">Postprocessing</span></a> turns the results into maps and figures.</p></li>
 <li><p><a class="reference internal" href="batch-processing.html"><span class="doc">Batch-processing (visual automation)</span></a> runs several of these steps in sequence without supervision.</p></li>
@@ -353,6 +368,7 @@
 <li class="toctree-l2"><a class="reference internal" href="case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l2"><a class="reference internal" href="case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l2"><a class="reference internal" href="case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l2"><a class="reference internal" href="case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -381,6 +397,17 @@
 <li class="toctree-l2"><a class="reference internal" href="morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l2"><a class="reference internal" href="morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="calibration-validation.html">Calibration &amp; validation</a><ul>

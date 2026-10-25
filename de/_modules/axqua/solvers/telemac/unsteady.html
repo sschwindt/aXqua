@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/unsteady.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -444,15 +458,8 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_outflow_wse_fn</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Callable Q -&gt; downstream WSE matching the outflow condition (None if free)."""</span>
-    <span class="n">cond</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
-    <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"elevation"</span><span class="p">:</span>
-        <span class="n">wse</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
-        <span class="k">return</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">wse</span>
-    <span class="k">return</span> <span class="n">hydraulics</span><span class="o">.</span><span class="n">read_stage_discharge</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span><span class="p">))</span>
+<span class="c1"># Callable Q -&gt; downstream WSE matching the outflow condition (None if free); one implementation for the build and the unsteady run.</span>
+<span class="n">_outflow_wse_fn</span> <span class="o">=</span> <span class="n">hydraulics</span><span class="o">.</span><span class="n">outflow_wse_fn</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_load_liquids</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">boundary</span><span class="o">.</span><span class="n">LiquidBoundary</span><span class="p">]:</span>
@@ -544,6 +551,13 @@
 <span class="w">    </span><span class="sd">"""Shared unsteady preamble: verify the hotstart source, load boundaries + the</span>
 <span class="sd">    hydrograph, and write the liquid-boundaries (Q(t)/SL(t)) file. Returns</span>
 <span class="sd">    ``(liquids, inflow, liq_path, duration, wse_fn)``."""</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"hydrology_mode"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
+
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span>
+            <span class="s2">"a hydrology case has no unsteady run: its inflow lines follow their "</span>
+            <span class="s2">"hydrograph in the hydrology run"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"boundaries.inflow"</span><span class="p">,</span>
+            <span class="n">remedy</span><span class="o">=</span><span class="s2">"Submit the hydrology run (axqua submit &lt;case&gt; --kind hydrology)."</span><span class="p">)</span>
     <span class="n">results_2d</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">results_slf</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">results_2d</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>

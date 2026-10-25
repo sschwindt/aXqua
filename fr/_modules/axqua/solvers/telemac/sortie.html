@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/sortie.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=a1a25f23"></script>
+      <script src="../../../../_static/documentation_options.js?v=740f9163"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/translations.js?v=e6b791cb"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calage et validation</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
@@ -408,11 +422,21 @@
 <span class="n">_RE_VOLUME</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"\s*VOLUME IN THE DOMAIN\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
 <span class="n">_RE_FLUX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
     <span class="sa">rf</span><span class="s2">"\s*FLUX BOUNDARY\s+(?P&lt;index&gt;\d+)\s*:\s*(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="c1"># TELEMAC-2D prints the error of a block relative to the volume in the domain, and</span>
+<span class="c1"># absolute while that volume is zero (a dry start before the rain has wetted anything)</span>
 <span class="n">_RE_ERROR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
-    <span class="sa">rf</span><span class="s2">"\s*RELATIVE ERROR IN VOLUME AT T\s*=\s*(?P&lt;time&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)\s*S\s*:\s*"</span>
+    <span class="sa">rf</span><span class="s2">"\s*(?:RELATIVE|ABSOLUTE) ERROR IN VOLUME AT T\s*=\s*(?P&lt;time&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)\s*S\s*:\s*"</span>
     <span class="sa">rf</span><span class="s2">"(?P&lt;value&gt;</span><span class="si">{</span><span class="n">_NUM</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
 <span class="n">_RE_ITERATION</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
     <span class="sa">r</span><span class="s2">"\s*ITERATION\s+(?P&lt;iteration&gt;\d+)\s+TIME\b(?P&lt;rest&gt;.*)"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="c1"># How many liquid boundaries the run had, as TELEMAC states it before the time loop:</span>
+<span class="c1"># 'THERE IS n LIQUID BOUNDARIES:' (bief/front2.f, only when n &gt; 0, followed by</span>
+<span class="c1"># 'THERE IS n SOLID BOUNDARIES:') in a serial run, 'NUMBER OF LIQUID BOUNDARIES: n'</span>
+<span class="c1"># (telemac2d_init.F, always) in a parallel one.</span>
+<span class="n">_RE_LIQUID</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s2">"\s*(?:THERE IS\s+(?P&lt;serial&gt;\d+)\s+LIQUID BOUNDARIES\s*:"</span>
+    <span class="sa">r</span><span class="s2">"|NUMBER OF LIQUID BOUNDARIES\s*:\s*(?P&lt;parallel&gt;\d+))"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">_RE_SOLID</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\s*THERE IS\s+\d+\s+SOLID BOUNDARIES\s*:"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
 
 <span class="c1"># --- TELEMAC-3D (telemac3d/bil3d.f) ---------------------------------------- #</span>
 <span class="c1"># The whole line is the header, so 'GAIA MASS-BALANCE OF SEDIMENTS' (hyphenated and</span>
@@ -483,6 +507,8 @@
     <span class="c1">#: passed through as printed rather than converted, so the two are not silently</span>
     <span class="c1">#: made to look alike. Everything else means the same in both.</span>
     <span class="n">dimension</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"2d"</span>
+    <span class="c1">#: the number of liquid boundaries the listing states; ``None`` when it states none</span>
+    <span class="n">liquid_boundaries</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">n_boundaries</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -538,12 +564,9 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">read_sortie</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sortie</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Parse the water-volume balance history out of a ``.sortie`` listing.</span>
 
-<span class="sd">    Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module</span>
-<span class="sd">    docstring); which one a listing carried is reported as :attr:`Sortie.dimension`.</span>
+<span class="sd">    Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module docstring); which one a listing carried is reported as :attr:`Sortie.dimension`.</span>
 
-<span class="sd">    Raises :class:`ValueError` when the listing holds no complete balance block -</span>
-<span class="sd">    normally because the run was launched without ``-s`` or without</span>
-<span class="sd">    ``PRINTING CUMULATED FLOWRATES : YES``.</span>
+<span class="sd">    Raises :class:`ValueError` when the listing holds no complete balance block - normally because the run was launched without ``-s`` or without ``PRINTING CUMULATED FLOWRATES : YES``. Blocks without any boundary flux are complete only when the listing itself says the run had no liquid boundary (a closed catchment of the hydrology mode): the domain of that run decides, not the case as it is built now.</span>
 <span class="sd">    """</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="n">study</span> <span class="o">=</span> <span class="s2">"UNKNOWN"</span>
@@ -552,6 +575,7 @@
     <span class="n">iter_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">want_study</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">dimension</span> <span class="o">=</span> <span class="s2">"2d"</span>
+    <span class="n">liquid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">iterations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">times</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -597,6 +621,15 @@
             <span class="k">if</span> <span class="s2">"NAME OF THE STUDY"</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">_RE_STUDY</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
                 <span class="n">want_study</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">liquid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_LIQUID</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">liquid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"serial"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"parallel"</span><span class="p">))</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">_RE_SOLID</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+                    <span class="n">liquid</span> <span class="o">=</span> <span class="mi">0</span>           <span class="c1"># front2.f names the liquid ones first, if any</span>
+                    <span class="k">continue</span>
 
             <span class="n">match</span> <span class="o">=</span> <span class="n">_RE_ITERATION</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
@@ -669,8 +702,11 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flux_rows</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">fluxes</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="c1"># drop any block whose fluxes were not all printed (a truncated tail)</span>
-    <span class="n">complete</span> <span class="o">=</span> <span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">n_bnd</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flux_rows</span><span class="p">),</span> <span class="nb">bool</span><span class="p">)</span>
+    <span class="c1"># drop any block whose fluxes were not all printed (a truncated tail). A domain</span>
+    <span class="c1"># without liquid boundaries prints none at all: every block of it is complete</span>
+    <span class="c1"># when its listing says so, and none is otherwise.</span>
+    <span class="n">complete</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fluxes</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">n_bnd</span>
+                <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flux_rows</span><span class="p">),</span> <span class="n">liquid</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">complete</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: balance blocks carry no boundary fluxes; "</span>
                          <span class="s2">"set 'PRINTING CUMULATED FLOWRATES : YES'."</span><span class="p">)</span>
@@ -682,7 +718,7 @@
         <span class="n">volume</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">volumes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">keep</span><span class="p">],</span>
         <span class="n">fluxes</span><span class="o">=</span><span class="n">fluxes</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span>
         <span class="n">volume_error</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)[</span><span class="n">keep</span><span class="p">],</span>
-        <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span>
+        <span class="n">dimension</span><span class="o">=</span><span class="n">dimension</span><span class="p">,</span> <span class="n">liquid_boundaries</span><span class="o">=</span><span class="n">liquid</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 

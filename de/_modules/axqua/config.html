@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/config.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -353,6 +367,10 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401  (part of this module's surface)</span>
+    <span class="n">HYDROLOGY_OUTLETS</span><span class="p">,</span> <span class="n">OUTLET_LEVELS</span><span class="p">,</span> <span class="n">RIVER_OUTLETS</span><span class="p">,</span> <span class="n">outlet_level</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401  (part of this module's surface)</span>
+    <span class="n">HYDROLOGY_WET_DEPTH</span><span class="p">,</span> <span class="n">RIVER_WET_DEPTH</span><span class="p">,</span> <span class="n">default_wet_depth</span><span class="p">)</span>
 
 <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">"axqua"</span><span class="p">)</span>
 
@@ -942,10 +960,10 @@
             <span class="n">p</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                 <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"boundaries.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> set but not found: </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"stage_discharge"</span><span class="p">,</span> <span class="s2">"elevation"</span><span class="p">,</span> <span class="s2">"free"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">RIVER_OUTLETS</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">"boundaries.outflow_condition must be 'stage_discharge', 'elevation', "</span>
-                <span class="sa">f</span><span class="s2">"or 'free', got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outflow_condition</span><span class="si">!r}</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"boundaries.outflow_condition must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">RIVER_OUTLETS</span><span class="p">)</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outflow_condition</span><span class="si">!r}</span><span class="s2">"</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rating_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"trapezoid"</span><span class="p">,</span> <span class="s2">"section"</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"boundaries.rating_method must be 'trapezoid' or "</span>
@@ -1603,7 +1621,8 @@
     <span class="c1"># the volume: negligible in any budget, dominant in any picture. Use the same</span>
     <span class="c1"># threshold when filtering the result in ParaView so the picture and the report</span>
     <span class="c1"># agree. To actually remove that water from the model, see the `drying` block.</span>
-    <span class="n">wet_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="c1"># Empty: 0.01 m, and 1 mm in a hydrology case, whose sheet flow is millimeters deep.</span>
+    <span class="n">wet_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># FE advection robustness for the distributive velocity scheme (14):</span>
     <span class="c1">#   implicitation 0.80 -&gt; more implicit (stable) depth/velocity update (TELEMAC</span>
     <span class="c1">#     default 0.55, which is too explicit for the wetting front here);</span>
@@ -1823,6 +1842,148 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">"fine_sediment.inflow_concentration is </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> kg/m3, which is "</span>
                     <span class="s2">"more than a river carries. The unit is kg/m3: 20 mg/l are 0.02"</span><span class="p">)</span></div>
+</div>
+
+
+
+
+
+<div class="viewcode-block" id="Hydrology">
+<a class="viewcode-back" href="../../code/configuration.html#axqua.config.Hydrology">[Doku]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Hydrology</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rainfall-runoff over a catchment with TELEMAC-2D: the hydrology mode.</span>
+
+<span class="sd">    Rain falls on every node, part of it infiltrates after Green-Ampt, part of the surface water evaporates, and the rest runs off to the outlet. The outline of the case is the drainage divide, a solid wall by definition, and the outflow lines of ``boundaries.liquid_boundaries`` are where water leaves; inflow lines are optional and carry the hydrographs of catchments upstream that are not in the model.</span>
+
+<span class="sd">    The mode changes the mesh too: triangles of near-equal sides everywhere, sized by the mesh zones, with no channel centerline (see :mod:`axqua.solvers.telemac.mesh`). TELEMAC only; the infiltration routine is generated by aXqua (:mod:`axqua.solvers.telemac.greenampt`).</span>
+<span class="sd">    """</span>
+
+    <span class="c1"># Hydrology mode: simulate rainfall-runoff over the catchment (TELEMAC only). The</span>
+    <span class="c1"># other settings of this block have no effect while this is off.</span>
+    <span class="n">enabled</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># ---- rain ----</span>
+    <span class="c1"># Rain series: a table of time and rain, or the file the data wizard writes</span>
+    <span class="c1"># (start_s, end_s, rain_mm_h). The model's time zero is the start of the series.</span>
+    <span class="n">rainfall</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># mm/h: the values are intensities. mm: they are depths per interval.</span>
+    <span class="n">rainfall_units</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"mm/h"</span>
+    <span class="c1"># Whether a time stamp is the start or the end of its interval. Weather services</span>
+    <span class="c1"># stamp the end (the rain of 12:00 to 13:00 is reported at 13:00).</span>
+    <span class="n">rainfall_stamp</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"end"</span>
+    <span class="c1"># Date and time of the model's time zero, for a dated series (ISO, e.g.</span>
+    <span class="c1"># 2024-06-02T14:00). Leave empty to start at the first interval.</span>
+    <span class="n">rainfall_start</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># ---- infiltration ----</span>
+    <span class="c1"># green-ampt: infiltration after Green-Ampt. none: no infiltration (Ks = 0).</span>
+    <span class="n">infiltration</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"green-ampt"</span>
+    <span class="c1"># Solution of Green-Ampt. sadeghi: de Vos et al. (2024), the explicit solution of</span>
+    <span class="c1"># Sadeghi et al. with Chu's ponding time; ponded water infiltrates after the rain.</span>
+    <span class="c1"># exact: Ks (1 + a/F) on the infiltrated depth. travert: TELEMAC's own equations.</span>
+    <span class="n">green_ampt</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"sadeghi"</span>
+    <span class="c1"># A node also ponds when water from upslope stands on it deeper than runon_depth,</span>
+    <span class="c1"># not only when the rain exceeds its capacity (an extension of de Vos et al.).</span>
+    <span class="n">ponding_by_runon</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">runon_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span>
+    <span class="c1"># Polygons of the soil zones, with a zone number per polygon. Leave empty for one</span>
+    <span class="c1"># soil over the whole catchment.</span>
+    <span class="n">soil_zones</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">soil_zone_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Zone ID"</span>
+    <span class="c1"># Table of the soil zones: zone_id, texture, ks_mm_h, suction_m, theta_s,</span>
+    <span class="c1"># theta_i. What a row leaves empty comes from its texture (Rawls et al., 1983).</span>
+    <span class="n">soil_table</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># One texture class for the whole catchment when there is no soil table, e.g.</span>
+    <span class="c1"># loam or sandy loam (Rawls et al., 1983).</span>
+    <span class="n">soil_texture</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Volumetric water content at the start of the event [-], for zones without</span>
+    <span class="c1"># their own theta_i, e.g. the ERA5-Land soil moisture the data wizard fetches.</span>
+    <span class="n">initial_water_content</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Effective saturation at the start [-] where no water content is given: 0 is a</span>
+    <span class="c1"># dry soil, 1 a saturated one.</span>
+    <span class="n">initial_saturation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span>
+    <span class="c1"># Polygons of sealed surfaces (roofs, roads): no infiltration there.</span>
+    <span class="n">sealed_surfaces</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># ---- wind and sun ----</span>
+    <span class="c1"># Weather series: a table of time and any of wind_speed_10m, wind_direction_10m</span>
+    <span class="c1"># (direction the wind comes from), shortwave_radiation, temperature,</span>
+    <span class="c1"># relative_humidity, et0 (mm/h), evaporation (mm/h).</span>
+    <span class="n">weather</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Apply the wind of the weather series (TELEMAC's wind stress).</span>
+    <span class="n">wind</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># Wind drag coefficient: flather or wu (depend on the wind speed), or constant.</span>
+    <span class="n">wind_formula</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"flather"</span>
+    <span class="c1"># TELEMAC applies no wind where the water is shallower than this [m].</span>
+    <span class="n">wind_threshold_depth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="c1"># Evaporation of surface water. none, et0 (the et0 column times open_water_factor),</span>
+    <span class="c1"># penman (FAO-56 Penman-Monteith from radiation, temperature, humidity and wind),</span>
+    <span class="c1"># or series (the evaporation column as it is).</span>
+    <span class="n">evaporation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"none"</span>
+    <span class="c1"># Evaporation of open water as a multiple of ET0 (FAO-56: 1.05 for water less</span>
+    <span class="c1"># than 2 m deep).</span>
+    <span class="n">open_water_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.05</span>
+    <span class="c1"># ---- outlet and run ----</span>
+    <span class="c1"># Condition of the outflow lines. normal_depth: TELEMAC's stage-discharge curve Z(Q), from boundaries.stage_discharge or from the normal flow through the section of each outflow line. free: depth and velocity have no gradient, which holds only where the flow leaves supercritical (steep, smooth outlets); a slower outlet fills up into a pond. elevation: the fixed level boundaries.prescribed_elevation, e.g. of a lake the catchment drains into. overfall: the terrain falls away beyond the outflow lines (the lower edge of a field, a terrace, a bank), so no level is held there: water leaves at critical flow at most and none comes back.</span>
+    <span class="n">outlet_condition</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"normal_depth"</span>
+    <span class="c1"># Bed slope at the outlet for normal_depth [-]. Leave empty to take it from the</span>
+    <span class="c1"># terrain model upstream of the outflow line.</span>
+    <span class="n">outlet_slope</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Simulated time after the last rain [s], for the runoff to drain.</span>
+    <span class="n">drain_time</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3600.0</span>
+    <span class="c1"># Interval of the result maps [s].</span>
+    <span class="n">printout_period</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">300.0</span>
+    <span class="c1"># Numerical kernel of the hydrology run. finite-volumes: TELEMAC's HLLC scheme</span>
+    <span class="c1"># with the hydrostatic reconstruction of Chen and Noelle, made for water that is</span>
+    <span class="c1"># shallower than the steps of the bed between nodes. finite-elements: the</span>
+    <span class="c1"># numerics of hydrodynamics; thin films drain slower and the outlet is fragile.</span>
+    <span class="n">kernel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"finite-volumes"</span>
+
+<div class="viewcode-block" id="Hydrology.validate">
+<a class="viewcode-back" href="../../code/configuration.html#axqua.config.Hydrology.validate">[Doku]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"rainfall_units"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"mm/h"</span><span class="p">,</span> <span class="s2">"mm"</span><span class="p">),</span> <span class="s2">"rainfall_stamp"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"start"</span><span class="p">,</span> <span class="s2">"end"</span><span class="p">),</span>
+                   <span class="s2">"infiltration"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"green-ampt"</span><span class="p">,</span> <span class="s2">"none"</span><span class="p">),</span>
+                   <span class="s2">"green_ampt"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"sadeghi"</span><span class="p">,</span> <span class="s2">"exact"</span><span class="p">,</span> <span class="s2">"travert"</span><span class="p">),</span>
+                   <span class="s2">"wind_formula"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"flather"</span><span class="p">,</span> <span class="s2">"wu"</span><span class="p">,</span> <span class="s2">"constant"</span><span class="p">),</span>
+                   <span class="s2">"evaporation"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"none"</span><span class="p">,</span> <span class="s2">"et0"</span><span class="p">,</span> <span class="s2">"penman"</span><span class="p">,</span> <span class="s2">"series"</span><span class="p">),</span>
+                   <span class="s2">"outlet_condition"</span><span class="p">:</span> <span class="n">HYDROLOGY_OUTLETS</span><span class="p">,</span>
+                   <span class="s2">"kernel"</span><span class="p">:</span> <span class="p">(</span><span class="s2">"finite-volumes"</span><span class="p">,</span> <span class="s2">"finite-elements"</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">allowed</span> <span class="ow">in</span> <span class="n">choices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hydrology.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be one of </span><span class="si">{</span><span class="n">allowed</span><span class="si">}</span><span class="s2">, got "</span>
+                                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rainfall</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"hydrology.rainfall is needed: the rain series that "</span>
+                             <span class="s2">"drives the catchment"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rainfall"</span><span class="p">,</span> <span class="s2">"soil_zones"</span><span class="p">,</span> <span class="s2">"soil_table"</span><span class="p">,</span> <span class="s2">"sealed_surfaces"</span><span class="p">,</span>
+                     <span class="s2">"weather"</span><span class="p">):</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hydrology.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> set but not found: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">infiltration</span> <span class="o">==</span> <span class="s2">"green-ampt"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">soil_table</span> <span class="ow">is</span> <span class="kc">None</span> \
+                <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">soil_texture</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"hydrology needs a soil for Green-Ampt: "</span>
+                             <span class="s2">"hydrology.soil_table or hydrology.soil_texture"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">wind</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaporation</span> <span class="o">!=</span> <span class="s2">"none"</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">weather</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"hydrology.weather is needed for wind and evaporation"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_water_content</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> \
+                <span class="ow">and</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_water_content</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.6</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"hydrology.initial_water_content is a volumetric share "</span>
+                             <span class="sa">f</span><span class="s2">"from 0 to 0.6, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_water_content</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_saturation</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"hydrology.initial_saturation is between 0 and 1, got "</span>
+                             <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_saturation</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="n">positive</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"drain_time"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">drain_time</span><span class="p">,</span> <span class="s2">"printout_period"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">printout_period</span><span class="p">,</span>
+                    <span class="s2">"open_water_factor"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">open_water_factor</span><span class="p">,</span>
+                    <span class="s2">"wind_threshold_depth"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_threshold_depth</span><span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">outlet_slope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">positive</span><span class="p">[</span><span class="s2">"outlet_slope"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outlet_slope</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">positive</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"hydrology.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> must be larger than 0, got </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runon_depth</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"hydrology.runon_depth cannot be negative"</span><span class="p">)</span></div>
 </div>
 
 
@@ -2563,6 +2724,8 @@
     <span class="n">openfoam</span><span class="p">:</span> <span class="n">OpenFoam</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">OpenFoam</span><span class="p">)</span>
     <span class="c1"># fine sediment over a bed that stays in place (optional; off by default)</span>
     <span class="n">fine_sediment</span><span class="p">:</span> <span class="n">FineSediment</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FineSediment</span><span class="p">)</span>
+    <span class="c1"># rainfall-runoff over a catchment, the hydrology mode (optional; off by default)</span>
+    <span class="n">hydrology</span><span class="p">:</span> <span class="n">Hydrology</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">Hydrology</span><span class="p">)</span>
     <span class="n">postproc</span><span class="p">:</span> <span class="n">PostProcessing</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">PostProcessing</span><span class="p">)</span>
     <span class="c1"># where the OpenFOAM case tree is written; defaults to &lt;sim_dir&gt;/openfoam</span>
     <span class="n">openfoam_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2588,6 +2751,12 @@
     <span class="n">control_sections_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"control-sections.txt"</span>    <span class="c1"># unsteady flux-verification sections</span>
     <span class="n">sections_output_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"r-control-sections.txt"</span>   <span class="c1"># SECTIONS OUTPUT FILE</span>
     <span class="n">results_unsteady_slf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"r2d-unsteady.slf"</span>         <span class="c1"># unsteady2d.cas RESULTS FILE</span>
+    <span class="c1"># the hydrology run (rainfall-runoff, hydrology mode) and the files it reads</span>
+    <span class="n">hydrology_cas_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"hydrology2d.cas"</span>
+    <span class="n">results_hydrology_slf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"r2d-hydrology.slf"</span>
+    <span class="n">forcing_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"forcing.txt"</span>            <span class="c1"># rain + evaporation (FORMATTED DATA FILE 1)</span>
+    <span class="n">atmosphere_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"atmosphere.txt"</span>      <span class="c1"># wind (ASCII ATMOSPHERIC DATA FILE)</span>
+    <span class="n">outlet_rating_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"outlet-rating.txt"</span>  <span class="c1"># STAGE-DISCHARGE CURVES FILE</span>
     <span class="n">results3d_unsteady_slf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"r3d-unsteady.slf"</span>       <span class="c1"># unsteady telemac3d 3D RESULT FILE</span>
     <span class="n">results2d_from_3d_unsteady_slf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"r3d-2d-unsteady.slf"</span>  <span class="c1"># unsteady 3D 2D RESULT FILE</span>
     <span class="n">ic_slf</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"initial-conditions.slf"</span>   <span class="c1"># hotstart file when prewet_depth is set</span>
@@ -2659,6 +2828,28 @@
 
 
     <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hydrology_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Is this a hydrology case (rainfall-runoff over a catchment)?</span>
+
+<span class="sd">        The one test of the mode. Code that is also handed stand-ins for a config reads it as ``getattr(cfg, "hydrology_mode", False)``."""</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hydrology</span><span class="o">.</span><span class="n">enabled</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">outflow_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The condition of the outflow lines: the outlet of a hydrology case, else</span>
+<span class="sd">        ``boundaries.outflow_condition``."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrology</span><span class="o">.</span><span class="n">outlet_condition</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wet_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""The depth [m] at or below which water counts as dry in the reports and the maps: ``hydrodynamics.wet_depth``, else 1 mm in a hydrology case and 1 cm in a river case."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">default_wet_depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rigid_lid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Convenience: is the OpenFOAM case single-phase under a fixed lid?"""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">"rigid-lid"</span>
@@ -2726,7 +2917,8 @@
             <span class="p">(</span><span class="s2">"telemac"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">validate_choice</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"surfaces"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaces</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"geodata"</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">produced</span><span class="o">=</span><span class="n">produced</span><span class="p">())),</span>
-            <span class="p">(</span><span class="s2">"boundaries"</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">produced</span><span class="o">=</span><span class="n">produced</span><span class="p">())),</span>
+            <span class="p">(</span><span class="s2">"boundaries"</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+                <span class="n">produced</span><span class="o">=</span><span class="n">produced</span><span class="p">()</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed_catchment</span><span class="p">())),</span>
             <span class="p">(</span><span class="s2">"ground_truth"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_note_ground_truth</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"boundaries"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_outflow</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"initialization"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_prewet</span><span class="p">),</span>
@@ -2737,6 +2929,8 @@
             <span class="p">(</span><span class="s2">"structures"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"openfoam"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"fine_sediment"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fine_sediment</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">"hydrology"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrology</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">"hydrology"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_hydrology</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"machine"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">postproc</span><span class="o">.</span><span class="n">environment</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"postproc"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">postproc</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
             <span class="p">(</span><span class="s2">"initialization"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">validate</span><span class="p">),</span>
@@ -2754,8 +2948,10 @@
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"</span><span class="si">%s</span><span class="s2">; HydroBayesCal setup will be skipped"</span><span class="p">,</span> <span class="n">problem</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_outflow</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cond</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
-        <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"stage_discharge"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cond</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outflow_condition</span>
+        <span class="c1"># a name that is no outflow condition is the finding of the block it is in</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">OUTLET_LEVELS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cond</span><span class="p">,</span> <span class="s2">"unknown"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"rating"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># A MISSING rating is a supported state, not an error: `rating_method`</span>
             <span class="c1"># exists to say how one is synthesized, and `workflow.prepare_steady_inputs`</span>
             <span class="c1"># does it from the outflow liquid line and the DEM before the build. So</span>
@@ -2768,10 +2964,44 @@
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"boundaries.stage_discharge is not set; the outflow rating will "</span>
                      <span class="s2">"be synthesized (rating_method: </span><span class="si">%s</span><span class="s2">) from the outflow line and "</span>
                      <span class="s2">"the DEM"</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">rating_method</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"elevation"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"fixed"</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"hydrology.outlet_condition"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrology_mode</span>
+                   <span class="k">else</span> <span class="s2">"boundaries.outflow_condition"</span><span class="p">)</span>
+            <span class="c1"># the setting to fill in comes first: the case check takes the first key of a message for its subject</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"boundaries.prescribed_elevation is required by </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">cond</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_closed_catchment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""A hydrology case may have no liquid boundary at all: a closed depression whose rain stays in it. Its missing lines are then not an error."""</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrology_mode</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"liquid_boundaries"</span><span class="p">})</span>
+        <span class="k">return</span> <span class="nb">frozenset</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_hydrology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""What a hydrology case cannot be combined with."""</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="c1"># what the hydrology build does not write: refused, so that a case that asks</span>
+        <span class="c1"># for it is not run without it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">"outflow_condition: elevation requires boundaries.prescribed_elevation"</span>
-            <span class="p">)</span>
+                <span class="s2">"hydrology and a gain-lose reach cannot be combined: in fortran mode "</span>
+                <span class="s2">"both drive TELEMAC's rain term, and the hydrology build writes no "</span>
+                <span class="s2">"source regions. Remove the gain_lose block or switch the hydrology "</span>
+                <span class="s2">"mode off."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">internal_sources</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"boundaries.internal_sources adds fixed-rate source regions, which the "</span>
+                <span class="s2">"hydrology build does not write. Set it to false or switch the "</span>
+                <span class="s2">"hydrology mode off."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">morphodynamics</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"hydrology and morphodynamics (GAIA) cannot be combined yet: the "</span>
+                <span class="s2">"hydrology build couples no GAIA steering file. Switch one of them "</span>
+                <span class="s2">"off."</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"initialization.prewet_depth seeds the channel of a river reach; a "</span>
+                <span class="s2">"hydrology case starts dry and is wetted by the rain. Leave it empty."</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_prewet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">mesh_zones</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -3001,6 +3231,7 @@
     <span class="n">drying</span> <span class="o">=</span> <span class="n">Drying</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">Drying</span><span class="p">,</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"drying"</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}))</span>
     <span class="n">structures</span> <span class="o">=</span> <span class="n">Structures</span><span class="p">(</span><span class="o">**</span><span class="n">_only_known</span><span class="p">(</span><span class="n">Structures</span><span class="p">,</span> <span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"structures"</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}))</span>
     <span class="n">fine_sediment</span> <span class="o">=</span> <span class="n">_load_fine_sediment</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fine_sediment"</span><span class="p">))</span>
+    <span class="n">hydrology</span> <span class="o">=</span> <span class="n">_load_hydrology</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"hydrology"</span><span class="p">),</span> <span class="n">cfg_dir</span><span class="p">)</span>
     <span class="n">calib</span> <span class="o">=</span> <span class="n">Calibration</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"calibration"</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{},</span> <span class="n">cfg_dir</span><span class="p">)</span>
 
     <span class="c1"># OpenFOAM extension: absent block -&gt; defaults, and nothing consults them</span>
@@ -3064,6 +3295,7 @@
         <span class="n">surfaces</span><span class="o">=</span><span class="n">surfaces</span><span class="p">,</span>
         <span class="n">openfoam</span><span class="o">=</span><span class="n">openfoam</span><span class="p">,</span>
         <span class="n">fine_sediment</span><span class="o">=</span><span class="n">fine_sediment</span><span class="p">,</span>
+        <span class="n">hydrology</span><span class="o">=</span><span class="n">hydrology</span><span class="p">,</span>
         <span class="n">postproc</span><span class="o">=</span><span class="n">postproc</span><span class="p">,</span>
         <span class="n">openfoam_dir</span><span class="o">=</span><span class="n">openfoam_dir</span><span class="p">,</span>
         <span class="n">declared_blocks</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">raw</span><span class="p">),</span>
@@ -3092,6 +3324,15 @@
     <span class="k">if</span> <span class="n">per_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">data</span><span class="p">[</span><span class="s2">"inflow_concentration"</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_line</span>
     <span class="k">return</span> <span class="n">FineSediment</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_hydrology</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cfg_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Hydrology</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``hydrology`` block, with its data files resolved against the case."""</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_only_known</span><span class="p">(</span><span class="n">Hydrology</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">raw</span> <span class="ow">or</span> <span class="p">{}))</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rainfall"</span><span class="p">,</span> <span class="s2">"soil_zones"</span><span class="p">,</span> <span class="s2">"soil_table"</span><span class="p">,</span> <span class="s2">"sealed_surfaces"</span><span class="p">,</span> <span class="s2">"weather"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">cfg_dir</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Hydrology</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 
 
 <span class="c1"># --------------------------------------------------------------------------- #</span>

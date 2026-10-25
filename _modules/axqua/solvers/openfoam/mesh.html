@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/openfoam/mesh.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -116,6 +117,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -277,6 +289,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -286,6 +299,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -1437,7 +1451,7 @@
 
     <span class="n">polygon</span><span class="p">,</span> <span class="n">how</span> <span class="o">=</span> <span class="n">_domain_polygon</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">of</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
                                    <span class="n">wet_margin</span><span class="o">=</span><span class="n">resolve_margin</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="p">),</span>
-                                   <span class="n">wet_depth</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span>
+                                   <span class="n">wet_depth</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span>
     <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"footprint: </span><span class="si">{</span><span class="n">how</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="n">structures</span> <span class="o">=</span> <span class="n">load_structures</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
@@ -1453,7 +1467,7 @@
         <span class="c1"># into slivers, and checkMesh rejects those as incorrectly oriented face</span>
         <span class="c1"># pyramids. One cell of dry ground beyond that line keeps the liquid-boundary</span>
         <span class="c1"># lines (which sit at the water's edge) inside the domain.</span>
-        <span class="n">trim_depth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">,</span> <span class="n">of</span><span class="o">.</span><span class="n">min_water_depth</span><span class="p">)</span>
+        <span class="n">trim_depth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">,</span> <span class="n">of</span><span class="o">.</span><span class="n">min_water_depth</span><span class="p">)</span>
         <span class="n">dry_footprint</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">dry_footprint</span><span class="p">(</span><span class="n">wet_depth</span><span class="o">=</span><span class="n">trim_depth</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="n">dx</span><span class="p">)</span>
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"columns shallower than </span><span class="si">{</span><span class="n">trim_depth</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2"> m left out: a water "</span>
                      <span class="s2">"column thinner than one cell cannot be meshed"</span><span class="p">)</span>
@@ -1583,7 +1597,7 @@
         <span class="c1"># footprint: the dry floodplain zones carry the vegetation ks (isar: 0.5 m),</span>
         <span class="c1"># which has no bearing on a wall function under water and would otherwise</span>
         <span class="c1"># pin the bed layer to half the column height everywhere.</span>
-        <span class="n">wet_cols</span> <span class="o">=</span> <span class="p">(</span><span class="n">column_depth</span> <span class="o">&gt;</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span> <span class="k">if</span> \
+        <span class="n">wet_cols</span> <span class="o">=</span> <span class="p">(</span><span class="n">column_depth</span> <span class="o">&gt;</span> <span class="n">cfg</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span> <span class="k">if</span> \
             <span class="n">column_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">bed_ks</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
         <span class="n">sample</span> <span class="o">=</span> <span class="n">bed_ks</span><span class="p">[</span><span class="n">wet_cols</span><span class="p">]</span> <span class="k">if</span> <span class="n">wet_cols</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="k">else</span> <span class="n">bed_ks</span>
         <span class="n">bed_layer</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmedian</span><span class="p">(</span><span class="n">sample</span><span class="p">))</span>

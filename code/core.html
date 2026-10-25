@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/code/core.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -119,6 +120,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -280,6 +292,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -289,6 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -724,6 +738,44 @@ were separated; nothing here knows about either solver.</p>
 <p>The Inn dataset’s <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">(inflow/outlfow)</span></code> typo is deliberately still matched - the
 layer is field data, and refusing to read it over a spelling mistake would help
 nobody.</p>
+<p>What each outflow condition prescribes at the outflow lines (<a class="reference internal" href="#axqua.core.boundaries.OUTLET_LEVELS" title="axqua.core.boundaries.OUTLET_LEVELS"><code class="xref py py-data docutils literal notranslate"><span class="pre">OUTLET_LEVELS</span></code></a>) is here as well, for the same reason: the case settings, the TELEMAC build and the hydrology build each ask it, and a list of condition names in each of them missed the <code class="docutils literal notranslate"><span class="pre">overfall</span></code> outlet twice when it was added.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.core.boundaries.OUTLET_LEVELS">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.boundaries.</span></span><span class="sig-name descname"><span class="pre">OUTLET_LEVELS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'elevation':</span> <span class="pre">'fixed',</span> <span class="pre">'free':</span> <span class="pre">None,</span> <span class="pre">'normal_depth':</span> <span class="pre">'curve',</span> <span class="pre">'overfall':</span> <span class="pre">'mesh',</span> <span class="pre">'stage_discharge':</span> <span class="pre">'rating'}</span></span><a class="headerlink" href="#axqua.core.boundaries.OUTLET_LEVELS" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">None</span></code> no level (<code class="docutils literal notranslate"><span class="pre">free</span></code>, zero gradient of depth and velocity), <code class="docutils literal notranslate"><span class="pre">&quot;curve&quot;</span></code> a level TELEMAC takes from its own Z(Q) curve as the discharge changes (<code class="docutils literal notranslate"><span class="pre">normal_depth</span></code>), <code class="docutils literal notranslate"><span class="pre">&quot;fixed&quot;</span></code> the level <code class="docutils literal notranslate"><span class="pre">boundaries.prescribed_elevation</span></code> (<code class="docutils literal notranslate"><span class="pre">elevation</span></code>), <code class="docutils literal notranslate"><span class="pre">&quot;rating&quot;</span></code> the level of the rating curve <code class="docutils literal notranslate"><span class="pre">boundaries.stage_discharge</span></code> at the discharge of the case (<code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code>), <code class="docutils literal notranslate"><span class="pre">&quot;mesh&quot;</span></code> a level below the lowest node, so that the lines hold no water (<code class="docutils literal notranslate"><span class="pre">overfall</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What each outflow condition prescribes at the outflow lines, so that the code that writes or reads an outlet asks this one table instead of listing condition names</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.core.boundaries.RIVER_OUTLETS">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.boundaries.</span></span><span class="sig-name descname"><span class="pre">RIVER_OUTLETS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('elevation',</span> <span class="pre">'stage_discharge',</span> <span class="pre">'free')</span></span><a class="headerlink" href="#axqua.core.boundaries.RIVER_OUTLETS" title="Link to this definition"></a></dt>
+<dd><p>The outflow conditions of a river case (<code class="docutils literal notranslate"><span class="pre">boundaries.outflow_condition</span></code>), the default first.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.core.boundaries.HYDROLOGY_OUTLETS">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.boundaries.</span></span><span class="sig-name descname"><span class="pre">HYDROLOGY_OUTLETS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('normal_depth',</span> <span class="pre">'free',</span> <span class="pre">'elevation',</span> <span class="pre">'overfall')</span></span><a class="headerlink" href="#axqua.core.boundaries.HYDROLOGY_OUTLETS" title="Link to this definition"></a></dt>
+<dd><p>The outflow conditions of a hydrology case (<code class="docutils literal notranslate"><span class="pre">hydrology.outlet_condition</span></code>), the default first.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.core.boundaries.outlet_level">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.boundaries.</span></span><span class="sig-name descname"><span class="pre">outlet_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/core/boundaries.html#outlet_level"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.core.boundaries.outlet_level" title="Link to this definition"></a></dt>
+<dd><p>Where the level of an outflow line under <em>condition</em> comes from (<a class="reference internal" href="#axqua.core.boundaries.OUTLET_LEVELS" title="axqua.core.boundaries.OUTLET_LEVELS"><code class="xref py py-data docutils literal notranslate"><span class="pre">OUTLET_LEVELS</span></code></a>); a name that is no outflow condition raises.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>condition</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.core.boundaries.liquid_lines">
 <span class="sig-prename descclassname"><span class="pre">axqua.core.boundaries.</span></span><span class="sig-name descname"><span class="pre">liquid_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/core/boundaries.html#liquid_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.core.boundaries.liquid_lines" title="Link to this definition"></a></dt>
@@ -1705,7 +1757,7 @@ exists to read <em>fields</em>, and axqua samples those on a KD-tree over <code 
 
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.core.selafin.write_geometry">
-<span class="sig-prename descclassname"><span class="pre">axqua.core.selafin.</span></span><span class="sig-name descname"><span class="pre">write_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ikle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipobo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">friction_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roughness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'axqua</span> <span class="pre">geometry'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2026,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/core/selafin.html#write_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.core.selafin.write_geometry" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">axqua.core.selafin.</span></span><span class="sig-name descname"><span class="pre">write_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ikle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipobo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">friction_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roughness</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'axqua</span> <span class="pre">geometry'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2026,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">double_precision</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/core/selafin.html#write_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.core.selafin.write_geometry" title="Link to this definition"></a></dt>
 <dd><p>Write a 2D triangular-mesh geometry SELAFIN.</p>
 <p>Always writes the BOTTOM variable. If <em>friction_id</em> is given it is written as
 <code class="docutils literal notranslate"><span class="pre">FRIC_ID</span></code> (per node), which TELEMAC reads to map nodes to friction zones in
@@ -1731,6 +1783,8 @@ where the coordinate granularity is comfortably below the cell size.</p>
 <li><p><strong>bottom</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(NPOIN,)</span> <span class="pre">float</span> <span class="pre">array</span></code> of <code class="xref py py-class docutils literal notranslate"><span class="pre">bed</span> <span class="pre">elevations</span> <span class="pre">(m).</span></code>)</p></li>
 <li><p><strong>friction_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">optional</span> <span class="pre">(NPOIN,)</span> <span class="pre">int</span> <span class="pre">array</span></code> of <code class="xref py py-class docutils literal notranslate"><span class="pre">friction-zone</span> <span class="pre">ids</span> <span class="pre">per</span> <span class="pre">node.</span></code>)</p></li>
 <li><p><strong>roughness</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">optional</span> <span class="pre">(NPOIN,)</span> <span class="pre">float</span> <span class="pre">array</span></code> of <code class="xref py py-class docutils literal notranslate"><span class="pre">per-node</span> <span class="pre">roughness</span> <span class="pre">values.</span></code>)</p></li>
+<li><p><strong>extra</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">further</span> <span class="pre">``(name</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">unit</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">values)`</span></code> node variables`, <code class="xref py py-class docutils literal notranslate"><span class="pre">written</span> <span class="pre">after</span> <span class="pre">the</span> <span class="pre">others;</span></code>) – TELEMAC reads them as private variables by their names (the soil fields of a
+hydrology case).</p></li>
 <li><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em> | </em><em>Path</em>)</p></li>
 <li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a>)</p></li>
 <li><p><strong>date</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>]</em>)</p></li>
@@ -2116,6 +2170,11 @@ table unreadable and the registry useless.</p>
 <span class="sig-name descname"><span class="pre">GAIN_LOSE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gain_lose'</span></span><a class="headerlink" href="#axqua.core.capabilities.Capability.GAIN_LOSE" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="axqua.core.capabilities.Capability.HYDROLOGY">
+<span class="sig-name descname"><span class="pre">HYDROLOGY</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'hydrology'</span></span><a class="headerlink" href="#axqua.core.capabilities.Capability.HYDROLOGY" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -2349,6 +2408,37 @@ tool) reads, so it is tested rather than assumed.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#axqua.core.capabilities.SolverStatus" title="axqua.core.capabilities.SolverStatus"><em>SolverStatus</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.core.capabilities.RIVER_WET_DEPTH">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.capabilities.</span></span><span class="sig-name descname"><span class="pre">RIVER_WET_DEPTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.01</span></span><a class="headerlink" href="#axqua.core.capabilities.RIVER_WET_DEPTH" title="Link to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">hydrodynamics.wet_depth</span></code> of a river case that sets none [m].</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="axqua.core.capabilities.HYDROLOGY_WET_DEPTH">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.capabilities.</span></span><span class="sig-name descname"><span class="pre">HYDROLOGY_WET_DEPTH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.001</span></span><a class="headerlink" href="#axqua.core.capabilities.HYDROLOGY_WET_DEPTH" title="Link to this definition"></a></dt>
+<dd><p>the sheet flow of a hillslope is millimeters deep, and the 1 cm of a river would hide it from the map.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">hydrodynamics.wet_depth</span></code> of a hydrology case that sets none [m]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.core.capabilities.default_wet_depth">
+<span class="sig-prename descclassname"><span class="pre">axqua.core.capabilities.</span></span><span class="sig-name descname"><span class="pre">default_wet_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hydrology_mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/core/capabilities.html#default_wet_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.core.capabilities.default_wet_depth" title="Link to this definition"></a></dt>
+<dd><p>The depth [m] at or below which water counts as dry when a case sets none: 1 mm in hydrology mode, 1 cm in a river case. The one place that says so, for <a class="reference internal" href="configuration.html#axqua.config.Config.wet_depth" title="axqua.config.Config.wet_depth"><code class="xref py py-attr docutils literal notranslate"><span class="pre">axqua.config.Config.wet_depth</span></code></a> and the display settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>hydrology_mode</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)">float</a></p>
 </dd>
 </dl>
 </dd></dl>

@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/genindex.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=292eb321"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/design-tabs.js?v=f930bc37"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -116,6 +117,17 @@
 <li class="toctree-l3"><a class="reference internal" href="usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -277,6 +289,7 @@
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -286,6 +299,7 @@
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -548,6 +562,8 @@
       <li><a href="code/configuration.html#axqua.core.environment.SolverEnvironment.assume_entered">assume_entered (axqua.core.environment.SolverEnvironment property)</a>
 </li>
       <li><a href="code/workflow.html#axqua.convergence.ConvergenceReport.asymptotic_ratio">asymptotic_ratio (axqua.convergence.ConvergenceReport attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Config.atmosphere_file">atmosphere_file (axqua.config.Config attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.auto_bed_layer">auto_bed_layer (axqua.config.OpenFoam attribute)</a>
 </li>
@@ -1705,6 +1721,8 @@
       </ul></li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.threed.cas3d_name">cas3d_name() (in module axqua.solvers.telemac.threed)</a>
 </li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.steering.cas_duration">cas_duration() (in module axqua.solvers.telemac.steering)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.Config.cas_file">cas_file (axqua.config.Config attribute)</a>
 
       <ul>
@@ -1859,10 +1877,10 @@
         <li><a href="code/jobs.html#axqua.jobs.model.OpenFoamSedimentRunOptions.check_mesh">(axqua.jobs.model.OpenFoamSedimentRunOptions attribute)</a>
 </li>
       </ul></li>
-      <li><a href="code/openfoam.html#axqua.solvers.openfoam.runtime.OpenFoamRuntime.check_mesh">check_mesh() (axqua.solvers.openfoam.runtime.OpenFoamRuntime method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="code/openfoam.html#axqua.solvers.openfoam.runtime.OpenFoamRuntime.check_mesh">check_mesh() (axqua.solvers.openfoam.runtime.OpenFoamRuntime method)</a>
+</li>
       <li><a href="code/jobs.html#axqua.jobs.model.check_transition">check_transition() (in module axqua.jobs.model)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.calibration.check_turbulence">check_turbulence() (in module axqua.solvers.openfoam.calibration)</a>
@@ -2193,6 +2211,8 @@
 </li>
       <li><a href="code/configuration.html#axqua.config.MeshConfig.default_size">default_size (axqua.config.MeshConfig attribute)</a>
 </li>
+      <li><a href="code/core.html#axqua.core.capabilities.default_wet_depth">default_wet_depth() (in module axqua.core.capabilities)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.Structures.default_width">default_width (axqua.config.Structures attribute)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.report.DischargeHistory.delivered">delivered (axqua.solvers.openfoam.report.DischargeHistory property)</a>
@@ -2345,6 +2365,8 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.report.LidApplicability.doubtful">doubtful (axqua.solvers.openfoam.report.LidApplicability property)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.drain_time">drain_time (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.Initialization.drainable_prewet">drainable_prewet (axqua.config.Initialization attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Initialization.drainable_tolerance">drainable_tolerance (axqua.config.Initialization attribute)</a>
@@ -2462,6 +2484,8 @@
 </li>
         <li><a href="code/configuration.html#axqua.config.GainLose.enabled">(axqua.config.GainLose attribute)</a>
 </li>
+        <li><a href="code/configuration.html#axqua.config.Hydrology.enabled">(axqua.config.Hydrology attribute)</a>
+</li>
         <li><a href="code/configuration.html#axqua.config.Morphodynamics.enabled">(axqua.config.Morphodynamics attribute)</a>
 </li>
         <li><a href="code/configuration.html#axqua.config.PreRun.enabled">(axqua.config.PreRun attribute)</a>
@@ -2533,10 +2557,10 @@
 </li>
       <li><a href="code/jobs.html#axqua.jobs.model.JobStatus.error">error (axqua.jobs.model.JobStatus attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/configuration.html#axqua.core.errors.ErrorRecord">ErrorRecord (class in axqua.core.errors)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/install.html#axqua.install.recipes.Plan.estimate">estimate (axqua.install.recipes.Plan attribute)</a>
 
       <ul>
@@ -2546,6 +2570,8 @@
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.case.estimate_cells">estimate_cells() (in module axqua.solvers.openfoam.case)</a>
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.gainlose.estimate_exchange">estimate_exchange() (in module axqua.solvers.telemac.gainlose)</a>
+</li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.mesh.estimate_hydrology_elements">estimate_hydrology_elements() (in module axqua.solvers.telemac.mesh)</a>
 </li>
       <li><a href="code/workflow.html#axqua.convergence.estimate_next_runtime">estimate_next_runtime() (in module axqua.convergence)</a>
 </li>
@@ -2561,6 +2587,8 @@
         <li><a href="code/workflow.html#axqua.validation.evaluate">(in module axqua.validation)</a>
 </li>
       </ul></li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.evaporation">evaporation (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/jobs.html#axqua.jobs.events.EventSink">EventSink (class in axqua.jobs.events)</a>
 </li>
       <li><a href="code/core.html#axqua.core.examples.Example">Example (class in axqua.core.examples)</a>
@@ -2615,6 +2643,8 @@
         <li><a href="code/jobs.html#axqua.jobs.lock.LockRecord.extra">(axqua.jobs.lock.LockRecord attribute)</a>
 </li>
         <li><a href="code/jobs.html#axqua.jobs.results.ResultEntry.extra">(axqua.jobs.results.ResultEntry attribute)</a>
+</li>
+        <li><a href="code/telemac.html#axqua.solvers.telemac.mesh.Mesh.extra">(axqua.solvers.telemac.mesh.Mesh attribute)</a>
 </li>
       </ul></li>
       <li><a href="code/configuration.html#axqua.config.Hydrodynamics.extra_keywords">extra_keywords (axqua.config.Hydrodynamics attribute)</a>
@@ -2801,14 +2831,14 @@
 </li>
       <li><a href="code/workflow.html#axqua.bayescal.FlowSpec">FlowSpec (class in axqua.bayescal)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/jobs.html#axqua.jobs.events.StatusFileSink.flush">flush() (axqua.jobs.events.StatusFileSink method)</a>
 
       <ul>
         <li><a href="code/jobs.html#axqua.jobs.events.TeeSink.flush">(axqua.jobs.events.TeeSink method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/jobs.html#axqua.jobs.model.SolverRunProgress.flux_imbalance">flux_imbalance (axqua.jobs.model.SolverRunProgress attribute)</a>
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.flux_convergence.FluxConvergence.flux_plot">flux_plot (axqua.solvers.telemac.flux_convergence.FluxConvergence attribute)</a>
@@ -2836,6 +2866,8 @@
       <li><a href="code/jobs.html#axqua.jobs.lock.LockRecord.for_self">for_self() (axqua.jobs.lock.LockRecord class method)</a>
 </li>
       <li><a href="code/jobs.html#axqua.jobs.model.MultiflowCalibrationOptions.force">force (axqua.jobs.model.MultiflowCalibrationOptions attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Config.forcing_file">forcing_file (axqua.config.Config attribute)</a>
 </li>
       <li><a href="code/workflow.html#axqua.convergence.ConvergenceReport.format">format() (axqua.convergence.ConvergenceReport method)</a>
 
@@ -3049,6 +3081,8 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.dicts.gravity">gravity() (in module axqua.solvers.openfoam.dicts)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.green_ampt">green_ampt (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.mesh.OpenFoamMesh.grid">grid (axqua.solvers.openfoam.mesh.OpenFoamMesh attribute)</a>
 </li>
       <li><a href="code/core.html#axqua.core.surfaces.grid_from_bounds">grid_from_bounds() (in module axqua.core.surfaces)</a>
@@ -3131,8 +3165,6 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.report.SurfaceFreedom.hit_lid">hit_lid (axqua.solvers.openfoam.report.SurfaceFreedom property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.report.SurfaceFreedom.hit_wall">hit_wall (axqua.solvers.openfoam.report.SurfaceFreedom property)</a>
 </li>
       <li><a href="code/jobs.html#axqua.jobs.lock.JobLock.holding">holding() (axqua.jobs.lock.JobLock method)</a>
@@ -3147,6 +3179,8 @@
       </ul></li>
       <li><a href="code/install.html#axqua.install.host.Host">Host (class in axqua.install.host)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/jobs.html#axqua.jobs.procs.host_id">host_id() (in module axqua.jobs.procs)</a>
 </li>
       <li><a href="code/configuration.html#axqua.core.environment.host_summary">host_summary() (in module axqua.core.environment)</a>
@@ -3172,6 +3206,30 @@
       <li><a href="code/configuration.html#axqua.config.Config.hydrodynamics">hydrodynamics (axqua.config.Config attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Hydrodynamics">Hydrodynamics (class in axqua.config)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Config.hydrology">hydrology (axqua.config.Config attribute)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.capabilities.Capability.HYDROLOGY">HYDROLOGY (axqua.core.capabilities.Capability attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology">Hydrology (class in axqua.config)</a>
+</li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.pipeline.Artifacts.hydrology_cas">hydrology_cas (axqua.solvers.telemac.pipeline.Artifacts attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Config.hydrology_cas_file">hydrology_cas_file (axqua.config.Config attribute)</a>
+</li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.pipeline.Artifacts.hydrology_files">hydrology_files (axqua.solvers.telemac.pipeline.Artifacts attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Config.hydrology_mode">hydrology_mode (axqua.config.Config property)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.boundaries.HYDROLOGY_OUTLETS">HYDROLOGY_OUTLETS (in module axqua.core.boundaries)</a>
+</li>
+      <li><a href="code/jobs.html#axqua.jobs.model.JobKind.HYDROLOGY_RUN">HYDROLOGY_RUN (axqua.jobs.model.JobKind attribute)</a>
+</li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.mesh.hydrology_size_grid">hydrology_size_grid() (in module axqua.solvers.telemac.mesh)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.capabilities.HYDROLOGY_WET_DEPTH">HYDROLOGY_WET_DEPTH (in module axqua.core.capabilities)</a>
+</li>
+      <li><a href="code/jobs.html#axqua.jobs.model.HydrologyOptions">HydrologyOptions (class in axqua.jobs.model)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.potential.hydrostatic_pressure">hydrostatic_pressure() (in module axqua.solvers.openfoam.potential)</a>
 </li>
@@ -3221,6 +3279,8 @@
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.threed.infer_vertical_layers">infer_vertical_layers() (in module axqua.solvers.telemac.threed)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.infiltration">infiltration (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.Boundaries.inflow">inflow (axqua.config.Boundaries attribute)</a>
 
       <ul>
@@ -3253,11 +3313,15 @@
 </li>
       <li><a href="code/configuration.html#axqua.config.FineSediment.initial_fraction">initial_fraction (axqua.config.FineSediment attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.initial_saturation">initial_saturation (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.initial_time_step">initial_time_step (axqua.config.OpenFoam attribute)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.fields.initial_velocity">initial_velocity() (in module axqua.solvers.openfoam.fields)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Hydrodynamics.initial_velocity_guess">initial_velocity_guess (axqua.config.Hydrodynamics attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.initial_water_content">initial_water_content (axqua.config.Hydrology attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Config.initialization">initialization (axqua.config.Config attribute)</a>
 </li>
@@ -3269,12 +3333,12 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.mesh.OpenFoamMesh.inlet_patches">inlet_patches (axqua.solvers.openfoam.mesh.OpenFoamMesh attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.sediment.BedGeometry.inlets">inlets (axqua.solvers.openfoam.sediment.BedGeometry attribute)</a>
 </li>
       <li><a href="code/jobs.html#axqua.jobs.paths.JobDir.input">input (axqua.jobs.paths.JobDir property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/workflow.html#axqua.model_column.ModelColumn.inside">inside (axqua.model_column.ModelColumn attribute)</a>
 </li>
       <li><a href="code/workflow.html#axqua.validation.inside_model">inside_model() (in module axqua.validation)</a>
@@ -3447,6 +3511,8 @@
 </li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.kepsilon_sigmak">kepsilon_sigmak (axqua.config.OpenFoam attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.kernel">kernel (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.core.profile.SolverBinding.keys">keys() (axqua.core.profile.SolverBinding class method)</a>
 </li>
       <li><a href="code/workflow.html#axqua.targets.ParameterSpec.keyword">keyword (axqua.targets.ParameterSpec attribute)</a>
@@ -3511,6 +3577,8 @@
         <li><a href="code/workflow.html#axqua.mesh_validity.MeshValidity.ks">(axqua.mesh_validity.MeshValidity attribute)</a>
 </li>
       </ul></li>
+      <li><a href="code/workflow.html#axqua.rating.ks_from_friction">ks_from_friction() (in module axqua.rating)</a>
+</li>
       <li><a href="code/core.html#axqua.core.geodata.ZoneRoughness.ks_max">ks_max (axqua.core.geodata.ZoneRoughness attribute)</a>
 
       <ul>
@@ -3689,10 +3757,10 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.case.limiting_velocity">limiting_velocity() (in module axqua.solvers.openfoam.case)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/telemac.html#axqua.solvers.telemac.sortie.LimitStop">LimitStop (class in axqua.solvers.telemac.sortie)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/configuration.html#axqua.core.diagnostics.Finding.line">line() (axqua.core.diagnostics.Finding method)</a>
 
       <ul>
@@ -3712,6 +3780,8 @@
 </li>
       </ul></li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.sections.line_discharges">line_discharges() (in module axqua.solvers.telemac.sections)</a>
+</li>
+      <li><a href="code/workflow.html#axqua.rating.line_section">line_section() (in module axqua.rating)</a>
 </li>
       <li><a href="code/core.html#axqua.core.geodata.Dataset.lines">lines() (axqua.core.geodata.Dataset method)</a>
 
@@ -3739,6 +3809,8 @@
         <li><a href="code/configuration.html#axqua.config.OpenFoam.liquid_boundaries">(axqua.config.OpenFoam attribute)</a>
 </li>
         <li><a href="code/telemac.html#axqua.solvers.telemac.pipeline.Artifacts.liquid_boundaries">(axqua.solvers.telemac.pipeline.Artifacts attribute)</a>
+</li>
+        <li><a href="code/telemac.html#axqua.solvers.telemac.sortie.Sortie.liquid_boundaries">(axqua.solvers.telemac.sortie.Sortie attribute)</a>
 </li>
         <li><a href="code/telemac.html#axqua.solvers.telemac.unsteady.Unsteady3DSetup.liquid_boundaries">(axqua.solvers.telemac.unsteady.Unsteady3DSetup attribute)</a>
 </li>
@@ -4596,9 +4668,11 @@
 </li>
       <li><a href="code/core.html#axqua.core.registry.names">names() (in module axqua.core.registry)</a>
 </li>
-      <li><a href="code/jobs.html#axqua.jobs.model.MeshConvergenceOptions.ncsize">ncsize (axqua.jobs.model.MeshConvergenceOptions attribute)</a>
+      <li><a href="code/jobs.html#axqua.jobs.model.HydrologyOptions.ncsize">ncsize (axqua.jobs.model.HydrologyOptions attribute)</a>
 
       <ul>
+        <li><a href="code/jobs.html#axqua.jobs.model.MeshConvergenceOptions.ncsize">(axqua.jobs.model.MeshConvergenceOptions attribute)</a>
+</li>
         <li><a href="code/jobs.html#axqua.jobs.model.Steady3DOptions.ncsize">(axqua.jobs.model.Steady3DOptions attribute)</a>
 </li>
         <li><a href="code/jobs.html#axqua.jobs.model.SteadyRunOptions.ncsize">(axqua.jobs.model.SteadyRunOptions attribute)</a>
@@ -4627,6 +4701,8 @@
       <li><a href="code/telemac.html#axqua.solvers.telemac.mesh.Mesh.node_matid">node_matid (axqua.solvers.telemac.mesh.Mesh attribute)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.hotstart.State2D.node_spacing">node_spacing (axqua.solvers.openfoam.hotstart.State2D property)</a>
+</li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.boundary.LiquidBoundary.nodes">nodes (axqua.solvers.telemac.boundary.LiquidBoundary attribute)</a>
 </li>
       <li><a href="code/core.html#axqua.core.geodata.nominal_channel_size">nominal_channel_size() (in module axqua.core.geodata)</a>
 
@@ -4704,6 +4780,8 @@
         <li><a href="code/openfoam.html#axqua.solvers.openfoam.quality.MeshReport.ok">(axqua.solvers.openfoam.quality.MeshReport property)</a>
 </li>
       </ul></li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.open_water_factor">open_water_factor (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.Config.openfoam">openfoam (axqua.config.Config attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.core.schema.Layer.OPENFOAM">OPENFOAM (axqua.core.schema.Layer attribute)</a>
@@ -4758,8 +4836,6 @@
 </li>
       <li><a href="code/install.html#axqua.install.recipes.Plan.optional_outputs">optional_outputs (axqua.install.recipes.Plan attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/install.html#axqua.install.recipes.Plan.options">options (axqua.install.recipes.Plan attribute)</a>
 
       <ul>
@@ -4772,6 +4848,8 @@
         <li><a href="code/postprocessing.html#axqua.postproc.scenes.Scene.options">(axqua.postproc.scenes.Scene attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/install.html#axqua.install.recipes.Options">Options (class in axqua.install.recipes)</a>
 
       <ul>
@@ -4791,14 +4869,28 @@
       <li><a href="code/configuration.html#axqua.config.OpenFoam.outflow_boundary">outflow_boundary (axqua.config.OpenFoam attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Boundaries.outflow_condition">outflow_condition (axqua.config.Boundaries attribute)</a>
+
+      <ul>
+        <li><a href="code/configuration.html#axqua.config.Config.outflow_condition">(axqua.config.Config property)</a>
+</li>
+      </ul></li>
+      <li><a href="code/workflow.html#axqua.rating.outflow_lines">outflow_lines() (in module axqua.rating)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.case.OpenFoamArtifacts.outflow_stage">outflow_stage (axqua.solvers.openfoam.case.OpenFoamArtifacts attribute)</a>
 </li>
       <li><a href="code/workflow.html#axqua.bayescal.outflow_stage">outflow_stage() (in module axqua.bayescal)</a>
 </li>
+      <li><a href="code/workflow.html#axqua.hydraulics.outflow_wse_fn">outflow_wse_fn() (in module axqua.hydraulics)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.outlet_air_margin">outlet_air_margin (axqua.config.OpenFoam attribute)</a>
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.OUTLET_BANDS">OUTLET_BANDS (in module axqua.solvers.telemac.wetting)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.outlet_condition">outlet_condition (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.boundaries.outlet_level">outlet_level() (in module axqua.core.boundaries)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.boundaries.OUTLET_LEVELS">OUTLET_LEVELS (in module axqua.core.boundaries)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.mesh.OpenFoamMesh.outlet_patches">outlet_patches (axqua.solvers.openfoam.mesh.OpenFoamMesh attribute)</a>
 </li>
@@ -4806,8 +4898,14 @@
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.outlet_profile">outlet_profile() (in module axqua.solvers.telemac.wetting)</a>
 </li>
-      <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.OutletProfile.outlet_slope">outlet_slope (axqua.solvers.telemac.wetting.OutletProfile attribute)</a>
+      <li><a href="code/configuration.html#axqua.config.Config.outlet_rating_file">outlet_rating_file (axqua.config.Config attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.outlet_slope">outlet_slope (axqua.config.Hydrology attribute)</a>
+
+      <ul>
+        <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.OutletProfile.outlet_slope">(axqua.solvers.telemac.wetting.OutletProfile attribute)</a>
+</li>
+      </ul></li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.OUTLET_SLOPE_FACTOR">OUTLET_SLOPE_FACTOR (in module axqua.solvers.telemac.wetting)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.outlet_stage">outlet_stage (axqua.config.OpenFoam attribute)</a>
@@ -5006,6 +5104,8 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.case.OpenFoamArtifacts.polymesh_dir">polymesh_dir (axqua.solvers.openfoam.case.OpenFoamArtifacts attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.ponding_by_runon">ponding_by_runon (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.FineSediment.porosity">porosity (axqua.config.FineSediment attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.GainLose.porous_depth">porous_depth (axqua.config.GainLose attribute)</a>
@@ -5126,6 +5226,8 @@
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.sortie.Sortie.printout_interval">printout_interval (axqua.solvers.telemac.sortie.Sortie property)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.printout_period">printout_period (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/configuration.html#axqua.config.Calibration.prior_samples">prior_samples (axqua.config.Calibration attribute)</a>
 </li>
       <li><a href="code/workflow.html#axqua.convergence.ConvergenceReport.probes">probes (axqua.convergence.ConvergenceReport attribute)</a>
@@ -5236,6 +5338,14 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.rainfall">rainfall (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.rainfall_stamp">rainfall_stamp (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.rainfall_start">rainfall_start (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.rainfall_units">rainfall_units (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/core.html#axqua.core.surfaces.rasterize">rasterize() (in module axqua.core.surfaces)</a>
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.pipeline.Artifacts.rasters">rasters (axqua.solvers.telemac.pipeline.Artifacts attribute)</a>
@@ -5259,6 +5369,8 @@
       <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.OutletProfile.reach_slope">reach_slope (axqua.solvers.telemac.wetting.OutletProfile attribute)</a>
 </li>
       <li><a href="code/install.html#axqua.install.runner.read">read() (in module axqua.install.runner)</a>
+</li>
+      <li><a href="code/telemac.html#axqua.solvers.telemac.steering.read_cas_values">read_cas_values() (in module axqua.solvers.telemac.steering)</a>
 </li>
       <li><a href="code/postprocessing.html#axqua.postproc.profiles.read_curve">read_curve() (in module axqua.postproc.profiles)</a>
 </li>
@@ -5498,10 +5610,10 @@
 </li>
       <li><a href="code/workflow.html#axqua.hbc.require_hbc">require_hbc() (in module axqua.hbc)</a>
 </li>
-      <li><a href="code/configuration.html#axqua.core.schema_meta.REQUIRED">REQUIRED (in module axqua.core.schema_meta)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="code/configuration.html#axqua.core.schema_meta.REQUIRED">REQUIRED (in module axqua.core.schema_meta)</a>
+</li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.sediment.required_bottom_layer">required_bottom_layer() (in module axqua.solvers.openfoam.sediment)</a>
 </li>
       <li><a href="code/configuration.html#axqua.core.schema_meta.REQUIRED_WHEN">REQUIRED_WHEN (in module axqua.core.schema_meta)</a>
@@ -5580,6 +5692,8 @@
 </li>
       <li><a href="code/configuration.html#axqua.config.Calibration.results_base">results_base (axqua.config.Calibration attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Config.results_hydrology_slf">results_hydrology_slf (axqua.config.Config attribute)</a>
+</li>
       <li><a href="code/jobs.html#axqua.jobs.paths.JobDir.results_json">results_json (axqua.jobs.paths.JobDir property)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Config.results_slf">results_slf (axqua.config.Config attribute)</a>
@@ -5601,6 +5715,10 @@
 </li>
       </ul></li>
       <li><a href="code/workflow.html#axqua.positional_error.RING_POINTS">RING_POINTS (in module axqua.positional_error)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.boundaries.RIVER_OUTLETS">RIVER_OUTLETS (in module axqua.core.boundaries)</a>
+</li>
+      <li><a href="code/core.html#axqua.core.capabilities.RIVER_WET_DEPTH">RIVER_WET_DEPTH (in module axqua.core.capabilities)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.roi">roi (axqua.config.OpenFoam attribute)</a>
 
@@ -5764,6 +5882,8 @@
         <li><a href="code/jobs.html#axqua.jobs.model.JobState.RUNNING">(axqua.jobs.model.JobState attribute)</a>
 </li>
       </ul></li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.runon_depth">runon_depth (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/workflow.html#axqua.convergence.LevelResult.runtime_s">runtime_s (axqua.convergence.LevelResult attribute)</a>
 
       <ul>
@@ -5847,6 +5967,8 @@
       <li><a href="code/configuration.html#axqua.core.environment.SolverEnvironment.script">script (axqua.core.environment.SolverEnvironment property)</a>
 </li>
       <li><a href="code/configuration.html#axqua.core.profile.AxquaProfile.script">script() (axqua.core.profile.AxquaProfile method)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.sealed_surfaces">sealed_surfaces (axqua.config.Hydrology attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Morphodynamics.secondary_currents">secondary_currents (axqua.config.Morphodynamics attribute)</a>
 </li>
@@ -6006,6 +6128,14 @@
       </ul></li>
       <li><a href="code/install.html#axqua.install.recipes.Options.smoke_test">smoke_test (axqua.install.recipes.Options attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.soil_table">soil_table (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.soil_texture">soil_texture (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.soil_zone_field">soil_zone_field (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.soil_zones">soil_zones (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/core.html#axqua.core.structures.solid_footprint">solid_footprint() (in module axqua.core.structures)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Structures.solid_freeboard_2d">solid_freeboard_2d (axqua.config.Structures attribute)</a>
@@ -6082,6 +6212,8 @@
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.sortie.Sortie">Sortie (class in axqua.solvers.telemac.sortie)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/configuration.html#axqua.core.machine.Resolved.source">source (axqua.core.machine.Resolved attribute)</a>
 
       <ul>
@@ -6096,8 +6228,6 @@
         <li><a href="code/workflow.html#axqua.validation.CalibratedSet.source">(axqua.validation.CalibratedSet attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/jobs.html#axqua.jobs.index.JobRow.source_config">source_config (axqua.jobs.index.JobRow attribute)</a>
 
       <ul>
@@ -6725,6 +6855,8 @@
 </li>
         <li><a href="code/configuration.html#axqua.config.Geodata.validate">(axqua.config.Geodata method)</a>
 </li>
+        <li><a href="code/configuration.html#axqua.config.Hydrology.validate">(axqua.config.Hydrology method)</a>
+</li>
         <li><a href="code/configuration.html#axqua.config.Initialization.validate">(axqua.config.Initialization method)</a>
 </li>
         <li><a href="code/configuration.html#axqua.config.OpenFoam.validate">(axqua.config.OpenFoam method)</a>
@@ -6940,12 +7072,18 @@
 </li>
       <li><a href="code/configuration.html#axqua.config.OpenFoam.water_viscosity">water_viscosity (axqua.config.OpenFoam attribute)</a>
 </li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.weather">weather (axqua.config.Hydrology attribute)</a>
+</li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.hotstart.State2D.wet">wet() (axqua.solvers.openfoam.hotstart.State2D method)</a>
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.WettingReport.wet_area">wet_area (axqua.solvers.telemac.wetting.WettingReport attribute)</a>
 </li>
-      <li><a href="code/configuration.html#axqua.config.Hydrodynamics.wet_depth">wet_depth (axqua.config.Hydrodynamics attribute)</a>
+      <li><a href="code/configuration.html#axqua.config.Config.wet_depth">wet_depth (axqua.config.Config property)</a>
+
+      <ul>
+        <li><a href="code/configuration.html#axqua.config.Hydrodynamics.wet_depth">(axqua.config.Hydrodynamics attribute)</a>
 </li>
+      </ul></li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.wetting.WET_DEPTH">WET_DEPTH (in module axqua.solvers.telemac.wetting)</a>
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.hotstart.State2D.wet_footprint">wet_footprint() (axqua.solvers.openfoam.hotstart.State2D method)</a>
@@ -6961,6 +7099,12 @@
       <li><a href="code/workflow.html#axqua.progress.SolverProgress.width">width (axqua.progress.SolverProgress property)</a>
 </li>
       <li><a href="code/configuration.html#axqua.config.Structures.width_field">width_field (axqua.config.Structures attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.wind">wind (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.wind_formula">wind_formula (axqua.config.Hydrology attribute)</a>
+</li>
+      <li><a href="code/configuration.html#axqua.config.Hydrology.wind_threshold_depth">wind_threshold_depth (axqua.config.Hydrology attribute)</a>
 </li>
       <li><a href="code/configuration.html#axqua.core.environment.EnvironmentKind.WINDOWS">WINDOWS (axqua.core.environment.EnvironmentKind attribute)</a>
 </li>
@@ -6994,12 +7138,12 @@
 </li>
       <li><a href="code/openfoam.html#axqua.solvers.openfoam.sediment.write_bed_layer">write_bed_layer() (in module axqua.solvers.openfoam.sediment)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/telemac.html#axqua.solvers.telemac.steering.write_cas">write_cas() (in module axqua.solvers.telemac.steering)</a>
 </li>
       <li><a href="code/telemac.html#axqua.solvers.telemac.boundary.write_cli">write_cli() (in module axqua.solvers.telemac.boundary)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="code/workflow.html#axqua.model_column.write_column_cache">write_column_cache() (in module axqua.model_column)</a>
 </li>
       <li><a href="code/workflow.html#axqua.labdata.write_comparison">write_comparison() (in module axqua.labdata)</a>

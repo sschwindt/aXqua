@@ -1,0 +1,877 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hydrologie &mdash; aXqua</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="canonical" href="https://axqua.eu/fr/usage/hydrology-simulations.html" />
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=740f9163"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" />
+    <link rel="next" title="Calage et validation" href="calibration-validation.html" />
+    <link rel="prev" title="Simulations morphodynamiques" href="morphodynamic-simulations.html" /> 
+<!-- axqua-i18n --><link rel="alternate" hreflang="en" href="https://axqua.eu/usage/hydrology-simulations.html"><link rel="alternate" hreflang="de" href="https://axqua.eu/de/usage/hydrology-simulations.html"><link rel="alternate" hreflang="fr" href="https://axqua.eu/fr/usage/hydrology-simulations.html"><link rel="alternate" hreflang="x-default" href="https://axqua.eu/usage/hydrology-simulations.html"><link rel="stylesheet" href="../../_i18n/lang.css"><script src="../../_i18n/lang.js" data-lang="fr" data-root="../../" data-page="usage/hydrology-simulations.html"></script></head>
+
+<body class="wy-body-for-nav"><details class="axqua-lang"><summary title="Language / Sprache / Langue" aria-label="Language / Sprache / Langue"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9s1.3-6.4 3.8-9z"/></svg><span>FR</span></summary><ul role="menu"><li><a href="../../usage/hydrology-simulations.html" hreflang="en" lang="en" data-axqua-lang="en">English</a></li><li><a href="../../de/usage/hydrology-simulations.html" hreflang="de" lang="de" data-axqua-lang="de">Deutsch</a></li><li><strong aria-current="true" lang="fr">Français</strong></li></ul></details> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            aXqua
+              <img src="../_static/aXqua-icon-reduced.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Objectif</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/index.html">Installation et configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation/qgis-plugin.html">Extension de QGIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-qgis">Installer QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-plugin-qgis">Installer l’extension aXqua (QGIS)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-the-axqua-program-backend">Installer le programme aXqua (backend)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#upgrade-the-backend">Mettre à jour le moteur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#install-from-the-source-code-development">Installer à partir du code source (développement)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#connect-the-plugin-to-the-axqua-program">Connectez l’extension au programme aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#find-the-path-of-the-installed-program">Trouvez le chemin du programme installé</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/qgis-plugin.html#axqua-panel-layout">La disposition du panneau aXqua</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/simulation-software.html">Logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#installation-wizards-short-version">Assistants d’installation (version courte)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#user-rights">Droits des utilisateurs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#telemac">TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/simulation-software.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/plugin-setup.html">Configuration de l’extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#plugin-profile">Profil d’extension</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#define-solver-bindings">Définir les liaisons solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/plugin-setup.html#job-execution">Exécution tâche</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation/postprocessors.html">Après traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../installation/postprocessors.html#paraview">ParaView</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Utilisation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="case-setup.html">Configuration de aXqua cas</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#project-settings">Paramètres du projet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#geodata">Géodonnées</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#liquid-boundaries">Frontières liquides</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#initial-conditions">Conditions initiales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#mesh-configuration">Maillage configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#wall-roughness">Rugosité des parois</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydrology">Hydrologie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="preprocessing.html">Prétraitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#axqua-workflow">flux de travail aXqua</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#meshing">Mèche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#pre-processing-checkup">Contrôle préalable au traitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#telemac-choices">TELEMAC choix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="preprocessing.html#openfoam-choices">Choix OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hydraulic-simulations.html">Simulations hydrauliques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#axqua-warm-up-concept">aXqua concept d’échauffement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-dry-runs-2d-3d">TELEMAC à sec 2D/3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#telemac-hotstarts">TELEMAC hotstarts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydraulic-simulations.html#openfoam">Ouvrir</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="mesh-convergence.html">Convergence en maillage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#mesh-study-setup">Configuration de l’étude maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#run-mesh-convergence-study">Exécuter étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mesh-convergence.html#study-report">Rapport d’étude</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="morphodynamic-simulations.html">Simulations morphodynamiques</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="calibration-validation.html">Calage et validation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#introduction-to-bayesian-calibration">Introduction au calage bayésien</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#ground-truth-data-setup">Vérité terrain configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#bayesian-calibration-validation-setup">Calage bayésien &amp; configuration de validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#run-hydrobayescal">Lancer HydroBayesCal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calibration-validation.html#quality-analysis">Analyse de la qualité</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#qgis-map-generation">Génération de cartes QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#paraview">ParaView</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postprocessing.html#visit">VisIt</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="batch-processing.html">Batch-processing (automatisation visuelle)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#a-sequence-of-steps">Une séquence d’étapes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#detach-jobs-continue-without-qgis">Détachement : Les tâches se poursuivent sans QGIS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="batch-processing.html#sequences-with-the-qgis-model-designer">Séquences avec le concepteur du modèle QGIS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../automation/index.html">Automatisation &amp; Terminal Utilisation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../automation/terminal-syntax.html">Syntaxe Terminal</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#open-a-terminal">Ouvrir un terminal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#commands">Commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#options-for-scripts">Options pour les scripts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/terminal-syntax.html#scripts-in-the-case-folder">Scripts dans le dossier cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../automation/batch-headless.html">Batch-processing (sans tête)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#monitor-and-control-jobs">Surveiller et contrôler les tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#sequences-of-jobs">Séquences des tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../automation/batch-headless.html#how-jobs-are-detached">Comment les tâches sont détachées</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../code/index.html">Documentation du code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../code/structure-uml.html">Structure générale et UML</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#design-rules">Règles de conception</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#packages">Emballages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#capabilities">Capacités</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/structure-uml.html#licenses">Licences</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/configuration.html">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.config">Description du cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casefile">Type de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema">Classification des paramètres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.schema_meta">Tableau des paramètres des formulaires</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.casecheck">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#profile-of-the-computer">Profil de l’ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.diagnostics">Résultats des contrôles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.errors">Types d’erreur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.machine">Emplacement du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/configuration.html#module-axqua.core.environment">Environnements des codes de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/core.html">Noyau agnostique du solveur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.geodata">Géodonnées et rasters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.boundaries">Frontières</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.structures">Structures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.surfaces">Terrain des surfaces CAO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.selafin">Format de fichier SELAFIN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#module-axqua.core.examples">Exemple cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/core.html#capabilities-and-backend-registry">Capacités et registre de backend</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/telemac.html">TELEMAC moteur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.pipeline">Construisez la séquence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.mesh">Maillage et maillage qualité</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.boundary">Conditions aux limites</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.steering">Dossiers de direction et de friction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.sortie">Évaluation des parcours</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.threed">TELEMAC-3D</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.unsteady">Débit variable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.gainlose">Échange avec un corps poreux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/telemac.html#module-axqua.solvers.telemac.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/openfoam.html">Moteur OpenFOAM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.polymesh">Maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.hotstart">État initial d’un résultat TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.dicts">Dictionnaires et assemblage cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.runtime">Exécutions et évaluation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.potential">Surface libre monophasée</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.sediment">Sédiments fins sur un lit fixe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/openfoam.html#module-axqua.solvers.openfoam.backend">Adaptateur moteur</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/workflow.html">Flux de travail, études et calage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.dem">Terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.hydraulics">Débit données et courbes de tarage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.ground_truth">Mesures de terrain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.workflow">Étapes partagées des scripts cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.convergence">Étude de convergence en maillage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.vertical_convergence">Etude de la verticale couches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.calibration">Calage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.validation">Validation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/workflow.html#module-axqua.progress">Affichage et enregistrement des progrès</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/jobs.html">Système tâche</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.model">Tâche description et stockage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.procs">Processus et réconciliation de l’État</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.profiles">Profils de solveur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.events">Progrès réalisés et registres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.submit">Soumission et exécution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/jobs.html#module-axqua.jobs.launcher">Lanceurs détachés</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/install.html">Installation du logiciel de simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.host">Système d’exploitation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.recipes">Plans d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.telemac_examples">Exemple cas de TELEMAC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/install.html#module-axqua.install.runner">Exécution d’une installation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/postprocessing.html">Post-traitement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.dataset">Description du résultat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.scenes">Chiffres</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.visit">VisIt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/postprocessing.html#module-axqua.postproc.selafin_vtk">Exportation des résultats de TELEMAC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/cli.html">Ligne de commande</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.cli">Commandes cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.jobcli">Commandes tâche</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.profilecli">Commandes de profil</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.installcli">Commandes d’installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.exportcli">Exporter les commandes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.casecli">Commandes de fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/cli.html#module-axqua.examplecli">Exemple de commandes cas</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../code/plugin.html">Extension de QGIS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../code/build-docs.html">Construction de la documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#languages-and-publication">Langues et publication</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../code/build-docs.html#rules-for-the-structure">Règles de la structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../troubleshooting/index.html">Dépannage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/tips-logfiles.html">Conseils généraux &amp; fichiers journaux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#tips">Conseils</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#logfiles">Fichiers journaux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#freeing-disk-space">Libérer l’espace disque</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/tips-logfiles.html#reporting-a-problem">Signaler un problème</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/warnings.html">Messages d’avertissement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#hydrology-checkup">Contrôle hydrologique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../troubleshooting/errors.html">Messages d’erreur</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#jobs">Tâches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#plugin">Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">Licence et avertissement</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#license">Licence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#disclaimer">Avertissement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../license.html#third-party-software">Logiciels tiers</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">aXqua</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Utilisation</a></li>
+      <li class="breadcrumb-item active">Hydrologie</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/usage/hydrology-simulations.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody"><div class="axqua-mt-note" role="note"><button type="button" aria-label="Fermer la remarque" title="Fermer la remarque">&times;</button>Cette page a été traduite automatiquement de l’anglais et peut contenir des erreurs. <a href="../../usage/hydrology-simulations.html" hreflang="en" lang="en" data-axqua-lang="en">Original en anglais</a></div>
+             
+  <section id="hydrology">
+<span id="help-hydrology"></span><h1>Hydrologie<a class="headerlink" href="#hydrology" title="Lien vers cette rubrique"></a></h1>
+<p>Une simulation d’hydrologie calcule comment la pluie dans un bassin versant devient le ruissellement. La pluie tombe sur chaque nœud de la maillage, une partie s’infiltre dans le sol, une partie de l’eau de surface s’évapore, et le reste coule sur le terrain jusqu’à la sortie. TELEMAC-2D résout les équations d’eau peu profonde sur tout le bassin versant, de sorte que l’hydrographe à la sortie, le hauteurs d’eau sur les pentes de collines et les zones inondées dans la vallée proviennent d’un modèle. Cette approche est appelée modèle hydrodynamique de ruissellement des précipitations, ou pluie sur grille (Caviedes-Voullième et al. 2012, Fernández-Pato et al. 2016). Il convient à des bassins versants jusqu’à des dizaines de kilomètres carrés, des inondations éclairs, des champs et des parcelles sur lesquels le chemin du ruissellement compte, par exemple pour l’érosion des sols.</p>
+<p>Le mode d’hydrologie est TELEMAC seulement. Il est activé dans les paramètres cas, avec la case à cocher <em>Hydrology mode</em> sur la page <em>Mesh configuration</em> ou sur la page <em>Hydrology</em> (<a class="reference internal" href="case-setup.html#case-hydrology"><span class="std std-ref">Hydrologie</span></a>), et fonctionne sur le sous-tab <em>Simulations &gt; Hydrology</em>.</p>
+<figure class="align-default" id="id1">
+<a class="reference internal image-reference" href="../_images/gui-case-editor-hydrology.png"><img alt="Les paramètres cas avec le mode Hydrologie case à cocher sur la page Configuration maillage" src="../_images/gui-case-editor-hydrology.png" style="width: 90%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Les réglages cas en mode hydrologie. (1) La case à cocher <em>Hydrology mode</em> en haut du frame <em>TELEMAC mesh</em>: il donne aux triangles proches égaux de maillage les réglages que le mode n’utilise pas, comme le rapport longueur-largeur des cellules chenal. (2) La longueur des bords du maillage : <em>Default size</em> à l’extérieur des zones de maillage ; à l’intérieur d’une zone son propre <code class="docutils literal notranslate"><span class="pre">Max</span> <span class="pre">Edge</span> <span class="pre">Length</span> <span class="pre">(m)</span></code>, sinon la longueur des bords de son type de zone. (3) La page <em>Hydrology</em> avec la pluie, le sol, le vent et le soleil et la sortie ; son commutateur et la case à cocher <em>Hydrology mode</em> sont un seul commutateur.</span><a class="headerlink" href="#id1" title="Lien vers cette image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Ce qui diffère d’une rivière cas.</strong> Cette section peut être lue seule. Un cas d’hydrologie utilise le même fichier de cas, le même prétraitement, le même système tâche et le même post-traitement qu’un cas, que les sections précédentes décrivent. Plusieurs de leurs étapes, cependant, fonctionnent différemment dans le mode d’hydrologie ou ne s’appliquent pas à elle :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18.0%" />
+<col style="width: 38.0%" />
+<col style="width: 44.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Étape</p></th>
+<th class="head"><p>Cas de rivière</p></th>
+<th class="head"><p>Cas d’hydrologie</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ce qui alimente le flux</p></td>
+<td><p>Le débit aux lignes d’entrée et le niveau d’eau aux lignes d’entrée (<a class="reference internal" href="case-setup.html#case-boundaries"><span class="std std-ref">Frontières liquides</span></a>).</p></td>
+<td><p>La pluie sur chaque nœud. Le cas n’a besoin que de lignes de sortie ; les lignes d’entrée sont optionnelles.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Contour du modèle</p></td>
+<td><p>Zone d’étude autour de la zone humide (<a class="reference internal" href="case-setup.html#case-geodata"><span class="std std-ref">Géodonnées</span></a>).</p></td>
+<td><p>Le fossé de drainage du bassin versant ou les bords d’un champ (<a class="reference internal" href="#hydrology-outlet"><span class="std std-ref">Frontières et sortie</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p>Maillage</p></td>
+<td><p>Triangles étendus le long du chenalaxe du chenal (<a class="reference internal" href="case-setup.html#case-mesh"><span class="std std-ref">Maillage configuration</span></a>).</p></td>
+<td><p>Triangles presque égaux partout ; pas de axe du chenal.</p></td>
+</tr>
+<tr class="row-odd"><td><p>État initial</p></td>
+<td><p>Un lit sec avec de l’eau à l’entrée, ou un chenal pré-humidifié (<a class="reference internal" href="case-setup.html#case-initialization"><span class="std std-ref">Conditions initiales</span></a>).</p></td>
+<td><p>Un bassin versant sec. La teneur initiale en eau du sol est la condition initiale qui compte.</p></td>
+</tr>
+<tr class="row-even"><td><p>Amande numérique</p></td>
+<td><p>Éléments finis par défaut (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC choix</span></a>).</p></td>
+<td><p>Volumes finis avec une reconstruction faite pour les films d’eau mince (<a class="reference internal" href="#hydrology-concept"><span class="std std-ref">Concept</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Simulation</p></td>
+<td><p>Une course sèche régulière, puis des démarrages à chaud et des descentes instables (<a class="reference internal" href="hydraulic-simulations.html"><span class="doc">Simulations hydrauliques</span></a>).</p></td>
+<td><p>Un courant instable sur la tempête et le temps après elle, qui porte aussi les hydrographes des lignes d’entrée.</p></td>
+</tr>
+<tr class="row-even"><td><p>La course est terminée ?</p></td>
+<td><p>Solde d’entrée et de sortie (<code class="docutils literal notranslate"><span class="pre">hydrodynamics.flux_tolerance</span></code>).</p></td>
+<td><p>Le bilan hydrique : pluie, infiltration, évaporation, écoulement et l’eau laissée sur le bassin versant.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Eau shallo-ouest indiquée</p></td>
+<td><p>1 cm.</p></td>
+<td><p>1 mm, car le flux de la feuille est de millimètres de profondeur.</p></td>
+</tr>
+<tr class="row-even"><td><p>Étude de convergence en maillage</p></td>
+<td><p>Disponible (<a class="reference internal" href="mesh-convergence.html"><span class="doc">Convergence en maillage</span></a>).</p></td>
+<td><p>Non disponible ; une procédure manuelle la remplace (<a class="reference internal" href="#hydrology-mesh-calibration"><span class="std std-ref">Résolution du maillage, calage et limites</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p>Transport des sédiments</p></td>
+<td><p>Disponible (<a class="reference internal" href="morphodynamic-simulations.html"><span class="doc">Simulations morphodynamiques</span></a>).</p></td>
+<td><p>Non disponible ; la construction refuse un cas qui le demande.</p></td>
+</tr>
+<tr class="row-even"><td><p>Calage et validation</p></td>
+<td><p>Disponible (<a class="reference internal" href="calibration-validation.html"><span class="doc">Calage et validation</span></a>).</p></td>
+<td><p>Pas encore disponible (<a class="reference internal" href="#hydrology-mesh-calibration"><span class="std std-ref">Résolution du maillage, calage et limites</span></a>).</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>L’exemple cas.</strong> <code class="docutils literal notranslate"><span class="pre">example-agrohydrology</span></code> est un champ arable de 5,6 ha sur une pente de collines en Basse-Bavière sous une pluie de 42,1 mm en 7 heures (<a class="reference internal" href="case-setup.html#help-example-case"><span class="std std-ref">Exemple cas</span></a>). Son guide (<code class="docutils literal notranslate"><span class="pre">README.md</span></code> dans le dossier de l’exemple) passe par chaque étape de cette section dans l’extension : le checkup, la construction, la course de 7 à 8 minutes sur 4 cœurs de processeur, le chargement du résultat et une seconde course sur un sol plus perméable. Sur l’onglet <em>Case Setup</em>, <em>Example case…</em> le télécharge ; dans un terminal, la commande est :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua example get example-agrohydrology --folder &lt;folder&gt;
+</pre></div>
+</div>
+<p><strong>Le flux de travail en bref.</strong> Un cas d’hydrologie est mis en place et exécuté en six étapes, dont chacune est expliquée dans une sous-section ci-dessous :</p>
+<ol class="arabic simple">
+<li><p>Créez le cas sur l’onglet <em>Case Setup</em> et allumez <em>Hydrology mode</em> dans ses paramètres (<a class="reference internal" href="#hydrology-case-setup"><span class="std std-ref">Cas configuration</span></a>).</p></li>
+<li><p>Recueillir les données sur la pluie, le sol et la météo avec le <em>Data wizard…</em> sur le sous-tab <em>Simulations &gt; Hydrology</em> (<a class="reference internal" href="#hydrology-data-setup"><span class="std std-ref">Configuration des données</span></a>, <a class="reference internal" href="#hydrology-weather"><span class="std std-ref">Vent et évaporation</span></a>).</p></li>
+<li><p>Dessinez les lignes de sortie et sélectionnez l’état de sortie (<a class="reference internal" href="#hydrology-outlet"><span class="std std-ref">Frontières et sortie</span></a>).</p></li>
+<li><p>Vérifiez les données et construisez le modèle sur l’onglet <em>Preprocessing</em> (<a class="reference internal" href="#hydrology-preprocessing"><span class="std std-ref">Prétraitement</span></a>).</p></li>
+<li><p>Exécutez la tempête avec <em>Submit</em> sur le sous-tab <em>Simulations &gt; Hydrology</em> (<a class="reference internal" href="#hydrology-run"><span class="std std-ref">Exécution et résultats</span></a>).</p></li>
+<li><p>Chargez le résultat, lisez l’hydrographe et le bilan hydrique et vérifiez la résolution du maillage (<a class="reference internal" href="#hydrology-run"><span class="std std-ref">Exécution et résultats</span></a>, <a class="reference internal" href="#hydrology-mesh-calibration"><span class="std std-ref">Résolution du maillage, calage et limites</span></a>).</p></li>
+</ol>
+<p>Dans un terminal, les mêmes étapes sont les suivantes ; la dernière commande convertit le résultat pour ParaView et VisIt :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua hydrology check &lt;case-file&gt;           # the checkup, with the terrain
+axqua &lt;case-file&gt;                           # build the model
+axqua submit &lt;case-file&gt; --kind hydrology   # run the storm as a job
+axqua export &lt;case-file&gt; --result r2d-hydrology.slf
+</pre></div>
+</div>
+<section id="concept">
+<span id="hydrology-concept"></span><h2>Concept<a class="headerlink" href="#concept" title="Lien vers cette rubrique"></a></h2>
+<p><strong>Rain sur grille.</strong> TELEMAC-2D résout les équations d’eau peu profonde moyennes de profondeur, qui expriment la conservation de la masse et de l’élan d’une couche d’eau sur le terrain (Hervouet 2007). Dans une rivière cas, l’eau entre dans le modèle à travers ses lignes d’entrée. Dans un cas d’hydrologie, la pluie entre comme terme source de l’équation de masse à chaque nœud, et l’infiltration et l’évaporation partent comme des puits. L’eau coule alors sous la gravité contre la résistance du sol. L’écoulement des feuilles sur une pente de colline n’est que de millimètres de profondeur, de sorte que sa résistance est celle de la surface du sol, de ses cailloux, de ses résidus de cultures et de sa végétation, que les hydrologues expriment comme un coefficient Manning pour l’écoulement terrestre (Engman, 1986). La résolution du maillage détermine les sillons, les forages et les dépressions que le modèle résout, et avec eux les chemins et le temps de déplacement du ruissellement (Caviedes-Voullième et al. 2012).</p>
+<p><strong>Infiltration après Green et Ampt.</strong> Le modèle Green-Ampt décrit l’infiltration comme un front mouillant aigu qui descend dans le sol (Green et Ampt, 191). Derrière le front, le sol est saturé, devant lui le sol conserve sa teneur initiale en eau. La capacité d’infiltration <span class="math notranslate nohighlight">\(f\)</span> [m/s] découle de la loi de Darcy sur la couche mouillé :</p>
+<div class="math notranslate nohighlight">
+\[f = K s \left(1 + \frac{\psi \,\theta s - \theta i)}{F}\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(K_s\)</span> is the saturated hydraulic conductivity, <span class="math notranslate nohighlight">\(\psi\)</span> the suction head at the wetting front, <span class="math notranslate nohighlight">\(\theta_s\)</span> and <span class="math notranslate nohighlight">\(\theta_i\)</span> the water contents at saturation and at the start, and <span class="math notranslate nohighlight">\(F\)</span> the depth infiltrated so far. At the start of a storm <span class="math notranslate nohighlight">\(F\)</span> is small and the capacity large, so that all rain infiltrates. With growing <span class="math notranslate nohighlight">\(F\)</span> the capacity falls toward <span class="math notranslate nohighlight">\(K_s\)</span>. When it falls below the rain intensity, water ponds on the surface and runoff begins (Mein and Larson 1973). Chu (1978) extended the ponding time to rain whose intensity changes from one interval to the next. The product <span class="math notranslate nohighlight">\(a = \psi (\theta_s - \theta_i)\)</span> combines the suction head and the moisture deficit into one length, which is what aXqua passes to TELEMAC per mesh node, together with <span class="math notranslate nohighlight">\(K_s\)</span>.</p>
+<p><strong>La mise en oeuvre dans TELEMAC.</strong> TELEMAC-2D a adopté une option Green-Ampt depuis la version 8.4 (<code class="docutils literal notranslate"><span class="pre">RAINFALL-RUNOFF</span> <span class="pre">MODEL</span> <span class="pre">:</span> <span class="pre">3</span></code>), la forme intégrale de Travert et al. (2022). La première mise en œuvre dans TELEMAC est Broich et al. (2022). De Vos et al. (2024) ont testé la forme libérée et ont constaté que l’eau en étang ne s’infiltre pas une fois la pluie arrêtée, et que la capacité augmente lorsque la pluie s’intensifie après étang. Ils recommandent la solution explicite de Sadeghi et al. (2024) avec le temps de pondage de Chu (1978). Cette révision ne fait pas partie d’une version de TELEMAC, donc aXqua génère la routine elle-même (<code class="docutils literal notranslate"><span class="pre">user_fortran/runoff_greenampt.f</span></code>) et offre trois solutions :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18.0%" />
+<col style="width: 82.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p><code class="docutils literal notranslate"><span class="pre">green_ampt</span></code></p></th>
+<th class="head"><p>Capacité d’infiltration</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sadeghi</span></code></p></td>
+<td><p>Par défaut, après de Vos et al. (2024) : avant de ponder la capacité exacte, de sorte que toute pluie s’infiltre ; après ponder la solution explicite de Sadeghi et al. (2024) dans le temps depuis ponder. L’eau étangée s’infiltre toujours après la pluie. Un nœud s’étend aussi lorsque l’eau de la pente ascendante s’y trouve plus profondément que <code class="docutils literal notranslate"><span class="pre">runon_depth</span></code>, ce qui comble l’écart que de Vos et al. nom.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">exact</span></code></p></td>
+<td><p>La capacité <span class="math notranslate nohighlight">\(K_s (1 + a/F)\)</span> sur la profondeur infiltrée de chaque nœud, a marché dans le temps. C’est la forme de Travert et al. sans le terme qui provoque l’augmentation de la capacité, plus l’infiltration d’eau en étang.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">travert</span></code></p></td>
+<td><p>Les équations TELEMAC libèrent, pour comparaison.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Les tests de aXqua comparent les trois solutions avec la solution Green-Ampt exacte sous une pluie constante : la solution <code class="docutils literal notranslate"><span class="pre">exact</span></code> accepte de 0,2%, <code class="docutils literal notranslate"><span class="pre">sadeghi</span></code> infiltre 1 à 4 % de moins et <code class="docutils literal notranslate"><span class="pre">travert</span></code> jusqu’à 9 % de plus. Sur un bassin plat fermé, TELEMAC avec la routine générée et la référence de aXqua en Python donnent la même profondeur infiltrée à quatre chiffres, avec le volume fini et le noyau d’élément fini et sur quatre noyaux de processeur.</p>
+<p><strong>Rain, vent et soleil.</strong> La pluie est une série pour l’ensemble du bassin versant, maintenue constante sur chacun de ses intervalles. Le vent d’une série météorologique agit à travers le stress du vent de TELEMAC sur l’eau plus profonde que <code class="docutils literal notranslate"><span class="pre">wind_threshold_depth</span></code> (1 m), c’est-à-dire sur les étangs et les lacs, pas sur le flux de la feuille d’une pente de collines. L’évaporation est prélevée dans les eaux de surface à l’évapotranspiration de référence FAO-56 fois le facteur d’eau libre, 1,05 pour l’eau de moins de 2 m de profondeur (Allen et al. 1998). L’eau du sol ne s’évapore pas dans ce modèle, car le modèle Green-Ampt ne maintient pas de budget d’eau du sol qui pourrait rendre l’eau. Pendant une tempête, le vent et l’évaporation sont petits contre la pluie ; dans les heures qui suivent, l’évaporation vide les étangs peu profonds qu’un modèle bidimensionnel conserve pour toujours.</p>
+<p><strong>Le noyau numérique.</strong> Le flux de feuilles sur une pente de collines est souvent plus mince que le pas du lit entre deux nœuds voisins : une pente de 5 % sur des cellules de 4 m est un pas de 0,2 m sous un film de millimètres. Une rivière cas fonctionne sur les éléments finis de TELEMAC par défaut (<a class="reference internal" href="preprocessing.html#preprocessing-telemac-choices"><span class="std std-ref">TELEMAC choix</span></a>). Un cas d’hydrologie fonctionne sur le noyau à volume fini avec le solveur HLLC (Toro et al. 1994), dont la reconstruction hydrostatique maintient une surface libre au repos sur un lit en pente. La reconstruction classique d’Audusse et al. (2004) échoue lorsque l’eau est plus faible que le pas du lit. TELEMAC propose donc la reconstruction de Chen et Noelle (2017), que sa propre validation de pluie utilise cas, et qui est la valeur par défaut du mode d’hydrologie (<code class="docutils literal notranslate"><span class="pre">kernel:</span> <span class="pre">finite-volumes</span></code>). Avec le noyau fini (<code class="docutils literal notranslate"><span class="pre">kernel:</span> <span class="pre">finite-elements</span></code>), un bassin d’essai a conservé 13 % de sa pluie à la surface 30 minutes après la tempête, contre 0,5 % avec des volumes finis. Le noyau à volume fini fonctionne avec une viscosité turbulente constante, qui est adéquate pour le flux de tôle, dont la résistance vient du sol et non de turbulences dans la colonne d’eau.</p>
+</section>
+<section id="case-setup">
+<span id="hydrology-case-setup"></span><h2>Cas configuration<a class="headerlink" href="#case-setup" title="Lien vers cette rubrique"></a></h2>
+<p>Un cas d’hydrologie est un fichier de cas comme n’importe quel autre (<a class="reference internal" href="case-setup.html"><span class="doc">Configuration de aXqua cas</span></a>), avec le bloc <code class="docutils literal notranslate"><span class="pre">hydrology</span></code>. Une hydrologie minimale fichier de cas semble comme suit :</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">project</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-catchment</span>
+<span class="w">  </span><span class="nt">crs_epsg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25832</span>
+<span class="nt">telemac</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">solver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">telemac2d</span>
+<span class="w">  </span><span class="nt">n_processors</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="nt">geodata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">dem_initial</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/dem.tif</span>
+<span class="w">  </span><span class="nt">boundary</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/catchment.gpkg</span>
+<span class="nt">boundaries</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">liquid_boundaries</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/geodata/outlet.gpkg</span>
+<span class="nt">mesh</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">default_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5.0</span><span class="w">                                </span><span class="c1"># [m]</span>
+<span class="nt">hydrology</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">rainfall</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-sources/hydrology/rainfall.csv</span>
+<span class="w">  </span><span class="nt">soil_texture</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">silt loam</span>
+<span class="w">  </span><span class="nt">initial_water_content</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25</span>
+</pre></div>
+</div>
+<p>Les pages des paramètres cas sont celles d’une rivière cas, dans le même ordre. Ce que signifie chacun d’eux pour un bassin versant :</p>
+<p><em>Project settings</em> (<a class="reference internal" href="case-setup.html#case-project"><span class="std std-ref">Paramètres du projet</span></a>). Comme dans une rivière cas : un métrique système de coordonnées de référence, les données d’entrée à <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code> et tout ce qu’aXqua produit à <code class="docutils literal notranslate"><span class="pre">axqua-case/</span></code>. Le résultat de la course est <code class="docutils literal notranslate"><span class="pre">axqua-case/simulation/r2d-hydrology.slf</span></code>; l’hydrographe et le bilan hydrique vont à <code class="docutils literal notranslate"><span class="pre">axqua-case/postprocessing/hydrology/</span></code>.</p>
+<p><em>Geodata</em> (<a class="reference internal" href="case-setup.html#case-geodata"><span class="std std-ref">Géodonnées</span></a>). Le modèle de terrain (<code class="docutils literal notranslate"><span class="pre">dem_initial</span></code>) et les contours du bassin versant (<code class="docutils literal notranslate"><span class="pre">boundary</span></code>) sont requis. Le schéma suit le fossé de drainage, que le QGIS dérive du modèle de terrain et de la position de la sortie avec les outils de son <em>Processing Toolbox</em> (par exemple <em>GRASS &gt; r.water.outlet</em>) ; dessinez-le sur un hillhade du modèle de terrain et vérifiez-le avec le contrôle d’hydrologie (<a class="reference internal" href="#hydrology-preprocessing"><span class="std std-ref">Prétraitement</span></a>). Zones de maillage (<code class="docutils literal notranslate"><span class="pre">mesh_zones</span></code>) sont facultatives et placent un maillage plus fin ou plus grossier dans certaines parties du bassin versant, à travers leur champ <code class="docutils literal notranslate"><span class="pre">Max</span> <span class="pre">Edge</span> <span class="pre">Length</span> <span class="pre">(m)</span></code>. Les ruisseaux et les fossés dessinés comme <code class="docutils literal notranslate"><span class="pre">breaklines</span></code> reçoivent un meilleur maillage le long d’eux. Zones de rugosité (<code class="docutils literal notranslate"><span class="pre">roughness_zones</span></code> et <code class="docutils literal notranslate"><span class="pre">roughness_table</span></code>) donnent différentes surfaces leur propre rugosité. Le chenal axe du chenal n’est pas utilisé. Les structures (<code class="docutils literal notranslate"><span class="pre">structures</span></code>), comme les remblais, les murs et les bâtiments, sont appliquées sur le terrain comme dans une rivière cas.</p>
+<p><em>Liquid boundaries</em> (<a class="reference internal" href="case-setup.html#case-boundaries"><span class="std std-ref">Frontières liquides</span></a>). La couche <code class="docutils literal notranslate"><span class="pre">liquid_boundaries</span></code> détient les lignes de sortie, avec le mot <code class="docutils literal notranslate"><span class="pre">outflow</span></code> dans le champ <code class="docutils literal notranslate"><span class="pre">Type</span> <span class="pre">(inflow/outflow)</span></code>, comme dans une rivière cas. Un cas d’hydrologie n’a pas besoin de débit ni de niveau d’eau. Où placer les lignes de sortie, et quelle condition ils obtiennent, est expliqué à <a class="reference internal" href="#hydrology-outlet"><span class="std std-ref">Frontières et sortie</span></a>. Une ligne d’entrée apporte l’eau d’un bassin versant en amont qui ne fait pas partie du modèle : elle prend la constante débit <code class="docutils literal notranslate"><span class="pre">boundaries.prescribed_flowrate</span></code> ou l’hydrographe <code class="docutils literal notranslate"><span class="pre">boundaries.inflow</span></code> (une table du temps et débit), que l’hydrologie suit. Sans ligne de sortie, le bassin versant est fermé et maintient toute sa pluie, et le contrôle le dit.</p>
+<p><em>Initial conditions</em> (<a class="reference internal" href="case-setup.html#case-initialization"><span class="std std-ref">Conditions initiales</span></a>). Le bassin commence à sécher. Seule une ligne d’écoulement reçoit la courte étendue d’eau du démarrage à sec, car TELEMAC ne peut prescrire un débit à travers une section sèche. Le chenal préhumidifié et le séchage des minces films d’une rivière cas ne sont pas disponibles en mode hydrologie. La condition initiale qui importe est la teneur en eau du sol (<a class="reference internal" href="#hydrology-data-setup"><span class="std std-ref">Configuration des données</span></a>).</p>
+<p><em>Mesh configuration</em> (<a class="reference internal" href="case-setup.html#case-mesh"><span class="std std-ref">Maillage configuration</span></a>). The check box <em>Hydrology mode</em> gives the mesh near-equal triangles everywhere. <code class="docutils literal notranslate"><span class="pre">default_size</span></code> is the edge length outside the mesh zones, <code class="docutils literal notranslate"><span class="pre">breakline_size</span></code> the edge length along the breaklines, and <code class="docutils literal notranslate"><span class="pre">growth_ratio</span></code> (1.2) the largest size ratio of neighboring triangles. The edge length decides which furrows and rills the model resolves and how long the run takes. A mesh with the edge length <span class="math notranslate nohighlight">\(h\)</span> has about <span class="math notranslate nohighlight">\(1.15\,A/h^2\)</span> nodes on an area <span class="math notranslate nohighlight">\(A\)</span>: 16,600 on the example field of 5.6 ha with 2 m, and about 58,000 on a catchment of 5 km² with 10 m. Halving <span class="math notranslate nohighlight">\(h\)</span> gives four times the nodes and, through the time step, about eight times the computing time, so a large catchment gets a coarse <code class="docutils literal notranslate"><span class="pre">default_size</span></code> and finer mesh zones along its streams.</p>
+<p><em>Wall roughness</em> (<a class="reference internal" href="case-setup.html#case-roughness"><span class="std std-ref">Rugosité des parois</span></a>). La rugosité du sol est la rugosité du lit. Une rivière cas la décrit par la rugosité équivalente de sable <span class="math notranslate nohighlight">\(k_s\)</span> de Nikuradse, qui présume l’eau beaucoup plus profonde que les éléments de rugosité. Le flux de feuilles de quelques millimètres de profondeur entre les cailloux et les tiges qui sont plus élevées que l’eau est profond, de sorte qu’un cas d’hydrologie prend habituellement un coefficient Manning ou Strickler pour le débit terrestre (Engman 1986), soit pour l’ensemble du bassin versant avec <code class="docutils literal notranslate"><span class="pre">friction.default_law</span></code> et <code class="docutils literal notranslate"><span class="pre">friction.default_coefficient</span></code>, soit pour la zone de rugosité avec <code class="docutils literal notranslate"><span class="pre">friction.roughness_law</span></code>. L’exemple cas utilise un coefficient Strickler de 30 m<sup>1/3</sup>/s (Manning’s <span class="math notranslate nohighlight">\(n\)</span> = 0,033) sur l’ensemble du champ. La rugosité de la parois fermées ne joue aucun rôle dans un bassin versant.</p>
+<p><em>Hydraulic simulation</em> (<a class="reference internal" href="case-setup.html#case-hydraulics"><span class="std std-ref">Simulation hydraulique</span></a>). <code class="docutils literal notranslate"><span class="pre">duration</span></code>, <code class="docutils literal notranslate"><span class="pre">flux_tolerance</span></code> et <code class="docutils literal notranslate"><span class="pre">turbulence_model</span></code> d’une rivière cas ne s’appliquent pas : le temps simulé suit de la pluie et <code class="docutils literal notranslate"><span class="pre">hydrology.drain_time</span></code>, la course est jugée par son bilan hydrique, et le noyau est défini par <code class="docutils literal notranslate"><span class="pre">hydrology.kernel</span></code>. <code class="docutils literal notranslate"><span class="pre">hydrodynamics.wet_depth</span></code>, l’eau la plus peu profonde qui compte aussi humide dans les rapports et sur les cartes, est 1 mm dans le mode d’hydrologie, sauf si le cas fixe une autre valeur. Le nombre de cœurs de processeur est défini dans le profil de l’ordinateur (<code class="docutils literal notranslate"><span class="pre">mpi_processes</span></code>, <a class="reference internal" href="../installation/plugin-setup.html#solver-bindings"><span class="std std-ref">Définir les liaisons solveur</span></a>) ou, sans lui, par <code class="docutils literal notranslate"><span class="pre">telemac.n_processors</span></code>.</p>
+<p><em>Hydrology</em> (<a class="reference internal" href="case-setup.html#case-hydrology"><span class="std std-ref">Hydrologie</span></a>). Le bloc <code class="docutils literal notranslate"><span class="pre">hydrology</span></code> contient la pluie, le sol, la météo et la sortie. L’assistant de données écrit la plupart de ces entrées (<a class="reference internal" href="#hydrology-data-setup"><span class="std std-ref">Configuration des données</span></a>) :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 26.0%" />
+<col style="width: 18.0%" />
+<col style="width: 56.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Entrée</p></th>
+<th class="head"><p>Par défaut</p></th>
+<th class="head"><p>Signification</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rainfall</span></code></p></td>
+<td><p>requis</p></td>
+<td><p>La série pluie : une table de temps et de pluie (<a class="reference internal" href="#hydrology-data-setup"><span class="std std-ref">Configuration des données</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rainfall_units</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mm/h</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mm/h</span></code> pour les intensités, <code class="docutils literal notranslate"><span class="pre">mm</span></code> pour les profondeurs par intervalle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">rainfall_stamp</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">end</span></code></p></td>
+<td><p>Qu’il s’agisse d’un timbre horaire, il s’agit de <code class="docutils literal notranslate"><span class="pre">start</span></code> ou de <code class="docutils literal notranslate"><span class="pre">end</span></code> de son intervalle.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">rainfall_start</span></code></p></td>
+<td><p>vide</p></td>
+<td><p>Date et heure du temps zéro du modèle, pour une série avec dates.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">infiltration</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">green-ampt</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">green-ampt</span></code>, ou <code class="docutils literal notranslate"><span class="pre">none</span></code> pour un bassin hydrographique scellé.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">green_ampt</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sadeghi</span></code></p></td>
+<td><p>La solution du modèle Green-Ampt : <code class="docutils literal notranslate"><span class="pre">sadeghi</span></code>, <code class="docutils literal notranslate"><span class="pre">exact</span></code> ou <code class="docutils literal notranslate"><span class="pre">travert</span></code> (<a class="reference internal" href="#hydrology-concept"><span class="std std-ref">Concept</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ponding_by_runon</span></code>, <code class="docutils literal notranslate"><span class="pre">runon_depth</span></code></p></td>
+<td><p>oui, 0,001 m</p></td>
+<td><p>Un nœud avec de l’eau de haut en haut plus profond que <code class="docutils literal notranslate"><span class="pre">runon_depth</span></code> compte comme pondue.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">soil_zones</span></code>, <code class="docutils literal notranslate"><span class="pre">soil_zone_field</span></code></p></td>
+<td><p>vide, <code class="docutils literal notranslate"><span class="pre">Zone</span> <span class="pre">ID</span></code></p></td>
+<td><p>Polygones des zones de sol et du champ de leur numéro de zone.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">soil_table</span></code></p></td>
+<td><p>vide</p></td>
+<td><p>Les paramètres de chaque zone de sol (<a class="reference internal" href="#hydrology-data-setup"><span class="std std-ref">Configuration des données</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">soil_texture</span></code></p></td>
+<td><p>vide</p></td>
+<td><p>Une classe de texture USDA pour l’ensemble du bassin versant, sans table.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">initial_water_content</span></code></p></td>
+<td><p>vide</p></td>
+<td><p>La teneur en eau du sol au début [m3/m3], pour les zones sans valeur propre.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">initial_saturation</span></code></p></td>
+<td><p>0.3</p></td>
+<td><p>La saturation effective qui s’applique lorsqu’aucune teneur initiale en eau n’est donnée.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sealed_surfaces</span></code></p></td>
+<td><p>vide</p></td>
+<td><p>Polygones de toits et de routes, sur lesquels rien ne s’infiltre.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weather</span></code>, <code class="docutils literal notranslate"><span class="pre">wind</span></code>, <code class="docutils literal notranslate"><span class="pre">evaporation</span></code></p></td>
+<td><p>vide, non, <code class="docutils literal notranslate"><span class="pre">none</span></code></p></td>
+<td><p>Les séries météorologiques et ce qui en est tiré (<a class="reference internal" href="#hydrology-weather"><span class="std std-ref">Vent et évaporation</span></a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">wind_formula</span></code>, <code class="docutils literal notranslate"><span class="pre">wind_threshold_depth</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">flather</span></code>, 1.0 m</p></td>
+<td><p>La traînée du vent et la profondeur au-dessous de laquelle le vent n’agit pas.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">open_water_factor</span></code></p></td>
+<td><p>1.05</p></td>
+<td><p>L’évaporation de l’eau libre comme multiple de l’évapotranspiration de référence.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outlet_condition</span></code>, <code class="docutils literal notranslate"><span class="pre">outlet_slope</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">normal_depth</span></code>, vide</p></td>
+<td><p>L’état des lignes de sortie et, pour <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code>, la pente du lit à la sortie (<a class="reference internal" href="#hydrology-outlet"><span class="std std-ref">Frontières et sortie</span></a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">drain_time</span></code></p></td>
+<td><p>3600 s</p></td>
+<td><p>Temps simulé après la dernière pluie.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">printout_period</span></code></p></td>
+<td><p>300 s</p></td>
+<td><p>Intervalle des cartes des résultats.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">kernel</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">finite-volumes</span></code></p></td>
+<td><p>Le noyau numérique : <code class="docutils literal notranslate"><span class="pre">finite-volumes</span></code> ou <code class="docutils literal notranslate"><span class="pre">finite-elements</span></code> (<a class="reference internal" href="#hydrology-concept"><span class="std std-ref">Concept</span></a>).</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>Morphodynamic simulation</em>, <em>OpenFOAM</em> et <em>Calibration and validation</em>. Le transport des sédiments avec GAIA, l’échange avec un corps poreux et les régions sources internes d’une rivière cas sont refusés dans le mode d’hydrologie, parce que la course d’hydrologie n’en écrit aucun. OpenFOAM n’a pas de mode d’hydrologie. Le calage n’est pas encore disponible pour l’hydrologie (<a class="reference internal" href="#hydrology-mesh-calibration"><span class="std std-ref">Résolution du maillage, calage et limites</span></a>).</p>
+</section>
+<section id="data-setup">
+<span id="hydrology-data-setup"></span><h2>Configuration des données<a class="headerlink" href="#data-setup" title="Lien vers cette rubrique"></a></h2>
+<p>Un cas d’hydrologie a besoin d’un modèle de terrain, les contours du bassin versant, une série de pluie et un sol. La météo est facultative. Le <em>Data wizard…</em> sur le sous-tab <em>Simulations &gt; Hydrology</em> guide à travers les données, un onglet pour chaque type :</p>
+<p id="help-hydrology-wizard"><strong>Les données assistant.</strong> Chaque onglet énumère d’abord les portails de données de l’agence météorologique nationale pour le pays du bassin versant, puis les itinéraires aXqua has. L’agence nationale vient en premier pour une raison : sa pluie stations hydrométriques et radar résolvent les minutes et les kilomètres d’une tempête, et sa conception des précipitations est ce que la pratique d’ingénierie attend. Les ensembles de données globaux remplissent là où rien d’autre n’est à portée de main. Rien n’est écrit dans le fichier de cas avant <em>Save</em>; les fichiers qu’une route produit vont dans <code class="docutils literal notranslate"><span class="pre">user-sources/hydrology</span></code> à côté du fichier de cas, chacun avec un fichier de provenance qui nomme la source, sa licence et l’attribution requise.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 80.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Tab</p></th>
+<th class="head"><p>Itinéraires</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Pluie</p></td>
+<td><p>Un record de pluie (un tableau de temps et de pluie en mm/h ou mm par intervalle) ; une tempête de conception d’un tableau de durée de profondeur d’une période de retour, comme KOSTRA-DWD en Allemagne ou NOAA Atlas 14 aux États-Unis, distribué sous la forme d’Euler de type II (DWA-A 118), bloc alternatif (Chow et al. 1988) ou un bloc ; ou un événement passé téléchargé à partir des archives d’Open-Meteo (ERA5 et ERA5-Land). Une réanalyse sous-estime les intensités courtes, les extrêmes d’une heure d’environ 40 %.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Sol</p></td>
+<td><p>Une carte du sol avec un numéro de zone par polygone et un tableau des zones ; une classe de texture pour l’ensemble du bassin versant ; ou les textures des sols de l’ISRIC (250 m). Surfaces scellées à partir d’une couche propre ou de la classe de l’ESA WorldCover (10 m).</p></td>
+</tr>
+<tr class="row-even"><td><p>Humidité initiale</p></td>
+<td><p>Une valeur, ou l’humidité du sol de ERA5-Land (0 à 7 cm) au début de l’événement.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Vent et soleil</p></td>
+<td><p>Les séries météorologiques, si son vent est appliqué, et comment l’évaporation est calculée.</p></td>
+</tr>
+<tr class="row-even"><td><p>Sortie</p></td>
+<td><p>L’état des lignes de sortie et du noyau numérique (voir ci-dessous).</p></td>
+</tr>
+</tbody>
+</table>
+<figure class="align-default" id="id2">
+<a class="reference internal image-reference" href="../_images/gui-hydrology-wizard.png"><img alt="L'assistant de données du mode hydrologie sur son onglet Pluie" src="../_images/gui-hydrology-wizard.png" style="width: 80%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">L’assistant de données. (1) Un onglet pour chaque type de données. (2) Les portails des agences nationales pour les pays du bassin versant, puis les ensembles de données mondiaux. (3) Un enregistrement de pluie de votre propre, d’une station hydrométrique, d’un produit radar ou d’une table de l’agence. (5) Un événement passé, téléchargé depuis Open-Meteo. (6) <em>Next</em> va à l’onglet suivant ; <em>Save</em> sur le dernier onglet écrit les choix dans le fichier de cas.</span><a class="headerlink" href="#id2" title="Lien vers cette image"></a></p>
+</figcaption>
+</figure>
+<p><strong>Série de rayons.</strong> Un timbre de temps d’un record de pluie est le début ou la fin de son intervalle. Les agences marquent la fin : la pluie de 12h00 à 13h00 est signalée à 13h00, ce qui est le défaut de <code class="docutils literal notranslate"><span class="pre">rainfall_stamp</span></code>. Le temps zéro du modèle est le début du premier intervalle, ou <code class="docutils literal notranslate"><span class="pre">rainfall_start</span></code> pour une série avec des dates.</p>
+<p>Les fichiers de station du DWD Climate Data Center sont lus lors de leur téléchargement. <code class="docutils literal notranslate"><span class="pre">MESS_DATUM</span></code> tient la date comme un numéro (<code class="docutils literal notranslate"><span class="pre">2024060213</span></code>), et les colonnes de pluie sont des profondeurs en mm quelque soit <code class="docutils literal notranslate"><span class="pre">rainfall_units</span></code> et <code class="docutils literal notranslate"><span class="pre">rainfall_stamp</span></code> dire : <code class="docutils literal notranslate"><span class="pre">R1</span></code> est l’heure avant le timbre, <code class="docutils literal notranslate"><span class="pre">RWS_10</span></code> les 10 minutes avant lui, et <code class="docutils literal notranslate"><span class="pre">RS</span></code> le jour de précipitation du DWD, qui court de 05:50 UTC de la date à 05:50 UTC du lendemain (heure locale de 07:30 avant avril 2001). Une valeur quotidienne est donc placée environ six heures après minuit, et il est beaucoup trop grossier pour résoudre une tempête. D’autres dates écrites comme un numéro, comme la colonne <code class="docutils literal notranslate"><span class="pre">time</span></code> de MeteoSwiss, sont également lues comme dates.</p>
+<p>Le fichier hyétographe de TELEMAC lui-même, dont la première ligne commence par <code class="docutils literal notranslate"><span class="pre">#HYETOGRAPH</span></code>, est lu comme le lit TELEMAC : les deux lignes de son en-tête sont ignorées, chaque ligne supplémentaire donne un temps en secondes et la profondeur de pluie en mm de l’intervalle qui se termine à ce moment, et la première ligne marque où la série commence. L’exemple cas utilise un tel fichier.</p>
+<p>Une valeur de -999, le code du DWD pour une mesure manquante, ou une cellule vide n’est pas une mesure. Sous la pluie il reste un intervalle de son propre, simulé comme sec, et le checkup nomme les lacunes ; dans la série météorologique, il est interpolé entre les lectures autour de lui. Une valeur de la DWD couvre sa propre heure, 10 minutes ou jour, de sorte qu’une heure ou un jour qu’un fichier n’a pas du tout est aussi un écart, plutôt que d’être couvert par la valeur suivante. Une rangée d’unités sous l’en-tête et une somme à la fin sont laissées de côté. Une ligne à l’intérieur des données dont le temps ne peut être lu arrête l’importation avec cette valeur, parce que sa pluie ne pouvait pas être placée dans le temps.</p>
+<p><strong>Paramètres du sol.</strong> La table de sol a une ligne par zone, avec les colonnes <code class="docutils literal notranslate"><span class="pre">zone_id</span></code>, <code class="docutils literal notranslate"><span class="pre">texture</span></code>, <code class="docutils literal notranslate"><span class="pre">ks_mm_h</span></code>, <code class="docutils literal notranslate"><span class="pre">suction_m</span></code>, <code class="docutils literal notranslate"><span class="pre">theta_s</span></code> et <code class="docutils literal notranslate"><span class="pre">theta_i</span></code>; une valeur qu’une ligne laisse vide vient de sa classe de texture. Lorsqu’il n’y a pas de mesures, Rawls et al. (1983) donnent des paramètres moyens Green-Ampt pour les onze classes de texture USDA :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 15.0%" />
+<col style="width: 15.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Classe de texture</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(K_s\)</span> [mm/h]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\psi\)</span> [m]</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\theta_s\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\theta_r\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>sable</p></td>
+<td><p>117.8</p></td>
+<td><p>0.050</p></td>
+<td><p>0.437</p></td>
+<td><p>0.020</p></td>
+</tr>
+<tr class="row-odd"><td><p>sable humide</p></td>
+<td><p>29.9</p></td>
+<td><p>0.061</p></td>
+<td><p>0.437</p></td>
+<td><p>0.036</p></td>
+</tr>
+<tr class="row-even"><td><p>limon sableux</p></td>
+<td><p>10.9</p></td>
+<td><p>0.110</p></td>
+<td><p>0.453</p></td>
+<td><p>0.041</p></td>
+</tr>
+<tr class="row-odd"><td><p>loam</p></td>
+<td><p>3.4</p></td>
+<td><p>0.089</p></td>
+<td><p>0.463</p></td>
+<td><p>0.029</p></td>
+</tr>
+<tr class="row-even"><td><p>Limon silt</p></td>
+<td><p>6.5</p></td>
+<td><p>0.167</p></td>
+<td><p>0.501</p></td>
+<td><p>0.015</p></td>
+</tr>
+<tr class="row-odd"><td><p>limon d’argile sablonneux</p></td>
+<td><p>1.5</p></td>
+<td><p>0.219</p></td>
+<td><p>0.398</p></td>
+<td><p>0.068</p></td>
+</tr>
+<tr class="row-even"><td><p>loam d’argile</p></td>
+<td><p>1.0</p></td>
+<td><p>0.209</p></td>
+<td><p>0.464</p></td>
+<td><p>0.155</p></td>
+</tr>
+<tr class="row-odd"><td><p>loam d’argile silty</p></td>
+<td><p>1.0</p></td>
+<td><p>0.273</p></td>
+<td><p>0.471</p></td>
+<td><p>0.039</p></td>
+</tr>
+<tr class="row-even"><td><p>argile sablonneuse</p></td>
+<td><p>0.6</p></td>
+<td><p>0.239</p></td>
+<td><p>0.430</p></td>
+<td><p>0.109</p></td>
+</tr>
+<tr class="row-odd"><td><p>argile silty</p></td>
+<td><p>0.5</p></td>
+<td><p>0.292</p></td>
+<td><p>0.479</p></td>
+<td><p>0.056</p></td>
+</tr>
+<tr class="row-even"><td><p>argile</p></td>
+<td><p>0.3</p></td>
+<td><p>0.316</p></td>
+<td><p>0.475</p></td>
+<td><p>0.090</p></td>
+</tr>
+</tbody>
+</table>
+<p><span class="math notranslate nohighlight">\(\theta_s\)</span> is the total porosity and <span class="math notranslate nohighlight">\(\theta_r\)</span> the residual water content. The values are means over many soils of each class, and a single soil may differ from them by an order of magnitude in <span class="math notranslate nohighlight">\(K_s\)</span>. The water content at the start of the event is the most sensitive of all inputs: a soil near saturation takes up little rain. It is given as <code class="docutils literal notranslate"><span class="pre">initial_water_content</span></code> or per zone; without it, aXqua assumes an effective saturation of 0.3 and the checkup says so.</p>
+</section>
+<section id="wind-and-evaporation">
+<span id="hydrology-weather"></span><h2>Vent et évaporation<a class="headerlink" href="#wind-and-evaporation" title="Lien vers cette rubrique"></a></h2>
+<p>La série météo est un tableau du temps et des colonnes <code class="docutils literal notranslate"><span class="pre">wind_speed_10m</span></code>, <code class="docutils literal notranslate"><span class="pre">wind_direction_10m</span></code> (la direction du vent vient de), <code class="docutils literal notranslate"><span class="pre">shortwave_radiation</span></code> [W/m2], <code class="docutils literal notranslate"><span class="pre">temperature</span></code> [°C], <code class="docutils literal notranslate"><span class="pre">relative_humidity</span></code> [%], <code class="docutils literal notranslate"><span class="pre">et0</span></code> [mm/h] et <code class="docutils literal notranslate"><span class="pre">evaporation</span></code> [mm/h]. Ses timbres horaires suivent <code class="docutils literal notranslate"><span class="pre">rainfall_stamp</span></code>. Avec <code class="docutils literal notranslate"><span class="pre">wind:</span> <span class="pre">true</span></code>, aXqua tourne la vitesse et la direction dans les deux composantes du vent et les écrit pour TELEMAC (<code class="docutils literal notranslate"><span class="pre">atmosphere.txt</span></code>) ; le coefficient de glisser suit Flather (<code class="docutils literal notranslate"><span class="pre">wind_formula</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">evaporation</span></code> prend une des quatre valeurs : <code class="docutils literal notranslate"><span class="pre">none</span></code>; <code class="docutils literal notranslate"><span class="pre">et0</span></code>, la colonne et0 fois <code class="docutils literal notranslate"><span class="pre">open_water_factor</span></code>; <code class="docutils literal notranslate"><span class="pre">penman</span></code>, l’équation horaire FAO-56 Penman-Monteith du rayonnement, de la température, de l’humidité et du vent à l’emplacement du bassin versant (Allen et al. 1998, eq. 53) ; et <code class="docutils literal notranslate"><span class="pre">series</span></code>, l’évaporation de la colonne telle qu’elle est. L’évaporation ne prend jamais plus que l’eau de surface qui est là après infiltration.</p>
+</section>
+<section id="boundaries-and-outlet">
+<span id="hydrology-outlet"></span><h2>Frontières et sortie<a class="headerlink" href="#boundaries-and-outlet" title="Lien vers cette rubrique"></a></h2>
+<p><strong>Le contour est un mur.</strong> Le contour d’un cas d’hydrologie est le fossé de drainage du bassin versant. Le long d’une fracture, une paroi solide n’est pas une approximation mais la définition de la fracture : aucune eau de surface ne la traverse. Lorsque le contour n’est pas le fossé, le terrain descend du domaine sous le mur, et dans le modèle l’eau recueillie des étangs en pente contre lui. La vérification d’hydrologie trouve ces endroits (<a class="reference internal" href="preprocessing.html#preprocessing-checkup"><span class="std std-ref">Contrôle préalable au traitement</span></a>).</p>
+<p><strong>La sortie.</strong> L’eau passe par les lignes d’écoulement de <code class="docutils literal notranslate"><span class="pre">boundaries.liquid_boundaries</span></code>, tirées sur le contour à travers la sortie du bassin versant. Comme dans une rivière cas (<a class="reference internal" href="case-setup.html#case-boundaries"><span class="std std-ref">Frontières liquides</span></a>), chaque nœud du contour qui n’est pas couvert par une ligne est une paroi fermée. Les lignes d’entrée sont facultatives et transportent les hydrographies des bassins versants en amont qui ne font pas partie du modèle. <code class="docutils literal notranslate"><span class="pre">hydrology.outlet_condition</span></code> définit ce que les lignes de sortie prescrivent :</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18.0%" />
+<col style="width: 82.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Sortie</p></th>
+<th class="head"><p>Signification</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">normal_depth</span></code></p></td>
+<td><p>Par défaut. Courbe de décharge de stade Z(Q) de TELEMAC de chaque ligne de sortie : niveau auquel la section de cette ligne transmet le débit en écoulement uniforme, à partir du modèle de terrain, du lit rugosité de la section et de la pente du lit en amont. Une courbe de tarage mesuré (<code class="docutils literal notranslate"><span class="pre">boundaries.stage_discharge</span></code>) prend sa place là où il en existe.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">free</span></code></p></td>
+<td><p>Rien n’est prescrit : profondeur et vitesse n’ont pas de gradient à travers la ligne. Cela ne tient que là où le flux laisse supercritique, à une sortie raide et lisse.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">elevation</span></code></p></td>
+<td><p>Le niveau fixe <code class="docutils literal notranslate"><span class="pre">boundaries.prescribed_elevation</span></code>, pour un bassin versant qui s’écoule dans un lac ou une grande rivière.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">overfall</span></code></p></td>
+<td><p>Aucune eau n’est retenue aux conduites d’écoulement : l’eau laisse comme au-dessus d’un bord, au débit critique au plus, et aucune ne revient. Pour un contour qui n’est pas un clivage mais le bord inférieur d’un champ, d’une terrasse ou d’une banque, sur lequel le terrain tombe.</p></td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal notranslate"><span class="pre">normal_depth</span></code> est la contrepartie de l’état de sortie <code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code> d’une rivière cas, avec une différence : une rivière cas prend le niveau de la courbe de tarage au débit qui entre dans le modèle, qui pour une course régulière est un niveau, tandis que TELEMAC déplace le niveau d’une sortie d’hydrologie le long de la courbe avec le débit qui la traverse.</p>
+<p>Une sortie libre semble être le choix naturel, puisque le gradient zéro sur une pente uniforme est le débit normal. Dans les essais de aXqua, il n’y avait pas : un chenal à 2 % avec un coefficient Manning de 0,03 court quelques centimètres de profondeur près de l’écoulement critique, et sa sortie libre rempli dans un étang debout avec le noyau à volume fini et est devenu instable avec le noyau à élément fini, où TELEMAC a signalé des vitesses entrant par la frontière libre. <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code> a drainé l’équilibre débit <span class="math notranslate nohighlight">\(Q = i A\)</span> du même bassin versant à 0,01 % avec les deux noyaux.</p>
+<p><strong>Un champ au lieu d’un bassin versant.</strong> Un champ, une parcelle ou une terrasse est souvent l’objet d’une étude, et ses contours ne se divisent pas : l’eau la laisse sur des bords entiers, où le terrain tombe au-delà d’eux. Ces bords sont des lignes de sortie, et <code class="docutils literal notranslate"><span class="pre">overfall</span></code> est leur état. TELEMAC fixe la profondeur à un niveau prescrit à un niveau inférieur à celui de la cote du fond, et à zéro là où c’est négatif. aXqua prescrit donc un niveau 1 m au-dessous du nœud la plus basse du maillage, et chaque nœud des lignes obtient une profondeur de zéro. Le noyau à volume fini prend cette profondeur comme un état sec en dehors de la ligne, de sorte que l’eau sort d’une cellule humide la façon dont il coule dans la terre sèche, et aucune eau ne peut entrer. Le noyau à éléments finis maintient les nœuds des lignes sèches, qui sur le champ d’exemple ne laissent pas entrer d’eau. Une courbe Z(Q) ne correspond pas à un tel bord, car un niveau pour un bord qui traverse la pente est le niveau de son point le plus bas seulement. La sortie libre copie l’état à l’intérieur du domaine vers l’extérieur, de sorte que l’eau coule partout où la vitesse au bord pointe dans le domaine. Sur le champ arable de l’exemple cas <code class="docutils literal notranslate"><span class="pre">example-agrohydrology</span></code>, une prise libre a pris 2,7 m3/s à travers le bord inférieur du champ 16 minutes après le début du ruissellement. Les autres bords d’un champ restent des murs, de sorte que le champ ne reçoit aucune course de ses voisins. Le bilan hydrologique montre si l’une de ses eaux traverse encore un mur.</p>
+<p><strong>Roughness of the outlet.</strong> The level of <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code> depends on the roughness of the outlet section. With Manning’s equation, <span class="math notranslate nohighlight">\(h \sim (n Q / (b \sqrt{S}))^{3/5}\)</span>, so that an error of 20 % in <span class="math notranslate nohighlight">\(n\)</span> changes the depth at the outlet by about 12 %. The disturbance fades upstream over a length of about <span class="math notranslate nohighlight">\(h/S\)</span>: 50 m for a depth of 0.5 m on a slope of 1 %, 1 km for a depth of 1 m on a slope of 0.1 %. The outlet therefore belongs a few such lengths downstream of where results are read. The roughness is that of the roughness zones at the outlet, or of <code class="docutils literal notranslate"><span class="pre">friction.default_law</span></code> and <code class="docutils literal notranslate"><span class="pre">default_coefficient</span></code>. The keyword <code class="docutils literal notranslate"><span class="pre">LAW</span> <span class="pre">OF</span> <span class="pre">FRICTION</span> <span class="pre">ON</span> <span class="pre">LATERAL</span> <span class="pre">BOUNDARIES</span></code> plays no part: TELEMAC applies it to solid walls only.</p>
+<p><strong>Pourquoi pas une profondeur de la vitesse locale.</strong> Une condition qui fixe la profondeur à chaque sortie nœud à partir de la vitesse locale avec l’équation de Manning prescrit une profondeur qui va à zéro partout où la vitesse est petite, qui draine l’eau en étang au début et pendant la récession, et il nourrit la vitesse à nouveau dans la profondeur prescrite, qui oscille dans le flux subcritique. La courbe Z(Q) de toute la section a la même physique sans cette rétroaction.</p>
+</section>
+<section id="preprocessing">
+<span id="hydrology-preprocessing"></span><h2>Prétraitement<a class="headerlink" href="#preprocessing" title="Lien vers cette rubrique"></a></h2>
+<p>Le prétraitement construit un cas d’hydrologie avec les mêmes cinq étapes qu’un cas de rivière (<a class="reference internal" href="preprocessing.html#preprocessing-workflow"><span class="std std-ref">flux de travail aXqua</span></a>), et <em>Build</em> sur l’onglet <em>Preprocessing</em> commence comme une tâche. Dans un terminal, la commande est <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">&lt;case-file&gt;</span></code>. Ce que les étapes font en mode hydrologie :</p>
+<ol class="arabic simple">
+<li><p><strong>Terrain.</strong> Le modèle de terrain est converti au système de coordonnées de référence du cas et coupé au contour.</p></li>
+<li><p><strong>Maillage.</strong> Gmsh (Geuzaine et Remacle 2009) divise le bassin versant en triangles quasi égaux avec son algorithme Frontal-Delaunay, et chaque nœud reçoit sa cote du fond du modèle de terrain, sa zone de rugosité et son sol : <span class="math notranslate nohighlight">\(K_s\)</span> (<code class="docutils literal notranslate"><span class="pre">KS</span></code>), le produit de la tête d’aspiration et du déficit d’humidité (<code class="docutils literal notranslate"><span class="pre">GA</span> <span class="pre">SUCTION</span> <span class="pre">A</span></code>) et le déficit d’humidité (<code class="docutils literal notranslate"><span class="pre">GA</span> <span class="pre">DELTA</span> <span class="pre">THETA</span></code>), que TELEMAC lit à partir du fichier géométrique. Comme dans une rivière cas, deux constructions à partir d’entrées identiques donnent des maillages qui diffèrent de moins de 1 % dans le nombre de nœuds (<a class="reference internal" href="preprocessing.html#preprocessing-meshing"><span class="std std-ref">Mèche</span></a>).</p></li>
+<li><p><strong>Frontières.</strong> Les nœuds sur les lignes de sortie obtiennent le code <code class="docutils literal notranslate"><span class="pre">5</span> <span class="pre">4</span> <span class="pre">4</span></code> (niveau prescrit) ou, avec un point de sortie libre, <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">4</span> <span class="pre">4</span></code>; les nœuds sur les lignes d’entrée <code class="docutils literal notranslate"><span class="pre">4</span> <span class="pre">5</span> <span class="pre">5</span></code>; tous les autres nœuds sur les contours sont des murs (<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">2</span> <span class="pre">2</span></code>).</p></li>
+<li><p><strong>Paramètres de simulation.</strong> aXqua écrit le forçage (pluie et évaporation, <code class="docutils literal notranslate"><span class="pre">forcing.txt</span></code>), le vent (<code class="docutils literal notranslate"><span class="pre">atmosphere.txt</span></code>), les courbes de sortie de <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code>, la routine d’infiltration générée (<code class="docutils literal notranslate"><span class="pre">user_fortran/runoff_greenampt.f</span></code>) et le fichier de paramètres <code class="docutils literal notranslate"><span class="pre">hydrology2d.cas</span></code>. No <code class="docutils literal notranslate"><span class="pre">steady2d.cas</span></code> est écrit, car un bassin versant n’a pas de régime permanent.</p></li>
+<li><p><strong>Mesures</strong> Les mesures de terrain du cas sont compilées comme dans un cas de rivière ; le calage qui les lit n’est pas encore disponible pour les pistes d’hydrologie.</p></li>
+</ol>
+<p>Le modèle est écrit à <code class="docutils literal notranslate"><span class="pre">axqua-case/simulation/</span></code>. Quant à un cas fluvial, le fichier journal <code class="docutils literal notranslate"><span class="pre">axqua.log</span></code> dans ce dossier rapporte la qualité du maillage avec son bord le plus court, qui limite le pas de temps de toute la course, et le sol que chaque zone a reçu.</p>
+<p><strong>Le contrôle d’hydrologie.</strong> Avant la construction, le contrôle d’hydrologie examine les données du cas ; il est décrit avec les autres vérifications dans <a class="reference internal" href="preprocessing.html#preprocessing-checkup"><span class="std std-ref">Contrôle préalable au traitement</span></a>. Ses résultats sont affichés dans la boîte <em>Hydrology checkup</em> de l’onglet <em>Preprocessing</em> et sur le sous-tab <em>Simulations &gt; Hydrology</em>, et il fonctionne au début de chaque construction, où une erreur arrête la construction. <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code> comprend sans l’analyse du modèle de terrain, qui <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">hydrology</span> <span class="pre">check</span> <span class="pre">&lt;case-file&gt;</span></code> et le bouton <em>Check</em> add. Le contrôle :</p>
+<ul class="simple">
+<li><p>lit la série pluie et la série météo, et nomme les lacunes, une pluie exceptionnellement intense, la pluie d’une réanalyse et la météo qui ne couvre pas la course ;</p></li>
+<li><p>vérifie les zones de sol et leurs valeurs par rapport aux classes de texture de Rawls et al. (1983) et nomme une teneur initiale en eau manquante ;</p></li>
+<li><p>désigne un bassin fermé sans ligne de sortie, une sortie libre, le noyau à éléments finis et un temps de drainage court pour la taille du bassin, et évalue le nombre d’éléments du maillage ;</p></li>
+<li><p>dirige l’eau de chaque cellule du modèle de terrain jusqu’au contour (inondation prioritaire, Barnes et al. 2014) et nomme chaque tronçon d’un mur sur lequel une grande zone s’écoule, où le contour ne suit pas le fossé ;</p></li>
+<li><p>remplit les dépressions fermées du modèle de terrain à leur niveau de déversement et nomme les plus grandes avec leur volume, parce qu’une dépression garde la pluie jusqu’à ce qu’il soit plein. C’est la bonne chose pour un étang et un mauvais endroit où le modèle de terrain bloque un ponceau ou l’ouverture d’un pont, qui doit ensuite être découpé dans le modèle de terrain ou modélisé comme une ligne de sortie.</p></li>
+</ul>
+<p>Chaque trouvaille nomme son remède, et <a class="reference internal" href="../troubleshooting/warnings.html"><span class="doc">Messages d’avertissement</span></a> et <a class="reference internal" href="../troubleshooting/errors.html"><span class="doc">Messages d’erreur</span></a> explique chacun d’eux.</p>
+</section>
+<section id="run-and-results">
+<span id="hydrology-run"></span><h2>Exécution et résultats<a class="headerlink" href="#run-and-results" title="Lien vers cette rubrique"></a></h2>
+<p>La course commence à sec et dure jusqu’à <code class="docutils literal notranslate"><span class="pre">drain_time</span></code> après la dernière pluie. <em>Submit</em> sur le sous-tab <em>Simulations &gt; Hydrology</em> l’exécute comme une tâche, qui se poursuit lorsque le QGIS est fermé (<a class="reference internal" href="../installation/plugin-setup.html#plugin-job-execution"><span class="std std-ref">Exécution tâche</span></a>) ; dans un terminal, la commande est <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">submit</span> <span class="pre">&lt;case-file&gt;</span> <span class="pre">--kind</span> <span class="pre">hydrology</span></code>. La colonne <em>Progress</em> de la liste tâche montre la part simulée de la tempête. Il n’y a pas de régime permanent et pas de hotstart : chaque course part du bassin versant sec et remplace le résultat du précédent, alors copiez le dossier <code class="docutils literal notranslate"><span class="pre">axqua-case/</span></code> avant une course dont le prédécesseur doit être conservé.</p>
+<figure class="align-default" id="id3">
+<a class="reference internal image-reference" href="../_images/gui-hydrology.png"><img alt="Le sous-tab Hydrologie de l'onglet Simulations" src="../_images/gui-hydrology.png" style="width: 70%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Le sous-tab <em>Hydrology</em> de l’onglet <em>Simulations</em>. (1) Le sous-tab. (2) <em>Build</em> prépare le cas, <em>Submit</em> fonctionne comme une tâche. (3) Les données du cas, avec la position et la zone du bassin versant. (4) Les résultats du contrôle d’hydrologie. (5) <em>Data wizard…</em> ouvre l’assistant (figure ci-dessus) ; <em>Check</em> effectue à nouveau le contrôle, y compris l’analyse du modèle de terrain.</span><a class="headerlink" href="#id3" title="Lien vers cette image"></a></p>
+</figcaption>
+</figure>
+<p>Après la course, aXqua écrit dans <code class="docutils literal notranslate"><span class="pre">postprocessing/hydrology</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">hydrograph.csv</span></code> et <code class="docutils literal notranslate"><span class="pre">hydrograph.png</span></code>: la pluie au-dessus, le débit à la sortie au-dessous, sur un axe temporel ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">water-balance.csv</span></code>: la pluie, l’écoulement, l’écoulement, les volumes infiltrés et évaporés, l’eau laissée sur le bassin versant, l’erreur de masse de TELEMAC, le coefficient de ruissellement (écoulement sur la pluie) et le pic débit avec son temps.</p></li>
+</ul>
+<p>Les volumes proviennent du bilan hydrique propre de TELEMAC et de la ligne <code class="docutils literal notranslate"><span class="pre">AXQUA</span> <span class="pre">HYDROLOGY</span></code> que la routine générée écrit dans la liste. Le bilan d’eau remplace le bilan de flux d’un cas (<a class="reference internal" href="hydraulic-simulations.html#hydraulics-dry-runs"><span class="std std-ref">TELEMAC à sec 2D/3D</span></a>) : pluie et écoulement égale infiltration, évaporation, écoulement et l’eau laissée sur le bassin versant, et le reste est l’erreur du volume. Sur les bassins d’essai et l’exemple cas il ferme à moins de 0,001 % de la pluie. L’eau laissée sur le bassin versant à la fin indique des dépressions ou un temps de drainage trop court.</p>
+<p><strong>Cartes.</strong> <em>Load results</em> ajoute la hauteur d’eau, la vitesse, la profondeur infiltrée et la marque d’eau élevée de TELEMAC et la vitesse la plus élevée de la course à QGIS, avec les styles de <a class="reference internal" href="postprocessing.html#help-postprocessing-qgis"><span class="std std-ref">Génération de cartes QGIS</span></a>. La carte de la hauteur d’eau montre l’eau à partir de 1 mm, parce que le flux de feuille d’une pente de collines est de millimètres de profondeur ; une rivière cas commence à 1 cm. Le seuil est <code class="docutils literal notranslate"><span class="pre">hydrodynamics.wet_depth</span></code>, qu’un cas peut fixer à une autre valeur. TELEMAC n’enregistre ses maxima que lorsque l’eau est plus profonde que 1 cm (<code class="docutils literal notranslate"><span class="pre">preres_telemac2d.f</span></code>), de sorte que sur une pente de collines la pointe de l’eau et la vitesse la plus élevée montrent les sillons, les chenaux et les étangs, et non le flux de feuille entre eux. Le résultat contient une carte à chaque <code class="docutils literal notranslate"><span class="pre">printout_period</span></code>. Le <em>Temporal Controller</em> de QGIS passe par eux, et <em>aXqua &gt; Export movie</em> les transforme en une vidéo de la tempête (<a class="reference internal" href="postprocessing.html#help-postprocessing-qgis"><span class="std std-ref">Génération de cartes QGIS</span></a>). Pour ParaView et VisIt, <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">export</span> <span class="pre">&lt;case-file&gt;</span> <span class="pre">--result</span> <span class="pre">r2d-hydrology.slf</span></code> convertit le résultat en fichiers VTK (<a class="reference internal" href="postprocessing.html#export-telemac-results"><span class="std std-ref">Exportation des résultats de TELEMAC</span></a>).</p>
+<p><strong>L’espace de disque.</strong> <em>Clean Up</em> (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Libérer l’espace disque</span></a>) propose de supprimer le pas de temps antérieur des résultats. Pour un cas, il s’agit du remplissage du tronçon ; pour un cas d’hydrologie, il s’agit de la tempête elle-même. L’hydrographe et le bilan hydrique sont conservés, parce qu’ils sont lus dans la liste, et la marque d’eau élevée et la vitesse la plus élevée sont conservés dans le dernier pas de temps, mais les cartes de la tempête sont perdues. Gardez tous les 5 ou 10 ans pas de temps plutôt que le dernier.</p>
+</section>
+<section id="mesh-resolution-calibration-and-limits">
+<span id="hydrology-mesh-calibration"></span><h2>Résolution du maillage, calage et limites<a class="headerlink" href="#mesh-resolution-calibration-and-limits" title="Lien vers cette rubrique"></a></h2>
+<p><strong>Résolution du maillage.</strong> L’étude de convergence en maillage de aXqua (<a class="reference internal" href="mesh-convergence.html"><span class="doc">Convergence en maillage</span></a>) compare les parcours réguliers aux points de mesure et n’est donc pas disponible en mode hydrologie : une tempête n’a pas de régime permanent. La question qu’il répond reste, car le maillage décide quels flux un modèle de bassin versant résout (Caviedes-Voullième et al. 2012). Il est répondu avec le même ratio de raffinement de 1,3 que l’étude utilise (Celik et coll., 2008). Copier le fichier de cas, définir <code class="docutils literal notranslate"><span class="pre">mesh.size_scale:</span> <span class="pre">0.77</span></code> dans la copie (toutes les longueurs de bord divisées par 1,3) et un <code class="docutils literal notranslate"><span class="pre">project.sim_dir</span></code> de sa propre, construire et exécuter, et comparer le coefficient de ruissellement, le pic débit et son temps avec ceux du maillage original. S’ils changent de moins que la tolérance acceptée (5 % à <a class="reference internal" href="mesh-convergence.html"><span class="doc">Convergence en maillage</span></a>), le maillage grossier est assez fin. Avec un troisième maillage, affiné une fois de plus, l’indice de convergence de la grille de Celik et al. (2008) peut être calculé pour chacune de ces quantités. Chaque raffinement de 1,3 coûte environ 2,2 fois le temps de calcul du précédent maillage.</p>
+<p><strong>Calage.</strong> Le calage bayésien avec HydroBayesCal (<a class="reference internal" href="calibration-validation.html"><span class="doc">Calage et validation</span></a>) ajuste les paramètres des cours d’eau réguliers aux profondeurs et vitesses mesurées. Il n’est pas encore disponible pour les parcours en hydrologie, et l’extension n’offre aucun calage pour un cas en mode hydrologie. Un hydrographe de sortie mesuré est comparé à <code class="docutils literal notranslate"><span class="pre">hydrograph.csv</span></code> plutôt. Les paramètres à ajuster d’abord sont la teneur initiale en eau et <span class="math notranslate nohighlight">\(K_s\)</span>, qui contrôlent la quantité de pluie devient ruissellement, puis la rugosité, qui contrôle quand le ruissellement arrive à la sortie. Fernández-Pato et al. (2016) ont étalonné les paramètres Green-Ampt d’un modèle d’eau peu profonde de cette façon et ont constaté que les valeurs calibrées dépendent des conditions initiales du bassin versant et du schéma de pluie de l’événement. Les paramètres étalonnés pour une tempête doivent donc être validés avec une autre tempête, de la même manière qu’un modèle de rivière est validé dans une autre situation d’écoulement (<a class="reference internal" href="calibration-validation.html"><span class="doc">Calage et validation</span></a>).</p>
+<p><strong>Limites</strong> Le mode hydrologie simule le ruissellement de surface avec infiltration. Il ne simule pas l’écoulement sous la surface : l’eau qui s’infiltre est partie du modèle et ne retourne pas sous forme d’écoulement ou d’eau souterraine débit. Un bassin versant dont les cours d’eau transportent un débit de base reçoit donc ce débit de base à travers une ligne d’écoulement. L’eau du sol ne s’évapore pas (<a class="reference internal" href="#hydrology-concept"><span class="std std-ref">Concept</span></a>), la pluie est uniforme dans l’espace, et la neige n’est pas représentée. La pluie radar est prévue pour une version ultérieure.</p>
+<p><strong>Références</strong></p>
+<ul class="simple">
+<li><p>Allen, R. G., Pereira, L. S., Raes, D. and Smith, M. (1998). Crop evapotranspiration. FAO Irrigation and Drainage Paper 56. FAO, Rome.</p></li>
+<li><p>Audusse, E., Bouchut, F., Bristeau, M.-O., Klein, R. and Perthame, B. (2004). A fast and stable well-balanced scheme with hydrostatic reconstruction for shallow water flows. SIAM Journal on Scientific Computing, 25(6), 2050-2065.</p></li>
+<li><p>Barnes, R., Lehman, C. and Mulla, D. (2014). Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers &amp; Geosciences, 62, 117-127.</p></li>
+<li><p>Broich, K., Obermaier, T., Alcamo, L. and Disse, M. (2022). TELEMAC as a hydrodynamic rainfall-runoff model: New extension using the Green-Ampt-infiltration. Proceedings of the XXVIIIth TELEMAC User Conference, Paris-Saclay, 143-145. <a class="reference external" href="https://hdl.handle.net/20.500.11970/110848">https://hdl.handle.net/20.500.11970/110848</a></p></li>
+<li><p>Caviedes-Voullième, D., García-Navarro, P. and Murillo, J. (2012). Influence of mesh structure on 2D full shallow water equations and SCS Curve Number simulation of rainfall/runoff events. Journal of Hydrology, 448-449, 39-59.</p></li>
+<li><p>Celik, I. B., Ghia, U., Roache, P. J., Freitas, C. J., Coleman, H. and Raad, P. E. (2008). Procedure for estimation and reporting of uncertainty due to discretization in CFD applications. ASME Journal of Fluids Engineering, 130(7), 078001.</p></li>
+<li><p>Chen, G. and Noelle, S. (2017). A new hydrostatic reconstruction scheme based on subcell reconstructions. SIAM Journal on Numerical Analysis, 55(2), 758-784.</p></li>
+<li><p>Chow, V. T., Maidment, D. R. and Mays, L. W. (1988). Applied Hydrology. McGraw-Hill, New York.</p></li>
+<li><p>Chu, S. T. (1978). Infiltration during an unsteady rain. Water Resources Research, 14(3), 461-466.</p></li>
+<li><p>De Vos, L. F., Broich, K., Wirthensohn, M. and Rüther, N. (2024). Revised implementation of the Green-Ampt infiltration method in TELEMAC-2D. Proceedings of the XXXth TELEMAC User Conference, Chambéry. <a class="reference external" href="https://hdl.handle.net/20.500.11970/114347">https://hdl.handle.net/20.500.11970/114347</a></p></li>
+<li><p>Engman, E. T. (1986). Roughness coefficients for routing surface runoff. Journal of Irrigation and Drainage Engineering, 112(1), 39-53.</p></li>
+<li><p>Fernández-Pato, J., Caviedes-Voullième, D. and García-Navarro, P. (2016). Rainfall/runoff simulation with 2D full shallow water equations: Sensitivity analysis and calibration of infiltration parameters. Journal of Hydrology.</p></li>
+<li><p>Geuzaine, C. and Remacle, J.-F. (2009). Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering, 79, 1309-1331. <a class="reference external" href="https://doi.org/10.1002/nme.2579">https://doi.org/10.1002/nme.2579</a></p></li>
+<li><p>Green, W. H. and Ampt, G. A. (1911). Studies on soil physics. The Journal of Agricultural Science, 4(1), 1-24.</p></li>
+<li><p>Hervouet, J.-M. (2007). Hydrodynamics of Free Surface Flows: Modelling with the Finite Element Method. Wiley, Chichester.</p></li>
+<li><p>Mein, R. G. and Larson, C. L. (1973). Modeling infiltration during a steady rain. Water Resources Research, 9(2), 384-394.</p></li>
+<li><p>Rawls, W. J., Brakensiek, D. L. and Miller, N. (1983). Green-Ampt infiltration parameters from soils data. Journal of Hydraulic Engineering, 109(1), 62-70.</p></li>
+<li><p>Sadeghi, S. H., Loescher, H. W., Jacoby, P. W. and Sullivan, P. L. (2024). A simple, accurate, and explicit form of the Green-Ampt model to estimate infiltration, sorptivity, and hydraulic conductivity. Vadose Zone Journal, 23(4).</p></li>
+<li><p>Toro, E. F., Spruce, M. and Speares, W. (1994). Restoration of the contact surface in the HLL-Riemann solver. Shock Waves, 4, 25-34. <a class="reference external" href="https://doi.org/10.1007/BF01414629">https://doi.org/10.1007/BF01414629</a></p></li>
+<li><p>Travert, J.-P., Taccone, F. and Bacchi, V. (2022). Modelling runoff for extreme rainfall events on large catchments using TELEMAC-2D. Proceedings of the XXVIIIth TELEMAC User Conference, Paris-Saclay, 131-139.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="morphodynamic-simulations.html" class="btn btn-neutral float-left" title="Simulations morphodynamiques" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="calibration-validation.html" class="btn btn-neutral float-right" title="Calage et validation" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2026, Sebastian Schwindt.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

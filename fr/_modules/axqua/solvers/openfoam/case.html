@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/openfoam/case.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=a1a25f23"></script>
+      <script src="../../../../_static/documentation_options.js?v=740f9163"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/translations.js?v=e6b791cb"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calage et validation</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
@@ -358,7 +372,8 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">RIVER_WET_DEPTH</span><span class="p">,</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">refresh_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.openfoam</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">dicts</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">mesh</span> <span class="k">as</span> <span class="n">ofmesh</span><span class="p">,</span>
                                     <span class="n">planview</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">quality</span><span class="p">)</span>
@@ -553,7 +568,7 @@
         <span class="c1"># at the discharge of the case, and the mesher walls the outlet above that</span>
         <span class="n">rating</span> <span class="o">=</span> <span class="n">rating_table</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">case_dir</span><span class="p">)</span>
         <span class="n">tailwater</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rating</span><span class="p">],</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rating</span><span class="p">]))</span>
-    <span class="k">elif</span> <span class="n">of</span><span class="o">.</span><span class="n">outlet_stage</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">!=</span> <span class="s2">"free"</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">of</span><span class="o">.</span><span class="n">outlet_stage</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>
 
         <span class="n">tailwater</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">q</span><span class="p">))</span>
@@ -598,7 +613,7 @@
                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">of_mesh</span><span class="o">.</span><span class="n">outlet_patches</span><span class="p">)</span><span class="si">}</span><span class="s2"> outlets each follow the same relation "</span>
                 <span class="s2">"with the discharge through their own patch, which is right only where "</span>
                 <span class="s2">"each outlet has a rating curve of that shape"</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"free (Neumann) outfall: the model chooses its own tailwater"</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -873,7 +888,7 @@
 <span class="sd">    """</span>
     <span class="n">polygon</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">_domain_polygon</span><span class="p">(</span>
         <span class="n">cfg</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">domain</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span> <span class="n">wet_margin</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">wet_margin</span><span class="p">,</span>
-        <span class="n">wet_depth</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span>
+        <span class="n">wet_depth</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">)</span>
     <span class="n">angle</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">flow_angle</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">align_to_flow</span> <span class="k">else</span> <span class="mf">0.0</span>
     <span class="n">grid</span> <span class="o">=</span> <span class="n">ofmesh</span><span class="o">.</span><span class="n">build_plan_grid</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">cell_size</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span>
                                   <span class="n">max_columns</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">openfoam</span><span class="o">.</span><span class="n">max_plan_columns</span><span class="p">)</span>
@@ -895,7 +910,7 @@
         <span class="c1"># re-deriving it from the seed here would report a water fraction the case</span>
         <span class="c1"># does not have - and reporting 96.8% for a domain that is water by</span>
         <span class="c1"># construction is exactly the kind of contradiction this line exists to catch.</span>
-        <span class="n">wet_depth</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.01</span>
+        <span class="n">wet_depth</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">wet_depth</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">RIVER_WET_DEPTH</span>
         <span class="n">water</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"rigid_lid"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
                  <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">initial_alpha</span><span class="p">(</span>
                      <span class="n">art</span><span class="o">.</span><span class="n">mesh</span><span class="p">,</span> <span class="n">wet_depth</span><span class="o">=</span><span class="n">wet_depth</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)))</span>

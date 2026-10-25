@@ -78,6 +78,101 @@ The check of a case (*Check* on the *Case Setup* tab, *Save* in the case setting
 ``The files of the validation situation 'High flow' show different discharges; the last one in the table was saved.``
     A validation situation has one discharge, and the table *Measurement files* of the case settings shows it in every row of the situation. Where the rows still show different values, the last one in the table was saved. Enter the discharge of the situation in one of its rows; the other rows follow (:ref:`validation situation <validation-setup>`).
 
+Hydrology checkup
+-----------------
+
+The hydrology checkup of a case in hydrology mode reports the following warnings (:doc:`../usage/hydrology-simulations`). A warning does not stop the build.
+
+.. _axqua-hydrology-rainfall-intense:
+
+``The rain peaks at ... mm/h``
+    More than 150 mm/h is held by a cloudburst for minutes only. The usual cause is a series of depths per interval that is read as intensities: set ``hydrology.rainfall_units`` to ``mm``.
+
+.. _axqua-hydrology-rainfall-gaps:
+
+``The rain record has no value for ... intervals``
+    Rows of the rain series are empty, or hold -999, which is how the DWD marks a missing measurement. aXqua keeps their intervals and takes them as dry, so that no rain is invented, but rain that fell in a gap is missing from the simulation. Fill the gaps from a neighboring gauge or a radar product, or make sure the event lies outside them.
+
+.. _axqua-hydrology-reanalysis-rain:
+
+``The rain comes from a reanalysis (ERA5)``
+    The rain was downloaded from Open-Meteo. A reanalysis spreads a storm over cells of 10 to 30 km and an hour and underestimates short intensities. Use gauge or radar data of the national meteorological agency where they exist, or a design storm.
+
+.. _axqua-hydrology-weather-alignment:
+
+``The rain has no date, the weather does``
+    A design storm, or a rain table in seconds, has no calendar time, while the weather series has dates, for example from an event the data wizard downloaded before. The weather is then applied from the start of the rain, with its wind and the evaporation of its own days. Set ``hydrology.rainfall_start`` to the date and time the rain is meant to start in the weather series, or remove the weather series when it belongs to another event.
+
+.. _axqua-hydrology-weather-gaps:
+
+``The weather series has no value for ... readings of ...``
+    Cells of the weather series are empty, or hold -999, which is how the DWD marks a missing measurement. aXqua interpolates each of them in time between the readings before and after it, and the wind direction as an angle, because wind, radiation, temperature and humidity change gradually, and a value of -999 would otherwise enter the wind and the evaporation as if it had been measured. Over a gap of a few hours the interpolation misses the course of the day: fill longer gaps from a neighboring station, or make sure the event lies outside them.
+
+.. _axqua-hydrology-weather-short:
+
+``The weather ends at ... s, the run at ... s``
+    After the end of the weather series there is no wind and no evaporation. Extend the series to the end of the run.
+
+.. _axqua-hydrology-wind-strong:
+
+``The wind reaches ... m/s at 10 m``
+    Above 40 m/s, check the unit: m/s, not km/h.
+
+.. _axqua-hydrology-evaporation-high:
+
+``Evaporation reaches ... mm/h``
+    Open water rarely evaporates more than 1.5 mm in an hour. Check the unit of ``et0`` or ``evaporation``: mm/h, not mm/day.
+
+.. _axqua-hydrology-soil-texture-mismatch:
+
+``Soil zone ... is ... with Ks = ... mm/h; Rawls et al. (1983) give ...``
+    The conductivity of a zone differs by more than a factor of ten from the mean of its texture class. That can be right for a measured soil; often it is a unit: Ks is in mm/h, and 1 cm/h is 10 mm/h, 1e-6 m/s is 3.6 mm/h.
+
+.. _axqua-hydrology-initial-moisture-default:
+
+``No initial water content is given``
+    The soil starts at an effective saturation of ``initial_saturation`` (0.3). The runoff of a storm depends strongly on the water content at the start: give a measured value, the ERA5-Land value of the event (data wizard), or ``theta_i`` per zone.
+
+.. _axqua-hydrology-closed-catchment:
+
+``The case has no outflow line: all rain stays in the catchment``
+    Right for a closed depression; otherwise draw an outflow line on the outline across the outlet of the catchment (page *Liquid boundaries* of the case settings).
+
+.. _axqua-hydrology-free-outlet:
+
+``A free outlet holds only where the flow leaves supercritical``
+    A free outlet prescribes nothing. At a slower outlet the water fills up into a pond, or the finite-element kernel becomes unstable, and the finite-volume kernel lets water in wherever the velocity at the outflow line points into the domain. Use ``normal_depth`` unless the outlet is steep and smooth, and ``overfall`` at the lower edge of a field over which the terrain falls away (:ref:`hydrology-outlet`).
+
+.. _axqua-hydrology-finite-elements:
+
+``The finite-element kernel lets thin films drain slowly``
+    TELEMAC validates rainfall-runoff with its finite-volume kernel and the hydrostatic reconstruction of Chen and Noelle (``hydrology.kernel: finite-volumes``).
+
+.. _axqua-hydrology-drain-short:
+
+``The run ends ... s after the rain``
+    Water from the far end of the catchment does not reach the outlet before the end of the run, so the recession of the hydrograph is cut off. Raise ``hydrology.drain_time``.
+
+.. _axqua-hydrology-large-mesh:
+
+``The mesh will have about ... elements``
+    More than two million triangles take long to compute. Raise ``mesh.default_size`` or the edge lengths of the mesh zones, and refine where it matters.
+
+.. _axqua-hydrology-flow-across-wall:
+
+``... % of the catchment drains across the outline where it is a wall``
+    The outline does not follow the drainage divide there: the terrain slopes out of the domain under a wall, and the water collected upslope ponds against it. Make those stretches outflow lines, or move the outline to the divide (:ref:`hydrology-outlet`).
+
+.. _axqua-hydrology-depressions:
+
+``The terrain holds ... closed depressions``
+    A depression keeps the rain until it is full. That is right for a pond and wrong where the terrain model blocks a culvert or the opening of a bridge: cut those openings into the terrain model, for example as a structure (:ref:`case-geodata`).
+
+.. _axqua-hydrology-terrain-unreadable:
+
+``The terrain model could not be analyzed``
+    The terrain analysis of the checkup failed, usually because the terrain model does not cover the outline. The build itself names the problem in more detail.
+
 Profile of this computer
 ------------------------
 

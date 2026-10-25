@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/installation/qgis-plugin.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/translations.js?v=9bf55d28"></script>
@@ -92,6 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -120,6 +121,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -281,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -290,6 +303,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -524,7 +538,7 @@ where<span class="w"> </span>axqua<span class="w">          </span><span class="
 </section>
 <section id="axqua-panel-layout">
 <h2>aXqua Panel Layout<a class="headerlink" href="#axqua-panel-layout" title="Link to this heading"></a></h2>
-<p>Nach erfolgreicher Konfiguration zeigt das Panel Tabs an, die dem Workflow folgen: <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (mit den Sub-Tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em> und <em>Morphodynamics</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> oben rechts öffnet die Dokumentation im Abschnitt des Tabs, der angezeigt wird, und <em>Clean Up</em> links davon gibt Speicherplatz frei (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Freigeben des Scheibenraums</span></a>). Help öffnet eine Kopie der auf diesem Computer erstellten Dokumentation, wenn eine vorhanden ist (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> in einer Kopie des installierten Repositorys wie in <a class="reference internal" href="#install-from-source"><span class="std std-ref">Installieren aus dem Quellcode (Entwicklung)</span></a>, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Aufbau der Dokumentation</span></a>), da sie die installierte Version und ansonsten die veröffentlichte Dokumentation unter <a class="reference external" href="https://axqua.eu">axqua.eu</a> beschreibt. Es öffnet die deutsche oder die französische Seite, wenn QGIS auf Deutsch oder Französisch eingestellt ist. Ein Browser, der als Snap- oder Flatpak-Paket installiert ist (z. B. Firefox auf Ubuntu), kann Dateien außerhalb des Home-Ordners nicht öffnen; für eine Kopie außerhalb öffnet Help die veröffentlichte Dokumentation. Die Jobliste unter den Tabs ist von jedem Tab aus sichtbar.</p>
+<p>Nach erfolgreicher Konfiguration zeigt das Panel Tabs an, die dem Workflow folgen: <em>Configuration</em>, <em>Case Setup</em>, <em>Preprocessing</em>, <em>Simulations</em> (mit den Sub-Tabs <em>Baseline (Telemac)</em>, <em>OpenFOAM</em>, <em>Mesh convergence</em>, <em>Morphodynamics</em> und <em>Hydrology</em>), <em>Calibration &amp; validation</em>, <em>Postprocessing</em>, <em>Batch-processing</em>. <em>Help</em> oben rechts öffnet die Dokumentation im Abschnitt des Tabs, der angezeigt wird, und <em>Clean Up</em> links davon gibt Speicherplatz frei (<a class="reference internal" href="../troubleshooting/tips-logfiles.html#help-cleanup"><span class="std std-ref">Freigeben des Scheibenraums</span></a>). Help öffnet eine Kopie der auf diesem Computer erstellten Dokumentation, wenn eine vorhanden ist (<code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">docs/i18n/build_i18n.sh</span></code> in einer Kopie des installierten Repositorys wie in <a class="reference internal" href="#install-from-source"><span class="std std-ref">Installieren aus dem Quellcode (Entwicklung)</span></a>, <a class="reference internal" href="../code/build-docs.html"><span class="doc">Aufbau der Dokumentation</span></a>), da sie die installierte Version und ansonsten die veröffentlichte Dokumentation unter <a class="reference external" href="https://axqua.eu">axqua.eu</a> beschreibt. Es öffnet die deutsche oder die französische Seite, wenn QGIS auf Deutsch oder Französisch eingestellt ist. Ein Browser, der als Snap- oder Flatpak-Paket installiert ist (z. B. Firefox auf Ubuntu), kann Dateien außerhalb des Home-Ordners nicht öffnen; für eine Kopie außerhalb öffnet Help die veröffentlichte Dokumentation. Die Jobliste unter den Tabs ist von jedem Tab aus sichtbar.</p>
 <figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="../_images/gui-qgis-window.png"><img alt="Das aXqua Panel im QGIS Fenster" src="../_images/gui-qgis-window.png" style="width: 100%;" />
 </a>

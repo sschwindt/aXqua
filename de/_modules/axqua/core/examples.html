@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/core/examples.html" />
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -626,21 +640,42 @@
 <span class="sd">    ``{"name", "title", "folder", "case", "guide", "files", "megabytes", "source"}``.</span>
 <span class="sd">    A folder that is there already is not touched: results of the user may be in it.</span>
 <span class="sd">    """</span>
-    <span class="n">tried</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tried</span><span class="p">,</span> <span class="n">unknown</span><span class="p">,</span> <span class="n">listed_here</span> <span class="o">=</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span>
     <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">example</span> <span class="o">=</span> <span class="n">_pick</span><span class="p">(</span><span class="n">read_index</span><span class="p">(</span><span class="n">candidate</span><span class="p">),</span> <span class="n">name</span><span class="p">,</span> <span class="n">candidate</span><span class="p">)</span>
+            <span class="n">listed</span> <span class="o">=</span> <span class="n">read_index</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">Missing</span><span class="p">:</span>
             <span class="n">tried</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2"> (no </span><span class="si">{</span><span class="n">INDEX</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
             <span class="k">continue</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">URLError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="n">tried</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">_reason</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
             <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">example</span> <span class="o">=</span> <span class="n">_pick</span><span class="p">(</span><span class="n">listed</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">candidate</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ConfigError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="c1"># the examples of this version lack the name; a later source is looked at only to say why</span>
+            <span class="n">unknown</span> <span class="o">=</span> <span class="n">unknown</span> <span class="ow">or</span> <span class="n">exc</span>
+            <span class="n">tried</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2"> (no example </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">unknown</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">listed_here</span><span class="p">:</span>
+            <span class="c1"># An example the checkout or the release tag of this aXqua does not have is newer than this aXqua, and its case file may use settings this version cannot read. One that an earlier source lists without its data belongs to this version.</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
+
+            <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"the example case </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is newer than aXqua </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2"> "</span>
+                <span class="s2">"has it, the examples of this version do not"</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="s2">"name"</span><span class="p">,</span>
+                <span class="n">remedy</span><span class="o">=</span><span class="s2">"Update aXqua (pip install --upgrade axqua, and the plugin) and "</span>
+                       <span class="sa">f</span><span class="s2">"download it again, or download it anyway with --source </span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_remote</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_complete</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">example</span><span class="p">):</span>
             <span class="c1"># a checkout carries the case file and the guide, not always the data</span>
             <span class="n">tried</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">candidate</span><span class="si">}</span><span class="s2"> (without the data of </span><span class="si">{</span><span class="n">example</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+            <span class="n">listed_here</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">continue</span>
         <span class="k">return</span> <span class="n">_place</span><span class="p">(</span><span class="n">candidate</span><span class="p">,</span> <span class="n">example</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">folder</span><span class="p">),</span> <span class="n">say</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">unknown</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="s2">"(no example "</span> <span class="ow">in</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tried</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">unknown</span>
     <span class="k">raise</span> <span class="n">_unreachable</span><span class="p">(</span><span class="n">tried</span><span class="p">)</span></div>
 
 

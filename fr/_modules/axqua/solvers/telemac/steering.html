@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/_modules/axqua/solvers/telemac/steering.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=a1a25f23"></script>
+      <script src="../../../../_static/documentation_options.js?v=740f9163"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/translations.js?v=e6b791cb"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calage et validation</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
@@ -345,9 +359,10 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">outlet_level</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.geodata</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataset</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">LiquidBoundary</span>
 
@@ -395,13 +410,54 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_turbulence_length_scale</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Turbulence integral length scale [m] - the flow depth proxy: the explicit</span>
-<span class="sd">    override, else the pre-wet depth, else 1 m."""</span>
+<span class="sd">    override, else the pre-wet depth, else 0.1 m for the overland flow of a hydrology</span>
+<span class="sd">    case, else 1 m."""</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span>
     <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">turbulence_length_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">turbulence_length_scale</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_hydrology</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">0.1</span>
     <span class="k">return</span> <span class="mf">1.0</span>
+
+
+<div class="viewcode-block" id="read_cas_values">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.steering.read_cas_values">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_cas_values</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="n">keywords</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``), ignoring comment lines - one file read/pass for all keywords."""</span>
+    <span class="n">pats</span> <span class="o">=</span> <span class="p">{</span><span class="n">kw</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rf</span><span class="s2">"^\s*</span><span class="si">{</span><span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">kw</span><span class="p">)</span><span class="si">}</span><span class="s2">\s*[:=]\s*(.+?)\s*$"</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">}</span>
+    <span class="n">found</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">keywords</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"*"</span><span class="p">)):</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">kw</span><span class="p">,</span> <span class="n">pat</span> <span class="ow">in</span> <span class="n">pats</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">found</span><span class="p">[</span><span class="n">kw</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="n">found</span><span class="p">[</span><span class="n">kw</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">found</span></div>
+
+
+
+<div class="viewcode-block" id="cas_duration">
+<a class="viewcode-back" href="../../../../code/telemac.html#axqua.solvers.telemac.steering.cas_duration">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cas_duration</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The ``DURATION`` of a steering file [s]; ``None`` without one."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">read_cas_values</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s2">"DURATION"</span><span class="p">)[</span><span class="s2">"DURATION"</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"D"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"d"</span><span class="p">,</span> <span class="s2">"e"</span><span class="p">))</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hydrology</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"hydrology_mode"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="eddy_viscosity_estimate">
@@ -472,6 +528,11 @@
     <span class="n">explicit</span> <span class="o">=</span> <span class="n">_coerce_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">turbulence_model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">explicit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">explicit</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"configured explicitly: </span><span class="si">{</span><span class="n">TURB_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">explicit</span><span class="p">,</span><span class="w"> </span><span class="n">explicit</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="n">_hydrology</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+        <span class="c1"># overland flow a few centimeters deep on cells of meters resolves no</span>
+        <span class="c1"># turbulence length scale; a transport model would only add a stiff solve</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="s2">"hydrology mode: constant eddy viscosity for overland flow, whose "</span>
+                   <span class="s2">"depth is far below the cell size"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">turbulence_pick_for_dx</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">_channel_cell_size</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">))</span></div>
 
 
@@ -681,7 +742,7 @@
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.rating</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolve_n</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.rating</span><span class="w"> </span><span class="kn">import</span> <span class="n">ks_from_friction</span>
 
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s2">"roughness"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">roughness</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
@@ -689,8 +750,11 @@
         <span class="k">if</span> <span class="n">usable</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>   <span class="c1"># fill any gap with the median of the usable values</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">usable</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="n">usable</span><span class="p">])))</span>
     <span class="n">law</span><span class="p">,</span> <span class="n">coef</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">boundary_law</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">boundary_coefficient</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="n">_resolve_n</span><span class="p">(</span><span class="n">coef</span> <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">coef</span> <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mf">0.0474</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">ks</span> <span class="o">=</span> <span class="n">ks_from_friction</span><span class="p">(</span><span class="n">law</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"friction.boundary_law </span><span class="si">{</span><span class="n">law</span><span class="si">}</span><span class="s2"> has no Nikuradse ks; give "</span>
+                         <span class="s2">"roughness zones or a Strickler/Manning/Nikuradse law"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ks</span><span class="p">)</span>
 
 
 <span class="c1">#: bounds on the per-transect bed slope used for the normal-depth seed [-]</span>
@@ -1156,7 +1220,7 @@
 <span class="sd">    inflow stays *inflow_q* - prescribing the full Q on each would multiply the</span>
 <span class="sd">    supplied discharge and flood the domain.</span>
 <span class="sd">    """</span>
-    <span class="n">free_outflow</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span>
+    <span class="n">free_outflow</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
     <span class="n">inflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">]</span>
     <span class="n">per_line</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">inflows</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">discharge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">)</span>
     <span class="n">inflow_nodes</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">n_nodes</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">1</span>
@@ -1189,7 +1253,10 @@
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-    <span class="n">free_outflow</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span>
+    <span class="c1"># a level comes from the file only where the outflow prescribes one that the file</span>
+    <span class="c1"># can give: not for a free outflow, and not for a hydrology outlet on TELEMAC's</span>
+    <span class="c1"># stage-discharge curve, whose level TELEMAC takes from the curve itself</span>
+    <span class="n">free_outflow</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">"curve"</span><span class="p">)</span>
     <span class="n">ordered</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">liquids</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">b</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
     <span class="n">inflows</span> <span class="o">=</span> <span class="p">[</span><span class="n">b</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">ordered</span> <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span><span class="p">]</span>
     <span class="n">per_line</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">inflows</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">discharge</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">inflows</span><span class="p">)</span>
@@ -1279,7 +1346,12 @@
               <span class="n">n_distributive_corrections</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
               <span class="n">sections_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">sections_output</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
               <span class="n">hotstart_note</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-              <span class="n">source_regions</span><span class="p">:</span> <span class="s2">"list | None"</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+              <span class="n">source_regions</span><span class="p">:</span> <span class="s2">"list | None"</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+              <span class="n">extra_block</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+              <span class="n">printouts</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+              <span class="n">printout_periods</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+              <span class="n">regime_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+              <span class="n">finite_volumes</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write a TELEMAC-2D steering (.cas) file.</span>
 
 <span class="sd">    The default (``unsteady=False``, ``out_name=None``) writes the **steady** initial</span>
@@ -1310,17 +1382,24 @@
 <span class="sd">    the file written by :func:`write_source_regions`, or, in ``percolation.mode:</span>
 <span class="sd">    fortran``, as the FORTRAN FILE + RAIN keywords for the generated USER_RAIN</span>
 <span class="sd">    routine (see :mod:`axqua.solvers.telemac.fortran`).</span>
+
+<span class="sd">    *extra_block* lines are added before the user overrides (the keywords of a</span>
+<span class="sd">    hydrology run, :mod:`axqua.solvers.telemac.hydrology`); *printouts* replaces the</span>
+<span class="sd">    graphic printout variables, *printout_periods* the graphic and listing periods in</span>
+<span class="sd">    steps, and *regime_label* the regime named in the title. *finite_volumes*</span>
+<span class="sd">    overrides ``hydrodynamics.finite_volumes`` (a hydrology run chooses its kernel).</span>
 <span class="sd">    """</span>
     <span class="n">h</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span>
+    <span class="n">fv</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">finite_volumes</span> <span class="k">if</span> <span class="n">finite_volumes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">bool</span><span class="p">(</span><span class="n">finite_volumes</span><span class="p">)</span>
     <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">prof</span> <span class="o">=</span> <span class="n">_prescribed_arrays</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">)</span>
     <span class="n">n_liquid</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">liquids</span><span class="p">)</span>
-    <span class="n">regime</span> <span class="o">=</span> <span class="s2">"unsteady"</span> <span class="k">if</span> <span class="n">unsteady</span> <span class="k">else</span> <span class="s2">"steady"</span>
+    <span class="n">regime</span> <span class="o">=</span> <span class="n">regime_label</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"unsteady"</span> <span class="k">if</span> <span class="n">unsteady</span> <span class="k">else</span> <span class="s2">"steady"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">turbulence_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">turbulence_model</span> <span class="o">=</span> <span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="kc">None</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="c1"># finalize the turbulence model up front (finite volumes accept only model 1) so</span>
     <span class="c1"># the graphic-printout list and every block below agree on the same model.</span>
     <span class="n">turb_model</span> <span class="o">=</span> <span class="n">turbulence_model</span>
-    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">finite_volumes</span> <span class="ow">and</span> <span class="n">turb_model</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">fv</span> <span class="ow">and</span> <span class="n">turb_model</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># FV's init_fv.f rejects ITURB&gt;=2 ('TURBULENCE MODEL NOT TAKEN INTO ACCOUNT');</span>
         <span class="c1"># k-epsilon (3) / Smagorinski (4) / Spalart-Allmaras (6) need finite elements.</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"finite volumes accept only TURBULENCE MODEL 1 (constant "</span>
@@ -1329,7 +1408,9 @@
         <span class="n">turb_model</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="c1"># K (TKE) and E (its dissipation) only exist for the k-epsilon model (3); request</span>
     <span class="c1"># them as graphic outputs there so the results carry the turbulence fields too.</span>
-    <span class="n">printvars</span> <span class="o">=</span> <span class="s2">"U,V,S,B,H,M,Q,F"</span> <span class="o">+</span> <span class="p">(</span><span class="s2">",K,E"</span> <span class="k">if</span> <span class="n">turb_model</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">printvars</span> <span class="o">=</span> <span class="p">(</span><span class="n">printouts</span> <span class="ow">or</span> <span class="s2">"U,V,S,B,H,M,Q,F"</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="s2">",K,E"</span> <span class="k">if</span> <span class="n">turb_model</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">graphic_period</span><span class="p">,</span> <span class="n">listing_period</span> <span class="o">=</span> <span class="n">printout_periods</span> <span class="ow">or</span> <span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">graphic_printout_period</span><span class="p">,</span>
+                                                          <span class="n">h</span><span class="o">.</span><span class="n">listing_printout_period</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">previous_computation</span><span class="p">:</span>
         <span class="c1"># since TELEMAC release 9.0 the boolean COMPUTATION CONTINUED keyword is</span>
@@ -1380,7 +1461,10 @@
         <span class="c1"># M = scalar velocity (sqrt(u^2+v^2)); written so the results carry</span>
         <span class="c1"># SCALAR VELOCITY directly, which HydroBayesCal reads as a calibration QoI.</span>
         <span class="c1"># K,E (TKE + dissipation) are appended for the k-epsilon model (see above).</span>
-        <span class="sa">f</span><span class="s2">"VARIABLES FOR GRAPHIC PRINTOUTS : '</span><span class="si">{</span><span class="n">printvars</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+        <span class="c1"># A list too long for DAMOCLES' 72 columns goes on a line of its own.</span>
+        <span class="o">*</span><span class="p">([</span><span class="sa">f</span><span class="s2">"VARIABLES FOR GRAPHIC PRINTOUTS : '</span><span class="si">{</span><span class="n">printvars</span><span class="si">}</span><span class="s2">'"</span><span class="p">]</span>
+          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">printvars</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">34</span> <span class="k">else</span>
+          <span class="p">[</span><span class="s2">"VARIABLES FOR GRAPHIC PRINTOUTS :"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">printvars</span><span class="si">}</span><span class="s2">'"</span><span class="p">]),</span>
         <span class="s2">"PRINTING CUMULATED FLOWRATES : YES"</span><span class="p">,</span>
         <span class="s2">"/"</span><span class="p">,</span>
         <span class="s2">"/ TIME"</span><span class="p">,</span>
@@ -1392,8 +1476,8 @@
            <span class="sa">f</span><span class="s2">"DESIRED COURANT NUMBER : </span><span class="si">{</span><span class="n">h</span><span class="o">.</span><span class="n">desired_courant</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
           <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">variable_timestep</span> <span class="k">else</span> <span class="p">[]),</span>
         <span class="n">duration_line</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">"GRAPHIC PRINTOUT PERIOD : </span><span class="si">{</span><span class="n">h</span><span class="o">.</span><span class="n">graphic_printout_period</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">"LISTING PRINTOUT PERIOD : </span><span class="si">{</span><span class="n">h</span><span class="o">.</span><span class="n">listing_printout_period</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"GRAPHIC PRINTOUT PERIOD : </span><span class="si">{</span><span class="n">graphic_period</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"LISTING PRINTOUT PERIOD : </span><span class="si">{</span><span class="n">listing_period</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="c1"># OPT-IN steady-state auto-stop (off by default, steady run only). TELEMAC's</span>
         <span class="c1"># steady.f stops when |X - X_prev| over two CONSECUTIVE TIME STEPS falls below</span>
         <span class="c1"># STOP CRITERIA - an ABSOLUTE per-step change. With VARIABLE TIME-STEP the dt is</span>
@@ -1407,7 +1491,7 @@
     <span class="p">]</span>
 
     <span class="c1"># numerics: finite elements (default) vs finite volumes ------------------</span>
-    <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">finite_volumes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">fv</span><span class="p">:</span>
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
             <span class="s2">"/ NUMERICS (finite volumes: robust for transcritical wetting/drying;"</span><span class="p">,</span>
             <span class="s2">"/ explicit scheme -&gt; time step is CFL-bound via VARIABLE TIME-STEP above)"</span><span class="p">,</span>
@@ -1465,7 +1549,7 @@
     <span class="p">]</span>
     <span class="c1"># tidal flats: FE needs the explicit wetting/drying treatment; FV handles dry</span>
     <span class="c1"># fronts intrinsically (the HLLC Riemann solver), so this block is FE-only.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">h</span><span class="o">.</span><span class="n">finite_volumes</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fv</span><span class="p">:</span>
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
             <span class="s2">"/"</span><span class="p">,</span>
             <span class="s2">"/ TIDAL FLATS"</span><span class="p">,</span>
@@ -1478,14 +1562,17 @@
             <span class="sa">f</span><span class="s2">"H CLIPPING : </span><span class="si">{</span><span class="s1">'YES'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">h</span><span class="o">.</span><span class="n">h_clipping</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'NO'</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
         <span class="p">]</span>
 
-    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
-        <span class="s2">"/"</span><span class="p">,</span>
-        <span class="s2">"/ BOUNDARY CONDITIONS"</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">"PRESCRIBED FLOWRATES : </span><span class="si">{</span><span class="n">flow</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">"PRESCRIBED ELEVATIONS : </span><span class="si">{</span><span class="n">elev</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">"VELOCITY PROFILES : </span><span class="si">{</span><span class="n">prof</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">"OPTION FOR LIQUID BOUNDARIES : </span><span class="si">{</span><span class="s1">';'</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'1'</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n_liquid</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">n_liquid</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
+            <span class="s2">"/"</span><span class="p">,</span>
+            <span class="s2">"/ BOUNDARY CONDITIONS"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"PRESCRIBED FLOWRATES : </span><span class="si">{</span><span class="n">flow</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"PRESCRIBED ELEVATIONS : </span><span class="si">{</span><span class="n">elev</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"VELOCITY PROFILES : </span><span class="si">{</span><span class="n">prof</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"OPTION FOR LIQUID BOUNDARIES : </span><span class="si">{</span><span class="s1">';'</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">'1'</span><span class="p">]</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">n_liquid</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"/ BOUNDARY CONDITIONS: none, a closed domain"</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span>
             <span class="ow">and</span> <span class="n">source_regions</span><span class="p">):</span>
@@ -1549,7 +1636,7 @@
         <span class="p">]</span>
         <span class="c1"># finite_volumes lives on cfg.hydrodynamics, not on cfg - reading it off cfg</span>
         <span class="c1"># made this guard dead code (getattr always fell back to False).</span>
-        <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">finite_volumes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fv</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">"internal source REGIONS need TYPE OF SOURCES 1, which the "</span>
                 <span class="s2">"finite-volume kernel rejects (prosou: 'ONLY SOURCES WITH DIRAC "</span>
@@ -1568,7 +1655,7 @@
         <span class="c1"># emit it only for finite elements.</span>
         <span class="o">*</span><span class="p">([</span><span class="sa">f</span><span class="s2">"LAW OF FRICTION ON LATERAL BOUNDARIES : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">boundary_law</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
            <span class="sa">f</span><span class="s2">"ROUGHNESS COEFFICIENT OF BOUNDARIES : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">boundary_coefficient</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="n">h</span><span class="o">.</span><span class="n">finite_volumes</span> <span class="k">else</span> <span class="p">[]),</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">fv</span> <span class="k">else</span> <span class="p">[]),</span>
         <span class="s2">"/"</span><span class="p">,</span>
         <span class="s2">"/ INITIAL CONDITIONS"</span><span class="p">,</span>
         <span class="o">*</span><span class="n">initial_conditions</span><span class="p">,</span>
@@ -1607,6 +1694,9 @@
                   <span class="s2">"COUPLING WITH : 'GAIA'"</span><span class="p">,</span>
                   <span class="sa">f</span><span class="s2">"GAIA STEERING FILE : </span><span class="si">{</span><span class="n">gaia_cas</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                   <span class="sa">f</span><span class="s2">"COUPLING PERIOD FOR GAIA : </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">morphodynamics</span><span class="o">.</span><span class="n">coupling_period</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">extra_block</span><span class="p">:</span>
+        <span class="n">lines</span> <span class="o">+=</span> <span class="n">extra_block</span>
 
     <span class="k">if</span> <span class="n">h</span><span class="o">.</span><span class="n">extra_keywords</span><span class="p">:</span>
         <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"/"</span><span class="p">,</span> <span class="s2">"/ USER OVERRIDES"</span><span class="p">]</span>

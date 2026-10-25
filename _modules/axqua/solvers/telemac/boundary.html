@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/solvers/telemac/boundary.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -116,6 +117,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -277,6 +289,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -286,6 +299,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -357,10 +371,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span><span class="p">,</span> <span class="n">outlet_level</span>
 <span class="c1"># The liquid-boundary readers are shared with the OpenFOAM backend, so they</span>
 <span class="c1"># live in the core; re-exported here because this module published them.</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>  <span class="c1"># noqa: F401</span>
@@ -400,9 +414,12 @@
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>        <span class="c1"># 1-based, in contour-appearance order</span>
     <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span>         <span class="c1"># "inflow" | "outflow"</span>
     <span class="n">n_nodes</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># per-line prescribed Q [m3/s]; None -&gt; split the</span></div>
-
+    <span class="n">discharge</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># per-line prescribed Q [m3/s]; None -&gt; split the</span>
                                      <span class="c1"># total reach discharge across inflows by node share</span>
+    <span class="c1"># the contour nodes of the boundary (0-based), known right after a build; not</span>
+    <span class="c1"># serialized (a hydrology outlet reads its own section through them)</span>
+    <span class="n">nodes</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="p">(),</span> <span class="n">compare</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="InternalSourceRegion">
@@ -471,8 +488,8 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_outflow_code</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">"""Free/Neumann outflow -&gt; 4 4 4; stage_discharge / elevation -&gt; 5 4 4."""</span>
-    <span class="k">return</span> <span class="n">OUTFLOW_FREE</span> <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span> <span class="k">else</span> <span class="n">OUTFLOW_ELEV</span>
+<span class="w">    </span><span class="sd">"""An outflow without a level (free, Neumann) -&gt; 4 4 4; every outflow with one -&gt; 5 4 4."""</span>
+    <span class="k">return</span> <span class="n">OUTFLOW_FREE</span> <span class="k">if</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">OUTFLOW_ELEV</span>
 
 
 
@@ -774,7 +791,8 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_warn_node_balance</span><span class="p">(</span><span class="n">liquids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LiquidBoundary</span><span class="p">],</span> <span class="n">mesh</span><span class="p">:</span> <span class="n">Mesh</span><span class="p">,</span>
-                       <span class="n">node_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                       <span class="n">node_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">hydrology</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Stability check on liquid-boundary *resolution* (node spacing), not raw counts.</span>
 
 <span class="sd">    Comparing total inflow vs total outflow node counts mislabels a legitimately</span>
@@ -787,6 +805,12 @@
     <span class="n">outflow</span> <span class="o">=</span> <span class="p">[</span><span class="n">lb</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span> <span class="k">if</span> <span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"outflow"</span><span class="p">]</span>
     <span class="n">n_in</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">inflow</span><span class="p">)</span>
     <span class="n">n_out</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">n_nodes</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">outflow</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hydrology</span> <span class="ow">and</span> <span class="n">n_in</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># a catchment is fed by its rain: an outlet alone is the normal case</span>
+        <span class="k">if</span> <span class="n">n_out</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"a hydrology case needs at least one outflow line: without "</span>
+                        <span class="s2">"one, the rain has nowhere to go"</span><span class="p">)</span>
+        <span class="k">return</span>
     <span class="k">if</span> <span class="n">n_in</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_out</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
             <span class="s2">"STABILITY RISK: liquid boundaries have </span><span class="si">%d</span><span class="s2"> inflow and </span><span class="si">%d</span><span class="s2"> outflow "</span>
@@ -844,6 +868,13 @@
 <span class="sd">    PRESCRIBED FLOWRATES / ELEVATIONS land on the wrong boundary (inflow Q and</span>
 <span class="sd">    outflow H swapped) or a single boundary that straddles the loop start is split</span>
 <span class="sd">    into two.</span>
+
+<span class="sd">    FRONT2 types the *segment* that leaves the start node, not the node, and a</span>
+<span class="sd">    segment with one wall node is a wall ("solid over liquid"). So when the start</span>
+<span class="sd">    node is the **last** node of a liquid run, TELEMAC begins on a wall and meets</span>
+<span class="sd">    that run last, not first. Found on the Inn KB15 reach (2026-10-20): the south-</span>
+<span class="sd">    westernmost node closed the inflow line, TELEMAC made the outflow boundary 1,</span>
+<span class="sd">    and the discharge went to the outflow while the inflow received none.</span>
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -867,6 +898,11 @@
     <span class="n">eps</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">key</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">*</span> <span class="mf">1e-4</span>
     <span class="n">cand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flatnonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">key</span> <span class="o">-</span> <span class="n">key</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="n">eps</span><span class="p">)</span>
     <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cand</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">oys</span><span class="p">[</span><span class="n">cand</span><span class="p">])])</span>
+    <span class="n">liquid</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"inflow"</span><span class="p">,</span> <span class="s2">"outflow"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">okinds</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="ow">in</span> <span class="n">liquid</span> <span class="ow">and</span> <span class="n">okinds</span><span class="p">[(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">liquid</span><span class="p">:</span>
+        <span class="c1"># the first segment is a wall: the start node closes the liquid run that</span>
+        <span class="c1"># FRONT2 meets last, so the walk effectively begins one node further on</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span>
     <span class="n">rkinds</span> <span class="o">=</span> <span class="p">[</span><span class="n">okinds</span><span class="p">[(</span><span class="n">start</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
     <span class="n">rnodes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">onodes</span><span class="p">[(</span><span class="n">start</span> <span class="o">+</span> <span class="n">j</span><span class="p">)</span> <span class="o">%</span> <span class="n">n</span><span class="p">])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
 
@@ -908,7 +944,8 @@
         <span class="k">for</span> <span class="n">kind</span><span class="p">,</span> <span class="n">node_ids</span> <span class="ow">in</span> <span class="n">_front2_runs</span><span class="p">(</span><span class="n">loop_nodes</span><span class="p">,</span> <span class="n">loop_kinds</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"inflow"</span><span class="p">,</span> <span class="s2">"outflow"</span><span class="p">):</span>
                 <span class="n">idx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">liquids</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="n">liquids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LiquidBoundary</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">)))</span>
+                <span class="n">liquids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LiquidBoundary</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">node_ids</span><span class="p">),</span>
+                                              <span class="n">nodes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">node_ids</span><span class="p">)))</span>
                 <span class="n">node_map</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_ids</span>
     <span class="k">return</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">node_map</span>
 
@@ -966,6 +1003,11 @@
 <span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.geometry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span>
 
+    <span class="n">hydrology</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="s2">"hydrology_mode"</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hydrology</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"  no liquid boundaries: a closed catchment, all its rain stays in "</span>
+                    <span class="s2">"it (set boundaries.liquid_boundaries for an outlet)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">"wall"</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="p">),</span> <span class="p">[]</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">liquid_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">tol</span> <span class="o">=</span> <span class="n">_match_tolerance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  liquid-boundary matching tolerance </span><span class="si">%.3f</span><span class="s2"> m (two median contour edges)"</span><span class="p">,</span>
@@ -995,6 +1037,10 @@
                  <span class="s2">"on a solid structure"</span><span class="p">,</span> <span class="n">on_solid</span><span class="p">)</span>
 
     <span class="n">liquids</span><span class="p">,</span> <span class="n">node_map</span> <span class="o">=</span> <span class="n">_number_liquid_boundaries</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">kinds</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">liquids</span> <span class="ow">and</span> <span class="n">hydrology</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">"  no contour node lies on a liquid-boundary line: the catchment "</span>
+                    <span class="s2">"is closed and all its rain stays in it"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kinds</span><span class="p">,</span> <span class="n">liquids</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">liquids</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">"No contour nodes matched the liquid-boundary lines. Check that the "</span>
@@ -1002,7 +1048,7 @@
             <span class="sa">f</span><span class="s2">"the matching tolerance (~</span><span class="si">{</span><span class="n">tol</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> m) suits the mesh resolution."</span>
         <span class="p">)</span>
     <span class="n">_assign_line_discharges</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">node_map</span><span class="p">)</span>
-    <span class="n">_warn_node_balance</span><span class="p">(</span><span class="n">liquids</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">node_map</span><span class="p">)</span>
+    <span class="n">_warn_node_balance</span><span class="p">(</span><span class="n">liquids</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">node_map</span><span class="p">,</span> <span class="n">hydrology</span><span class="o">=</span><span class="n">hydrology</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">kinds</span><span class="p">,</span> <span class="n">liquids</span></div>
 
 

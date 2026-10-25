@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/jobcli.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -902,10 +916,12 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">_list_lines</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">rows</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[</span><span class="s2">"no jobs"</span><span class="p">]</span>
-    <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'JOB ID'</span><span class="si">:</span><span class="s2">&lt;40</span><span class="si">}{</span><span class="s1">'SOLVER'</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}{</span><span class="s1">'KIND'</span><span class="si">:</span><span class="s2">&lt;24</span><span class="si">}{</span><span class="s1">'STATE'</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2">CREATED"</span>
+    <span class="c1"># a job id carries the case name, so the column grows with the longest one</span>
+    <span class="n">wide</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mi">40</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">job_id</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">])</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'JOB ID'</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">wide</span><span class="si">}}{</span><span class="s1">'SOLVER'</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}{</span><span class="s1">'KIND'</span><span class="si">:</span><span class="s2">&lt;24</span><span class="si">}{</span><span class="s1">'STATE'</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}</span><span class="s2">CREATED"</span>
     <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="n">header</span><span class="p">,</span> <span class="s2">"-"</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)]</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">job_id</span><span class="si">:</span><span class="s2">&lt;40</span><span class="si">}{</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">solver</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}{</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">kind</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;24</span><span class="si">}</span><span class="s2">"</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">row</span><span class="o">.</span><span class="n">job_id</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">wide</span><span class="si">}}{</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">solver</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;10</span><span class="si">}{</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">kind</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;24</span><span class="si">}</span><span class="s2">"</span>
                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">state</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">:</span><span class="s2">&lt;18</span><span class="si">}{</span><span class="n">row</span><span class="o">.</span><span class="n">created</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span>
 

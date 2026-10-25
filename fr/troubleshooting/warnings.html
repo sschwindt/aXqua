@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/troubleshooting/warnings.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a1a25f23"></script>
+      <script src="../_static/documentation_options.js?v=740f9163"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/translations.js?v=e6b791cb"></script>
@@ -92,6 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
 </ul>
 </li>
@@ -120,6 +121,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calage et validation</a><ul>
@@ -281,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#preprocessing">Prétraitement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simulation-software">Logiciel de simulation</a></li>
@@ -290,6 +303,7 @@
 <li class="toctree-l3"><a class="reference internal" href="errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="errors.html#case-file">Fichier de cas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
@@ -395,6 +409,82 @@
 </dl>
 <dl class="simple" id="axqua-config-discharge-conflict">
 <dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">files</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">validation</span> <span class="pre">situation</span> <span class="pre">'High</span> <span class="pre">flow'</span> <span class="pre">show</span> <span class="pre">different</span> <span class="pre">discharges;</span> <span class="pre">the</span> <span class="pre">last</span> <span class="pre">one</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">table</span> <span class="pre">was</span> <span class="pre">saved.</span></code></dt><dd><p>Une situation de validation a un débit, et le tableau <em>Measurement files</em> des paramètres cas le montre dans chaque ligne de la situation. Lorsque les lignes affichent encore des valeurs différentes, la dernière dans la table a été enregistrée. Entrez le débit de la situation dans une de ses lignes ; les autres lignes suivent (<a class="reference internal" href="../usage/calibration-validation.html#validation-setup"><span class="std std-ref">situation de validation</span></a>).</p>
+</dd>
+</dl>
+</section>
+<section id="hydrology-checkup">
+<h2>Contrôle hydrologique<a class="headerlink" href="#hydrology-checkup" title="Lien vers cette rubrique"></a></h2>
+<p>Le contrôle hydrologique d’un cas en mode hydrologie signale les avertissements suivants (<a class="reference internal" href="../usage/hydrology-simulations.html"><span class="doc">Hydrologie</span></a>). Un avertissement n’arrête pas la construction.</p>
+<dl class="simple" id="axqua-hydrology-rainfall-intense">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">rain</span> <span class="pre">peaks</span> <span class="pre">at</span> <span class="pre">...</span> <span class="pre">mm/h</span></code></dt><dd><p>Plus de 150 mm/h sont maintenus par un nuage pendant quelques minutes seulement. La cause habituelle est une série de profondeurs par intervalle qui est lue comme intensités : set <code class="docutils literal notranslate"><span class="pre">hydrology.rainfall_units</span></code> à <code class="docutils literal notranslate"><span class="pre">mm</span></code>.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-rainfall-gaps">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">rain</span> <span class="pre">record</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">value</span> <span class="pre">for</span> <span class="pre">...</span> <span class="pre">intervals</span></code></dt><dd><p>Les rangées de la série de pluie sont vides, ou tiennent -999, ce qui fait que le DWD marque une mesure manquante. aXqua garde leurs intervalles et les prend comme secs, de sorte qu’aucune pluie n’est inventée, mais la pluie qui est tombée dans un trou est absente de la simulation. Remplir les trous d’un voisin station hydrométrique ou d’un produit radar, ou s’assurer que l’événement se trouve en dehors d’eux.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-reanalysis-rain">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">rain</span> <span class="pre">comes</span> <span class="pre">from</span> <span class="pre">a</span> <span class="pre">reanalysis</span> <span class="pre">(ERA5)</span></code></dt><dd><p>La pluie a été téléchargée depuis Open-Meteo. Une réanalyse répand une tempête sur des cellules de 10 à 30 km et d’une heure et sous-estime de courtes intensités. Utilisez la station hydrométrique ou les données radar de l’agence météorologique nationale où elles existent, ou une tempête de conception.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-weather-alignment">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">rain</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">date,</span> <span class="pre">the</span> <span class="pre">weather</span> <span class="pre">does</span></code></dt><dd><p>Une tempête de conception, ou une table de pluie en quelques secondes, n’a pas d’heure de calendrier, tandis que les séries météorologiques ont des dates, par exemple d’un événement que l’assistant de données a téléchargé avant. Le temps est ensuite appliqué dès le début de la pluie, avec son vent et l’évaporation de ses propres jours. Définissez <code class="docutils literal notranslate"><span class="pre">hydrology.rainfall_start</span></code> à la date et à l’heure où la pluie est censée commencer dans la série météorologique, ou retirez la série météorologique quand elle appartient à un autre événement.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-weather-gaps">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">weather</span> <span class="pre">series</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">value</span> <span class="pre">for</span> <span class="pre">...</span> <span class="pre">readings</span> <span class="pre">of</span> <span class="pre">...</span></code></dt><dd><p>Les cellules de la série météo sont vides, ou tiennent -999, ce qui indique que le DWD marque une mesure manquante. aXqua interpole chacun d’eux dans le temps entre les lectures avant et après, et la direction du vent comme un angle, parce que le vent, le rayonnement, la température et l’humidité changent progressivement, et une valeur de -999 entrerait autrement dans le vent et l’évaporation comme si elle avait été mesurée. Pendant quelques heures, l’interpolation manque le cours de la journée : combler de plus longues lacunes d’une station voisine, ou s’assurer que l’événement se trouve en dehors d’eux.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-weather-short">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">weather</span> <span class="pre">ends</span> <span class="pre">at</span> <span class="pre">...</span> <span class="pre">s,</span> <span class="pre">the</span> <span class="pre">run</span> <span class="pre">at</span> <span class="pre">...</span> <span class="pre">s</span></code></dt><dd><p>Après la fin de la série météo, il n’y a ni vent ni évaporation. Étendre la série jusqu’à la fin de la course.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-wind-strong">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">wind</span> <span class="pre">reaches</span> <span class="pre">...</span> <span class="pre">m/s</span> <span class="pre">at</span> <span class="pre">10</span> <span class="pre">m</span></code></dt><dd><p>Au-dessus de 40 m/s, vérifier l’unité : m/s, pas km/h.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-evaporation-high">
+<dt><code class="docutils literal notranslate"><span class="pre">Evaporation</span> <span class="pre">reaches</span> <span class="pre">...</span> <span class="pre">mm/h</span></code></dt><dd><p>L’eau libre s’évapore rarement plus de 1,5 mm en une heure. Vérifiez l’unité <code class="docutils literal notranslate"><span class="pre">et0</span></code> ou <code class="docutils literal notranslate"><span class="pre">evaporation</span></code>: mm/h, pas mm/jour.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-soil-texture-mismatch">
+<dt><code class="docutils literal notranslate"><span class="pre">Soil</span> <span class="pre">zone</span> <span class="pre">...</span> <span class="pre">is</span> <span class="pre">...</span> <span class="pre">with</span> <span class="pre">Ks</span> <span class="pre">=</span> <span class="pre">...</span> <span class="pre">mm/h;</span> <span class="pre">Rawls</span> <span class="pre">et</span> <span class="pre">al.</span> <span class="pre">(1983)</span> <span class="pre">give</span> <span class="pre">...</span></code></dt><dd><p>La conductivité d’une zone diffère de plus d’un facteur de dix de la moyenne de sa classe de texture. Cela peut être juste pour un sol mesuré ; souvent c’est une unité : Ks est en mm/h, et 1 cm/h est 10 mm/h, 1e-6 m/s est 3,6 mm/h.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-initial-moisture-default">
+<dt><code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">initial</span> <span class="pre">water</span> <span class="pre">content</span> <span class="pre">is</span> <span class="pre">given</span></code></dt><dd><p>Le sol commence par une saturation efficace de <code class="docutils literal notranslate"><span class="pre">initial_saturation</span></code> (0.3). Le ruissellement d’une tempête dépend fortement du contenu en eau au début : donner une valeur mesurée, la valeur ERA5-Land de l’événement (assistant de données), ou <code class="docutils literal notranslate"><span class="pre">theta_i</span></code> par zone.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-closed-catchment">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">case</span> <span class="pre">has</span> <span class="pre">no</span> <span class="pre">outflow</span> <span class="pre">line:</span> <span class="pre">all</span> <span class="pre">rain</span> <span class="pre">stays</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">catchment</span></code></dt><dd><p>Droit pour une dépression fermée ; sinon tracer une ligne de sortie sur le contour à travers la sortie du bassin (page <em>Liquid boundaries</em> des paramètres cas).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-free-outlet">
+<dt><code class="docutils literal notranslate"><span class="pre">A</span> <span class="pre">free</span> <span class="pre">outlet</span> <span class="pre">holds</span> <span class="pre">only</span> <span class="pre">where</span> <span class="pre">the</span> <span class="pre">flow</span> <span class="pre">leaves</span> <span class="pre">supercritical</span></code></dt><dd><p>Une prise libre ne prescrit rien. À une sortie plus lente, l’eau se remplit dans un étang, ou le noyau à éléments finis devient instable, et le noyau à volumes finis laisse l’eau entrer partout où la vitesse à la ligne de sortie pointe dans le domaine. Utilisez <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code> sauf si la sortie est raide et lisse, et <code class="docutils literal notranslate"><span class="pre">overfall</span></code> au bord inférieur d’un champ sur lequel le terrain tombe (<a class="reference internal" href="../usage/hydrology-simulations.html#hydrology-outlet"><span class="std std-ref">Frontières et sortie</span></a>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-finite-elements">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">finite-element</span> <span class="pre">kernel</span> <span class="pre">lets</span> <span class="pre">thin</span> <span class="pre">films</span> <span class="pre">drain</span> <span class="pre">slowly</span></code></dt><dd><p>TELEMAC valide le ruissellement des précipitations avec son noyau à volume fini et la reconstruction hydrostatique de Chen et Noelle (<code class="docutils literal notranslate"><span class="pre">hydrology.kernel:</span> <span class="pre">finite-volumes</span></code>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-drain-short">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">run</span> <span class="pre">ends</span> <span class="pre">...</span> <span class="pre">s</span> <span class="pre">after</span> <span class="pre">the</span> <span class="pre">rain</span></code></dt><dd><p>L’eau de l’extrémité du bassin versant n’est pas tronçon la sortie avant la fin de la course, de sorte que la récession de l’hydrographe est coupée. Élever <code class="docutils literal notranslate"><span class="pre">hydrology.drain_time</span></code>.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-large-mesh">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">mesh</span> <span class="pre">will</span> <span class="pre">have</span> <span class="pre">about</span> <span class="pre">...</span> <span class="pre">elements</span></code></dt><dd><p>Plus de deux millions de triangles prennent du temps à calculer. Élever <code class="docutils literal notranslate"><span class="pre">mesh.default_size</span></code> ou les longueurs de bordure des zones de maillage, et préciser où cela compte.</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-flow-across-wall">
+<dt><code class="docutils literal notranslate"><span class="pre">...</span> <span class="pre">%</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">catchment</span> <span class="pre">drains</span> <span class="pre">across</span> <span class="pre">the</span> <span class="pre">outline</span> <span class="pre">where</span> <span class="pre">it</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">wall</span></code></dt><dd><p>Le contour ne suit pas le fossé de drainage : le terrain descend du domaine sous un mur, et l’eau ramasse les étangs en pente contre lui. Faire ces étirements de lignes de sortie, ou déplacer le contour à la fracture (<a class="reference internal" href="../usage/hydrology-simulations.html#hydrology-outlet"><span class="std std-ref">Frontières et sortie</span></a>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-depressions">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">terrain</span> <span class="pre">holds</span> <span class="pre">...</span> <span class="pre">closed</span> <span class="pre">depressions</span></code></dt><dd><p>Une dépression maintient la pluie jusqu’à ce qu’elle soit pleine. C’est bien pour un étang et un mauvais endroit où le modèle de terrain bloque un ponceau ou l’ouverture d’un pont : couper ces ouvertures dans le modèle de terrain, par exemple en tant que structure (<a class="reference internal" href="../usage/case-setup.html#case-geodata"><span class="std std-ref">Géodonnées</span></a>).</p>
+</dd>
+</dl>
+<dl class="simple" id="axqua-hydrology-terrain-unreadable">
+<dt><code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">terrain</span> <span class="pre">model</span> <span class="pre">could</span> <span class="pre">not</span> <span class="pre">be</span> <span class="pre">analyzed</span></code></dt><dd><p>L’analyse du terrain a échoué, généralement parce que le modèle de terrain ne couvre pas le contour. La construction elle-même nomme le problème plus en détail.</p>
 </dd>
 </dl>
 </section>

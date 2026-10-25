@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/cli.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -791,13 +805,16 @@
 
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"done. Produced case in </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"geometry_slf"</span><span class="p">,</span> <span class="s2">"boundary_cli"</span><span class="p">,</span> <span class="s2">"friction_tbl"</span><span class="p">,</span> <span class="s2">"initial_conditions"</span><span class="p">,</span>
-                 <span class="s2">"cas_file"</span><span class="p">,</span> <span class="s2">"unsteady_cas"</span><span class="p">,</span> <span class="s2">"liquid_boundaries"</span><span class="p">,</span> <span class="s2">"gaia_cas"</span><span class="p">,</span>
-                 <span class="s2">"ground_truth"</span><span class="p">,</span> <span class="s2">"calibration_csv"</span><span class="p">,</span> <span class="s2">"hbc_config"</span><span class="p">):</span>
+                 <span class="s2">"cas_file"</span><span class="p">,</span> <span class="s2">"hydrology_cas"</span><span class="p">,</span> <span class="s2">"unsteady_cas"</span><span class="p">,</span> <span class="s2">"liquid_boundaries"</span><span class="p">,</span>
+                 <span class="s2">"gaia_cas"</span><span class="p">,</span> <span class="s2">"ground_truth"</span><span class="p">,</span> <span class="s2">"calibration_csv"</span><span class="p">,</span> <span class="s2">"hbc_config"</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">art</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  </span><span class="si">%-16s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"next: cd </span><span class="si">%s</span><span class="s2"> &amp;&amp; python bal_telemac.py --config </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
-             <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hbc_config</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"next: axqua submit </span><span class="si">%s</span><span class="s2"> --kind hydrology"</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"next: cd </span><span class="si">%s</span><span class="s2"> &amp;&amp; python bal_telemac.py --config </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span>
+                 <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hbc_config</span><span class="p">)</span>
     <span class="k">return</span> <span class="mi">0</span>
 
 
@@ -952,6 +969,13 @@
     <span class="k">return</span> <span class="n">examplecli</span><span class="o">.</span><span class="n">run_example</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_run_hydrology</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""``axqua hydrology`` - data and checkup of a hydrology case</span>
+<span class="sd">    (:mod:`axqua.hydrologycli`)."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydrologycli</span>
+    <span class="k">return</span> <span class="n">hydrologycli</span><span class="o">.</span><span class="n">run_hydrology</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_run_export</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""``axqua export`` - results for ParaView and VisIt (:mod:`axqua.exportcli`)."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">exportcli</span>
@@ -1084,6 +1108,7 @@
     <span class="s2">"export"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_export</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"validation"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_validation</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"example"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_example</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
+    <span class="s2">"hydrology"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_run_hydrology</span><span class="p">(</span><span class="n">argv</span><span class="p">),</span>
     <span class="s2">"schema"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_case_cli</span><span class="p">(</span><span class="s2">"run_schema"</span><span class="p">,</span> <span class="n">argv</span><span class="p">),</span>
     <span class="s2">"case"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_case_cli</span><span class="p">(</span><span class="s2">"run_case"</span><span class="p">,</span> <span class="n">argv</span><span class="p">),</span>
     <span class="s2">"check"</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">argv</span><span class="p">:</span> <span class="n">_case_cli</span><span class="p">(</span><span class="s2">"run_check"</span><span class="p">,</span> <span class="n">argv</span><span class="p">),</span>

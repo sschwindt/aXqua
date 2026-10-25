@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/code/workflow.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=a1a25f23"></script>
+      <script src="../_static/documentation_options.js?v=740f9163"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/translations.js?v=e6b791cb"></script>
@@ -92,6 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
 </ul>
 </li>
@@ -120,6 +121,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../usage/calibration-validation.html">Calage et validation</a><ul>
@@ -281,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
@@ -290,6 +303,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fichier de cas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
@@ -613,14 +627,24 @@ shapefile/gpkg or a CSV with x/y columns.</p>
 <p>Shared by both backends: TELEMAC writes it as <code class="docutils literal notranslate"><span class="pre">PRESCRIBED</span> <span class="pre">ELEVATIONS</span></code> and
 OpenFOAM as a <code class="docutils literal notranslate"><span class="pre">prghPressure</span></code> profile on the outlet patch, and they must agree
 or the two models are not driven the same way.</p>
-<p><code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code> (default) reads the rating curve and interpolates the WSE
-at the simulated discharge; <code class="docutils literal notranslate"><span class="pre">elevation</span></code> uses the fixed prescribed value.</p>
+<p>Where the level comes from is <a class="reference internal" href="core.html#axqua.core.boundaries.OUTLET_LEVELS" title="axqua.core.boundaries.OUTLET_LEVELS"><code class="xref py py-data docutils literal notranslate"><span class="pre">axqua.core.boundaries.OUTLET_LEVELS</span></code></a>: <code class="docutils literal notranslate"><span class="pre">stage_discharge</span></code> reads the rating curve and interpolates the WSE at the simulated discharge, <code class="docutils literal notranslate"><span class="pre">elevation</span></code> uses the fixed prescribed value, <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code> the level of TELEMAC’s Z(Q) curve at the discharge (the starting value TELEMAC then updates), and <code class="docutils literal notranslate"><span class="pre">overfall</span></code> the level below the lowest node of the built mesh. A free outflow has no level and raises.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>inflow_q</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p>
 </dd>
 <dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.hydraulics.outflow_wse_fn">
+<span class="sig-prename descclassname"><span class="pre">axqua.hydraulics.</span></span><span class="sig-name descname"><span class="pre">outflow_wse_fn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/hydraulics.html#outflow_wse_fn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.hydraulics.outflow_wse_fn" title="Lien vers cette définition"></a></dt>
+<dd><p>Callable Q -&gt; level of the outflow lines for a liquid-boundaries file, or None where the file gives no level: a free outflow prescribes none, and a <code class="docutils literal notranslate"><span class="pre">normal_depth</span></code> outlet takes its level from TELEMAC’s own Z(Q) curve as the discharge changes. A rating curve gives the level of each discharge, every other outlet one level: <em>level</em> where the caller has it already (the hydrology build, from its mesh), else <a class="reference internal" href="#axqua.hydraulics.resolve_outflow_wse" title="axqua.hydraulics.resolve_outflow_wse"><code class="xref py py-func docutils literal notranslate"><span class="pre">resolve_outflow_wse()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>level</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -646,6 +670,24 @@ given <code class="docutils literal notranslate"><span class="pre">Q</span></cod
 <p>Roughness is given either as a Manning <code class="docutils literal notranslate"><span class="pre">n</span></code> or a Strickler <code class="docutils literal notranslate"><span class="pre">Kst</span></code> (<code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">1/Kst</span></code>).
 The result is written as a <code class="docutils literal notranslate"><span class="pre">Q,WSE,depth</span></code> CSV that <code class="xref py py-func docutils literal notranslate"><span class="pre">axqua.hydraulics.</span>
 <span class="pre">read_stage_discharge()</span></code> consumes as <code class="docutils literal notranslate"><span class="pre">boundaries.stage_discharge</span></code>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.rating.ks_from_friction">
+<span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">ks_from_friction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">law</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coefficient</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#ks_from_friction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.rating.ks_from_friction" title="Lien vers cette définition"></a></dt>
+<dd><p>Nikuradse ks [m] equivalent to a TELEMAC friction law and its coefficient.</p>
+<p>Strickler (law 3, K = 1/n) and Manning (law 4, n) through the Strickler relation n = ks^(1/6) / 21.1, i.e. ks = (n / 0.0474)^6; Nikuradse (law 5) is ks itself. <code class="docutils literal notranslate"><span class="pre">None</span></code> for a law without such an equivalent (Chezy, Haaland, …).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>law</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>coefficient</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)">float</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="axqua.rating.normal_depth">
 <span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">normal_depth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">discharge</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">manning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strickler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bottom_width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">side_slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#normal_depth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.rating.normal_depth" title="Lien vers cette définition"></a></dt>
@@ -757,15 +799,31 @@ continuity. Integrating the real section removes that artifact.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="axqua.rating.outflow_lines">
+<span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">outflow_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#outflow_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.rating.outflow_lines" title="Lien vers cette définition"></a></dt>
+<dd><p>The outflow lines of <code class="docutils literal notranslate"><span class="pre">boundaries.liquid_boundaries</span></code>, as a GeoDataFrame.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="axqua.rating.line_section">
+<span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">line_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ks_fallback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#line_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.rating.line_section" title="Lien vers cette définition"></a></dt>
+<dd><p>The cross-section along <em>line</em>: <code class="docutils literal notranslate"><span class="pre">(station,</span> <span class="pre">bed,</span> <span class="pre">ks,</span> <span class="pre">points)</span></code>.</p>
+<p>Samples the bed straight out of <code class="docutils literal notranslate"><span class="pre">geodata.dem_initial</span></code> and picks up the Nikuradse <code class="docutils literal notranslate"><span class="pre">ks</span></code> of the roughness zone each sample falls in (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_zones</span></code> + <code class="docutils literal notranslate"><span class="pre">roughness_table</span></code>); without roughness zones every sample gets <em>ks_fallback</em>, or the ks of the lateral <code class="docutils literal notranslate"><span class="pre">friction.boundary_*</span></code> roughness when that is None too. Samples the DEM has no value for are left out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_samples</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p></li>
+<li><p><strong>ks_fallback</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(dans Python v3.15)"><em>float</em></a><em> | </em><em>None</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="axqua.rating.synthesize_outflow_rating_from_section">
 <span class="sig-prename descclassname"><span class="pre">axqua.rating.</span></span><span class="sig-name descname"><span class="pre">synthesize_outflow_rating_from_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">discharge</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Séparateur de paramètres par mot-clé uniquement (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">slope</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/axqua/rating.html#synthesize_outflow_rating_from_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#axqua.rating.synthesize_outflow_rating_from_section" title="Lien vers cette définition"></a></dt>
 <dd><p>Outflow rating from the DEM cross-section along the outflow boundary line.</p>
-<p>Samples the bed along the <code class="docutils literal notranslate"><span class="pre">outflow</span></code> liquid-boundary line straight out of
-<code class="docutils literal notranslate"><span class="pre">geodata.dem_initial</span></code>, picks up the Nikuradse <code class="docutils literal notranslate"><span class="pre">ks</span></code> of the roughness zone each
-sample falls in (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_zones</span></code> + <code class="docutils literal notranslate"><span class="pre">roughness_table</span></code>; the lateral
-<code class="docutils literal notranslate"><span class="pre">friction.boundary_*</span></code> roughness otherwise), takes the reach slope from a linear
-fit of the DEM along <code class="docutils literal notranslate"><span class="pre">geodata.channel_centerline</span></code>, and inverts the section
-conveyance with <a class="reference internal" href="#axqua.rating.section_rating" title="axqua.rating.section_rating"><code class="xref py py-func docutils literal notranslate"><span class="pre">section_rating()</span></code></a>.</p>
+<p>Samples the bed along the <code class="docutils literal notranslate"><span class="pre">outflow</span></code> liquid-boundary line straight out of <code class="docutils literal notranslate"><span class="pre">geodata.dem_initial</span></code>, picks up the Nikuradse <code class="docutils literal notranslate"><span class="pre">ks</span></code> of the roughness zone each sample falls in (<code class="docutils literal notranslate"><span class="pre">geodata.roughness_zones</span></code> + <code class="docutils literal notranslate"><span class="pre">roughness_table</span></code>; the lateral <code class="docutils literal notranslate"><span class="pre">friction.boundary_*</span></code> roughness otherwise), takes the reach slope from a linear fit of the DEM along <code class="docutils literal notranslate"><span class="pre">geodata.channel_centerline</span></code>, and inverts the section conveyance with <a class="reference internal" href="#axqua.rating.section_rating" title="axqua.rating.section_rating"><code class="xref py py-func docutils literal notranslate"><span class="pre">section_rating()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>n_samples</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(dans Python v3.15)"><em>int</em></a>)</p>
@@ -2126,6 +2184,9 @@ mesh-convergence study so they share one source of truth for the steady setup.</
 <p><em>prewet_depth</em> defaults to the sentinel « leave it as the config has it »; pass a
 float (or None) to set <code class="docutils literal notranslate"><span class="pre">initialization.prewet_depth</span></code> - the mesh-convergence study
 hotstarts the channel this way, the dry-start initial run leaves it untouched.</p>
+<p>A hydrology case (<code class="docutils literal notranslate"><span class="pre">hydrology.enabled</span></code>) is driven by its rain and has no steady
+discharge: nothing is prescribed or synthesized, and the discharge of an inflow
+line, if the case gives one, is returned (else 0).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Paramètres<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

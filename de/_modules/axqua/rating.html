@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/rating.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -373,6 +387,25 @@
     <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"roughness must be positive, got Manning n=</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">n</span>
+
+
+<div class="viewcode-block" id="ks_from_friction">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.ks_from_friction">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">ks_from_friction</span><span class="p">(</span><span class="n">law</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Nikuradse ks [m] equivalent to a TELEMAC friction law and its coefficient.</span>
+
+<span class="sd">    Strickler (law 3, K = 1/n) and Manning (law 4, n) through the Strickler relation n = ks^(1/6) / 21.1, i.e. ks = (n / 0.0474)^6; Nikuradse (law 5) is ks itself. ``None`` for a law without such an equivalent (Chezy, Haaland, ...).</span>
+<span class="sd">    """</span>
+    <span class="n">law</span><span class="p">,</span> <span class="n">coefficient</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">law</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">law</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">coefficient</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"roughness must be positive, got </span><span class="si">{</span><span class="n">coefficient</span><span class="si">}</span><span class="s2"> for law </span><span class="si">{</span><span class="n">law</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coefficient</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">coefficient</span> <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">coefficient</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mf">0.0474</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_conveyance_q</span><span class="p">(</span><span class="n">h</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">slope</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -703,24 +736,31 @@
     <span class="k">return</span> <span class="n">good</span>
 
 
-<div class="viewcode-block" id="synthesize_outflow_rating_from_section">
-<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.synthesize_outflow_rating_from_section">[Doku]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">synthesize_outflow_rating_from_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                                           <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Outflow rating from the DEM cross-section along the outflow boundary line.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_dem_points</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Coordinates of *points* in the DEM's own frame.</span>
 
-<span class="sd">    Samples the bed along the ``outflow`` liquid-boundary line straight out of</span>
-<span class="sd">    ``geodata.dem_initial``, picks up the Nikuradse ``ks`` of the roughness zone each</span>
-<span class="sd">    sample falls in (``geodata.roughness_zones`` + ``roughness_table``; the lateral</span>
-<span class="sd">    ``friction.boundary_*`` roughness otherwise), takes the reach slope from a linear</span>
-<span class="sd">    fit of the DEM along ``geodata.channel_centerline``, and inverts the section</span>
-<span class="sd">    conveyance with :func:`section_rating`.</span>
+<span class="sd">    A case built from a CAD assembly runs in local coordinates: the DEM has no CRS even where ``crs_epsg`` names the grid the drawing is set out in, because the two have never been tied together (see `axqua georef`). Reprojecting into ``None`` raises, so when the DEM carries no CRS the points are already in its frame and are sampled as they stand.</span>
 <span class="sd">    """</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">rasterio.warp</span><span class="w"> </span><span class="kn">import</span> <span class="n">transform</span> <span class="k">as</span> <span class="n">warp_transform</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="k">if</span> <span class="n">dem</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">warp_transform</span><span class="p">(</span><span class="sa">f</span><span class="s2">"EPSG:</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">dem</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
+                          <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sample_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">points</span><span class="p">):</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">_dem_points</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">dem</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">))],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="outflow_lines">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.outflow_lines">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">outflow_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The outflow lines of ``boundaries.liquid_boundaries``, as a GeoDataFrame."""</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.boundary</span><span class="w"> </span><span class="kn">import</span> <span class="n">_is_internal</span><span class="p">,</span> <span class="n">_normalise_kind</span><span class="p">,</span> <span class="n">_type_column</span>
 
@@ -732,58 +772,29 @@
                   <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">lb</span><span class="p">[</span><span class="n">type_col</span><span class="p">]]]</span>
     <span class="k">if</span> <span class="n">outflow</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no 'outflow' line in boundaries.liquid_boundaries"</span><span class="p">)</span>
-    <span class="n">line</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">outflow</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">!=</span> <span class="s2">"LineString"</span><span class="p">:</span>
-        <span class="n">line</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outflow</span></div>
+
+
+
+<div class="viewcode-block" id="line_section">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.line_section">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">line_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="n">ks_fallback</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""The cross-section along *line*: ``(station, bed, ks, points)``.</span>
+
+<span class="sd">    Samples the bed straight out of ``geodata.dem_initial`` and picks up the Nikuradse ``ks`` of the roughness zone each sample falls in (``geodata.roughness_zones`` + ``roughness_table``); without roughness zones every sample gets *ks_fallback*, or the ks of the lateral ``friction.boundary_*`` roughness when that is None too. Samples the DEM has no value for are left out.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
 
     <span class="n">station</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">)</span>
     <span class="n">pts</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">station</span><span class="p">]</span>
     <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="p">)</span> <span class="k">as</span> <span class="n">dem</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="nf">_to_dem</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">"""Sample coordinates in the DEM's own frame.</span>
-
-<span class="sd">            A case built from a CAD assembly runs in local coordinates: the DEM has no</span>
-<span class="sd">            CRS even where ``crs_epsg`` names the grid the drawing is set out in,</span>
-<span class="sd">            because the two have never been tied together (see `axqua georef`).</span>
-<span class="sd">            Reprojecting into ``None`` raises, so when the DEM carries no CRS the line</span>
-<span class="sd">            is already in its frame and is sampled as it stands.</span>
-<span class="sd">            """</span>
-            <span class="k">if</span> <span class="n">dem</span><span class="o">.</span><span class="n">crs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
-                <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">warp_transform</span><span class="p">(</span><span class="sa">f</span><span class="s2">"EPSG:</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">dem</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span>
-                                  <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">x</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">y</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">])</span>
-
-        <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">_to_dem</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span>
-        <span class="n">bed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">dem</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">))],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">slope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">cl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">channel_centerline</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
-                <span class="n">cl</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
-            <span class="n">merged</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-            <span class="n">cline</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged</span> <span class="k">if</span> <span class="n">merged</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"LineString"</span>
-                     <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">merged</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
-            <span class="n">sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cline</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
-            <span class="n">cp</span> <span class="o">=</span> <span class="p">[</span><span class="n">cline</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">sc</span><span class="p">]</span>
-            <span class="n">cx</span><span class="p">,</span> <span class="n">cy</span> <span class="o">=</span> <span class="n">_to_dem</span><span class="p">(</span><span class="n">cp</span><span class="p">)</span>
-            <span class="n">zc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">dem</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">cx</span><span class="p">,</span> <span class="n">cy</span><span class="p">))],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
-            <span class="c1"># nodata, not just NaN: rasterio hands back the raster's fill value, and</span>
-            <span class="c1"># -9999 is perfectly finite. Fitting a slope through it is not a small</span>
-            <span class="c1"># error - on munich-vsf, whose centerline crosses walls the bed rasters</span>
-            <span class="c1"># leave empty, it returned 44.5 instead of 0.053, and a slope three orders</span>
-            <span class="c1"># of magnitude too steep gives a normal depth of 29 mm at the outlet.</span>
-            <span class="n">good</span> <span class="o">=</span> <span class="n">_valid</span><span class="p">(</span><span class="n">zc</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">good</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">"geodata.channel_centerline samples no bed elevation in "</span>
-                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, so the reach slope cannot be "</span>
-                    <span class="s2">"inferred. Check that the centerline lies over the DEM's covered "</span>
-                    <span class="s2">"area, or pass an explicit slope to "</span>
-                    <span class="s2">"synthesize_outflow_rating_from_section()."</span><span class="p">)</span>
-            <span class="n">slope</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">sc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">zc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
-    <span class="n">good</span> <span class="o">=</span> <span class="n">_valid</span><span class="p">(</span><span class="n">bed</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span>
+        <span class="n">bed</span> <span class="o">=</span> <span class="n">_sample_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">pts</span><span class="p">)</span>
+        <span class="n">good</span> <span class="o">=</span> <span class="n">_valid</span><span class="p">(</span><span class="n">bed</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span>
     <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">pts</span> <span class="o">=</span> <span class="n">station</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">bed</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">good</span><span class="p">)</span> <span class="k">if</span> <span class="n">g</span><span class="p">]</span>
 
-    <span class="c1"># roughness per sample from the roughness zones, else the lateral-boundary value</span>
+    <span class="c1"># roughness per sample from the roughness zones, else the fallback</span>
     <span class="n">ks</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_zones</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">roughness_table</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.geodata</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_roughness_table</span>
@@ -805,12 +816,65 @@
             <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">vals</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">ks</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
                 <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">ks</span><span class="p">),</span> <span class="n">ks</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">ks</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">ks</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ks_fallback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">bed</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">ks_fallback</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">ks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">law</span><span class="p">,</span> <span class="n">coef</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">boundary_law</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">boundary_coefficient</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">_resolve_n</span><span class="p">(</span><span class="n">coef</span> <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="mi">4</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">coef</span> <span class="k">if</span> <span class="n">law</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">bed</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">n</span> <span class="o">/</span> <span class="mf">0.0474</span><span class="p">)</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>   <span class="c1"># Strickler-Manning -&gt; ks (m)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">ks_from_friction</span><span class="p">(</span><span class="n">law</span><span class="p">,</span> <span class="n">coef</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"friction.boundary_law </span><span class="si">{</span><span class="n">law</span><span class="si">}</span><span class="s2"> has no Nikuradse ks; give "</span>
+                             <span class="s2">"roughness zones or a Strickler/Manning/Nikuradse law"</span><span class="p">)</span>
+        <span class="n">ks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">bed</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"no roughness zones for the outflow section: using ks=</span><span class="si">%.3f</span><span class="s2"> m "</span>
                  <span class="s2">"from friction.boundary_*"</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">ks</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">pts</span></div>
+
+
+
+<div class="viewcode-block" id="synthesize_outflow_rating_from_section">
+<a class="viewcode-back" href="../../code/workflow.html#axqua.rating.synthesize_outflow_rating_from_section">[Doku]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">synthesize_outflow_rating_from_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">discharge</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">slope</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                           <span class="n">n_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Outflow rating from the DEM cross-section along the outflow boundary line.</span>
+
+<span class="sd">    Samples the bed along the ``outflow`` liquid-boundary line straight out of ``geodata.dem_initial``, picks up the Nikuradse ``ks`` of the roughness zone each sample falls in (``geodata.roughness_zones`` + ``roughness_table``; the lateral ``friction.boundary_*`` roughness otherwise), takes the reach slope from a linear fit of the DEM along ``geodata.channel_centerline``, and inverts the section conveyance with :func:`section_rating`.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">geopandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gpd</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">rasterio</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">shapely.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">unary_union</span>
+
+    <span class="n">outflow</span> <span class="o">=</span> <span class="n">outflow_lines</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">outflow</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">!=</span> <span class="s2">"LineString"</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">slope</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">rasterio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="p">)</span> <span class="k">as</span> <span class="n">dem</span><span class="p">:</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">channel_centerline</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span> <span class="ow">and</span> <span class="n">cl</span><span class="o">.</span><span class="n">crs</span><span class="o">.</span><span class="n">to_epsg</span><span class="p">()</span> <span class="o">!=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">:</span>
+                <span class="n">cl</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">epsg</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">crs_epsg</span><span class="p">)</span>
+            <span class="n">merged</span> <span class="o">=</span> <span class="n">unary_union</span><span class="p">(</span><span class="n">cl</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">cline</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged</span> <span class="k">if</span> <span class="n">merged</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">"LineString"</span>
+                     <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">merged</span><span class="o">.</span><span class="n">geoms</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">g</span><span class="o">.</span><span class="n">length</span><span class="p">))</span>
+            <span class="n">sc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">cline</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+            <span class="n">cp</span> <span class="o">=</span> <span class="p">[</span><span class="n">cline</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">sc</span><span class="p">]</span>
+            <span class="n">zc</span> <span class="o">=</span> <span class="n">_sample_dem</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">cp</span><span class="p">)</span>
+            <span class="c1"># nodata, not just NaN: rasterio hands back the raster's fill value, and</span>
+            <span class="c1"># -9999 is perfectly finite. Fitting a slope through it is not a small</span>
+            <span class="c1"># error - on munich-vsf, whose centerline crosses walls the bed rasters</span>
+            <span class="c1"># leave empty, it returned 44.5 instead of 0.053, and a slope three orders</span>
+            <span class="c1"># of magnitude too steep gives a normal depth of 29 mm at the outlet.</span>
+            <span class="n">good</span> <span class="o">=</span> <span class="n">_valid</span><span class="p">(</span><span class="n">zc</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">good</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">"geodata.channel_centerline samples no bed elevation in "</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">geodata</span><span class="o">.</span><span class="n">dem_initial</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, so the reach slope cannot be "</span>
+                    <span class="s2">"inferred. Check that the centerline lies over the DEM's covered "</span>
+                    <span class="s2">"area, or pass an explicit slope to "</span>
+                    <span class="s2">"synthesize_outflow_rating_from_section()."</span><span class="p">)</span>
+            <span class="n">slope</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span><span class="n">sc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="n">zc</span><span class="p">[</span><span class="n">good</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">station</span><span class="p">,</span> <span class="n">bed</span><span class="p">,</span> <span class="n">ks</span><span class="p">,</span> <span class="n">_pts</span> <span class="o">=</span> <span class="n">line_section</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">n_samples</span><span class="o">=</span><span class="n">n_samples</span><span class="p">)</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"outflow section: </span><span class="si">%.2f</span><span class="s2"> m wide, bed </span><span class="si">%.3f</span><span class="s2">..</span><span class="si">%.3f</span><span class="s2"> m, ks </span><span class="si">%.3f</span><span class="s2">..</span><span class="si">%.3f</span><span class="s2"> m, "</span>

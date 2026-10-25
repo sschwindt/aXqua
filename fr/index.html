@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/fr/index.html" />
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=a1a25f23"></script>
+      <script src="_static/documentation_options.js?v=740f9163"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/translations.js?v=e6b791cb"></script>
@@ -91,6 +91,7 @@
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#mesh-configuration">Maillage configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#wall-roughness">Rugosité des parois</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#hydraulic-simulation">Simulation hydraulique</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/case-setup.html#morphodynamic-simulation">Simulation morphodynamique</a></li>
 </ul>
 </li>
@@ -119,6 +120,17 @@
 <li class="toctree-l3"><a class="reference internal" href="usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="usage/morphodynamic-simulations.html#openfoam-setup">Configuration OpenFOAM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#case-setup">Cas configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#data-setup">Configuration des données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#wind-and-evaporation">Vent et évaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#boundaries-and-outlet">Frontières et sortie</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#preprocessing">Prétraitement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#run-and-results">Exécution et résultats</a></li>
+<li class="toctree-l3"><a class="reference internal" href="usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Résolution du maillage, calage et limites</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="usage/calibration-validation.html">Calage et validation</a><ul>
@@ -280,6 +292,7 @@
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#preprocessing">Prétraitement</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/warnings.html#simulation-software">Logiciel de simulation</a></li>
@@ -289,6 +302,7 @@
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#installation-of-the-simulation-software">Installation du logiciel de simulation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#check-of-a-case">Vérification d’un cas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#hydrology-checkup">Contrôle hydrologique</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#profile-of-this-computer">Profil de cet ordinateur</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#case-file">Fichier de cas</a></li>
 <li class="toctree-l3"><a class="reference internal" href="troubleshooting/errors.html#preprocessing-and-simulations">Prétraitement et simulation</a></li>
@@ -344,6 +358,7 @@
 <li><p>Les <strong>simulations hydrauliques</strong> commencent par un calcul TELEMAC à partir d’un lit sec. Le résultat sert de point de départ aux simulations 3D avec TELEMAC-3D ou OpenFOAM (<a class="reference internal" href="usage/hydraulic-simulations.html"><span class="doc">Simulations hydrauliques</span></a>).</p></li>
 <li><p>Les <strong>études de convergence en maillage</strong> quantifient dans quelle mesure un résultat dépend de la résolution du maillage, au moyen de l’indice de convergence de maillage de Celik et al. (2008) (<a class="reference internal" href="usage/mesh-convergence.html"><span class="doc">Convergence en maillage</span></a>).</p></li>
 <li><p>Les <strong>simulations morphodynamiques</strong> ajoutent le transport sédimentaire et l’évolution de la cote du fond (<a class="reference internal" href="usage/morphodynamic-simulations.html"><span class="doc">Simulations morphodynamiques</span></a>).</p></li>
+<li><p><strong>Hydrologie</strong> calcule le ruissellement de pluie au-dessus d’un bassin versant ou d’un champ avec TELEMAC, avec infiltration verte-ampt, vent et évaporation (<a class="reference internal" href="usage/hydrology-simulations.html"><span class="doc">Hydrologie</span></a>).</p></li>
 <li><p>Le <strong>calage et la validation</strong> ajustent les paramètres incertains du modèle aux mesures de terrain par une méthode bayésienne assistée par un modèle de substitution (Oladyshkin et al. 2020) et indiquent l’incertitude restante (<a class="reference internal" href="usage/calibration-validation.html"><span class="doc">Calage et validation</span></a>), en s’appuyant sur le projet <a class="reference external" href="https://hydrobayescal.readthedocs.io">hydroBayesCal</a>.</p></li>
 <li><p>Le <strong>post-traitement</strong> transforme les résultats en cartes et en figures (<a class="reference internal" href="usage/postprocessing.html"><span class="doc">Post-traitement</span></a>) avec QGIS, <a class="reference external" href="https://www.paraview.org/">ParaView</a> et <a class="reference external" href="https://visit-dav.github.io/visit-website/index.html">Visit DAV</a>.</p></li>
 </ol>

@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/de/_modules/axqua/solvers/telemac/pipeline.html" />
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../../../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../../../../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../../../_static/translations.js?v=9bf55d28"></script>
@@ -89,6 +89,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -117,6 +118,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../usage/hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../usage/calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -278,6 +290,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -287,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -341,6 +355,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">calibration</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">hydraulics</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">boundary</span><span class="p">,</span> <span class="n">fortran</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">steering</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">OUTLET_LEVELS</span><span class="p">,</span> <span class="n">outlet_level</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.capabilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">refresh_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.env</span><span class="w"> </span><span class="kn">import</span> <span class="n">TelemacRuntime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.logsetup</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_step</span><span class="p">,</span> <span class="n">setup_logging</span>
@@ -363,6 +378,9 @@
     <span class="n">gaia_cas</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">source_regions</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># SOURCE REGIONS DATA FILE (losing-gaining reach)</span>
     <span class="n">user_fortran</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>     <span class="c1"># FORTRAN FILE folder (percolation.mode: fortran)</span>
+    <span class="c1"># the hydrology run (hydrology mode): its .cas and the files it reads</span>
+    <span class="n">hydrology_cas</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">hydrology_files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
     <span class="n">ground_truth</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">calibration_csv</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">hbc_config</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
@@ -405,12 +423,15 @@
     <span class="c1"># boundaries.rating_method set, leaving stage_discharge unset is a legitimate</span>
     <span class="c1"># "derive it from the geodata at the simulated Q" (see workflow.</span>
     <span class="c1"># synthesize_rating_if_missing), and it must land before validate() checks it.</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"stage_discharge"</span>
+    <span class="c1"># before the validation: a name that is no condition is the validation's to report</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">OUTLET_LEVELS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="o">==</span> <span class="s2">"rating"</span>
             <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">synthesize_rating_if_missing</span>
         <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">))</span>
     <span class="n">cfg</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+        <span class="n">_hydrology_checkup</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">t_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"build start: case '</span><span class="si">%s</span><span class="s2">' -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="p">)</span>
 
@@ -447,97 +468,23 @@
         <span class="c1"># scalar prescribed_flowrate, falling back to the series' representative value.</span>
         <span class="n">inflow</span> <span class="o">=</span> <span class="p">(</span><span class="n">hydraulics</span><span class="o">.</span><span class="n">read_inflow</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span><span class="p">),</span> <span class="n">steady</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                   <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">inflow_q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">inflow_q</span> <span class="o">=</span> <span class="n">inflow</span><span class="o">.</span><span class="n">steady_value</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+            <span class="c1"># a catchment is driven by its rain; the outlet takes what arrives, and</span>
+            <span class="c1"># inflow lines (catchments upstream) are optional</span>
+            <span class="n">inflow_q</span> <span class="o">=</span> <span class="n">outflow_wse</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  hydrology mode: outlet </span><span class="si">%s</span><span class="s2">, </span><span class="si">%d</span><span class="s2"> inflow line(s)"</span><span class="p">,</span>
+                     <span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">"no steady discharge for the build: set boundaries.prescribed_flowrate "</span>
-                <span class="s2">"(m3/s) in case-config.yml, or provide boundaries.inflow."</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
-            <span class="n">outflow_wse</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  prescribed inflow Q=</span><span class="si">%.3f</span><span class="s2"> m3/s, free (Neumann) outflow"</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">outflow_wse</span> <span class="o">=</span> <span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  prescribed inflow Q=</span><span class="si">%.3f</span><span class="s2"> m3/s, outflow WSE=</span><span class="si">%.3f</span><span class="s2"> m (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
-                     <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span>
+            <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span> <span class="o">=</span> <span class="n">_river_boundary_values</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">inflow</span><span class="p">)</span>
 
     <span class="c1"># 4) steering files</span>
     <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"stage 4/5: write friction table and steering (.cas)"</span><span class="p">):</span>
         <span class="n">art</span><span class="o">.</span><span class="n">friction_tbl</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_friction_tbl</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-        <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_gaia_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
-        <span class="n">gaia_name</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="c1"># turbulence model selected from the actual mesh resolution + velocity guess</span>
-        <span class="n">turb_model</span><span class="p">,</span> <span class="n">turb_why</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
-        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  turbulence model </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">turb_model</span><span class="p">,</span>
-                 <span class="n">steering</span><span class="o">.</span><span class="n">TURB_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">turb_model</span><span class="p">,</span> <span class="s2">"?"</span><span class="p">),</span> <span class="n">turb_why</span><span class="p">)</span>
-        <span class="c1"># initial condition. Default is a DRY START - only a thin plug at the inflow</span>
-        <span class="c1"># is wetted (a fully dry bed makes DEBIMP abort at the prescribed-Q inflow);</span>
-        <span class="c1"># the channel-wide hotstart is used only when prewet_depth is set (e.g. the</span>
-        <span class="c1"># mesh-convergence study). Both continue from the written SELAFIN.</span>
-        <span class="n">prev_comp</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_initial_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
-            <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+            <span class="n">_write_hydrology</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">art</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_dry_start_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
-            <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="c1"># internal source/sink REGIONS for a losing-gaining reach (empty unless the</span>
-        <span class="c1"># liquid-boundary layer carries internal 'int-*' lines); shared by every .cas</span>
-        <span class="n">source_regions</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">exchange_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">source_regions</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  internal source region </span><span class="si">%s</span><span class="s2">: </span><span class="si">%+.4f</span><span class="s2"> m3/s over </span><span class="si">%d</span><span class="s2"> node(s), "</span>
-                     <span class="s2">"</span><span class="si">%.0f</span><span class="s2"> m2"</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">discharge</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
-        <span class="c1"># The water table the generated routine uses as the drain's taper floor must</span>
-        <span class="c1"># be the one the pre-wet seeded the pools with, so it is re-fitted here from</span>
-        <span class="c1"># the initial-conditions file that was just written. With explicit</span>
-        <span class="c1"># percolation.water_table_levels both fits read the same numbers and are</span>
-        <span class="c1"># identical by construction; derived from the seeded surface they can differ</span>
-        <span class="c1"># by a centimeter or so near the internal lines.</span>
-        <span class="n">plane</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">water_table</span> <span class="o">==</span> <span class="s2">"phreatic"</span> <span class="ow">and</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
-            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">watertable</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
-
-            <span class="n">ic</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="p">)[</span><span class="s2">"values"</span><span class="p">][</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span>
-            <span class="n">plane</span> <span class="o">=</span> <span class="n">watertable</span><span class="o">.</span><span class="n">fit_phreatic_plane</span><span class="p">(</span>
-                <span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">surface</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">the_mesh</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="n">ic</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">source_regions</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span><span class="p">:</span>
-                <span class="c1"># USER_RAIN percolation: the generated routine withdraws over the</span>
-                <span class="c1"># patch depth-limited and reinjects at the gaining line; no</span>
-                <span class="c1"># SOURCE REGIONS file (the .cas carries FORTRAN FILE + RAIN keys).</span>
-                <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span> <span class="o">=</span> <span class="n">fortran</span><span class="o">.</span><span class="n">write_user_fortran</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">source_regions</span><span class="p">,</span>
-                                                              <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
-                <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  percolation USER_RAIN routine -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">art</span><span class="o">.</span><span class="n">source_regions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_source_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">source_regions</span><span class="p">)</span>
-        <span class="c1"># the initial run is ALWAYS steady (steady2d.cas)</span>
-        <span class="n">art</span><span class="o">.</span><span class="n">cas_file</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_cas</span><span class="p">(</span>
-            <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">gaia_cas</span><span class="o">=</span><span class="n">gaia_name</span><span class="p">,</span>
-            <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">,</span> <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
-            <span class="n">source_regions</span><span class="o">=</span><span class="n">source_regions</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="c1"># additionally write the unsteady hydrograph case when a varying inflow</span>
-        <span class="c1"># series is available (a constant-Q inflow needs no unsteady run)</span>
-        <span class="k">if</span> <span class="n">_has_hydrograph</span><span class="p">(</span><span class="n">inflow</span><span class="p">):</span>
-            <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_liquid_boundaries</span><span class="p">(</span>
-                <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">_outflow_wse_fn</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
-            <span class="n">art</span><span class="o">.</span><span class="n">unsteady_cas</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_cas</span><span class="p">(</span>
-                <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">inflow</span><span class="o">.</span><span class="n">discharge</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">gaia_cas</span><span class="o">=</span><span class="n">gaia_name</span><span class="p">,</span>
-                <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">,</span> <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
-                <span class="n">unsteady</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">liquid_boundaries_file</span><span class="o">=</span><span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="n">duration</span><span class="o">=</span><span class="n">_hydrograph_duration</span><span class="p">(</span><span class="n">inflow</span><span class="p">),</span> <span class="n">out_name</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">unsteady_cas_file</span><span class="p">,</span>
-                <span class="n">source_regions</span><span class="o">=</span><span class="n">source_regions</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  unsteady hydrograph case -&gt; </span><span class="si">%s</span><span class="s2"> (Q(t) from </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
-                     <span class="n">art</span><span class="o">.</span><span class="n">unsteady_cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  inflow is a constant discharge; no unsteady2d.cas written"</span><span class="p">)</span>
+            <span class="n">_write_river_steering</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">,</span>
+                                  <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">art</span><span class="p">)</span>
 
     <span class="c1"># 5) ground-truth -&gt; calibration CSV + HydroBayesCal config.</span>
     <span class="c1"># The model setup (stages 1-4) is complete at this point. Ground-truth feeds</span>
@@ -576,22 +523,164 @@
         <span class="c1"># module import time (the package __init__ wires both up)</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.workflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_solver_streaming</span>
 
+        <span class="c1"># the hydrology mode builds hydrology2d.cas and no steady2d.cas; its duration</span>
+        <span class="c1"># comes from the rain, not from hydrodynamics.duration</span>
+        <span class="n">cas</span><span class="p">,</span> <span class="n">duration</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrology_mode</span><span class="p">:</span>
+            <span class="n">cas</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">hydrology_cas_file</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">cas_duration</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cas</span><span class="p">))</span>
         <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dry run: launch </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> once to validate the case"</span><span class="p">):</span>
             <span class="c1"># stream the listing live with the simulated-time progress bar (same</span>
             <span class="c1"># look as initial_run.py) on the configured core count - this is also</span>
             <span class="c1"># the per-level solver run of the mesh-convergence study</span>
-            <span class="n">proc</span> <span class="o">=</span> <span class="n">run_solver_streaming</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">run_solver_streaming</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">cas_file</span><span class="o">=</span><span class="n">cas</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
             <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"solver finished rc=</span><span class="si">%d</span><span class="s2">"</span><span class="p">,</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">telemac</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2"> failed (rc=</span><span class="si">{</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2">) on "</span>
-                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">cas_file</span><span class="si">}</span><span class="s2">; see the listing above / </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">cas</span><span class="si">}</span><span class="s2">; see the listing above / </span><span class="si">{</span><span class="n">cfg</span><span class="o">.</span><span class="n">model_dir</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># refresh the case's MODEL= markers so the folder describes itself as it is now</span>
     <span class="n">refresh_markers</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"build done: case '</span><span class="si">%s</span><span class="s2">' in </span><span class="si">%.2f</span><span class="s2">s"</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span> <span class="o">-</span> <span class="n">t_start</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">art</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_hydrology_checkup</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""The hydrology checkup before the build: warnings logged, errors stop it."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydrology.checks</span><span class="w"> </span><span class="kn">import</span> <span class="n">run_checks</span>
+
+    <span class="k">with</span> <span class="n">log_step</span><span class="p">(</span><span class="s2">"hydrology checkup (rain, weather, soil, outlet, terrain)"</span><span class="p">):</span>
+        <span class="n">findings</span> <span class="o">=</span> <span class="n">run_checks</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">terrain</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">finding</span> <span class="ow">in</span> <span class="n">findings</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">error</span> <span class="k">if</span> <span class="n">finding</span><span class="o">.</span><span class="n">severity</span> <span class="o">==</span> <span class="s2">"error"</span> <span class="k">else</span> <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">)(</span>
+                <span class="s2">"  </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">finding</span><span class="o">.</span><span class="n">line</span><span class="p">())</span>
+    <span class="n">bad</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">findings</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">severity</span> <span class="o">==</span> <span class="s2">"error"</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">bad</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">ConfigError</span><span class="p">(</span><span class="n">bad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">message</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">bad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span>
+                                 <span class="n">remedy</span><span class="o">=</span><span class="n">bad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">remedy</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_river_boundary_values</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">inflow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""The steady inflow discharge and outflow level of a river reach."""</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inflow_q</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">inflow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inflow_q</span> <span class="o">=</span> <span class="n">inflow</span><span class="o">.</span><span class="n">steady_value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"no steady discharge for the build: set boundaries.prescribed_flowrate "</span>
+            <span class="s2">"(m3/s) in case-config.yml, or provide boundaries.inflow."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">outflow_wse</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  prescribed inflow Q=</span><span class="si">%.3f</span><span class="s2"> m3/s, free (Neumann) outflow"</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">outflow_wse</span> <span class="o">=</span> <span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  prescribed inflow Q=</span><span class="si">%.3f</span><span class="s2"> m3/s, outflow WSE=</span><span class="si">%.3f</span><span class="s2"> m (</span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                 <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_river_steering</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">,</span>
+                          <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">art</span><span class="p">:</span> <span class="n">Artifacts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stage 4 of a river reach: GAIA, initial state, sources, steady and unsteady steering."""</span>
+    <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_gaia_cas</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+    <span class="n">gaia_name</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">gaia_cas</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="c1"># turbulence model selected from the actual mesh resolution + velocity guess</span>
+    <span class="n">turb_model</span><span class="p">,</span> <span class="n">turb_why</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  turbulence model </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">turb_model</span><span class="p">,</span>
+             <span class="n">steering</span><span class="o">.</span><span class="n">TURB_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">turb_model</span><span class="p">,</span> <span class="s2">"?"</span><span class="p">),</span> <span class="n">turb_why</span><span class="p">)</span>
+    <span class="c1"># initial condition. Default is a DRY START - only a thin plug at the inflow</span>
+    <span class="c1"># is wetted (a fully dry bed makes DEBIMP abort at the prescribed-Q inflow);</span>
+    <span class="c1"># the channel-wide hotstart is used only when prewet_depth is set (e.g. the</span>
+    <span class="c1"># mesh-convergence study). Both continue from the written SELAFIN.</span>
+    <span class="n">prev_comp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">prewet_depth</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_initial_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+        <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_dry_start_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+        <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="c1"># internal source/sink REGIONS for a losing-gaining reach (empty unless the</span>
+    <span class="c1"># liquid-boundary layer carries internal 'int-*' lines); shared by every .cas</span>
+    <span class="n">source_regions</span> <span class="o">=</span> <span class="n">boundary</span><span class="o">.</span><span class="n">exchange_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">source_regions</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  internal source region </span><span class="si">%s</span><span class="s2">: </span><span class="si">%+.4f</span><span class="s2"> m3/s over </span><span class="si">%d</span><span class="s2"> node(s), "</span>
+                 <span class="s2">"</span><span class="si">%.0f</span><span class="s2"> m2"</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">discharge</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">area</span><span class="p">)</span>
+    <span class="c1"># The water table the generated routine uses as the drain's taper floor must</span>
+    <span class="c1"># be the one the pre-wet seeded the pools with, so it is re-fitted here from</span>
+    <span class="c1"># the initial-conditions file that was just written. With explicit</span>
+    <span class="c1"># percolation.water_table_levels both fits read the same numbers and are</span>
+    <span class="c1"># identical by construction; derived from the seeded surface they can differ</span>
+    <span class="c1"># by a centimeter or so near the internal lines.</span>
+    <span class="n">plane</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">percolation</span><span class="o">.</span><span class="n">water_table</span> <span class="o">==</span> <span class="s2">"phreatic"</span> <span class="ow">and</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">watertable</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">selafin</span>
+
+        <span class="n">ic</span> <span class="o">=</span> <span class="n">selafin</span><span class="o">.</span><span class="n">read_slf</span><span class="p">(</span><span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="p">)[</span><span class="s2">"values"</span><span class="p">][</span><span class="s2">"WATER DEPTH"</span><span class="p">]</span>
+        <span class="n">plane</span> <span class="o">=</span> <span class="n">watertable</span><span class="o">.</span><span class="n">fit_phreatic_plane</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">surface</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">the_mesh</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="o">+</span> <span class="n">ic</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">source_regions</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="n">cfg</span><span class="o">.</span><span class="n">gain_lose</span><span class="o">.</span><span class="n">implementation</span> <span class="o">==</span> <span class="s2">"fortran"</span><span class="p">:</span>
+            <span class="c1"># USER_RAIN percolation: the generated routine withdraws over the</span>
+            <span class="c1"># patch depth-limited and reinjects at the gaining line; no</span>
+            <span class="c1"># SOURCE REGIONS file (the .cas carries FORTRAN FILE + RAIN keys).</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span> <span class="o">=</span> <span class="n">fortran</span><span class="o">.</span><span class="n">write_user_fortran</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">source_regions</span><span class="p">,</span>
+                                                          <span class="n">plane</span><span class="o">=</span><span class="n">plane</span><span class="p">)</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  percolation USER_RAIN routine -&gt; </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">art</span><span class="o">.</span><span class="n">source_regions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_source_regions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">source_regions</span><span class="p">)</span>
+    <span class="c1"># the initial run is ALWAYS steady (steady2d.cas)</span>
+    <span class="n">art</span><span class="o">.</span><span class="n">cas_file</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_cas</span><span class="p">(</span>
+        <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow_q</span><span class="p">,</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">gaia_cas</span><span class="o">=</span><span class="n">gaia_name</span><span class="p">,</span>
+        <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">,</span> <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
+        <span class="n">source_regions</span><span class="o">=</span><span class="n">source_regions</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># additionally write the unsteady hydrograph case when a varying inflow</span>
+    <span class="c1"># series is available (a constant-Q inflow needs no unsteady run)</span>
+    <span class="k">if</span> <span class="n">_has_hydrograph</span><span class="p">(</span><span class="n">inflow</span><span class="p">):</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_liquid_boundaries</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">_outflow_wse_fn</span><span class="p">(</span><span class="n">cfg</span><span class="p">))</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">unsteady_cas</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_cas</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">inflow</span><span class="o">.</span><span class="n">discharge</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">outflow_wse</span><span class="p">,</span> <span class="n">gaia_cas</span><span class="o">=</span><span class="n">gaia_name</span><span class="p">,</span>
+            <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">,</span> <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
+            <span class="n">unsteady</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">liquid_boundaries_file</span><span class="o">=</span><span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">duration</span><span class="o">=</span><span class="n">_hydrograph_duration</span><span class="p">(</span><span class="n">inflow</span><span class="p">),</span> <span class="n">out_name</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">unsteady_cas_file</span><span class="p">,</span>
+            <span class="n">source_regions</span><span class="o">=</span><span class="n">source_regions</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  unsteady hydrograph case -&gt; </span><span class="si">%s</span><span class="s2"> (Q(t) from </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span>
+                 <span class="n">art</span><span class="o">.</span><span class="n">unsteady_cas</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  inflow is a constant discharge; no unsteady2d.cas written"</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_write_hydrology</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span> <span class="n">art</span><span class="p">:</span> <span class="n">Artifacts</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Stage 4 of a hydrology case: forcing, runoff routine, outlet and the .cas.</span>
+
+<span class="sd">    The run starts dry; only an inflow line gets the plug of the dry start, since TELEMAC cannot prescribe a discharge through a dry section. No steady case is written: a catchment has no steady state to start from.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">hydrology</span>
+
+    <span class="n">turb_model</span><span class="p">,</span> <span class="n">turb_why</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">select_turbulence_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"  turbulence model </span><span class="si">%d</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="n">turb_model</span><span class="p">,</span>
+             <span class="n">steering</span><span class="o">.</span><span class="n">TURB_NAMES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">turb_model</span><span class="p">,</span> <span class="s2">"?"</span><span class="p">),</span> <span class="n">turb_why</span><span class="p">)</span>
+    <span class="n">prev_comp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">lb</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="s2">"inflow"</span> <span class="k">for</span> <span class="n">lb</span> <span class="ow">in</span> <span class="n">liquids</span><span class="p">):</span>
+        <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">write_dry_start_conditions</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">)</span>
+        <span class="n">prev_comp</span> <span class="o">=</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">art</span><span class="o">.</span><span class="n">initial_conditions</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">written</span> <span class="o">=</span> <span class="n">hydrology</span><span class="o">.</span><span class="n">write_case</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">the_mesh</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">inflow</span><span class="p">,</span>
+                                   <span class="n">turbulence_model</span><span class="o">=</span><span class="n">turb_model</span><span class="p">,</span>
+                                   <span class="n">previous_computation</span><span class="o">=</span><span class="n">prev_comp</span><span class="p">)</span>
+    <span class="n">art</span><span class="o">.</span><span class="n">hydrology_cas</span> <span class="o">=</span> <span class="n">written</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"cas"</span><span class="p">)</span>
+    <span class="n">art</span><span class="o">.</span><span class="n">user_fortran</span> <span class="o">=</span> <span class="n">written</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"user_fortran"</span><span class="p">)</span>
+    <span class="n">art</span><span class="o">.</span><span class="n">liquid_boundaries</span> <span class="o">=</span> <span class="n">written</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"liquid_boundaries"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">art</span><span class="o">.</span><span class="n">hydrology_files</span> <span class="o">=</span> <span class="n">written</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_has_hydrograph</span><span class="p">(</span><span class="n">inflow</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -613,16 +702,8 @@
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="mf">3600.0</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_outflow_wse_fn</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Callable Q -&gt; outflow WSE for the hydrograph file, matching the outflow</span>
-<span class="sd">    condition (free outflow prescribes nothing)."""</span>
-    <span class="n">cond</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
-    <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"free"</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">cond</span> <span class="o">==</span> <span class="s2">"elevation"</span><span class="p">:</span>
-        <span class="n">wse</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
-        <span class="k">return</span> <span class="k">lambda</span> <span class="n">q</span><span class="p">:</span> <span class="n">wse</span>
-    <span class="k">return</span> <span class="n">hydraulics</span><span class="o">.</span><span class="n">read_stage_discharge</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span><span class="p">))</span>
+<span class="c1"># Callable Q -&gt; outflow WSE for the hydrograph file, matching the outflow condition (free outflow prescribes nothing); one implementation for the build and the unsteady run.</span>
+<span class="n">_outflow_wse_fn</span> <span class="o">=</span> <span class="n">hydraulics</span><span class="o">.</span><span class="n">outflow_wse_fn</span>
 
 
 

@@ -16,7 +16,7 @@
     <link rel="canonical" href="https://axqua.eu/_modules/axqua/validation.html" />
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=292eb321"></script>
+      <script src="../../_static/documentation_options.js?v=fc837d61"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/design-tabs.js?v=f930bc37"></script>
@@ -88,6 +88,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#mesh-configuration">Mesh configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#wall-roughness">Wall roughness</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydraulic-simulation">Hydraulic simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#hydrology">Hydrology</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/case-setup.html#morphodynamic-simulation">Morphodynamic simulation</a></li>
 </ul>
 </li>
@@ -116,6 +117,17 @@
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#concept">Concept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#telemac-gaia-setup">TELEMAC-GAIA Setup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../usage/morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/hydrology-simulations.html">Hydrology</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#concept">Concept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#case-setup">Case setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#data-setup">Data setup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#wind-and-evaporation">Wind and evaporation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#boundaries-and-outlet">Boundaries and outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#run-and-results">Run and results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../usage/hydrology-simulations.html#mesh-resolution-calibration-and-limits">Mesh resolution, calibration and limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../usage/calibration-validation.html">Calibration &amp; validation</a><ul>
@@ -277,6 +289,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulations">Simulations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/warnings.html#simulation-software">Simulation software</a></li>
@@ -286,6 +299,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#installation-of-the-simulation-software">Installation of the simulation software</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#check-of-a-case">Check of a case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#hydrology-checkup">Hydrology checkup</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#profile-of-this-computer">Profile of this computer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#case-file">Case file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing and simulations</a></li>
@@ -617,6 +631,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ValidationSetup</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Write the steering file of the validation run into the model folder."""</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua</span><span class="w"> </span><span class="kn">import</span> <span class="n">bayescal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.boundaries</span><span class="w"> </span><span class="kn">import</span> <span class="n">outlet_level</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.core.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigError</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.hydraulics</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_outflow_wse</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">axqua.solvers.telemac</span><span class="w"> </span><span class="kn">import</span> <span class="n">steering</span>
@@ -636,13 +651,14 @@
     <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span> <span class="o">=</span> <span class="n">_liquids_for</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">situation</span><span class="p">)</span>
     <span class="n">there</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
     <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_flowrate</span> <span class="o">=</span> <span class="n">total</span>
-    <span class="n">condition</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">outflow_condition</span>
+    <span class="n">condition</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">outflow_condition</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">outlet_level</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">prescribed_elevation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">situation</span><span class="o">.</span><span class="n">prescribed_elevation</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">condition</span> <span class="o">!=</span> <span class="s2">"elevation"</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">!=</span> <span class="s2">"fixed"</span><span class="p">:</span>
             <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"The outflow water level of the validation situation is not "</span>
                          <span class="sa">f</span><span class="s2">"used: the case computes it (</span><span class="si">{</span><span class="n">condition</span><span class="si">}</span><span class="s2">)."</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">condition</span> <span class="o">==</span> <span class="s2">"elevation"</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"fixed"</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ConfigError</span><span class="p">(</span>
             <span class="s2">"the case prescribes the water level at the outflow, and the validation "</span>
             <span class="sa">f</span><span class="s2">"situation </span><span class="si">{</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> names none"</span><span class="p">,</span>
@@ -650,7 +666,7 @@
             <span class="n">remedy</span><span class="o">=</span><span class="s2">"Enter the outflow water level at which the validation data were "</span>
                    <span class="s2">"measured. The level of the calibration belongs to its discharge."</span><span class="p">)</span>
     <span class="n">given</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span>
-    <span class="k">if</span> <span class="n">condition</span> <span class="o">==</span> <span class="s2">"stage_discharge"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">given</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"rating"</span> <span class="ow">and</span> <span class="p">(</span><span class="n">given</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="n">given</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()):</span>
         <span class="c1"># The case has no measured rating curve: its outflow level was derived from</span>
         <span class="c1"># the channel geometry for the calibrated discharge. The level of this</span>
         <span class="c1"># situation is derived the same way, for its own discharge.</span>
@@ -661,7 +677,7 @@
         <span class="n">own</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">there</span><span class="o">.</span><span class="n">boundaries</span><span class="o">.</span><span class="n">stage_discharge</span> <span class="o">=</span> <span class="n">own</span>
         <span class="n">synthesize_rating_if_missing</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
-    <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">condition</span> <span class="o">==</span> <span class="s2">"free"</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">))</span>
+    <span class="n">stage</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">float</span><span class="p">(</span><span class="n">resolve_outflow_wse</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">total</span><span class="p">))</span>
     <span class="n">flow</span><span class="p">,</span> <span class="n">elev</span><span class="p">,</span> <span class="n">_profiles</span> <span class="o">=</span> <span class="n">steering</span><span class="o">.</span><span class="n">_prescribed_arrays</span><span class="p">(</span><span class="n">there</span><span class="p">,</span> <span class="n">liquids</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="n">stage</span><span class="p">)</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED FLOWRATES"</span><span class="p">,</span> <span class="n">flow</span><span class="p">)</span>
     <span class="n">text</span> <span class="o">=</span> <span class="n">bayescal</span><span class="o">.</span><span class="n">_patch_cas</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">"PRESCRIBED ELEVATIONS"</span><span class="p">,</span> <span class="n">elev</span><span class="p">)</span>
@@ -927,7 +943,7 @@
     <span class="n">report</span> <span class="o">=</span> <span class="n">compare</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">model_path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">geometry_slf</span><span class="p">),</span> <span class="n">result</span><span class="p">,</span>
                      <span class="n">name</span><span class="o">=</span><span class="n">situation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                      <span class="n">measurement_error</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration</span><span class="o">.</span><span class="n">measurement_error</span><span class="p">),</span>
-                     <span class="n">wet_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">hydrodynamics</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">))</span>
+                     <span class="n">wet_depth</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">wet_depth</span><span class="p">))</span>
     <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">calibration_dir</span><span class="p">)</span> <span class="o">/</span> <span class="n">FOLDER</span>
     <span class="n">folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">report</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">folder</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"validation-</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>

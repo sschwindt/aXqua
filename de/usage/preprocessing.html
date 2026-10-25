@@ -17,7 +17,7 @@
     <link rel="canonical" href="https://axqua.eu/de/usage/preprocessing.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=5451682b"></script>
+      <script src="../_static/documentation_options.js?v=81fca66b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/translations.js?v=9bf55d28"></script>
@@ -92,6 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#mesh-configuration">Rechennetzkonfiguration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#wall-roughness">Wandrauheit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydraulic-simulation">Hydraulische Simulation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="case-setup.html#hydrology">Hydrologie</a></li>
 <li class="toctree-l3"><a class="reference internal" href="case-setup.html#morphodynamic-simulation">Morphodynamische Simulation</a></li>
 </ul>
 </li>
@@ -120,6 +121,17 @@
 <li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#concept">Konzept</a></li>
 <li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#telemac-gaia-setup">Einrichtung von TELEMAC-GAIA</a></li>
 <li class="toctree-l3"><a class="reference internal" href="morphodynamic-simulations.html#openfoam-setup">OpenFOAM Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="hydrology-simulations.html">Hydrologie</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#concept">Konzept</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#case-setup">Fallaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#data-setup">Datenaufbau</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#wind-and-evaporation">Wind und Verdunstung</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#boundaries-and-outlet">Ränder und Outlet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#preprocessing">Preprocessing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#run-and-results">Lauf und Ergebnisse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hydrology-simulations.html#mesh-resolution-calibration-and-limits">Netzauflösung, Kalibrierung und Limits</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="calibration-validation.html">Kalibrierung und Validierung</a><ul>
@@ -281,6 +293,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#preprocessing">Preprocessing</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulations">Simulationen</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/warnings.html#simulation-software">Simulationssoftware</a></li>
@@ -290,6 +303,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation">Installation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#installation-of-the-simulation-software">Installation der Simulationssoftware</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#check-of-a-case">Kontrolle eines Falls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#hydrology-checkup">Hydrologieprüfung</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#profile-of-this-computer">Profil dieses Computers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#case-file">Fall-Datei</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../troubleshooting/errors.html#preprocessing-and-simulations">Preprocessing und Simulationen</a></li>
@@ -414,6 +428,11 @@
 <li><p>die Messpunkte liegen innerhalb des Modells. Der Befehl <code class="docutils literal notranslate"><span class="pre">axqua</span> <span class="pre">check-gt</span> <span class="pre">&lt;case-file&gt;</span></code> vergleicht zusätzlich die Höhen der Messpunkte mit dem Gelände-Modell.</p></li>
 </ul>
 <p>Die letzte Prüfung ist die erste Simulation selbst, die zeigt, ob Zufluss und Ausfluss Flussabschnitt eine Balance (<a class="reference internal" href="hydraulic-simulations.html#hydraulics-dry-runs"><span class="std std-ref">TELEMAC Trockenläufe 2D/3D</span></a>).</p>
+<p><strong>Der Hydrologie-Checkup.</strong> Ein Fall in den Hydrologie-Modus (<a class="reference internal" href="hydrology-simulations.html#hydrology-preprocessing"><span class="std std-ref">Preprocessing</span></a>) erhält einen weiteren Check, der im Feld <em>Hydrology checkup</em> der Registerkarte <em>Preprocessing</em> angezeigt wird und am Anfang jedes Builds ausgeführt wird, wobei ein Fehler den Build stoppt:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua hydrology check &lt;case-file&gt;
+</pre></div>
+</div>
+<p>Es liest die Regenreihe und die Wetterreihe, prüft die Bodenzonen und ihre Werte gegen die Texturklassen von Rawls et al. (1983) und benennt einen fehlenden Anfangswassergehalt, einen freien Auslass und den Finite-Elemente-Kernel. Es analysiert dann das Gelände-Modell. Jede Zelle des Umrisses wird als Ausgang geöffnet und das Gelände wird von ihnen nach innen geflutet (vorrangige Flut, Barnes et al. 2014), so dass jede Zelle auf einem Weg zum Umriss abfließt. Wo ein großer Bereich zu einem Abschnitt des Umrisses abfließt, der eine Wand und keine Ausflusslinie ist, folgt der Umriss nicht der Kluft, und das dort gesammelte Wasser würde gegen die Wand Teich. Die gleiche Flut füllt die geschlossenen Mulden des Gelände-Modells bis zu ihrem Verschüttungsniveau; die größten werden mit ihrem Volumen benannt, weil eine Mulde den Regen hält, bis er voll ist. Das ist richtig für einen Teich und falsch, wo das Gelände-Modell einen Durchgang oder die Öffnung einer Brücke blockiert.</p>
 </section>
 <section id="telemac-choices">
 <span id="preprocessing-telemac-choices"></span><h2>TELEMAC-Entscheidungen<a class="headerlink" href="#telemac-choices" title="Link to this heading"></a></h2>
@@ -466,7 +485,9 @@
 <p><strong>Schärfe des Wasserspiegel.</strong> In einem flachen Fluss verteilt sich der Wasserspiegel eines <code class="docutils literal notranslate"><span class="pre">vof</span></code>-Laufs über mehrere Zellen. Der Layer des Rechennetz folgt dem Bett, und die Oberfläche kreuzt sie überall dort, wo das Bett abfällt. Im Beispiel der Isar mit 1 m Zellen und 14 Layer befand sich etwa ein Drittel des Wassers in vollständig gefüllten Zellen, und der Übergang von Wasser zu Luft war etwa so hoch, wie das Wasser tief war. Die Einstellung <code class="docutils literal notranslate"><span class="pre">interface_compression</span></code> (1 standardmäßig) legt fest, wie stark OpenFOAM die Oberfläche zusammenhält. Mit 2 war der Übergang auf dem Isar-Beispiel halb so hoch mit 2 m Zellen und ein Viertel so hoch mit 1 m Zellen, und der Lauf brauchte etwa ein Drittel mehr Zeitschritte. Bei 1 m Zellen haben sich die Durchschnittswerte über dem Flussabschnitt kaum geändert: Wo das Wasser tiefer als 5 cm war, änderte sich der Wassertiefe um 3 mm und die Tiefe gemittelte Geschwindigkeit um weniger als 0,01 m / s im Durchschnitt, und der Wasserstände bei Zuflüsse und der Ausfluss änderte sich um weniger als 5 mm. Spalte für Spalte änderte sich jedoch die Tiefe-gemittelte Geschwindigkeit um 0,09 m/s (Mittelwertquadrat), fünfmal so viel wie sie innerhalb eines Laufs über 100 s variierte, und der Mittelwert Sohlschubspannung stieg von 8,7 auf 9,7 Pa. Lokale Geschwindigkeiten und Bettscherspannungen eines <code class="docutils literal notranslate"><span class="pre">vof</span></code> Laufs in einem flachen Flussabschnitt hängen somit von dieser Einstellung ab; welcher Wert die genaueren gibt, wurde nicht gegen Messungen getestet. Spuren von Wasser in einer verschmierten Oberfläche verlassen auch das Modell mit der Luft durch seine Oberseite. aXqua meldet diesen Verlust nach jedem Lauf als Anteil des Abfluss und schließt ihn in den Abfluss-Saldo ein. Beim Isar-Beispiel mit 1 m-Zellen betrug der Verlust 0,8 % des Abfluss mit Kompression 1 und 1,3 bis 1,6 % mit Kompression 2.</p>
 <p>Die simulierte Zeit, die ein Modell für einen stationären Zustand benötigt, hängt davon ab, wie viel Wasser der Flussabschnitt speichern oder abgeben muss, bevor Zufluss und Ausfluss zustimmen. Ein 3D-Modell hat einen anderen Widerstand als das 2D-Modell, von dem es ausgeht, und der Unterschied im gespeicherten Wasser fließt langsam durch Pools und Seitengerinne ab. Am Beispiel Isar benötigte das Modell mit 2 m Zellen etwa 3000 s simulierte Zeit, bis der Ausfluss den Zufluss um weniger als 1 % übertraf.</p>
 <p class="rubric">Referenzen</p>
+<p>Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers &amp; Geosciences 62, 117–127.</p>
 <p>Geuzaine, C., Remacle, J.-F., 2009. Gmsh: A 3-D finite element mesh generator with built-in pre- and post-processing facilities. International Journal for Numerical Methods in Engineering 79, 1309–1331. <a class="reference external" href="https://doi.org/10.1002/nme.2579">https://doi.org/10.1002/nme.2579</a></p>
+<p>Rawls, W. J., Brakensiek, D. L., Miller, N., 1983. Green-Ampt infiltration parameters from soils data. Journal of Hydraulic Engineering 109(1), 62–70.</p>
 <p>Thorenz, C., 2024. Boundary conditions for hydraulic structures modelling with OpenFOAM. 10th International Symposium on Hydraulic Structures, Zurich. <a class="reference external" href="https://doi.org/10.3929/ethz-b-000675949">https://doi.org/10.3929/ethz-b-000675949</a></p>
 </section>
 </section>
