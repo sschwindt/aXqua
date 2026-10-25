@@ -102,6 +102,7 @@ class HydrologyWizard(QDialog):
         self.info = dict(info or {})
         self.pending: dict[str, object] = {}       # dotted key -> value, for Save
         self.saved = False
+        self.wrote = False                   # a download or an import wrote data files
         self.portals: dict = {}
         self._portal_labels: list[tuple[QLabel, str]] = []
         self.setWindowTitle(f"Hydrology data: {self.case.name}")
@@ -494,6 +495,7 @@ class HydrologyWizard(QDialog):
                   on_error=self._failed, owner=self)
 
     def _fetched(self, answer: dict, what: str) -> None:
+        self.wrote = True
         settings = dict(answer.get("settings") or {})
         for key, value in settings.items():
             self.pending[key] = value

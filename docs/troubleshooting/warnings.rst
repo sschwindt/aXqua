@@ -103,6 +103,11 @@ The hydrology checkup of a case in hydrology mode reports the following warnings
 ``The rain has no date, the weather does``
     A design storm, or a rain table in seconds, has no calendar time, while the weather series has dates, for example from an event the data wizard downloaded before. The weather is then applied from the start of the rain, with its wind and the evaporation of its own days. Set ``hydrology.rainfall_start`` to the date and time the rain is meant to start in the weather series, or remove the weather series when it belongs to another event.
 
+.. _axqua-hydrology-weather-gaps:
+
+``The weather series has no value for ... readings of ...``
+    Cells of the weather series are empty, or hold -999, which is how the DWD marks a missing measurement. aXqua interpolates each of them in time between the readings before and after it, and the wind direction as an angle, because wind, radiation, temperature and humidity change gradually, and a value of -999 would otherwise enter the wind and the evaporation as if it had been measured. Over a gap of a few hours the interpolation misses the course of the day: fill longer gaps from a neighboring station, or make sure the event lies outside them.
+
 .. _axqua-hydrology-weather-short:
 
 ``The weather ends at ... s, the run at ... s``

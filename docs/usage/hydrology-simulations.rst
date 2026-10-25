@@ -83,6 +83,10 @@ A hydrology case needs a terrain model, the outline of the catchment, a rain ser
 
 **Rain series.** A time stamp of a rain record is the start or the end of its interval. Agencies stamp the end: the rain of 12:00 to 13:00 is reported at 13:00, which is the default of ``rainfall_stamp``. The model's time zero is the start of the first interval, or ``rainfall_start`` for a series with dates.
 
+The station files of the DWD Climate Data Center are read as they are downloaded. ``MESS_DATUM`` holds the date as one number (``2024060213``), and the rain columns are depths in mm whatever ``rainfall_units`` and ``rainfall_stamp`` say: ``R1`` is the hour before the stamp, ``RWS_10`` the 10 minutes before it, and ``RS`` the precipitation day of the DWD, which runs from 05:50 UTC of the date to 05:50 UTC of the next day (07:30 local time before April 2001). A daily value is therefore placed about six hours after midnight, and it is far too coarse to resolve a storm. Other dates written as one number, such as the ``time`` column of MeteoSwiss, are read as dates as well.
+
+A value of -999, the code of the DWD for a missing measurement, or an empty cell is no measurement. In the rain it stays an interval of its own, simulated as dry, and the checkup names the gaps; in the weather series it is interpolated between the readings around it. A units row under the header and a sum at the end are left out. A row inside the data whose time cannot be read stops the import with that value, because its rain could not be placed in time.
+
 **Soil parameters.** Where no measurements exist, Rawls et al. (1983) give mean Green-Ampt parameters for the eleven USDA texture classes:
 
 .. list-table::

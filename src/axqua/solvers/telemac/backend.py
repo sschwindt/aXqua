@@ -122,6 +122,8 @@ class TelemacBackend(BaseBackend):
 
     def _run_hydrology(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
                        **_ignored):
+        from axqua.solvers.telemac.steering import cas_duration
+
         if not cfg.hydrology_mode:
             raise errors.ConfigError(
                 "the case is not in hydrology mode", subject="hydrology.enabled",
@@ -129,7 +131,7 @@ class TelemacBackend(BaseBackend):
                        "the case again.")
         return self._launch(cfg, ctx=ctx, cas_file=cfg.hydrology_cas_file,
                             ncsize=ncsize, solver=None, name="telemac-hydrology",
-                            duration=_cas_duration(cfg, cfg.hydrology_cas_file))
+                            duration=cas_duration(cfg.model_path(cfg.hydrology_cas_file)))
 
     def _run_steady(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
                     cas_file: str | None = None, **_ignored):
@@ -566,13 +568,6 @@ class TelemacBackend(BaseBackend):
 
 
 BACKEND = TelemacBackend()
-
-
-def _cas_duration(cfg, cas_name: str) -> float | None:
-    """The ``DURATION`` of a 2D steering file, for the progress bar."""
-    from axqua.solvers.telemac.steering import cas_duration
-
-    return cas_duration(cfg.model_path(cas_name))
 
 
 def _level_progress(ctx: Any):

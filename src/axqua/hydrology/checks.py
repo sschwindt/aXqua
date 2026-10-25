@@ -28,6 +28,7 @@ CODES = {
     "axqua.hydrology.reanalysis_rain": WARNING,
     "axqua.hydrology.weather_unreadable": ERROR,
     "axqua.hydrology.weather_alignment": WARNING,
+    "axqua.hydrology.weather_gaps": WARNING,
     "axqua.hydrology.weather_short": WARNING,
     "axqua.hydrology.wind_strong": WARNING,
     "axqua.hydrology.evaporation_high": WARNING,
@@ -134,6 +135,7 @@ def _check_rain(cfg, found: list[Finding]):
 
 def _check_weather(cfg, rain, found: list[Finding]) -> None:
     from axqua.hydrology import weather
+    from axqua.hydrology.rainfall import _count
 
     h = cfg.hydrology
     if not (h.wind or h.evaporation != "none"):
@@ -164,6 +166,16 @@ def _check_weather(cfg, rain, found: list[Finding]) -> None:
                               f"The weather series cannot be used: {exc}",
                               "hydrology.weather"))
         return
+    if meteo.gaps:
+        found.append(_finding(
+            "axqua.hydrology.weather_gaps",
+            "The weather series has no value for "
+            + ", ".join(f"{_count(n, 'reading')} of {name}"
+                        for name, n in meteo.gaps.items())
+            + "; they are interpolated between the readings around them.",
+            "hydrology.weather",
+            "Fill longer gaps from a neighboring station, or make sure the event lies "
+            "outside them."))
     if rain is not None and rain.origin is None and meteo.origin is not None:
         found.append(_finding(
             "axqua.hydrology.weather_alignment",

@@ -84,6 +84,14 @@ _RE_ERROR = re.compile(
     rf"(?P<value>{_NUM})", re.IGNORECASE)
 _RE_ITERATION = re.compile(
     r"\s*ITERATION\s+(?P<iteration>\d+)\s+TIME\b(?P<rest>.*)", re.IGNORECASE)
+# How many liquid boundaries the run had, as TELEMAC states it before the time loop:
+# 'THERE IS n LIQUID BOUNDARIES:' (bief/front2.f, only when n > 0, followed by
+# 'THERE IS n SOLID BOUNDARIES:') in a serial run, 'NUMBER OF LIQUID BOUNDARIES: n'
+# (telemac2d_init.F, always) in a parallel one.
+_RE_LIQUID = re.compile(
+    r"\s*(?:THERE IS\s+(?P<serial>\d+)\s+LIQUID BOUNDARIES\s*:"
+    r"|NUMBER OF LIQUID BOUNDARIES\s*:\s*(?P<parallel>\d+))", re.IGNORECASE)
+_RE_SOLID = re.compile(r"\s*THERE IS\s+\d+\s+SOLID BOUNDARIES\s*:", re.IGNORECASE)
 
 # --- TELEMAC-3D (telemac3d/bil3d.f) ---------------------------------------- #
 # The whole line is the header, so 'GAIA MASS-BALANCE OF SEDIMENTS' (hyphenated and
@@ -152,6 +160,8 @@ class Sortie:
     #: passed through as printed rather than converted, so the two are not silently
     #: made to look alike. Everything else means the same in both.
     dimension: str = "2d"
+    #: the number of liquid boundaries the listing states; ``None`` when it states none
+    liquid_boundaries: int | None = None
 
     @property
     def n_boundaries(self) -> int:
@@ -198,7 +208,7 @@ class Sortie:
         return frame
 
 
-def read_sortie(path: str | Path, *, closed: bool = False) -> Sortie:
+def read_sortie(path: str | Path) -> Sortie:
     """Parse the water-volume balance history out of a ``.sortie`` listing.
 
     Reads both the TELEMAC-2D and the TELEMAC-3D balance block (see the module
@@ -206,9 +216,10 @@ def read_sortie(path: str | Path, *, closed: bool = False) -> Sortie:
 
     Raises :class:`ValueError` when the listing holds no complete balance block -
     normally because the run was launched without ``-s`` or without
-    ``PRINTING CUMULATED FLOWRATES : YES``. *closed* accepts blocks without any
-    boundary flux, which is what a domain without liquid boundaries prints (a closed
-    catchment of the hydrology mode); for any other run such blocks are that error.
+    ``PRINTING CUMULATED FLOWRATES : YES``. Blocks without any boundary flux are
+    complete only when the listing itself says the run had no liquid boundary (a
+    closed catchment of the hydrology mode): the domain of that run decides, not the
+    case as it is built now.
     """
     path = Path(path)
     study = "UNKNOWN"
@@ -217,6 +228,7 @@ def read_sortie(path: str | Path, *, closed: bool = False) -> Sortie:
     iter_time: float | None = None
     want_study = False
     dimension = "2d"
+    liquid: int | None = None
 
     iterations: list[int] = []
     times: list[float] = []
@@ -262,6 +274,15 @@ def read_sortie(path: str | Path, *, closed: bool = False) -> Sortie:
             if "NAME OF THE STUDY" in line.upper() and _RE_STUDY.match(line):
                 want_study = True
                 continue
+
+            if liquid is None:
+                match = _RE_LIQUID.match(line)
+                if match:
+                    liquid = int(match.group("serial") or match.group("parallel"))
+                    continue
+                if _RE_SOLID.match(line):
+                    liquid = 0           # front2.f names the liquid ones first, if any
+                    continue
 
             match = _RE_ITERATION.match(line)
             if match:
@@ -336,9 +357,9 @@ def read_sortie(path: str | Path, *, closed: bool = False) -> Sortie:
             fluxes[i, index - 1] = value
     # drop any block whose fluxes were not all printed (a truncated tail). A domain
     # without liquid boundaries prints none at all: every block of it is complete
-    # when the caller expects a closed domain, and none is otherwise.
+    # when its listing says so, and none is otherwise.
     complete = (~np.isnan(fluxes).any(axis=1) if n_bnd
-                else np.full(len(flux_rows), bool(closed)))
+                else np.full(len(flux_rows), liquid == 0))
     if not complete.any():
         raise ValueError(f"{path.name}: balance blocks carry no boundary fluxes; "
                          "set 'PRINTING CUMULATED FLOWRATES : YES'.")
@@ -350,7 +371,7 @@ def read_sortie(path: str | Path, *, closed: bool = False) -> Sortie:
         volume=np.asarray(volumes, dtype=float)[keep],
         fluxes=fluxes[keep],
         volume_error=np.asarray(errors, dtype=float)[keep],
-        dimension=dimension,
+        dimension=dimension, liquid_boundaries=liquid,
     )
 
 

@@ -44,7 +44,6 @@ from __future__ import annotations
 
 import logging
 import math
-import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -53,6 +52,7 @@ import numpy as np
 from axqua.core import selafin
 from axqua.config import Config
 from axqua.solvers.telemac.steering import TURB_NAMES, _global_friction, select_turbulence_model
+from axqua.solvers.telemac.steering import read_cas_values as _read_cas_values
 
 log = logging.getLogger("axqua")
 
@@ -233,23 +233,6 @@ def courant_time_step(dx: float, dz: float, u_char: float,
 # --------------------------------------------------------------------------- #
 # writing the 3D steering
 # --------------------------------------------------------------------------- #
-
-def _read_cas_values(path: Path, *keywords: str) -> dict[str, str | None]:
-    """Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``),
-    ignoring comment lines - one file read/pass for all keywords."""
-    pats = {kw: re.compile(rf"^\s*{re.escape(kw)}\s*[:=]\s*(.+?)\s*$", re.IGNORECASE)
-            for kw in keywords}
-    found: dict[str, str | None] = dict.fromkeys(keywords)
-    for line in Path(path).read_text().splitlines():
-        if line.lstrip().startswith(("/", "*")):
-            continue
-        for kw, pat in pats.items():
-            if found[kw] is None:
-                m = pat.match(line)
-                if m:
-                    found[kw] = m.group(1).strip()
-    return found
-
 
 def cas3d_name(cfg: Config, suffix: str = "") -> str:
     """``<case-name>3d<suffix>.cas`` with a filesystem-safe case name.

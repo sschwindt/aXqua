@@ -157,6 +157,24 @@ def test_cancelling_everything_leaves_nothing_in_flight(qgis_app):
     assert not tasks._IN_FLIGHT
 
 
+def test_a_task_the_user_cancels_says_so_instead_of_answering(qgis_app):
+    """A box that waits for the answer has to stop waiting (its Check button)."""
+    from axqua_plugin.core import tasks
+
+    said = []
+    task = tasks.RunnerTask("test", lambda: 1, on_success=said.append,
+                            on_cancel=lambda: said.append("cancelled"))
+    task.run()
+    task.cancel()
+    task.finished(True)
+    assert said == ["cancelled"]
+    unloaded = tasks.run_async("test", lambda: 1,
+                               on_cancel=lambda: said.append("after unload"))
+    tasks.cancel_all()                       # the plugin goes, and its widgets with it
+    unloaded.finished(False)
+    assert said == ["cancelled"]
+
+
 # ------------------------------------------------------------------------- layers
 
 
@@ -3293,32 +3311,40 @@ def test_the_outflow_level_of_a_catchment_is_required_when_its_outlet_is_a_lake(
     editor.deleteLater()
 
 
-def test_a_late_answer_for_another_case_does_not_reach_the_hydrology_box(
-        qgis_app, tmp_path, monkeypatch):
-    """A checkup of the terrain takes seconds; the user may have chosen another case."""
+def _hydro_box(monkeypatch, *cases):
+    """A box of the hydrology data and the requests it makes, which no one answers."""
     from types import SimpleNamespace
 
     from axqua_plugin.gui import hydrology_box
 
     calls = []
     monkeypatch.setattr(hydrology_box, "run_async",
-                        lambda title, call, on_success=None, on_error=None, owner=None:
-                        calls.append((title, on_success)))
-    first, second = tmp_path / "a.axq-case", tmp_path / "b.axq-case"
-    first.write_text("")
-    second.write_text("")
-    chosen = [first]
+                        lambda title, call, **callbacks: calls.append((title, callbacks)))
+    for case in cases:
+        case.write_text("")
+    chosen = [cases[0]]
     ctx = SimpleNamespace(project=SimpleNamespace(active_case_path=lambda: chosen[0]),
-                          client=None)
-    box = hydrology_box.HydrologyDataBox(ctx)
+                          client=None, refresh_case=lambda: None)
+    return hydrology_box.HydrologyDataBox(ctx), calls, chosen
+
+
+def _asked(calls, start=0):
+    return ["checkup" if "checkup" in title else "info" for title, _ in calls[start:]]
+
+
+def test_a_late_answer_for_another_case_does_not_reach_the_hydrology_box(
+        qgis_app, tmp_path, monkeypatch):
+    """A checkup of the terrain takes seconds; the user may have chosen another case."""
+    first, second = tmp_path / "a.axq-case", tmp_path / "b.axq-case"
+    box, calls, chosen = _hydro_box(monkeypatch, first, second)
     box.refresh()
     assert calls == []                          # not on the screen: nothing asked
     box.show()
-    assert len(calls) == 2                      # shown: the data and the quick checkup
-    late = [answer for title, answer in calls if "checkup" in title][0]
+    assert _asked(calls) == ["info", "checkup"]  # shown: the data and the quick checkup
+    late = calls[1][1]["on_success"]
     chosen[0] = second
     box.refresh()
-    current = [answer for title, answer in calls[2:] if "checkup" in title][0]
+    current = [cb for title, cb in calls[2:] if "checkup" in title][0]["on_success"]
     current({"findings": []})
     late({"findings": [{"severity": "warning", "code": "axqua.hydrology.depressions",
                         "message": "of case a", "subject": "geodata.dem_initial"}]})
@@ -3330,26 +3356,16 @@ def test_a_late_answer_for_another_case_does_not_reach_the_hydrology_box(
 def test_a_refresh_does_not_replace_a_checkup_of_the_terrain_under_way(
         qgis_app, tmp_path, monkeypatch):
     """The user asked for the terrain with Check; a job ending refreshes the case."""
-    from types import SimpleNamespace
-
-    from axqua_plugin.gui import hydrology_box
-
-    calls = []
-    monkeypatch.setattr(hydrology_box, "run_async",
-                        lambda title, call, on_success=None, on_error=None, owner=None:
-                        calls.append((title, on_success)))
-    case = tmp_path / "a.axq-case"
-    case.write_text("")
-    ctx = SimpleNamespace(project=SimpleNamespace(active_case_path=lambda: case),
-                          client=None)
-    box = hydrology_box.HydrologyDataBox(ctx)
+    box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
     box.refresh()
     box.show()                                       # data + quick checkup
+    calls[0][1]["on_success"]({})
     box.check(terrain=True)
-    terrain = calls[-1][1]
-    box.refresh()                                    # data only, no quick checkup
-    assert [title for title, _ in calls[3:]] == [
-        "aXqua: reading the hydrology data of the case"]
+    terrain = calls[-1][1]["on_success"]
+    box.refresh()                                    # the data again, no quick checkup
+    assert _asked(calls, 3) == ["info"]
+    box.refresh()                                    # the data are on their way too
+    assert _asked(calls, 3) == ["info"]
     terrain({"findings": [{"severity": "warning",
                            "code": "axqua.hydrology.flow_across_wall",
                            "message": "water crosses the outline",
@@ -3357,5 +3373,82 @@ def test_a_refresh_does_not_replace_a_checkup_of_the_terrain_under_way(
     assert [f.code for f in box.finding_list.findings] == [
         "axqua.hydrology.flow_across_wall"]
     box.refresh()                                    # done: a refresh checks again
-    assert sum("checkup" in title for title, _ in calls) == 3
+    assert _asked(calls, 4) == ["checkup"]
+    box.deleteLater()
+
+
+def test_a_voided_checkup_of_the_terrain_does_not_hold_back_the_next_one(
+        qgis_app, tmp_path, monkeypatch):
+    """Its answer is void once the case is no longer chosen, so it is not waited for."""
+    case = tmp_path / "a.axq-case"
+    box, calls, chosen = _hydro_box(monkeypatch, case)
+    box.refresh()
+    box.show()
+    box.check(terrain=True)
+    chosen[0] = None
+    box.refresh()                                    # no case: every answer is void
+    chosen[0] = case
+    box.refresh()                                    # chosen again: checked again
+    assert _asked(calls, 3) == ["info", "checkup"]
+    box.deleteLater()
+
+
+def test_a_checkup_of_the_terrain_is_asked_again_when_the_data_change(
+        qgis_app, tmp_path, monkeypatch):
+    """The data wizard may save while the terrain is checked; that answer is old."""
+    import os
+
+    case = tmp_path / "a.axq-case"
+    box, calls, _ = _hydro_box(monkeypatch, case)
+    box.refresh()
+    box.show()
+    box.check(terrain=True)
+    old = calls[-1][1]["on_success"]
+    case.write_text("hydrology:\n  enabled: true\n")      # saved in the meantime
+    os.utime(case, ns=(1, 1))
+    box.refresh()
+    assert _asked(calls, 3) == ["info", "checkup"]
+    assert box.state.text() == "Checking the terrain model..."   # the terrain again
+    old({"findings": [{"severity": "error", "code": "axqua.hydrology.rainfall_missing",
+                       "message": "no rain", "subject": "hydrology.rainfall"}]})
+    assert box.finding_list.findings == []           # the answer for the old data
+    box.deleteLater()
+
+
+def test_the_data_wizard_refreshes_the_box_once_when_the_case_status_fails(
+        qgis_app, tmp_path, monkeypatch):
+    """The page refreshes the box only when it can read the status of the case."""
+    from axqua_plugin import compat
+    from axqua_plugin.gui import hydrology_wizard
+
+    box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
+    box.refresh()
+    box.show()
+    calls[0][1]["on_success"]({})
+    calls[1][1]["on_success"]({"findings": []})
+
+    class _Wizard:
+        def __init__(self, *args, **kwargs):
+            self.saved, self.wrote = True, True
+
+    monkeypatch.setattr(hydrology_wizard, "HydrologyWizard", _Wizard)
+    monkeypatch.setattr(compat, "exec_dialog", lambda dialog: None)
+    box.open_wizard()                                # the case status never arrives
+    assert _asked(calls, 2) == ["info", "checkup"]
+    box.refresh()                                    # the page, when it does arrive
+    assert _asked(calls, 2) == ["info", "checkup"]
+    box.deleteLater()
+
+
+def test_a_cancelled_checkup_lets_the_user_check_again(qgis_app, tmp_path, monkeypatch):
+    box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
+    box.refresh()
+    box.show()
+    box.check(terrain=True)
+    assert not box.check_button.isEnabled()
+    calls[-1][1]["on_cancel"]()                      # cancelled in the task bar
+    assert box.check_button.isEnabled()
+    assert "cancelled" in box.state.text()
+    box.refresh()                    # the data are on their way, the checkup is not
+    assert _asked(calls, 3) == ["checkup"]
     box.deleteLater()

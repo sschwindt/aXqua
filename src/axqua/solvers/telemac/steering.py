@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 from pathlib import Path
 
 from axqua.config import Config
@@ -76,20 +77,33 @@ def _turbulence_length_scale(cfg: Config) -> float:
     return 1.0
 
 
+def read_cas_values(path: str | Path, *keywords: str) -> dict[str, str | None]:
+    """Values of *keywords* from a steering file (``KEY : value`` or ``KEY = value``),
+    ignoring comment lines - one file read/pass for all keywords."""
+    pats = {kw: re.compile(rf"^\s*{re.escape(kw)}\s*[:=]\s*(.+?)\s*$", re.IGNORECASE)
+            for kw in keywords}
+    found: dict[str, str | None] = dict.fromkeys(keywords)
+    for line in Path(path).read_text(errors="replace").splitlines():
+        if line.lstrip().startswith(("/", "*")):
+            continue
+        for kw, pat in pats.items():
+            if found[kw] is None:
+                m = pat.match(line)
+                if m:
+                    found[kw] = m.group(1).strip()
+    return found
+
+
 def cas_duration(path: str | Path) -> float | None:
     """The ``DURATION`` of a steering file [s]; ``None`` without one."""
     try:
-        text = Path(path).read_text(encoding="utf-8", errors="replace")
+        value = read_cas_values(path, "DURATION")["DURATION"]
     except OSError:
         return None
-    for line in text.splitlines():
-        key, sep, value = line.partition(":")
-        if sep and key.strip().upper() == "DURATION":
-            try:
-                return float(value.strip())
-            except ValueError:
-                return None
-    return None
+    try:
+        return float(value.replace("D", "E").replace("d", "e")) if value else None
+    except ValueError:
+        return None
 
 
 def _hydrology(cfg: Config) -> bool:

@@ -670,20 +670,31 @@ def test_a_design_storm_clears_the_time_zero_of_an_earlier_event(tmp_path, capsy
     assert "axqua.hydrology.weather_alignment" in codes
 
 
-def test_a_listing_without_boundary_fluxes_is_accepted_only_for_a_closed_domain(
-        tmp_path):
+@pytest.mark.parametrize("statement, closed", [
+    ("", False),                                            # says nothing: an error
+    (" THERE IS     1 LIQUID BOUNDARIES:\n\n THERE IS     1 SOLID BOUNDARIES:\n", False),
+    (" THERE IS     1 SOLID BOUNDARIES:\n", True),          # serial, no liquid one
+    (" NUMBER OF LIQUID BOUNDARIES:           0\n", True),   # parallel
+    (" NUMBER OF LIQUID BOUNDARIES:           2\n", False)])
+def test_a_listing_without_boundary_fluxes_is_accepted_when_it_says_its_domain_is_closed(
+        tmp_path, statement, closed):
+    """The listing of the run decides, not the case as it is built now (an outlet
+    added and built after the run would otherwise make its listing unreadable)."""
     from axqua.solvers.telemac.sortie import read_sortie
 
     listing = tmp_path / "case.cas_2026.sortie"
-    listing.write_text("".join(
+    listing.write_text(statement + "".join(
         f"                            BALANCE OF WATER VOLUME\n"
         f"     VOLUME IN THE DOMAIN :   {v:.6E} M3\n"
         f"     RELATIVE ERROR IN VOLUME AT T =     {t:.4f} S :  0.000000E+00\n"
         for t, v in ((60.0, 10.0), (120.0, 20.0))))
-    with pytest.raises(ValueError, match="no boundary fluxes"):
-        read_sortie(listing)                                 # a river run: an error
-    closed = read_sortie(listing, closed=True)
-    assert list(closed.time) == [60.0, 120.0] and closed.fluxes.shape == (2, 0)
+    if not closed:
+        with pytest.raises(ValueError, match="no boundary fluxes"):
+            read_sortie(listing)
+        return
+    sortie = read_sortie(listing)
+    assert list(sortie.time) == [60.0, 120.0] and sortie.fluxes.shape == (2, 0)
+    assert sortie.liquid_boundaries == 0
 
 
 def test_the_size_grid_is_computed_once_per_build_and_not_by_a_quick_checkup(
@@ -738,14 +749,14 @@ def test_one_conversion_of_a_friction_law_to_a_nikuradse_ks(law, coefficient, ks
 
 def test_daily_and_ten_minute_files_of_the_dwd_are_depths_whatever_the_settings(
         tmp_path):
-    """RS is mm per day on the day MESS_DATUM names, RWS_10 mm per 10 minutes before
-    it; the units and stamp settings (mm/h, end by default) do not apply."""
+    """RS is mm per precipitation day of the DWD, RWS_10 mm per 10 minutes before
+    MESS_DATUM; the units and stamp settings (mm/h, end by default) do not apply."""
     daily = tmp_path / "produkt_nieder_tag_03379.txt"
     daily.write_text("STATIONS_ID;MESS_DATUM;QN_6;  RS;RSF;SH_TAG;NSH_TAG;eor\n"
                      "3379;20240601;3;20.0;6;0;0;eor\n3379;20240602;3;10.0;6;0;0;eor\n")
     series = rainfall.read_series(daily)                     # the defaults: mm/h, end
     assert series.total_mm == pytest.approx(30.0)
-    assert series.origin == pd.Timestamp("2024-06-01")
+    assert series.origin == pd.Timestamp("2024-06-01 05:50")   # its morning observation
     ten = tmp_path / "produkt_zehn_min_rr_03379.txt"
     ten.write_text("STATIONS_ID;MESS_DATUM;QN;RWS_DAU_10;RWS_10;RWS_IND_10;eor\n"
                    "3379;202406021210;3;10;1.5;1;eor\n3379;202406021220;3;10;0.5;1;eor\n")
@@ -764,13 +775,89 @@ def test_a_units_row_and_a_sum_are_not_data(tmp_path):
         rainfall.read_series(path)
 
 
-def test_unix_seconds_are_never_read_as_dates(tmp_path):
-    """From 2030 on, Unix seconds also parse as YYYYMMDDHH; only a column named as a
-    date is read so."""
-    path = tmp_path / "logger.csv"
-    path.write_text("timestamp,rain\n1900010100,5\n1900013700,5\n1900017300,0\n")
+def test_a_broken_time_at_the_end_or_a_value_without_a_time_stops_the_import(tmp_path):
+    """Only a row that cannot be data is left out; the last, perhaps the peak, is not."""
+    path = tmp_path / "rain.csv"
+    path.write_text("time,rain\n2024-06-02 12:00,1\n2024-06-02 13:00,2\n"
+                    "2024-06-02 25:00,9\n")
+    with pytest.raises(ValueError, match="25:00"):
+        rainfall.read_series(path)
+    path.write_text("time,rain\n2024-06-02 12:00,1\n,2\n2024-06-02 14:00,2\n")
+    with pytest.raises(ValueError, match="after '2024-06-02 12:00' has a value"):
+        rainfall.read_series(path)
+    # two files joined: an empty row and the header of the second inside the data
+    path.write_text("time;rain\n2024-06-02 12:00;1\n;\ntime;rain\n"
+                    "2024-06-02 13:00;2\n2024-06-02 14:00;2\n")
     series = rainfall.read_series(path)
-    assert series.origin is None and list(series.end_s) == [3600.0, 7200.0, 10800.0]
+    assert list(series.intensity_mm_h) == [1.0, 2.0, 2.0]
+    assert any("2 rows inside the data" in note for note in series.notes)
+
+
+@pytest.mark.parametrize("text, origin", [
+    ("stn;time;rre150h0\nSMA;202406021200;1\nSMA;202406021300;4\n"   # MeteoSwiss
+     "SMA;202406021400;0.5\n", "2024-06-02 11:00"),
+    ("Zeit;Regen\n2024060222;1\n2024060223;2\n2024060300;3\n",       # over midnight
+     "2024-06-02 21:00"),
+    ("time,rain\n2024060212,1\n2024060213,2\n", "2024-06-02 11:00")])
+def test_integer_dates_are_read_as_dates_whatever_the_column_is_called(
+        tmp_path, text, origin):
+    path = tmp_path / "rain.csv"
+    path.write_text(text)
+    series = rainfall.read_series(path, units="mm")
+    assert series.origin == pd.Timestamp(origin)
+    assert np.allclose(np.diff(series.end_s), 3600.0)
+
+
+@pytest.mark.parametrize("values, step", [
+    ((1900010100, 1900013700, 1900017300), 3600.0),
+    ((2030010100, 2030010700, 2030011300), 600.0)])     # these parse as dates as well
+def test_unix_seconds_are_never_read_as_dates(tmp_path, values, step):
+    """From 2030 on, Unix seconds also parse as YYYYMMDDHH; their steps are whole
+    minutes, which YYYYMMDDHH read as a number never are."""
+    path = tmp_path / "logger.csv"
+    path.write_text("timestamp,rain\n" + "".join(f"{v},5\n" for v in values))
+    series = rainfall.read_series(path)
+    assert series.origin is None
+    assert list(series.end_s) == [step, 2 * step, 3 * step]
+
+
+def test_a_missing_reading_of_the_weather_is_interpolated_and_named(tmp_path):
+    """-999 used to reach the evaporation as a temperature and TELEMAC as wind."""
+    from axqua.config import load_config
+    from axqua.hydrology import weather
+    from axqua.hydrology.checks import run_checks
+
+    path = tmp_path / "user-sources" / "produkt_tu_stunde_03379.txt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("STATIONS_ID;MESS_DATUM;QN_9;TT_TU;RF_TU;eor\n"
+                    "3379;2024060211;3;15.0;80.0;eor\n3379;2024060212;3;-999;-999;eor\n"
+                    "3379;2024060213;3;17.0;70.0;eor\n")
+    meteo = weather.read_weather(path)
+    assert list(meteo.values["temperature"]) == [15.0, 16.0, 17.0]
+    assert list(meteo.values["relative_humidity"]) == [80.0, 75.0, 70.0]
+    assert meteo.gaps == {"temperature": 1, "relative_humidity": 1}
+    wind = tmp_path / "user-sources" / "wind.csv"
+    wind.write_text("time,wind_speed_10m,wind_direction_10m\nunit,m/s,deg\n"
+                    "2024-06-02 13:00,5,350\n2024-06-02 14:00,,-999\n"
+                    "2024-06-02 15:00,7,10\n")
+    meteo = weather.read_weather(wind)                  # and a units row is no data
+    assert list(meteo.values["wind_speed_10m"]) == [5.0, 6.0, 7.0]
+    assert meteo.values["wind_direction_10m"][1] == pytest.approx(0.0)  # not 180
+    case = _catchment(tmp_path, extra="  weather: user-sources/wind.csv\n"
+                                      "  wind: true\n")
+    codes = {f.code for f in run_checks(load_config(case))}
+    assert "axqua.hydrology.weather_gaps" in codes
+
+
+def test_the_duration_of_a_steering_file_is_read_as_telemac_reads_it(tmp_path):
+    from axqua.solvers.telemac.steering import cas_duration
+
+    cas = tmp_path / "hydrology2d.cas"
+    cas.write_text("/ DURATION : 1\nTITLE = 'catchment'\n  DURATION = 7200\n")
+    assert cas_duration(cas) == 7200.0
+    cas.write_text("DURATION : 3.6D3\n")
+    assert cas_duration(cas) == 3600.0
+    assert cas_duration(tmp_path / "missing.cas") is None
 
 
 def test_a_gap_survives_the_file_the_wizard_writes_and_is_named(tmp_path, capsys):
@@ -788,17 +875,3 @@ def test_a_gap_survives_the_file_the_wizard_writes_and_is_named(tmp_path, capsys
     assert "1 intervals" in answer["caution"]
     written = rainfall.read_series(answer["rainfall"])      # the canonical file
     assert written.gaps == 1 and written.total_mm == pytest.approx(20.0)
-
-
-def test_only_a_catchment_built_without_liquid_boundaries_is_a_closed_domain(tmp_path):
-    from axqua.config import load_config
-    from axqua.hydrology.report import closed_domain
-
-    cfg = load_config(_catchment(tmp_path))
-    assert not closed_domain(cfg)                     # not built: it has an outflow line
-    cli = Path(cfg.model_dir) / cfg.boundary_cli
-    cli.parent.mkdir(parents=True, exist_ok=True)
-    cli.write_text("2 2 2 0.0 0.0 0.0 0.0 2 0.0 0.0 0.0 1 1\n" * 3)
-    assert closed_domain(cfg)
-    cli.write_text(cli.read_text() + "5 4 4 0.0 0.0 0.0 0.0 4 0.0 0.0 0.0 4 4\n")
-    assert not closed_domain(cfg)

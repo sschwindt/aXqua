@@ -32,8 +32,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from axqua.hydrology.rainfall import (RainSeries, _column, _named_like_a_date,
-                                     _read_table, _seconds)
+from axqua.hydrology.rainfall import (RainSeries, _column, _count, _data_rows,
+                                     _no_measurement, _read_table, _seconds)
 
 #: Evaporation sources of the ``hydrology.evaporation`` setting.
 EVAPORATION_MODES = ("none", "et0", "penman", "series")
@@ -65,6 +65,8 @@ class WeatherSeries:
     values: dict[str, np.ndarray]
     origin: pd.Timestamp | None = None
     notes: list[str] = field(default_factory=list)
+    #: readings the table had no value for, by variable; interpolated (:func:`fill_gaps`)
+    gaps: dict[str, int] = field(default_factory=dict)
 
     def has(self, name: str) -> bool:
         return name in self.values and np.isfinite(self.values[name]).any()
@@ -82,27 +84,67 @@ class WeatherSeries:
         return path
 
 
+def fill_gaps(times, values, *, circular: bool = False) -> tuple[np.ndarray, int]:
+    """*values* with each missing one (``NaN``) interpolated in time, and their number.
+
+    Between two readings the value is interpolated linearly, before the first and after
+    the last the nearest reading holds. A direction in degrees (*circular*) is
+    interpolated as a unit vector, so that 350 and 10 give 0 and not 180. A variable
+    without any reading stays empty and counts no gap: the series does not have it.
+    """
+    times = np.asarray(times, dtype=float)
+    values = np.asarray(values, dtype=float)
+    ok = np.isfinite(values)
+    if ok.all() or not ok.any():
+        return values, 0
+    if circular:
+        angle = np.radians(values[ok])
+        east = np.interp(times, times[ok], np.sin(angle))
+        north = np.interp(times, times[ok], np.cos(angle))
+        between = np.round(np.degrees(np.arctan2(east, north)), 9) % 360.0
+    else:
+        between = np.interp(times, times[ok], values[ok])
+    return np.where(ok, values, between), int((~ok).sum())
+
+
 def read_weather(path: str | Path, *, stamp: str = "end",
                  origin: pd.Timestamp | None = None) -> WeatherSeries:
     """Read a weather table: ``start_s, end_s`` and named columns, or a time column.
 
-    Columns are found by the words in :data:`VARIABLES`. With dates in the table and an
-    *origin* (the time zero of the rain), the weather is put on the rain's clock.
+    Columns are found by the words in :data:`VARIABLES`. Rows that are no data, a
+    units row or a sum, are left out as for rain, and a row with a value but no
+    readable time stops the import. A reading without a value (empty, or -999 as the
+    DWD writes it) is interpolated between the readings around it (:func:`fill_gaps`):
+    wind, sun and air change gradually, and -999 would otherwise reach the solver as a
+    temperature or a wind speed. With dates in the table and an *origin* (the time zero
+    of the rain), the weather is put on the rain's clock.
     """
     path = Path(path)
     frame = _read_table(path)
     cols = {str(c).lower().strip(): c for c in frame.columns}
-    if "start_s" in cols and "end_s" in cols:
-        starts = pd.to_numeric(frame[cols["start_s"]]).to_numpy(dtype=float)
-        ends = pd.to_numeric(frame[cols["end_s"]]).to_numpy(dtype=float)
-        first = None
+    canonical = "start_s" in cols and "end_s" in cols
+    if canonical:
+        tcol = None
         skip = (cols["start_s"], cols["end_s"])
     else:
         tcol = _column(frame, "time", "date", "datum", "zeit")
         if tcol is None:
             raise ValueError(f"{path.name}: no time column (time, date, datum or zeit)")
-        seconds, first = _seconds(frame[tcol].reset_index(drop=True),
-                                  integer_dates=_named_like_a_date(tcol))
+        skip = (tcol,)
+    found = {}
+    for name, words in VARIABLES.items():
+        exact = cols.get(name)
+        col = exact if exact is not None else _column(frame, *words, exclude=skip)
+        if col is not None and col not in skip:
+            found[name] = col
+    notes = []
+    first = None
+    if canonical:
+        starts = pd.to_numeric(frame[cols["start_s"]]).to_numpy(dtype=float)
+        ends = pd.to_numeric(frame[cols["end_s"]]).to_numpy(dtype=float)
+    else:
+        frame, notes = _data_rows(frame, tcol, list(found.values()), path.name)
+        seconds, first = _seconds(frame[tcol])
         if seconds.size < 2:
             raise ValueError(f"{path.name}: at least two rows are needed")
         steps = np.diff(seconds)
@@ -114,13 +156,13 @@ def read_weather(path: str | Path, *, stamp: str = "end",
         else:
             starts = seconds
             ends = np.concatenate([seconds[1:], [seconds[-1] + steps[-1]]])
-        skip = (tcol,)
-    values = {}
-    for name, words in VARIABLES.items():
-        exact = cols.get(name)
-        col = exact if exact is not None else _column(frame, *words, exclude=skip)
-        if col is not None and col not in skip:
-            values[name] = pd.to_numeric(frame[col], errors="coerce").to_numpy(float)
+    values, gaps = {}, {}
+    middle = (starts + ends) / 2.0
+    for name, col in found.items():
+        values[name], missing = fill_gaps(middle, _no_measurement(frame[col]),
+                                          circular=name == "wind_direction_10m")
+        if missing:
+            gaps[name] = missing
     shift = 0.0
     start_time = None
     if first is not None:
@@ -131,8 +173,13 @@ def read_weather(path: str | Path, *, stamp: str = "end",
             shift = (start_time - origin).total_seconds()
     zero = starts[0]
     series = WeatherSeries(starts - zero + shift, ends - zero + shift, values,
-                           origin=origin if origin is not None else start_time)
+                           origin=origin if origin is not None else start_time,
+                           gaps=gaps)
     series.notes.append(f"read {path.name}: {', '.join(sorted(values)) or 'no columns'}")
+    series.notes.extend(notes)
+    for name, missing in gaps.items():
+        series.notes.append(f"{_count(missing, 'reading')} of {name} without a value, "
+                            "interpolated between the readings around them")
     return series
 
 
