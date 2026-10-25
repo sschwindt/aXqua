@@ -166,11 +166,13 @@ def _rainfall(args) -> tuple[dict, list[str]]:
     if problems:
         raise ValueError(f"{args.file.name}: {'; '.join(problems)}")
     path = series.write(_out_dir(args) / "rainfall.csv")
+    # a record without dates clears the time zero of an earlier event: it would
+    # otherwise date this rain, and put the weather of that event under it
     settings = {"hydrology.rainfall": _relative(path, args.case) if args.case
                 else str(path),
-                "hydrology.rainfall_units": "mm/h"}
-    if series.origin is not None:
-        settings["hydrology.rainfall_start"] = series.origin.isoformat()
+                "hydrology.rainfall_units": "mm/h",
+                "hydrology.rainfall_start": (series.origin.isoformat()
+                                             if series.origin is not None else None)}
     data = {"rainfall": str(path), "total_mm": series.total_mm,
             "peak_mm_h": series.peak_mm_h, "duration_s": series.end,
             "settings": settings, "notes": series.notes}
@@ -193,9 +195,11 @@ def _design(args) -> tuple[dict, list[str]]:
                                   step_min=args.step, distribution=args.distribution,
                                   peak=args.peak)
     path = storm.write(_out_dir(args) / "design-storm.csv")
+    # a design storm has no date: the time zero of an earlier event goes
     settings = {"hydrology.rainfall": _relative(path, args.case) if args.case
                 else str(path),
-                "hydrology.rainfall_units": "mm/h"}
+                "hydrology.rainfall_units": "mm/h",
+                "hydrology.rainfall_start": None}
     data = {"rainfall": str(path), "total_mm": storm.total_mm,
             "peak_mm_h": storm.peak_mm_h, "settings": settings,
             "blocks": storm.to_frame().to_dict(orient="list")}
@@ -257,9 +261,9 @@ def _check(args) -> tuple[dict, list[str]]:
 
     cfg = _need_case(args)
     findings = run_checks(cfg, terrain=not args.no_terrain)
-    data = {"path": str(args.case), "enabled": bool(cfg.hydrology.enabled),
+    data = {"path": str(args.case), "enabled": cfg.hydrology_mode,
             "findings": [f.as_dict() for f in findings]}
     lines = [f.line() for f in findings] or [
-        f"{args.case}: no findings" if cfg.hydrology.enabled
+        f"{args.case}: no findings" if cfg.hydrology_mode
         else f"{args.case}: the case is not in hydrology mode"]
     return data, lines

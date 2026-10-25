@@ -77,8 +77,7 @@ def _turbulence_length_scale(cfg: Config) -> float:
 
 
 def _hydrology(cfg: Config) -> bool:
-    hydrology = getattr(cfg, "hydrology", None)
-    return bool(hydrology is not None and hydrology.enabled)
+    return getattr(cfg, "hydrology_mode", False)
 
 
 def eddy_viscosity_estimate(cfg: Config) -> float:
@@ -348,7 +347,7 @@ def _node_roughness(cfg: Config, mesh):
     """
     import numpy as np
 
-    from axqua.rating import _resolve_n
+    from axqua.rating import ks_from_friction
 
     if getattr(mesh, "roughness", None) is not None:
         ks = np.asarray(mesh.roughness, dtype=float)
@@ -356,8 +355,11 @@ def _node_roughness(cfg: Config, mesh):
         if usable.any():   # fill any gap with the median of the usable values
             return np.where(usable, ks, float(np.median(ks[usable])))
     law, coef = cfg.friction.boundary_law, cfg.friction.boundary_coefficient
-    n = _resolve_n(coef if law == 4 else None, coef if law == 3 else None)
-    return np.full(mesh.x.shape, (n / 0.0474) ** 6)
+    ks = ks_from_friction(law, coef)
+    if ks is None:
+        raise ValueError(f"friction.boundary_law {law} has no Nikuradse ks; give "
+                         "roughness zones or a Strickler/Manning/Nikuradse law")
+    return np.full(mesh.x.shape, ks)
 
 
 #: bounds on the per-transect bed slope used for the normal-depth seed [-]

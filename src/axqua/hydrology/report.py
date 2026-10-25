@@ -234,7 +234,7 @@ def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     if listing is None:
         raise FileNotFoundError(f"no listing of {cfg.hydrology_cas_file} in "
                                 f"{cfg.model_dir}; run the hydrology simulation first")
-    sortie = read_sortie(listing)
+    sortie = read_sortie(listing, closed=True)   # a catchment without an outlet
     if sortie.time.size == 0:
         raise ValueError(f"{listing.name} holds no water balance yet")
     budget = read_budget(listing)

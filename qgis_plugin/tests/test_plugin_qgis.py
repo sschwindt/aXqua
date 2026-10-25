@@ -3103,6 +3103,10 @@ def _hydro_field(key, kind, label, **extra):
 
 HYDRO_SWITCH = {"label": "Hydrology mode", "seed": {"enabled": True}}
 
+#: the outlet of a catchment is a lake
+_LAKE = {"all": [{"block": "hydrology"},
+                 {"key": "hydrology.outlet_condition", "in": ["elevation"]}]}
+
 HYDRO_SCHEMA = {
     "sections": [
         {"block": "geodata", "title": "Geodata", "label": "case-geodata", "fields": [
@@ -3111,25 +3115,38 @@ HYDRO_SCHEMA = {
         {"block": "boundaries", "title": "Liquid boundaries", "label": "",
          "fields": [_hydro_field("boundaries.prescribed_flowrate", "number",
                                  "Discharge", required=True,
-                                 required_unless=[{"block": "hydrology"}])]},
+                                 required_unless=[{"block": "hydrology"}]),
+                    _hydro_field("boundaries.prescribed_elevation", "number",
+                                 "Outflow level",
+                                 required_when=[{"key": "boundaries.outflow_condition",
+                                                 "in": ["elevation"]}, _LAKE],
+                                 required_unless=[{"all": [
+                                     {"block": "hydrology"},
+                                     {"key": "hydrology.outlet_condition",
+                                      "in": ["normal_depth", "free"]}]}])]},
         {"block": "mesh", "title": "Mesh", "label": "", "fields": [
             _hydro_field("mesh.default_size", "number", "Edge length")]},
         {"block": "hydrology", "title": "Hydrology", "label": "", "fields": [
             _hydro_field("hydrology.enabled", "bool", "Enabled", hidden=True),
             _hydro_field("hydrology.rainfall", "table", "Rain series",
-                         required_when=[{"block": "hydrology"}])]},
+                         required_when=[{"block": "hydrology"}]),
+            {**_hydro_field("hydrology.outlet_condition", "choice", "Outlet"),
+             "choices": ["normal_depth", "free", "elevation"],
+             "default": "normal_depth"}]},
     ],
     "pages": [
         {"key": "geodata", "title": "Geodata", "label": "", "switch": {},
          "frames": [{"title": "", "info": "", "keys": ["geodata.channel_centerline"]}]},
         {"key": "boundaries", "title": "Liquid boundaries", "label": "", "switch": {},
          "frames": [{"title": "", "info": "",
-                     "keys": ["boundaries.prescribed_flowrate"]}]},
+                     "keys": ["boundaries.prescribed_flowrate",
+                              "boundaries.prescribed_elevation"]}]},
         {"key": "mesh", "title": "Mesh configuration", "label": "", "switch": {},
          "frames": [{"title": "TELEMAC mesh", "info": "", "keys": ["mesh.default_size"],
                      "switch": {"block": "hydrology", **HYDRO_SWITCH}}]},
         {"key": "hydrology", "title": "Hydrology", "label": "", "switch": HYDRO_SWITCH,
-         "frames": [{"title": "Rain", "info": "", "keys": ["hydrology.rainfall"]}]},
+         "frames": [{"title": "Rain", "info": "", "keys": ["hydrology.rainfall",
+                                                           "hydrology.outlet_condition"]}]},
     ],
 }
 
@@ -3253,3 +3270,58 @@ def test_the_data_wizard_lists_the_agency_first_and_saves_what_was_chosen(
     assert written["project"] == {"name": "c"}               # the rest is kept
     assert wizard.saved
     wizard.deleteLater()
+
+
+def test_the_outflow_level_of_a_catchment_is_required_when_its_outlet_is_a_lake(
+        qgis_app, tmp_path, monkeypatch):
+    """A condition {"all": [...]} holds when each of its parts does."""
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "c.axq-case",
+                                    {"boundaries": {"outflow_condition": "elevation"}},
+                                    HYDRO_SCHEMA)
+    level = editor.rows["boundaries.prescribed_elevation"].label_widget
+    assert _purple(level)                          # a river: its outflow is a level
+    editor.switches["hydrology"].setChecked(True)
+    assert not _purple(level)                      # a catchment with a normal-depth outlet
+    outlet = editor.rows["hydrology.outlet_condition"].widget
+    outlet.setCurrentIndex(outlet.findData("elevation"))
+    assert _purple(level)                          # its outlet is a lake
+    editor.deleteLater()
+
+
+def test_a_late_answer_for_another_case_does_not_reach_the_hydrology_box(
+        qgis_app, tmp_path, monkeypatch):
+    """A checkup of the terrain takes seconds; the user may have chosen another case."""
+    from types import SimpleNamespace
+
+    from axqua_plugin.gui import hydrology_box
+
+    calls = []
+    monkeypatch.setattr(hydrology_box, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        calls.append((title, on_success)))
+    first, second = tmp_path / "a.axq-case", tmp_path / "b.axq-case"
+    first.write_text("")
+    second.write_text("")
+    chosen = [first]
+    ctx = SimpleNamespace(project=SimpleNamespace(active_case_path=lambda: chosen[0]),
+                          client=None)
+    box = hydrology_box.HydrologyDataBox(ctx)
+    box.refresh()
+    assert calls == []                          # not on the screen: nothing asked
+    box.show()
+    assert len(calls) == 2                      # shown: the data and the quick checkup
+    late = [answer for title, answer in calls if "checkup" in title][0]
+    chosen[0] = second
+    box.refresh()
+    current = [answer for title, answer in calls[2:] if "checkup" in title][0]
+    current({"findings": []})
+    late({"findings": [{"severity": "warning", "code": "axqua.hydrology.depressions",
+                        "message": "of case a", "subject": "geodata.dem_initial"}]})
+    assert box.finding_list.findings == []      # case a's answer came too late
+    assert box.check_button.isEnabled()
+    box.deleteLater()

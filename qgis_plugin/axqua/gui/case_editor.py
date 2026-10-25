@@ -143,8 +143,11 @@ def condition_met(condition: dict, value_of, block_on) -> bool:
     """Whether one condition of ``required_when`` holds.
 
     *value_of(key)* is the current value of a setting (its default when unset),
-    *block_on(block)* whether a block is switched on.
+    *block_on(block)* whether a block is switched on. ``{"all": [...]}`` holds when
+    every condition in it holds.
     """
+    if "all" in condition:
+        return all(condition_met(c, value_of, block_on) for c in condition["all"])
     if "block" in condition:
         return bool(block_on(condition["block"]))
     return value_of(condition.get("key", "")) in list(condition.get("in") or [])

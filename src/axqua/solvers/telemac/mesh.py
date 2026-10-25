@@ -197,8 +197,7 @@ def _anisotropic_enabled(cfg: Config) -> bool:
 
 def _hydrology_enabled(cfg: Config) -> bool:
     """The hydrology mode meshes a catchment: no channel mesh, no centerline."""
-    hydrology = getattr(cfg, "hydrology", None)
-    return bool(hydrology is not None and hydrology.enabled)
+    return getattr(cfg, "hydrology_mode", False)
 
 
 _DEFAULT_BG_BUDGET = 40000
@@ -369,8 +368,47 @@ def _anisotropic_size_field(cfg: Config, poly, *, bg_budget: int = 40000,
 #: against its extent and a grid that steps over a zone does not see it.
 _HYDROLOGY_BG_BUDGET = 250_000
 
+#: Size grids already computed in this process, by their inputs (see
+#: :func:`_size_grid_key`): a build asks for the grid three times (the checkup's
+#: estimate, the log line, the size field), and it costs seconds on a large catchment.
+_SIZE_GRIDS: dict[tuple, tuple] = {}
+
+
+def _size_grid_key(cfg: Config, poly, bg_budget: int) -> tuple:
+    """Everything :func:`hydrology_size_grid` reads; the zone layer by name, size and
+    modification time, so that a changed file is read again."""
+    import hashlib
+
+    m = cfg.mesh
+    zones = cfg.geodata.mesh_zones
+    stamp = None
+    if zones is not None:
+        try:
+            stat = Path(zones).stat()
+            stamp = (str(zones), stat.st_mtime_ns, stat.st_size)
+        except OSError:
+            stamp = (str(zones), None, None)
+    return (hashlib.sha1(poly.wkb).hexdigest(), int(bg_budget), cfg.crs_epsg, stamp,
+            float(m.default_size), float(m.size_scale or 1.0), float(m.growth_ratio),
+            float(m.channel_size), float(m.floodplain_size), float(m.refinement_size),
+            str(m.zone_name_field), str(m.zone_size_field))
+
 
 def hydrology_size_grid(cfg: Config, poly, *, bg_budget: int = _HYDROLOGY_BG_BUDGET):
+    """Target edge length on a regular grid over the catchment, growth-limited; once
+    per set of inputs in a process (the arrays returned are read-only)."""
+    key = _size_grid_key(cfg, poly, bg_budget)
+    if key not in _SIZE_GRIDS:
+        grid = _hydrology_size_grid(cfg, poly, bg_budget=bg_budget)
+        for array in grid:
+            array.setflags(write=False)
+        if len(_SIZE_GRIDS) >= 4:                     # a few cases, not a leak
+            _SIZE_GRIDS.pop(next(iter(_SIZE_GRIDS)))
+        _SIZE_GRIDS[key] = grid
+    return _SIZE_GRIDS[key]
+
+
+def _hydrology_size_grid(cfg: Config, poly, *, bg_budget: int):
     """Target edge length on a regular grid over the catchment, growth-limited.
 
     Each grid point takes the finest ``Max Edge Length (m)`` of the mesh zones within

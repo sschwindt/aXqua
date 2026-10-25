@@ -2315,10 +2315,18 @@ class Config:
         return frozenset(produced)
 
     @property
+    def hydrology_mode(self) -> bool:
+        """Is this a hydrology case (rainfall-runoff over a catchment)?
+
+        The one test of the mode. Code that is also handed stand-ins for a config
+        reads it as ``getattr(cfg, "hydrology_mode", False)``."""
+        return bool(self.hydrology.enabled)
+
+    @property
     def outflow_condition(self) -> str:
         """The condition of the outflow lines: the outlet of a hydrology case, else
         ``boundaries.outflow_condition``."""
-        if self.hydrology.enabled:
+        if self.hydrology_mode:
             return self.hydrology.outlet_condition
         return self.boundaries.outflow_condition
 
@@ -2434,20 +2442,32 @@ class Config:
     def _closed_catchment(self) -> frozenset[str]:
         """A hydrology case may have no liquid boundary at all: a closed depression
         whose rain stays in it. Its missing lines are then not an error."""
-        if self.hydrology.enabled and self.boundaries.liquid_boundaries is None:
+        if self.hydrology_mode and self.boundaries.liquid_boundaries is None:
             return frozenset({"liquid_boundaries"})
         return frozenset()
 
     def _check_hydrology(self) -> None:
         """What a hydrology case cannot be combined with."""
-        if not self.hydrology.enabled:
+        if not self.hydrology_mode:
             return
-        if self.gain_lose.active and self.gain_lose.implementation == "fortran":
+        # what the hydrology build does not write: refused, so that a case that asks
+        # for it is not run without it
+        if self.gain_lose.active:
             raise ValueError(
-                "hydrology and a gain-lose reach in fortran mode cannot be combined: "
-                "both drive TELEMAC's rain term, and the gain-lose routine would "
-                "overwrite the runoff of the rain. Remove the gain_lose block or "
-                "switch the hydrology mode off.")
+                "hydrology and a gain-lose reach cannot be combined: in fortran mode "
+                "both drive TELEMAC's rain term, and the hydrology build writes no "
+                "source regions. Remove the gain_lose block or switch the hydrology "
+                "mode off.")
+        if self.boundaries.internal_sources:
+            raise ValueError(
+                "boundaries.internal_sources adds fixed-rate source regions, which the "
+                "hydrology build does not write. Set it to false or switch the "
+                "hydrology mode off.")
+        if self.morphodynamics.enabled:
+            raise ValueError(
+                "hydrology and morphodynamics (GAIA) cannot be combined yet: the "
+                "hydrology build couples no GAIA steering file. Switch one of them "
+                "off.")
         if self.initialization.prewet_depth is not None:
             raise ValueError(
                 "initialization.prewet_depth seeds the channel of a river reach; a "

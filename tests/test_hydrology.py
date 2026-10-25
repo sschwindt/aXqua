@@ -567,3 +567,167 @@ def test_an_event_from_open_meteo_becomes_rain_and_weather(tmp_path, monkeypatch
     assert fetch.worldcover_tiles((12.1, 46.0, 12.5, 47.0)) == ["N45E012"]
     assert fetch.worldcover_tiles((11.5, 47.9, 12.2, 48.3)) == [
         "N45E009", "N45E012", "N48E009", "N48E012"]
+
+
+# ------------------------------------------------- what the review of 2026-10-25 found
+
+
+def test_a_dry_run_of_a_hydrology_case_launches_its_own_steering_file(tmp_path,
+                                                                     monkeypatch):
+    """The build of a catchment writes hydrology2d.cas and no steady2d.cas."""
+    from types import SimpleNamespace
+
+    from axqua import workflow
+    from axqua.config import load_config
+    from axqua.solvers.telemac import pipeline
+
+    launched = {}
+
+    def fake(runtime, cfg, **kwargs):
+        launched.update(kwargs)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(workflow, "run_solver_streaming", fake)
+    cfg = load_config(_catchment(tmp_path))
+    pipeline.run(cfg, validate_env=False, dry_run=True, log_to_file=False)
+    assert launched["cas_file"] == "hydrology2d.cas"
+    assert launched["duration"] == pytest.approx(1200.0)     # the rain + drain_time
+
+
+@pytest.mark.parametrize("change, word", [
+    (lambda cfg: setattr(cfg.morphodynamics, "enabled", True), "morphodynamics"),
+    (lambda cfg: setattr(cfg.boundaries, "internal_sources", True), "internal_sources"),
+    (lambda cfg: setattr(cfg.gain_lose, "enabled", True), "gain-lose"),
+])
+def test_what_the_hydrology_build_does_not_write_is_refused(tmp_path, change, word):
+    from axqua.config import load_config
+
+    cfg = load_config(_catchment(tmp_path))
+    cfg._check_hydrology()                                  # as it is: accepted
+    change(cfg)
+    with pytest.raises(ValueError, match=word):
+        cfg._check_hydrology()
+
+
+def test_an_hourly_file_of_the_dwd_is_read_with_its_dates_and_its_gap(tmp_path):
+    """MESS_DATUM is YYYYMMDDHH as one integer, R1 the rain, -999 a missing value."""
+    path = tmp_path / "produkt_rr_stunde_20240601_20240603_03379.txt"
+    path.write_text(
+        "STATIONS_ID;MESS_DATUM;QN_8;  R1;RS_IND;WRTR;eor\n"
+        "       3379;2024060211;    3;   0.0;   0;-999;eor\n"
+        "       3379;2024060212;    3;   2.1;   1;   6;eor\n"
+        "       3379;2024060213;    3;-999;-999;-999;eor\n"
+        "       3379;2024060214;    3;   4.0;   1;   6;eor\n")
+    series = rainfall.read_series(path, units="mm", stamp="end")
+    assert series.origin == pd.Timestamp("2024-06-02 10:00")
+    assert list(series.end_s) == [3600.0, 7200.0, 10800.0, 14400.0]
+    assert list(series.intensity_mm_h) == pytest.approx([0.0, 2.1, 0.0, 4.0])
+    assert series.gaps == 1 and series.gap_hours == pytest.approx(1.0)
+    assert series.total_mm == pytest.approx(6.1)
+
+
+def test_seconds_are_not_read_as_dates():
+    seconds = pd.Series([0, 3600, 7200, 10800])
+    assert rainfall._integer_dates(seconds) is None
+    assert rainfall._seconds(seconds)[1] is None
+
+
+def test_a_gap_in_a_record_stays_a_gap_and_the_checkup_names_it(tmp_path):
+    """The row after a gap used to be stretched over it, adding rain never measured."""
+    from axqua.config import load_config
+    from axqua.hydrology.checks import run_checks
+
+    case = _catchment(tmp_path)
+    (tmp_path / "user-sources" / "rain.csv").write_text(
+        "time,rain\n2024-06-02 12:00,10\n2024-06-02 13:00,\n2024-06-02 14:00,10\n")
+    series = rainfall.read_series(tmp_path / "user-sources" / "rain.csv")
+    assert list(series.intensity_mm_h) == [10.0, 0.0, 10.0]
+    assert series.total_mm == pytest.approx(20.0)
+    codes = {f.code for f in run_checks(load_config(case))}
+    assert "axqua.hydrology.rainfall_gaps" in codes
+
+
+def test_a_design_storm_clears_the_time_zero_of_an_earlier_event(tmp_path, capsys):
+    import json
+
+    from axqua import cli
+    from axqua.config import load_config
+    from axqua.hydrology.checks import run_checks
+
+    case = _catchment(tmp_path)
+    assert cli.main(["hydrology", "design", str(case), "--pairs", "10:15,60:30",
+                     "--duration", "60", "--step", "10", "--json"]) == 0
+    settings = json.loads(capsys.readouterr().out)["data"]["settings"]
+    assert "hydrology.rainfall_start" in settings
+    assert settings["hydrology.rainfall_start"] is None      # removed from the case
+    # the weather of an event under a rain without a date is named
+    (tmp_path / "user-sources" / "weather.csv").write_text(
+        "time,wind_speed_10m,wind_direction_10m\n2024-06-02 13:00,5,270\n"
+        "2024-06-02 14:00,5,270\n2024-06-02 15:00,5,270\n")
+    case = _catchment(tmp_path, extra="  weather: user-sources/weather.csv\n"
+                                      "  wind: true\n")
+    codes = {f.code for f in run_checks(load_config(case))}
+    assert "axqua.hydrology.weather_alignment" in codes
+
+
+def test_a_listing_without_boundary_fluxes_is_accepted_only_for_a_closed_domain(
+        tmp_path):
+    from axqua.solvers.telemac.sortie import read_sortie
+
+    listing = tmp_path / "case.cas_2026.sortie"
+    listing.write_text("".join(
+        f"                            BALANCE OF WATER VOLUME\n"
+        f"     VOLUME IN THE DOMAIN :   {v:.6E} M3\n"
+        f"     RELATIVE ERROR IN VOLUME AT T =     {t:.4f} S :  0.000000E+00\n"
+        for t, v in ((60.0, 10.0), (120.0, 20.0))))
+    with pytest.raises(ValueError, match="no boundary fluxes"):
+        read_sortie(listing)                                 # a river run: an error
+    closed = read_sortie(listing, closed=True)
+    assert list(closed.time) == [60.0, 120.0] and closed.fluxes.shape == (2, 0)
+
+
+def test_the_size_grid_is_computed_once_per_build_and_not_by_a_quick_checkup(
+        tmp_path, monkeypatch):
+    import geopandas as gpd
+    from shapely.geometry import Polygon
+
+    from axqua.config import load_config
+    from axqua.hydrology.checks import run_checks
+    from axqua.solvers.telemac import mesh
+
+    case = _catchment(tmp_path)
+    zone = Polygon([(X0 + 25, Y0 - 1), (X0 + 35, Y0 - 1), (X0 + 35, Y0 + 51),
+                    (X0 + 25, Y0 + 51)])
+    zones = tmp_path / "user-sources" / "zones.gpkg"
+    gpd.GeoDataFrame({"Zone Name": ["channel"], "Max Edge Length (m)": [1.5]},
+                     geometry=[zone], crs="EPSG:25832").to_file(zones)
+    case.write_text(case.read_text().replace(
+        "  boundary: user-sources/catchment.gpkg",
+        "  boundary: user-sources/catchment.gpkg\n  mesh_zones: user-sources/zones.gpkg"))
+    cfg = load_config(case)
+    calls = []
+    real = mesh._hydrology_size_grid
+    monkeypatch.setattr(mesh, "_hydrology_size_grid",
+                        lambda *a, **k: calls.append(1) or real(*a, **k))
+    monkeypatch.setattr(mesh, "_SIZE_GRIDS", {})
+    run_checks(cfg, terrain=False)                     # the case settings, a refresh
+    assert calls == []
+    run_checks(cfg, terrain=True)
+    mesh.build_mesh(cfg)                               # its log line and its size field
+    assert calls == [1]
+    gpd.GeoDataFrame({"Zone Name": ["channel"], "Max Edge Length (m)": [2.0]},
+                     geometry=[zone], crs="EPSG:25832").to_file(zones)
+    mesh.estimate_hydrology_elements(cfg)              # a changed layer is read again
+    assert calls == [1, 1]
+
+
+@pytest.mark.parametrize("law, coefficient, ks", [
+    (4, 0.03, (0.03 / 0.0474) ** 6), (3, 25.0, ((1 / 25.0) / 0.0474) ** 6),
+    (5, 0.2, 0.2), (2, 50.0, None)])
+def test_one_conversion_of_a_friction_law_to_a_nikuradse_ks(law, coefficient, ks):
+    from axqua.rating import ks_from_friction
+
+    if ks is None:
+        assert ks_from_friction(law, coefficient) is None
+    else:
+        assert ks_from_friction(law, coefficient) == pytest.approx(ks)

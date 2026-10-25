@@ -224,13 +224,19 @@ def test_what_is_required_is_on_the_form_and_follows_the_options():
     for key in ("project.name", "geodata.dem_initial", "geodata.boundary",
                 "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate"):
         assert by_key[key]["required"] and by_key[key]["essential"], key
+    def check(condition) -> None:
+        """A condition has one of the three forms the editor evaluates."""
+        assert set(condition) in ({"key", "in"}, {"block"}, {"all"}), condition
+        if "key" in condition:
+            assert condition["key"] in by_key, condition
+        for part in condition.get("all", ()):
+            check(part)
+
     for key, conditions in schema_meta.REQUIRED_WHEN.items():
         assert key in by_key and by_key[key]["essential"], key
         assert by_key[key]["required_when"] == conditions
         for condition in conditions:
-            assert set(condition) in ({"key", "in"}, {"block"}), condition
-            if "key" in condition:
-                assert condition["key"] in by_key, condition
+            check(condition)
     assert by_key["fine_sediment.grain_size"]["required_when"] == [
         {"key": "fine_sediment.enabled", "in": [True]}]
     # a catchment is driven by its rain: no discharge, and an outflow line only if it
@@ -240,9 +246,15 @@ def test_what_is_required_is_on_the_form_and_follows_the_options():
         for key, conditions in table.items():
             assert key in by_key and by_key[key][field] == conditions, key
             for condition in conditions:
-                assert set(condition) in ({"key", "in"}, {"block"}), condition
+                check(condition)
     assert by_key["boundaries.prescribed_flowrate"]["required_unless"] == [
         {"block": "hydrology"}]
+    # the outflow level is needed in hydrology mode too when the outlet is a level
+    level = {"all": [{"block": "hydrology"},
+                     {"key": "hydrology.outlet_condition", "in": ["elevation"]}]}
+    assert level in by_key["boundaries.prescribed_elevation"]["required_when"]
+    assert "elevation" not in str(by_key["boundaries.prescribed_elevation"]
+                                  ["required_unless"])
     assert {"block": "hydrology"} in by_key["geodata.channel_centerline"]["disabled_when"]
     assert by_key["postproc.telemac_maps"]["kind"] == "multichoice"
 

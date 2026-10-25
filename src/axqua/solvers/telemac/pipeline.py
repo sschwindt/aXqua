@@ -78,7 +78,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         from axqua.workflow import synthesize_rating_if_missing
         synthesize_rating_if_missing(cfg, float(cfg.boundaries.prescribed_flowrate))
     cfg.validate()
-    if cfg.hydrology.enabled:
+    if cfg.hydrology_mode:
         _hydrology_checkup(cfg)
     t_start = time.perf_counter()
     log.info("build start: case '%s' -> %s", cfg.name, cfg.model_dir)
@@ -116,7 +116,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         # scalar prescribed_flowrate, falling back to the series' representative value.
         inflow = (hydraulics.read_inflow(Path(cfg.boundaries.inflow), steady=False)
                   if cfg.boundaries.inflow is not None else None)
-        if cfg.hydrology.enabled:
+        if cfg.hydrology_mode:
             # a catchment is driven by its rain; the outlet takes what arrives, and
             # inflow lines (catchments upstream) are optional
             inflow_q = outflow_wse = None
@@ -128,7 +128,7 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
     # 4) steering files
     with log_step("stage 4/5: write friction table and steering (.cas)"):
         art.friction_tbl = steering.write_friction_tbl(cfg)
-        if cfg.hydrology.enabled:
+        if cfg.hydrology_mode:
             _write_hydrology(cfg, the_mesh, liquids, inflow, art)
         else:
             _write_river_steering(cfg, the_mesh, liquids, inflow, inflow_q,
@@ -171,16 +171,23 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         # module import time (the package __init__ wires both up)
         from axqua.workflow import run_solver_streaming
 
+        # the hydrology mode builds hydrology2d.cas and no steady2d.cas; its duration
+        # comes from the rain, not from hydrodynamics.duration
+        cas, duration = cfg.cas_file, None
+        if cfg.hydrology_mode:
+            from axqua.solvers.telemac.backend import _cas_duration
+            cas = cfg.hydrology_cas_file
+            duration = _cas_duration(cfg, cas)
         with log_step(f"dry run: launch {cfg.telemac.solver} once to validate the case"):
             # stream the listing live with the simulated-time progress bar (same
             # look as initial_run.py) on the configured core count - this is also
             # the per-level solver run of the mesh-convergence study
-            proc = run_solver_streaming(runtime, cfg)
+            proc = run_solver_streaming(runtime, cfg, cas_file=cas, duration=duration)
             log.info("solver finished rc=%d", proc.returncode)
             if proc.returncode != 0:
                 raise RuntimeError(
                     f"{cfg.telemac.solver} failed (rc={proc.returncode}) on "
-                    f"{cfg.cas_file}; see the listing above / {cfg.model_dir}")
+                    f"{cas}; see the listing above / {cfg.model_dir}")
 
     # refresh the case's MODEL= markers so the folder describes itself as it is now
     refresh_markers(cfg)

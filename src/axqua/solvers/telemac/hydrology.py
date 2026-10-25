@@ -241,19 +241,16 @@ def design_discharge(cfg: Config, rain: rainfall.RainSeries, inflow=None) -> flo
 def bed_roughness_ks(cfg: Config) -> float:
     """Nikuradse ks [m] of the bed where no roughness zones say otherwise.
 
-    From ``friction.default_law`` / ``default_coefficient``: Manning's n and Strickler's
-    K through ``n = ks^(1/6) / 21.1`` (the Strickler relation the rating uses), a
-    Nikuradse value as it is. Not the lateral wall roughness: TELEMAC applies that to
-    solid walls only, and an outlet is the bed of its section.
+    From ``friction.default_law`` / ``default_coefficient`` through
+    :func:`axqua.rating.ks_from_friction`. Not the lateral wall roughness: TELEMAC
+    applies that to solid walls only, and an outlet is the bed of its section.
     """
+    from axqua.rating import ks_from_friction
+
     law = int(cfg.friction.default_law)
-    coef = float(cfg.friction.default_coefficient)
-    if law == 5:
-        return coef
-    if law == 4:
-        return (coef / 0.0474) ** 6
-    if law == 3:
-        return ((1.0 / coef) / 0.0474) ** 6
+    ks = ks_from_friction(law, cfg.friction.default_coefficient)
+    if ks is not None:
+        return ks
     log.warning("  friction law %d has no Nikuradse equivalent; the outlet section takes "
                 "ks = 0.1 m", law)
     return 0.1

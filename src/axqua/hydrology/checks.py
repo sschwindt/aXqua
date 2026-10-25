@@ -4,9 +4,10 @@ Returns :class:`~axqua.core.diagnostics.Finding` objects and never raises, so th
 settings and the plugin can show every problem at once; the build runs the same checks
 and stops on an error. Each code has an anchor in ``docs/troubleshooting/``.
 
-*terrain* switches on the analysis of the DEM (:mod:`axqua.hydrology.terrain`), which
-takes seconds: the case settings leave it out, ``axqua hydrology check`` and the build
-run it.
+*terrain* switches on the part that takes seconds: the analysis of the DEM
+(:mod:`axqua.hydrology.terrain`) and the estimate of the mesh size from the size grid.
+The case settings and the refresh of the plugin leave it out, ``axqua hydrology check``,
+the *Check* button and the build run it.
 """
 
 from __future__ import annotations
@@ -23,8 +24,10 @@ from axqua.core.diagnostics import ERROR, WARNING, Finding
 CODES = {
     "axqua.hydrology.rainfall_unreadable": ERROR,
     "axqua.hydrology.rainfall_intense": WARNING,
+    "axqua.hydrology.rainfall_gaps": WARNING,
     "axqua.hydrology.reanalysis_rain": WARNING,
     "axqua.hydrology.weather_unreadable": ERROR,
+    "axqua.hydrology.weather_alignment": WARNING,
     "axqua.hydrology.weather_short": WARNING,
     "axqua.hydrology.wind_strong": WARNING,
     "axqua.hydrology.evaporation_high": WARNING,
@@ -67,14 +70,13 @@ def _provenance(path) -> dict:
 
 def run_checks(cfg, *, terrain: bool = False) -> list[Finding]:
     """All findings of the hydrology checkup; empty when the case is not in the mode."""
-    h = getattr(cfg, "hydrology", None)
-    if h is None or not h.enabled:
+    if not getattr(cfg, "hydrology_mode", False):
         return []
     found: list[Finding] = []
     rain = _check_rain(cfg, found)
     _check_weather(cfg, rain, found)
     _check_soil(cfg, found)
-    _check_outlet_and_run(cfg, rain, found)
+    _check_outlet_and_run(cfg, rain, found, terrain=terrain)
     if terrain:
         _check_terrain(cfg, found)
     return found
@@ -104,6 +106,13 @@ def _check_rain(cfg, found: list[Finding]):
                               f"The rain series is not usable: {'; '.join(problems)}.",
                               "hydrology.rainfall"))
         return None
+    if series.gaps:
+        found.append(_finding(
+            "axqua.hydrology.rainfall_gaps",
+            f"The rain record has no value for {series.gaps} intervals "
+            f"({series.gap_hours:g} h); they are taken as dry.", "hydrology.rainfall",
+            "Fill the gaps from a neighboring gauge or the radar product of the "
+            "national meteorological agency, or check that the event lies outside them."))
     if series.peak_mm_h > PEAK_RAIN_MM_H:
         found.append(_finding(
             "axqua.hydrology.rainfall_intense",
@@ -155,6 +164,14 @@ def _check_weather(cfg, rain, found: list[Finding]) -> None:
                               f"The weather series cannot be used: {exc}",
                               "hydrology.weather"))
         return
+    if rain is not None and rain.origin is None and meteo.origin is not None:
+        found.append(_finding(
+            "axqua.hydrology.weather_alignment",
+            f"The rain has no date, the weather does (it starts "
+            f"{meteo.origin:%Y-%m-%d %H:%M}); the weather is applied from the start of "
+            "the rain.", "hydrology.rainfall_start",
+            "Set hydrology.rainfall_start to place the rain in the time of the "
+            "weather, or remove the weather series if it belongs to another event."))
     if rain is not None:
         run_end = rain.last_rain + float(h.drain_time)
         if meteo.end_s.size and float(meteo.end_s[-1]) < run_end - 1.0:
@@ -249,7 +266,7 @@ def _has_own_theta(cfg):
     return [False]
 
 
-def _check_outlet_and_run(cfg, rain, found: list[Finding]) -> None:
+def _check_outlet_and_run(cfg, rain, found: list[Finding], *, terrain: bool) -> None:
     h = cfg.hydrology
     outflow = 0
     if cfg.boundaries.liquid_boundaries is not None:
@@ -295,7 +312,7 @@ def _check_outlet_and_run(cfg, rain, found: list[Finding]) -> None:
                 "hydrology.drain_time"))
         from axqua.solvers.telemac.mesh import estimate_hydrology_elements
 
-        elements = estimate_hydrology_elements(cfg)
+        elements = estimate_hydrology_elements(cfg) if terrain else 0
         if elements > MESH_ELEMENTS:
             found.append(_finding(
                 "axqua.hydrology.large_mesh",

@@ -103,8 +103,7 @@ def _has_varying_inflow(cfg) -> bool:
 
 def _hydrology(cfg) -> bool:
     """A hydrology case: rainfall-runoff over a catchment (``hydrology.enabled``)."""
-    hydrology = getattr(cfg, "hydrology", None)
-    return bool(hydrology is not None and hydrology.enabled)
+    return getattr(cfg, "hydrology_mode", False)
 
 
 def _calibration_configured(cfg) -> bool:

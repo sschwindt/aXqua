@@ -113,8 +113,7 @@ def prepare_steady_inputs(cfg: Config, discharge: float | None = None, *,
     discharge: nothing is prescribed or synthesized, and the discharge of an inflow
     line, if the case gives one, is returned (else 0).
     """
-    hydrology = getattr(cfg, "hydrology", None)
-    if hydrology is not None and hydrology.enabled:
+    if getattr(cfg, "hydrology_mode", False):
         q = discharge if discharge is not None else cfg.boundaries.prescribed_flowrate
         return float(q) if q is not None else 0.0
     q = resolve_discharge(cfg, discharge)

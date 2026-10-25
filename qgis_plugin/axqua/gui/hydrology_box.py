@@ -7,7 +7,11 @@ window that guides through the data (:mod:`.hydrology_wizard`); *Check* runs the
 checkup with the analysis of the terrain model, which takes a few seconds.
 
 The plugin decides nothing here: the answers are those of ``axqua hydrology info``
-and ``axqua hydrology check``.
+and ``axqua hydrology check``. Two rules keep them right and cheap: an answer is shown
+only when it is the newest one asked for the case that is still chosen (a checkup of
+the terrain takes seconds, and the user may have moved on to another case), and a box
+that is not on the screen asks nothing until its tab is shown, so that one refresh of
+the case starts one checkup, not one per tab that carries the box.
 """
 
 from __future__ import annotations
@@ -53,6 +57,8 @@ class HydrologyDataBox(QGroupBox):
         self.ctx = context
         self.case: Path | None = None
         self.info: dict = {}
+        self._stale = False                  # a refresh waits for the box to be shown
+        self._tickets = {"info": 0, "check": 0}   # the newest request of each kind
         layout = QVBoxLayout(self)
         self.summary = QLabel("")
         self.summary.setWordWrap(True)
@@ -81,14 +87,40 @@ class HydrologyDataBox(QGroupBox):
     def refresh(self) -> None:
         case = self.ctx.project.active_case_path()
         self.case = Path(case) if case is not None else None
+        self._stale = True
+        if self.isVisible():
+            self._load()
+
+    def showEvent(self, event) -> None:              # noqa: N802 - Qt's name
+        super().showEvent(event)
+        if self._stale:
+            self._load()
+
+    def _ticket(self, kind: str) -> tuple[int, Path | None]:
+        self._tickets[kind] += 1
+        return self._tickets[kind], self.case
+
+    def _current(self, kind: str, ticket: tuple[int, Path | None]) -> bool:
+        """Is *ticket* the newest request of *kind*, for the case still chosen?"""
+        return ticket[0] == self._tickets[kind] and ticket[1] == self.case
+
+    def _load(self) -> None:
+        self._stale = False
         if self.case is None or not self.case.exists():
+            self._ticket("info")
+            self._ticket("check")             # answers still on their way are void
             self.show_info({})
+            self.finding_list.set_findings([], checked=False)
+            self.check_button.setEnabled(True)
             return
         client, chosen = self.ctx.client, self.case
+        ticket = self._ticket("info")
         run_async("aXqua: reading the hydrology data of the case",
                   lambda: client.hydrology_info(chosen),
-                  on_success=self.show_info,
-                  on_error=lambda exc: self.show_info({}, note=user_text(exc)),
+                  on_success=lambda info: (self.show_info(info)
+                                           if self._current("info", ticket) else None),
+                  on_error=lambda exc: (self.show_info({}, note=user_text(exc))
+                                        if self._current("info", ticket) else None),
                   owner=self)
         self.check(terrain=False)
 
@@ -100,12 +132,17 @@ class HydrologyDataBox(QGroupBox):
         if self.case is None:
             return
         client, chosen = self.ctx.client, self.case
+        ticket = self._ticket("check")
         self.state.setText("Checking the terrain model..." if terrain else "")
         self.check_button.setEnabled(False)
         run_async("aXqua: the hydrology checkup",
                   lambda: client.hydrology_check(chosen, terrain=terrain),
-                  on_success=lambda answer: self.show_findings(answer, terrain),
-                  on_error=self.show_error, owner=self)
+                  on_success=lambda answer: (self.show_findings(answer, terrain)
+                                             if self._current("check", ticket)
+                                             else None),
+                  on_error=lambda exc: (self.show_error(exc)
+                                        if self._current("check", ticket) else None),
+                  owner=self)
 
     def show_findings(self, answer: dict, terrain: bool) -> None:
         self.check_button.setEnabled(True)

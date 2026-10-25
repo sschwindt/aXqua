@@ -181,13 +181,20 @@ REQUIRED = frozenset({
     "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate",
 })
 
+#: The outlet of a hydrology case is a level (a lake, a reservoir).
+_HYDROLOGY_LEVEL = {"all": [{"block": "hydrology"},
+                            {"key": "hydrology.outlet_condition", "in": ["elevation"]}]}
+
 #: Entries that are not needed while a condition holds: ``key -> conditions`` (of which
 #: one suffices), in the form of :data:`REQUIRED_WHEN`. A hydrology case is driven by
-#: its rain, so it needs no discharge, and a closed catchment no outflow line.
+#: its rain, so it needs no discharge, and a closed catchment no outflow line; it
+#: needs an outflow level only when its own outlet is one.
 REQUIRED_UNLESS: dict[str, list[dict[str, Any]]] = {
     "boundaries.prescribed_flowrate": [{"block": "hydrology"}],
     "boundaries.liquid_boundaries": [{"block": "hydrology"}],
-    "boundaries.prescribed_elevation": [{"block": "hydrology"}],
+    "boundaries.prescribed_elevation": [
+        {"all": [{"block": "hydrology"},
+                 {"key": "hydrology.outlet_condition", "in": ["normal_depth", "free"]}]}],
 }
 
 #: Entries that have no effect while a condition holds, which a form grays out:
@@ -200,10 +207,11 @@ DISABLED_WHEN: dict[str, list[dict[str, Any]]] = {
 
 #: Entries an option makes necessary: ``key -> conditions``, of which one suffices. A
 #: condition is ``{"key": ..., "in": [values]}`` (an unset entry counts with its
-#: default) or ``{"block": ...}`` (the block is switched on).
+#: default), ``{"block": ...}`` (the block is switched on) or ``{"all": [conditions]}``
+#: (every one of them holds; a plugin older than this form reads it as not holding).
 REQUIRED_WHEN: dict[str, list[dict[str, Any]]] = {
     "boundaries.prescribed_elevation": [{"key": "boundaries.outflow_condition",
-                                         "in": ["elevation"]}],
+                                         "in": ["elevation"]}, _HYDROLOGY_LEVEL],
     "boundaries.inflow": [{"key": "hydrodynamics.regime", "in": ["unsteady"]}],
     "gain_lose.zone": [{"key": "gain_lose.enabled", "in": [True]}],
     "geodata.dem_target": [{"key": "dem_of_difference.enabled", "in": [True]}],

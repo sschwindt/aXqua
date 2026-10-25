@@ -639,7 +639,7 @@ def classify_nodes(cfg: Config, mesh: Mesh) -> tuple[list[str], list[LiquidBound
     """
     from shapely.geometry import Point
 
-    hydrology = bool(getattr(cfg, "hydrology", None) and cfg.hydrology.enabled)
+    hydrology = getattr(cfg, "hydrology_mode", False)
     if hydrology and cfg.boundaries.liquid_boundaries is None:
         log.warning("  no liquid boundaries: a closed catchment, all its rain stays in "
                     "it (set boundaries.liquid_boundaries for an outlet)")

@@ -88,10 +88,20 @@ The hydrology checkup of a case in hydrology mode reports the following warnings
 ``The rain peaks at ... mm/h``
     More than 150 mm/h is held by a cloudburst for minutes only. The usual cause is a series of depths per interval that is read as intensities: set ``hydrology.rainfall_units`` to ``mm``.
 
+.. _axqua-hydrology-rainfall-gaps:
+
+``The rain record has no value for ... intervals``
+    Rows of the rain series are empty, or hold -999, which is how the DWD marks a missing measurement. aXqua keeps their intervals and takes them as dry, so that no rain is invented, but rain that fell in a gap is missing from the simulation. Fill the gaps from a neighboring gauge or a radar product, or make sure the event lies outside them.
+
 .. _axqua-hydrology-reanalysis-rain:
 
 ``The rain comes from a reanalysis (ERA5)``
     The rain was downloaded from Open-Meteo. A reanalysis spreads a storm over cells of 10 to 30 km and an hour and underestimates short intensities. Use gauge or radar data of the national meteorological agency where they exist, or a design storm.
+
+.. _axqua-hydrology-weather-alignment:
+
+``The rain has no date, the weather does``
+    A design storm, or a rain table in seconds, has no calendar time, while the weather series has dates, for example from an event the data wizard downloaded before. The weather is then applied from the start of the rain, with its wind and the evaporation of its own days. Set ``hydrology.rainfall_start`` to the date and time the rain is meant to start in the weather series, or remove the weather series when it belongs to another event.
 
 .. _axqua-hydrology-weather-short:
 

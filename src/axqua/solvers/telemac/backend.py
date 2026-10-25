@@ -122,7 +122,7 @@ class TelemacBackend(BaseBackend):
 
     def _run_hydrology(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
                        **_ignored):
-        if not cfg.hydrology.enabled:
+        if not cfg.hydrology_mode:
             raise errors.ConfigError(
                 "the case is not in hydrology mode", subject="hydrology.enabled",
                 remedy="Switch the hydrology mode on in the case settings and build "
@@ -412,7 +412,7 @@ class TelemacBackend(BaseBackend):
         kind = getattr(getattr(ctx, "spec", None), "kind", None)
         if kind is JobKind.HYDROLOGY_RUN:
             return self._hydrology_report(cfg, ctx)
-        if getattr(cfg, "hydrology", None) is not None and cfg.hydrology.enabled:
+        if getattr(cfg, "hydrology_mode", False):
             return None             # a catchment has no steady flux balance to judge
         if kind not in (JobKind.STEADY_RUN, JobKind.UNSTEADY_RUN, JobKind.PREPROCESSING):
             return None

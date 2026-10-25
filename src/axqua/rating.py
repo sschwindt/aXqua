@@ -44,6 +44,24 @@ def _resolve_n(manning: float | None, strickler: float | None) -> float:
     return n
 
 
+def ks_from_friction(law: int, coefficient: float) -> float | None:
+    """Nikuradse ks [m] equivalent to a TELEMAC friction law and its coefficient.
+
+    Strickler (law 3, K = 1/n) and Manning (law 4, n) through the Strickler relation
+    n = ks^(1/6) / 21.1, i.e. ks = (n / 0.0474)^6; Nikuradse (law 5) is ks itself.
+    ``None`` for a law without such an equivalent (Chezy, Haaland, ...).
+    """
+    law, coefficient = int(law), float(coefficient)
+    if law not in (3, 4, 5):
+        return None
+    if coefficient <= 0.0:
+        raise ValueError(f"roughness must be positive, got {coefficient} for law {law}")
+    if law == 5:
+        return coefficient
+    n = coefficient if law == 4 else 1.0 / coefficient
+    return (n / 0.0474) ** 6
+
+
 def _conveyance_q(h: float, n: float, slope: float,
                   bottom_width: float, side_slope: float) -> float:
     """Manning discharge for depth *h* in a trapezoidal section (0 if h<=0)."""
@@ -444,8 +462,11 @@ def line_section(cfg, line, *, n_samples: int = 300, ks_fallback: float | None =
         ks = np.full(bed.shape, float(ks_fallback))
     if ks is None:
         law, coef = cfg.friction.boundary_law, cfg.friction.boundary_coefficient
-        n = _resolve_n(coef if law == 4 else None, coef if law == 3 else None)
-        ks = np.full(bed.shape, (n / 0.0474) ** 6)   # Strickler-Manning -> ks (m)
+        value = ks_from_friction(law, coef)
+        if value is None:
+            raise ValueError(f"friction.boundary_law {law} has no Nikuradse ks; give "
+                             "roughness zones or a Strickler/Manning/Nikuradse law")
+        ks = np.full(bed.shape, value)
         log.info("no roughness zones for the outflow section: using ks=%.3f m "
                  "from friction.boundary_*", float(ks[0]))
     return station, bed, ks, pts
