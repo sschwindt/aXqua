@@ -31,6 +31,22 @@ log = logging.getLogger("axqua.solvers.telemac.backend")
 #: Which ``.cas`` each 3D variant runs, and what its result is called. Kept here rather
 #: than re-derived, because ``spec.py`` already names the same three files and the two
 #: must not drift.
+#: What a case in hydrology mode does not run: a steady state, the unsteady and 3D runs that start from one, the studies that compare steady runs and the calibration that perturbs one. A file left from when the case was a river case (``steady2d.cas``, ``r2d.slf``, ``unsteady2d.cas``) would otherwise run a model that is no longer the case.
+_NOT_IN_HYDROLOGY_MODE = frozenset({
+    Capability.STEADY2D, Capability.UNSTEADY2D, Capability.UNSTEADY3D, Capability.STEADY3D,
+    Capability.MESH_CONVERGENCE, Capability.VERTICAL_CONVERGENCE, Capability.CALIBRATION})
+
+
+def _refuse_in_hydrology_mode(cfg, capability) -> None:
+    """A :class:`~axqua.core.errors.ConfigError` for a capability of :data:`_NOT_IN_HYDROLOGY_MODE` in a case in hydrology mode."""
+    if getattr(cfg, "hydrology_mode", False) and capability in _NOT_IN_HYDROLOGY_MODE:
+        raise errors.ConfigError(
+            f"a case in hydrology mode has no {capability.value} simulation",
+            subject="hydrology.enabled",
+            remedy="Run the storm with the hydrology run (axqua submit <case> --kind "
+                   "hydrology), or switch the hydrology mode off and build the case again.")
+
+
 _3D_VARIANTS = {
     "hydrostatic": ("hotstart3d_hydrostatic.cas", "r3d-hydrostatic.slf"),
     "hydrodyn": ("hotstart3d_hydrodyn.cas", None),
@@ -63,10 +79,14 @@ class TelemacBackend(BaseBackend):
     def build(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
               **kwargs):
         capability = capability or Capability.STEADY2D
+        if capability is not Capability.STEADY2D:
+            # the build of the case itself is the build of STEADY2D, in either mode
+            _refuse_in_hydrology_mode(cfg, capability)
         if capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D):
             return self._build_unsteady(cfg, ctx=ctx, **kwargs)
         if capability in (Capability.STEADY3D,):
             return self._build_3d(cfg, ctx=ctx, **kwargs)
+        # a hydrology case is built by the same pipeline (it knows the mode)
         return self._build_case(cfg, ctx=ctx, **kwargs)
 
     def _build_case(self, cfg, *, ctx: Any = None, discharge: float | None = None,
@@ -82,7 +102,8 @@ class TelemacBackend(BaseBackend):
         artifacts = pipeline.run(cfg, validate_env=validate_env, dry_run=dry_run,
                                  log_to_file=False)
         if ctx is not None:
-            for name in ("geometry_slf", "boundary_cli", "cas_file", "friction_tbl"):
+            for name in ("geometry_slf", "boundary_cli", "cas_file", "friction_tbl",
+                         "hydrology_cas"):
                 path = getattr(artifacts, name, None)
                 if path:
                     ctx.record(Path(path).name, path, kind="file")
@@ -110,11 +131,27 @@ class TelemacBackend(BaseBackend):
     def run(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
             **kwargs):
         capability = capability or Capability.STEADY2D
+        _refuse_in_hydrology_mode(cfg, capability)
         if capability is Capability.STEADY3D:
             return self._run_3d(cfg, ctx=ctx, **kwargs)
         if capability in (Capability.UNSTEADY2D, Capability.UNSTEADY3D):
             return self._run_unsteady(cfg, ctx=ctx, **kwargs)
+        if capability is Capability.HYDROLOGY:
+            return self._run_hydrology(cfg, ctx=ctx, **kwargs)
         return self._run_steady(cfg, ctx=ctx, **kwargs)
+
+    def _run_hydrology(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
+                       **_ignored):
+        from axqua.solvers.telemac.steering import cas_duration
+
+        if not cfg.hydrology_mode:
+            raise errors.ConfigError(
+                "the case is not in hydrology mode", subject="hydrology.enabled",
+                remedy="Switch the hydrology mode on in the case settings and build "
+                       "the case again.")
+        return self._launch(cfg, ctx=ctx, cas_file=cfg.hydrology_cas_file,
+                            ncsize=ncsize, solver=None, name="telemac-hydrology",
+                            duration=cas_duration(cfg.model_path(cfg.hydrology_cas_file)))
 
     def _run_steady(self, cfg, *, ctx: Any = None, ncsize: int | None = None,
                     cas_file: str | None = None, **_ignored):
@@ -233,6 +270,7 @@ class TelemacBackend(BaseBackend):
     # -- study --------------------------------------------------------------------
     def study(self, cfg, capability: Capability | None = None, *, ctx: Any = None,
               **kwargs):
+        _refuse_in_hydrology_mode(cfg, capability)
         if capability is Capability.MESH_CONVERGENCE:
             return self._mesh_convergence(cfg, ctx=ctx, **kwargs)
         if capability is Capability.VERTICAL_CONVERGENCE:
@@ -395,6 +433,10 @@ class TelemacBackend(BaseBackend):
         """
         from axqua.jobs.model import JobKind
         kind = getattr(getattr(ctx, "spec", None), "kind", None)
+        if kind is JobKind.HYDROLOGY_RUN:
+            return self._hydrology_report(cfg, ctx)
+        if getattr(cfg, "hydrology_mode", False):
+            return None             # a catchment has no steady flux balance to judge
         if kind not in (JobKind.STEADY_RUN, JobKind.UNSTEADY_RUN, JobKind.PREPROCESSING):
             return None
         if not any(Path(cfg.model_dir).glob("*.sortie")):
@@ -410,6 +452,21 @@ class TelemacBackend(BaseBackend):
                            if name.endswith(".png") else "table")
         self._wetting_reports(cfg, ctx)
         return fc
+
+    @staticmethod
+    def _hydrology_report(cfg, ctx: Any):
+        """Outlet hydrograph and water balance of a hydrology run."""
+        from axqua.hydrology import report
+
+        result = report.analyze(cfg)
+        if ctx is not None:
+            folder = Path(cfg.postprocessing_dir) / "hydrology"
+            ctx.record("Outlet hydrograph", folder / "hydrograph.png", kind="figure")
+            ctx.record("Outlet hydrograph (table)", folder / "hydrograph.csv",
+                       kind="table")
+            ctx.record("Water balance", folder / "water-balance.csv", kind="table")
+            ctx.progress(flux_imbalance=result.relative_error)
+        return result
 
     @staticmethod
     def _wetting_reports(cfg, ctx: Any) -> None:
@@ -471,6 +528,8 @@ class TelemacBackend(BaseBackend):
              "SCALAR VELOCITY"),
             (getattr(cfg, "results_unsteady_slf", None), "TELEMAC result (unsteady)",
              "SCALAR VELOCITY"),
+            (getattr(cfg, "results_hydrology_slf", None), "TELEMAC result (hydrology)",
+             "SCALAR VELOCITY"),
             (getattr(cfg, "results2d_from_3d_slf", None),
              "TELEMAC-3D result (depth-averaged)", "VELOCITY"),
             (threed.HYDROSTATIC_RESULT_2D,
@@ -510,6 +569,15 @@ class TelemacBackend(BaseBackend):
                 ctx.record(f"{label} (3D file, not a map layer)", cfg.model_path(name),
                            kind="file")
 
+        hydrology = cfg.model_path(getattr(cfg, "results_hydrology_slf", "r2d-hydrology.slf"))
+        if hydrology.exists():
+            ctx.record("TELEMAC result (hydrology) - infiltrated depth", hydrology,
+                       kind="mesh", variable="INFILTRATED")
+            # TELEMAC's maxima over the run (MAXZ, MAXV in the printouts)
+            ctx.record("TELEMAC result (hydrology) - high water mark", hydrology,
+                       kind="mesh", variable="HIGH WATER MARK")
+            ctx.record("TELEMAC result (hydrology) - highest velocity", hydrology,
+                       kind="mesh", style=STYLE_VELOCITY, variable="HIGHEST VELOCITY")
         ctx.record("Mesh geometry", cfg.model_path(cfg.geometry_slf), kind="mesh")
         for name, kind in (("mesh-convergence.xlsx", "table"),
                            ("vertical-convergence.xlsx", "table")):

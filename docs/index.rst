@@ -17,6 +17,7 @@ Building a numerical model by hand involves many steps in which input files can 
 #. **Hydraulic simulations** begin with a TELEMAC run on a dry riverbed. The result serves as the starting point for 3D simulations with TELEMAC-3D or OpenFOAM (:doc:`usage/hydraulic-simulations`).
 #. **Mesh convergence studies** quantify how much a result depends on the mesh resolution, with the grid convergence index of Celik et al. (2008) (:doc:`usage/mesh-convergence`).
 #. **Morphodynamic simulations** add sediment transport and bed elevation change (:doc:`usage/morphodynamic-simulations`).
+#. **Hydrology** computes the runoff of rain over a catchment or a field with TELEMAC, with Green-Ampt infiltration, wind and evaporation (:doc:`usage/hydrology-simulations`).
 #. **Calibration and validation** adjust uncertain model parameters to field measurements with a surrogate-assisted Bayesian method (Oladyshkin et al. 2020) and report the remaining uncertainty (:doc:`usage/calibration-validation`) based on the `hydroBayesCal <https://hydrobayescal.readthedocs.io>`_ project.
 #. **Postprocessing** turns results into maps and figures (:doc:`usage/postprocessing`) via QGIS, `ParaView <https://www.paraview.org/>`_, and `Visit DAV <https://visit-dav.github.io/visit-website/index.html>`_.
 

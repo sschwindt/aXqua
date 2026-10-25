@@ -194,6 +194,13 @@ class PreprocessingPage(QWidget):
             "build starts from the TELEMAC warm-up run.")
         layout.addWidget(self.openfoam_note)
 
+        # the checkup of a case in hydrology mode: rain, soil, weather, outlet, terrain
+        from .hydrology_box import HydrologyDataBox
+
+        self.hydrology = HydrologyDataBox(context)
+        self.hydrology.setTitle("Hydrology checkup")
+        layout.addWidget(self.hydrology)
+
         check_box = QGroupBox("Preprocessing checkup")
         check_layout = QVBoxLayout(check_box)
         self.table = QTableWidget(0, len(self.COLUMNS))
@@ -207,13 +214,21 @@ class PreprocessingPage(QWidget):
 
     def apply(self, case_view) -> None:
         rows = []
-        steady = None
+        steady = hydrology = None
         for solver in (case_view.enabled_solvers if case_view is not None else []):
             for capability in solver.visible_capabilities:
                 rows.append((capability.title, solver.name, capability.configured,
                              capability.built, capability.run))
                 if (solver.name, capability.name) == sections.PREPROCESSING_CAPABILITY:
                     steady = capability
+                if (solver.name, capability.name) == ("telemac", "hydrology"):
+                    hydrology = capability
+        # a case in hydrology mode has no steady simulation; the build makes its case
+        if hydrology is not None and hydrology.configured:
+            steady = hydrology
+        self.hydrology.setVisible(steady is hydrology and hydrology is not None)
+        if steady is hydrology and hydrology is not None:
+            self.hydrology.refresh()
         self.table.setRowCount(len(rows))
         for index, row in enumerate(rows):
             for column, value in enumerate(row):
@@ -658,8 +673,8 @@ class BatchPage(QWidget):
             needed = step.needs
             # 3D and calibration become possible once the steps before them have run,
             # so only what the case file itself rules out is grayed out
-            wanted = ((step.solver, needed) in by_solver if step.solver
-                      else needed in asked)
+            wanted = any(((step.solver, one) in by_solver if step.solver
+                          else one in asked) for one in needed.split("|"))
             usable = case_view is not None and (wanted or needed == "steady3d")
             entry.setFlags(entry.flags() | enabled if usable
                            else entry.flags() & ~enabled)

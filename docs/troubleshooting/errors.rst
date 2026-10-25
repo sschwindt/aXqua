@@ -186,6 +186,26 @@ The check of a case (*Check* on the *Case Setup* tab, *Save* in the case setting
 ``the case file cannot be read``
     The file does not exist or may not be read. Verify the path and the access rights.
 
+Hydrology checkup
+-----------------
+
+The hydrology checkup of a case in hydrology mode (*Check* on the sub-tab *Simulations > Hydrology* and on the tab *Preprocessing*, ``axqua hydrology check <case-file>``, and the start of every build) reports the following errors. An error stops the build (:doc:`../usage/hydrology-simulations`).
+
+.. _axqua-hydrology-rainfall-unreadable:
+
+``The rain series cannot be read`` or ``is not usable``
+    The file of ``hydrology.rainfall`` is missing, has no time column, or has times that do not increase, intervals that overlap, or negative rain. A table of time and rain, in mm/h or in mm per interval, is expected; the data wizard writes one from a record.
+
+.. _axqua-hydrology-weather-unreadable:
+
+``The weather series cannot be used``
+    Wind or evaporation is switched on, but ``hydrology.weather`` is missing or lacks the columns the choice needs: wind needs ``wind_speed_10m`` and ``wind_direction_10m``, evaporation ``et0`` needs ``et0``, ``penman`` needs radiation, temperature, humidity and wind with dates, and ``series`` needs ``evaporation``.
+
+.. _axqua-hydrology-soil-invalid:
+
+``Soil zone ...`` or ``The soil cannot be read``
+    A value of the soil table is impossible (a negative Ks, a suction head above 1 m, which is usually a value in centimeters, or a water content at the start above saturation), a texture class is unknown, or a zone number of the soil layer is missing from the table.
+
 Profile of this computer
 ------------------------
 

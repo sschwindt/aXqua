@@ -279,7 +279,7 @@ def read(cfg, case_dir: str | Path | None = None, *, time: str | None = None) ->
     alpha = (read_cells(alpha_file, columns.n_cells) if alpha_file.is_file()
              else np.ones(columns.n_cells))
     return depth_average(columns, alpha, velocity, time=time,
-                         wet_depth=float(cfg.hydrodynamics.wet_depth))
+                         wet_depth=float(cfg.wet_depth))
 
 
 def write(cfg, case_dir: str | Path | None = None, *, time: str | None = None,
@@ -288,7 +288,7 @@ def write(cfg, case_dir: str | Path | None = None, *, time: str | None = None,
     case_dir = Path(case_dir) if case_dir else Path(cfg.openfoam_case_dir)
     view = read(cfg, case_dir, time=time)
     out = write_slf(view, Path(path) if path else case_dir / RESULT_NAME)
-    summary = view.summary(float(cfg.hydrodynamics.wet_depth))
+    summary = view.summary(float(cfg.wet_depth))
     log.info("depth-averaged result at t = %s s: %.0f m2 wet, %.0f m3 of water, mean "
              "depth %.3f m, mean velocity %.3f m/s -> %s", view.time,
              summary["wetted_area"], summary["volume"], summary["mean_depth"],

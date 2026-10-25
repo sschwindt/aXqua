@@ -9,21 +9,21 @@ A case file contains nothing that is specific to a computer. Where the simulatio
 
 .. _help-example-case:
 
-**Example case.** A complete case is available for trying out every step before a case of one's own is set up. It describes a braided reach of the Isar River of 6.6 ha at a discharge of 2.4 m³/s, with a coarse mesh, so that the model is built in one minute and a steady simulation takes about two minutes. The example is a folder that contains the case file, the input data in the subfolder ``user-sources/``, and a guide (``README.md``) that explains every step from the build to the loading of the result in QGIS. The folder has a size of about 6 MB. Its terrain model is cut to the outline of the model, which is all that aXqua reads of a terrain model. The example includes the velocity and depth measurements of two field campaigns at two discharges, so that the calibration and the validation can be tried as well.
+**Example cases.** Two complete cases are available for trying out every step before a case of one's own is set up. ``example-isar`` describes a braided reach of the Isar River of 6.6 ha at a discharge of 2.4 m³/s, with a coarse mesh, so that the model is built in one minute and a steady simulation takes about two minutes. It includes the velocity and depth measurements of two field campaigns at two discharges, so that the calibration and the validation can be tried as well. ``example-agrohydrology`` is an arable field of 5.6 ha on a hillslope in Lower Bavaria under a rain of 42 mm in 7 hours, for the hydrology mode (:ref:`help-hydrology`): Green-Ampt infiltration with two soils, sheet flow over the field, and the runoff that leaves it over three of its edges. Each example is a folder that contains the case file, the input data in the subfolder ``user-sources/``, and a guide (``README.md``) that explains every step from the build to the loading of the result in QGIS. The folders have a size of a few megabytes. Their terrain models are cut to the outline of the model, which is all that aXqua reads of a terrain model.
 
 On the *Case Setup* tab, *Example case...* opens a window that lists the available examples. Select the folder in which the folder of the example is to be created and click *Download*. The example is then added to the list of cases, and the next step is *Build* on the *Preprocessing* tab. In a terminal, the following command does the same:
 
 .. code-block:: text
 
-   axqua example get --folder <folder>
+   axqua example get <name> --folder <folder>
 
-The example is not part of the installed program. It is downloaded from the aXqua repository on GitHub. Its input data may be reused and adapted for any purpose, provided that aXqua is cited (Creative Commons Attribution 4.0 International License). The file ``LICENSE.md`` in the folder of the example states the terms and the citation. A folder with the name of the example that already exists is never overwritten, because it may contain results. Delete the folder, or select another one, to download the example again.
+The examples are not part of the installed program. They are downloaded from the aXqua repository on GitHub. Their input data may be reused and adapted for any purpose, provided that aXqua is cited (Creative Commons Attribution 4.0 International License). The file ``LICENSE.md`` in the folder of the example states the terms and the citation. A folder with the name of the example that already exists is never overwritten, because it may contain results. Delete the folder, or select another one, to download the example again.
 
 **In the plugin.** The *Case Setup* tab has two boxes. The box *Cases* lists the cases that the plugin knows. *New case...* creates a case file and opens its settings, *Add case...* adds an existing case file, *Example case...* downloads the example, and *Remove from list* takes the active case off the list without deleting its file. The selected case is the active one, to which all other tabs refer. The plugin remembers the list when QGIS is closed; there is no separate project file, because a case is the project. A project file of an earlier version (``.axqua-prj``) can still be selected with *Add case...*, which adds the cases that it lists.
 
-The box *Case settings* shows the file of the active case. *Open case settings...* opens the settings of the active case in a window of their own, and *Check* examines the case without opening the window. The window shows the settings on pages, which are listed on the left in the order of the subsections below: *Project settings*, *Geodata*, *Liquid boundaries*, *Initial conditions*, *Mesh configuration*, *Wall roughness*, *Hydraulic simulation*, *Morphodynamic simulation*, *TELEMAC*, *OpenFOAM*, *Calibration and validation*, and *Post-processing*. A page can hold several frames: the exchange with a porous body is a frame of the page *Liquid boundaries*, the drying of thin films a frame of *Initial conditions*, the lattice of the OpenFOAM model a frame of *Mesh configuration*, and the structures and the surfaces from CAD are frames of *OpenFOAM*. On each page, the window shows the settings that every case needs and all settings that the case file already contains. Every other setting of a frame is added with *Add setting...*. A tooltip explains each setting, and a frame whose purpose is not obvious has an information button.
+The box *Case settings* shows the file of the active case. *Open case settings...* opens the settings of the active case in a window of their own, and *Check* examines the case without opening the window. The window shows the settings on pages, which are listed on the left in the order of the subsections below: *Project settings*, *Geodata*, *Liquid boundaries*, *Initial conditions*, *Mesh configuration*, *Wall roughness*, *Hydraulic simulation*, *Hydrology*, *Morphodynamic simulation*, *TELEMAC*, *OpenFOAM*, *Calibration and validation*, and *Post-processing*. A page can hold several frames: the exchange with a porous body is a frame of the page *Liquid boundaries*, the drying of thin films a frame of *Initial conditions*, the lattice of the OpenFOAM model a frame of *Mesh configuration*, and the structures and the surfaces from CAD are frames of *OpenFOAM*. On each page, the window shows the settings that every case needs and all settings that the case file already contains. Every other setting of a frame is added with *Add setting...*. A tooltip explains each setting, and a frame whose purpose is not obvious has an information button.
 
-**Required settings** are written in bold dark purple, the color of the aXqua icon. For a minimal case, these are the name and the coordinate reference system, the terrain model, the model outline, the inflow and outflow lines, and the discharge, plus the outflow water level while the outflow condition is a fixed level. An option that is switched on adds the settings that it needs: an unsteady simulation requires the hydrograph, sediment transport with GAIA the sediment classes, fine sediment over a fixed bed the grain size and the concentration at the inflow, and the DEM of difference the second terrain model. The pages *TELEMAC*, *OpenFOAM* and *Calibration and validation* begin with a switch (*Simulate with TELEMAC*, *Simulate with OpenFOAM*, *Calibrate and validate this case*). A switch that is off leaves the block out of the case file and grays out its settings, also where they are shown on another page. Switched on, its required settings turn purple as well. A page whose required setting is still empty is marked in the list on the left, and saving reports each empty required setting.
+**Required settings** are written in bold dark purple, the color of the aXqua icon. For a minimal case, these are the name and the coordinate reference system, the terrain model, the model outline, the inflow and outflow lines, and the discharge, plus the outflow water level while the outflow condition is a fixed level. A case in hydrology mode needs neither the discharge nor inflow lines (:ref:`hydrology-case-setup`). An option that is switched on adds the settings that it needs: an unsteady simulation requires the hydrograph, sediment transport with GAIA the sediment classes, fine sediment over a fixed bed the grain size and the concentration at the inflow, and the DEM of difference the second terrain model. The pages *TELEMAC*, *OpenFOAM* and *Calibration and validation* begin with a switch (*Simulate with TELEMAC*, *Simulate with OpenFOAM*, *Calibrate and validate this case*). A switch that is off leaves the block out of the case file and grays out its settings, also where they are shown on another page. Switched on, its required settings turn purple as well. A page whose required setting is still empty is marked in the list on the left, and saving reports each empty required setting.
 
 .. figure:: ../img/gui-case-setup.png
    :alt: The Case Setup tab of the plugin
@@ -271,6 +271,8 @@ The default values produce a fine mesh. A reach of 0.3 km² then has several hun
 
 Without mesh zones and a centerline, aXqua creates a mesh of uniform resolution (``default_size``).
 
+**Hydrology mode.** The check box *Hydrology mode* at the top of the frame *TELEMAC mesh* switches the case to rainfall-runoff over a catchment (:ref:`case-hydrology`). A catchment has no channel to align cells with, so the mesh then consists of near-equal triangles everywhere: the edge length of each mesh zone applies isotropically, ``default_size`` applies outside the zones, and streams drawn as ``geodata.breaklines`` are refined to ``breakline_size``. Between zones the edge length grows by at most ``growth_ratio`` per triangle. The channel centerline is not used and is grayed out.
+
 **OpenFOAM lattice.** The OpenFOAM model is built on a lattice of columns in plan with layers in the vertical (:ref:`preprocessing-openfoam-choices`). Its resolution is set on the same page of the case settings, in the frame *OpenFOAM lattice*. With ``openfoam.cell_size_factor``, the cell size of the lattice follows the edge length in the channel: 3 makes the lattice three times coarser than the TELEMAC mesh, so that a change of the TELEMAC mesh carries over. Without the factor, ``openfoam.cell_size`` is used as it is. ``openfoam.n_layers`` is the number of layers in the vertical.
 
 .. _case-roughness:
@@ -318,6 +320,33 @@ The ``hydrodynamics`` block controls the hydraulic simulation with TELEMAC. Most
 With ``turbulence_model: auto``, aXqua selects the turbulence model from the mesh resolution relative to the water depth. The time step is adapted automatically during the run, so that the simulation remains stable (``desired_courant``).
 
 The number of processor cores is a property of the computer and is set in its profile (``mpi_processes``, :ref:`solver-bindings`). Where the profile names no number, ``telemac.n_processors`` of the case file applies. The settings of the 3D simulation with OpenFOAM are described in :ref:`preprocessing-openfoam-choices`.
+
+.. _case-hydrology:
+
+Hydrology
+---------
+
+The page *Hydrology* of the case settings describes a rainfall-runoff simulation over a catchment with TELEMAC (:doc:`hydrology-simulations`). Its switch at the top, which is the same as the check box *Hydrology mode* on the page *Mesh configuration*, writes the block ``hydrology``:
+
+.. code-block:: yaml
+
+   hydrology:
+     enabled: true
+     rainfall: user-sources/hydrology/rainfall.csv   # time and rain
+     rainfall_units: mm/h                             # or mm per interval
+     rainfall_stamp: end                              # a time stamp ends its interval
+     infiltration: green-ampt
+     green_ampt: sadeghi                              # de Vos et al. (2024)
+     soil_zones: user-sources/hydrology/soil-zones.gpkg
+     soil_table: user-sources/hydrology/soil-table.csv
+     initial_water_content: 0.25                      # [m3/m3] at the start
+     weather: user-sources/hydrology/weather.csv
+     wind: true
+     evaporation: et0                                 # FAO-56 reference times 1.05
+     outlet_condition: normal_depth
+     drain_time: 3600                                 # [s] after the last rain
+
+In hydrology mode, the case needs no discharge and no inflow line: the rain drives it, and the outflow lines of the page *Liquid boundaries* are where the water leaves. Without any outflow line the catchment is closed and keeps its rain. The page has four frames: *Rain*, *Infiltration (Green-Ampt)*, *Wind and sun*, and *Outlet and run*, each with a button that explains it. The data wizard on the sub-tab *Simulations > Hydrology* writes the files and these entries (:ref:`the data wizard <help-hydrology-wizard>`).
 
 .. _case-morphodynamics:
 

@@ -69,13 +69,13 @@ def summarize(report: dict) -> str:
 
 def point_layers() -> list[tuple[str, str]]:
     """``(name, file)`` of the point layers that are open in QGIS."""
-    from qgis.core import QgsProject, QgsVectorLayer, QgsWkbTypes
+    from qgis.core import Qgis, QgsProject, QgsVectorLayer
 
     found = []
     for layer in QgsProject.instance().mapLayers().values():
         if not isinstance(layer, QgsVectorLayer):
             continue
-        if QgsWkbTypes.geometryType(layer.wkbType()) != QgsWkbTypes.PointGeometry:
+        if layer.geometryType() != Qgis.GeometryType.Point:
             continue
         source = layer.source().split("|")[0]
         if source and Path(source).is_file():

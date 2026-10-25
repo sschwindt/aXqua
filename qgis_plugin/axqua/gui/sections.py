@@ -72,6 +72,10 @@ SECTIONS: tuple[Section, ...] = (
                 SubSection("morphodynamics", "Morphodynamics", "help-morphodynamics", (
                     ("telemac", "morphodynamics"), ("openfoam", "morphodynamics")),
                     page="usage/morphodynamic-simulations", choose_solver=True),
+                # rainfall-runoff over a catchment, TELEMAC only (the user's order of
+                # 2026-10-24)
+                SubSection("hydrology", "Hydrology", "help-hydrology", (
+                    ("telemac", "hydrology"),), page="usage/hydrology-simulations"),
             )),
     Section("calibration", "Calibration & validation", "usage/calibration-validation",
             "help-calibration", capabilities=(("telemac", "calibration"),
@@ -95,6 +99,7 @@ WINDOWS: dict[str, tuple[str, str]] = {
     "install-postprocessors": ("installation/postprocessors", "help-postprocessors"),
     "example-case": ("usage/case-setup", "help-example-case"),
     "cleanup": ("troubleshooting/tips-logfiles", "help-cleanup"),
+    "hydrology-wizard": ("usage/hydrology-simulations", "help-hydrology-wizard"),
 }
 
 #: Where a capability nobody has placed is shown: with the simulations of its solver.

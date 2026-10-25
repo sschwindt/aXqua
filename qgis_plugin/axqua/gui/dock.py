@@ -61,6 +61,10 @@ EMPTY = {
         "This case does not use OpenFOAM for morphodynamics. Switch on Fine sediment "
         "over a fixed bed in Case settings > Morphodynamic simulation to simulate fine "
         "sediment with sediDriftFoam2 over a bed that stays in place."),
+    ("hydraulics", "hydrology"): (
+        "This case is not in hydrology mode. Switch on Hydrology mode in Case settings "
+        "(page Mesh configuration or Hydrology) to simulate rainfall-runoff over a "
+        "catchment with TELEMAC."),
     ("calibration", ""): "This case has no simulation that can be calibrated.",
 }
 
@@ -295,6 +299,10 @@ class AxquaDock(QDockWidget):
             from .validation_box import CalibrationPage
             return CalibrationPage(self.ctx, key, sub,
                                    empty_text=EMPTY.get((key, sub), ""))
+        if (key, sub) == ("hydraulics", "hydrology"):
+            from .hydrology_box import HydrologyPage
+            return HydrologyPage(self.ctx, key, sub,
+                                 empty_text=EMPTY.get((key, sub), ""))
         placed = sections.section(key).subsection(sub) if sub else None
         if placed is not None and placed.choose_solver:
             return SolverChoicePage(

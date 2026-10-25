@@ -164,6 +164,38 @@ def test_an_unknown_example_is_answered_with_the_ones_there_are(source, tmp_path
     assert "demo" in caught.value.remedy
 
 
+def test_an_example_newer_than_the_installed_release_is_named_but_not_placed(
+        source, tmp_path, monkeypatch):
+    """An installed release reads the index of its own tag first. An example only the main branch has is newer than the release, and its case file may use settings the release cannot read: the answer says so and where it is, rather than "no example" or a case that does not load."""
+    older = tmp_path / "older"
+    older.mkdir()
+    _index(older, name="isar")
+    monkeypatch.setattr(examples, "sources", lambda explicit="": (
+        [explicit] if explicit else [str(older), str(source)]))
+    with pytest.raises(ConfigError, match="'demo' is newer than aXqua") as caught:
+        examples.fetch("demo", tmp_path / "work", say=lambda text: None)
+    assert f"--source {source}" in caught.value.remedy
+    assert not (tmp_path / "work" / "demo").exists()
+    # named as the source, it is placed
+    done = examples.fetch("demo", tmp_path / "work", source=str(source), say=lambda text: None)
+    assert done["source"] == str(source)
+    # a checkout of this version that lists it without its data belongs to this version: the data come from a later source
+    bare = tmp_path / "bare"
+    (bare / "demo").mkdir(parents=True)
+    (bare / "demo" / "demo.axq-case").write_bytes(FILES["demo.axq-case"])
+    _index(bare)
+    monkeypatch.setattr(examples, "sources", lambda explicit="": (
+        [explicit] if explicit else [str(bare), str(older), str(source)]))
+    done = examples.fetch("demo", tmp_path / "again", say=lambda text: None)
+    assert done["source"] == str(source)
+    monkeypatch.setattr(examples, "sources", lambda explicit="": (
+        [explicit] if explicit else [str(older), str(source)]))
+    # where no source has it, the answer names the examples there are
+    with pytest.raises(ConfigError, match="no example case 'inn'") as caught:
+        examples.fetch("inn", tmp_path / "work", say=lambda text: None)
+    assert "isar" in caught.value.remedy
+
+
 def test_where_the_examples_are_looked_for(monkeypatch, tmp_path):
     import axqua
 

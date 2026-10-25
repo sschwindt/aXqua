@@ -67,6 +67,8 @@ def result_files(cfg) -> list[tuple[str, str, Path]]:
         (f"{steady.stem}-hotstart{steady.suffix}", "continued steady simulation, 2D"),
         (getattr(cfg, "results_unsteady_slf", "r2d-unsteady.slf"),
          "unsteady simulation, 2D"),
+        (getattr(cfg, "results_hydrology_slf", "r2d-hydrology.slf"),
+         "hydrology simulation (rainfall-runoff), 2D"),
         (getattr(cfg, "results3d_slf", "r3d.slf"), "3D simulation"),
         (getattr(cfg, "results2d_from_3d_slf", "r3d-2d.slf"),
          "3D simulation, depth-averaged"),
@@ -99,8 +101,15 @@ def _has_varying_inflow(cfg) -> bool:
     return cfg.boundaries.inflow is not None
 
 
+def _hydrology(cfg) -> bool:
+    """A hydrology case: rainfall-runoff over a catchment (``hydrology.enabled``)."""
+    return getattr(cfg, "hydrology_mode", False)
+
+
 def _calibration_configured(cfg) -> bool:
-    """Calibration needs parameters to perturb and ground truth to fit against."""
+    """Calibration needs parameters to perturb and ground truth to fit against, and a steady run to perturb: a hydrology case has none, so HydroBayesCal is not available in the mode yet."""
+    if _hydrology(cfg):
+        return False
     has_params = bool(cfg.calibration.parameters)
     gt = cfg.ground_truth
     has_truth = bool(gt.measurements or gt.sources or gt.targets)
@@ -108,9 +117,8 @@ def _calibration_configured(cfg) -> bool:
 
 
 def _three_d_configured(cfg) -> bool:
-    """The 3D path is available once the 2D result it hotstarts from exists; there is
-    no separate config switch for it (``add3d.py`` is an opt-in script)."""
-    return _exists(cfg, cfg.results_slf)
+    """The 3D path is available once the 2D result it hotstarts from exists; there is no separate config switch for it (``add3d.py`` is an opt-in script). A hydrology case has no steady 2D result of its own: an ``r2d.slf`` left from when the case was a river case would start 3D from a model that is no longer the case."""
+    return not _hydrology(cfg) and _exists(cfg, cfg.results_slf)
 
 
 SPEC = BackendSpec(
@@ -125,13 +133,15 @@ SPEC = BackendSpec(
     capabilities={
         Capability.STEADY2D: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=lambda cfg: True,           # every TELEMAC case builds one
+            # every river case builds one; a catchment has no steady state
+            configured=lambda cfg: not _hydrology(cfg),
             built=lambda cfg: _exists(cfg, cfg.cas_file),
             run=lambda cfg: _exists(cfg, cfg.results_slf),
         ),
         Capability.UNSTEADY2D: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=_has_varying_inflow,
+            # a hydrology case runs the hydrograph of its inflow lines in its own run
+            configured=lambda cfg: _has_varying_inflow(cfg) and not _hydrology(cfg),
             built=lambda cfg: _exists(cfg, cfg.unsteady_cas_file),
             run=lambda cfg: _exists(cfg, cfg.results_unsteady_slf),
         ),
@@ -167,9 +177,16 @@ SPEC = BackendSpec(
                                or _model(cfg, cfg.user_fortran_dir).is_dir()),
             run=lambda cfg: _exists(cfg, cfg.results_slf),
         ),
+        Capability.HYDROLOGY: CapabilitySpec(
+            support=Support.SUPPORTED,
+            configured=_hydrology,
+            built=lambda cfg: _exists(cfg, cfg.hydrology_cas_file),
+            run=lambda cfg: _exists(cfg, cfg.results_hydrology_slf),
+        ),
         Capability.MESH_CONVERGENCE: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=lambda cfg: True,
+            # the study compares steady flux-balanced runs; a catchment has none
+            configured=lambda cfg: not _hydrology(cfg),
             built=lambda cfg: (Path(cfg.postprocessing_dir) / "mesh-convergence").is_dir(),
             run=lambda cfg: any((Path(cfg.postprocessing_dir) / "mesh-convergence")
                                 .glob("mesh-convergence.*")),

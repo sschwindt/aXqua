@@ -544,10 +544,12 @@ def run_list(argv: list[str]) -> int:
 def _list_lines(rows) -> list[str]:
     if not rows:
         return ["no jobs"]
-    header = f"{'JOB ID':<40}{'SOLVER':<10}{'KIND':<24}{'STATE':<18}CREATED"
+    # a job id carries the case name, so the column grows with the longest one
+    wide = max([40] + [len(row.job_id) + 2 for row in rows])
+    header = f"{'JOB ID':<{wide}}{'SOLVER':<10}{'KIND':<24}{'STATE':<18}CREATED"
     out = [header, "-" * len(header)]
     for row in rows:
-        out.append(f"{row.job_id:<40}{(row.solver or ''):<10}{(row.kind or ''):<24}"
+        out.append(f"{row.job_id:<{wide}}{(row.solver or ''):<10}{(row.kind or ''):<24}"
                    f"{(row.state or ''):<18}{row.created or ''}")
     return out
 

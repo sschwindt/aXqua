@@ -69,6 +69,9 @@ BLOCK_LAYER: dict[str, Layer] = {
     "gain_lose": Layer.SHARED,      # a property of the reach; TELEMAC-only *today*
     "structures": Layer.SHARED,     # dams and walls are terrain, and both codes mesh them
     "drying": Layer.TELEMAC,
+    # rainfall-runoff with TELEMAC's rain term and aXqua's runoff routine; the user
+    # asked for it as a mode of TELEMAC only
+    "hydrology": Layer.TELEMAC,
     "initialization": Layer.TELEMAC,
     "telemac": Layer.TELEMAC,
     "openfoam": Layer.OPENFOAM,

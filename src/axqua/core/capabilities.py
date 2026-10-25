@@ -75,6 +75,7 @@ class Capability(str, Enum):
     MESH_CONVERGENCE = "mesh_convergence"    # horizontal grid independence
     VERTICAL_CONVERGENCE = "vertical_convergence"
     GAIN_LOSE = "gain_lose"                  # losing/gaining reach exchange
+    HYDROLOGY = "hydrology"                  # rainfall-runoff over a catchment
 
     def __str__(self) -> str:                # so f-strings render the value
         return self.value
@@ -100,6 +101,7 @@ CAPABILITY_ORDER: tuple[Capability, ...] = (
     Capability.FREE_SURFACE_3D,
     Capability.MORPHODYNAMICS,
     Capability.GAIN_LOSE,
+    Capability.HYDROLOGY,
     Capability.MESH_CONVERGENCE,
     Capability.VERTICAL_CONVERGENCE,
     Capability.CALIBRATION,
@@ -275,6 +277,17 @@ def read_marker(path: str | Path) -> SolverStatus:
     )
 
 
+#: ``hydrodynamics.wet_depth`` of a river case that sets none [m].
+RIVER_WET_DEPTH = 0.01
+#: ``hydrodynamics.wet_depth`` of a hydrology case that sets none [m]: the sheet flow of a hillslope is millimeters deep, and the 1 cm of a river would hide it from the map.
+HYDROLOGY_WET_DEPTH = 0.001
+
+
+def default_wet_depth(hydrology_mode: bool) -> float:
+    """The depth [m] at or below which water counts as dry when a case sets none: 1 mm in hydrology mode, 1 cm in a river case. The one place that says so, for :attr:`axqua.config.Config.wet_depth` and the display settings."""
+    return HYDROLOGY_WET_DEPTH if hydrology_mode else RIVER_WET_DEPTH
+
+
 def _display_settings(cfg) -> dict:
     """How this case's results should be drawn, read off the case.
 
@@ -282,10 +295,15 @@ def _display_settings(cfg) -> dict:
     imported to answer "what can this case do?" and must not fail because a config
     predates a field.
     """
-    hydro = getattr(cfg, "hydrodynamics", None)
     post = getattr(cfg, "postproc", None)
+    # Config.wet_depth resolves the default of the mode; a stand-in may carry only the setting of the case, and then gets the default of its mode here
+    wet = getattr(cfg, "wet_depth", None)
+    if wet is None:
+        wet = getattr(getattr(cfg, "hydrodynamics", None), "wet_depth", None)
+    if wet is None:
+        wet = default_wet_depth(getattr(cfg, "hydrology_mode", False))
     return {
-        "wet_depth": float(getattr(hydro, "wet_depth", 0.01) or 0.01),
+        "wet_depth": float(wet),
         "velocity_scale_max": float(
             getattr(post, "velocity_scale_max", 5.0) or 5.0),
     }

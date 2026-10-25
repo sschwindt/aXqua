@@ -405,7 +405,7 @@ def write_fields(of_mesh, cfg, case_dir: str | Path, *, state=None,
     # the whole trick - the air phase is removed by construction rather than modeled
     # cheaply, and none of the pressure formulation has to be re-derived.
     alpha = (np.ones(of_mesh.n_cells) if rigid
-             else initial_alpha(of_mesh, wet_depth=cfg.hydrodynamics.wet_depth))
+             else initial_alpha(of_mesh, wet_depth=cfg.wet_depth))
     velocity = initial_velocity(of_mesh, alpha, state)
     k, epsilon, omega = turbulence_scales(state, cfg)
 

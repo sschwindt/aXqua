@@ -76,6 +76,27 @@ EXAMPLES: dict[str, dict] = {
                 ("ground-truth/flowtracker/Sep25/Isar_Sep25.gpkg", "copy"),
         },
     },
+    "example-agrohydrology": {
+        "title": "Arable field, rainfall-runoff with Green-Ampt infiltration",
+        "summary": "A 5.6 ha arable field on a hillslope in Lower Bavaria under a "
+                   "rain of 42 mm in 7 hours. Hydrology mode of TELEMAC-2D with about "
+                   "16,600 nodes: Green-Ampt infiltration after de Vos et al. (2024) "
+                   "with two soils, sheet flow over the field, and the runoff that "
+                   "leaves it over three of its edges, in about 7 minutes.",
+        "case": "example-agrohydrology.axq-case",
+        "documents": ["README.md", "LICENSE.md", "LICENSE-CC-BY-4.0.txt"],
+        # reconstructed from two TELEMAC models of the field (see the README)
+        "origin": "agrohydrology/user-sources",
+        "outline": "geodata/field-outline.gpkg",
+        "files": {
+            "geodata/dgm1.tif": ("geodata/dgm1.tif", "terrain"),
+            "geodata/field-outline.gpkg": ("geodata/field-outline.gpkg", "copy"),
+            "geodata/liquid-boundaries.gpkg": ("geodata/liquid-boundaries.gpkg", "copy"),
+            "hydrology/hyetograph.txt": ("hydrology/hyetograph.txt", "copy"),
+            "hydrology/soil-ks-0.61.csv": ("hydrology/soil-ks-0.61.csv", "copy"),
+            "hydrology/soil-ks-2.csv": ("hydrology/soil-ks-2.csv", "copy"),
+        },
+    },
 }
 
 

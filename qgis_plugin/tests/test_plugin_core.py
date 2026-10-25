@@ -128,7 +128,7 @@ def test_the_plugin_never_imports_axqua():
 # ----------------------------------------------------------- executable discovery
 
 
-def _fake_axqua(tmp_path: Path, *, version: str = "axqua 1.0.2",
+def _fake_axqua(tmp_path: Path, *, version: str = "axqua 1.1.0",
                     exit_code: int = 0) -> Path:
     tmp_path.mkdir(parents=True, exist_ok=True)
     script = tmp_path / "axqua"
@@ -178,23 +178,23 @@ def test_a_missing_executable_names_every_place_it_looked(monkeypatch):
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_axqua_too_old_for_this_plugin_is_refused_by_name(tmp_path, monkeypatch):
-    """An older aXqua presented as a series of unexplained parse failures at every verb rather than as one sentence here. Since 1.0 the plugin also calls commands 0.5 does not have."""
-    old = _fake_axqua(tmp_path, version="axqua 0.5.0")
+    """An older aXqua presented as a series of unexplained parse failures at every verb rather than as one sentence here. Since 1.1 the plugin also calls commands 1.0 does not have (``hydrology``)."""
+    old = _fake_axqua(tmp_path, version="axqua 1.0.2")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
     with pytest.raises(runner_client.RunnerNotFound) as excinfo:
         runner_client.find_executable(str(old))
-    assert "1.0 or newer" in str(excinfo.value)
+    assert "1.1 or newer" in str(excinfo.value)
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
 def test_an_unusual_version_string_is_accepted(tmp_path, monkeypatch):
     """Refusing to run something because its version is a git describe string would be
     worse than the problem the check exists for."""
-    dev = _fake_axqua(tmp_path, version="axqua 1.0.1.dev3+g1a2b3c4")
+    dev = _fake_axqua(tmp_path, version="axqua 1.1.0.dev3+g1a2b3c4")
     monkeypatch.delenv(runner_client.ENV_VAR, raising=False)
     monkeypatch.setattr("shutil.which", lambda name: None)
-    assert runner_client.find_executable(str(dev)).version.startswith("1.0.1")
+    assert runner_client.find_executable(str(dev)).version.startswith("1.1.0")
 
 
 @pytest.mark.skipif(os.name == "nt", reason="shell script stub")
@@ -252,7 +252,7 @@ def test_a_structured_failure_reaches_the_user_with_its_remedy():
 def test_output_that_is_not_json_is_reported_as_such(tmp_path, monkeypatch):
     script = tmp_path / "axqua"
     script.write_text("#!/bin/sh\nif [ \"$1\" = \"--version\" ]; then echo "
-                      "'axqua 1.0.0'; else echo 'Segmentation fault'; fi\n",
+                      "'axqua 1.1.0'; else echo 'Segmentation fault'; fi\n",
                       encoding="utf-8")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     client = runner_client.RunnerClient(str(script))
@@ -483,6 +483,32 @@ def test_a_capability_with_no_job_kind_is_disabled_rather_than_dead():
     assert capability.can_submit is False
     assert capability.state_text == "not available yet"
     assert "cannot be started from the plugin yet" in capability.reason
+
+
+def test_a_hydrology_case_says_why_it_offers_no_steady_run_and_no_calibration():
+    """In hydrology mode the steady run, the unsteady runs, the 3D runs, both studies and the calibration are not configured, whatever the case file holds. "Add the relevant block" was the wrong advice: the block may well be there."""
+    def payload(hydrology):
+        return {"solvers": [{"solver": "telemac", "enabled": True, "capabilities": [
+            {"capability": "hydrology", "implemented": "yes", "configured": hydrology},
+            {"capability": "calibration", "implemented": "yes", "configured": False},
+            {"capability": "unsteady2d", "implemented": "yes", "configured": False},
+            {"capability": "mesh_convergence", "implemented": "yes",
+             "configured": False}]}]}
+
+    telemac = CaseView.from_payload(payload(True)).solver("telemac")
+    assert "not yet available" in telemac.capability("calibration").reason
+    assert "hydrology run" in telemac.capability("unsteady2d").reason
+    assert "steady simulations" in telemac.capability("mesh_convergence").reason
+    for name in ("calibration", "unsteady2d", "mesh_convergence"):
+        assert "relevant block" not in telemac.capability(name).reason
+    river = CaseView.from_payload(payload(False)).solver("telemac")
+    assert "relevant block" in river.capability("calibration").reason
+    # the mode is TELEMAC's: an OpenFOAM box of the same case keeps its own advice
+    mixed = payload(True)
+    mixed["solvers"].append({"solver": "openfoam", "enabled": False, "capabilities": [
+        {"capability": "mesh_convergence", "implemented": "yes", "configured": False}]})
+    openfoam = CaseView.from_payload(mixed).solver("openfoam")
+    assert "relevant block" in openfoam.capability("mesh_convergence").reason
 
 
 def test_morphodynamics_runs_with_the_flow_and_the_tab_says_so():
@@ -765,6 +791,9 @@ UNSCOPED_ENUMS = [
     (r"QgsColorRampShader\.Interpolated", "QgsColorRampShader.Type.Interpolated"),
     (r"QgsLegendStyle\.(Title|Group|Subgroup|SymbolLabel)", "QgsLegendStyle.Style.*"),
     (r"Qt\.(UserRole|AlignRight|AlignCenter|MatchExactly)\b", "Qt.<Scope>.*"),
+    # QGIS's Qt6 check flagged QgsWkbTypes.PointGeometry on 2026-10-25; the member lives in Qgis.GeometryType since QGIS 3.30, and the QgsWkbTypes spellings are aliases.
+    (r"QgsWkbTypes\.(GeometryType\.)?(Point|Line|Polygon|Unknown|Null)Geometry\b",
+     "Qgis.GeometryType.*"),
 ]
 
 #: Every scope ``Qt`` member the plugin uses lives under. Anything else spelled
@@ -810,14 +839,14 @@ def test_no_unscoped_qt_enum_outside_compat(pattern, scoped):
                             f"compat: {offenders}")
 
 
-def test_no_exec_underscore_outside_compat():
-    """``exec_`` was removed in Qt6. compat routes it through getattr, so the literal
-    member call should exist nowhere else."""
+def test_no_exec_underscore_anywhere():
+    """``exec_`` was removed in Qt6. compat routes it through getattr, so neither a member call nor a function of that name exists anywhere, compat included: QGIS's Qt6 check reads compat too and asked on 2026-10-25 for its ``def exec_`` to be renamed."""
     import re
 
+    bad = re.compile(r"\.exec_\(|\bdef exec_\b")
     offenders = [str(p.relative_to(PLUGIN_ROOT))
                  for p in (PLUGIN_ROOT / "axqua").rglob("*.py")
-                 if p.name != "compat.py" and re.search(r"\.exec_\(", p.read_text("utf-8"))]
+                 if bad.search(p.read_text("utf-8"))]
     assert offenders == []
 
 
@@ -883,13 +912,14 @@ def test_a_waiting_job_says_whom_it_waits_for_in_the_progress_column():
 
 #: The tabs the user's instructions prescribe, in their order, with their sub-tabs.
 #: The user's corrections of 2026-10-16: Mesh convergence and Morphodynamic simulation
-#: moved into Simulations, whose TELEMAC sub-tab is the baseline.
+#: moved into Simulations, whose TELEMAC sub-tab is the baseline. The user's order of
+#: 2026-10-24: a sub-tab Hydrology, TELEMAC only.
 PRESCRIBED = [
     ("Configuration", []),
     ("Case Setup", []),
     ("Preprocessing", []),
     ("Simulations", ["Baseline (Telemac)", "OpenFOAM", "Mesh convergence",
-                     "Morphodynamics"]),
+                     "Morphodynamics", "Hydrology"]),
     ("Calibration & validation", []),
     ("Postprocessing", ["QGIS", "ParaView", "VisIt"]),
     ("Batch-processing", []),
@@ -911,8 +941,9 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
     from axqua_plugin.gui import sections
 
     keys = sections.help_keys()
-    # 7 tabs, 7 sub-tabs, 3 installation wizards and the windows of the example case and of Clean Up
-    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 7 + 3 + 2
+    # 7 tabs, 8 sub-tabs, 3 installation wizards and the windows of the example case,
+    # of Clean Up and of the hydrology data wizard
+    assert len(keys) == len({key for key, _, _ in keys}) == 7 + 8 + 3 + 3
     for key, page, label in keys:
         text = (DOCS / f"{page}.rst").read_text(encoding="utf-8")
         assert f".. _{label}:" in text, f"{key}: {label} is not on {page}"
@@ -924,6 +955,8 @@ def test_every_tab_and_sub_tab_opens_a_label_that_exists_on_its_page():
                                                           "help-mesh-convergence")
     assert sections.help_target("hydraulics", "morphodynamics")[0] == \
         "usage/morphodynamic-simulations"
+    assert sections.help_target("hydraulics", "hydrology") == (
+        "usage/hydrology-simulations", "help-hydrology")
 
 
 def test_a_capability_is_shown_on_the_tab_of_its_section():

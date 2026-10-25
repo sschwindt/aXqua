@@ -157,6 +157,24 @@ def test_cancelling_everything_leaves_nothing_in_flight(qgis_app):
     assert not tasks._IN_FLIGHT
 
 
+def test_a_task_the_user_cancels_says_so_instead_of_answering(qgis_app):
+    """A box that waits for the answer has to stop waiting (its Check button)."""
+    from axqua_plugin.core import tasks
+
+    said = []
+    task = tasks.RunnerTask("test", lambda: 1, on_success=said.append,
+                            on_cancel=lambda: said.append("cancelled"))
+    task.run()
+    task.cancel()
+    task.finished(True)
+    assert said == ["cancelled"]
+    unloaded = tasks.run_async("test", lambda: 1,
+                               on_cancel=lambda: said.append("after unload"))
+    tasks.cancel_all()                       # the plugin goes, and its widgets with it
+    unloaded.finished(False)
+    assert said == ["cancelled"]
+
+
 # ------------------------------------------------------------------------- layers
 
 
@@ -913,7 +931,7 @@ def test_the_panel_has_the_prescribed_tabs_and_sub_tabs(dock):
     inner = {key: [tabs.tabText(i) for i in range(tabs.count())]
              for key, tabs in dock.subtabs.items()}
     assert inner == {"hydraulics": ["Baseline (Telemac)", "OpenFOAM",
-                                    "Mesh convergence", "Morphodynamics"],
+                                    "Mesh convergence", "Morphodynamics", "Hydrology"],
                      "postprocessing": ["QGIS", "ParaView", "VisIt"]}
     # the job list is below the tabs and not one of them
     assert dock.jobs_tab.parent() is not None and dock.tabs.indexOf(dock.jobs_tab) == -1
@@ -3086,3 +3104,356 @@ def test_every_processing_algorithm_loads(qgis_app):
         assert algorithm.shortHelpString()
     names = {algorithm.name() for algorithm in provider.algorithms()}
     assert {"importresults"} <= names and len(names) == 3
+
+
+# --------------------------------------------------------------- hydrology mode
+
+
+def _hydro_field(key, kind, label, **extra):
+    field = _field(key, kind, label, True)
+    field.update({"required": extra.get("required", False),
+                  "required_when": extra.get("required_when", []),
+                  "required_unless": extra.get("required_unless", []),
+                  "disabled_when": extra.get("disabled_when", []),
+                  "hidden": extra.get("hidden", False)})
+    return field
+
+
+HYDRO_SWITCH = {"label": "Hydrology mode", "seed": {"enabled": True}}
+
+#: the outlet of a catchment is a lake
+_LAKE = {"all": [{"block": "hydrology"},
+                 {"key": "hydrology.outlet_condition", "in": ["elevation"]}]}
+
+HYDRO_SCHEMA = {
+    "sections": [
+        {"block": "geodata", "title": "Geodata", "label": "case-geodata", "fields": [
+            _hydro_field("geodata.channel_centerline", "vector", "Centerline",
+                         disabled_when=[{"block": "hydrology"}])]},
+        {"block": "boundaries", "title": "Liquid boundaries", "label": "",
+         "fields": [_hydro_field("boundaries.prescribed_flowrate", "number",
+                                 "Discharge", required=True,
+                                 required_unless=[{"block": "hydrology"}]),
+                    _hydro_field("boundaries.prescribed_elevation", "number",
+                                 "Outflow level",
+                                 required_when=[{"key": "boundaries.outflow_condition",
+                                                 "in": ["elevation"]}, _LAKE],
+                                 required_unless=[{"all": [
+                                     {"block": "hydrology"},
+                                     {"key": "hydrology.outlet_condition",
+                                      "in": ["normal_depth", "free"]}]}])]},
+        {"block": "mesh", "title": "Mesh", "label": "", "fields": [
+            _hydro_field("mesh.default_size", "number", "Edge length")]},
+        {"block": "hydrology", "title": "Hydrology", "label": "", "fields": [
+            _hydro_field("hydrology.enabled", "bool", "Enabled", hidden=True),
+            _hydro_field("hydrology.rainfall", "table", "Rain series",
+                         required_when=[{"block": "hydrology"}]),
+            {**_hydro_field("hydrology.outlet_condition", "choice", "Outlet"),
+             "choices": ["normal_depth", "free", "elevation"],
+             "default": "normal_depth"}]},
+    ],
+    "pages": [
+        {"key": "geodata", "title": "Geodata", "label": "", "switch": {},
+         "frames": [{"title": "", "info": "", "keys": ["geodata.channel_centerline"]}]},
+        {"key": "boundaries", "title": "Liquid boundaries", "label": "", "switch": {},
+         "frames": [{"title": "", "info": "",
+                     "keys": ["boundaries.prescribed_flowrate",
+                              "boundaries.prescribed_elevation"]}]},
+        {"key": "mesh", "title": "Mesh configuration", "label": "", "switch": {},
+         "frames": [{"title": "TELEMAC mesh", "info": "", "keys": ["mesh.default_size"],
+                     "switch": {"block": "hydrology", **HYDRO_SWITCH}}]},
+        {"key": "hydrology", "title": "Hydrology", "label": "", "switch": HYDRO_SWITCH,
+         "frames": [{"title": "Rain", "info": "", "keys": ["hydrology.rainfall",
+                                                           "hydrology.outlet_condition"]}]},
+    ],
+}
+
+
+def test_hydrology_mode_is_one_switch_on_the_mesh_page_and_on_its_own(
+        qgis_app, tmp_path, monkeypatch):
+    """The user's words: "a check-button for Hydrology-mode must also be integrated in
+    mesh generation"; the mode needs no discharge and no centerline."""
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    case = {"geodata": {"channel_centerline": "cl.gpkg"},
+            "boundaries": {"prescribed_flowrate": None}, "mesh": {"default_size": 5.0}}
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "c.axq-case", case,
+                                    HYDRO_SCHEMA)
+    boxes = editor._switch_boxes["hydrology"]
+    assert len(boxes) == 2 and not any(box.isChecked() for box in boxes)
+    rows = editor.rows
+    assert "hydrology.enabled" not in rows                    # the switch stands for it
+    assert _purple(rows["boundaries.prescribed_flowrate"].label_widget)
+    assert rows["geodata.channel_centerline"].container.isEnabled()
+
+    boxes[0].setChecked(True)                                 # on the mesh page
+    assert boxes[1].isChecked()                               # the page switch follows
+    assert not _purple(rows["boundaries.prescribed_flowrate"].label_widget)
+    assert not rows["geodata.channel_centerline"].container.isEnabled()
+    assert _purple(rows["hydrology.rainfall"].label_widget)
+    assert editor.values()["hydrology"] == {"enabled": True}
+
+    rows["hydrology.rainfall"].widget.setText("user-sources/hydrology/rain.csv")
+    boxes[1].setChecked(False)                                # off on its own page
+    assert not boxes[0].isChecked()
+    # switched off, not deleted: the rain stays for later
+    assert editor.values()["hydrology"] == {
+        "enabled": False, "rainfall": "user-sources/hydrology/rain.csv"}
+    editor.deleteLater()
+
+
+def test_a_block_without_enabled_true_opens_switched_off(qgis_app, tmp_path,
+                                                        monkeypatch):
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    case = {"hydrology": {"rainfall": "rain.csv"}}           # the loader reads it as off
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "c.axq-case", case,
+                                    HYDRO_SCHEMA)
+    assert not editor.switches["hydrology"].isChecked()
+    editor.deleteLater()
+
+
+class _HydroClient:
+    def __init__(self):
+        self.written = []
+
+    def hydrology_portals(self, case=None, countries=()):
+        return {"advice": "ask the agency",
+                "national": [{"name": "DWD RADOLAN", "url": "https://dwd.example",
+                              "offers": ["rain"], "note": "", "country_name": "Germany",
+                              "country": "DE"}],
+                "global": [{"name": "SoilGrids", "url": "https://soilgrids.example",
+                            "offers": ["soil"], "note": "250 m"},
+                           {"name": "Open-Meteo", "url": "https://om.example",
+                            "offers": ["rain", "weather"], "note": "ERA5"}]}
+
+    def hydrology_textures(self):
+        return {"textures": [{"texture": "loam", "ks_mm_h": 3.4, "suction_m": 0.0889,
+                              "theta_s": 0.463}]}
+
+    def hydrology_info(self, case):
+        return {"latitude": 47.8, "longitude": 11.7, "area_m2": 3.0e6,
+                "countries": ["DE"], "files": {}, "outlet_condition": "normal_depth"}
+
+    def hydrology_fetch(self, case, what, **options):
+        return {"settings": {"hydrology.rainfall": "user-sources/hydrology/rainfall.csv",
+                             "hydrology.weather": "user-sources/hydrology/weather.csv"},
+                "weather": "user-sources/hydrology/weather.csv",
+                "caution": "Reanalysis underestimates short rain intensities."}
+
+    def case_read(self, case):
+        return {"data": {"project": {"name": "c"}, "hydrology": {"enabled": False}}}
+
+    def case_write(self, case, data):
+        self.written.append(data)
+        return {"findings": []}
+
+
+def test_the_data_wizard_lists_the_agency_first_and_saves_what_was_chosen(
+        qgis_app, tmp_path, monkeypatch):
+    from axqua_plugin.gui import hydrology_wizard
+
+    monkeypatch.setattr(hydrology_wizard, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    client = _HydroClient()
+
+    class _Ctx:
+        pass
+
+    ctx = _Ctx()
+    ctx.client = client
+    wizard = hydrology_wizard.HydrologyWizard(ctx, tmp_path / "c.axq-case")
+    assert [wizard.tabs.tabText(i) for i in range(wizard.tabs.count())] == [
+        "Rain", "Soil", "Initial moisture", "Wind and sun", "Outlet", "Save"]
+    rain_links = next(label.text() for label, offers in wizard._portal_labels
+                      if offers == "rain")
+    assert rain_links.index("DWD RADOLAN") < rain_links.index("Open-Meteo")
+    assert "SoilGrids" not in rain_links
+    assert "countries DE" in wizard.where.text()
+    wizard.fetch_event()
+    assert "Reanalysis" in wizard.status.text()
+    wizard.texture.setCurrentIndex(wizard.texture.findData("loam"))
+    assert "3.4 mm/h" in wizard.texture_values.text()
+    wizard.save()
+    written = client.written[-1]
+    assert written["hydrology"]["enabled"] is True
+    assert written["hydrology"]["rainfall"] == "user-sources/hydrology/rainfall.csv"
+    assert written["project"] == {"name": "c"}               # the rest is kept
+    assert wizard.saved
+    wizard.deleteLater()
+
+
+def test_the_outflow_level_of_a_catchment_is_required_when_its_outlet_is_a_lake(
+        qgis_app, tmp_path, monkeypatch):
+    """A condition {"all": [...]} holds when each of its parts does."""
+    from axqua_plugin.gui import case_editor
+
+    monkeypatch.setattr(case_editor, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        on_success(call()))
+    editor = case_editor.CaseEditor(_CaseClient(), tmp_path / "c.axq-case",
+                                    {"boundaries": {"outflow_condition": "elevation"}},
+                                    HYDRO_SCHEMA)
+    level = editor.rows["boundaries.prescribed_elevation"].label_widget
+    assert _purple(level)                          # a river: its outflow is a level
+    editor.switches["hydrology"].setChecked(True)
+    assert not _purple(level)                      # a catchment with a normal-depth outlet
+    outlet = editor.rows["hydrology.outlet_condition"].widget
+    outlet.setCurrentIndex(outlet.findData("elevation"))
+    assert _purple(level)                          # its outlet is a lake
+    editor.deleteLater()
+
+
+def _hydro_box(monkeypatch, *cases):
+    """A box of the hydrology data and the requests it makes, which no one answers."""
+    from types import SimpleNamespace
+
+    from axqua_plugin.gui import hydrology_box
+
+    calls = []
+    monkeypatch.setattr(hydrology_box, "run_async",
+                        lambda title, call, **callbacks: calls.append((title, callbacks)))
+    for case in cases:
+        case.write_text("")
+    chosen = [cases[0]]
+    ctx = SimpleNamespace(project=SimpleNamespace(active_case_path=lambda: chosen[0]),
+                          client=None, refresh_case=lambda: None)
+    return hydrology_box.HydrologyDataBox(ctx), calls, chosen
+
+
+def _asked(calls, start=0):
+    return ["checkup" if "checkup" in title else "info" for title, _ in calls[start:]]
+
+
+def test_a_late_answer_for_another_case_does_not_reach_the_hydrology_box(
+        qgis_app, tmp_path, monkeypatch):
+    """A checkup of the terrain takes seconds; the user may have chosen another case."""
+    first, second = tmp_path / "a.axq-case", tmp_path / "b.axq-case"
+    box, calls, chosen = _hydro_box(monkeypatch, first, second)
+    box.refresh()
+    assert calls == []                          # not on the screen: nothing asked
+    box.show()
+    assert _asked(calls) == ["info", "checkup"]  # shown: the data and the quick checkup
+    late = calls[1][1]["on_success"]
+    chosen[0] = second
+    box.refresh()
+    current = [cb for title, cb in calls[2:] if "checkup" in title][0]["on_success"]
+    current({"findings": []})
+    late({"findings": [{"severity": "warning", "code": "axqua.hydrology.depressions",
+                        "message": "of case a", "subject": "geodata.dem_initial"}]})
+    assert box.finding_list.findings == []      # case a's answer came too late
+    assert box.check_button.isEnabled()
+    box.deleteLater()
+
+
+def test_a_refresh_does_not_replace_a_checkup_of_the_terrain_under_way(
+        qgis_app, tmp_path, monkeypatch):
+    """The user asked for the terrain with Check; a job ending refreshes the case."""
+    box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
+    box.refresh()
+    box.show()                                       # data + quick checkup
+    calls[0][1]["on_success"]({})
+    box.check(terrain=True)
+    terrain = calls[-1][1]["on_success"]
+    box.refresh()                                    # the data again, no quick checkup
+    assert _asked(calls, 3) == ["info"]
+    box.refresh()                                    # the data are on their way too
+    assert _asked(calls, 3) == ["info"]
+    terrain({"findings": [{"severity": "warning",
+                           "code": "axqua.hydrology.flow_across_wall",
+                           "message": "water crosses the outline",
+                           "subject": "geodata.boundary"}]})
+    assert [f.code for f in box.finding_list.findings] == [
+        "axqua.hydrology.flow_across_wall"]
+    box.refresh()                                    # done: a refresh checks again
+    assert _asked(calls, 4) == ["checkup"]
+    box.deleteLater()
+
+
+def test_a_voided_checkup_of_the_terrain_does_not_hold_back_the_next_one(
+        qgis_app, tmp_path, monkeypatch):
+    """Its answer is void once the case is no longer chosen, so it is not waited for."""
+    case = tmp_path / "a.axq-case"
+    box, calls, chosen = _hydro_box(monkeypatch, case)
+    box.refresh()
+    box.show()
+    box.check(terrain=True)
+    chosen[0] = None
+    box.refresh()                                    # no case: every answer is void
+    chosen[0] = case
+    box.refresh()                                    # chosen again: checked again
+    assert _asked(calls, 3) == ["info", "checkup"]
+    box.deleteLater()
+
+
+def test_a_checkup_of_the_terrain_is_asked_again_when_the_data_change(
+        qgis_app, tmp_path, monkeypatch):
+    """The data wizard may save while the terrain is checked; that answer is old."""
+    import os
+
+    case = tmp_path / "a.axq-case"
+    box, calls, _ = _hydro_box(monkeypatch, case)
+    box.refresh()
+    box.show()
+    box.check(terrain=True)
+    old = calls[-1][1]["on_success"]
+    case.write_text("hydrology:\n  enabled: true\n")      # saved in the meantime
+    os.utime(case, ns=(1, 1))
+    box.refresh()
+    assert _asked(calls, 3) == ["info", "checkup"]
+    assert box.state.text() == "Checking the terrain model..."   # the terrain again
+    old({"findings": [{"severity": "error", "code": "axqua.hydrology.rainfall_missing",
+                       "message": "no rain", "subject": "hydrology.rainfall"}]})
+    assert box.finding_list.findings == []           # the answer for the old data
+    box.deleteLater()
+
+
+def test_the_data_wizard_refreshes_the_box_once_when_the_case_status_fails(
+        qgis_app, tmp_path, monkeypatch):
+    """The page refreshes the box only when it can read the status of the case; the box of the other tab is told as well."""
+    from axqua_plugin import compat
+    from axqua_plugin.gui import hydrology_box, hydrology_wizard
+
+    box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
+    box.refresh()
+    box.show()
+    calls[0][1]["on_success"]({})
+    calls[1][1]["on_success"]({"findings": []})
+    other = hydrology_box.HydrologyDataBox(box.ctx)     # the Preprocessing tab's box
+    other.refresh()                                     # not on the screen yet
+
+    class _Wizard:
+        def __init__(self, *args, **kwargs):
+            self.saved, self.wrote = True, True
+
+    monkeypatch.setattr(hydrology_wizard, "HydrologyWizard", _Wizard)
+    monkeypatch.setattr(compat, "exec_dialog", lambda dialog: None)
+    box.open_wizard()                                # the case status never arrives
+    assert _asked(calls, 2) == ["info", "checkup"]
+    box.refresh()                                    # the page, when it does arrive
+    assert _asked(calls, 2) == ["info", "checkup"]
+    other.show()                                     # its tab is opened: it asks
+    assert _asked(calls, 4) == ["info", "checkup"]
+    box.deleteLater()
+    other.deleteLater()
+
+
+def test_a_cancelled_checkup_lets_the_user_check_again(qgis_app, tmp_path, monkeypatch):
+    box, calls, _ = _hydro_box(monkeypatch, tmp_path / "a.axq-case")
+    box.refresh()
+    box.show()
+    box.check(terrain=True)
+    assert not box.check_button.isEnabled()
+    calls[-1][1]["on_cancel"]()                      # cancelled in the task bar
+    assert box.check_button.isEnabled()
+    assert "cancelled" in box.state.text()
+    box.refresh()                    # the data are on their way, the checkup is not
+    assert _asked(calls, 3) == ["checkup"]
+    box.deleteLater()

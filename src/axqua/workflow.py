@@ -17,6 +17,7 @@ import logging
 from pathlib import Path
 
 from axqua.config import Config
+from axqua.core.boundaries import OUTLET_LEVELS
 from axqua.env import TelemacRuntime
 from axqua.progress import SolverProgress
 from axqua.rating import synthesize_outflow_rating
@@ -76,7 +77,8 @@ def synthesize_rating_if_missing(cfg: Config, discharge: float,
     Returns the rating path (existing or generated), or None for the other outflow
     conditions (``elevation`` / ``free``), which need no rating curve.
     """
-    if cfg.boundaries.outflow_condition != "stage_discharge":
+    # also called before the validation, which reports a name that is no condition
+    if OUTLET_LEVELS.get(cfg.outflow_condition) != "rating":
         return None
     sd = cfg.boundaries.stage_discharge
     method = getattr(cfg.boundaries, "rating_method", "trapezoid")
@@ -108,7 +110,14 @@ def prepare_steady_inputs(cfg: Config, discharge: float | None = None, *,
     *prewet_depth* defaults to the sentinel "leave it as the config has it"; pass a
     float (or None) to set ``initialization.prewet_depth`` - the mesh-convergence study
     hotstarts the channel this way, the dry-start initial run leaves it untouched.
+
+    A hydrology case (``hydrology.enabled``) is driven by its rain and has no steady
+    discharge: nothing is prescribed or synthesized, and the discharge of an inflow
+    line, if the case gives one, is returned (else 0).
     """
+    if getattr(cfg, "hydrology_mode", False):
+        q = discharge if discharge is not None else cfg.boundaries.prescribed_flowrate
+        return float(q) if q is not None else 0.0
     q = resolve_discharge(cfg, discharge)
     cfg.boundaries.prescribed_flowrate = q
     if prewet_depth is not _UNSET:
@@ -406,7 +415,7 @@ def report_wetting(cfg: Config) -> list[str]:
             # legitimately wet; without this it counts as BOTH film and an isolated
             # puddle, i.e. reads as a defect when it is what the model intends
             supported=water_table_mask(cfg),
-            wet_depth=cfg.hydrodynamics.wet_depth,
+            wet_depth=cfg.wet_depth,
             out=cfg.model_dir,
         )
     except Exception as exc:  # noqa: BLE001

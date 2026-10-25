@@ -161,6 +161,9 @@ SPEC = BackendSpec(
         ),
         # Possible, not yet built.
         Capability.GAIN_LOSE: CapabilitySpec(support=Support.NOT_IMPLEMENTED),
+        # Rainfall-runoff over a catchment is the shallow-water equations with rain
+        # and infiltration on every cell; a two-phase 3D model is not that tool.
+        Capability.HYDROLOGY: CapabilitySpec(support=Support.NOT_APPLICABLE),
         Capability.MESH_CONVERGENCE: CapabilitySpec(
             support=Support.SUPPORTED,
             configured=lambda cfg: "openfoam" in cfg.declared_blocks,

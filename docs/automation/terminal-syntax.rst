@@ -82,8 +82,8 @@ Preparing and checking a case:
      - Create a case file with the entries that every case has.
    * - ``axqua example list``
      - List the example cases with their size (:ref:`Example case <help-example-case>`).
-   * - ``axqua example get --folder <folder>``
-     - Download the example case into ``<folder>``: the case file, the input data and a guide. With several examples, name the example before ``--folder``.
+   * - ``axqua example get <name> --folder <folder>``
+     - Download the example case ``<name>`` into ``<folder>``: the case file, the input data and a guide. The name may be left out while there is only one example.
    * - ``axqua <case-file>``
      - Run the preprocessing and write the TELEMAC model.
    * - ``axqua <case-file> --dry-run``

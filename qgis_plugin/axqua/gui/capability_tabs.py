@@ -39,6 +39,7 @@ TITLES = {
     "vertical_convergence": "Vertical convergence",
     "calibration": "Calibration (BAL)",
     "gain_lose": "Gain-lose reach",
+    "hydrology": "Hydrology (rainfall-runoff)",
 }
 
 ORDER = list(TITLES)
@@ -54,6 +55,7 @@ PRIMARY_KIND = {
     "mesh_convergence": "mesh-convergence",
     "vertical_convergence": "vertical-convergence",
     "calibration": "calibration",
+    "hydrology": "hydrology",
 }
 
 #: The kind that *builds* what the tab then runs, where the two differ.
@@ -63,6 +65,8 @@ BUILD_KIND = {
     "steady3d": "build-3d",
     "unsteady3d": "build-3d",
     "free_surface_3d": "openfoam-build",
+    # a hydrology case is built by the same build as any TELEMAC case
+    "hydrology": "preprocessing",
 }
 
 #: Where one solver does something else under the name of a capability than the others.
@@ -101,6 +105,33 @@ NOT_CONFIGURED_REASON = (
 #: :data:`FIXED_OPTIONS`), and a future one still gets this text rather than dead buttons.
 NO_JOB_KIND_REASON = "{title} with {solver} cannot be started from the plugin yet."
 
+#: What a capability that is switched on in the case settings says while it is off,
+#: in place of :data:`NOT_CONFIGURED_REASON`.
+HOW_TO_CONFIGURE = {
+    "hydrology": ("This case is not in hydrology mode. Switch on Hydrology mode in Case "
+                  "settings, on the page Mesh configuration or Hydrology, and build the "
+                  "case on the tab Preprocessing."),
+}
+#: Why a case in hydrology mode does not offer a capability, in place of the advice to add a block: the block may well be in the case file, and the mode is what rules it out.
+NOT_IN_HYDROLOGY_MODE = {
+    "steady2d": ("A case in hydrology mode is driven by its rain and has no steady "
+                 "simulation; its run is on the sub-tab Hydrology."),
+    "unsteady2d": ("A case in hydrology mode runs the hydrographs of its inflow lines in "
+                   "its hydrology run, on the sub-tab Hydrology."),
+    "unsteady3d": ("A case in hydrology mode runs the hydrographs of its inflow lines in "
+                   "its hydrology run, on the sub-tab Hydrology."),
+    "steady3d": ("TELEMAC-3D starts from a steady 2D result, which a case in hydrology "
+                 "mode does not have."),
+    "vertical_convergence": ("TELEMAC-3D starts from a steady 2D result, which a case in "
+                             "hydrology mode does not have."),
+    "mesh_convergence": ("The mesh convergence study compares steady simulations, which a "
+                         "case in hydrology mode does not have. The documentation, section "
+                         "Hydrology, describes how to check its mesh instead."),
+    "calibration": ("The calibration is not yet available for a case in hydrology mode. "
+                    "The documentation, section Hydrology, describes how to compare its "
+                    "hydrograph with a measured one."),
+}
+
 
 #: Capabilities that are not simulations of their own. They are switched on in the case
 #: file and are then built and run with another capability's jobs, so "there is no job
@@ -130,6 +161,8 @@ class CapabilityView:
     configured: bool | None = None
     built: bool | None = None
     run: bool | None = None
+    #: Whether the case is in hydrology mode, which rules out the capabilities of :data:`NOT_IN_HYDROLOGY_MODE`.
+    hydrology_mode: bool = False
 
     @property
     def own(self) -> dict:
@@ -189,7 +222,12 @@ class CapabilityView:
             # Before "not configured": configuring it would not help.
             return NO_JOB_KIND_REASON.format(title=self.title, solver=self.solver)
         if not self.configured:
-            return NOT_CONFIGURED_REASON.format(title=self.title)
+            # the mode is TELEMAC's; another solver's box keeps its own advice
+            if (self.hydrology_mode and self.solver == "telemac"
+                    and self.name in NOT_IN_HYDROLOGY_MODE):
+                return NOT_IN_HYDROLOGY_MODE[self.name]
+            return HOW_TO_CONFIGURE.get(self.name) or NOT_CONFIGURED_REASON.format(
+                title=self.title)
         return ""
 
     @property
@@ -251,6 +289,9 @@ class CaseView:
     @classmethod
     def from_payload(cls, payload: dict[str, Any]) -> "CaseView":
         solvers = []
+        hydrology = any(c.get("capability") == "hydrology" and c.get("configured")
+                        for entry in payload.get("solvers") or []
+                        for c in entry.get("capabilities") or [])
         for entry in payload.get("solvers") or []:
             name = str(entry.get("solver") or "")
             solvers.append(SolverView(
@@ -266,6 +307,7 @@ class CaseView:
                         configured=c.get("configured"),
                         built=c.get("built"),
                         run=c.get("run"),
+                        hydrology_mode=hydrology,
                     )
                     for c in (entry.get("capabilities") or [])
                 ],
