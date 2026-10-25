@@ -188,28 +188,50 @@ def resolve_outflow_wse(cfg, inflow_q: float) -> float:
     OpenFOAM as a ``prghPressure`` profile on the outlet patch, and they must agree
     or the two models are not driven the same way.
 
-    ``stage_discharge`` (default) reads the rating curve and interpolates the WSE
-    at the simulated discharge; ``elevation`` uses the fixed prescribed value.
+    Where the level comes from is :data:`axqua.core.boundaries.OUTLET_LEVELS`: ``stage_discharge`` reads the rating curve and interpolates the WSE at the simulated discharge, ``elevation`` uses the fixed prescribed value, ``normal_depth`` the level of TELEMAC's Z(Q) curve at the discharge (the starting value TELEMAC then updates), and ``overfall`` the level below the lowest node of the built mesh. A free outflow has no level and raises.
     """
-    cond = cfg.outflow_condition
-    if cond == "elevation":
+    from axqua.config import outlet_level
+
+    level = outlet_level(cfg.outflow_condition)
+    if level == "fixed":
         if cfg.boundaries.prescribed_elevation is None:
             raise ValueError(
                 "outflow_condition: elevation needs boundaries.prescribed_elevation"
             )
         return float(cfg.boundaries.prescribed_elevation)
-    if cond == "normal_depth":
-        # the outlet of a hydrology case on TELEMAC's stage-discharge curve: the level
-        # of the curve at the discharge, the starting value TELEMAC then updates
+    if level == "curve":
         from axqua.solvers.telemac.hydrology import outlet_rating_csv
 
         return read_stage_discharge(outlet_rating_csv(cfg))(inflow_q)
-    # stage_discharge: look up the rating curve at the simulated Q
+    if level == "mesh":
+        from axqua.solvers.telemac.hydrology import overfall_level
+        from axqua.workflow import mesh_from_geometry
+
+        return overfall_level(mesh_from_geometry(cfg))
+    if level is None:
+        raise ValueError(f"a {cfg.outflow_condition} outflow prescribes no water level")
+    return _rating(cfg)(inflow_q)
+
+
+def outflow_wse_fn(cfg):
+    """Callable Q -> level of the outflow lines for a liquid-boundaries file, or None where the file gives no level: a free outflow prescribes none, and a ``normal_depth`` outlet takes its level from TELEMAC's own Z(Q) curve as the discharge changes. A rating curve gives the level of each discharge, every other outlet one level."""
+    from axqua.config import outlet_level
+
+    level = outlet_level(cfg.outflow_condition)
+    if level in (None, "curve"):
+        return None
+    if level == "rating":
+        return _rating(cfg)
+    wse = resolve_outflow_wse(cfg, 0.0)
+    return lambda _q: wse
+
+
+def _rating(cfg):
+    """The rating curve of the outflow, Q -> WSE, from ``boundaries.stage_discharge``."""
     if cfg.boundaries.stage_discharge is None:
         raise ValueError(
             "outflow_condition: stage_discharge needs boundaries.stage_discharge (a Q-h "
             "rating CSV). Generate one with `axqua rating` from a Manning/"
             "Strickler value and the channel geometry (normal-flow conditions)."
         )
-    wse_at = read_stage_discharge(Path(cfg.boundaries.stage_discharge))
-    return wse_at(inflow_q)
+    return read_stage_discharge(Path(cfg.boundaries.stage_discharge))

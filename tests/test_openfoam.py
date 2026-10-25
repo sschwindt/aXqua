@@ -255,6 +255,7 @@ class _Cfg:
 
         self.openfoam = OpenFoam(**kw)
         self.hydrodynamics = Hydrodynamics()
+        self.wet_depth = 0.01        # Config.wet_depth of a river case
 
 
 def test_fvsolution_carries_the_settings_that_tame_the_air_phase():

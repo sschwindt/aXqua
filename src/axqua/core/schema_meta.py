@@ -34,6 +34,8 @@ import typing
 from pathlib import Path
 from typing import Any
 
+from axqua.core.boundaries import HYDROLOGY_OUTLETS, RIVER_OUTLETS, outlet_level
+
 __all__ = ["BLOCKS", "CURATED", "KINDS", "PAGES", "REQUIRED", "REQUIRED_WHEN", "SWITCHES",
            "block_classes", "build", "field_kinds", "pages"]
 
@@ -183,9 +185,13 @@ REQUIRED = frozenset({
     "boundaries.liquid_boundaries", "boundaries.prescribed_flowrate",
 })
 
+#: The outlets of a hydrology case that hold the level ``boundaries.prescribed_elevation`` (a lake, a reservoir), and those that do not.
+_FIXED_LEVEL = [c for c in HYDROLOGY_OUTLETS if outlet_level(c) == "fixed"]
+_OTHER_LEVEL = [c for c in HYDROLOGY_OUTLETS if outlet_level(c) != "fixed"]
+
 #: The outlet of a hydrology case is a level (a lake, a reservoir).
 _HYDROLOGY_LEVEL = {"all": [{"block": "hydrology"},
-                            {"key": "hydrology.outlet_condition", "in": ["elevation"]}]}
+                            {"key": "hydrology.outlet_condition", "in": _FIXED_LEVEL}]}
 
 #: Entries that are not needed while a condition holds: ``key -> conditions`` (of which
 #: one suffices), in the form of :data:`REQUIRED_WHEN`. A hydrology case is driven by
@@ -196,8 +202,7 @@ REQUIRED_UNLESS: dict[str, list[dict[str, Any]]] = {
     "boundaries.liquid_boundaries": [{"block": "hydrology"}],
     "boundaries.prescribed_elevation": [
         {"all": [{"block": "hydrology"},
-                 {"key": "hydrology.outlet_condition",
-                  "in": ["normal_depth", "free", "overfall"]}]}],
+                 {"key": "hydrology.outlet_condition", "in": _OTHER_LEVEL}]}],
 }
 
 #: Entries that have no effect while a condition holds, which a form grays out:
@@ -279,7 +284,7 @@ CURATED: dict[str, dict[str, Any]] = {
                                          help="Total inflow of the steady simulation."),
     "boundaries.outflow_condition": _c(
         "Water level at the outflow", "choice",
-        choices=("elevation", "stage_discharge", "free"),
+        choices=RIVER_OUTLETS,
         help="elevation: the fixed level entered below. stage_discharge: from a rating "
              "curve at the simulated discharge. free: nothing is prescribed."),
     "boundaries.prescribed_elevation": _c("Outflow water level", "number", "m a.s.l."),
@@ -299,7 +304,8 @@ CURATED: dict[str, dict[str, Any]] = {
              "with a Nikuradse roughness of 0.05-0.5 m, water 5 mm deep stands "
              "inside the grain roughness rather than flowing over it. The reports "
              "of aXqua and the map styles of the plugin both use this value, so "
-             "the picture and the report agree."),
+             "the picture and the report agree. Empty: 0.01 m, and 0.001 m in "
+             "hydrology mode, whose sheet flow is millimeters deep."),
     "postproc.velocity_scale_max": _c(
         "Velocity scale maximum", "number", unit="m/s",
         help="Upper end of the velocity color scale in every figure of this case. "
@@ -440,7 +446,7 @@ CURATED: dict[str, dict[str, Any]] = {
              "radiation, temperature, humidity and wind. series: the evaporation "
              "column."),
     "hydrology.outlet_condition": _c(
-        "Outlet", "choice", choices=("normal_depth", "free", "elevation", "overfall"),
+        "Outlet", "choice", choices=HYDROLOGY_OUTLETS,
         help="normal_depth: the level of normal flow through each outflow section. "
              "free: nothing prescribed; only for a supercritical outlet. elevation: "
              "the fixed level of the page Liquid boundaries. overfall: no water is "

@@ -139,7 +139,8 @@ SPEC = BackendSpec(
         ),
         Capability.UNSTEADY2D: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=_has_varying_inflow,
+            # a hydrology case runs the hydrograph of its inflow lines in its own run
+            configured=lambda cfg: _has_varying_inflow(cfg) and not _hydrology(cfg),
             built=lambda cfg: _exists(cfg, cfg.unsteady_cas_file),
             run=lambda cfg: _exists(cfg, cfg.results_unsteady_slf),
         ),
@@ -154,7 +155,8 @@ SPEC = BackendSpec(
         ),
         Capability.UNSTEADY3D: CapabilitySpec(
             support=Support.SUPPORTED,
-            configured=lambda cfg: _has_varying_inflow(cfg) and _three_d_configured(cfg),
+            configured=lambda cfg: (_has_varying_inflow(cfg) and not _hydrology(cfg)
+                                    and _three_d_configured(cfg)),
             built=lambda cfg: _exists(cfg, UNSTEADY3D_CAS),
             run=lambda cfg: _exists(cfg, cfg.results3d_unsteady_slf),
         ),

@@ -553,7 +553,7 @@ def evaluate(cfg, situation, setup: ValidationSetup | None = None) -> Validation
     report = compare(points, cfg.model_path(cfg.geometry_slf), result,
                      name=situation.name,
                      measurement_error=float(cfg.calibration.measurement_error),
-                     wet_depth=float(cfg.hydrodynamics.wet_depth))
+                     wet_depth=float(cfg.wet_depth))
     folder = Path(cfg.calibration_dir) / FOLDER
     folder.mkdir(parents=True, exist_ok=True)
     report.table.to_csv(folder / f"validation-{tag}.csv", index=False)

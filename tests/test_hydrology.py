@@ -174,6 +174,22 @@ def test_telemacs_own_hyetograph_file_is_read_as_telemac_reads_it(tmp_path):
     path.write_text("#HYETOGRAPH FILE\n#T (s) RAINFALL (mm)\n0 0\n3600 6.72\nend\n")
     with pytest.raises(ValueError, match="line 5"):
         rainfall.read_series(path)
+    # TELEMAC reads only the time of the first line (READ(UL,*) AT1)
+    path.write_text("#HYETOGRAPH FILE\n#T (s) RAINFALL (mm)\n0.\n3600 6.72\n")
+    assert list(rainfall.read_series(path).intensity_mm_h) == [6.72]
+
+
+def test_a_rain_table_that_only_names_a_hyetograph_is_read_as_a_table(tmp_path):
+    """Only a file that begins with TELEMAC's #HYETOGRAPH is its hyetograph file; a comment that names a hyetograph is a comment of an ordinary table, with its own units and stamps."""
+    table = "time,rain\n0,0\n600,2\n1200,3\n"
+    plain, named = tmp_path / "plain.csv", tmp_path / "named.csv"
+    plain.write_text(table)
+    named.write_text("# Hyetograph, DWD station 3668\n" + table)
+    expected = rainfall.read_series(plain, units="mm", stamp="end")
+    series = rainfall.read_series(named, units="mm", stamp="end")
+    assert list(series.end_s) == list(expected.end_s) == [600.0, 1200.0, 1800.0]
+    assert list(series.intensity_mm_h) == list(expected.intensity_mm_h) == [0.0, 12.0, 18.0]
+    assert not any("TELEMAC" in note for note in series.notes)
 
 
 def test_the_canonical_file_round_trips(tmp_path):
@@ -436,18 +452,24 @@ def test_a_hydrology_case_builds_without_a_discharge_or_a_centerline(tmp_path):
 
 def test_a_hydrology_case_shows_water_from_one_millimeter(tmp_path):
     """Sheet flow is millimeters deep: the river's 1 cm would leave the map of a catchment nearly empty. A case that sets its own threshold keeps it."""
-    from axqua.config import HYDROLOGY_WET_DEPTH, load_config
+    from axqua.config import HYDROLOGY_WET_DEPTH, dump_config, load_config
     from axqua.core.capabilities import _display_settings
 
     case = _catchment(tmp_path)
     cfg = load_config(case)
-    assert cfg.hydrodynamics.wet_depth == HYDROLOGY_WET_DEPTH == 0.001
+    assert cfg.wet_depth == HYDROLOGY_WET_DEPTH == 0.001
     assert _display_settings(cfg)["wet_depth"] == 0.001
+    # the default is resolved where it is read, not stored: after a dump and a load with the mode switched off, the case is a river case with the river's 1 cm
+    cfg.hydrology.enabled = False
+    assert cfg.wet_depth == 0.01
+    dumped = tmp_path / "dumped.axq-case"
+    dump_config(cfg, dumped)
+    assert load_config(dumped).wet_depth == 0.01
     case.write_text(case.read_text() + "hydrodynamics:\n  wet_depth: 0.005\n")
-    assert load_config(case).hydrodynamics.wet_depth == 0.005
+    assert load_config(case).wet_depth == 0.005
     river = case.read_text().replace("  enabled: true\n", "  enabled: false\n")
     case.write_text(river.replace("hydrodynamics:\n  wet_depth: 0.005\n", ""))
-    assert load_config(case).hydrodynamics.wet_depth == 0.01
+    assert load_config(case).wet_depth == 0.01
 
 
 def test_an_overfall_outlet_holds_no_water_at_its_lines(tmp_path):

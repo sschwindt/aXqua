@@ -164,6 +164,21 @@ def test_an_unknown_example_is_answered_with_the_ones_there_are(source, tmp_path
     assert "demo" in caught.value.remedy
 
 
+def test_an_example_a_release_does_not_have_yet_comes_from_the_next_source(
+        source, tmp_path, monkeypatch):
+    """An installed release reads the index of its own tag first, which may predate an example that the main branch has."""
+    older = tmp_path / "older"
+    older.mkdir()
+    _index(older, name="isar")
+    monkeypatch.setattr(examples, "sources", lambda explicit="": [str(older), str(source)])
+    done = examples.fetch("demo", tmp_path / "work", say=lambda text: None)
+    assert done["source"] == str(source)
+    # where no source has it, the answer names the examples there are
+    with pytest.raises(ConfigError, match="no example case 'inn'") as caught:
+        examples.fetch("inn", tmp_path / "work", say=lambda text: None)
+    assert "isar" in caught.value.remedy
+
+
 def test_where_the_examples_are_looked_for(monkeypatch, tmp_path):
     import axqua
 

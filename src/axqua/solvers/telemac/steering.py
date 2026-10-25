@@ -17,7 +17,7 @@ import math
 import re
 from pathlib import Path
 
-from axqua.config import Config
+from axqua.config import Config, outlet_level
 from axqua.core.geodata import dataset
 from axqua.solvers.telemac.boundary import LiquidBoundary
 
@@ -848,7 +848,7 @@ def _prescribed_arrays(cfg: Config, liquids: list[LiquidBoundary],
     inflow stays *inflow_q* - prescribing the full Q on each would multiply the
     supplied discharge and flood the domain.
     """
-    free_outflow = cfg.outflow_condition == "free"
+    free_outflow = outlet_level(cfg.outflow_condition) is None
     inflows = [b for b in liquids if b.kind == "inflow"]
     per_line = bool(inflows) and all(b.discharge is not None for b in inflows)
     inflow_nodes = sum(b.n_nodes for b in inflows) or 1
@@ -882,7 +882,7 @@ def write_liquid_boundaries(cfg: Config, liquids: list[LiquidBoundary],
     # a level comes from the file only where the outflow prescribes one that the file
     # can give: not for a free outflow, and not for a hydrology outlet on TELEMAC's
     # stage-discharge curve, whose level TELEMAC takes from the curve itself
-    free_outflow = cfg.outflow_condition in ("free", "normal_depth")
+    free_outflow = outlet_level(cfg.outflow_condition) in (None, "curve")
     ordered = sorted(liquids, key=lambda b: b.index)
     inflows = [b for b in ordered if b.kind == "inflow"]
     per_line = bool(inflows) and all(b.discharge is not None for b in inflows)

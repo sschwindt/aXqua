@@ -462,7 +462,7 @@ def _run_build(argv: list[str] | None) -> int:
     for name in ("geometry_slf", "boundary_cli", "friction_tbl", "initial_conditions",
                  "cas_file", "hydrology_cas", "unsteady_cas", "liquid_boundaries",
                  "gaia_cas", "ground_truth", "calibration_csv", "hbc_config"):
-        value = getattr(art, name, None)
+        value = getattr(art, name)
         if value:
             log.info("  %-16s %s", name, value)
     if cfg.hydrology_mode:

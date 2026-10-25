@@ -44,8 +44,8 @@ MISSING_AT_OR_BELOW = -999.0
 #: Dates written as one integer, by number of digits (DWD ``MESS_DATUM``).
 _INTEGER_DATES = {8: "%Y%m%d", 10: "%Y%m%d%H", 12: "%Y%m%d%H%M"}
 
-#: The word the first line of TELEMAC's hyetograph file carries (``#HYETOGRAPH FILE``).
-TELEMAC_HYETOGRAPH = "HYETOGRAPH"
+#: How the first line of TELEMAC's hyetograph file begins (``#HYETOGRAPH FILE``); a comment that only names a hyetograph (``# Hyetograph, station 3668``) is no such file.
+TELEMAC_HYETOGRAPH = "#HYETOGRAPH"
 
 
 @dataclass
@@ -351,10 +351,12 @@ def telemac_hyetograph(path: str | Path) -> RainSeries | None:
     if path.suffix.lower() in (".xlsx", ".xls"):
         return None
     try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        with path.open(encoding="utf-8", errors="replace") as stream:
+            first = stream.readline()
+            if not first.strip().upper().startswith(TELEMAC_HYETOGRAPH):
+                return None
+            lines = [first, *stream.read().splitlines()]
     except OSError:
-        return None
-    if not lines or TELEMAC_HYETOGRAPH not in lines[0].upper():
         return None
     rows = []
     for number, line in enumerate(lines[2:], start=3):
@@ -362,7 +364,8 @@ def telemac_hyetograph(path: str | Path) -> RainSeries | None:
             continue
         fields = line.replace(",", " ").split()
         try:
-            rows.append((float(fields[0]), float(fields[1])))
+            # TELEMAC reads only the time of the first line (READ(UL,*) AT1)
+            rows.append((float(fields[0]), float(fields[1]) if rows else 0.0))
         except (IndexError, ValueError):
             raise ValueError(f"{path.name}, line {number}: {line.strip()!r} is not a time "
                              "in s and a depth in mm, as TELEMAC's hyetograph file "

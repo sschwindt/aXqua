@@ -278,21 +278,32 @@ def fetch(name: str, folder: str | os.PathLike, *, source: str = "",
     ``{"name", "title", "folder", "case", "guide", "files", "megabytes", "source"}``.
     A folder that is there already is not touched: results of the user may be in it.
     """
-    tried = []
+    tried, unknown = [], None
     for candidate in sources(source):
         try:
-            example = _pick(read_index(candidate), name, candidate)
+            listed = read_index(candidate)
         except Missing:
             tried.append(f"{candidate} (no {INDEX})")
             continue
         except (OSError, urllib.error.URLError) as exc:
             tried.append(f"{candidate} ({_reason(exc)})")
             continue
+        try:
+            example = _pick(listed, name, candidate)
+        except ConfigError as exc:
+            if not name:
+                raise
+            # the tag of an installed release may predate an example that the main branch has, so a name one source lacks is looked for in the next one
+            unknown = unknown or exc
+            tried.append(f"{candidate} (no example {name!r})")
+            continue
         if not is_remote(candidate) and not _complete(candidate, example):
             # a checkout carries the case file and the guide, not always the data
             tried.append(f"{candidate} (without the data of {example.name})")
             continue
         return _place(candidate, example, Path(folder), say)
+    if unknown is not None and all("(no example " in t for t in tried):
+        raise unknown
     raise _unreachable(tried)
 
 

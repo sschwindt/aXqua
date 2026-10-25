@@ -30,7 +30,7 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from axqua.config import Config
+from axqua.config import Config, outlet_level
 # The liquid-boundary readers are shared with the OpenFOAM backend, so they
 # live in the core; re-exported here because this module published them.
 from axqua.core.boundaries import (  # noqa: F401
@@ -132,8 +132,8 @@ def load_liquid_boundaries(path: str | Path) -> list["LiquidBoundary"]:
 
 
 def _outflow_code(cfg: Config) -> tuple[int, int, int]:
-    """Free/Neumann outflow -> 4 4 4; stage_discharge / elevation -> 5 4 4."""
-    return OUTFLOW_FREE if cfg.outflow_condition == "free" else OUTFLOW_ELEV
+    """An outflow without a level (free, Neumann) -> 4 4 4; every outflow with one -> 5 4 4."""
+    return OUTFLOW_FREE if outlet_level(cfg.outflow_condition) is None else OUTFLOW_ELEV
 
 
 

@@ -1057,7 +1057,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
 
     polygon, how = _domain_polygon(cfg, state, domain=of.domain,
                                    wet_margin=resolve_margin(cfg, state),
-                                   wet_depth=cfg.hydrodynamics.wet_depth)
+                                   wet_depth=cfg.wet_depth)
     notes.append(f"footprint: {how}")
 
     structures = load_structures(cfg)
@@ -1073,7 +1073,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
         # into slivers, and checkMesh rejects those as incorrectly oriented face
         # pyramids. One cell of dry ground beyond that line keeps the liquid-boundary
         # lines (which sit at the water's edge) inside the domain.
-        trim_depth = max(cfg.hydrodynamics.wet_depth, of.min_water_depth)
+        trim_depth = max(cfg.wet_depth, of.min_water_depth)
         dry_footprint = state.dry_footprint(wet_depth=trim_depth, margin=dx)
         notes.append(f"columns shallower than {trim_depth:g} m left out: a water "
                      "column thinner than one cell cannot be meshed")
@@ -1203,7 +1203,7 @@ def build_mesh(cfg: Config, *, state=None, dem: str | Path | None = None,
         # footprint: the dry floodplain zones carry the vegetation ks (isar: 0.5 m),
         # which has no bearing on a wall function under water and would otherwise
         # pin the bed layer to half the column height everywhere.
-        wet_cols = (column_depth > cfg.hydrodynamics.wet_depth) if \
+        wet_cols = (column_depth > cfg.wet_depth) if \
             column_depth is not None else np.ones(bed_ks.shape, dtype=bool)
         sample = bed_ks[wet_cols] if wet_cols.any() else bed_ks
         bed_layer = 2.0 * float(np.nanmedian(sample))

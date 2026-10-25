@@ -507,7 +507,7 @@ def estimate_cells(cfg: Config, *, state: State2D | None = None) -> int:
     """
     polygon, _ = ofmesh._domain_polygon(
         cfg, state, domain=cfg.openfoam.domain, wet_margin=cfg.openfoam.wet_margin,
-        wet_depth=cfg.hydrodynamics.wet_depth)
+        wet_depth=cfg.wet_depth)
     angle = ofmesh.flow_angle(cfg) if cfg.openfoam.align_to_flow else 0.0
     grid = ofmesh.build_plan_grid(polygon, cfg.openfoam.cell_size, angle=angle,
                                   max_columns=cfg.openfoam.max_plan_columns)
@@ -526,7 +526,7 @@ def summarise(art: OpenFoamArtifacts) -> list[str]:
         # re-deriving it from the seed here would report a water fraction the case
         # does not have - and reporting 96.8% for a domain that is water by
         # construction is exactly the kind of contradiction this line exists to catch.
-        wet_depth = art.cfg.hydrodynamics.wet_depth if art.cfg is not None else 0.01
+        wet_depth = art.cfg.wet_depth if art.cfg is not None else 0.01
         water = (1.0 if getattr(art.mesh, "rigid_lid", False)
                  else float(np.mean(fields.initial_alpha(
                      art.mesh, wet_depth=wet_depth) > 0.5)))

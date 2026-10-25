@@ -104,15 +104,8 @@ def load_hydrograph(cfg: Config) -> hydraulics.Inflow:
     return inflow
 
 
-def _outflow_wse_fn(cfg: Config):
-    """Callable Q -> downstream WSE matching the outflow condition (None if free)."""
-    cond = cfg.outflow_condition
-    if cond in ("free", "normal_depth"):
-        return None
-    if cond == "elevation":
-        wse = float(cfg.boundaries.prescribed_elevation)
-        return lambda q: wse
-    return hydraulics.read_stage_discharge(Path(cfg.boundaries.stage_discharge))
+# Callable Q -> downstream WSE matching the outflow condition (None if free); one implementation for the build and the unsteady run.
+_outflow_wse_fn = hydraulics.outflow_wse_fn
 
 
 def _load_liquids(cfg: Config) -> list[boundary.LiquidBoundary]:
@@ -201,6 +194,13 @@ def _prepare_forcing(cfg: Config):
     """Shared unsteady preamble: verify the hotstart source, load boundaries + the
     hydrograph, and write the liquid-boundaries (Q(t)/SL(t)) file. Returns
     ``(liquids, inflow, liq_path, duration, wse_fn)``."""
+    if getattr(cfg, "hydrology_mode", False):
+        from axqua.core import errors
+
+        raise errors.ConfigError(
+            "a hydrology case has no unsteady run: its inflow lines follow their "
+            "hydrograph in the hydrology run", subject="boundaries.inflow",
+            remedy="Submit the hydrology run (axqua submit <case> --kind hydrology).")
     results_2d = cfg.model_path(cfg.results_slf)
     if not results_2d.exists():
         raise FileNotFoundError(

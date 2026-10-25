@@ -284,10 +284,13 @@ def _display_settings(cfg) -> dict:
     imported to answer "what can this case do?" and must not fail because a config
     predates a field.
     """
-    hydro = getattr(cfg, "hydrodynamics", None)
     post = getattr(cfg, "postproc", None)
+    # Config.wet_depth resolves the default of the mode; a stand-in may carry only the setting of the case
+    wet = getattr(cfg, "wet_depth", None)
+    if wet is None:
+        wet = getattr(getattr(cfg, "hydrodynamics", None), "wet_depth", None)
     return {
-        "wet_depth": float(getattr(hydro, "wet_depth", 0.01) or 0.01),
+        "wet_depth": float(wet or 0.01),
         "velocity_scale_max": float(
             getattr(post, "velocity_scale_max", 5.0) or 5.0),
     }

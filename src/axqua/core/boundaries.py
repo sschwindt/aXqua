@@ -9,12 +9,33 @@ were separated; nothing here knows about either solver.
 The Inn dataset's ``Type (inflow/outlfow)`` typo is deliberately still matched - the
 layer is field data, and refusing to read it over a spelling mistake would help
 nobody.
+
+What each outflow condition prescribes at the outflow lines (:data:`OUTLET_LEVELS`) is here as well, for the same reason: the case settings, the TELEMAC build and the hydrology build each ask it, and a list of condition names in each of them missed the ``overfall`` outlet twice when it was added.
 """
 
 from __future__ import annotations
 
 import logging
 from pathlib import Path
+
+#: What each outflow condition prescribes at the outflow lines, so that the code that writes or reads an outlet asks this one table instead of listing condition names: ``None`` no level (``free``, zero gradient of depth and velocity), ``"curve"`` a level TELEMAC takes from its own Z(Q) curve as the discharge changes (``normal_depth``), ``"fixed"`` the level ``boundaries.prescribed_elevation`` (``elevation``), ``"rating"`` the level of the rating curve ``boundaries.stage_discharge`` at the discharge of the case (``stage_discharge``), ``"mesh"`` a level below the lowest node, so that the lines hold no water (``overfall``).
+OUTLET_LEVELS: dict[str, str | None] = {
+    "free": None, "normal_depth": "curve", "elevation": "fixed",
+    "stage_discharge": "rating", "overfall": "mesh"}
+#: The outflow conditions of a river case (``boundaries.outflow_condition``), the default first.
+RIVER_OUTLETS = ("elevation", "stage_discharge", "free")
+#: The outflow conditions of a hydrology case (``hydrology.outlet_condition``), the default first.
+HYDROLOGY_OUTLETS = ("normal_depth", "free", "elevation", "overfall")
+
+
+def outlet_level(condition: str) -> str | None:
+    """Where the level of an outflow line under *condition* comes from (:data:`OUTLET_LEVELS`); a name that is no outflow condition raises."""
+    try:
+        return OUTLET_LEVELS[condition]
+    except KeyError:
+        raise ValueError(f"{condition!r} is no outflow condition; the conditions are "
+                         f"{', '.join(OUTLET_LEVELS)}") from None
+
 
 log = logging.getLogger("axqua")
 

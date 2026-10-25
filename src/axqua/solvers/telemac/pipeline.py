@@ -349,16 +349,8 @@ def _hydrograph_duration(inflow) -> float:
     return float(t[-1] - t[0]) or 3600.0
 
 
-def _outflow_wse_fn(cfg: Config):
-    """Callable Q -> outflow WSE for the hydrograph file, matching the outflow
-    condition (free outflow prescribes nothing)."""
-    cond = cfg.outflow_condition
-    if cond in ("free", "normal_depth"):
-        return None
-    if cond == "elevation":
-        wse = float(cfg.boundaries.prescribed_elevation)
-        return lambda q: wse
-    return hydraulics.read_stage_discharge(Path(cfg.boundaries.stage_discharge))
+# Callable Q -> outflow WSE for the hydrograph file, matching the outflow condition (free outflow prescribes nothing); one implementation for the build and the unsteady run.
+_outflow_wse_fn = hydraulics.outflow_wse_fn
 
 
 

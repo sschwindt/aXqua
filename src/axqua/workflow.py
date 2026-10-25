@@ -413,7 +413,7 @@ def report_wetting(cfg: Config) -> list[str]:
             # legitimately wet; without this it counts as BOTH film and an isolated
             # puddle, i.e. reads as a defect when it is what the model intends
             supported=water_table_mask(cfg),
-            wet_depth=cfg.hydrodynamics.wet_depth,
+            wet_depth=cfg.wet_depth,
             out=cfg.model_dir,
         )
     except Exception as exc:  # noqa: BLE001

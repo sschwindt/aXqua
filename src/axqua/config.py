@@ -22,6 +22,8 @@ from typing import Any
 import yaml
 
 from axqua.core import schema
+from axqua.core.boundaries import (  # noqa: F401  (part of this module's surface)
+    HYDROLOGY_OUTLETS, OUTLET_LEVELS, RIVER_OUTLETS, outlet_level)
 
 log = logging.getLogger("axqua")
 
@@ -550,10 +552,10 @@ class Boundaries:
             p = getattr(self, name)
             if p is not None and not Path(p).exists():
                 raise FileNotFoundError(f"boundaries.{name} set but not found: {p}")
-        if self.outflow_condition not in ("stage_discharge", "elevation", "free"):
+        if self.outflow_condition not in RIVER_OUTLETS:
             raise ValueError(
-                "boundaries.outflow_condition must be 'stage_discharge', 'elevation', "
-                f"or 'free', got {self.outflow_condition!r}"
+                f"boundaries.outflow_condition must be one of {', '.join(RIVER_OUTLETS)}, "
+                f"got {self.outflow_condition!r}"
             )
         if self.rating_method not in ("trapezoid", "section"):
             raise ValueError("boundaries.rating_method must be 'trapezoid' or "
@@ -1171,9 +1173,8 @@ class Hydrodynamics:
     # the volume: negligible in any budget, dominant in any picture. Use the same
     # threshold when filtering the result in ParaView so the picture and the report
     # agree. To actually remove that water from the model, see the `drying` block.
-    # A hydrology case takes HYDROLOGY_WET_DEPTH (1 mm) unless it sets its own: the
-    # sheet flow of a hillslope is millimeters deep.
-    wet_depth: float = 0.01
+    # Empty: 0.01 m, and 1 mm in a hydrology case, whose sheet flow is millimeters deep.
+    wet_depth: float | None = None
     # FE advection robustness for the distributive velocity scheme (14):
     #   implicitation 0.80 -> more implicit (stable) depth/velocity update (TELEMAC
     #     default 0.55, which is too explicit for the wetting front here);
@@ -1389,6 +1390,8 @@ class FineSediment:
 
 #: ``hydrodynamics.wet_depth`` of a hydrology case that sets none [m]: the sheet flow of a hillslope is millimeters deep, and the 1 cm of a river would hide it from the map.
 HYDROLOGY_WET_DEPTH = 0.001
+#: ``hydrodynamics.wet_depth`` of a river case that sets none [m].
+RIVER_WET_DEPTH = 0.01
 
 
 @dataclass
@@ -1463,15 +1466,7 @@ class Hydrology:
     # than 2 m deep).
     open_water_factor: float = 1.05
     # ---- outlet and run ----
-    # Condition of the outflow lines. normal_depth: TELEMAC's stage-discharge curve
-    # Z(Q), from boundaries.stage_discharge or from the normal flow through the
-    # section of each outflow line. free: depth and velocity have no gradient, which
-    # holds only where the flow leaves supercritical (steep, smooth outlets); a
-    # slower outlet fills up into a pond. elevation: the fixed level
-    # boundaries.prescribed_elevation, e.g. of a lake the catchment drains into.
-    # overfall: the terrain falls away beyond the outflow lines (the lower edge of
-    # a field, a terrace, a bank), so no level is held there: water leaves at
-    # critical flow at most and none comes back.
+    # Condition of the outflow lines. normal_depth: TELEMAC's stage-discharge curve Z(Q), from boundaries.stage_discharge or from the normal flow through the section of each outflow line. free: depth and velocity have no gradient, which holds only where the flow leaves supercritical (steep, smooth outlets); a slower outlet fills up into a pond. elevation: the fixed level boundaries.prescribed_elevation, e.g. of a lake the catchment drains into. overfall: the terrain falls away beyond the outflow lines (the lower edge of a field, a terrace, a bank), so no level is held there: water leaves at critical flow at most and none comes back.
     outlet_condition: str = "normal_depth"
     # Bed slope at the outlet for normal_depth [-]. Leave empty to take it from the
     # terrain model upstream of the outflow line.
@@ -1494,8 +1489,7 @@ class Hydrology:
                    "green_ampt": ("sadeghi", "exact", "travert"),
                    "wind_formula": ("flather", "wu", "constant"),
                    "evaporation": ("none", "et0", "penman", "series"),
-                   "outlet_condition": ("free", "normal_depth", "elevation",
-                                        "overfall"),
+                   "outlet_condition": HYDROLOGY_OUTLETS,
                    "kernel": ("finite-volumes", "finite-elements")}
         for name, allowed in choices.items():
             if getattr(self, name) not in allowed:
@@ -2333,6 +2327,18 @@ class Config:
         return self.boundaries.outflow_condition
 
     @property
+    def outlet_level(self) -> str | None:
+        """Where the level of the outflow lines comes from (:data:`OUTLET_LEVELS`)."""
+        return outlet_level(self.outflow_condition)
+
+    @property
+    def wet_depth(self) -> float:
+        """The depth [m] at or below which water counts as dry in the reports and the maps: ``hydrodynamics.wet_depth``, else 1 mm in a hydrology case and 1 cm in a river case."""
+        if self.hydrodynamics.wet_depth is not None:
+            return float(self.hydrodynamics.wet_depth)
+        return HYDROLOGY_WET_DEPTH if self.hydrology_mode else RIVER_WET_DEPTH
+
+    @property
     def rigid_lid(self) -> bool:
         """Convenience: is the OpenFOAM case single-phase under a fixed lid?"""
         return self.openfoam.mode == "rigid-lid"
@@ -2697,9 +2703,6 @@ def load_config(path: str | os.PathLike) -> Config:
     structures = Structures(**_only_known(Structures, raw.get("structures", {}) or {}))
     fine_sediment = _load_fine_sediment(raw.get("fine_sediment"))
     hydrology = _load_hydrology(raw.get("hydrology"), cfg_dir)
-    if hydrology.enabled and "wet_depth" not in (raw.get("hydrodynamics") or {}):
-        # sheet flow over a catchment is millimeters deep; a river's 1 cm hides it
-        hydro.wet_depth = HYDROLOGY_WET_DEPTH
     calib = Calibration.from_dict(raw.get("calibration", {}) or {}, cfg_dir)
 
     # OpenFOAM extension: absent block -> defaults, and nothing consults them
