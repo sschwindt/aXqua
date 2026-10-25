@@ -731,3 +731,74 @@ def test_one_conversion_of_a_friction_law_to_a_nikuradse_ks(law, coefficient, ks
         assert ks_from_friction(law, coefficient) is None
     else:
         assert ks_from_friction(law, coefficient) == pytest.approx(ks)
+
+
+# --------------------------------------------- what the second review of 2026-10-25 found
+
+
+def test_daily_and_ten_minute_files_of_the_dwd_are_depths_whatever_the_settings(
+        tmp_path):
+    """RS is mm per day on the day MESS_DATUM names, RWS_10 mm per 10 minutes before
+    it; the units and stamp settings (mm/h, end by default) do not apply."""
+    daily = tmp_path / "produkt_nieder_tag_03379.txt"
+    daily.write_text("STATIONS_ID;MESS_DATUM;QN_6;  RS;RSF;SH_TAG;NSH_TAG;eor\n"
+                     "3379;20240601;3;20.0;6;0;0;eor\n3379;20240602;3;10.0;6;0;0;eor\n")
+    series = rainfall.read_series(daily)                     # the defaults: mm/h, end
+    assert series.total_mm == pytest.approx(30.0)
+    assert series.origin == pd.Timestamp("2024-06-01")
+    ten = tmp_path / "produkt_zehn_min_rr_03379.txt"
+    ten.write_text("STATIONS_ID;MESS_DATUM;QN;RWS_DAU_10;RWS_10;RWS_IND_10;eor\n"
+                   "3379;202406021210;3;10;1.5;1;eor\n3379;202406021220;3;10;0.5;1;eor\n")
+    series = rainfall.read_series(ten)
+    assert list(series.intensity_mm_h) == pytest.approx([9.0, 3.0])
+    assert series.origin == pd.Timestamp("2024-06-02 12:00")
+
+
+def test_a_units_row_and_a_sum_are_not_data(tmp_path):
+    path = tmp_path / "rain.csv"
+    path.write_text("time,rain\ns,mm/h\n0,1\n3600,2\n7200,0\nSumme,3\n")
+    series = rainfall.read_series(path)
+    assert list(series.intensity_mm_h) == [1.0, 2.0, 0.0] and series.gaps == 0
+    path.write_text("time,rain\n0,1\nkaputt,2\n7200,0\n")   # inside the data: an error
+    with pytest.raises(ValueError, match="kaputt"):
+        rainfall.read_series(path)
+
+
+def test_unix_seconds_are_never_read_as_dates(tmp_path):
+    """From 2030 on, Unix seconds also parse as YYYYMMDDHH; only a column named as a
+    date is read so."""
+    path = tmp_path / "logger.csv"
+    path.write_text("timestamp,rain\n1900010100,5\n1900013700,5\n1900017300,0\n")
+    series = rainfall.read_series(path)
+    assert series.origin is None and list(series.end_s) == [3600.0, 7200.0, 10800.0]
+
+
+def test_a_gap_survives_the_file_the_wizard_writes_and_is_named(tmp_path, capsys):
+    import json
+
+    from axqua import cli
+
+    case = _catchment(tmp_path)
+    record = tmp_path / "gauge.csv"
+    record.write_text("time,rain\n2024-06-02 12:00,10\n2024-06-02 13:00,\n"
+                      "2024-06-02 14:00,10\n")
+    assert cli.main(["hydrology", "rainfall", str(case), "--file", str(record),
+                     "--json"]) == 0
+    answer = json.loads(capsys.readouterr().out)["data"]
+    assert "1 intervals" in answer["caution"]
+    written = rainfall.read_series(answer["rainfall"])      # the canonical file
+    assert written.gaps == 1 and written.total_mm == pytest.approx(20.0)
+
+
+def test_only_a_catchment_built_without_liquid_boundaries_is_a_closed_domain(tmp_path):
+    from axqua.config import load_config
+    from axqua.hydrology.report import closed_domain
+
+    cfg = load_config(_catchment(tmp_path))
+    assert not closed_domain(cfg)                     # not built: it has an outflow line
+    cli = Path(cfg.model_dir) / cfg.boundary_cli
+    cli.parent.mkdir(parents=True, exist_ok=True)
+    cli.write_text("2 2 2 0.0 0.0 0.0 0.0 2 0.0 0.0 0.0 1 1\n" * 3)
+    assert closed_domain(cfg)
+    cli.write_text(cli.read_text() + "5 4 4 0.0 0.0 0.0 0.0 4 0.0 0.0 0.0 4 4\n")
+    assert not closed_domain(cfg)

@@ -32,7 +32,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from axqua.hydrology.rainfall import RainSeries, _column, _read_table, _seconds
+from axqua.hydrology.rainfall import (RainSeries, _column, _named_like_a_date,
+                                     _read_table, _seconds)
 
 #: Evaporation sources of the ``hydrology.evaporation`` setting.
 EVAPORATION_MODES = ("none", "et0", "penman", "series")
@@ -100,7 +101,8 @@ def read_weather(path: str | Path, *, stamp: str = "end",
         tcol = _column(frame, "time", "date", "datum", "zeit")
         if tcol is None:
             raise ValueError(f"{path.name}: no time column (time, date, datum or zeit)")
-        seconds, first = _seconds(frame[tcol].reset_index(drop=True))
+        seconds, first = _seconds(frame[tcol].reset_index(drop=True),
+                                  integer_dates=_named_like_a_date(tcol))
         if seconds.size < 2:
             raise ValueError(f"{path.name}: at least two rows are needed")
         steps = np.diff(seconds)

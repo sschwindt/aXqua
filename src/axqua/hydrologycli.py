@@ -142,7 +142,7 @@ def _info(args) -> tuple[dict, list[str]]:
     files = {name: (str(getattr(h, name)) if getattr(h, name) is not None else "")
              for name in ("rainfall", "weather", "soil_zones", "soil_table",
                           "sealed_surfaces")}
-    data = {"enabled": bool(h.enabled), "longitude": lon, "latitude": lat,
+    data = {"enabled": cfg.hydrology_mode, "longitude": lon, "latitude": lat,
             "area_m2": area, "countries": portals.countries_at(lon, lat),
             "files": files, "outlet_condition": h.outlet_condition,
             "infiltration": h.infiltration, "green_ampt": h.green_ampt,
@@ -176,6 +176,16 @@ def _rainfall(args) -> tuple[dict, list[str]]:
     data = {"rainfall": str(path), "total_mm": series.total_mm,
             "peak_mm_h": series.peak_mm_h, "duration_s": series.end,
             "settings": settings, "notes": series.notes}
+    # what the wizard shows beside "done"; the notes stay in the answer
+    caution = []
+    if series.gaps:
+        caution.append(f"{series.gaps} intervals ({series.gap_hours:g} h) have no value; "
+                       "they stay gaps in the file and are simulated as dry.")
+    if series.step_s >= 86400.0:
+        caution.append("The record has daily values: a day is far too coarse to resolve "
+                       "a storm. Use hourly or 10-minute data.")
+    if caution:
+        data["caution"] = " ".join(caution)
     return data, [f"{path}: {series.total_mm:.1f} mm, peak {series.peak_mm_h:.1f} mm/h"]
 
 

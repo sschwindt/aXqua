@@ -570,18 +570,9 @@ BACKEND = TelemacBackend()
 
 def _cas_duration(cfg, cas_name: str) -> float | None:
     """The ``DURATION`` of a 2D steering file, for the progress bar."""
-    try:
-        text = cfg.model_path(cas_name).read_text(encoding="utf-8", errors="replace")
-    except OSError:
-        return None
-    for line in text.splitlines():
-        key, sep, value = line.partition(":")
-        if sep and key.strip().upper() == "DURATION":
-            try:
-                return float(value.strip())
-            except ValueError:
-                return None
-    return None
+    from axqua.solvers.telemac.steering import cas_duration
+
+    return cas_duration(cfg.model_path(cas_name))
 
 
 def _level_progress(ctx: Any):

@@ -219,6 +219,20 @@ def plot(path: Path, sortie, forcing_table, title: str) -> Path:
     return path
 
 
+def closed_domain(cfg) -> bool:
+    """Was the case built without any liquid boundary (a catchment without outlet)?
+
+    Read from the ``.cli`` of the build, whose liquid rows have a code other than 2:
+    only such a case prints balance blocks without boundary fluxes, and for any other
+    one a listing without them is the error that names the missing keyword."""
+    cli = Path(cfg.model_dir) / cfg.boundary_cli
+    try:
+        rows = [line.split()[:3] for line in cli.read_text().splitlines() if line.strip()]
+    except OSError:
+        return cfg.boundaries.liquid_boundaries is None
+    return bool(rows) and all(row == ["2", "2", "2"] for row in rows)
+
+
 def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     """Write the hydrograph and the water balance of the last hydrology run.
 
@@ -234,7 +248,7 @@ def analyze(cfg, *, out_dir: Path | None = None) -> WaterBalance:
     if listing is None:
         raise FileNotFoundError(f"no listing of {cfg.hydrology_cas_file} in "
                                 f"{cfg.model_dir}; run the hydrology simulation first")
-    sortie = read_sortie(listing, closed=True)   # a catchment without an outlet
+    sortie = read_sortie(listing, closed=closed_domain(cfg))
     if sortie.time.size == 0:
         raise ValueError(f"{listing.name} holds no water balance yet")
     budget = read_budget(listing)

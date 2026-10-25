@@ -76,6 +76,22 @@ def _turbulence_length_scale(cfg: Config) -> float:
     return 1.0
 
 
+def cas_duration(path: str | Path) -> float | None:
+    """The ``DURATION`` of a steering file [s]; ``None`` without one."""
+    try:
+        text = Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    for line in text.splitlines():
+        key, sep, value = line.partition(":")
+        if sep and key.strip().upper() == "DURATION":
+            try:
+                return float(value.strip())
+            except ValueError:
+                return None
+    return None
+
+
 def _hydrology(cfg: Config) -> bool:
     return getattr(cfg, "hydrology_mode", False)
 

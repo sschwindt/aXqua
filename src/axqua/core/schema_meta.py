@@ -208,7 +208,10 @@ DISABLED_WHEN: dict[str, list[dict[str, Any]]] = {
 #: Entries an option makes necessary: ``key -> conditions``, of which one suffices. A
 #: condition is ``{"key": ..., "in": [values]}`` (an unset entry counts with its
 #: default), ``{"block": ...}`` (the block is switched on) or ``{"all": [conditions]}``
-#: (every one of them holds; a plugin older than this form reads it as not holding).
+#: (every one of them holds). A plugin older than the ``all`` form reads it as not
+#: holding: in this table that drops a requirement, in :data:`REQUIRED_UNLESS` it keeps
+#: one. No released plugin is affected: 1.0.2 and earlier read no ``required_unless``
+#: at all, and the plugin that brought it brought ``all`` as well.
 REQUIRED_WHEN: dict[str, list[dict[str, Any]]] = {
     "boundaries.prescribed_elevation": [{"key": "boundaries.outflow_condition",
                                          "in": ["elevation"]}, _HYDROLOGY_LEVEL],

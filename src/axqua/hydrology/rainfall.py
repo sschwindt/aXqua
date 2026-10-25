@@ -28,6 +28,7 @@ KOSTRA-DWD (Germany), NOAA Atlas 14 (USA) and comparable national products publi
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -40,11 +41,16 @@ DISTRIBUTIONS = ("euler2", "alternating", "block")
 #: Column names of the series aXqua writes.
 CANONICAL = ("start_s", "end_s", "rain_mm_h")
 
-#: Rain columns of the DWD Climate Data Center by their exact names: hourly ``R1``,
-#: 10-minute ``RWS_10``, daily ``RS``. Matched before the words of :func:`read_series`,
+#: Rain columns of the DWD Climate Data Center by their exact names, with the stamp of
+#: their ``MESS_DATUM`` and the period a value covers. Each is a depth in mm (the DWD's
+#: descriptions of the hourly, 10-minute and daily products), so the units and stamp
+#: settings do not apply to them. Matched before the words of :func:`read_series`,
 #: because the other columns of those files (``QN_8``, ``RS_IND``, ``WRTR``, ``eor``)
-#: hold quality flags and indicators.
-AGENCY_COLUMNS = ("r1", "rws_10", "rs")
+#: hold quality flags and indicators. The description of the daily product does not
+#: say when its day begins; ``RS`` is placed on the calendar day ``MESS_DATUM`` names.
+AGENCY_COLUMNS = {"r1": ("end", "the hour before MESS_DATUM"),
+                  "rws_10": ("end", "the 10 minutes before MESS_DATUM"),
+                  "rs": ("start", "the day MESS_DATUM names")}
 
 #: Values agencies write for "no measurement" (DWD: -999).
 MISSING_AT_OR_BELOW = -999.0
@@ -62,13 +68,30 @@ class RainSeries:
     intensity_mm_h: np.ndarray
     origin: pd.Timestamp | None = None        # calendar time of t = 0, when known
     notes: list[str] = field(default_factory=list)
-    gaps: int = 0                  # intervals the record had no value for, taken as dry
-    gap_hours: float = 0.0         # their length [h]
+    #: intervals the record had no value for; simulated as dry, written empty
+    missing: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         self.start_s = np.asarray(self.start_s, dtype=float)
         self.end_s = np.asarray(self.end_s, dtype=float)
         self.intensity_mm_h = np.asarray(self.intensity_mm_h, dtype=float)
+        self.missing = (np.zeros(self.start_s.shape, bool) if self.missing is None
+                        else np.asarray(self.missing, dtype=bool))
+
+    @property
+    def gaps(self) -> int:
+        """Number of intervals without a value."""
+        return int(self.missing.sum())
+
+    @property
+    def gap_hours(self) -> float:
+        """Their length [h]."""
+        return float(((self.end_s - self.start_s) / 3600.0)[self.missing].sum())
+
+    @property
+    def step_s(self) -> float:
+        """The typical length of an interval [s]."""
+        return float(np.median(self.end_s - self.start_s)) if self.end_s.size else 0.0
 
     @property
     def depth_mm(self) -> np.ndarray:
@@ -102,11 +125,14 @@ class RainSeries:
         return float(self.intensity_mm_h[k])
 
     def to_frame(self) -> pd.DataFrame:
+        """The canonical table; an interval without a value has no intensity."""
         return pd.DataFrame({"start_s": self.start_s, "end_s": self.end_s,
-                             "rain_mm_h": self.intensity_mm_h})
+                             "rain_mm_h": np.where(self.missing, np.nan,
+                                                   self.intensity_mm_h)})
 
     def write(self, path: str | Path) -> Path:
-        """Write the canonical CSV (both interval ends, intensity in mm/h)."""
+        """Write the canonical CSV (both interval ends, intensity in mm/h; a gap stays
+        empty, so that whoever reads the file again still sees it)."""
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         self.to_frame().to_csv(path, index=False, float_format="%.6g")
@@ -156,11 +182,19 @@ def _column(frame: pd.DataFrame, *words: str, exclude: tuple = ()) -> str | None
     return None
 
 
+def _named_like_a_date(column) -> bool:
+    """Only a column named as a date (``MESS_DATUM``, ``date``) may hold integer dates:
+    a column of Unix seconds is called ``time`` or ``timestamp``, and from 2030 its
+    values also parse as ``YYYYMMDDHH``."""
+    return "dat" in str(column).lower()
+
+
 def _integer_dates(numeric: pd.Series) -> pd.Series | None:
     """Dates of a column of integers like 2024060213 (``YYYYMMDDHH``), else ``None``.
 
-    Seconds of a model are never written so: every value has to have the same number
-    of digits, parse as a date of a plausible year and increase."""
+    Every value has to have the same number of digits, parse as a date between 1900
+    and 2100 and increase; and the column has to be named as a date
+    (:func:`_named_like_a_date`), which the caller decides."""
     values = numeric.to_numpy(dtype=float)
     if not np.all(values == np.round(values)) or np.any(values <= 0):
         return None
@@ -170,25 +204,33 @@ def _integer_dates(numeric: pd.Series) -> pd.Series | None:
         return None
     stamps = pd.to_datetime(text, format=_INTEGER_DATES[next(iter(digits))],
                             errors="coerce")
-    if stamps.isna().any() or not stamps.dt.year.between(1800, 2200).all():
+    if stamps.isna().any() or not stamps.dt.year.between(1900, 2100).all():
         return None
     if not stamps.is_monotonic_increasing:
         return None
     return stamps
 
 
-def _seconds(values: pd.Series) -> tuple[np.ndarray, pd.Timestamp | None]:
-    """Seconds of a time column, and the calendar time of its first row if dated."""
+def _seconds(values: pd.Series, *, integer_dates: bool = False
+             ) -> tuple[np.ndarray, pd.Timestamp | None]:
+    """Seconds of a time column, and the calendar time of its first row if dated.
+
+    *integer_dates* lets a column of integers be read as ``YYYYMMDDHH`` dates and the
+    like (:func:`_integer_dates`)."""
     numeric = pd.to_numeric(values, errors="coerce")
     if numeric.notna().all():
-        stamps = _integer_dates(numeric)
+        stamps = _integer_dates(numeric) if integer_dates else None
         if stamps is None:
             return numeric.to_numpy(dtype=float), None
         first = stamps.iloc[0]
         return (stamps - first).dt.total_seconds().to_numpy(dtype=float), first
-    stamps = pd.to_datetime(values, errors="coerce", utc=False)
+    with warnings.catch_warnings():         # "could not infer format": parsed one by one
+        warnings.simplefilter("ignore", UserWarning)
+        stamps = pd.to_datetime(values, errors="coerce", utc=False)
     if stamps.isna().any():
-        bad = values[stamps.isna()].iloc[0]
+        # the first value that is neither; else the column mixes seconds and dates
+        neither = values[numeric.isna() & stamps.isna()]
+        bad = (neither if len(neither) else values[stamps.isna()]).iloc[0]
         raise ValueError(f"time value {bad!r} is neither seconds nor a date")
     first = stamps.iloc[0]
     return (stamps - first).dt.total_seconds().to_numpy(dtype=float), first
@@ -223,8 +265,9 @@ def read_series(path: str | Path, *, units: str = "mm/h", stamp: str = "end",
     frame = _read_table(path)
     cols = {str(c).lower().strip(): c for c in frame.columns}
     if all(name in cols for name in CANONICAL):
+        rain = pd.to_numeric(frame[cols["rain_mm_h"]], errors="coerce")
         series = RainSeries(frame[cols["start_s"]], frame[cols["end_s"]],
-                            frame[cols["rain_mm_h"]])
+                            rain.fillna(0.0), missing=rain.isna())
         if start:
             series.origin = pd.Timestamp(start)
         return series
@@ -232,22 +275,46 @@ def read_series(path: str | Path, *, units: str = "mm/h", stamp: str = "end",
         (c for c in frame.columns if str(c).lower().strip() == "t"), None)
     if tcol is None:
         raise ValueError(f"{path.name}: no time column (time, date, datum, zeit or t)")
-    vcol = (next((cols[name] for name in AGENCY_COLUMNS if name in cols
-                  and cols[name] != tcol), None)
-            or _column(frame, "rain", "precip", "niederschlag", "rr", "mm", "intens",
-                       exclude=(tcol,))
-            or next((c for c in reversed(frame.columns) if c != tcol
-                     and pd.to_numeric(frame[c], errors="coerce").notna().any()), None))
+    agency = next((name for name in AGENCY_COLUMNS if name in cols
+                   and cols[name] != tcol), None)
+    vcol = (cols[agency] if agency else None) or (
+        _column(frame, "rain", "precip", "niederschlag", "rr", "mm", "intens",
+                exclude=(tcol,))
+        or next((c for c in reversed(frame.columns) if c != tcol
+                 and pd.to_numeric(frame[c], errors="coerce").notna().any()), None))
     if vcol is None:
         raise ValueError(f"{path.name}: no column with rain values")
+    notes = []
+    if agency:
+        stamp, period = AGENCY_COLUMNS[agency]
+        units = "mm"
+        notes.append(f"column {vcol!r} of the DWD: the depth of {period} in mm; the "
+                     "units and stamp settings do not apply to it")
+    # rows before the first and after the last time are not data: a units row under
+    # the header, a sum at the end. A row without a time inside cannot be placed.
+    times = frame[tcol]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        numeric = pd.to_numeric(times, errors="coerce")
+        dated = pd.to_datetime(times.where(numeric.isna()), errors="coerce")
+    is_time = (numeric.notna() | dated.notna()).to_numpy()
+    if not is_time.any():
+        raise ValueError(f"{path.name}: no row has a time")
+    first_row, last_row = np.flatnonzero(is_time)[[0, -1]]
+    skipped = len(frame) - (last_row - first_row + 1)
+    frame = frame.iloc[first_row:last_row + 1]
+    if skipped:
+        notes.append(f"{skipped} rows before or after the data have no time and are "
+                     "left out (a units row, a sum)")
+    timed = frame[tcol].notna() & (frame[tcol].astype(str).str.strip() != "")
+    frame = frame[timed]
+    # a row without a value (empty, -999) keeps its interval as a gap
     values = pd.to_numeric(frame[vcol], errors="coerce")
     values = values.mask(values <= MISSING_AT_OR_BELOW)
     if not values.notna().any():
         raise ValueError(f"{path.name}: no rows with a rain value")
-    # a row without a time cannot be placed; a row without a value is a gap
-    timed = frame[tcol].notna() & (frame[tcol].astype(str).str.strip() != "")
-    frame, values = frame[timed], values[timed]
-    seconds, first = _seconds(frame[tcol].reset_index(drop=True))
+    seconds, first = _seconds(frame[tcol].reset_index(drop=True),
+                              integer_dates=_named_like_a_date(tcol))
     missing = values.isna().to_numpy()
     values = values.fillna(0.0).to_numpy(dtype=float)
     if seconds.size == 1:
@@ -275,10 +342,10 @@ def read_series(path: str | Path, *, units: str = "mm/h", stamp: str = "end",
         zero = starts[0] + (anchor - origin).total_seconds()
         origin = anchor
     series = RainSeries(starts - zero, ends - zero, intensity, origin=origin,
-                        gaps=int(missing.sum()),
-                        gap_hours=float(hours[missing].sum()))
+                        missing=missing)
     series.notes.append(f"read {path.name}: column {vcol!r} in {units}, time stamps at "
                         f"the {stamp} of each interval")
+    series.notes.extend(notes)
     if series.gaps:
         series.notes.append(f"{series.gaps} intervals ({series.gap_hours:g} h) have no "
                             "value and are taken as dry")

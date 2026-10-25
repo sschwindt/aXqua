@@ -59,6 +59,7 @@ class HydrologyDataBox(QGroupBox):
         self.info: dict = {}
         self._stale = False                  # a refresh waits for the box to be shown
         self._tickets = {"info": 0, "check": 0}   # the newest request of each kind
+        self._terrain_for: Path | None = None    # the case a terrain checkup runs for
         layout = QVBoxLayout(self)
         self.summary = QLabel("")
         self.summary.setWordWrap(True)
@@ -115,6 +116,9 @@ class HydrologyDataBox(QGroupBox):
             return
         client, chosen = self.ctx.client, self.case
         ticket = self._ticket("info")
+        # a checkup with the terrain that is under way for this case is what the
+        # quick one would only replace (a job that ends refreshes the case as well)
+        quick = self._terrain_for != self.case
         run_async("aXqua: reading the hydrology data of the case",
                   lambda: client.hydrology_info(chosen),
                   on_success=lambda info: (self.show_info(info)
@@ -122,7 +126,8 @@ class HydrologyDataBox(QGroupBox):
                   on_error=lambda exc: (self.show_info({}, note=user_text(exc))
                                         if self._current("info", ticket) else None),
                   owner=self)
-        self.check(terrain=False)
+        if quick:
+            self.check(terrain=False)
 
     def show_info(self, info: dict, *, note: str = "") -> None:
         self.info = info or {}
@@ -133,6 +138,7 @@ class HydrologyDataBox(QGroupBox):
             return
         client, chosen = self.ctx.client, self.case
         ticket = self._ticket("check")
+        self._terrain_for = chosen if terrain else None
         self.state.setText("Checking the terrain model..." if terrain else "")
         self.check_button.setEnabled(False)
         run_async("aXqua: the hydrology checkup",
@@ -145,12 +151,14 @@ class HydrologyDataBox(QGroupBox):
                   owner=self)
 
     def show_findings(self, answer: dict, terrain: bool) -> None:
+        self._terrain_for = None
         self.check_button.setEnabled(True)
         self.state.setText("" if terrain else
                            "Check runs the analysis of the terrain model as well.")
         self.finding_list.set_findings(fnd.from_payload(answer), checked=True)
 
     def show_error(self, exc) -> None:
+        self._terrain_for = None
         self.check_button.setEnabled(True)
         self.state.setText(user_text(exc))
 
@@ -164,8 +172,7 @@ class HydrologyDataBox(QGroupBox):
         wizard = HydrologyWizard(self.ctx, self.case, self.info, parent=self)
         exec_dialog(wizard)
         if wizard.saved:
-            self.ctx.refresh_case()
-            self.refresh()
+            self.ctx.refresh_case()           # which refreshes this box through its page
 
 
 class HydrologyPage(SectionPage):

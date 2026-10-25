@@ -3325,3 +3325,37 @@ def test_a_late_answer_for_another_case_does_not_reach_the_hydrology_box(
     assert box.finding_list.findings == []      # case a's answer came too late
     assert box.check_button.isEnabled()
     box.deleteLater()
+
+
+def test_a_refresh_does_not_replace_a_checkup_of_the_terrain_under_way(
+        qgis_app, tmp_path, monkeypatch):
+    """The user asked for the terrain with Check; a job ending refreshes the case."""
+    from types import SimpleNamespace
+
+    from axqua_plugin.gui import hydrology_box
+
+    calls = []
+    monkeypatch.setattr(hydrology_box, "run_async",
+                        lambda title, call, on_success=None, on_error=None, owner=None:
+                        calls.append((title, on_success)))
+    case = tmp_path / "a.axq-case"
+    case.write_text("")
+    ctx = SimpleNamespace(project=SimpleNamespace(active_case_path=lambda: case),
+                          client=None)
+    box = hydrology_box.HydrologyDataBox(ctx)
+    box.refresh()
+    box.show()                                       # data + quick checkup
+    box.check(terrain=True)
+    terrain = calls[-1][1]
+    box.refresh()                                    # data only, no quick checkup
+    assert [title for title, _ in calls[3:]] == [
+        "aXqua: reading the hydrology data of the case"]
+    terrain({"findings": [{"severity": "warning",
+                           "code": "axqua.hydrology.flow_across_wall",
+                           "message": "water crosses the outline",
+                           "subject": "geodata.boundary"}]})
+    assert [f.code for f in box.finding_list.findings] == [
+        "axqua.hydrology.flow_across_wall"]
+    box.refresh()                                    # done: a refresh checks again
+    assert sum("checkup" in title for title, _ in calls) == 3
+    box.deleteLater()

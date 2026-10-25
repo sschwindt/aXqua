@@ -175,9 +175,8 @@ def run(cfg: Config, *, validate_env: bool = True, dry_run: bool = False,
         # comes from the rain, not from hydrodynamics.duration
         cas, duration = cfg.cas_file, None
         if cfg.hydrology_mode:
-            from axqua.solvers.telemac.backend import _cas_duration
             cas = cfg.hydrology_cas_file
-            duration = _cas_duration(cfg, cas)
+            duration = steering.cas_duration(cfg.model_path(cas))
         with log_step(f"dry run: launch {cfg.telemac.solver} once to validate the case"):
             # stream the listing live with the simulated-time progress bar (same
             # look as initial_run.py) on the configured core count - this is also
