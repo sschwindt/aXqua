@@ -111,6 +111,86 @@ msgstr "Der Fall kann gespeichert werden, aber der nächste Schritt des Workflow
 msgid "A validation situation has one discharge, and the table *Measurement files* of the case settings shows it in every row of the situation. Where the rows still show different values, the last one in the table was saved. Enter the discharge of the situation in one of its rows; the other rows follow (:ref:`validation situation <validation-setup>`)."
 msgstr "Eine Validierungssituation hat einen Abfluss, und die Tabelle *Measurement files* der Fall-Einstellungen zeigt sie in jeder Zeile der Situation an. Wo die Zeilen noch unterschiedliche Werte zeigen, wurde der letzte in der Tabelle gespeichert. Geben Sie den Abfluss der Situation in einer ihrer Zeilen ein; die anderen Zeilen folgen (:ref:`Validierungssituation <validation-setup>`)."
 
+# machine translation: argos 45ae04fd2738
+msgid "Hydrology checkup"
+msgstr "Hydrologieprüfung"
+
+# machine translation: argos e3ca5a135d16
+msgid "The hydrology checkup of a case in hydrology mode reports the following warnings (:doc:`../usage/hydrology-simulations`). A warning does not stop the build."
+msgstr "Die Hydrologieprüfung eines Falls im Hydrologiemodus meldet die folgenden Warnungen (:doc:`../usage/hydrology-simulations`). Eine Warnung stoppt den Build nicht."
+
+# machine translation: argos 3f5f9d89de2b
+msgid "More than 150 mm/h is held by a cloudburst for minutes only. The usual cause is a series of depths per interval that is read as intensities: set ``hydrology.rainfall_units`` to ``mm``."
+msgstr "Mehr als 150 mm/h werden durch einen Wolkenbruch nur Minuten lang gehalten. Die übliche Ursache ist eine Reihe von Tiefen pro Intervall, die als Intensitäten gelesen werden: setzen Sie ``hydrology.rainfall_units`` auf ``mm``."
+
+# machine translation: argos 29c56022000a
+msgid "Rows of the rain series are empty, or hold -999, which is how the DWD marks a missing measurement. aXqua keeps their intervals and takes them as dry, so that no rain is invented, but rain that fell in a gap is missing from the simulation. Fill the gaps from a neighboring gauge or a radar product, or make sure the event lies outside them."
+msgstr "Reihen der Regenreihe sind leer oder halten -999, so dass der DWD eine fehlende Messung markiert. aXqua hält ihre Intervalle und nimmt sie trocken, so dass kein Regen erfunden wird, sondern Regen, der in eine Lücke gefallen ist, in der Simulation fehlt. Füllen Sie die Lücken von einem benachbarten Pegel oder einem Radarprodukt oder stellen Sie sicher, dass das Ereignis außerhalb von ihnen liegt."
+
+# machine translation: argos 53e887bfb441
+msgid "The rain was downloaded from Open-Meteo. A reanalysis spreads a storm over cells of 10 to 30 km and an hour and underestimates short intensities. Use gauge or radar data of the national meteorological agency where they exist, or a design storm."
+msgstr "Der Regen wurde von Open-Meteo heruntergeladen. Eine Reanalyse verbreitet einen Sturm über Zellen von 10 bis 30 km und einer Stunde und unterschätzt kurze Intensitäten. Verwenden Sie Pegel- oder Radardaten der nationalen Wetterbehörde, wo sie vorhanden sind, oder einen Designsturm."
+
+# machine translation: argos dc4014ab17f1
+msgid "A design storm, or a rain table in seconds, has no calendar time, while the weather series has dates, for example from an event the data wizard downloaded before. The weather is then applied from the start of the rain, with its wind and the evaporation of its own days. Set ``hydrology.rainfall_start`` to the date and time the rain is meant to start in the weather series, or remove the weather series when it belongs to another event."
+msgstr "Ein Designsturm oder ein Regentisch in Sekunden hat keine Kalenderzeit, während die Wetterserie Daten hat, beispielsweise von einem Ereignis, das der Datenassistent zuvor heruntergeladen hat. Das Wetter wird dann vom Beginn des Regens mit seinem Wind und der Verdunstung seiner eigenen Tage angewendet. Setzen Sie ``hydrology.rainfall_start`` auf das Datum und die Uhrzeit, zu der der Regen in der Wetterserie beginnen soll, oder entfernen Sie die Wetterserie, wenn sie zu einem anderen Ereignis gehört."
+
+# machine translation: argos 85329cdba79b
+msgid "Cells of the weather series are empty, or hold -999, which is how the DWD marks a missing measurement. aXqua interpolates each of them in time between the readings before and after it, and the wind direction as an angle, because wind, radiation, temperature and humidity change gradually, and a value of -999 would otherwise enter the wind and the evaporation as if it had been measured. Over a gap of a few hours the interpolation misses the course of the day: fill longer gaps from a neighboring station, or make sure the event lies outside them."
+msgstr "Zellen der Wetterserie sind leer oder halten -999, so dass der DWD eine fehlende Messung markiert. aXqua interpoliert jeden von ihnen in der Zeit zwischen den Messwerten davor und danach und die Windrichtung als Winkel, da sich Wind, Strahlung, Temperatur und Feuchtigkeit allmählich ändern und ein Wert von -999 sonst in den Wind und die Verdunstung eintreten würde, als ob er gemessen worden wäre. Über eine Lücke von wenigen Stunden verfehlt die Interpolation den Tagesverlauf: Längere Lücken von einer Nachbarstation aus füllen oder sicherstellen, dass das Ereignis außerhalb liegt."
+
+# machine translation: argos 132908a50b2d
+msgid "After the end of the weather series there is no wind and no evaporation. Extend the series to the end of the run."
+msgstr "Nach dem Ende der Wetterserie gibt es keinen Wind und keine Verdunstung. Erweitern Sie die Serie bis zum Ende des Laufs."
+
+# machine translation: argos 6b7c2bde7306
+msgid "Above 40 m/s, check the unit: m/s, not km/h."
+msgstr "Über 40 m/s überprüfen Sie das Gerät: m/s, nicht km/h."
+
+# machine translation: argos f07314969002
+msgid "Open water rarely evaporates more than 1.5 mm in an hour. Check the unit of ``et0`` or ``evaporation``: mm/h, not mm/day."
+msgstr "Offenes Wasser verdampft selten mehr als 1,5 mm in einer Stunde. Überprüfen Sie die Einheit von ``et0`` oder ``evaporation``: mm / h, nicht mm / Tag."
+
+# machine translation: argos 318bc4b59109
+msgid "The conductivity of a zone differs by more than a factor of ten from the mean of its texture class. That can be right for a measured soil; often it is a unit: Ks is in mm/h, and 1 cm/h is 10 mm/h, 1e-6 m/s is 3.6 mm/h."
+msgstr "Die Leitfähigkeit einer Zone unterscheidet sich um mehr als den Faktor zehn vom Mittelwert ihrer Texturklasse. Das kann für einen gemessenen Boden richtig sein; oft ist es eine Einheit: Ks ist in mm / h und 1 cm / h ist 10 mm / h, 1e-6 m / s ist 3,6 mm / h."
+
+# machine translation: argos a48a24739264
+msgid "The soil starts at an effective saturation of ``initial_saturation`` (0.3). The runoff of a storm depends strongly on the water content at the start: give a measured value, the ERA5-Land value of the event (data wizard), or ``theta_i`` per zone."
+msgstr "Der Boden beginnt mit einer effektiven Sättigung von ``initial_saturation`` (0.3). Der Ablauf eines Sturms hängt stark vom Wassergehalt am Anfang ab: Geben Sie einen Messwert an, den ERA5-Landwert des Ereignisses (Daten Assistent) oder ``theta_i`` pro Zone."
+
+# machine translation: argos 61fe3f826629
+msgid "Right for a closed depression; otherwise draw an outflow line on the outline across the outlet of the catchment (page *Liquid boundaries* of the case settings)."
+msgstr "Rechts für eine geschlossene Senke; andernfalls zeichnen Sie eine Ausflusslinie auf dem Umriss über den Auslass des Einzugsgebiets (Seite *Liquid boundaries* der Falleinstellungen)."
+
+# machine translation: argos e7ca1e3e9923
+msgid "A free outlet prescribes nothing. At a slower outlet the water fills up into a pond, or the finite-element kernel becomes unstable, and the finite-volume kernel lets water in wherever the velocity at the outflow line points into the domain. Use ``normal_depth`` unless the outlet is steep and smooth, and ``overfall`` at the lower edge of a field over which the terrain falls away (:ref:`hydrology-outlet`)."
+msgstr "Ein Free Outlet schreibt nichts vor. Bei einem langsameren Auslass füllt sich das Wasser in einen Teich, oder der Finite-Elemente-Kernel wird instabil, und der Finite-Volume-Kernel lässt Wasser dort ein, wo die Geschwindigkeit an der Ausflusslinie in den Bereich zeigt. Verwenden Sie ``normal_depth``, es sei denn, die Steckdose ist steil und glatt, und ``overfall`` am unteren Rand eines Feldes, über das das Gelände fällt (:ref:`hydrology-outlet`)."
+
+# machine translation: argos fe0cd156be34
+msgid "TELEMAC validates rainfall-runoff with its finite-volume kernel and the hydrostatic reconstruction of Chen and Noelle (``hydrology.kernel: finite-volumes``)."
+msgstr "TELEMAC validiert den Niederschlagsabfluss mit seinem endlichen Volumenkern und die hydrostatische Rekonstruktion von Chen und Noelle (``hydrology.kernel: finite-volumes``)."
+
+# machine translation: argos 650523aa7f24
+msgid "Water from the far end of the catchment does not reach the outlet before the end of the run, so the recession of the hydrograph is cut off. Raise ``hydrology.drain_time``."
+msgstr "Wasser aus dem äußersten Ende des Einzugsgebietes nicht Flussabschnitt den Auslass vor dem Ende des Laufs, so dass die Rezession des Hydrographen abgeschnitten wird. Raise ``hydrology.drain_time``."
+
+# machine translation: argos b59043b216e5
+msgid "More than two million triangles take long to compute. Raise ``mesh.default_size`` or the edge lengths of the mesh zones, and refine where it matters."
+msgstr "Mehr als zwei Millionen Dreiecke brauchen lange, um zu berechnen. Heben Sie ``mesh.default_size`` oder die Kantenlängen der Rechennetzzonen an und verfeinern Sie, wo es darauf ankommt."
+
+# machine translation: argos 20337e53757a
+msgid "The outline does not follow the drainage divide there: the terrain slopes out of the domain under a wall, and the water collected upslope ponds against it. Make those stretches outflow lines, or move the outline to the divide (:ref:`hydrology-outlet`)."
+msgstr "Der Umriss folgt nicht der dortigen Entwässerungstrennung: Das Gelände fällt unter einer Mauer aus dem Domäne ab, und das Wasser sammelte sich an Hangteichen. Machen Sie diese Dehnungen Ausflusslinien, oder verschieben Sie den Umriss auf die Teilung (:ref:`hydrology-outlet`)."
+
+# machine translation: argos 9977d7330b23
+msgid "A depression keeps the rain until it is full. That is right for a pond and wrong where the terrain model blocks a culvert or the opening of a bridge: cut those openings into the terrain model, for example as a structure (:ref:`case-geodata`)."
+msgstr "Eine Depression hält den Regen, bis er voll ist. Das ist richtig für einen Teich und falsch, wo das Gelände-Modell einen Durchgang oder die Öffnung einer Brücke blockiert: Schneiden Sie diese Öffnungen in das Gelände-Modell, zum Beispiel als Struktur (:ref:`case-geodata`)."
+
+# machine translation: argos e55d0bab5851
+msgid "The terrain analysis of the checkup failed, usually because the terrain model does not cover the outline. The build itself names the problem in more detail."
+msgstr "Die Gelände-Analyse des Checkups ist fehlgeschlagen, in der Regel, weil das Gelände-Modell den Umriss nicht abdeckt. Der Build selbst benennt das Problem genauer."
+
 # machine translation: argos ea0b969845ad
 msgid "Profile of this computer"
 msgstr "Profil dieses Computers"

@@ -1,0 +1,740 @@
+# French translation of the aXqua documentation, page usage/hydrology-simulations.
+# Written by docs/i18n/translate.py. An entry with the comment "machine translation" is
+# translated again when its English text changes. Delete that comment after reviewing an
+# entry, and the translation is kept as long as the English text stays the same.
+msgid ""
+msgstr ""
+"Project-Id-Version: aXqua\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+# machine translation: argos a367c01413ea
+msgid "Hydrology"
+msgstr "Hydrologie"
+
+# machine translation: argos afcdcd547210
+msgid "A hydrology simulation computes how rain on a catchment becomes runoff. Rain falls on every node of the mesh, part of it infiltrates into the soil, part of the surface water evaporates, and the rest flows over the terrain to the outlet. TELEMAC-2D solves the shallow water equations over the whole catchment, so that the hydrograph at the outlet, the water depths on the hillslopes and the flooded areas in the valley come from one model. This approach is called a hydrodynamic rainfall-runoff model, or rain on grid (Caviedes-Voullième et al. 2012, Fernández-Pato et al. 2016). It suits catchments up to some tens of square kilometers, flash floods, and fields and plots on which the path of the runoff matters, for example for soil erosion."
+msgstr "Une simulation d'hydrologie calcule comment la pluie dans un bassin versant devient le ruissellement. La pluie tombe sur chaque nœud de la maillage, une partie s'infiltre dans le sol, une partie de l'eau de surface s'évapore, et le reste coule sur le terrain jusqu'à la sortie. TELEMAC-2D résout les équations d'eau peu profonde sur tout le bassin versant, de sorte que l'hydrographe à la sortie, le hauteurs d'eau sur les pentes de collines et les zones inondées dans la vallée proviennent d'un modèle. Cette approche est appelée modèle hydrodynamique de ruissellement des précipitations, ou pluie sur grille (Caviedes-Voullième et al. 2012, Fernández-Pato et al. 2016). Il convient à des bassins versants jusqu'à des dizaines de kilomètres carrés, des inondations éclairs, des champs et des parcelles sur lesquels le chemin du ruissellement compte, par exemple pour l'érosion des sols."
+
+# machine translation: argos 08a8e1dac834
+msgid "The hydrology mode is TELEMAC only. It is switched on in the case settings, with the check box *Hydrology mode* on the page *Mesh configuration* or on the page *Hydrology* (:ref:`case-hydrology`), and runs on the sub-tab *Simulations > Hydrology*."
+msgstr "Le mode d'hydrologie est TELEMAC seulement. Il est activé dans les paramètres cas, avec la case à cocher *Hydrology mode* sur la page *Mesh configuration* ou sur la page *Hydrology* (:ref:`case-hydrology`), et fonctionne sur le sous-tab *Simulations > Hydrology*."
+
+# machine translation: argos bfde8f3caa90
+msgid "The case settings with the check box Hydrology mode on the page Mesh configuration"
+msgstr "Les paramètres cas avec le mode Hydrologie case à cocher sur la page Configuration maillage"
+
+# machine translation: argos b726f96b0e10
+msgid "The case settings in hydrology mode. (1) The check box *Hydrology mode* at the top of the frame *TELEMAC mesh*: it gives the mesh near-equal triangles and grays out the settings the mode does not use, such as the length-to-width ratio of channel cells. (2) The edge lengths of the mesh: *Default size* outside the mesh zones; inside a zone its own ``Max Edge Length (m)``, else the edge length of its zone type. (3) The page *Hydrology* with rain, soil, wind and sun and the outlet; its switch and the check box *Hydrology mode* are one switch."
+msgstr "Les réglages cas en mode hydrologie. (1) La case à cocher *Hydrology mode* en haut du frame *TELEMAC mesh*: il donne aux triangles proches égaux de maillage les réglages que le mode n'utilise pas, comme le rapport longueur-largeur des cellules chenal. (2) La longueur des bords du maillage : *Default size* à l'extérieur des zones de maillage ; à l'intérieur d'une zone son propre ``Max Edge Length (m)``, sinon la longueur des bords de son type de zone. (3) La page *Hydrology* avec la pluie, le sol, le vent et le soleil et la sortie ; son commutateur et la case à cocher *Hydrology mode* sont un seul commutateur."
+
+# machine translation: argos cdf6c204076a
+msgid "**What differs from a river case.** This section can be read on its own. A hydrology case uses the same case file, the same preprocessing, the same job system and the same postprocessing as a river case, which the preceding sections describe. Several of their steps, however, work differently in the hydrology mode or do not apply to it:"
+msgstr "**Ce qui diffère d'une rivière cas.** Cette section peut être lue seule. Un cas d'hydrologie utilise le même fichier de cas, le même prétraitement, le même système tâche et le même post-traitement qu'un cas, que les sections précédentes décrivent. Plusieurs de leurs étapes, cependant, fonctionnent différemment dans le mode d'hydrologie ou ne s'appliquent pas à elle :"
+
+# machine translation: argos 5b8de90cfdb3
+msgid "Step"
+msgstr "Étape"
+
+# machine translation: argos 8b40032255bf
+msgid "River case"
+msgstr "Cas de rivière"
+
+# machine translation: argos febaa0f95761
+msgid "Hydrology case"
+msgstr "Cas d'hydrologie"
+
+# machine translation: argos 02196b59a9cb
+msgid "What drives the flow"
+msgstr "Ce qui alimente le flux"
+
+# machine translation: argos 128279ab704e
+msgid "The discharge at the inflow lines and the water level at the outflow lines (:ref:`case-boundaries`)."
+msgstr "Le débit aux lignes d'entrée et le niveau d'eau aux lignes d'entrée (:ref:`case-boundaries`)."
+
+# machine translation: argos c8449dad717e
+msgid "The rain on every node. The case needs outflow lines only; inflow lines are optional."
+msgstr "La pluie sur chaque nœud. Le cas n'a besoin que de lignes de sortie ; les lignes d'entrée sont optionnelles."
+
+# machine translation: argos 488dbd3f288d
+msgid "Model outline"
+msgstr "Contour du modèle"
+
+# machine translation: argos d000af85c1ed
+msgid "The region of interest around the wetted area (:ref:`case-geodata`)."
+msgstr "Zone d'étude autour de la zone humide (:ref:`case-geodata`)."
+
+# machine translation: argos 758de8377d2b
+msgid "The drainage divide of the catchment, or the edges of a field (:ref:`hydrology-outlet`)."
+msgstr "Le fossé de drainage du bassin versant ou les bords d'un champ (:ref:`hydrology-outlet`)."
+
+# machine translation: argos 4ad3d02803d8
+msgid "Mesh"
+msgstr "Maillage"
+
+# machine translation: argos 2c7d5e0a1582
+msgid "Triangles stretched along the channel centerline (:ref:`case-mesh`)."
+msgstr "Triangles étendus le long du chenalaxe du chenal (:ref:`case-mesh`)."
+
+# machine translation: argos 3934ffc18e92
+msgid "Near-equal triangles everywhere; no centerline."
+msgstr "Triangles presque égaux partout ; pas de axe du chenal."
+
+# machine translation: argos b77e3f15ef3b
+msgid "Initial state"
+msgstr "État initial"
+
+# machine translation: argos 117d99adc141
+msgid "A dry bed with water at the inflow, or a pre-wetted channel (:ref:`case-initialization`)."
+msgstr "Un lit sec avec de l'eau à l'entrée, ou un chenal pré-humidifié (:ref:`case-initialization`)."
+
+# machine translation: argos ac43b32a3f82
+msgid "A dry catchment. The initial water content of the soil is the initial condition that matters."
+msgstr "Un bassin versant sec. La teneur initiale en eau du sol est la condition initiale qui compte."
+
+# machine translation: argos 093c6e6fe3a9
+msgid "Numerical kernel"
+msgstr "Amande numérique"
+
+# machine translation: argos d1009142b035
+msgid "Finite elements by default (:ref:`preprocessing-telemac-choices`)."
+msgstr "Éléments finis par défaut (:ref:`preprocessing-telemac-choices`)."
+
+# machine translation: argos dbe3b8c0cab4
+msgid "Finite volumes with a reconstruction made for thin water films (:ref:`hydrology-concept`)."
+msgstr "Volumes finis avec une reconstruction faite pour les films d'eau mince (:ref:`hydrology-concept`)."
+
+# machine translation: argos 88713fac4a66
+msgid "Simulation"
+msgstr "Simulation"
+
+# machine translation: argos 52e47c05b6f0
+msgid "A steady dry run, then hotstarts and unsteady runs (:doc:`hydraulic-simulations`)."
+msgstr "Une course sèche régulière, puis des démarrages à chaud et des descentes instables (:doc:`hydraulic-simulations`)."
+
+# machine translation: argos 23c58445535b
+msgid "One unsteady run over the storm and the time after it, which also carries the hydrographs of the inflow lines."
+msgstr "Un courant instable sur la tempête et le temps après elle, qui porte aussi les hydrographes des lignes d'entrée."
+
+# machine translation: argos 84fd601f82fe
+msgid "Is the run complete?"
+msgstr "La course est terminée ?"
+
+# machine translation: argos 018b5b1b684d
+msgid "Inflow and outflow balance (``hydrodynamics.flux_tolerance``)."
+msgstr "Solde d'entrée et de sortie (``hydrodynamics.flux_tolerance``)."
+
+# machine translation: argos 5d55d47fc1d8
+msgid "The water balance: rain, infiltration, evaporation, outflow and the water left on the catchment."
+msgstr "Le bilan hydrique : pluie, infiltration, évaporation, écoulement et l'eau laissée sur le bassin versant."
+
+# machine translation: argos 5823d932621c
+msgid "Shallowest water shown"
+msgstr "Eau shallo-ouest indiquée"
+
+# machine translation: argos 0447e5c76aed
+msgid "1 cm."
+msgstr "1 cm."
+
+# machine translation: argos e27fb9d59312
+msgid "1 mm, because sheet flow is millimeters deep."
+msgstr "1 mm, car le flux de la feuille est de millimètres de profondeur."
+
+# machine translation: argos bfe0725b9ff0
+msgid "Mesh convergence study"
+msgstr "Étude de convergence en maillage"
+
+# machine translation: argos 142ef878626e
+msgid "Available (:doc:`mesh-convergence`)."
+msgstr "Disponible (:doc:`mesh-convergence`)."
+
+# machine translation: argos 519e7efda000
+msgid "Not available; a manual procedure replaces it (:ref:`hydrology-mesh-calibration`)."
+msgstr "Non disponible ; une procédure manuelle la remplace (:ref:`hydrology-mesh-calibration`)."
+
+# machine translation: argos 660bdb2e18a9
+msgid "Sediment transport"
+msgstr "Transport des sédiments"
+
+# machine translation: argos 142ef878626e
+msgid "Available (:doc:`morphodynamic-simulations`)."
+msgstr "Disponible (:doc:`morphodynamic-simulations`)."
+
+# machine translation: argos f6eed4be9dfb
+msgid "Not available; the build refuses a case that asks for it."
+msgstr "Non disponible ; la construction refuse un cas qui le demande."
+
+# machine translation: argos b78c8bfd107f
+msgid "Calibration and validation"
+msgstr "Calage et validation"
+
+# machine translation: argos 142ef878626e
+msgid "Available (:doc:`calibration-validation`)."
+msgstr "Disponible (:doc:`calibration-validation`)."
+
+# machine translation: argos 2100c1c1e730
+msgid "Not yet available (:ref:`hydrology-mesh-calibration`)."
+msgstr "Pas encore disponible (:ref:`hydrology-mesh-calibration`)."
+
+# machine translation: argos 2850ee7c0b48
+msgid "**The example case.** ``example-agrohydrology`` is an arable field of 5.6 ha on a hillslope in Lower Bavaria under a rain of 42.1 mm in 7 hours (:ref:`Example cases <help-example-case>`). Its guide (``README.md`` in the folder of the example) walks through every step of this section in the plugin: the checkup, the build, the run of 7 to 8 minutes on 4 processor cores, the loading of the result, and a second run on a more permeable soil. On the *Case Setup* tab, *Example case...* downloads it; in a terminal, the command is:"
+msgstr "**L'exemple cas.** ``example-agrohydrology`` est un champ arable de 5,6 ha sur une pente de collines en Basse-Bavière sous une pluie de 42,1 mm en 7 heures (:ref:`Exemple cas <help-example-case>`). Son guide (``README.md`` dans le dossier de l'exemple) passe par chaque étape de cette section dans l'extension : le checkup, la construction, la course de 7 à 8 minutes sur 4 cœurs de processeur, le chargement du résultat et une seconde course sur un sol plus perméable. Sur l'onglet *Case Setup*, *Example case...* le télécharge ; dans un terminal, la commande est :"
+
+# machine translation: argos b23c67d59d98
+msgid "**The workflow in brief.** A hydrology case is set up and run in six steps, each of which is explained in a subsection below:"
+msgstr "**Le flux de travail en bref.** Un cas d'hydrologie est mis en place et exécuté en six étapes, dont chacune est expliquée dans une sous-section ci-dessous :"
+
+# machine translation: argos 40c114e07491
+msgid "Create the case on the *Case Setup* tab and switch on *Hydrology mode* in its settings (:ref:`hydrology-case-setup`)."
+msgstr "Créez le cas sur l'onglet *Case Setup* et allumez *Hydrology mode* dans ses paramètres (:ref:`hydrology-case-setup`)."
+
+# machine translation: argos 716d6ec2a3d5
+msgid "Collect rain, soil and weather data with the *Data wizard...* on the sub-tab *Simulations > Hydrology* (:ref:`hydrology-data-setup`, :ref:`hydrology-weather`)."
+msgstr "Recueillir les données sur la pluie, le sol et la météo avec le *Data wizard...* sur le sous-tab *Simulations > Hydrology* (:ref:`hydrology-data-setup`, :ref:`hydrology-weather`)."
+
+# machine translation: argos 4ae3c394ad70
+msgid "Draw the outflow lines and select the outlet condition (:ref:`hydrology-outlet`)."
+msgstr "Dessinez les lignes de sortie et sélectionnez l'état de sortie (:ref:`hydrology-outlet`)."
+
+# machine translation: argos dc2a2b181a96
+msgid "Check the data and build the model on the *Preprocessing* tab (:ref:`hydrology-preprocessing`)."
+msgstr "Vérifiez les données et construisez le modèle sur l'onglet *Preprocessing* (:ref:`hydrology-preprocessing`)."
+
+# machine translation: argos 6ce7dab4c14f
+msgid "Run the storm with *Submit* on the sub-tab *Simulations > Hydrology* (:ref:`hydrology-run`)."
+msgstr "Exécutez la tempête avec *Submit* sur le sous-tab *Simulations > Hydrology* (:ref:`hydrology-run`)."
+
+# machine translation: argos 457ebc0a6fef
+msgid "Load the result, read the hydrograph and the water balance, and check the mesh resolution (:ref:`hydrology-run`, :ref:`hydrology-mesh-calibration`)."
+msgstr "Chargez le résultat, lisez l'hydrographe et le bilan hydrique et vérifiez la résolution du maillage (:ref:`hydrology-run`, :ref:`hydrology-mesh-calibration`)."
+
+# machine translation: argos 0503b74b5277
+msgid "In a terminal, the same steps are as follows; the last command converts the result for ParaView and VisIt:"
+msgstr "Dans un terminal, les mêmes étapes sont les suivantes ; la dernière commande convertit le résultat pour ParaView et VisIt :"
+
+# machine translation: argos 291f7e8b0421
+msgid "Concept"
+msgstr "Concept"
+
+# machine translation: argos f52c95d09962
+msgid "**Rain on grid.** TELEMAC-2D solves the depth-averaged shallow water equations, which express the conservation of mass and momentum of a water layer over the terrain (Hervouet 2007). In a river case, water enters the model through its inflow lines. In a hydrology case, the rain enters as a source term of the mass equation at every node, and the infiltration and the evaporation leave as sinks. The water then flows downslope under gravity against the resistance of the ground. Sheet flow on a hillslope is only millimeters deep, so its resistance is that of the soil surface, its clods, crop residue and vegetation, which hydrologists express as a Manning coefficient for overland flow (Engman 1986). The resolution of the mesh determines which furrows, rills and depressions the model resolves, and with them the paths and the travel time of the runoff (Caviedes-Voullième et al. 2012)."
+msgstr "**Rain sur grille.** TELEMAC-2D résout les équations d'eau peu profonde moyennes de profondeur, qui expriment la conservation de la masse et de l'élan d'une couche d'eau sur le terrain (Hervouet 2007). Dans une rivière cas, l'eau entre dans le modèle à travers ses lignes d'entrée. Dans un cas d'hydrologie, la pluie entre comme terme source de l'équation de masse à chaque nœud, et l'infiltration et l'évaporation partent comme des puits. L'eau coule alors sous la gravité contre la résistance du sol. L'écoulement des feuilles sur une pente de colline n'est que de millimètres de profondeur, de sorte que sa résistance est celle de la surface du sol, de ses cailloux, de ses résidus de cultures et de sa végétation, que les hydrologues expriment comme un coefficient Manning pour l'écoulement terrestre (Engman, 1986). La résolution du maillage détermine les sillons, les forages et les dépressions que le modèle résout, et avec eux les chemins et le temps de déplacement du ruissellement (Caviedes-Voullième et al. 2012)."
+
+# machine translation: argos bbf6c30fa5cd
+msgid "**Infiltration after Green and Ampt.** The Green-Ampt model describes infiltration as a sharp wetting front that moves down into the soil (Green and Ampt 1911). Behind the front the soil is saturated, ahead of it the soil keeps its initial water content. The infiltration capacity :math:`f` [m/s] follows from Darcy's law across the wetted layer:"
+msgstr "**Infiltration après Green et Ampt.** Le modèle Green-Ampt décrit l'infiltration comme un front mouillant aigu qui descend dans le sol (Green et Ampt, 191). Derrière le front, le sol est saturé, devant lui le sol conserve sa teneur initiale en eau. La capacité d'infiltration :math:`f` [m/s] découle de la loi de Darcy sur la couche mouillé :"
+
+# machine translation: argos abf46c5d85a8
+msgid "f = K_s \\left(1 + \\frac{\\psi \\,(\\theta_s - \\theta_i)}{F}\\right)"
+msgstr "f = K s \\left(1 + \\frac{\\psi \\,\\theta s - \\theta i)}{F}\\right)"
+
+# machine translation: argos 686613daa3ab
+msgid "**The implementation in TELEMAC.** TELEMAC-2D has carried a Green-Ampt option since release 8.4 (``RAINFALL-RUNOFF MODEL : 3``), the integral form of Travert et al. (2022). The first implementation in TELEMAC is Broich et al. (2022). De Vos et al. (2024) tested the released form and found that ponded water does not infiltrate once the rain stops, and that the capacity rises when the rain intensifies after ponding. They recommend the explicit solution of Sadeghi et al. (2024) with the ponding time of Chu (1978). That revision is not part of a TELEMAC release, so aXqua generates the routine itself (``user_fortran/runoff_greenampt.f``) and offers three solutions:"
+msgstr "**La mise en oeuvre dans TELEMAC.** TELEMAC-2D a adopté une option Green-Ampt depuis la version 8.4 (``RAINFALL-RUNOFF MODEL : 3``), la forme intégrale de Travert et al. (2022). La première mise en œuvre dans TELEMAC est Broich et al. (2022). De Vos et al. (2024) ont testé la forme libérée et ont constaté que l'eau en étang ne s'infiltre pas une fois la pluie arrêtée, et que la capacité augmente lorsque la pluie s'intensifie après étang. Ils recommandent la solution explicite de Sadeghi et al. (2024) avec le temps de pondage de Chu (1978). Cette révision ne fait pas partie d'une version de TELEMAC, donc aXqua génère la routine elle-même (``user_fortran/runoff_greenampt.f``) et offre trois solutions :"
+
+# machine translation: argos 69f5498d9a04
+msgid "Infiltration capacity"
+msgstr "Capacité d'infiltration"
+
+# machine translation: argos 63e929e0859b
+msgid "The default, after de Vos et al. (2024): before ponding the exact capacity, so that all rain infiltrates; after ponding the explicit solution of Sadeghi et al. (2024) in the time since ponding. Ponded water keeps infiltrating after the rain. A node also ponds when water from upslope stands on it deeper than ``runon_depth``, which closes the gap that de Vos et al. name."
+msgstr "Par défaut, après de Vos et al. (2024) : avant de ponder la capacité exacte, de sorte que toute pluie s'infiltre ; après ponder la solution explicite de Sadeghi et al. (2024) dans le temps depuis ponder. L'eau étangée s'infiltre toujours après la pluie. Un nœud s'étend aussi lorsque l'eau de la pente ascendante s'y trouve plus profondément que ``runon_depth``, ce qui comble l'écart que de Vos et al. nom."
+
+# machine translation: argos 348eb5ffba2c
+msgid "The capacity :math:`K_s (1 + a/F)` on the infiltrated depth of each node, stepped in time. This is the form of Travert et al. without the term that causes the rise of the capacity, plus the infiltration of ponded water."
+msgstr "La capacité :math:`K_s (1 + a/F)` sur la profondeur infiltrée de chaque nœud, a marché dans le temps. C'est la forme de Travert et al. sans le terme qui provoque l'augmentation de la capacité, plus l'infiltration d'eau en étang."
+
+# machine translation: argos f550095068c1
+msgid "The equations TELEMAC releases, for comparison."
+msgstr "Les équations TELEMAC libèrent, pour comparaison."
+
+# machine translation: argos 00a6c11d433b
+msgid "The tests of aXqua compare the three solutions with the exact Green-Ampt solution under constant rain: the ``exact`` solution agrees to 0.2 %, ``sadeghi`` infiltrates 1 to 4 % less, and ``travert`` up to 9 % more. On a flat closed basin, TELEMAC with the generated routine and the reference of aXqua in Python give the same infiltrated depth to four digits, with the finite-volume and the finite-element kernel and on four processor cores."
+msgstr "Les tests de aXqua comparent les trois solutions avec la solution Green-Ampt exacte sous une pluie constante : la solution ``exact`` accepte de 0,2%, ``sadeghi`` infiltre 1 à 4 % de moins et ``travert`` jusqu'à 9 % de plus. Sur un bassin plat fermé, TELEMAC avec la routine générée et la référence de aXqua en Python donnent la même profondeur infiltrée à quatre chiffres, avec le volume fini et le noyau d'élément fini et sur quatre noyaux de processeur."
+
+# machine translation: argos 9c50636f1a32
+msgid "**Rain, wind and sun.** The rain is one series for the whole catchment, held constant over each of its intervals. The wind of a weather series acts through TELEMAC's wind stress on water deeper than ``wind_threshold_depth`` (1 m), that is on ponds and lakes, not on the sheet flow of a hillslope. Evaporation is taken from the surface water at the FAO-56 reference evapotranspiration times the factor of open water, 1.05 for water less than 2 m deep (Allen et al. 1998). Soil water does not evaporate in this model, because the Green-Ampt model keeps no soil water budget that could give water back. During a storm both wind and evaporation are small against the rain; in the hours after it, evaporation empties the shallow ponds that a two-dimensional model otherwise keeps forever."
+msgstr "**Rain, vent et soleil.** La pluie est une série pour l'ensemble du bassin versant, maintenue constante sur chacun de ses intervalles. Le vent d'une série météorologique agit à travers le stress du vent de TELEMAC sur l'eau plus profonde que ``wind_threshold_depth`` (1 m), c'est-à-dire sur les étangs et les lacs, pas sur le flux de la feuille d'une pente de collines. L'évaporation est prélevée dans les eaux de surface à l'évapotranspiration de référence FAO-56 fois le facteur d'eau libre, 1,05 pour l'eau de moins de 2 m de profondeur (Allen et al. 1998). L'eau du sol ne s'évapore pas dans ce modèle, car le modèle Green-Ampt ne maintient pas de budget d'eau du sol qui pourrait rendre l'eau. Pendant une tempête, le vent et l'évaporation sont petits contre la pluie ; dans les heures qui suivent, l'évaporation vide les étangs peu profonds qu'un modèle bidimensionnel conserve pour toujours."
+
+# machine translation: argos b88ed58ce90a
+msgid "**The numerical kernel.** Sheet flow on a hillslope is often thinner than the step of the bed between two neighboring nodes: a slope of 5 % over cells of 4 m is a step of 0.2 m under a film of millimeters. A river case runs on TELEMAC's finite elements by default (:ref:`preprocessing-telemac-choices`). A hydrology case runs on the finite-volume kernel with the HLLC solver (Toro et al. 1994), whose hydrostatic reconstruction keeps a water surface at rest over a sloping bed. The classical reconstruction of Audusse et al. (2004) fails where the water is shallower than the step of the bed. TELEMAC therefore offers the reconstruction of Chen and Noelle (2017), which its own rain-runoff validation case uses, and which is the default of the hydrology mode (``kernel: finite-volumes``). With the finite-element kernel (``kernel: finite-elements``), a test catchment kept 13 % of its rain on the surface 30 minutes after the storm, against 0.5 % with finite volumes. The finite-volume kernel works with a constant turbulent viscosity, which is adequate for sheet flow, whose resistance comes from the ground and not from turbulence in the water column."
+msgstr "**Le noyau numérique.** Le flux de feuilles sur une pente de collines est souvent plus mince que le pas du lit entre deux nœuds voisins : une pente de 5 % sur des cellules de 4 m est un pas de 0,2 m sous un film de millimètres. Une rivière cas fonctionne sur les éléments finis de TELEMAC par défaut (:ref:`preprocessing-telemac-choices`). Un cas d'hydrologie fonctionne sur le noyau à volume fini avec le solveur HLLC (Toro et al. 1994), dont la reconstruction hydrostatique maintient une surface libre au repos sur un lit en pente. La reconstruction classique d'Audusse et al. (2004) échoue lorsque l'eau est plus faible que le pas du lit. TELEMAC propose donc la reconstruction de Chen et Noelle (2017), que sa propre validation de pluie utilise cas, et qui est la valeur par défaut du mode d'hydrologie (``kernel: finite-volumes``). Avec le noyau fini (``kernel: finite-elements``), un bassin d'essai a conservé 13 % de sa pluie à la surface 30 minutes après la tempête, contre 0,5 % avec des volumes finis. Le noyau à volume fini fonctionne avec une viscosité turbulente constante, qui est adéquate pour le flux de tôle, dont la résistance vient du sol et non de turbulences dans la colonne d'eau."
+
+# machine translation: argos dc2c28e34cc3
+msgid "Case setup"
+msgstr "Cas configuration"
+
+# machine translation: argos 50d826e43e34
+msgid "A hydrology case is a case file like any other (:doc:`case-setup`), with the block ``hydrology``. A minimal hydrology case file looks as follows:"
+msgstr "Un cas d'hydrologie est un fichier de cas comme n'importe quel autre (:doc:`case-setup`), avec le bloc ``hydrology``. Une hydrologie minimale fichier de cas semble comme suit :"
+
+# machine translation: argos ade9fadb6269
+msgid "The pages of the case settings are those of a river case, in the same order. What each of them means for a catchment:"
+msgstr "Les pages des paramètres cas sont celles d'une rivière cas, dans le même ordre. Ce que signifie chacun d'eux pour un bassin versant :"
+
+# machine translation: argos f8181119edf5
+msgid "*Project settings* (:ref:`case-project`). As in a river case: a metric coordinate reference system, the input data in ``user-sources/`` and everything aXqua produces in ``axqua-case/``. The result of the run is ``axqua-case/simulation/r2d-hydrology.slf``; the hydrograph and the water balance go to ``axqua-case/postprocessing/hydrology/``."
+msgstr "*Project settings* (:ref:`case-project`). Comme dans une rivière cas : un métrique système de coordonnées de référence, les données d'entrée à ``user-sources/`` et tout ce qu'aXqua produit à ``axqua-case/``. Le résultat de la course est ``axqua-case/simulation/r2d-hydrology.slf``; l'hydrographe et le bilan hydrique vont à ``axqua-case/postprocessing/hydrology/``."
+
+# machine translation: argos 31d5be54a3bf
+msgid "*Geodata* (:ref:`case-geodata`). The terrain model (``dem_initial``) and the outline of the catchment (``boundary``) are required. The outline follows the drainage divide, which QGIS derives from the terrain model and the position of the outlet with the tools of its *Processing Toolbox* (for example *GRASS > r.water.outlet*); draw it on a hillshade of the terrain model and check it with the hydrology checkup (:ref:`hydrology-preprocessing`). Mesh zones (``mesh_zones``) are optional and set a finer or coarser mesh in parts of the catchment, through their field ``Max Edge Length (m)``. Streams and ditches drawn as ``breaklines`` receive a finer mesh along them. Roughness zones (``roughness_zones`` and ``roughness_table``) give different surfaces their own roughness. The channel centerline is not used. Structures (``structures``), such as embankments, walls and buildings, are applied to the terrain as in a river case."
+msgstr "*Geodata* (:ref:`case-geodata`). Le modèle de terrain (``dem_initial``) et les contours du bassin versant (``boundary``) sont requis. Le schéma suit le fossé de drainage, que le QGIS dérive du modèle de terrain et de la position de la sortie avec les outils de son *Processing Toolbox* (par exemple *GRASS > r.water.outlet*) ; dessinez-le sur un hillhade du modèle de terrain et vérifiez-le avec le contrôle d'hydrologie (:ref:`hydrology-preprocessing`). Zones de maillage (``mesh_zones``) sont facultatives et placent un maillage plus fin ou plus grossier dans certaines parties du bassin versant, à travers leur champ ``Max Edge Length (m)``. Les ruisseaux et les fossés dessinés comme ``breaklines`` reçoivent un meilleur maillage le long d'eux. Zones de rugosité (``roughness_zones`` et ``roughness_table``) donnent différentes surfaces leur propre rugosité. Le chenal axe du chenal n'est pas utilisé. Les structures (``structures``), comme les remblais, les murs et les bâtiments, sont appliquées sur le terrain comme dans une rivière cas."
+
+# machine translation: argos 347dc28b587a
+msgid "*Liquid boundaries* (:ref:`case-boundaries`). The layer ``liquid_boundaries`` holds the outflow lines, with the word ``outflow`` in the field ``Type (inflow/outflow)``, as in a river case. A hydrology case needs no discharge and no water level. Where to place the outflow lines, and which condition they get, is explained in :ref:`hydrology-outlet`. An inflow line brings the water of a catchment upstream that is not part of the model: it takes the constant discharge ``boundaries.prescribed_flowrate`` or the hydrograph ``boundaries.inflow`` (a table of time and discharge), which the hydrology run follows. Without any outflow line, the catchment is closed and keeps all of its rain, and the checkup says so."
+msgstr "*Liquid boundaries* (:ref:`case-boundaries`). La couche ``liquid_boundaries`` détient les lignes de sortie, avec le mot ``outflow`` dans le champ ``Type (inflow/outflow)``, comme dans une rivière cas. Un cas d'hydrologie n'a pas besoin de débit ni de niveau d'eau. Où placer les lignes de sortie, et quelle condition ils obtiennent, est expliqué à :ref:`hydrology-outlet`. Une ligne d'entrée apporte l'eau d'un bassin versant en amont qui ne fait pas partie du modèle : elle prend la constante débit ``boundaries.prescribed_flowrate`` ou l'hydrographe ``boundaries.inflow`` (une table du temps et débit), que l'hydrologie suit. Sans ligne de sortie, le bassin versant est fermé et maintient toute sa pluie, et le contrôle le dit."
+
+# machine translation: argos 2e6a9d091f4e
+msgid "*Initial conditions* (:ref:`case-initialization`). The catchment starts dry. Only an inflow line gets the short stretch of water of the dry start, because TELEMAC cannot prescribe a discharge through a dry section. The pre-wetted channel and the drying of thin films of a river case are not available in the hydrology mode. The initial condition that matters is the water content of the soil (:ref:`hydrology-data-setup`)."
+msgstr "*Initial conditions* (:ref:`case-initialization`). Le bassin commence à sécher. Seule une ligne d'écoulement reçoit la courte étendue d'eau du démarrage à sec, car TELEMAC ne peut prescrire un débit à travers une section sèche. Le chenal préhumidifié et le séchage des minces films d'une rivière cas ne sont pas disponibles en mode hydrologie. La condition initiale qui importe est la teneur en eau du sol (:ref:`hydrology-data-setup`)."
+
+# machine translation: argos 217a5001ad59
+msgid "*Wall roughness* (:ref:`case-roughness`). The roughness of the ground is the roughness of the bed. A river case describes it by the equivalent sand roughness :math:`k_s` of Nikuradse, which presumes water much deeper than the roughness elements. Sheet flow a few millimeters deep runs between clods and stalks that are higher than the water is deep, so a hydrology case usually takes a Manning or Strickler coefficient for overland flow (Engman 1986), either for the whole catchment with ``friction.default_law`` and ``friction.default_coefficient``, or per roughness zone with ``friction.roughness_law``. The example case uses a Strickler coefficient of 30 m\\ :sup:`1/3`/s (Manning's :math:`n` = 0.033) on the whole field. The roughness of the closed walls plays no part in a catchment."
+msgstr "*Wall roughness* (:ref:`case-roughness`). La rugosité du sol est la rugosité du lit. Une rivière cas la décrit par la rugosité équivalente de sable :math:`k_s` de Nikuradse, qui présume l'eau beaucoup plus profonde que les éléments de rugosité. Le flux de feuilles de quelques millimètres de profondeur entre les cailloux et les tiges qui sont plus élevées que l'eau est profond, de sorte qu'un cas d'hydrologie prend habituellement un coefficient Manning ou Strickler pour le débit terrestre (Engman 1986), soit pour l'ensemble du bassin versant avec ``friction.default_law`` et ``friction.default_coefficient``, soit pour la zone de rugosité avec ``friction.roughness_law``. L'exemple cas utilise un coefficient Strickler de 30 m\\ :sup:`1/3`/s (Manning's :math:`n` = 0,033) sur l'ensemble du champ. La rugosité de la parois fermées ne joue aucun rôle dans un bassin versant."
+
+# machine translation: argos 6798adf157d6
+msgid "*Hydraulic simulation* (:ref:`case-hydraulics`). ``duration``, ``flux_tolerance`` and ``turbulence_model`` of a river case do not apply: the simulated time follows from the rain and ``hydrology.drain_time``, the run is judged by its water balance, and the kernel is set by ``hydrology.kernel``. ``hydrodynamics.wet_depth``, the shallowest water that counts as wet in the reports and on the maps, is 1 mm in the hydrology mode unless the case sets another value. The number of processor cores is set in the profile of the computer (``mpi_processes``, :ref:`solver-bindings`) or, without it, by ``telemac.n_processors``."
+msgstr "*Hydraulic simulation* (:ref:`case-hydraulics`). ``duration``, ``flux_tolerance`` et ``turbulence_model`` d'une rivière cas ne s'appliquent pas : le temps simulé suit de la pluie et ``hydrology.drain_time``, la course est jugée par son bilan hydrique, et le noyau est défini par ``hydrology.kernel``. ``hydrodynamics.wet_depth``, l'eau la plus peu profonde qui compte aussi humide dans les rapports et sur les cartes, est 1 mm dans le mode d'hydrologie, sauf si le cas fixe une autre valeur. Le nombre de cœurs de processeur est défini dans le profil de l'ordinateur (``mpi_processes``, :ref:`solver-bindings`) ou, sans lui, par ``telemac.n_processors``."
+
+# machine translation: argos 6554ddc22bd8
+msgid "*Hydrology* (:ref:`case-hydrology`). The block ``hydrology`` holds the rain, the soil, the weather and the outlet. The data wizard writes most of these entries (:ref:`hydrology-data-setup`):"
+msgstr "*Hydrology* (:ref:`case-hydrology`). Le bloc ``hydrology`` contient la pluie, le sol, la météo et la sortie. L'assistant de données écrit la plupart de ces entrées (:ref:`hydrology-data-setup`) :"
+
+# machine translation: argos 78fd8e170f75
+msgid "Entry"
+msgstr "Entrée"
+
+# machine translation: argos 88488e99fcdc
+msgid "Default"
+msgstr "Par défaut"
+
+# machine translation: argos 2c7c3ec284a3
+msgid "Meaning"
+msgstr "Signification"
+
+# machine translation: argos be64e2dd5041
+msgid "required"
+msgstr "requis"
+
+# machine translation: argos 059e1365aedf
+msgid "The rain series: a table of time and rain (:ref:`hydrology-data-setup`)."
+msgstr "La série pluie : une table de temps et de pluie (:ref:`hydrology-data-setup`)."
+
+# machine translation: argos 90a1953cca9e
+msgid "``mm/h`` for intensities, ``mm`` for depths per interval."
+msgstr "``mm/h`` pour les intensités, ``mm`` pour les profondeurs par intervalle."
+
+# machine translation: argos ae516eb11721
+msgid "Whether a time stamp is the ``start`` or the ``end`` of its interval."
+msgstr "Qu'il s'agisse d'un timbre horaire, il s'agit de ``start`` ou de ``end`` de son intervalle."
+
+# machine translation: argos e7bb0b87bf75
+msgid "empty"
+msgstr "vide"
+
+# machine translation: argos 8d407f290a31
+msgid "Date and time of the model's time zero, for a series with dates."
+msgstr "Date et heure du temps zéro du modèle, pour une série avec dates."
+
+# machine translation: argos 5a0574645020
+msgid "``green-ampt``, or ``none`` for a sealed catchment."
+msgstr "``green-ampt``, ou ``none`` pour un bassin hydrographique scellé."
+
+# machine translation: argos c499a6251175
+msgid "The solution of the Green-Ampt model: ``sadeghi``, ``exact`` or ``travert`` (:ref:`hydrology-concept`)."
+msgstr "La solution du modèle Green-Ampt : ``sadeghi``, ``exact`` ou ``travert`` (:ref:`hydrology-concept`)."
+
+# machine translation: argos c02bf8576ea2
+msgid "yes, 0.001 m"
+msgstr "oui, 0,001 m"
+
+# machine translation: argos bbd66e72c6ff
+msgid "A node with water from upslope deeper than ``runon_depth`` counts as ponded."
+msgstr "Un nœud avec de l'eau de haut en haut plus profond que ``runon_depth`` compte comme pondue."
+
+# machine translation: argos 57e9864311cf
+msgid "empty, ``Zone ID``"
+msgstr "vide, ``Zone ID``"
+
+# machine translation: argos d898e15f2d06
+msgid "Polygons of the soil zones and the field of their zone number."
+msgstr "Polygones des zones de sol et du champ de leur numéro de zone."
+
+# machine translation: argos d835b0a62c58
+msgid "The parameters of each soil zone (:ref:`hydrology-data-setup`)."
+msgstr "Les paramètres de chaque zone de sol (:ref:`hydrology-data-setup`)."
+
+# machine translation: argos c5feafad789f
+msgid "One USDA texture class for the whole catchment, without a table."
+msgstr "Une classe de texture USDA pour l'ensemble du bassin versant, sans table."
+
+# machine translation: argos 379505e7ee71
+msgid "The water content of the soil at the start [m³/m³], for zones without a value of their own."
+msgstr "La teneur en eau du sol au début [m3/m3], pour les zones sans valeur propre."
+
+# machine translation: argos c170bf93f95b
+msgid "The effective saturation that applies where no initial water content is given."
+msgstr "La saturation effective qui s'applique lorsqu'aucune teneur initiale en eau n'est donnée."
+
+# machine translation: argos 6050fcbbfdad
+msgid "Polygons of roofs and roads, on which nothing infiltrates."
+msgstr "Polygones de toits et de routes, sur lesquels rien ne s'infiltre."
+
+# machine translation: argos ba94c2cd63b9
+msgid "empty, no, ``none``"
+msgstr "vide, non, ``none``"
+
+# machine translation: argos 5e219cad6e19
+msgid "The weather series and what is taken from it (:ref:`hydrology-weather`)."
+msgstr "Les séries météorologiques et ce qui en est tiré (:ref:`hydrology-weather`)."
+
+# machine translation: argos cfc00d8f66a9
+msgid "The drag of the wind, and the depth below which the wind does not act."
+msgstr "La traînée du vent et la profondeur au-dessous de laquelle le vent n'agit pas."
+
+# machine translation: argos 4576a55b497e
+msgid "Evaporation of open water as a multiple of the reference evapotranspiration."
+msgstr "L'évaporation de l'eau libre comme multiple de l'évapotranspiration de référence."
+
+# machine translation: argos e7bb0b87bf75
+msgid "``normal_depth``, empty"
+msgstr "``normal_depth``, vide"
+
+# machine translation: argos ca8cd83b12ee
+msgid "The condition of the outflow lines and, for ``normal_depth``, the bed slope at the outlet (:ref:`hydrology-outlet`)."
+msgstr "L'état des lignes de sortie et, pour ``normal_depth``, la pente du lit à la sortie (:ref:`hydrology-outlet`)."
+
+# machine translation: argos 3f63cd39fd12
+msgid "Simulated time after the last rain."
+msgstr "Temps simulé après la dernière pluie."
+
+# machine translation: argos c39ce39fb1a1
+msgid "Interval of the result maps."
+msgstr "Intervalle des cartes des résultats."
+
+# machine translation: argos 9cfb0d70092b
+msgid "The numerical kernel: ``finite-volumes`` or ``finite-elements`` (:ref:`hydrology-concept`)."
+msgstr "Le noyau numérique : ``finite-volumes`` ou ``finite-elements`` (:ref:`hydrology-concept`)."
+
+# machine translation: argos 627ec90d086b
+msgid "*Morphodynamic simulation*, *OpenFOAM* and *Calibration and validation*. Sediment transport with GAIA, the exchange with a porous body and the internal source regions of a river case are refused in the hydrology mode, because the hydrology run writes none of them. OpenFOAM has no hydrology mode. The calibration is not yet available for hydrology runs (:ref:`hydrology-mesh-calibration`)."
+msgstr "*Morphodynamic simulation*, *OpenFOAM* et *Calibration and validation*. Le transport des sédiments avec GAIA, l'échange avec un corps poreux et les régions sources internes d'une rivière cas sont refusés dans le mode d'hydrologie, parce que la course d'hydrologie n'en écrit aucun. OpenFOAM n'a pas de mode d'hydrologie. Le calage n'est pas encore disponible pour l'hydrologie (:ref:`hydrology-mesh-calibration`)."
+
+# machine translation: argos 261428aa1a8b
+msgid "Data setup"
+msgstr "Configuration des données"
+
+# machine translation: argos fda77e7da325
+msgid "A hydrology case needs a terrain model, the outline of the catchment, a rain series and a soil. Weather is optional. The *Data wizard...* on the sub-tab *Simulations > Hydrology* guides through the data, one tab for each kind:"
+msgstr "Un cas d'hydrologie a besoin d'un modèle de terrain, les contours du bassin versant, une série de pluie et un sol. La météo est facultative. Le *Data wizard...* sur le sous-tab *Simulations > Hydrology* guide à travers les données, un onglet pour chaque type :"
+
+# machine translation: argos b4f9e9cf2a09
+msgid "**The data wizard.** Every tab first lists the data portals of the national meteorological agency for the country of the catchment, and then the routes aXqua has. The national agency comes first for a reason: its rain gauges and radar resolve the minutes and kilometers of a storm, and its design rainfall is what engineering practice expects. Global data sets fill in where nothing else is at hand. Nothing is written into the case file before *Save*; the files a route produces go into ``user-sources/hydrology`` beside the case file, each with a provenance file that names the source, its license and the required attribution."
+msgstr "**Les données assistant.** Chaque onglet énumère d'abord les portails de données de l'agence météorologique nationale pour le pays du bassin versant, puis les itinéraires aXqua has. L'agence nationale vient en premier pour une raison : sa pluie stations hydrométriques et radar résolvent les minutes et les kilomètres d'une tempête, et sa conception des précipitations est ce que la pratique d'ingénierie attend. Les ensembles de données globaux remplissent là où rien d'autre n'est à portée de main. Rien n'est écrit dans le fichier de cas avant *Save*; les fichiers qu'une route produit vont dans ``user-sources/hydrology`` à côté du fichier de cas, chacun avec un fichier de provenance qui nomme la source, sa licence et l'attribution requise."
+
+# machine translation: argos 048240838747
+msgid "Tab"
+msgstr "Tab"
+
+# machine translation: argos 125424effee7
+msgid "Routes"
+msgstr "Itinéraires"
+
+# machine translation: argos 1e6b200a4e11
+msgid "Rain"
+msgstr "Pluie"
+
+# machine translation: argos 21dde4e38ab5
+msgid "A rain record (a table of time and rain in mm/h or mm per interval); a design storm from a depth-duration table of one return period, such as KOSTRA-DWD in Germany or NOAA Atlas 14 in the United States, distributed as Euler type II (DWA-A 118), alternating block (Chow et al. 1988) or one block; or a past event downloaded from the archive of Open-Meteo (ERA5 and ERA5-Land). A reanalysis underestimates short intensities, 1-hour extremes by about 40 %."
+msgstr "Un record de pluie (un tableau de temps et de pluie en mm/h ou mm par intervalle) ; une tempête de conception d'un tableau de durée de profondeur d'une période de retour, comme KOSTRA-DWD en Allemagne ou NOAA Atlas 14 aux États-Unis, distribué sous la forme d'Euler de type II (DWA-A 118), bloc alternatif (Chow et al. 1988) ou un bloc ; ou un événement passé téléchargé à partir des archives d'Open-Meteo (ERA5 et ERA5-Land). Une réanalyse sous-estime les intensités courtes, les extrêmes d'une heure d'environ 40 %."
+
+# machine translation: argos bf2213c04b75
+msgid "Soil"
+msgstr "Sol"
+
+# machine translation: argos 0a1f18982ec3
+msgid "A soil map with a zone number per polygon and a table of the zones; one texture class for the whole catchment; or the textures of ISRIC SoilGrids (250 m). Sealed surfaces from a layer of one's own or from the class built-up of ESA WorldCover (10 m)."
+msgstr "Une carte du sol avec un numéro de zone par polygone et un tableau des zones ; une classe de texture pour l'ensemble du bassin versant ; ou les textures des sols de l'ISRIC (250 m). Surfaces scellées à partir d'une couche propre ou de la classe de l'ESA WorldCover (10 m)."
+
+# machine translation: argos cc176d3b73c0
+msgid "Initial moisture"
+msgstr "Humidité initiale"
+
+# machine translation: argos 9b77eda39352
+msgid "A value, or the soil moisture of ERA5-Land (0 to 7 cm) at the start of the event."
+msgstr "Une valeur, ou l'humidité du sol de ERA5-Land (0 à 7 cm) au début de l'événement."
+
+# machine translation: argos aafc63b142ad
+msgid "Wind and sun"
+msgstr "Vent et soleil"
+
+# machine translation: argos 0295fa1a95b0
+msgid "The weather series, whether its wind is applied, and how evaporation is computed."
+msgstr "Les séries météorologiques, si son vent est appliqué, et comment l'évaporation est calculée."
+
+# machine translation: argos 8191b2127e58
+msgid "Outlet"
+msgstr "Sortie"
+
+# machine translation: argos a58eb7821897
+msgid "The condition of the outflow lines and the numerical kernel (see below)."
+msgstr "L'état des lignes de sortie et du noyau numérique (voir ci-dessous)."
+
+# machine translation: argos 0d8f50546295
+msgid "The data wizard of the hydrology mode on its tab Rain"
+msgstr "L'assistant de données du mode hydrologie sur son onglet Pluie"
+
+# machine translation: argos 8ccec8713469
+msgid "The data wizard. (1) One tab for each kind of data. (2) The portals of the national agencies for the countries of the catchment, then the global data sets. (3) A rain record of your own, from a gauge, a radar product or a table of the agency. (4) A design storm from the depth-duration table of one return period. (5) A past event, downloaded from Open-Meteo. (6) *Next* goes to the next tab; *Save* on the last tab writes the choices into the case file."
+msgstr "L'assistant de données. (1) Un onglet pour chaque type de données. (2) Les portails des agences nationales pour les pays du bassin versant, puis les ensembles de données mondiaux. (3) Un enregistrement de pluie de votre propre, d'une station hydrométrique, d'un produit radar ou d'une table de l'agence. (5) Un événement passé, téléchargé depuis Open-Meteo. (6) *Next* va à l'onglet suivant ; *Save* sur le dernier onglet écrit les choix dans le fichier de cas."
+
+# machine translation: argos c08bb5823ebe
+msgid "**Rain series.** A time stamp of a rain record is the start or the end of its interval. Agencies stamp the end: the rain of 12:00 to 13:00 is reported at 13:00, which is the default of ``rainfall_stamp``. The model's time zero is the start of the first interval, or ``rainfall_start`` for a series with dates."
+msgstr "**Série de rayons.** Un timbre de temps d'un record de pluie est le début ou la fin de son intervalle. Les agences marquent la fin : la pluie de 12h00 à 13h00 est signalée à 13h00, ce qui est le défaut de ``rainfall_stamp``. Le temps zéro du modèle est le début du premier intervalle, ou ``rainfall_start`` pour une série avec des dates."
+
+# machine translation: argos b422b743a2b6
+msgid "The station files of the DWD Climate Data Center are read as they are downloaded. ``MESS_DATUM`` holds the date as one number (``2024060213``), and the rain columns are depths in mm whatever ``rainfall_units`` and ``rainfall_stamp`` say: ``R1`` is the hour before the stamp, ``RWS_10`` the 10 minutes before it, and ``RS`` the precipitation day of the DWD, which runs from 05:50 UTC of the date to 05:50 UTC of the next day (07:30 local time before April 2001). A daily value is therefore placed about six hours after midnight, and it is far too coarse to resolve a storm. Other dates written as one number, such as the ``time`` column of MeteoSwiss, are read as dates as well."
+msgstr "Les fichiers de station du DWD Climate Data Center sont lus lors de leur téléchargement. ``MESS_DATUM`` tient la date comme un numéro (``2024060213``), et les colonnes de pluie sont des profondeurs en mm quelque soit ``rainfall_units`` et ``rainfall_stamp`` dire : ``R1`` est l'heure avant le timbre, ``RWS_10`` les 10 minutes avant lui, et ``RS`` le jour de précipitation du DWD, qui court de 05:50 UTC de la date à 05:50 UTC du lendemain (heure locale de 07:30 avant avril 2001). Une valeur quotidienne est donc placée environ six heures après minuit, et il est beaucoup trop grossier pour résoudre une tempête. D'autres dates écrites comme un numéro, comme la colonne ``time`` de MeteoSwiss, sont également lues comme dates."
+
+# machine translation: argos 3a37bae269bc
+msgid "The hyetograph file of TELEMAC itself, whose first line begins with ``#HYETOGRAPH``, is read as TELEMAC reads it: the two lines of its header are skipped, each further line gives a time in seconds and the rain depth in mm of the interval that ends at that time, and the first line marks where the series begins. The example case uses such a file."
+msgstr "Le fichier hyétographe de TELEMAC lui-même, dont la première ligne commence par ``#HYETOGRAPH``, est lu comme le lit TELEMAC : les deux lignes de son en-tête sont ignorées, chaque ligne supplémentaire donne un temps en secondes et la profondeur de pluie en mm de l'intervalle qui se termine à ce moment, et la première ligne marque où la série commence. L'exemple cas utilise un tel fichier."
+
+# machine translation: argos 478035a97df2
+msgid "A value of -999, the code of the DWD for a missing measurement, or an empty cell is no measurement. In the rain it stays an interval of its own, simulated as dry, and the checkup names the gaps; in the weather series it is interpolated between the readings around it. A value of the DWD covers its own hour, 10 minutes or day, so an hour or a day that a file does not have at all is a gap as well, rather than being covered by the next value. A units row under the header and a sum at the end are left out. A row inside the data whose time cannot be read stops the import with that value, because its rain could not be placed in time."
+msgstr "Une valeur de -999, le code du DWD pour une mesure manquante, ou une cellule vide n'est pas une mesure. Sous la pluie il reste un intervalle de son propre, simulé comme sec, et le checkup nomme les lacunes ; dans la série météorologique, il est interpolé entre les lectures autour de lui. Une valeur de la DWD couvre sa propre heure, 10 minutes ou jour, de sorte qu'une heure ou un jour qu'un fichier n'a pas du tout est aussi un écart, plutôt que d'être couvert par la valeur suivante. Une rangée d'unités sous l'en-tête et une somme à la fin sont laissées de côté. Une ligne à l'intérieur des données dont le temps ne peut être lu arrête l'importation avec cette valeur, parce que sa pluie ne pouvait pas être placée dans le temps."
+
+# machine translation: argos c24af88f5383
+msgid "**Soil parameters.** The soil table has one row per zone, with the columns ``zone_id``, ``texture``, ``ks_mm_h``, ``suction_m``, ``theta_s`` and ``theta_i``; a value that a row leaves empty comes from its texture class. Where no measurements exist, Rawls et al. (1983) give mean Green-Ampt parameters for the eleven USDA texture classes:"
+msgstr "**Paramètres du sol.** La table de sol a une ligne par zone, avec les colonnes ``zone_id``, ``texture``, ``ks_mm_h``, ``suction_m``, ``theta_s`` et ``theta_i``; une valeur qu'une ligne laisse vide vient de sa classe de texture. Lorsqu'il n'y a pas de mesures, Rawls et al. (1983) donnent des paramètres moyens Green-Ampt pour les onze classes de texture USDA :"
+
+# machine translation: argos 6195619c5d90
+msgid "Texture class"
+msgstr "Classe de texture"
+
+# machine translation: argos 6f8715703803
+msgid ":math:`K_s` [mm/h]"
+msgstr ":math:`K_s` [mm/h]"
+
+# machine translation: argos 7842632eaa4b
+msgid "sand"
+msgstr "sable"
+
+# machine translation: argos 9a2bcae9f5d4
+msgid "loamy sand"
+msgstr "sable humide"
+
+# machine translation: argos c8ff774a68ee
+msgid "sandy loam"
+msgstr "limon sableux"
+
+# machine translation: argos 6438696baabd
+msgid "loam"
+msgstr "loam"
+
+# machine translation: argos 4c5bd20e5121
+msgid "silt loam"
+msgstr "Limon silt"
+
+# machine translation: argos cd6b30ad92a8
+msgid "sandy clay loam"
+msgstr "limon d'argile sablonneux"
+
+# machine translation: argos 822566f694aa
+msgid "clay loam"
+msgstr "loam d'argile"
+
+# machine translation: argos 0dd4bfe1afae
+msgid "silty clay loam"
+msgstr "loam d'argile silty"
+
+# machine translation: argos a7c2ea6fa722
+msgid "sandy clay"
+msgstr "argile sablonneuse"
+
+# machine translation: argos 3eab274ae576
+msgid "silty clay"
+msgstr "argile silty"
+
+# machine translation: argos a00759ad6f56
+msgid "clay"
+msgstr "argile"
+
+# machine translation: argos 9d04d9d78044
+msgid "Wind and evaporation"
+msgstr "Vent et évaporation"
+
+# machine translation: argos 28389c5ec73d
+msgid "The weather series is a table of time and any of the columns ``wind_speed_10m``, ``wind_direction_10m`` (the direction the wind comes from), ``shortwave_radiation`` [W/m²], ``temperature`` [°C], ``relative_humidity`` [%], ``et0`` [mm/h] and ``evaporation`` [mm/h]. Its time stamps follow ``rainfall_stamp``. With ``wind: true``, aXqua turns speed and direction into the two components of the wind and writes them for TELEMAC (``atmosphere.txt``); the drag coefficient follows Flather (``wind_formula``)."
+msgstr "La série météo est un tableau du temps et des colonnes ``wind_speed_10m``, ``wind_direction_10m`` (la direction du vent vient de), ``shortwave_radiation`` [W/m2], ``temperature`` [°C], ``relative_humidity`` [%], ``et0`` [mm/h] et ``evaporation`` [mm/h]. Ses timbres horaires suivent ``rainfall_stamp``. Avec ``wind: true``, aXqua tourne la vitesse et la direction dans les deux composantes du vent et les écrit pour TELEMAC (``atmosphere.txt``) ; le coefficient de glisser suit Flather (``wind_formula``)."
+
+# machine translation: argos 075c8dda1301
+msgid "``evaporation`` takes one of four values: ``none``; ``et0``, the column et0 times ``open_water_factor``; ``penman``, the hourly FAO-56 Penman-Monteith equation from radiation, temperature, humidity and wind at the location of the catchment (Allen et al. 1998, eq. 53); and ``series``, the column evaporation as it is. The evaporation never takes more than the surface water that is there after infiltration."
+msgstr "``evaporation`` prend une des quatre valeurs : ``none``; ``et0``, la colonne et0 fois ``open_water_factor``; ``penman``, l'équation horaire FAO-56 Penman-Monteith du rayonnement, de la température, de l'humidité et du vent à l'emplacement du bassin versant (Allen et al. 1998, eq. 53) ; et ``series``, l'évaporation de la colonne telle qu'elle est. L'évaporation ne prend jamais plus que l'eau de surface qui est là après infiltration."
+
+# machine translation: argos 1c7dba960f96
+msgid "Boundaries and outlet"
+msgstr "Frontières et sortie"
+
+# machine translation: argos 15c9d70959ef
+msgid "**The outline is a wall.** The outline of a hydrology case is the drainage divide of the catchment. Along a divide, a solid wall is not an approximation but the definition of the divide: no surface water crosses it. Where the outline is not the divide, the terrain slopes out of the domain under the wall, and in the model the water collected upslope ponds against it. The hydrology checkup finds these places (:ref:`preprocessing-checkup`)."
+msgstr "**Le contour est un mur.** Le contour d'un cas d'hydrologie est le fossé de drainage du bassin versant. Le long d'une fracture, une paroi solide n'est pas une approximation mais la définition de la fracture : aucune eau de surface ne la traverse. Lorsque le contour n'est pas le fossé, le terrain descend du domaine sous le mur, et dans le modèle l'eau recueillie des étangs en pente contre lui. La vérification d'hydrologie trouve ces endroits (:ref:`preprocessing-checkup`)."
+
+# machine translation: argos e7267d3ac04a
+msgid "**The outlet.** Water leaves through the outflow lines of ``boundaries.liquid_boundaries``, drawn on the outline across the outlet of the catchment. As in a river case (:ref:`case-boundaries`), every node of the outline that is not covered by a line is a closed wall. Inflow lines are optional and carry the hydrographs of catchments upstream that are not part of the model. ``hydrology.outlet_condition`` sets what the outflow lines prescribe:"
+msgstr "**La sortie.** L'eau passe par les lignes d'écoulement de ``boundaries.liquid_boundaries``, tirées sur le contour à travers la sortie du bassin versant. Comme dans une rivière cas (:ref:`case-boundaries`), chaque nœud du contour qui n'est pas couvert par une ligne est une paroi fermée. Les lignes d'entrée sont facultatives et transportent les hydrographies des bassins versants en amont qui ne font pas partie du modèle. ``hydrology.outlet_condition`` définit ce que les lignes de sortie prescrivent :"
+
+# machine translation: argos 9ff6ff8aa383
+msgid "The default. TELEMAC's stage-discharge curve Z(Q) of each outflow line: the level at which the section of that line conveys the discharge in uniform flow, from the terrain model, the bed roughness of the section and the bed slope upstream of it. A measured rating curve (``boundaries.stage_discharge``) takes its place where one exists."
+msgstr "Par défaut. Courbe de décharge de stade Z(Q) de TELEMAC de chaque ligne de sortie : niveau auquel la section de cette ligne transmet le débit en écoulement uniforme, à partir du modèle de terrain, du lit rugosité de la section et de la pente du lit en amont. Une courbe de tarage mesuré (``boundaries.stage_discharge``) prend sa place là où il en existe."
+
+# machine translation: argos 66886bb20973
+msgid "Nothing is prescribed: depth and velocity have no gradient across the line. This holds only where the flow leaves supercritical, at a steep and smooth outlet."
+msgstr "Rien n'est prescrit : profondeur et vitesse n'ont pas de gradient à travers la ligne. Cela ne tient que là où le flux laisse supercritique, à une sortie raide et lisse."
+
+# machine translation: argos 466c6078136f
+msgid "The fixed level ``boundaries.prescribed_elevation``, for a catchment that drains into a lake or a large river."
+msgstr "Le niveau fixe ``boundaries.prescribed_elevation``, pour un bassin versant qui s'écoule dans un lac ou une grande rivière."
+
+# machine translation: argos 51c621bd8dfe
+msgid "No water is held at the outflow lines: the water leaves as over a brink, at critical flow at most, and none comes back. For an outline that is not a divide but the lower edge of a field, a terrace or a bank, over which the terrain falls away."
+msgstr "Aucune eau n'est retenue aux conduites d'écoulement : l'eau laisse comme au-dessus d'un bord, au débit critique au plus, et aucune ne revient. Pour un contour qui n'est pas un clivage mais le bord inférieur d'un champ, d'une terrasse ou d'une banque, sur lequel le terrain tombe."
+
+# machine translation: argos b5efc3060cb0
+msgid "``normal_depth`` is the counterpart of the outflow condition ``stage_discharge`` of a river case, with one difference: a river case takes the level from the rating curve at the discharge that enters the model, which for a steady run is one level, while TELEMAC moves the level of a hydrology outlet along the curve with the discharge that leaves through it."
+msgstr "``normal_depth`` est la contrepartie de l'état de sortie ``stage_discharge`` d'une rivière cas, avec une différence : une rivière cas prend le niveau de la courbe de tarage au débit qui entre dans le modèle, qui pour une course régulière est un niveau, tandis que TELEMAC déplace le niveau d'une sortie d'hydrologie le long de la courbe avec le débit qui la traverse."
+
+# machine translation: argos ba340bac224b
+msgid "A free outlet appears to be the natural choice, since zero gradient on a uniform slope is normal flow. In the tests of aXqua it was not: a channel at 2 % with a Manning coefficient of 0.03 runs a few centimeters deep near critical flow, and its free outlet filled up into a standing pond with the finite-volume kernel and became unstable with the finite-element kernel, where TELEMAC reported velocities entering through the free boundary. ``normal_depth`` drained the equilibrium discharge :math:`Q = i A` of the same catchment to 0.01 % with both kernels."
+msgstr "Une sortie libre semble être le choix naturel, puisque le gradient zéro sur une pente uniforme est le débit normal. Dans les essais de aXqua, il n'y avait pas : un chenal à 2 % avec un coefficient Manning de 0,03 court quelques centimètres de profondeur près de l'écoulement critique, et sa sortie libre rempli dans un étang debout avec le noyau à volume fini et est devenu instable avec le noyau à élément fini, où TELEMAC a signalé des vitesses entrant par la frontière libre. ``normal_depth`` a drainé l'équilibre débit :math:`Q = i A` du même bassin versant à 0,01 % avec les deux noyaux."
+
+# machine translation: argos 13ed6a9723ba
+msgid "**A field instead of a catchment.** A field, a plot or a terrace is often the object of a study, and its outline is no divide: water leaves it over whole edges, wherever the terrain falls away beyond them. These edges are outflow lines, and ``overfall`` is their condition. TELEMAC sets the depth at a node of a prescribed level to the level minus the bed elevation, and to zero where that is negative. aXqua therefore prescribes a level 1 m below the lowest node of the mesh, and every node of the lines gets a depth of zero. The finite-volume kernel takes that depth as a dry state outside the line, so water flows out of a wet cell the way it flows into dry land, and no water can come in. The finite-element kernel holds the nodes of the lines dry, which on the example field also let no water in. A Z(Q) curve does not fit such an edge, because one level for an edge that runs across the slope is the level of its lowest point only. The free outlet copies the state inside the domain to the outside, so water flows in wherever the velocity at the edge points into the domain. On the arable field of the example case ``example-agrohydrology``, a free outlet took in 2.7 m³/s through the lower edge of the field 16 minutes after the runoff began. The other edges of a field stay walls, so the field receives no run-on from its neighbors. The hydrology checkup shows whether any of its own water still crosses a wall."
+msgstr "**Un champ au lieu d'un bassin versant.** Un champ, une parcelle ou une terrasse est souvent l'objet d'une étude, et ses contours ne se divisent pas : l'eau la laisse sur des bords entiers, où le terrain tombe au-delà d'eux. Ces bords sont des lignes de sortie, et ``overfall`` est leur état. TELEMAC fixe la profondeur à un niveau prescrit à un niveau inférieur à celui de la cote du fond, et à zéro là où c'est négatif. aXqua prescrit donc un niveau 1 m au-dessous du nœud la plus basse du maillage, et chaque nœud des lignes obtient une profondeur de zéro. Le noyau à volume fini prend cette profondeur comme un état sec en dehors de la ligne, de sorte que l'eau sort d'une cellule humide la façon dont il coule dans la terre sèche, et aucune eau ne peut entrer. Le noyau à éléments finis maintient les nœuds des lignes sèches, qui sur le champ d'exemple ne laissent pas entrer d'eau. Une courbe Z(Q) ne correspond pas à un tel bord, car un niveau pour un bord qui traverse la pente est le niveau de son point le plus bas seulement. La sortie libre copie l'état à l'intérieur du domaine vers l'extérieur, de sorte que l'eau coule partout où la vitesse au bord pointe dans le domaine. Sur le champ arable de l'exemple cas ``example-agrohydrology``, une prise libre a pris 2,7 m3/s à travers le bord inférieur du champ 16 minutes après le début du ruissellement. Les autres bords d'un champ restent des murs, de sorte que le champ ne reçoit aucune course de ses voisins. Le bilan hydrologique montre si l'une de ses eaux traverse encore un mur."
+
+# machine translation: argos 8bfee42ac519
+msgid "**Why not a depth from the local velocity.** A condition that sets the depth at each outlet node from the local velocity with Manning's equation prescribes a depth that goes to zero wherever the velocity is small, which drains ponded water at the start and during the recession, and it feeds the velocity back into the prescribed depth, which oscillates in subcritical flow. The Z(Q) curve of the whole section has the same physics without that feedback."
+msgstr "**Pourquoi pas une profondeur de la vitesse locale.** Une condition qui fixe la profondeur à chaque sortie nœud à partir de la vitesse locale avec l'équation de Manning prescrit une profondeur qui va à zéro partout où la vitesse est petite, qui draine l'eau en étang au début et pendant la récession, et il nourrit la vitesse à nouveau dans la profondeur prescrite, qui oscille dans le flux subcritique. La courbe Z(Q) de toute la section a la même physique sans cette rétroaction."
+
+# machine translation: argos a72d0dc9965e
+msgid "Preprocessing"
+msgstr "Prétraitement"
+
+# machine translation: argos accebd48ef9d
+msgid "The preprocessing builds a hydrology case with the same five steps as a river case (:ref:`preprocessing-workflow`), and *Build* on the *Preprocessing* tab starts it as a job. In a terminal, the command is ``axqua <case-file>``. What the steps do in the hydrology mode:"
+msgstr "Le prétraitement construit un cas d'hydrologie avec les mêmes cinq étapes qu'un cas de rivière (:ref:`preprocessing-workflow`), et *Build* sur l'onglet *Preprocessing* commence comme une tâche. Dans un terminal, la commande est ``axqua <case-file>``. Ce que les étapes font en mode hydrologie :"
+
+# machine translation: argos e0ef904f2007
+msgid "**Terrain.** The terrain model is converted to the coordinate reference system of the case and cut to the outline."
+msgstr "**Terrain.** Le modèle de terrain est converti au système de coordonnées de référence du cas et coupé au contour."
+
+# machine translation: argos 2224ee318ac5
+msgid "**Mesh.** Gmsh (Geuzaine and Remacle 2009) divides the catchment into near-equal triangles with its Frontal-Delaunay algorithm, and each node receives its bed elevation from the terrain model, its roughness zone and its soil: :math:`K_s` (``KS``), the product of suction head and moisture deficit (``GA SUCTION A``) and the moisture deficit (``GA DELTA THETA``), which TELEMAC reads from the geometry file. As in a river case, two builds from identical inputs give meshes that differ by less than 1 % in the number of nodes (:ref:`preprocessing-meshing`)."
+msgstr "**Maillage.** Gmsh (Geuzaine et Remacle 2009) divise le bassin versant en triangles quasi égaux avec son algorithme Frontal-Delaunay, et chaque nœud reçoit sa cote du fond du modèle de terrain, sa zone de rugosité et son sol : :math:`K_s` (``KS``), le produit de la tête d'aspiration et du déficit d'humidité (``GA SUCTION A``) et le déficit d'humidité (``GA DELTA THETA``), que TELEMAC lit à partir du fichier géométrique. Comme dans une rivière cas, deux constructions à partir d'entrées identiques donnent des maillages qui diffèrent de moins de 1 % dans le nombre de nœuds (:ref:`preprocessing-meshing`)."
+
+# machine translation: argos 3a6c14b3b3e4
+msgid "**Boundaries.** The nodes on the outflow lines get the code ``5 4 4`` (a prescribed level) or, with a free outlet, ``4 4 4``; the nodes on inflow lines ``4 5 5``; all other nodes of the outline are walls (``2 2 2``)."
+msgstr "**Frontières.** Les nœuds sur les lignes de sortie obtiennent le code ``5 4 4`` (niveau prescrit) ou, avec un point de sortie libre, ``4 4 4``; les nœuds sur les lignes d'entrée ``4 5 5``; tous les autres nœuds sur les contours sont des murs (``2 2 2``)."
+
+# machine translation: argos 3042f48ec944
+msgid "**Simulation settings.** aXqua writes the forcing (rain and evaporation, ``forcing.txt``), the wind (``atmosphere.txt``), the outlet curves of ``normal_depth``, the generated infiltration routine (``user_fortran/runoff_greenampt.f``) and the steering file ``hydrology2d.cas``. No ``steady2d.cas`` is written, because a catchment has no steady state."
+msgstr "**Paramètres de simulation.** aXqua écrit le forçage (pluie et évaporation, ``forcing.txt``), le vent (``atmosphere.txt``), les courbes de sortie de ``normal_depth``, la routine d'infiltration générée (``user_fortran/runoff_greenampt.f``) et le fichier de paramètres ``hydrology2d.cas``. No ``steady2d.cas`` est écrit, car un bassin versant n'a pas de régime permanent."
+
+# machine translation: argos 8f088696e2a2
+msgid "**Measurements.** Field measurements of the case are compiled as in a river case; the calibration that reads them is not yet available for hydrology runs."
+msgstr "**Mesures** Les mesures de terrain du cas sont compilées comme dans un cas de rivière ; le calage qui les lit n'est pas encore disponible pour les pistes d'hydrologie."
+
+# machine translation: argos bec965ea7f67
+msgid "The model is written to ``axqua-case/simulation/``. As for a river case, the log file ``axqua.log`` in that folder reports the quality of the mesh with its shortest edge, which limits the time step of the whole run, and the soil that each zone received."
+msgstr "Le modèle est écrit à ``axqua-case/simulation/``. Quant à un cas fluvial, le fichier journal ``axqua.log`` dans ce dossier rapporte la qualité du maillage avec son bord le plus court, qui limite le pas de temps de toute la course, et le sol que chaque zone a reçu."
+
+# machine translation: argos 16d6287e7e26
+msgid "**The hydrology checkup.** Before the build, the hydrology checkup examines the data of the case; it is described with the other checks in :ref:`preprocessing-checkup`. Its findings are shown in the box *Hydrology checkup* of the *Preprocessing* tab and on the sub-tab *Simulations > Hydrology*, and it runs at the start of every build, where an error stops the build. ``axqua check <case-file>`` includes it without the analysis of the terrain model, which ``axqua hydrology check <case-file>`` and the button *Check* add. The checkup:"
+msgstr "**Le contrôle d'hydrologie.** Avant la construction, le contrôle d'hydrologie examine les données du cas ; il est décrit avec les autres vérifications dans :ref:`preprocessing-checkup`. Ses résultats sont affichés dans la boîte *Hydrology checkup* de l'onglet *Preprocessing* et sur le sous-tab *Simulations > Hydrology*, et il fonctionne au début de chaque construction, où une erreur arrête la construction. ``axqua check <case-file>`` comprend sans l'analyse du modèle de terrain, qui ``axqua hydrology check <case-file>`` et le bouton *Check* add. Le contrôle :"
+
+# machine translation: argos 4992b79a302b
+msgid "reads the rain series and the weather series, and names gaps, an unusually intense rain, rain from a reanalysis and weather that does not cover the run;"
+msgstr "lit la série pluie et la série météo, et nomme les lacunes, une pluie exceptionnellement intense, la pluie d'une réanalyse et la météo qui ne couvre pas la course ;"
+
+# machine translation: argos 93c97bf5bac0
+msgid "checks the soil zones and their values against the texture classes of Rawls et al. (1983), and names a missing initial water content;"
+msgstr "vérifie les zones de sol et leurs valeurs par rapport aux classes de texture de Rawls et al. (1983) et nomme une teneur initiale en eau manquante ;"
+
+# machine translation: argos 4c265a24c98d
+msgid "names a closed catchment without an outflow line, a free outlet, the finite-element kernel and a drain time that is short for the size of the catchment, and estimates the number of elements of the mesh;"
+msgstr "désigne un bassin fermé sans ligne de sortie, une sortie libre, le noyau à éléments finis et un temps de drainage court pour la taille du bassin, et évalue le nombre d'éléments du maillage ;"
+
+# machine translation: argos bf7c13985738
+msgid "routes the water of every cell of the terrain model to the outline (priority flood, Barnes et al. 2014) and names every stretch of a wall over which a large area drains, where the outline does not follow the divide;"
+msgstr "dirige l'eau de chaque cellule du modèle de terrain jusqu'au contour (inondation prioritaire, Barnes et al. 2014) et nomme chaque tronçon d'un mur sur lequel une grande zone s'écoule, où le contour ne suit pas le fossé ;"
+
+# machine translation: argos 2b2b99763501
+msgid "fills the closed depressions of the terrain model to their spill level and names the largest ones with their volume, because a depression keeps the rain until it is full. That is right for a pond and wrong where the terrain model blocks a culvert or the opening of a bridge, which then has to be cut into the terrain model or modeled as an outflow line."
+msgstr "remplit les dépressions fermées du modèle de terrain à leur niveau de déversement et nomme les plus grandes avec leur volume, parce qu'une dépression garde la pluie jusqu'à ce qu'il soit plein. C'est la bonne chose pour un étang et un mauvais endroit où le modèle de terrain bloque un ponceau ou l'ouverture d'un pont, qui doit ensuite être découpé dans le modèle de terrain ou modélisé comme une ligne de sortie."
+
+# machine translation: argos 39f2e1501f12
+msgid "Every finding names its remedy, and :doc:`../troubleshooting/warnings` and :doc:`../troubleshooting/errors` explain each of them."
+msgstr "Chaque trouvaille nomme son remède, et :doc:`../troubleshooting/warnings` et :doc:`../troubleshooting/errors` explique chacun d'eux."
+
+# machine translation: argos 221931f17aa5
+msgid "Run and results"
+msgstr "Exécution et résultats"
+
+# machine translation: argos 07d0a367529e
+msgid "The run starts dry and lasts until ``drain_time`` after the last rain. *Submit* on the sub-tab *Simulations > Hydrology* runs it as a job, which continues when QGIS is closed (:ref:`plugin-job-execution`); in a terminal, the command is ``axqua submit <case-file> --kind hydrology``. The column *Progress* of the job list shows the simulated share of the storm. There is no steady state and no hotstart: every run starts from the dry catchment and replaces the result of the previous one, so copy the folder ``axqua-case/`` before a run whose predecessor is to be kept."
+msgstr "La course commence à sec et dure jusqu'à ``drain_time`` après la dernière pluie. *Submit* sur le sous-tab *Simulations > Hydrology* l'exécute comme une tâche, qui se poursuit lorsque le QGIS est fermé (:ref:`plugin-job-execution`) ; dans un terminal, la commande est ``axqua submit <case-file> --kind hydrology``. La colonne *Progress* de la liste tâche montre la part simulée de la tempête. Il n'y a pas de régime permanent et pas de hotstart : chaque course part du bassin versant sec et remplace le résultat du précédent, alors copiez le dossier ``axqua-case/`` avant une course dont le prédécesseur doit être conservé."
+
+# machine translation: argos f07de55a6b9a
+msgid "The sub-tab Hydrology of the tab Simulations"
+msgstr "Le sous-tab Hydrologie de l'onglet Simulations"
+
+# machine translation: argos 32c58093ec5c
+msgid "The sub-tab *Hydrology* of the tab *Simulations*. (1) The sub-tab. (2) *Build* prepares the case, *Submit* runs it as a job. (3) The data of the case, with the position and the area of the catchment. (4) The findings of the hydrology checkup. (5) *Data wizard...* opens the wizard (figure above); *Check* runs the checkup again, including the analysis of the terrain model."
+msgstr "Le sous-tab *Hydrology* de l'onglet *Simulations*. (1) Le sous-tab. (2) *Build* prépare le cas, *Submit* fonctionne comme une tâche. (3) Les données du cas, avec la position et la zone du bassin versant. (4) Les résultats du contrôle d'hydrologie. (5) *Data wizard...* ouvre l'assistant (figure ci-dessus) ; *Check* effectue à nouveau le contrôle, y compris l'analyse du modèle de terrain."
+
+# machine translation: argos 99c0e2e0298e
+msgid "After the run, aXqua writes into ``postprocessing/hydrology``:"
+msgstr "Après la course, aXqua écrit dans ``postprocessing/hydrology``:"
+
+# machine translation: argos 8fa2e6047cbc
+msgid "``hydrograph.csv`` and ``hydrograph.png``: the rain above, the discharge at the outlet below, over one time axis;"
+msgstr "``hydrograph.csv`` et ``hydrograph.png``: la pluie au-dessus, le débit à la sortie au-dessous, sur un axe temporel ;"
+
+# machine translation: argos f17c998801a9
+msgid "``water-balance.csv``: rain, inflow, outflow, infiltrated and evaporated volumes, the water left on the catchment, TELEMAC's mass error, the runoff coefficient (outflow over rain) and the peak discharge with its time."
+msgstr "``water-balance.csv``: la pluie, l'écoulement, l'écoulement, les volumes infiltrés et évaporés, l'eau laissée sur le bassin versant, l'erreur de masse de TELEMAC, le coefficient de ruissellement (écoulement sur la pluie) et le pic débit avec son temps."
+
+# machine translation: argos c7962c6a628e
+msgid "The volumes come from TELEMAC's own water balance and from the line ``AXQUA HYDROLOGY`` that the generated routine writes into the listing. The water balance takes the place of the flux balance of a river case (:ref:`hydraulics-dry-runs`): rain and inflow equal infiltration, evaporation, outflow and the water left on the catchment, and the remainder is the error of the volume. On the test catchments and the example case it closes to less than 0.001 % of the rain. Water left on the catchment at the end points to depressions or to a drain time that was too short."
+msgstr "Les volumes proviennent du bilan hydrique propre de TELEMAC et de la ligne ``AXQUA HYDROLOGY`` que la routine générée écrit dans la liste. Le bilan d'eau remplace le bilan de flux d'un cas (:ref:`hydraulics-dry-runs`) : pluie et écoulement égale infiltration, évaporation, écoulement et l'eau laissée sur le bassin versant, et le reste est l'erreur du volume. Sur les bassins d'essai et l'exemple cas il ferme à moins de 0,001 % de la pluie. L'eau laissée sur le bassin versant à la fin indique des dépressions ou un temps de drainage trop court."
+
+# machine translation: argos 49511495db36
+msgid "**Maps.** *Load results* adds the water depth, the velocity, the infiltrated depth and TELEMAC's high water mark and highest velocity of the run to QGIS, with the styles of :ref:`help-postprocessing-qgis`. The map of the water depth shows water from 1 mm on, because the sheet flow of a hillslope is millimeters deep; a river case starts at 1 cm. The threshold is ``hydrodynamics.wet_depth``, which a case may set to another value. TELEMAC itself records its maxima only where the water is deeper than 1 cm (``preres_telemac2d.f``), so that on a hillslope the high water mark and the highest velocity show the furrows, channels and ponds, and not the sheet flow between them. The result holds one map every ``printout_period``. The *Temporal Controller* of QGIS steps through them, and *aXqua > Export movie* turns them into a video of the storm (:ref:`help-postprocessing-qgis`). For ParaView and VisIt, ``axqua export <case-file> --result r2d-hydrology.slf`` converts the result into VTK files (:ref:`Export of TELEMAC results <export-telemac-results>`)."
+msgstr "**Cartes.** *Load results* ajoute la hauteur d'eau, la vitesse, la profondeur infiltrée et la marque d'eau élevée de TELEMAC et la vitesse la plus élevée de la course à QGIS, avec les styles de :ref:`help-postprocessing-qgis`. La carte de la hauteur d'eau montre l'eau à partir de 1 mm, parce que le flux de feuille d'une pente de collines est de millimètres de profondeur ; une rivière cas commence à 1 cm. Le seuil est ``hydrodynamics.wet_depth``, qu'un cas peut fixer à une autre valeur. TELEMAC n'enregistre ses maxima que lorsque l'eau est plus profonde que 1 cm (``preres_telemac2d.f``), de sorte que sur une pente de collines la pointe de l'eau et la vitesse la plus élevée montrent les sillons, les chenaux et les étangs, et non le flux de feuille entre eux. Le résultat contient une carte à chaque ``printout_period``. Le *Temporal Controller* de QGIS passe par eux, et *aXqua > Export movie* les transforme en une vidéo de la tempête (:ref:`help-postprocessing-qgis`). Pour ParaView et VisIt, ``axqua export <case-file> --result r2d-hydrology.slf`` convertit le résultat en fichiers VTK (:ref:`Exportation des résultats de TELEMAC <export-telemac-results>`)."
+
+# machine translation: argos efc2d6dda428
+msgid "**Disk space.** *Clean Up* (:ref:`help-cleanup`) offers to remove the earlier time steps of results. For a river case these are the filling of the reach; for a hydrology case they are the storm itself. The hydrograph and the water balance are kept, because they are read from the listing, and the high water mark and the highest velocity are kept in the last time step, but the maps of the storm are lost. Keep every 5th or 10th time step rather than only the last one."
+msgstr "**L'espace de disque.** *Clean Up* (:ref:`help-cleanup`) propose de supprimer le pas de temps antérieur des résultats. Pour un cas, il s'agit du remplissage du tronçon ; pour un cas d'hydrologie, il s'agit de la tempête elle-même. L'hydrographe et le bilan hydrique sont conservés, parce qu'ils sont lus dans la liste, et la marque d'eau élevée et la vitesse la plus élevée sont conservés dans le dernier pas de temps, mais les cartes de la tempête sont perdues. Gardez tous les 5 ou 10 ans pas de temps plutôt que le dernier."
+
+# machine translation: argos b911d20b21c3
+msgid "Mesh resolution, calibration and limits"
+msgstr "Résolution du maillage, calage et limites"
+
+# machine translation: argos b55f49c132db
+msgid "**Mesh resolution.** The mesh convergence study of aXqua (:doc:`mesh-convergence`) compares steady runs at the measurement points and is therefore not available in the hydrology mode: a storm has no steady state. The question it answers remains, because the mesh decides which flow paths a catchment model resolves (Caviedes-Voullième et al. 2012). It is answered with the same refinement ratio of 1.3 that the study uses (Celik et al. 2008). Copy the case file, set ``mesh.size_scale: 0.77`` in the copy (all edge lengths divided by 1.3) and a ``project.sim_dir`` of its own, build and run it, and compare the runoff coefficient, the peak discharge and its time with those of the original mesh. If they change by less than the accepted tolerance (5 % in :doc:`mesh-convergence`), the coarser mesh is fine enough. With a third mesh, refined once more, the grid convergence index of Celik et al. (2008) can be computed for each of these quantities. Each refinement by 1.3 costs about 2.2 times the computing time of the previous mesh."
+msgstr "**Résolution du maillage.** L'étude de convergence en maillage de aXqua (:doc:`mesh-convergence`) compare les parcours réguliers aux points de mesure et n'est donc pas disponible en mode hydrologie : une tempête n'a pas de régime permanent. La question qu'il répond reste, car le maillage décide quels flux un modèle de bassin versant résout (Caviedes-Voullième et al. 2012). Il est répondu avec le même ratio de raffinement de 1,3 que l'étude utilise (Celik et coll., 2008). Copier le fichier de cas, définir ``mesh.size_scale: 0.77`` dans la copie (toutes les longueurs de bord divisées par 1,3) et un ``project.sim_dir`` de sa propre, construire et exécuter, et comparer le coefficient de ruissellement, le pic débit et son temps avec ceux du maillage original. S'ils changent de moins que la tolérance acceptée (5 % à :doc:`mesh-convergence`), le maillage grossier est assez fin. Avec un troisième maillage, affiné une fois de plus, l'indice de convergence de la grille de Celik et al. (2008) peut être calculé pour chacune de ces quantités. Chaque raffinement de 1,3 coûte environ 2,2 fois le temps de calcul du précédent maillage."
+
+# machine translation: argos 69fd1d737631
+msgid "**Calibration.** The Bayesian calibration with HydroBayesCal (:doc:`calibration-validation`) adjusts parameters of steady river runs to measured depths and velocities. It is not yet available for hydrology runs, and the plugin offers no calibration for a case in the hydrology mode. A measured outlet hydrograph is compared with ``hydrograph.csv`` instead. The parameters to adjust first are the initial water content and :math:`K_s`, which control how much rain becomes runoff, and then the roughness, which controls when the runoff arrives at the outlet. Fernández-Pato et al. (2016) calibrated Green-Ampt parameters of a shallow water model in this way and found that the calibrated values depend on the initial conditions of the catchment and on the rain pattern of the event. Parameters calibrated for one storm should therefore be validated with another storm, in the same way as a river model is validated in another flow situation (:doc:`calibration-validation`)."
+msgstr "**Calage.** Le calage bayésien avec HydroBayesCal (:doc:`calibration-validation`) ajuste les paramètres des cours d'eau réguliers aux profondeurs et vitesses mesurées. Il n'est pas encore disponible pour les parcours en hydrologie, et l'extension n'offre aucun calage pour un cas en mode hydrologie. Un hydrographe de sortie mesuré est comparé à ``hydrograph.csv`` plutôt. Les paramètres à ajuster d'abord sont la teneur initiale en eau et :math:`K_s`, qui contrôlent la quantité de pluie devient ruissellement, puis la rugosité, qui contrôle quand le ruissellement arrive à la sortie. Fernández-Pato et al. (2016) ont étalonné les paramètres Green-Ampt d'un modèle d'eau peu profonde de cette façon et ont constaté que les valeurs calibrées dépendent des conditions initiales du bassin versant et du schéma de pluie de l'événement. Les paramètres étalonnés pour une tempête doivent donc être validés avec une autre tempête, de la même manière qu'un modèle de rivière est validé dans une autre situation d'écoulement (:doc:`calibration-validation`)."
+
+# machine translation: argos 9f54b64a8e84
+msgid "**Limits.** The hydrology mode simulates surface runoff with infiltration. It does not simulate flow below the surface: water that infiltrates is gone from the model and does not return as interflow or groundwater discharge. A catchment whose streams carry a base flow therefore receives that base flow through an inflow line. Soil water does not evaporate (:ref:`hydrology-concept`), the rain is uniform in space, and snow is not represented. Gridded radar rain is planned for a later version."
+msgstr "**Limites** Le mode hydrologie simule le ruissellement de surface avec infiltration. Il ne simule pas l'écoulement sous la surface : l'eau qui s'infiltre est partie du modèle et ne retourne pas sous forme d'écoulement ou d'eau souterraine débit. Un bassin versant dont les cours d'eau transportent un débit de base reçoit donc ce débit de base à travers une ligne d'écoulement. L'eau du sol ne s'évapore pas (:ref:`hydrology-concept`), la pluie est uniforme dans l'espace, et la neige n'est pas représentée. La pluie radar est prévue pour une version ultérieure."
+
+# machine translation: argos c2a8956f275c
+msgid "**References**"
+msgstr "**Références**"
