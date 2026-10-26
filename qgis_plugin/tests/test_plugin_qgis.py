@@ -259,6 +259,59 @@ def test_a_mesh_variable_really_is_styled(project, tmp_path):
     assert added[0].rendererSettings().activeScalarDatasetGroup() == 0
 
 
+def _with_datasets(layer, folder: Path, values: dict):
+    """Add scalar groups ``name -> one value per node`` (one time step) to *layer*."""
+    for name, row in values.items():
+        path = folder / f"{name.lower().replace(' ', '-')}.dat"
+        path.write_text("DATASET\nOBJTYPE \"mesh2d\"\nBEGSCL\nND 4\nNC 2\n"
+                        f"NAME \"{name}\"\nTS 0 0.0\n" + "".join(f"{v:.4f}\n" for v in row)
+                        + "ENDDS\n", encoding="utf-8")
+        assert layer.addDatasets(str(path)), name
+    return layer
+
+
+def test_a_mesh_entry_without_a_style_shows_its_own_variable(project, tmp_path):
+    """The infiltrated depth of a hydrology run has no style of its own. It used to be
+    left unstyled, and QGIS drew the first group of the file under its name."""
+    from qgis.core import QgsMeshDatasetIndex, QgsMeshLayer
+
+    layer = QgsMeshLayer(str(_write_mesh(tmp_path)), "result", "mdal")
+    _with_datasets(layer, tmp_path, {"INFILTRATED": (0.010, 0.012, 0.014, 0.016)})
+    loader = result_loader.ResultLoader(project)
+    loader._style(layer, result_loader.ResultItem(name="infiltrated depth", path=tmp_path,
+                                                  kind="mesh", variable="INFILTRATED"))
+    settings = layer.rendererSettings()
+    group = settings.activeScalarDatasetGroup()
+    assert layer.datasetGroupMetadata(QgsMeshDatasetIndex(group)).name() == "INFILTRATED"
+    scalar = settings.scalarSettings(group)
+    assert (scalar.classificationMinimum(), scalar.classificationMaximum()) == pytest.approx(
+        (0.010, 0.016))
+    assert loader.warnings == []
+
+
+def test_the_high_water_mark_is_drawn_as_the_highest_water_depth(project, tmp_path):
+    """TELEMAC's high water mark equals the bed where no water was recorded, so drawn as
+    a level it repeats the terrain. The layer shows the mark minus the bed."""
+    from qgis.core import QgsMeshDatasetIndex, QgsMeshLayer
+
+    layer = QgsMeshLayer(str(_write_mesh(tmp_path)), "result", "mdal")
+    _with_datasets(layer, tmp_path, {"BOTTOM": (400.0, 401.0, 402.0, 403.0),
+                                     "HIGH WATER MARK": (400.0, 401.05, 402.0, 403.2)})
+    loader = result_loader.ResultLoader(project, min_depth=0.001)
+    # the result list of a run of aXqua 1.1.0 names the variable only
+    for style in ("high-water", ""):
+        loader._style(layer, result_loader.ResultItem(name="high water mark", path=tmp_path,
+                                                      kind="mesh", style=style,
+                                                      variable="HIGH WATER MARK"))
+        group = layer.rendererSettings().activeScalarDatasetGroup()
+        meta = layer.datasetGroupMetadata(QgsMeshDatasetIndex(group))
+        assert meta.name() == result_loader.HIGHEST_DEPTH
+        assert (meta.minimum(), meta.maximum()) == pytest.approx((0.0, 0.2), abs=1e-4)
+    assert loader.warnings == []
+    assert sum(layer.datasetGroupMetadata(QgsMeshDatasetIndex(i)).name()
+               == result_loader.HIGHEST_DEPTH for i in layer.datasetGroupsIndexes()) == 1
+
+
 def _result_layer(folder: Path, steps: int = 1):
     """The fixture mesh with a water depth and a velocity, as a result carries them,
     at *steps* time steps. The values grow from step to step, so that the picture of

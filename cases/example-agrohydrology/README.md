@@ -117,7 +117,7 @@ Select the completed job in the list and click *Load results* below the list. QG
 | *TELEMAC result (hydrology)* | water depth in blue; cells with less than 1 mm of water are transparent |
 | *TELEMAC result (hydrology) - velocity* | flow velocity from yellow (slow) to purple (fast) |
 | *TELEMAC result (hydrology) - infiltrated depth* | the depth that has infiltrated since the start [m] |
-| *TELEMAC result (hydrology) - high water mark* | the highest water level of the run [m above sea level], where the water was deeper than 1 cm |
+| *TELEMAC result (hydrology) - high water mark* | the highest water depth of the run [m]: TELEMAC's high water mark minus the bed, where the water was deeper than 1 cm (the level itself is the dataset *high water mark* of the layer) |
 | *TELEMAC result (hydrology) - highest velocity* | the highest flow velocity of the run, where the water was deeper than 1 cm |
 | *Mesh geometry* | the mesh with the bed elevation and the soil |
 

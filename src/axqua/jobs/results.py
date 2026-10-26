@@ -34,6 +34,8 @@ __all__ = ["ResultEntry", "ResultManifest", "read_manifest", "write_manifest"]
 #: ignore, not a contract it must satisfy, so a new style never breaks an older plugin.
 STYLE_DEPTH = "water-depth"
 STYLE_VELOCITY = "velocity"
+#: TELEMAC's high water mark (a level), drawn as the highest water depth: the mark minus the bed, which is zero where TELEMAC recorded no water.
+STYLE_HIGH_WATER = "high-water"
 STYLE_NONE = ""
 
 

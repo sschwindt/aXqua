@@ -144,6 +144,21 @@ def depth_settings(style: DepthStyle) -> QgsMeshRendererScalarSettings:
     return settings
 
 
+#: A variable of its own range (the infiltrated depth, a time of arrival): *viridis*.
+RANGE_STOPS = ("#fde725", "#5ec962", "#21918c", "#3b528b", "#440154")
+
+
+def range_settings(minimum: float, maximum: float,
+                   stops: tuple[str, ...] = RANGE_STOPS) -> QgsMeshRendererScalarSettings:
+    """Scalar settings over the variable's own range, nothing transparent."""
+    if not maximum > minimum:
+        maximum = minimum + 1e-6
+    settings = QgsMeshRendererScalarSettings()
+    settings.setClassificationMinimumMaximum(minimum, maximum)
+    settings.setColorRampShader(_shader(minimum, maximum, stops))
+    return settings
+
+
 def velocity_scalar_settings(style: VelocityStyle) -> QgsMeshRendererScalarSettings:
     settings = QgsMeshRendererScalarSettings()
     settings.setClassificationMinimumMaximum(0.0, style.maximum)
