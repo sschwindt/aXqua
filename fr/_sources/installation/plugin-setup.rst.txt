@@ -10,16 +10,16 @@ The plugin setup contains everything that describes the **computer** and not the
 
    .. raw:: html
 
-      <iframe
-        src="https://www.youtube.com/embed/gK83Q8bJCHI"
-        title="Installing aXqua: QGIS Plugin and Python Backend"
-        width="560" height="315"
-        style="width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0;"
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen>
-      </iframe>
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="Installing aXqua: QGIS Plugin and Python Backend"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
 
    `Open the tutorial on YouTube <https://youtu.be/gK83Q8bJCHI>`_.
 
