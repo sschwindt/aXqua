@@ -15,5 +15,5 @@ documentation - `docs/` is - and nothing in the code reads them.
   system existed. Superseded by detached jobs (`axqua submit`), kept because the
   reasoning about SIGHUP and RDP is still correct.
 
-`docs/restructuring-instructions.md` is **not** here on purpose: it is live, and
-`tests/test_docs_outline.py` checks the documentation against the outline it prescribes.
+`docs/restructuring-instructions.md` was removed on 2026-10-27; the outline it prescribed is pinned by
+`tests/test_docs_outline.py`.

@@ -131,6 +131,8 @@ html_theme_options = {
     "sticky_navigation": True,
 }
 html_css_files = ["axqua.css"]
+# local copies of the documentation show a linked thumbnail instead of a YouTube player
+html_js_files = ["video-embed.js"]
 html_baseurl = os.environ.get(
     "READTHEDOCS_CANONICAL_URL", "https://axqua.eu/"
 )

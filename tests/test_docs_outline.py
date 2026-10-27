@@ -1,7 +1,7 @@
 """The documentation outline is a contract, so it is pinned here.
 
 The outline of sections, subsections and subsubsections was prescribed
-(``docs/restructuring-instructions.md``), and two other things are built on it: the
+(``docs/restructuring-instructions.md``, removed on 2026-10-27 once this file had taken it over), and two other things are built on it: the
 navigation menu, which lists the sections and opens their subsections on demand, and the QGIS plugin,
 whose tabs open the documentation at the ``help-`` labels. A heading that is renamed or
 moved in passing would break both without any build error, so the structure is read back
