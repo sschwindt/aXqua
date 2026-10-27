@@ -9,6 +9,7 @@
   <title>Configuration de l’extension &mdash; aXqua</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
 
@@ -17,11 +18,16 @@
     <link rel="canonical" href="https://axqua.eu/fr/installation/plugin-setup.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=740f9163"></script>
+      <script src="../_static/documentation_options.js?v=d077157a"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>let toggleHintShow = 'Cliquez pour afficher';</script>
+      <script>let toggleHintHide = 'Cliquez pour masquer';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=b8b12719"></script>
       <script src="../_static/translations.js?v=e6b791cb"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Recherche" href="../search.html" />
@@ -349,6 +355,19 @@
   <section id="plugin-setup">
 <span id="help-configuration"></span><h1>Configuration de l’extension<a class="headerlink" href="#plugin-setup" title="Lien vers cette rubrique"></a></h1>
 <p>La configuration extension contient tout ce qui décrit le <strong>ordinateur</strong> et non le projet de simulation, c’est-à-dire où Python et le logiciel de simulation sont installés, et où des simulations seront écrites. Ces réglages <strong>sont effectués une fois par ordinateur</strong>. Ils sont séparés de la description d’un tronçon (<a class="reference internal" href="../usage/case-setup.html"><span class="doc">Configuration de aXqua cas</span></a>), afin qu’un cas puisse être copié sur un autre ordinateur sans changement.</p>
+<div class="tip dropdown admonition">
+<p class="admonition-title">Regardez ce tutoriel sur YouTube</p>
+<iframe
+  src="https://www.youtube.com/embed/gK83Q8bJCHI"
+  title="Installing aXqua: QGIS Plugin and Python Backend"
+  width="560" height="315"
+  style="width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0;"
+  loading="lazy"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen>
+</iframe><p><a class="reference external" href="https://youtu.be/gK83Q8bJCHI">Ouvrez le tutoriel sur YouTube</a>.</p>
+</div>
 <section id="plugin-profile">
 <span id="id1"></span><h2>Profil d’extension<a class="headerlink" href="#plugin-profile" title="Lien vers cette rubrique"></a></h2>
 <p>Tous les paramètres d’un ordinateur sont stockés dans un seul fichier, le <strong>profil</strong>. Son nom se termine par <code class="docutils literal notranslate"><span class="pre">.axq-profile</span></code>. Le profil par défaut est le fichier <code class="docutils literal notranslate"><span class="pre">default.axq-profile</span></code> dans la configuration aXqua dossier de l’utilisateur (<code class="docutils literal notranslate"><span class="pre">~/.config/axqua/</span></code> sur Linux). Chaque compte utilisateur d’un ordinateur a son propre profil.</p>

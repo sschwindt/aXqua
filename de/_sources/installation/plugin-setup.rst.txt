@@ -5,6 +5,24 @@ Plugin setup
 
 The plugin setup contains everything that describes the **computer** and not the simulation project, that is, where Python and the simulation software are installed, and where simulations will be written. These **settings are made once per computer**. They are kept apart from the description of a reach (:doc:`../usage/case-setup`), so that a case can be copied to another computer without changes.
 
+.. admonition:: Watch this Tutorial on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <iframe
+        src="https://www.youtube.com/embed/gK83Q8bJCHI"
+        title="Installing aXqua: QGIS Plugin and Python Backend"
+        width="560" height="315"
+        style="width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0;"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
+
+   `Open the tutorial on YouTube <https://youtu.be/gK83Q8bJCHI>`_.
+
 .. _plugin-profile:
 
 Plugin profile

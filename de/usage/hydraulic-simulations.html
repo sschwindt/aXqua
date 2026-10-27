@@ -9,6 +9,7 @@
   <title>Hydraulische Simulationen &mdash; aXqua</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=9c3e77be" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../_static/axqua.css?v=1f25626f" />
 
@@ -17,11 +18,16 @@
     <link rel="canonical" href="https://axqua.eu/de/usage/hydraulic-simulations.html" />
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=81fca66b"></script>
+      <script src="../_static/documentation_options.js?v=25842272"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script>let toggleHintShow = 'Klicken zum Anzeigen';</script>
+      <script>let toggleHintHide = 'Klicken zum Ausblenden';</script>
+      <script>let toggleOpenOnPrint = 'true';</script>
+      <script src="../_static/togglebutton.js?v=b8b12719"></script>
       <script src="../_static/translations.js?v=9bf55d28"></script>
       <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Stichwortverzeichnis" href="../genindex.html" />
     <link rel="search" title="Suche" href="../search.html" />
@@ -363,6 +369,19 @@
 </section>
 <section id="telemac-dry-runs-2d-3d">
 <span id="help-hydraulics-telemac"></span><span id="hydraulics-dry-runs"></span><h2>TELEMAC Trockenläufe 2D/3D<a class="headerlink" href="#telemac-dry-runs-2d-3d" title="Link to this heading"></a></h2>
+<div class="tip dropdown admonition">
+<p class="admonition-title">Dieses Tutorial auf YouTube ansehen</p>
+<iframe
+  src="https://www.youtube.com/embed/gK83Q8bJCHI"
+  title="Installing aXqua: QGIS Plugin and Python Backend"
+  width="560" height="315"
+  style="width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0;"
+  loading="lazy"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allowfullscreen>
+</iframe><p><a class="reference external" href="https://youtu.be/2qWOA7l5xeg">Öffnen Sie das Tutorial auf YouTube</a>.</p>
+</div>
 <p>Ein <strong>trockener Lauf</strong> ist eine Simulation, die von einem trockenen Flusssohle (<a class="reference internal" href="case-setup.html#case-initialization"><span class="std std-ref">Ausgangsbedingungen</span></a>) ausgeht.</p>
 <p><strong>2D.</strong> Klicken Sie nach Preprocessing auf <em>Submit</em> in der Box <em>Steady 2D</em> auf der Registerkarte <em>Simulations &gt; Baseline (Telemac)</em> des Plugins. Der Lauf erscheint in der Jobliste unterhalb der Tabs mit seinem Fortschritt. In einem Terminal lautet der Befehl:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind steady

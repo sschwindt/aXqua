@@ -28,6 +28,24 @@ The warm-up is active by default and should not be disabled. Without it, OpenFOA
 TELEMAC dry runs 2D/3D
 ----------------------
 
+.. admonition:: Watch this Tutorial on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <iframe
+        src="https://www.youtube.com/embed/gK83Q8bJCHI"
+        title="Installing aXqua: QGIS Plugin and Python Backend"
+        width="560" height="315"
+        style="width: 100%; height: auto; aspect-ratio: 16 / 9; border: 0;"
+        loading="lazy"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
+
+   `Open the tutorial on YouTube <https://youtu.be/2qWOA7l5xeg>`_.
+
 A **dry run** is a simulation that starts from a dry riverbed (:ref:`case-initialization`).
 
 **2D.** After preprocessing, click *Submit* in the box *Steady 2D* on the tab *Simulations > Baseline (Telemac)* of the plugin. The run appears in the job list below the tabs with its progress. In a terminal, the command is:
