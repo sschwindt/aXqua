@@ -4,7 +4,7 @@ qgisMinimumVersion=3.44
 qgisMaximumVersion=4.99
 description=Set up, run and monitor TELEMAC and OpenFOAM models of free-surface water bodies (rivers, lakes, reservoirs, hydraulic structures) from QGIS, with jobs that keep running after QGIS is closed.
 about=aXqua turns geodata into a calibration-ready hydro- and morphodynamic model (TELEMAC-2D/3D with GAIA, or an OpenFOAM interFoam free-surface case) and drives it through a persistent job runner. Simulations are launched as detached system jobs, so they survive closing QGIS, and are rediscovered with their live state when you reopen it. Results load back as mesh, raster and vector layers, with depth and velocity styling applied to the meshes. The plugin drives the aXqua command-line tool, installed separately with 'pip install axqua', and needs a working TELEMAC and/or OpenFOAM installation.
-version=1.1.0
+version=1.1.1
 author=Sebastian Schwindt
 email=schwindt.water@gmail.com
 
@@ -25,7 +25,13 @@ deprecated=False
 server=False
 hasProcessingProvider=yes
 
-changelog=1.1.0
+changelog=1.1.1
+    - Load results: the layers "infiltrated depth" and "high water mark" of a
+      hydrology run showed the water depth of the first time step. Each now shows
+      its own variable, and the high water mark is drawn as the highest water
+      depth (the mark minus the bed). Results of aXqua 1.1.0 are read too.
+    - The aXqua program is published on PyPI by the release workflow.
+    1.1.0
     - Hydrology mode: rainfall-runoff over a catchment or a field with TELEMAC-2D
       and Green-Ampt infiltration, rain uniform in space, wind and evaporation.
       The sub-tab Simulations > Hydrology runs it, a data wizard fetches or reads
