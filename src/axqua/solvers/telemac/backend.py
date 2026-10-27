@@ -24,7 +24,7 @@ from typing import Any
 from axqua.core import errors
 from axqua.core.capabilities import Capability
 from axqua.core.registry import BaseBackend
-from axqua.jobs.results import STYLE_DEPTH, STYLE_VELOCITY
+from axqua.jobs.results import STYLE_DEPTH, STYLE_HIGH_WATER, STYLE_VELOCITY
 
 log = logging.getLogger("axqua.solvers.telemac.backend")
 
@@ -575,7 +575,7 @@ class TelemacBackend(BaseBackend):
                        kind="mesh", variable="INFILTRATED")
             # TELEMAC's maxima over the run (MAXZ, MAXV in the printouts)
             ctx.record("TELEMAC result (hydrology) - high water mark", hydrology,
-                       kind="mesh", variable="HIGH WATER MARK")
+                       kind="mesh", style=STYLE_HIGH_WATER, variable="HIGH WATER MARK")
             ctx.record("TELEMAC result (hydrology) - highest velocity", hydrology,
                        kind="mesh", style=STYLE_VELOCITY, variable="HIGHEST VELOCITY")
         ctx.record("Mesh geometry", cfg.model_path(cfg.geometry_slf), kind="mesh")

@@ -344,7 +344,8 @@ class ResultLoader:
 
     def _style(self, layer, item: ResultItem) -> None:
         from qgis.core import QgsMeshLayer, QgsVectorLayer
-        if not item.style:
+        # a mesh entry that names its variable is shown with that variable, also without a style
+        if not item.style and not (item.variable and isinstance(layer, QgsMeshLayer)):
             return
         try:
             if isinstance(layer, QgsMeshLayer):
@@ -364,6 +365,11 @@ class ResultLoader:
 
     def _style_mesh(self, layer, item: ResultItem) -> None:
         from . import styles
+        # the result lists of aXqua 1.1.0 name the variable of the high water mark without its style
+        if item.style == STYLE_HIGH_WATER or (
+                not item.style and item.variable.strip().upper() == "HIGH WATER MARK"):
+            self._style_high_water(layer, item)
+            return
         index = _dataset_index(layer, item.variable)
         if index is None:
             self.warnings.append(
@@ -404,7 +410,34 @@ class ResultLoader:
                 renderer.setVectorSettings(vector_index,
                                            styles.velocity_vector_settings(style))
         else:
+            # a variable of its own: its own range, so that the layer shows that variable
+            # and not the first group of the file
+            low, high = _dataset_range(layer, index)
+            renderer.setActiveScalarDatasetGroup(index)
+            renderer.setScalarSettings(index, styles.range_settings(low, high))
+        layer.setRendererSettings(renderer)
+        layer.triggerRepaint()
+
+    def _style_high_water(self, layer, item: ResultItem) -> None:
+        """TELEMAC's high water mark is a level, equal to the bed where TELEMAC recorded no water (shallower than 1 cm). Drawn as a level it repeats the terrain, so the layer gets a group *highest water depth* (the mark minus the bed) in the depth style; the mark itself stays a group of the layer."""
+        from . import styles
+        mark, bed = _dataset_index(layer, item.variable), _dataset_index(layer, "BOTTOM")
+        if mark is None or bed is None:
+            self.warnings.append(f"{item.name}: no dataset {item.variable!r} or BOTTOM in this mesh")
             return
+        index = _difference_group(layer, mark, bed, HIGHEST_DEPTH)
+        if index is None:
+            self.warnings.append(f"{item.name}: the highest water depth could not be computed; "
+                                 "the layer shows the high water mark as a level")
+            low, high = _dataset_range(layer, mark)
+            index, settings = mark, styles.range_settings(low, high)
+        else:
+            maximum, _why = _dataset_maximum(layer, index)
+            settings = styles.depth_settings(styles.DepthStyle(minimum=self.min_depth,
+                                                               maximum=maximum or 1.0))
+        renderer = layer.rendererSettings()
+        renderer.setActiveScalarDatasetGroup(index)
+        renderer.setScalarSettings(index, settings)
         layer.setRendererSettings(renderer)
         layer.triggerRepaint()
 
@@ -418,6 +451,10 @@ VELOCITY_VECTORS = ("VELOCITY",)
 
 #: The style of a polygon layer whose result is one of its attributes.
 STYLE_GRADUATED = "graduated"
+#: jobs.results.STYLE_HIGH_WATER (the plugin does not import the library)
+STYLE_HIGH_WATER = "high-water"
+#: the group the loader adds to a high water mark
+HIGHEST_DEPTH = "highest water depth"
 
 #: Classes of that style. Each holds the same number of polygons, so that a result
 #: whose values span several orders of magnitude, as rates of deposition do, still
@@ -666,6 +703,40 @@ def _vector_index(layer, variable: str = "") -> int | None:
             return index
         vectors.append(index)
     return vectors[0] if len(vectors) == 1 else None
+
+
+def _dataset_range(layer, index: int) -> tuple[float, float]:
+    """The group's own minimum and maximum (0 and 1 where the file reports none)."""
+    try:
+        meta = group_metadata(layer, index)
+        low, high = float(meta.minimum()), float(meta.maximum())
+    except Exception:  # noqa: BLE001 - a range is a nicety
+        return 0.0, 1.0
+    if not (low == low and high == high) or low > high or abs(high) > 1e300:
+        return 0.0, 1.0
+    return low, high
+
+
+def _difference_group(layer, first: int, second: int, name: str) -> int | None:
+    """A virtual group *first* minus *second* over all time steps of *first* (QGIS's mesh calculator), or the existing group of that name."""
+    found = _dataset_index(layer, name)
+    if found is not None and group_metadata(layer, found).name().strip() == name:
+        return found
+    try:
+        from qgis.core import QgsMeshCalculator, QgsMeshDatasetGroup, QgsMeshDatasetIndex
+        kind = getattr(QgsMeshDatasetGroup, "Type", QgsMeshDatasetGroup).Virtual
+        steps = layer.datasetCount(QgsMeshDatasetIndex(first, 0))
+        end = layer.datasetMetadata(QgsMeshDatasetIndex(first, max(steps - 1, 0))).time()
+        formula = f'"{group_metadata(layer, first).name()}" - "{group_metadata(layer, second).name()}"'
+        calc = QgsMeshCalculator(formula, name, layer.extent(), kind, layer, 0.0, float(end))
+        if calc.processCalculation() != 0:
+            return None
+    except Exception:  # noqa: BLE001
+        return None
+    for index in layer.datasetGroupsIndexes():
+        if (group_metadata(layer, index).name() or "").strip() == name:
+            return index
+    return None
 
 
 def _dataset_maximum(layer, index: int) -> tuple[float | None, str]:

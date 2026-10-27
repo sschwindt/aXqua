@@ -77,17 +77,16 @@ jobs:
   # The aXqua program on PyPI, from the same tag as the plugin zip: the plugin requires the
   # program of its own version (MINIMUM_VERSION in qgis_plugin/axqua/core/runner_client.py),
   # so the two are released together. PyPI never accepts a version twice, not even after a
-  # deletion, so the upload runs only after the checks of the plugin, and the environment
-  # `pypi` should require an approval (Settings > Environments > pypi > Required reviewers).
+  # deletion, so the upload runs only after the checks of the plugin; the environment
+  # `pypi` admits tags v* only (Settings > Environments > pypi > Deployment branches and tags).
   #
-  # OFF until the repository variable PYPI_UPLOAD is "true" (Settings > Secrets and
-  # variables > Actions > Variables): until then the program is uploaded by hand with twine
-  # (docs/code/plugin.rst names the commands), and a tag must not end in a red
-  # run because no publisher is registered. To switch it on, register trusted publishing
-  # first (no token is stored): on pypi.org, the project's Settings > Publishing (before
-  # the project exists: Your account > Publishing > Add a pending publisher), with owner
-  # sschwindt, repository aXqua, workflow plugin-release.yml, environment pypi. The same
-  # on test.pypi.org with the environment testpypi, for a rehearsal through
+  # ON since 1.1.1 (the user's order of 2026-10-27): the repository variable PYPI_UPLOAD is
+  # "true" (Settings > Secrets and variables > Actions > Variables; set it to anything else
+  # to go back to uploading by hand with twine, docs/code/plugin.rst names the commands).
+  # The upload uses trusted publishing, so no token is stored: pypi.org knows this
+  # workflow as a publisher of the project axqua (the project's Settings > Publishing,
+  # owner sschwindt, repository aXqua, workflow plugin-release.yml, environment pypi). The
+  # same on test.pypi.org with the environment testpypi, for a rehearsal through
   # Actions > release > Run workflow with the target testpypi.
   pypi:
     needs: build
