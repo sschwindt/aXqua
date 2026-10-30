@@ -8,7 +8,7 @@ Usage
 
       <div class="video-embed">
         <iframe
-          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          src="https://youtu.be/2qWOA7l5xeg"
           title="TELEMAC 2D simulations with aXqua: dry start"
           loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
