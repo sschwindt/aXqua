@@ -5,6 +5,26 @@ Preprocessing
 
 Preprocessing converts the case description into the files that a simulation code reads. No simulation is started during preprocessing. Its result is a complete model that can be inspected before computing time is spent.
 
+.. admonition:: Watch the first preprocessing workflow on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="TELEMAC 2D simulations with aXqua: dry start"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/2qWOA7l5xeg>`_.
+
+
+
 .. _preprocessing-workflow:
 
 aXqua workflow

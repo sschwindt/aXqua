@@ -366,6 +366,19 @@
 <li><p><strong>OpenFAM (facultatif)</strong> Le modèle OpenFOAM commence par le résultat TELEMAC. La position de la surface libre, la zone mouillée et les vitesses en sont tirées.</p></li>
 </ol>
 <p>L’exécution TELEMAC qui précède une simulation OpenFOAM s’appelle <strong>warm-up</strong>. Elle a trois effets sur le modèle OpenFOAM : les cellules sous la surface libre commencent à être remplies d’eau mobile, le haut du maillage est placé peu au-dessus de la surface libre de sorte que peu de cellules ne contiennent que de l’air, et le maillage est limité à la partie mouillée du tronçon. Si le cas n’a pas encore de résultat 2D stable, aXqua réalise une simulation TELEMAC grossière à cette fin, ce qui prend environ une minute pour un petit tronçon.</p>
+<div class="tip dropdown admonition">
+<p class="admonition-title">Regardez la configuration TELEMAC-2D sur YouTube</p>
+<div class="video-embed">
+  <iframe
+    src="https://www.youtube.com/embed/gK83Q8bJCHI"
+    title="TELEMAC 2D simulations with aXqua: dry start"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen>
+  </iframe>
+</div><p><a class="reference external" href="https://youtu.be/2qWOA7l5xeg">Ouvrez le tutoriel sur YouTube</a>.</p>
+</div>
 <p>L’échauffement est actif par défaut et ne devrait pas être désactivé. Sans cela, OpenFOAM commence avec un couvercle plat haut au-dessus du terrain, le maillage contient plusieurs fois plus de cellules d’air, et le remplissage du tronçon doit être calculé par le modèle le plus cher. Dans le extension, l’échauffement est le case à cocher <em>Use TELEMAC warm-up</em> sur le sous-tab <em>OpenFOAM</em> de l’onglet <em>Simulations</em> (<a class="reference internal" href="#help-hydraulics-openfoam"><span class="std std-ref">Ouvrir</span></a>). Dans le fichier de cas, c’est le paramètre <code class="docutils literal notranslate"><span class="pre">openfoam.pre_run.enabled</span></code>, qui est activé par défaut.</p>
 </section>
 <section id="telemac-dry-runs-2d-3d">
@@ -388,11 +401,11 @@
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>axqua submit &lt;case-file&gt; --kind steady
 </pre></div>
 </div>
-<figure class="align-default" id="id1">
+<figure class="align-default" id="id2">
 <a class="reference internal image-reference" href="../_images/gui-hydraulics-telemac.png"><img alt="Le sous-onglet Baseline (Telemac) de l'onglet Simulations" src="../_images/gui-hydraulics-telemac.png" style="width: 70%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">L’onglet <em>Simulations</em>, sous-tab <em>Baseline (Telemac)</em>. (1) Les sous-tabs de l’onglet <em>Simulations</em>. (2) La boîte <em>Steady 2D</em> avec son état. (3) <em>Submit</em> commence la simulation. (4) <em>Load results</em> ajoute le résultat à la carte. (5) La liste tâche avec l’état et le progrès de chaque tâche.</span><a class="headerlink" href="#id1" title="Lien vers cette image"></a></p>
+<p><span class="caption-text">L’onglet <em>Simulations</em>, sous-tab <em>Baseline (Telemac)</em>. (1) Les sous-tabs de l’onglet <em>Simulations</em>. (2) La boîte <em>Steady 2D</em> avec son état. (3) <em>Submit</em> commence la simulation. (4) <em>Load results</em> ajoute le résultat à la carte. (5) La liste tâche avec l’état et le progrès de chaque tâche.</span><a class="headerlink" href="#id2" title="Lien vers cette image"></a></p>
 </figcaption>
 </figure>
 <p>Lorsque l’exécution est terminée, aXqua évalue si le débit est stable. Il lit le débit à travers chaque frontière ouverte à partir de la sortie de TELEMAC et écrit les fichiers suivants dans <code class="docutils literal notranslate"><span class="pre">axqua-case/simulation/</span></code>:</p>
@@ -450,11 +463,11 @@ axqua submit &lt;case-file&gt; --kind unsteady --option mode_3d=true
 <li><p><strong>Cours.</strong> Cliquez sur <em>Submit</em>. La course comporte deux étapes : une première étape courte avec un petit pas de temps, dans lequel s’installe la surface libre, et l’étape principale. L’affichage de progression indique le numéro du Courant (<code class="docutils literal notranslate"><span class="pre">Co</span></code>) et le pas de temps (<code class="docutils literal notranslate"><span class="pre">dt</span></code>). En bonne santé, le pas de temps reste près d’une valeur constante. Un pas de temps qui tombe par ordre de grandeur indique un problème, généralement de l’air qui est accéléré à des vitesses irréalistes.</p></li>
 <li><p><strong>Évaluation.</strong> Après la course, aXqua rapporte le débit d’eau à l’entrée et la sortie et compare leur différence relative avec <code class="docutils literal notranslate"><span class="pre">hydrodynamics.flux_tolerance</span></code>, qui est le même critère que pour TELEMAC. L’eau qui laisse le modèle à travers son sommet fait partie de cet équilibre et est déclarée comme une part du débit. aXqua indique également si l’eau a atteint le couvercle ou les limites latérales du maillage. Dans ce cas, le maillage a limité le flux, et <code class="docutils literal notranslate"><span class="pre">openfoam.freeboard</span></code> ou <code class="docutils literal notranslate"><span class="pre">openfoam.wet_margin</span></code> doit être augmenté. L’eau peut aussi passer par le haut pendant que la surface libre reste bien en dessous, comme des traces d’eau que l’air transporte loin d’une surface sapée (<a class="reference internal" href="preprocessing.html#preprocessing-openfoam-choices"><span class="std std-ref">Choix OpenFOAM</span></a>).</p></li>
 </ol>
-<figure class="align-default" id="id2">
+<figure class="align-default" id="id3">
 <a class="reference internal image-reference" href="../_images/gui-hydraulics-openfoam.png"><img alt="Le sous-onglet OpenFOAM de l'onglet Simulations" src="../_images/gui-hydraulics-openfoam.png" style="width: 70%;" />
 </a>
 <figcaption>
-<p><span class="caption-text">L’onglet <em>Simulations</em>, sous-tab <em>OpenFOAM</em>. (1) L’onglet case à cocher <em>Use TELEMAC warm-up</em>. Dans l’état affiché, le fichier de cas décide, dans lequel le réchauffement est activé par défaut. (2) <em>Build</em> crée le modèle OpenFOAM. (3) <em>Submit</em> commence la simulation.</span><a class="headerlink" href="#id2" title="Lien vers cette image"></a></p>
+<p><span class="caption-text">L’onglet <em>Simulations</em>, sous-tab <em>OpenFOAM</em>. (1) L’onglet case à cocher <em>Use TELEMAC warm-up</em>. Dans l’état affiché, le fichier de cas décide, dans lequel le réchauffement est activé par défaut. (2) <em>Build</em> crée le modèle OpenFOAM. (3) <em>Submit</em> commence la simulation.</span><a class="headerlink" href="#id3" title="Lien vers cette image"></a></p>
 </figcaption>
 </figure>
 <p>Dans un terminal, les commandes sont :</p>

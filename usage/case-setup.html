@@ -356,6 +356,19 @@
   <section id="axqua-case-setup">
 <span id="help-case-setup"></span><h1>aXqua case setup<a class="headerlink" href="#axqua-case-setup" title="Link to this heading"></a></h1>
 <p>An <strong>aXqua case</strong> is the complete description of one free-surface water body for one modeling task, such as a river reach, a lake, a reservoir, or the surroundings of a hydraulic structure: the terrain, the boundaries of the model, the roughness of the bed, the settings of the simulation, and the field measurements for the calibration. The description is stored in one <strong>case file</strong>, whose name ends with <code class="docutils literal notranslate"><span class="pre">.axq-case</span></code>. All simulation steps read this file, so that a 2D TELEMAC model and a 3D OpenFOAM model of the same water body use the same input.</p>
+<div class="tip dropdown admonition">
+<p class="admonition-title">Fundamentals of this tutorial are explained on YouTube</p>
+<div class="video-embed">
+  <iframe
+    src="https://www.youtube.com/embed/gK83Q8bJCHI"
+    title="TELEMAC 2D simulations with aXqua: dry start"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerpolicy="strict-origin-when-cross-origin"
+    allowfullscreen>
+  </iframe>
+</div><p><a class="reference external" href="https://youtu.be/2qWOA7l5xeg">Open the tutorial on YouTube</a>.</p>
+</div>
 <p>A case file contains nothing that is specific to a computer. Where the simulation software is installed is stored in the profile of the computer (<a class="reference internal" href="../installation/plugin-setup.html#plugin-profile"><span class="std std-ref">Plugin profile</span></a>). A case folder can therefore be copied to another computer, or published together with a study, and used there without changes.</p>
 <p id="help-example-case"><strong>Example cases.</strong> Two complete cases are available for trying out every step before a case of one’s own is set up. <code class="docutils literal notranslate"><span class="pre">example-isar</span></code> describes a braided reach of the Isar River of 6.6 ha at a discharge of 2.4 m³/s, with a coarse mesh, so that the model is built in one minute and a steady simulation takes about two minutes. It includes the velocity and depth measurements of two field campaigns at two discharges, so that the calibration and the validation can be tried as well. <code class="docutils literal notranslate"><span class="pre">example-agrohydrology</span></code> is an arable field of 5.6 ha on a hillslope in Lower Bavaria under a rain of 42 mm in 7 hours, for the hydrology mode (<a class="reference internal" href="hydrology-simulations.html#help-hydrology"><span class="std std-ref">Hydrology</span></a>): Green-Ampt infiltration with two soils, sheet flow over the field, and the runoff that leaves it over three of its edges. Each example is a folder that contains the case file, the input data in the subfolder <code class="docutils literal notranslate"><span class="pre">user-sources/</span></code>, and a guide (<code class="docutils literal notranslate"><span class="pre">README.md</span></code>) that explains every step from the build to the loading of the result in QGIS. The folders have a size of a few megabytes. Their terrain models are cut to the outline of the model, which is all that aXqua reads of a terrain model.</p>
 <p>On the <em>Case Setup</em> tab, <em>Example case…</em> opens a window that lists the available examples. Select the folder in which the folder of the example is to be created and click <em>Download</em>. The example is then added to the list of cases, and the next step is <em>Build</em> on the <em>Preprocessing</em> tab. In a terminal, the following command does the same:</p>

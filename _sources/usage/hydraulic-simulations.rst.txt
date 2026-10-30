@@ -20,6 +20,25 @@ aXqua therefore lets the cheapest model do this work. The sequence is:
 
 The TELEMAC run that precedes an OpenFOAM simulation is called the **warm-up**. It has three effects on the OpenFOAM model: the cells below the water surface start filled with moving water, the top of the mesh is placed shortly above the water surface so that few cells contain only air, and the mesh is limited to the wetted part of the reach. If the case has no steady 2D result yet, aXqua runs a coarse TELEMAC simulation on its own for this purpose, which takes about one minute for a small reach.
 
+.. admonition:: Watch the TELEMAC-2D dry run setup on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="TELEMAC 2D simulations with aXqua: dry start"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/2qWOA7l5xeg>`_.
+
+
 The warm-up is active by default and should not be disabled. Without it, OpenFOAM starts with a flat lid high above the terrain, the mesh contains many times more air cells, and the filling of the reach has to be computed by the most expensive model. In the plugin, the warm-up is the check box *Use TELEMAC warm-up* on the sub-tab *OpenFOAM* of the tab *Simulations* (:ref:`help-hydraulics-openfoam`). In the case file, it is the setting ``openfoam.pre_run.enabled``, which is enabled by default.
 
 .. _hydraulics-dry-runs:

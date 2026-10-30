@@ -5,6 +5,25 @@ aXqua case setup
 
 An **aXqua case** is the complete description of one free-surface water body for one modeling task, such as a river reach, a lake, a reservoir, or the surroundings of a hydraulic structure: the terrain, the boundaries of the model, the roughness of the bed, the settings of the simulation, and the field measurements for the calibration. The description is stored in one **case file**, whose name ends with ``.axq-case``. All simulation steps read this file, so that a 2D TELEMAC model and a 3D OpenFOAM model of the same water body use the same input.
 
+.. admonition:: Fundamentals of this tutorial are explained on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="TELEMAC 2D simulations with aXqua: dry start"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/2qWOA7l5xeg>`_.
+
+
 A case file contains nothing that is specific to a computer. Where the simulation software is installed is stored in the profile of the computer (:ref:`plugin-profile`). A case folder can therefore be copied to another computer, or published together with a study, and used there without changes.
 
 .. _help-example-case:

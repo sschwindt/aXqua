@@ -1,6 +1,24 @@
 Usage
 =====
 
+.. admonition:: Some tutorials are explained on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="TELEMAC 2D simulations with aXqua: dry start"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/2qWOA7l5xeg>`_.
+
 This section follows the order in which a model is built and used. Each subsection corresponds to one working step:
 
 #. :doc:`case-setup` describes the free-surface water body and the modeling task in a case file.

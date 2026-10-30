@@ -5,6 +5,26 @@ Postprocessing
 
 Postprocessing turns simulation results into maps, figures and tables. Depth-averaged results are best presented as maps in QGIS. Three-dimensional results require ParaView or VisIt (:doc:`../installation/postprocessors`).
 
+.. admonition:: Watch aXua postprocessing basics on YouTube
+   :class: tip dropdown
+
+   .. raw:: html
+
+      <div class="video-embed">
+        <iframe
+          src="https://www.youtube.com/embed/gK83Q8bJCHI"
+          title="TELEMAC 2D simulations with aXqua: dry start"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+   `Open the tutorial on YouTube <https://youtu.be/2qWOA7l5xeg>`_.
+
+
+
 .. _help-postprocessing-qgis:
 
 QGIS map generation
